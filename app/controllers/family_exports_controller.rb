@@ -47,6 +47,12 @@ class FamilyExportsController < ApplicationController
 
   def index
     @pagy, @exports = pagy(visible_exports.ordered, limit: safe_per_page)
+    @google_drive_oauth_configuration = Current.user.google_drive_oauth_configuration ||
+                                        Current.user.build_google_drive_oauth_configuration(family: Current.family)
+    @google_drive_server_oauth_configured = GoogleDrive::Client.configured?
+    @google_drive_oauth_configured = GoogleDrive::Client.configured?(
+      configuration: @google_drive_oauth_configuration
+    )
     @google_drive_connection = Current.user.google_drive_connection
     @google_drive_export_schedules = Current.user.google_drive_export_schedules
       .where(family: Current.family)

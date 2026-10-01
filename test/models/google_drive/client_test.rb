@@ -32,4 +32,20 @@ class GoogleDrive::ClientTest < ActiveSupport::TestCase
       assert_nil GoogleDrive::Client.client_id
     end
   end
+
+  test "prefers a user's OAuth configuration over server configuration" do
+    configuration = GoogleDriveOauthConfiguration.new(
+      client_id: "personal-client-id",
+      client_secret: "personal-client-secret"
+    )
+
+    with_env_overrides(
+      "GOOGLE_DRIVE_CLIENT_ID" => "server-client-id",
+      "GOOGLE_DRIVE_CLIENT_SECRET" => "server-client-secret"
+    ) do
+      assert_equal "personal-client-id", GoogleDrive::Client.client_id(configuration: configuration)
+      assert_equal "personal-client-secret", GoogleDrive::Client.client_secret(configuration: configuration)
+      assert GoogleDrive::Client.configured?(configuration: configuration)
+    end
+  end
 end

@@ -50,7 +50,10 @@ class GoogleDriveConnection < ApplicationRecord
         next access_token
       end
 
-      payload = GoogleDrive::Client.refresh_tokens(refresh_token: refresh_token)
+      payload = GoogleDrive::Client.refresh_tokens(
+        refresh_token: refresh_token,
+        configuration: user.google_drive_oauth_configuration
+      )
       apply_token_payload!(payload)
       access_token
     end

@@ -25,16 +25,16 @@ class GoogleDrive::Client
   ApiError = Class.new(Error)
 
   class << self
-    def configured?
-      client_id.present? && client_secret.present?
+    def configured?(configuration: nil)
+      client_id(configuration: configuration).present? && client_secret(configuration: configuration).present?
     end
 
-    def client_id
-      ENV["GOOGLE_DRIVE_CLIENT_ID"].presence || credential(:client_id)
+    def client_id(configuration: nil)
+      configuration&.client_id.presence || ENV["GOOGLE_DRIVE_CLIENT_ID"].presence || credential(:client_id)
     end
 
-    def client_secret
-      ENV["GOOGLE_DRIVE_CLIENT_SECRET"].presence || credential(:client_secret)
+    def client_secret(configuration: nil)
+      configuration&.client_secret.presence || ENV["GOOGLE_DRIVE_CLIENT_SECRET"].presence || credential(:client_secret)
     end
 
     def generate_pkce
@@ -43,10 +43,10 @@ class GoogleDrive::Client
       { verifier:, challenge: }
     end
 
-    def authorization_url(redirect_uri:, state:, code_challenge:)
-      ensure_configured!
+    def authorization_url(redirect_uri:, state:, code_challenge:, configuration: nil)
+      ensure_configured!(configuration: configuration)
       query = URI.encode_www_form(
-        client_id: client_id,
+        client_id: client_id(configuration: configuration),
         redirect_uri: redirect_uri,
         response_type: "code",
         scope: SCOPES.join(" "),
@@ -60,23 +60,25 @@ class GoogleDrive::Client
       "#{AUTHORIZE_URL}?#{query}"
     end
 
-    def exchange_code(code:, redirect_uri:, code_verifier:)
+    def exchange_code(code:, redirect_uri:, code_verifier:, configuration: nil)
       token_request(
         code: code,
-        client_id: client_id,
-        client_secret: client_secret,
+        client_id: client_id(configuration: configuration),
+        client_secret: client_secret(configuration: configuration),
         redirect_uri: redirect_uri,
         code_verifier: code_verifier,
-        grant_type: "authorization_code"
+        grant_type: "authorization_code",
+        configuration: configuration
       )
     end
 
-    def refresh_tokens(refresh_token:)
+    def refresh_tokens(refresh_token:, configuration: nil)
       token_request(
         refresh_token: refresh_token,
-        client_id: client_id,
-        client_secret: client_secret,
-        grant_type: "refresh_token"
+        client_id: client_id(configuration: configuration),
+        client_secret: client_secret(configuration: configuration),
+        grant_type: "refresh_token",
+        configuration: configuration
       )
     end
 
@@ -108,12 +110,13 @@ class GoogleDrive::Client
         credentials.dig(:google_drive, key)
       end
 
-      def ensure_configured!
-        raise ConfigurationError, "Google Drive OAuth is not configured" unless configured?
+      def ensure_configured!(configuration: nil)
+        raise ConfigurationError, "Google Drive OAuth is not configured" unless configured?(configuration: configuration)
       end
 
       def token_request(params)
-        ensure_configured!
+        configuration = params.delete(:configuration)
+        ensure_configured!(configuration: configuration)
         uri = URI(TOKEN_URL)
         request = Net::HTTP::Post.new(uri)
         request["Content-Type"] = "application/x-www-form-urlencoded"

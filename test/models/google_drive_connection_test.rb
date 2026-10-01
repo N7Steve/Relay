@@ -3,6 +3,12 @@ require "test_helper"
 class GoogleDriveConnectionTest < ActiveSupport::TestCase
   setup do
     @user = users(:family_admin)
+    @configuration = GoogleDriveOauthConfiguration.create!(
+      family: @user.family,
+      user: @user,
+      client_id: "personal-client-id",
+      client_secret: "personal-client-secret"
+    )
     @connection = GoogleDriveConnection.create!(
       family: @user.family,
       user: @user,
@@ -16,7 +22,10 @@ class GoogleDriveConnectionTest < ActiveSupport::TestCase
   end
 
   test "refreshes an expired access token without discarding the refresh token" do
-    GoogleDrive::Client.expects(:refresh_tokens).with(refresh_token: "long-lived-refresh-token").returns(
+    GoogleDrive::Client.expects(:refresh_tokens).with(
+      refresh_token: "long-lived-refresh-token",
+      configuration: @configuration
+    ).returns(
       "access_token" => "fresh-access-token",
       "expires_in" => 3600,
       "scope" => "openid email https://www.googleapis.com/auth/drive.file"

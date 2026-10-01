@@ -2,7 +2,8 @@ class GoogleDriveConnectionsController < ApplicationController
   OAUTH_SESSION_TTL = 10.minutes
 
   def connect
-    unless GoogleDrive::Client.configured?
+    configuration = Current.user.google_drive_oauth_configuration
+    unless GoogleDrive::Client.configured?(configuration: configuration)
       redirect_to family_exports_path, alert: t("google_drive_connections.not_configured")
       return
     end
@@ -13,13 +14,15 @@ class GoogleDriveConnectionsController < ApplicationController
       "state" => state,
       "code_verifier" => pkce[:verifier],
       "user_id" => Current.user.id,
+      "oauth_configuration_id" => configuration&.id,
       "started_at" => Time.current.to_i
     }
 
     redirect_to GoogleDrive::Client.authorization_url(
       redirect_uri: callback_google_drive_connection_url,
       state: state,
-      code_challenge: pkce[:challenge]
+      code_challenge: pkce[:challenge],
+      configuration: configuration
     ), allow_other_host: true
   end
 
@@ -40,10 +43,12 @@ class GoogleDriveConnectionsController < ApplicationController
       return
     end
 
+    configuration = oauth_configuration_for(oauth_session)
     payload = GoogleDrive::Client.exchange_code(
       code: params[:code],
       redirect_uri: callback_google_drive_connection_url,
-      code_verifier: oauth_session[:code_verifier]
+      code_verifier: oauth_session[:code_verifier],
+      configuration: configuration
     )
     verify_required_scope!(payload)
     profile = GoogleDrive::Client.user_info(access_token: payload.fetch("access_token"))
@@ -97,6 +102,15 @@ class GoogleDriveConnectionsController < ApplicationController
       return false if oauth_session[:started_at].to_i < OAUTH_SESSION_TTL.ago.to_i
 
       ActiveSupport::SecurityUtils.secure_compare(params[:state].to_s, oauth_session[:state].to_s)
+    end
+
+    def oauth_configuration_for(oauth_session)
+      expected_id = oauth_session[:oauth_configuration_id].presence
+      configuration = Current.user.google_drive_oauth_configuration
+      return configuration if configuration&.id.to_s == expected_id.to_s
+      return if expected_id.nil? && configuration.nil?
+
+      raise GoogleDrive::Client::ConfigurationError, "Google Drive OAuth configuration changed during authorization"
     end
 
     def verify_required_scope!(payload)

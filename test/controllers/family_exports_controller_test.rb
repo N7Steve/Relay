@@ -148,9 +148,29 @@ class FamilyExportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "Full backup"
     assert_select "h2", text: "Custom transaction export"
     assert_select "h2", text: "Cloud exports"
+    assert_select "form[action='#{google_drive_oauth_configuration_path}'][method='post']" do
+      assert_select "input[name='google_drive_oauth_configuration[client_id]']"
+      assert_select "input[type='password'][name='google_drive_oauth_configuration[client_secret]']"
+      assert_select "button[type='submit']", text: "Save credentials"
+    end
     assert_select "form[action='#{connect_google_drive_connection_path}'][method='post'][data-turbo='false']" do
       assert_select "button", text: "Connect Google Drive"
     end
+  end
+
+  test "does not render the stored Drive OAuth secret" do
+    GoogleDriveOauthConfiguration.create!(
+      family: @family,
+      user: @admin,
+      client_id: "personal-client-id",
+      client_secret: "never-render-this-secret"
+    )
+
+    get family_exports_path
+
+    assert_response :success
+    assert_match "personal-client-id", response.body
+    assert_no_match "never-render-this-secret", response.body
   end
 
   test "Drive reconnect uses a non-Turbo form" do

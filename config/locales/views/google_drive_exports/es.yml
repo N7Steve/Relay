@@ -1,12 +1,15 @@
 ---
 es:
   google_drive_connections:
-    not_configured: Las exportaciones a Google Drive no están configuradas en esta instalación de Sure.
+    not_configured: Añade tu ID de cliente y secreto OAuth de Google antes de conectar Drive.
     state_mismatch: La sesión de autorización de Google ha caducado o no se ha podido verificar. Inténtalo de nuevo.
     access_denied: No se ha concedido acceso a Google Drive.
     connection_failed: No se ha podido conectar Google Drive. Inténtalo de nuevo.
     connected: "Google Drive conectado como %{email}."
     disconnected: Google Drive desconectado. Los archivos existentes no se han eliminado.
+  google_drive_oauth_configurations:
+    update:
+      success: Configuración OAuth de Google guardada. Ya puedes conectar Google Drive.
   google_drive_export_schedules:
     connection_required: Conecta Google Drive antes de configurar una exportación automática.
     create:
@@ -57,6 +60,16 @@ es:
     google_drive:
       title: Exportaciones cloud
       description: Guarda tus datos periódicamente en Google Drive.
+      oauth_configuration:
+        title: Configuración OAuth de Google
+        description: Introduce las credenciales OAuth de tu proyecto de Google Cloud. Solo se usarán para tu usuario.
+        personal_configured: Estás usando tus propias credenciales OAuth. El secreto guardado nunca se muestra.
+        server_configured: Actualmente se usa la configuración general del servidor. Si guardas credenciales aquí, solo se aplicarán a tu usuario.
+        callback: "URI de redirección autorizada en Google Cloud: %{url}"
+        client_id: ID de cliente
+        client_secret: Secreto de cliente
+        secret_unchanged: Déjalo vacío para conservar el secreto actual
+        save: Guardar credenciales
       connected_as: "Conectado como %{email}"
       connect: Conectar Google Drive
       reconnect: Reconectar Google Drive

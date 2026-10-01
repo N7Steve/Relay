@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -971,6 +971,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
     t.index ["family_id", "google_subject"], name: "index_google_drive_connections_on_family_id_and_google_subject"
     t.index ["family_id"], name: "index_google_drive_connections_on_family_id"
     t.index ["user_id"], name: "index_google_drive_connections_on_user_id", unique: true
+  end
+
+  create_table "google_drive_oauth_configurations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "client_id", null: false
+    t.text "client_secret", null: false
+    t.datetime "created_at", null: false
+    t.uuid "family_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["family_id"], name: "index_google_drive_oauth_configurations_on_family_id"
+    t.index ["user_id"], name: "index_google_drive_oauth_configurations_on_user_id", unique: true
   end
 
   create_table "google_drive_export_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -2889,6 +2900,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
   add_foreign_key "google_drive_export_schedules", "google_drive_connections", on_delete: :cascade
   add_foreign_key "google_drive_export_schedules", "users", on_delete: :cascade
   add_foreign_key "google_drive_export_targets", "google_drive_export_schedules", on_delete: :cascade
+  add_foreign_key "google_drive_oauth_configurations", "families", on_delete: :cascade
+  add_foreign_key "google_drive_oauth_configurations", "users", on_delete: :cascade
   add_foreign_key "holdings", "account_providers"
   add_foreign_key "holdings", "accounts", on_delete: :cascade
   add_foreign_key "holdings", "securities"

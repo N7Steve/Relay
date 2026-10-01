@@ -327,6 +327,8 @@ Rails.application.routes.draw do
     get :callback
   end
 
+  resource :google_drive_oauth_configuration, only: :update
+
   resources :google_drive_export_schedules, except: [ :index, :show ] do
     member do
       post :run_now

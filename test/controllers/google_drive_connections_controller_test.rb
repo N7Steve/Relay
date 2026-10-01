@@ -3,20 +3,29 @@ require "test_helper"
 class GoogleDriveConnectionsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:family_admin)
+    @configuration = GoogleDriveOauthConfiguration.create!(
+      family: @user.family,
+      user: @user,
+      client_id: "personal-client-id",
+      client_secret: "personal-client-secret"
+    )
     sign_in @user
   end
 
   test "connect starts a separate offline OAuth flow" do
-    GoogleDrive::Client.stubs(:configured?).returns(true)
+    GoogleDrive::Client.stubs(:configured?).with(configuration: @configuration).returns(true)
     GoogleDrive::Client.stubs(:generate_pkce).returns(verifier: "verifier", challenge: "challenge")
     GoogleDrive::Client.expects(:authorization_url).with do |attributes|
-      attributes[:state].present? && attributes[:code_challenge] == "challenge"
+      attributes[:state].present? &&
+        attributes[:code_challenge] == "challenge" &&
+        attributes[:configuration] == @configuration
     end.returns("https://accounts.google.com/o/oauth2/v2/auth?client_id=test")
 
     post connect_google_drive_connection_path
 
     assert_redirected_to "https://accounts.google.com/o/oauth2/v2/auth?client_id=test"
     assert_equal @user.id, session.dig(:google_drive_oauth, "user_id")
+    assert_equal @configuration.id, session.dig(:google_drive_oauth, "oauth_configuration_id")
     assert_equal "verifier", session.dig(:google_drive_oauth, "code_verifier")
   end
 
@@ -30,13 +39,15 @@ class GoogleDriveConnectionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "callback stores the connected Google identity and tokens" do
-    GoogleDrive::Client.stubs(:configured?).returns(true)
+    GoogleDrive::Client.stubs(:configured?).with(configuration: @configuration).returns(true)
     GoogleDrive::Client.stubs(:generate_pkce).returns(verifier: "verifier", challenge: "challenge")
     GoogleDrive::Client.stubs(:authorization_url).returns("https://accounts.google.com/authorize")
     post connect_google_drive_connection_path
     oauth_session = session[:google_drive_oauth]
 
-    GoogleDrive::Client.expects(:exchange_code).returns(
+    GoogleDrive::Client.expects(:exchange_code).with do |attributes|
+      attributes[:code] == "code" && attributes[:configuration] == @configuration
+    end.returns(
       "access_token" => "access-token",
       "refresh_token" => "refresh-token",
       "expires_in" => 3600,

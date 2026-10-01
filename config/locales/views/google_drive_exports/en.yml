@@ -1,12 +1,15 @@
 ---
 en:
   google_drive_connections:
-    not_configured: Google Drive exports are not configured on this Sure installation.
+    not_configured: Add your Google OAuth client ID and secret before connecting Drive.
     state_mismatch: The Google authorization session expired or could not be verified. Please try again.
     access_denied: Google Drive access was not granted.
     connection_failed: Google Drive could not be connected. Please try again.
     connected: "Google Drive connected as %{email}."
     disconnected: Google Drive disconnected. Existing files were not deleted.
+  google_drive_oauth_configurations:
+    update:
+      success: Google OAuth configuration saved. You can now connect Google Drive.
   google_drive_export_schedules:
     connection_required: Connect Google Drive before configuring an automatic export.
     create:
@@ -57,6 +60,16 @@ en:
     google_drive:
       title: Cloud exports
       description: Save your data to Google Drive on a schedule.
+      oauth_configuration:
+        title: Google OAuth configuration
+        description: Enter the OAuth credentials from your Google Cloud project. They will only be used for your user.
+        personal_configured: You are using your own OAuth credentials. The saved secret is never displayed.
+        server_configured: The server-wide configuration is currently in use. Credentials saved here will only apply to your user.
+        callback: "Authorized redirect URI in Google Cloud: %{url}"
+        client_id: Client ID
+        client_secret: Client secret
+        secret_unchanged: Leave blank to keep the current secret
+        save: Save credentials
       connected_as: "Connected as %{email}"
       connect: Connect Google Drive
       reconnect: Reconnect Google Drive

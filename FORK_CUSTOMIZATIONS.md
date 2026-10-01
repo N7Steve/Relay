@@ -332,6 +332,9 @@ Funcionalidad propia incorporada en agosto de 2026:
 - Exportaciones automáticas de transacciones a Google Drive por usuario, con OAuth
   independiente del inicio de sesión, filtros persistentes y frecuencia diaria,
   semanal o mensual en la zona horaria de la familia.
+- Cada usuario puede guardar desde la UI su propio ID y secreto de cliente OAuth;
+  tienen prioridad sobre la configuración global del servidor, no se vuelve a
+  mostrar el secreto guardado y cualquier cambio exige reconectar Drive.
 - Cada programación permite elegir entre un CSV analítico limpio y el formato
   detallado anterior. El formato limpio usa una fila por movimiento lógico, un ID
   estable, importes absolutos, tipo explícito (`expense`, `income` o `transfer`),
@@ -460,6 +463,7 @@ El orden y el efecto sobre datos deben preservarse:
 | `20260910140000_create_merchant_customizations.rb` | Crea personalizaciones de comercio aisladas por familia, con unicidad por `(family_id, merchant_id)`; los adjuntos usan las tablas existentes de Active Storage |
 | `20260920120000_create_google_drive_exports.rb` | Añade conexiones OAuth personales, programaciones, destinos remotos estables e historial de ejecuciones para Google Drive |
 | `20260921120000_add_forecast_behavior_to_transactions.rb` | Separa movimientos normales, excepcionales e irregulares recurrentes para previsiones; migra `one_time` a `exceptional_once` |
+| `20261001190000_create_google_drive_oauth_configurations.rb` | Guarda credenciales OAuth de Google Drive independientes por usuario |
 
 `db/schema.rb` debe reflejar el resultado acumulado; no resolver sus conflictos de forma aislada sin comprobar estas migraciones.
 
