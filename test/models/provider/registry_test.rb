@@ -1,6 +1,14 @@
 require "test_helper"
 
 class Provider::RegistryTest < ActiveSupport::TestCase
+  test "the global gate also prevents resolving classification providers" do
+    Setting.stubs(:ai_features_enabled?).returns(false)
+    Provider::Jev.expects(:new).never
+
+    assert_nil Provider::Registry.get_provider(:jev)
+    assert_equal [], Provider::Registry.for_concept(:classification).providers
+  end
+
   test "the global gate prevents resolving any LLM provider" do
     Setting.stubs(:ai_features_enabled?).returns(false)
 

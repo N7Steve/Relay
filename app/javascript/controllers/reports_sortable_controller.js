@@ -175,6 +175,12 @@ export default class extends Controller {
           this.moveDown(currentSection);
         }
         break;
+      case "ArrowLeft":
+      case "ArrowRight":
+        // Keep the period hotkeys from leaving the page before the new
+        // order is saved, which only happens on release.
+        if (this.keyboardGrabbedElement) event.preventDefault();
+        break;
       case "Enter":
       case " ":
         event.preventDefault();
@@ -239,7 +245,9 @@ export default class extends Controller {
 
   getDragAfterElement(y) {
     const draggableElements = [
-      ...this.sectionTargets.filter((section) => section !== this.draggedElement),
+      ...this.sectionTargets.filter(
+        (section) => section !== this.draggedElement,
+      ),
     ];
 
     return draggableElements.reduce(

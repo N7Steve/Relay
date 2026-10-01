@@ -77,6 +77,22 @@ class DepositoriesControllerTest < ActionDispatch::IntegrationTest
     assert_select "details select[name='account[financial_treatment]']", 0
   end
 
+  test "an invalid account update preserves its balance and custom logo" do
+    @account.custom_logo.attach(fixture_file_upload("profile_image.png", "image/png", :binary))
+    balance = @account.balance
+    logo_id = @account.custom_logo.blob.id
+
+    assert_no_difference "Valuation.count" do
+      patch depository_path(@account), params: {
+        account: { name: "", balance: balance + 100, delete_custom_logo: "1" }
+      }
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal balance, @account.reload.balance
+    assert_equal logo_id, @account.custom_logo.blob.id
+  end
+
   test "update attaches and removes a custom account logo" do
     patch depository_path(@account), params: {
       account: {
@@ -93,5 +109,45 @@ class DepositoriesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to account_path(@account)
     assert_not @account.reload.custom_logo.attached?
+  end
+
+  # --- member-owned connections (issue #3579) ------------------------------
+
+  test "a member sees only member-connectable providers in the method selector" do
+    Provider::Registry.stubs(:plaid_provider_for_region).returns(stub("plaid"))
+    Family.any_instance.stubs(:can_connect_plaid_us?).returns(true)
+    Family.any_instance.stubs(:can_connect_plaid_eu?).returns(false)
+
+    sign_in users(:family_member)
+    get new_depository_path(step: "method_select")
+
+    assert_response :success
+    assert_select "a[href=?]", new_plaid_item_path(region: "us", accountable_type: "Depository"), count: 1
+    # SimpleFIN is tenant-wide, so it must not be offered to a member even
+    # when it is configured.
+    assert_select "a[href*=?]", "simplefin", count: 0
+  end
+
+  test "an admin still sees every configured provider in the method selector" do
+    Provider::Registry.stubs(:plaid_provider_for_region).returns(stub("plaid"))
+    Family.any_instance.stubs(:can_connect_plaid_us?).returns(true)
+    Family.any_instance.stubs(:can_connect_plaid_eu?).returns(false)
+
+    sign_in users(:family_admin)
+    get new_depository_path(step: "method_select")
+
+    assert_response :success
+    assert_select "a[href=?]", new_plaid_item_path(region: "us", accountable_type: "Depository"), count: 1
+  end
+
+  test "a member is offered manual entry even with no connectable providers" do
+    Family.any_instance.stubs(:can_connect_plaid_us?).returns(false)
+    Family.any_instance.stubs(:can_connect_plaid_eu?).returns(false)
+
+    sign_in users(:family_member)
+    get new_depository_path(step: "method_select")
+
+    assert_response :success
+    assert_select "a[href=?]", new_depository_path, count: 1
   end
 end

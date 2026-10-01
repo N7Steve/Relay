@@ -31,6 +31,67 @@ El alcance histórico inicial de este documento era `upstream/main...a01ed5290`.
 
 ## Resumen de propiedad
 
+### Resolución de conflictos de upstream del 2 de octubre de 2026
+
+La actualización queda preparada en el índice, pendiente de commit y de validación
+Rails en un entorno compatible. Referencias de esta resolución:
+
+| Referencia | SHA |
+| --- | --- |
+| HEAD previo del fork | `d4f5065530b4259b57585a7287effab028e6aed3` |
+| Upstream entrante | `ec4282e0eba808e443b6c15a11d567c1c4c4f3fb` |
+| Ancestro Git, anterior a los squash | `79c826c0e3391063834887936bbe44dc1d90d0cf` |
+| Upstream previamente integrado, usado para comparar contenido | `9ec28abacc52056b3c5544b7bc5549c6d175d701` |
+
+Se han conservado Agenda y sus enlaces/protecciones en movimientos, los tres
+tratamientos financieros y el archivo independiente de cuentas, informes y
+roboadvisor, logos por familia, preferencias de vista compacta y exportaciones
+personales a Google Drive. Bills, Plan, presupuestos y objetivos mantienen la
+frontera de navegación del fork. Los campos de transferencias de `TotalsRow`
+permanecen intactos y la caché de totales conserva su versión `v6`.
+
+La evolución upstream se integra con estas adaptaciones:
+
+- El dashboard incorpora ocultación de widgets y consultas bajo demanda,
+  conservando los selectores y preferencias independientes y los meses familiares.
+  Spending Trend mantiene la curva anterior completa, plegando los días sobrantes
+  al último punto cuando el período seleccionado es más corto. El encabezado
+  compara días transcurridos equivalentes durante el período activo; con inicio
+  distinto del día 1 muestra las fechas reales del intervalo comparado.
+- El selector de períodos admite las opciones de préstamos junto con `param`,
+  `aria_label` y el estado de los demás widgets. Los diálogos conservan las
+  animaciones y añaden la restauración de foco de upstream.
+- La actualización atómica de cuentas mantiene la subida/borrado de `custom_logo`;
+  una validación fallida revierte también el cambio de saldo.
+- Jev, su proveedor secundario de comparación, el descubrimiento de modelos del
+  asistente externo y los nuevos diagnósticos diferidos dependen de la misma puerta
+  `Setting.ai_features_enabled?`, tanto al mostrarlos como al ejecutarlos.
+- Bills conserva su evolución interna. Sus proyecciones cachean sólo IDs bajo
+  `transactions_projected_recurring/v7`, sin exponerse en el producto del fork.
+- Se conserva la migración ya existente
+  `20260910130001_nullify_sessions_active_impersonator_session_on_delete.rb`.
+  La copia upstream `20260910130000_nullify_sessions_active_impersonator_session_on_delete.rb`
+  se descarta: tiene el mismo contenido y colisiona con la migración histórica
+  `20260910130000_remove_excluded_from_accounts.rb`. No se han ejecutado migraciones.
+- Se eliminan métodos, constantes, pruebas y una columna de etiquetas duplicados
+  que surgían al combinar código incorporado previamente mediante squash.
+
+Se amplía la cobertura de la puerta IA, períodos y filtros del dashboard, opciones
+del selector de períodos y reversión de saldo/logo. Estas regresiones y la suite
+Rails quedan pendientes de ejecución, al igual que las comprobaciones dependientes
+del bundle y la regeneración local de OpenAPI. La documentación API entrante se
+conserva alineada con los specs de upstream.
+
+La comprobación local pasa para la sintaxis de 569 archivos Ruby y 27 archivos
+JavaScript, las plantillas ERB y los YAML modificados, la consistencia estática
+de endpoints API, el lint JavaScript y el formato de los JavaScript modificados
+incluidos en Biome. No quedan marcadores de conflicto, claves YAML repetidas ni
+métodos, constantes o versiones de migración duplicados. Las dieciséis migraciones
+propias y los campos del esquema que respaldan el fork siguen presentes.
+`git diff --cached --check` pasa y el índice no contiene conflictos. El formato
+global de Biome sigue señalando 88 archivos JavaScript que coinciden con el HEAD
+previo; el formato de los archivos JavaScript modificados sí pasa.
+
 | Área | Propiedad | Debe preservarse al actualizar upstream |
 | --- | --- | --- |
 | Pagos recurrentes / programados | Propia | Modelos, generación, confirmación/rechazo, transferencias recurrentes e integración en transacciones |
@@ -232,7 +293,7 @@ Los subtipos no son meras etiquetas en todo el dominio: algunos subtipos de inve
 - Exportación CSV del desglose y ayuda para llevarlo a Google Sheets.
 - `IncomeStatement` y totales adaptados a las reglas del fork, incluidas cuentas de solo seguimiento/fuera de mis finanzas, movimientos internos e inversiones.
 - `IncomeStatement::Totals::TotalsRow` conserva obligatoriamente los campos `is_transfer_to_excluded` e `is_transfer_from_excluded`. Deben estar presentes de extremo a extremo en el constructor, `Data.define`, todos los `SELECT`/`UNION` y los `GROUP BY`. La refactorización upstream mediante `IncomeStatement::ScopedTransactionsQuery` se conserva, pero no puede eliminar estas extensiones del fork.
-- Los resultados de `IncomeStatement::Totals` se serializan en la caché compartida. Si cambia el número o significado de los miembros de `TotalsRow`, se debe incrementar la versión de la clave `income_statement/totals_query` (actualmente `v5`). De lo contrario, un despliegue puede fallar en producción con `TypeError: struct IncomeStatement::Totals::TotalsRow not compatible (struct size differs)`. No usar `Rails.cache.clear` ni `FLUSHDB` como solución, porque Redis también sirve a Sidekiq.
+- Los resultados de `IncomeStatement::Totals` se serializan en la caché compartida. Si cambia el número o significado de los miembros de `TotalsRow`, se debe incrementar la versión de la clave `income_statement/totals_query` (actualmente `v6`). De lo contrario, un despliegue puede fallar en producción con `TypeError: struct IncomeStatement::Totals::TotalsRow not compatible (struct size differs)`. No usar `Rails.cache.clear` ni `FLUSHDB` como solución, porque Redis también sirve a Sidekiq.
 - `SharedExpensesCalculator` para distribuir gastos compartidos y calcular métricas personalizadas de gasto e ingreso.
 - Búsqueda de transacciones y series de patrimonio usadas como soporte de los informes.
 - Caché/invalidez ajustadas para que los cambios de cuenta se reflejen inmediatamente.
@@ -482,7 +543,7 @@ Las 230 rutas del inventario original se agrupaban así. Tras la integración sq
 - `app/views/`: cuentas, comercios, informes, inversiones, transacciones, transferencias, pagos programados, exportaciones y ajustes generales de UI.
 - `config/locales/`: traducciones de todas las áreas anteriores.
 - `config/routes.rb`, `config/schedule.yml`, `config/initializers/{sidekiq,active_storage_authorization}.rb`: rutas, ejecución periódica y autorización de adjuntos.
-- `db/migrate/` y `db/schema.rb`: las quince migraciones enumeradas y su esquema resultante.
+- `db/migrate/` y `db/schema.rb`: las dieciséis migraciones enumeradas y su esquema resultante.
 - `test/`: cobertura de pagos programados, cuentas, comercios personalizados, autorización de Active Storage, transferencias, transacciones, exportaciones, Syncable y componentes DS.
 - Raíz/scripts/docs: `Gemfile`, `README.md`, `informe_scheduled_payments.md`, `rollback-instructions.md`, `conflicts.txt`, `script.rb` y `script/debug_subtypes.rb`.
 
@@ -509,7 +570,7 @@ git diff
 2. Revisar este inventario por área funcional, no sólo por archivo: upstream puede mover o renombrar el código.
 3. En conflictos de cuentas, preservar la separación entre tratamiento financiero (`exclude_from_reports`/`cashflow_boundary`), presentación (`archived`) y ciclo de vida (`status`). No reintroducir `accounts.excluded`; no confundirlo con `entries.excluded`.
 4. En conflictos de transacciones/transferencias, comprobar también pagos programados, informes y exportaciones; comparten modelos y controladores.
-5. No aceptar automáticamente el `db/schema.rb`: validar primero las quince migraciones propias.
+5. No aceptar automáticamente el `db/schema.rb`: validar primero las dieciséis migraciones propias.
 6. Si upstream incorpora una función equivalente, decidir expresamente si migrar a ella y añadir pruebas de regresión antes de retirar la implementación del fork.
 7. Mantener Bills oculto en toda la interfaz, también con Preview Features. Conservar su implementación únicamente como referencia interna y portar funciones útiles hacia Pagos programados de forma selectiva y probada. Al resolver conflictos, integrar primero la evolución upstream del subsistema y reaplicar después la frontera pequeña formada por `bills_frontend_enabled?`, los guards de controlador y `Insight.for_product_frontend`; no resolverlos eliminando código Bills ni conectando ambos modelos.
 8. En cambios de `IncomeStatement::Totals`, verificar los dos indicadores internos de transferencias que cruzan la frontera (`transfer_to_excluded`/`transfer_from_excluded`) y versionar la clave de caché si cambia cualquier `Data.define` cacheado.

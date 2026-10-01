@@ -1,4 +1,3 @@
----
 ca:
   account:
     entries:
@@ -9,8 +8,6 @@ ca:
       change_simplefin_account: Canvia el compte de SimpleFIN
       complete_setup: Completa la configuració
       default_label: Per defecte
-      disabled_label: Desactivat
-      archived_label: Arxivat
       delete: Elimina el compte
       disable: Desactiva el compte
       edit: Edita
@@ -20,10 +17,15 @@ ca:
       remove_default: Treu com a predeterminat
       set_default: Estableix com a predeterminat
       sharing: Compartició
-      archive: Arxivar compte
-      unarchive: Desarxivar compte
       troubleshoot: Resolució de problemes
       unlink_provider: Desenllaça del proveïdor
+      exclude_from_reports: Exclou de tots els informes
+      include_in_reports: Inclou als informes
+      excluded_from_reports_indicator: Exclòs dels informes
+      disabled_label: Desactivat
+      archived_label: Arxivat
+      archive: Arxivar compte
+      unarchive: Desarxivar compte
     chart:
       data_not_available: Dades no disponibles per al període seleccionat
     confirm_unlink:
@@ -34,7 +36,8 @@ ca:
       warning_can_delete: Després de desenllaçar-lo, podràs eliminar el compte si
         és necessari
       warning_manual_updates: Hauràs d'afegir transaccions i actualitzar saldos manualment
-      warning_no_sync: El compte ja no es sincronitzarà automàticament amb el teu proveïdor
+      warning_no_sync: El compte ja no es sincronitzarà automàticament amb el teu
+        proveïdor
       warning_title: Això significa
       warning_transactions_kept: Totes les transaccions i saldos existents es conservaran
     create:
@@ -51,22 +54,27 @@ ca:
     form:
       additional_details: Detalls addicionals
       balance: 'Saldo a la data:'
-      institution_domain_label: Domini de la institució
+      institution_domain_label: Domini de l'entitat
       institution_domain_placeholder: p. ex., chase.com
-      institution_name_label: Nom de la institució
+      institution_name_label: Nom de l'entitat
       institution_name_placeholder: p. ex., Chase Bank
       name_label: Nom del compte
       name_placeholder: Exemple de nom de compte
       notes_label: Notes
       notes_placeholder: Emmagatzema informació addicional com números de compte,
         codis de sortida, IBAN, números de ruta, etc.
-      exclude_from_reports_label: Excloure dels informes i les mètriques
-      exclude_from_reports_description: Els comptes exclosos estan ocults als informes i als càlculs del patrimoni net.
-      archive_label: Arxivar compte
-      archive_description: Els comptes arxivats s'oculten de la barra lateral però continuen comptant al patrimoni net i els informes.
       opening_balance_date_label: Data del saldo inicial
-    accountable_group:
-      archived_badge: "(Arxivat)"
+      exclude_from_reports: Exclou de tots els informes
+      enable_category_matcher_label: Activa l'assignació de categories
+      enable_category_matcher_hint: Si està activat, la categoria suggerida pel proveïdor
+        s'aplica a les transaccions importades. Desactiva-ho per deixar les transaccions
+        noves sense categoria.
+      exclude_from_reports_label: Excloure dels informes i les mètriques
+      exclude_from_reports_description: Els comptes exclosos estan ocults als informes
+        i als càlculs del patrimoni net.
+      archive_label: Arxivar compte
+      archive_description: Els comptes arxivats s'oculten de la barra lateral però
+        continuen comptant al patrimoni net i els informes.
     index:
       accounts: Comptes
       cancel_sync: Cancel·la la sincronització
@@ -79,6 +87,8 @@ ca:
         close: Tanca
         navigate: Navega
         select: Selecciona
+        next: Següent
+        previous: Anterior
       import_accounts: Importa comptes
       method_selector:
         connected_entry: Enllaça el compte
@@ -145,11 +155,14 @@ ca:
         manage: Gestiona els comptes
         sharing: Compartició
         statements: Extractes
+        exclude_from_reports: Exclou de tots els informes
+        include_in_reports: Inclou als informes
       tabs:
         activity: Activitat
         holdings: Posicions
         overview: Resum
         statements: Extractes
+        schedule: Amortització
     sidebar:
       configure_providers: Configura els teus proveïdors aquí.
       missing_data: Falten dades històriques
@@ -164,6 +177,8 @@ ca:
         all: Tots
         assets: Actius
         debts: Deutes
+      expand_all: Desplega-ho tot
+      collapse_all: Plega-ho tot
     subtype_regions:
       au: Austràlia
       ca: Canadà
@@ -211,6 +226,8 @@ ca:
       success: El compte s'ha desenllaçat correctament. Ara és un compte manual.
     update:
       success: Compte %{type} actualitzat
+    accountable_group:
+      archived_badge: "(Arxivat)"
   email_confirmations:
     new:
       invalid_token: L'enllaç de confirmació no és vàlid o ha caducat.

@@ -62,7 +62,7 @@ class TransactionCategorySelectTest < ApplicationSystemTestCase
 
       within "[data-controller='category-select']" do
         find("button", match: :first).click
-        click_button "(uncategorized)"
+        find("button[data-category-id='']").click
       end
     end
 

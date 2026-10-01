@@ -130,7 +130,8 @@ export default class extends Controller {
     if (!this.holdActivated) {
       const dx = touchX - this.touchStartX;
       const dy = touchY - this.touchStartY;
-      if (dx * dx + dy * dy > 100) { // 10px radius
+      if (dx * dx + dy * dy > 100) {
+        // 10px radius
         this.cancelHold();
       }
       return;
@@ -142,7 +143,10 @@ export default class extends Controller {
     this.currentTouchX = touchX;
     this.currentTouchY = touchY;
 
-    const afterElement = this.getDragAfterElement(this.currentTouchX, this.currentTouchY);
+    const afterElement = this.getDragAfterElement(
+      this.currentTouchX,
+      this.currentTouchY,
+    );
     this.clearPlaceholders();
 
     if (afterElement == null) {
@@ -160,7 +164,10 @@ export default class extends Controller {
       return;
     }
 
-    const afterElement = this.getDragAfterElement(this.currentTouchX, this.currentTouchY);
+    const afterElement = this.getDragAfterElement(
+      this.currentTouchX,
+      this.currentTouchY,
+    );
     const container = this.element;
 
     if (afterElement == null) {
@@ -204,6 +211,9 @@ export default class extends Controller {
   // ===== Keyboard Navigation =====
   handleKeyDown(event) {
     const currentSection = event.currentTarget;
+    // Keys pressed on a control inside the card (a header button, a widget's
+    // own inputs) belong to that control, not to the reorder grab.
+    if (event.target !== currentSection) return;
 
     switch (event.key) {
       case "ArrowUp":

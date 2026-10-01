@@ -2,9 +2,9 @@ class UI::PeriodPicker < ApplicationComponent
   # Unified time-range selector shared by the dashboard and account charts.
   #
   # Renders a DS::Menu as a flat list of link items — one per Period. Each item
-  # is a GET link to `url` carrying the configured query parameter (plus any
-  # `extra_params`), which re-renders `frame` (a Turbo Frame id) with the chosen
-  # period. When `frame` is nil the links fall back to a normal Turbo Drive visit.
+  # is a GET link to `url` carrying `?period=<key>` (plus any `extra_params`),
+  # which re-renders `frame` (a Turbo Frame id) with the chosen period. When
+  # `frame` is nil the links fall back to a normal Turbo Drive visit.
   #
   # The selected period is marked with a check icon and `aria-current`, and the
   # trigger button shows its label.
@@ -14,33 +14,34 @@ class UI::PeriodPicker < ApplicationComponent
   # trigger shows the range's actual dates rather than a bare "Custom".
   #
   # NOTE: `url` must be a path without a query string; pass query state via
-  # `extra_params` so the picker can compose its query string cleanly.
-  attr_reader :selected, :selected_key, :url, :frame, :extra_params, :placement, :param, :aria_label
+  # `extra_params` so the picker can compose `?period=…` cleanly.
+  attr_reader :selected, :selected_key, :url, :frame, :extra_params, :placement, :options, :param, :aria_label
 
-  def initialize(
-    selected:,
-    url:,
-    frame: nil,
-    extra_params: {},
-    placement: "bottom-end",
-    param: :period,
-    aria_label: nil
-  )
+  # `options` narrows the menu to [key, label] pairs, for a chart that offers
+  # its own timescales under the shared period keys (the loan chart). Without
+  # it every Period is offered under its own short label.
+  def initialize(selected:, url:, frame: nil, extra_params: {}, placement: "bottom-end", options: nil, param: :period, aria_label: nil)
     @selected = selected
     @selected_key = selected.respond_to?(:key) ? selected.key : selected.to_s
     @url = url
     @frame = frame
     @extra_params = (extra_params || {}).symbolize_keys
     @placement = placement
+    @options = options
     @param = param.to_sym
     @aria_label = aria_label
   end
 
-  def periods
-    Period.all
+  # [key, label] pairs, in menu order.
+  def items
+    options || Period.all.map { |period| [ period.key, period.label_short ] }
   end
 
   def selected_label
+    # A chart that supplies its own timescales labels them itself.
+    option_label = options&.to_h&.fetch(selected_key, nil)
+    return option_label if option_label
+
     # A custom range's own label is just "Custom", which says nothing about what
     # the chart is showing. Show the dates instead.
     return selected.label_range if custom_selected?
@@ -53,6 +54,13 @@ class UI::PeriodPicker < ApplicationComponent
   # date range (drag-selected on a chart) rather than one of PERIODS.
   def custom_selected?
     selected_key.blank? && selected.is_a?(Period)
+  end
+
+  # The trailing custom row belongs to the full Period menu. A chart that
+  # narrows the menu to its own timescales offers no custom range, so the row
+  # would be a choice that chart cannot show.
+  def custom_row?
+    options.nil? && custom_selected?
   end
 
   def selected?(key)

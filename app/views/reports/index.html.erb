@@ -69,24 +69,34 @@
     <div class="flex items-center gap-1 mb-4">
       <% if @period_nav %>
         <div class="flex items-center gap-2">
-          <%= render DS::Link.new(
-            variant: "icon",
-            icon: "chevron-left",
-            href: @period_nav[:prev_url],
-            aria: { label: t("reports.index.previous_period", default: "Previous period") }
-          ) %>
+          <%= render DS::Tooltip.new(text: t("reports.index.shortcut_hint", action: t("reports.index.previous_period"), key: "←")) do |tooltip| %>
+            <% tooltip.with_trigger do %>
+              <%= render DS::Link.new(
+                variant: "icon",
+                icon: "chevron-left",
+                href: @period_nav[:prev_url],
+                aria: { label: t("reports.index.previous_period"), keyshortcuts: "ArrowLeft" },
+                data: { controller: "hotkey", hotkey: "ArrowLeft" },
+              ) %>
+            <% end %>
+          <% end %>
 
           <% if @period_nav[:next_url].blank? %>
             <button disabled aria-label="<%= t("reports.index.next_period", default: "Next period") %>" class="text-subdued inline-flex items-center justify-center w-9 h-9 rounded-lg cursor-not-allowed">
               <%= icon("chevron-right", color: "current") %>
             </button>
           <% else %>
-            <%= render DS::Link.new(
-              variant: "icon",
-              icon: "chevron-right",
-              href: @period_nav[:next_url],
-              aria: { label: t("reports.index.next_period", default: "Next period") }
-            ) %>
+            <%= render DS::Tooltip.new(text: t("reports.index.shortcut_hint", action: t("reports.index.next_period"), key: "→")) do |tooltip| %>
+              <% tooltip.with_trigger do %>
+                <%= render DS::Link.new(
+                  variant: "icon",
+                  icon: "chevron-right",
+                  href: @period_nav[:next_url],
+                  aria: { label: t("reports.index.next_period"), keyshortcuts: "ArrowRight" },
+                  data: { controller: "hotkey", hotkey: "ArrowRight" },
+                ) %>
+              <% end %>
+            <% end %>
           <% end %>
         </div>
 

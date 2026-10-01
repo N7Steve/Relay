@@ -59,7 +59,6 @@ class WiseItemTest < ActiveSupport::TestCase
   end
 
   test "generate_sca_keypair! stores a private key and returns a matching public key" do
-    WiseItem.stubs(:encryption_ready?).returns(true)
     stub_sca_encryption_available
 
     public_pem = @wise_item.generate_sca_keypair!
@@ -130,7 +129,6 @@ class WiseItemTest < ActiveSupport::TestCase
   end
 
   test "generate_sca_keypair! replaces a previously generated key" do
-    WiseItem.stubs(:encryption_ready?).returns(true)
     stub_sca_encryption_available
 
     first_public_key = @wise_item.generate_sca_keypair!

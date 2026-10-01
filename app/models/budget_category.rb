@@ -274,7 +274,13 @@ class BudgetCategory < ApplicationRecord
       # Subcategory with individual limit
       (self[:budgeted_spending] || 0) + rolled_over_amount - actual_spending
     else
+      # A parent card displays its full allocation and total spending (including
+      # all children), so the available amount must reconcile with those same
+      # figures. Child allocations are already included in the parent's stored
+      # budget, while ring-fenced children carry their rollover separately from
+      # the parent. Include that carry without counting child allocations twice.
       child_rollover = subcategories.reject(&:inherits_parent_budget?).sum(&:rolled_over_amount)
+
       (self[:budgeted_spending] || 0) + rolled_over_amount + child_rollover - actual_spending
     end
   end
@@ -326,8 +332,9 @@ class BudgetCategory < ApplicationRecord
     (display_budgeted_spending.to_d + display_rolled_over_amount.to_d).positive?
   end
 
-  # Shared children show the parent's carry; parent cards aggregate carry held
-  # by ring-fenced children so all displayed figures reconcile.
+  # Sibling of `display_budgeted_spending`: shared children show the parent's
+  # shared carry, while parents aggregate carry held by ring-fenced children so
+  # their displayed budget, rollover, spending, and availability reconcile.
   def display_rolled_over_amount
     return parent_budget_category&.rolled_over_amount || 0 if inherits_parent_budget?
     return rolled_over_amount if subcategory?

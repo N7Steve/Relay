@@ -1,19 +1,15 @@
 ---
 pl:
   insights:
-    notification:
-      title: Nowa analiza finansowa
-      body: Otwórz Sure, aby przejrzeć najnowszą analizę AI.
-    index:
-      title: Analityka
-      subtitle: Co dzieje się w twoich finansach, odświeżane codziennie.
-      refresh: Sprawdź nowe analizy
-      empty:
-        title: Brak analiz
-        description: Analizy pojawią się tutaj, gdy na kontach będzie wystarczająco dużo aktywności. Odświeżają się automatycznie każdej nocy.
-    refresh:
-      queued: Generujemy świeże analizy. Sprawdź za minutę.
-      checking: Sprawdzanie...
+    actions:
+      budget: Zobacz budżet
+      cash_flow_warning: Przejrzyj cykliczne transakcje
+      idle_cash: Przejdź do konta
+      maintained_goal_depleted: Zobacz rezerwę
+      net_worth_milestone: Zobacz raport wartości netto
+      savings_rate_change: Zobacz transakcje z tego miesiąca
+      spending_anomaly: Zobacz transakcje %{category}
+      subscription_audit: Przejrzyj cykliczne transakcje
     card:
       acknowledge: Rozumiem
       acknowledge_title: Ukryj, dopóki liczby się nie zmienią

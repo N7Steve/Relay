@@ -455,6 +455,9 @@ class HoldingTest < ActiveSupport::TestCase
         currency: "USD"
     end
 
+    # A coin bought elsewhere at one price and moved in at another was never
+    # bought here, so counting the day it arrived as its cost reports a gain of
+    # zero on a position that may have doubled.
     test "an internal movement does not set the cost basis" do
       holding = holdings(:one)
 

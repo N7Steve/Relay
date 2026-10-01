@@ -312,6 +312,27 @@ class Family::DataExporter
         }.to_json
       end
 
+      # Export provider-assigned merchants (auto-detected by bank sync/AI enrichment)
+      # referenced by this family's transactions and recurring transactions. These
+      # are shared across every family on the instance, so only the ones actually
+      # in use here are included -- see #3113. ProviderMerchant does not support
+      # color, so none is exported for it.
+      referenced_provider_merchants.each do |merchant|
+        lines << {
+          type: "ProviderMerchant",
+          data: {
+            id: merchant.id,
+            name: merchant.name,
+            source: merchant.source,
+            provider_merchant_id: merchant.provider_merchant_id,
+            logo_url: merchant.logo_url,
+            website_url: merchant.website_url,
+            created_at: merchant.created_at,
+            updated_at: merchant.updated_at
+          }
+        }.to_json
+      end
+
       # Export recurring transactions after accounts and merchants so import can remap dependencies.
       @family.recurring_transactions.includes(:account, :merchant).find_each do |recurring_transaction|
         lines << {
@@ -571,6 +592,16 @@ class Family::DataExporter
       end
     end
 
+    def referenced_provider_merchants
+      @referenced_provider_merchants ||= ProviderMerchant.where(id: referenced_merchant_ids).to_a
+    end
+
+    def referenced_merchant_ids
+      transaction_ids = @family.transactions.where.not(merchant_id: nil).distinct.pluck(:merchant_id)
+      recurring_ids = @family.recurring_transactions.where.not(merchant_id: nil).distinct.pluck(:merchant_id)
+      (transaction_ids + recurring_ids).uniq
+    end
+
     def family_transaction_ids
       @family_transaction_ids ||= exportable_transactions.select(:id)
     end
@@ -804,7 +835,7 @@ class Family::DataExporter
 
     def resolve_multi_tag_operand(value)
       ids = value.to_s.split(",")
-      records = ids.map { |id| resolve_rule_operand_record(@family.tags, id, fallback_to_name: true) }
+      records = ids.map { |id| resolve_rule_operand_record(:tags, id, fallback_to_name: true) }
       names = records.each_with_index.map { |record, i| record&.name || ids[i] }
       refs = records.compact.map { |record| rule_value_ref("Tag", record) }
 

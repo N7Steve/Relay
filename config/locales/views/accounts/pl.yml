@@ -1,4 +1,3 @@
----
 pl:
   account:
     entries:
@@ -9,8 +8,6 @@ pl:
       change_simplefin_account: Zmień konto SimpleFIN
       complete_setup: Dokończ konfigurację
       default_label: Domyślne
-      disabled_label: Wyłączone
-      archived_label: Zarchiwizowane
       delete: Usuń konto
       disable: Wyłącz konto
       edit: Edytuj
@@ -23,6 +20,8 @@ pl:
       remove_default: Usuń status domyślnego
       set_default: Ustaw jako domyślne
       sharing: Udostępnianie
+      disabled_label: Wyłączone
+      archived_label: Zarchiwizowane
       archive: Zarchiwizuj konto
       unarchive: Przywróć konto z archiwum
     chart:
@@ -64,21 +63,23 @@ pl:
       name_label: Nazwa konta
       name_placeholder: Przykładowa nazwa konta
       notes_label: Notatki
-      notes_placeholder: Zapisz dodatkowe informacje, takie jak numery kont, kody rozliczeniowe, IBAN, numery routingowe itp.
+      notes_placeholder: Zapisz dodatkowe informacje, takie jak numery kont, kody
+        rozliczeniowe, IBAN, numery routingowe itp.
       exclude_from_reports_label: Wyklucz z raportów i metryk
-      exclude_from_reports_description: Wykluczone konta są ukryte w raportach i obliczeniach wartości netto.
+      exclude_from_reports_description: Wykluczone konta są ukryte w raportach i obliczeniach
+        wartości netto.
       archive_label: Zarchiwizuj konto
-      archive_description: Zarchiwizowane konta są ukryte na pasku bocznym, ale nadal uwzględniane w wartości netto i raportach.
-    accountable_group:
-      archived_badge: "(Zarchiwizowane)"
+      archive_description: Zarchiwizowane konta są ukryte na pasku bocznym, ale nadal
+        uwzględniane w wartości netto i raportach.
     index:
       accounts: Konta
+      cancel_sync: Anuluj synchronizację
+      new_account: Nowe konto
+      sync: Synchronizuj wszystko
       account_groups:
         total: Razem
         active: Aktywne
         archived: Zarchiwizowane
-      new_account: Nowe konto
-      sync: Synchronizuj wszystko
     new:
       container:
         close: Zamknij
@@ -220,6 +221,8 @@ pl:
       success: Konto zostało pomyślnie odłączone. Teraz jest kontem ręcznym.
     update:
       success: Zaktualizowano konto %{type}
+    accountable_group:
+      archived_badge: "(Zarchiwizowane)"
   email_confirmations:
     new:
       invalid_token: Nieprawidłowy lub wygasły link potwierdzający.

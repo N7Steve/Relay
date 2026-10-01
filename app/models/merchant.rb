@@ -25,6 +25,7 @@ class Merchant < ApplicationRecord
       new(name: I18n.t(NO_MERCHANT_NAME_KEY))
     end
 
+    # Helper to get the localized name for "No merchant"
     def no_merchant_name
       I18n.t(NO_MERCHANT_NAME_KEY)
     end

@@ -50,12 +50,8 @@ export default class extends Controller {
   }
 
   #uniqueKey() {
-    // Prefixed so it can never collide with the numeric indexes Rails
-    // assigns to already-persisted conditions/actions when rendering an
-    // edit form (0, 1, 2, ...). A plain monotonic counter starting at 1
-    // would otherwise reuse index 1 and clobber an existing nested record.
     this.keySequence = (this.keySequence ?? 0) + 1;
-    return `new_${this.keySequence}`;
+    return Date.now() * 1000 + this.keySequence;
   }
 
   // Updates the prefix visibility of all conditions and condition groups
@@ -67,13 +63,13 @@ export default class extends Controller {
     conditions.forEach((condition) => {
       // Only process visible conditions, this prevents conditions that are marked for removal and hidden
       // from being added to the index. This is important when editing a rule.
-      if (!condition.classList.contains('hidden')) {
-        const prefixEl = condition.querySelector('[data-condition-prefix]');
+      if (!condition.classList.contains("hidden")) {
+        const prefixEl = condition.querySelector("[data-condition-prefix]");
         if (prefixEl) {
           if (conditionIndex === 0) {
-            prefixEl.classList.add('hidden');
+            prefixEl.classList.add("hidden");
           } else {
-            prefixEl.classList.remove('hidden');
+            prefixEl.classList.remove("hidden");
           }
           conditionIndex++;
         }

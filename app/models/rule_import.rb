@@ -265,6 +265,10 @@ class RuleImport < Import
       names.map { |name| find_or_create_tag(name).id }.join(",")
     end
 
+    # Preloaded once per import and extended in place on cache-miss, so a
+    # category/merchant/tag created for an earlier row is immediately visible
+    # to a later row referencing the same name, instead of one query per
+    # condition/action across every row in the file.
     def categories_by_name
       @categories_by_name ||= family.categories.index_by(&:name)
     end

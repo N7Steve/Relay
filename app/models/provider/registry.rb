@@ -3,7 +3,7 @@ class Provider::Registry
 
   Error = Class.new(StandardError)
 
-  CONCEPTS = %i[exchange_rates securities llm property_valuations]
+  CONCEPTS = %i[exchange_rates securities llm property_valuations classification]
 
   validates :concept, inclusion: { in: CONCEPTS }
 
@@ -111,6 +111,20 @@ class Provider::Registry
         Provider::Anthropic.new(access_token, base_url: base_url, model: model)
       end
 
+      def jev
+        return nil unless Setting.ai_features_enabled?
+
+        api_key = Provider::Jev.api_key # pipelock:ignore
+
+        return nil unless api_key.present?
+
+        Provider::Jev.new(
+          api_key,
+          endpoint: Provider::Jev.effective_endpoint,
+          model: Provider::Jev.effective_model
+        )
+      end
+
       def yahoo_finance
         Provider::YahooFinance.new
       end
@@ -137,6 +151,14 @@ class Provider::Registry
         return nil unless api_key.present?
 
         Provider::AlphaVantage.new(api_key)
+      end
+
+      def mansa
+        api_key = ENV["MANSA_API_KEY"].presence || Setting.mansa_api_key # pipelock:ignore
+
+        return nil unless api_key.present?
+
+        Provider::Mansa.new(api_key)
       end
 
       def mfapi
@@ -210,9 +232,11 @@ class Provider::Registry
       when :exchange_rates
         %i[twelve_data yahoo_finance moex_public frankfurter]
       when :securities
-        %i[twelve_data yahoo_finance tiingo eodhd alpha_vantage mfapi binance_public moex_public tinkoff_invest]
+        %i[twelve_data yahoo_finance tiingo eodhd alpha_vantage mfapi binance_public moex_public tinkoff_invest mansa]
       when :llm
         Setting.ai_features_enabled? ? %i[openai anthropic] : []
+      when :classification
+        Setting.ai_features_enabled? ? %i[jev] : []
       when :property_valuations
         %i[rentcast realie]
       else

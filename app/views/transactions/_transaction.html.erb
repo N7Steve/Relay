@@ -43,7 +43,7 @@
           <% end %>
         </div>
 
-        <div class="max-w-full min-w-0 <%= "opacity-50 text-secondary" if entry.excluded %>">
+        <div class="flex-1 max-w-full min-w-0 <%= "opacity-50 text-secondary" if entry.excluded %>">
           <%= content_tag :div, class: ["flex items-center gap-3 lg:gap-4"] do %>
             <div class="hidden lg:flex shrink-0">
               <% if transaction.transfer? %>
@@ -73,9 +73,9 @@
               <% end %>
             </div>
 
-            <div class="truncate">
+            <div class="truncate flex-1 min-w-0">
               <div class="space-y-0.5">
-                <div class="flex items-center gap-1 min-w-0">
+                <div class="flex items-center gap-1 min-w-0" data-tag-fit-bounds="0.5">
                   <div class="truncate flex-shrink">
                     <%= link_to(
                           entry.name,
@@ -156,6 +156,10 @@
                       <%= render "transactions/transfer_match", transaction: transaction %>
                     <% end %>
                   </div>
+
+                  <div class="md:hidden flex shrink-0 min-w-0 max-w-1/2 has-[[data-tag-empty]]:hidden">
+                    <%= render "tags/menu", entry: entry, transaction: transaction, variant: :mobile %>
+                  </div>
                 </div>
 
                 <div class="text-secondary text-xs font-normal">
@@ -189,7 +193,9 @@
                     <% end %>
                     <div class="flex min-w-0 items-center gap-1">
                       <%= render "categories/category_name_mobile", transaction: transaction %>
-                      <span class="lg:hidden min-w-0 truncate">• <%= transaction.merchant&.present? ? transaction.merchant.name : t("transactions.transaction.general_merchant") %></span>
+                        <% if transaction.merchant&.present? %>
+                        <span class="lg:hidden min-w-0 truncate">• <%= transaction.merchant.name %></span>
+                      <% end %>
                     </div>
                   <% end %>
                 </div>
