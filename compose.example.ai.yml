@@ -77,6 +77,8 @@ x-rails-env: &rails_env
   DB_HOST: db
   DB_PORT: 5432
   REDIS_URL: redis://redis:6379/1
+  GOOGLE_DRIVE_CLIENT_ID: ${GOOGLE_DRIVE_CLIENT_ID:-}
+  GOOGLE_DRIVE_CLIENT_SECRET: ${GOOGLE_DRIVE_CLIENT_SECRET:-}
   # MCP server endpoint — enables /mcp for external AI assistants (e.g. Claude, GPT).
   # Set both values to activate. MCP_USER_EMAIL must match an existing user's email.
   # External AI clients should connect via Pipelock (port 8889) for scanning.

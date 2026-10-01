@@ -30,11 +30,11 @@ class GoogleDrive::Client
     end
 
     def client_id
-      ENV["GOOGLE_DRIVE_CLIENT_ID"].presence || Rails.application.credentials.dig(:google_drive, :client_id)
+      ENV["GOOGLE_DRIVE_CLIENT_ID"].presence || credential(:client_id)
     end
 
     def client_secret
-      ENV["GOOGLE_DRIVE_CLIENT_SECRET"].presence || Rails.application.credentials.dig(:google_drive, :client_secret)
+      ENV["GOOGLE_DRIVE_CLIENT_SECRET"].presence || credential(:client_secret)
     end
 
     def generate_pkce
@@ -101,6 +101,13 @@ class GoogleDrive::Client
     end
 
     private
+      def credential(key)
+        credentials = Rails.application.credentials
+        return unless credentials.respond_to?(:dig)
+
+        credentials.dig(:google_drive, key)
+      end
+
       def ensure_configured!
         raise ConfigurationError, "Google Drive OAuth is not configured" unless configured?
       end

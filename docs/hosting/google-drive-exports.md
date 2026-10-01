@@ -22,6 +22,11 @@ ID, so renaming or moving it does not change the link.
    GOOGLE_DRIVE_CLIENT_SECRET=...
    ```
 
+   For Docker Compose deployments, store both values in the `.env` file beside
+   the Compose file and recreate both `web` and `worker`. The provided Compose
+   examples pass the variables through their shared Rails environment so they
+   survive restarts and image updates.
+
 These credentials are intentionally separate from `GOOGLE_OAUTH_CLIENT_ID` and
 `GOOGLE_OAUTH_CLIENT_SECRET`, which are used for signing in. Drive authorization
 requests `openid`, `email`, and the narrow `drive.file` scope, plus offline access

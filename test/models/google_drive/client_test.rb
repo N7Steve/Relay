@@ -24,4 +24,12 @@ class GoogleDrive::ClientTest < ActiveSupport::TestCase
     assert_match(/\A[A-Za-z0-9_-]+\z/, pkce[:verifier])
     assert_match(/\A[A-Za-z0-9_-]+\z/, pkce[:challenge])
   end
+
+  test "ignores scalar Rails credentials when Drive environment variables are absent" do
+    Rails.application.stubs(:credentials).returns("not-structured-credentials")
+
+    with_env_overrides("GOOGLE_DRIVE_CLIENT_ID" => nil) do
+      assert_nil GoogleDrive::Client.client_id
+    end
+  end
 end

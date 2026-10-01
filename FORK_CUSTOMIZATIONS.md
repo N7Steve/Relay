@@ -347,6 +347,9 @@ Funcionalidad propia incorporada en agosto de 2026:
   contenido del mismo archivo. Renombrarlo o moverlo conserva el enlace. Si se
   elimina, se envía a la papelera o pierde permisos, la programación requiere
   atención y no crea silenciosamente otro archivo con una referencia distinta.
+- Las plantillas Docker propagan las credenciales OAuth de Drive tanto a `web`
+  como a `worker`, y el cliente ignora de forma segura Rails Credentials escalares
+  o mal estructuradas en vez de fallar al invocar `dig` durante una renovación.
 - Los tokens de Drive y la identidad conectada usan Active Record Encryption cuando
   está configurado. Cada ejecución revalida la pertenencia familiar y el acceso del
   usuario a todas las cuentas seleccionadas.
