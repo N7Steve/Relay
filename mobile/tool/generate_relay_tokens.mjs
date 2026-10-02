@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const TOKENS_PATH = resolve(ROOT, "design/tokens/sure.tokens.json");
+const TOKENS_PATH = resolve(ROOT, "design/tokens/relay.tokens.json");
 const OUT_PATH = resolve(ROOT, "mobile/lib/theme/sure_tokens.dart");
 
 const COLOR_TOKENS = [
@@ -52,7 +52,7 @@ const WEIGHT_TOKENS = [
 ];
 
 // Single-layer elevation scale (shadow/*). Mode-aware: each token carries a
-// `sure.dark` extension, so light/dark emit different shadow colors.
+// `relay.dark` extension, so light/dark emit different shadow colors.
 const SHADOW_TOKENS = [
   ["shadowXs", "shadow.xs"],
   ["shadowSm", "shadow.sm"],
@@ -74,8 +74,8 @@ function nodeAt(tokens, path) {
 }
 
 function valueForMode(node, mode) {
-  if (mode === "dark" && node.$extensions?.["sure.dark"] !== undefined) {
-    return node.$extensions["sure.dark"];
+  if (mode === "dark" && node.$extensions?.["relay.dark"] !== undefined) {
+    return node.$extensions["relay.dark"];
   }
   if (node.$value === undefined) {
     throw new Error("[mobile-tokens] Token is missing $value");
@@ -192,8 +192,8 @@ function buildDart(tokens) {
   );
 
   return `// GENERATED CODE - DO NOT EDIT BY HAND.
-// Source: design/tokens/sure.tokens.json
-// Build: node mobile/tool/generate_sure_tokens.mjs
+// Source: design/tokens/relay.tokens.json
+// Build: node mobile/tool/generate_relay_tokens.mjs
 
 import 'package:flutter/painting.dart';
 
@@ -205,7 +205,7 @@ class SureTokens {
   static const String fontMono = '${fontMono}';
 
   // Keep the existing Flutter fallback behavior until native mobile font assets
-  // are registered. The canonical web stack remains in sure.tokens.json.
+  // are registered. The canonical web stack remains in relay.tokens.json.
   static const List<String> fontFallback = <String>[
     'Inter',
     'Arial',
@@ -241,12 +241,12 @@ function main() {
   if (check) {
     let existing;
     try {
-      existing = readFileSync(OUT_PATH, "utf8");
+      existing = readFileSync(OUT_PATH, "utf8").replace(/\r\n/g, "\n");
     } catch (error) {
       if (error.code === "ENOENT") {
         console.error(
           "[mobile-tokens] mobile/lib/theme/sure_tokens.dart is missing. " +
-            "Run node mobile/tool/generate_sure_tokens.mjs.",
+            "Run node mobile/tool/generate_relay_tokens.mjs.",
         );
         process.exit(1);
       }
@@ -255,7 +255,7 @@ function main() {
     if (existing !== output) {
       console.error(
         "[mobile-tokens] mobile/lib/theme/sure_tokens.dart is stale. " +
-          "Run node mobile/tool/generate_sure_tokens.mjs.",
+          "Run node mobile/tool/generate_relay_tokens.mjs.",
       );
       process.exit(1);
     }

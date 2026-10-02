@@ -130,8 +130,79 @@ Compatibilidad y reversión:
   volúmenes automáticamente. Los archivos gráficos originales quedan conservados.
 
 El inventario siguiente conserva los nombres de partida como mapa de búsqueda.
-Marca web, Rails/versión, npm raíz y aislamiento Docker ya avanzaron; los tokens,
+Marca web, Rails/versión, npm raíz, aislamiento Docker y tokens ya avanzaron;
 clientes, datos persistidos y distribución siguen en las fases siguientes.
+
+## Tercera entrega: diseño Relay y limpieza del legado
+
+Ejecutada el **3 de octubre de 2026**, sobre `e5f294220`:
+
+- Fuente `design/tokens/relay.tokens.json`, entrada `relay-design-system.css` y
+  directorio `relay-design-system/`; consumidores, Lookbook, guías y atributos
+  Git alineados. Las extensiones internas pasan de `sure.*` a `relay.*`.
+- Generador móvil `mobile/tool/generate_relay_tokens.mjs` adaptado junto con sus
+  pruebas y comentarios. Se mantienen `SureTokens`, sus archivos Dart y los
+  componentes nativos como contratos internos del cliente existente.
+- `npm run tokens:build` genera CSS web y Dart móvil; `tokens:check` comprueba
+  ambos sin escribir y detecta archivos ausentes o desactualizados. CI ejecuta
+  esta comprobación. Los checks aceptan CRLF en un checkout Windows.
+- Todos los valores de tokens se conservan. El CSS regenerado elimina tres
+  bloques redundantes heredados (`divide-subdued`, `button-bg-accent` y su hover)
+  que ya no emitía el generador anterior. Las utilidades correspondientes siguen
+  presentes; las hojas manuales no cambian sus estilos.
+- Los 12 workflows heredados de publicación, releases, distribución, mirror,
+  documentación, Gittensor y evaluaciones LLM por etiquetas pasan a
+  `docs/archive/sure/workflows/`, con contenido intacto. Fuera de
+  `.github/workflows/` no pueden ejecutar operaciones en Relay. Se conservan CI
+  Rails/JavaScript, PR, Flutter, chart y Pipelock; los canales propios de
+  publicación siguen pendientes de definición.
+- Los informes antiguos de Agenda y rollback pasan a `docs/archive/sure/`, con
+  un índice que explica su carácter histórico. El script `script.rb` pasa a
+  `script/debug_currency_methods.rb`, sin cambiar su contenido. `conflicts.txt`
+  se elimina después de verificar que es una lista UTF-16 de diez rutas de
+  conflictos antiguos, sin consumidores. Todo conserva trazabilidad en Git.
+- El mapa de preservación enlaza las rutas nuevas. No se elimina funcionalidad
+  de Agenda, exportaciones, proveedores, IA, seguridad ni clientes nativos.
+
+### Criterio de limpieza de la raíz
+
+Se retiran de la raíz cuatro archivos históricos o auxiliares:
+`informe_scheduled_payments.md`, `rollback-instructions.md`, `script.rb` y
+`conflicts.txt`. El resto de la limpieza renombra fuentes de diseño y archiva
+automatización fuera de la raíz.
+
+Se mantienen los archivos necesarios para Rails, Bundler, npm, lint, Docker,
+instrucciones y licencia. Los siguientes restos requieren continuidad explícita:
+
+| Archivo/área | Razón para conservarlo ahora |
+| --- | --- |
+| `compose.example*.yml`, `pipelock.example.yaml`, `.env.example`, `charts/sure/` | Configuración de despliegue heredada, consumida por documentación y comprobaciones de seguridad; preparar destinos Relay antes de sustituirla |
+| `Project.json`, `bitrig/`, `appStoreConnect/`, `desktop/`, `mobile/` | Clientes nativos e identidad de distribución todavía por decidir; no eliminar clientes por una limpieza de marca |
+| `perf.rake` | Derailed Benchmarks lo exige en la raíz; la dependencia sigue en Gemfile |
+| `FORK_CUSTOMIZATIONS.md`, `FORK_EVOLUTION.md`, `RELAY_MIGRATION.md`, adaptadores de agentes | Preservación, dirección y seguimiento actuales del proyecto |
+
+### Estado y próximos pasos
+
+| Fase | Estado después de esta entrega |
+| --- | --- |
+| 0. Base independiente | Completada; historia y remotos conservados |
+| 1. Identidad visible | Marca web/PWA hecha; auditoría de servicios/hosting y superficies mantenidas pendiente |
+| 2. Backend, herramientas y diseño | Rails, versión técnica, npm y tokens hechos; versión propia y tareas/variables compatibles pendientes |
+| 3. Infraestructura y artefactos | Local/test aislados y publicación heredada retirada; imágenes y chart Relay pendientes |
+| 4. Datos y contratos | Pendiente; STI, imports, exportaciones, variables legacy y cabeceras conservados |
+| 5. Integraciones y clientes | Pendiente; callbacks y package/bundle IDs conservados |
+| 6. Ensayo y publicación | Pendiente; no se ha migrado una instalación ni desplegado Relay |
+
+Siguiente bloque técnico: preparar nombres Relay para exportaciones nuevas y
+variables/tareas con precedencia documentada sobre los nombres Sure, probando
+lectura legacy. Antes de tocar `SureImport`, diseñar conjuntamente STI, API,
+restricciones y jobs. Para distribución, definir primero versión/canal y
+destinos propios; no restaurar directamente los workflows archivados.
+
+Reversión: revertir esta entrega devuelve las rutas, generadores y documentos
+anteriores. Eso también reactiva los workflows heredados: revisar este efecto
+antes de revertir en GitHub. No hay migraciones, cambios de datos, claves,
+volúmenes o configuración externa que revertir.
 
 ## Inventario técnico de la separación
 
@@ -364,6 +435,35 @@ visual temporal no añade pruebas al producto. No se arrancó el entorno local
 Relay ni se aplicaron migraciones a instalaciones existentes. Se detienen los
 servicios de pruebas sin borrar volúmenes y se conserva Sure intacto.
 Los resultados son locales; no equivalen a una release o despliegue de clientes.
+
+### Validación de la tercera entrega
+
+Ejecutada el 3 de octubre de 2026. Se usan proyectos Docker nuevos
+`relay-migration-unit` y `relay-migration-system`, cada uno con su base aislada
+`relay_test`. La suite de navegador ejecuta todos los tests de sistema.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite completa Rails/Minitest | 10.777 pruebas, 45.639 aserciones, 0 fallos, 0 errores, 33 omisiones heredadas |
+| Suite completa de sistema en Chromium | 189 pruebas, 968 aserciones, 0 fallos, 0 errores, 0 omisiones |
+| RuboCop completo | 2.915 archivos, sin infracciones |
+| ERB lint completo | 779 plantillas, sin errores |
+| Biome | 142 archivos, sin errores |
+| Brakeman | 0 errores, 0 avisos activos; conserva las 8 exclusiones heredadas |
+| Assets | Compilación correcta en ambas suites |
+| Generadores | CSS y Dart actualizados; sintaxis Node válida; checks ejecutados en Windows y Linux |
+| Checks negativos de generación | Ambos rechazan archivos ausentes y desactualizados sin escribirlos, sobre copias temporales |
+| Preservación del diseño | Valores JSON y CSS manual idénticos; declaraciones Dart idénticas; CSS generado solo elimina los 3 bloques duplicados descritos |
+| Archivo histórico | 12 workflows y 2 informes conservan su contenido; script trasladado sin cambios |
+| Configuración | 7 workflows activos y 12 archivados parsean; llamadas locales resueltas; Compose local/test válido |
+| Whitespace | `git diff --cached --check` correcto |
+
+No se ejecuta Flutter nativo localmente; las declaraciones generadas se verifican
+por comparación y el workflow Flutter activo comprueba el cliente en CI. La
+validación local no certifica el resultado remoto, una release ni un despliegue.
+Los logs y copias de auditoría están en `tmp/`, fuera de Git. No se ejecutan
+migraciones ni se arranca la instalación local. Los servicios de pruebas se
+detienen conservando sus volúmenes al terminar.
 
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia

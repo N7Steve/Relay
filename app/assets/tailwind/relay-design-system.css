@@ -1,6 +1,6 @@
 /*
- * Sure design system entry.
- * Tokens (theme, dark overrides, utilities) are generated from design/tokens/sure.tokens.json: see _generated.css.
+ * Relay design system entry.
+ * Tokens (theme, dark overrides, utilities) are generated from design/tokens/relay.tokens.json: see _generated.css.
  * Element resets, components, and prose overrides remain hand-written.
  */
 
@@ -11,7 +11,7 @@
  */
 @custom-variant theme-dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-@import './sure-design-system/_generated.css';
-@import './sure-design-system/base.css';
-@import './sure-design-system/components.css';
-@import './sure-design-system/prose.css';
+@import './relay-design-system/_generated.css';
+@import './relay-design-system/base.css';
+@import './relay-design-system/components.css';
+@import './relay-design-system/prose.css';

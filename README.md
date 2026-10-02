@@ -13,6 +13,7 @@ the Sure or Maybe teams.
 - [Development guides](docs/llm-guides/README.md)
 - [Local Docker setup](docs/llm-guides/docker-local-app.md) and [tests](docs/llm-guides/docker-tests.md)
 - [Relay migration plan](RELAY_MIGRATION.md)
+- [Historical Sure documents and release workflows](docs/archive/sure/README.md)
 
 Deployment and client documentation still contains inherited Sure configuration;
 consult the migration plan before using it for Relay.

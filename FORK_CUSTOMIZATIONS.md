@@ -180,7 +180,7 @@ Es el bloque funcional propio más grande. No debe reducirse a una simple etique
 - Controlador y job: `app/controllers/scheduled_payments_controller.rb`, `app/jobs/generate_scheduled_payments_job.rb`.
 - UI: `app/views/scheduled_payments/`, `app/helpers/scheduled_payments_helper.rb` y `scheduled_payment_form_controller.js`. La consulta de resumen/calendario vive en `app/models/scheduled_payment/agenda.rb`.
 - Integración: `app/models/account.rb`, `app/models/entry.rb`, `app/models/family.rb`, `app/models/transaction.rb`, `app/controllers/transactions_controller.rb`, `config/routes.rb`, `config/schedule.yml`, `config/initializers/sidekiq.rb`.
-- Operación: `lib/tasks/scheduled_payments.rake`, `informe_scheduled_payments.md`.
+- Operación: `lib/tasks/scheduled_payments.rake`, `docs/archive/sure/informe_scheduled_payments.md`.
 - Cobertura: pruebas de modelo, controlador y job, más fixtures `scheduled_payment*`.
 
 ### Refuerzo de robustez de septiembre de 2026
@@ -501,10 +501,10 @@ Rutas afectadas: `app/models/concerns/syncable.rb`, modelos/importers/syncers de
 - Eliminación de presupuestos desde la UI/controlador.
 - Ajustes menores en insights, usuario, sesiones, assistant functions, tags y budgets.
 - Cambios en `Gemfile` para soporte de UI y documentación añadida al `README.md`.
-- Workflows propios: `.github/workflows/gittensor-impact.yml` y cambios en `pipelock.yml`.
-- Documentación/operación: `rollback-instructions.md` e `informe_scheduled_payments.md`.
-- Scripts de diagnóstico: `script/debug_subtypes.rb` y `script.rb`.
-- `conflicts.txt` es un artefacto binario presente en el fork: **revisar antes de conservar o resolver en un merge**; no asumir que es funcionalidad necesaria.
+- Workflows: se conserva `.github/workflows/pipelock.yml`. Gittensor y los workflows heredados de distribución/publicación están archivados en `docs/archive/sure/workflows/`; ya no se ejecutan en Relay (3 de octubre de 2026).
+- Documentación/operación: `docs/archive/sure/rollback-instructions.md` e `docs/archive/sure/informe_scheduled_payments.md`.
+- Scripts de diagnóstico: `script/debug_subtypes.rb` y `script/debug_currency_methods.rb`.
+- `conflicts.txt` se retiró el 3 de octubre de 2026: era una lista UTF-16 de diez rutas de conflictos antiguos, sin consumidores ni comportamiento. Se conserva en Git; no restaurarla en futuras integraciones.
 
 ## Migraciones propias
 
@@ -548,7 +548,7 @@ Las 230 rutas del inventario original se agrupaban así. Tras la integración sq
 - `config/routes.rb`, `config/schedule.yml`, `config/initializers/{sidekiq,active_storage_authorization}.rb`: rutas, ejecución periódica y autorización de adjuntos.
 - `db/migrate/` y `db/schema.rb`: las dieciséis migraciones enumeradas y su esquema resultante.
 - `test/`: cobertura de pagos programados, cuentas, comercios personalizados, autorización de Active Storage, transferencias, transacciones, exportaciones, Syncable y componentes DS.
-- Raíz/scripts/docs: `Gemfile`, `README.md`, `informe_scheduled_payments.md`, `rollback-instructions.md`, `conflicts.txt`, `script.rb` y `script/debug_subtypes.rb`.
+- Raíz/scripts/docs: `Gemfile`, `README.md`, `docs/archive/sure/informe_scheduled_payments.md`, `docs/archive/sure/rollback-instructions.md`, `script/debug_currency_methods.rb` y `script/debug_subtypes.rb`.
 
 Para obtener el manifiesto exacto y actualizado de archivos en cualquier momento:
 

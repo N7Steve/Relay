@@ -8,7 +8,7 @@ import '../theme/sure_spacing.dart';
 /// and filled (neutral `buttonPrimary` + inverse label) when selected.
 ///
 /// Colors resolve from the active [SureColors] palette, so it's brightness-aware
-/// and stays in lockstep with `sure.tokens.json` (and avoids the Material
+/// and stays in lockstep with `relay.tokens.json` (and avoids the Material
 /// `primaryContainer` tint the raw `FilterChip` falls back to).
 ///
 /// ```dart

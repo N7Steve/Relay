@@ -1,5 +1,5 @@
 # Bills subsystem: adds the `accent` and `outline_muted` variants, with their
-# colours declared in design/tokens/sure.tokens.json alongside every other
+# colours declared in design/tokens/relay.tokens.json alongside every other
 # button colour.
 class DS::Buttonish < DesignSystemComponent
   VARIANTS = {
@@ -12,7 +12,7 @@ class DS::Buttonish < DesignSystemComponent
       icon_classes: "text-primary"
     },
     # A tinted call to action for navigation that leaves the app. Backed by the
-    # button-bg-accent utilities in design/tokens/sure.tokens.json, so the colour
+    # button-bg-accent utilities in design/tokens/relay.tokens.json, so the colour
     # lives with every other button colour rather than in this file.
     accent: {
       container_classes: "text-link button-bg-accent hover:button-bg-accent-hover disabled:button-bg-disabled",

@@ -22,7 +22,7 @@ class SureSegment<T> {
 /// the subtle DS shadow) and unselected segments are flat `textSecondary` labels.
 ///
 /// Colors resolve from the active [SureColors] palette, so it's brightness-aware
-/// and stays in lockstep with `sure.tokens.json` (and avoids the Material
+/// and stays in lockstep with `relay.tokens.json` (and avoids the Material
 /// `SegmentedButton` `secondaryContainer` look). Expects a bounded width — the
 /// segments share it equally.
 ///
