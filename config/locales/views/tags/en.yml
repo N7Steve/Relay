@@ -19,6 +19,7 @@ en:
       delete_all: Delete all
     menu:
       label: Edit tags
+      filter: "Filter by %{name}"
       loading: Loading tags...
     new:
       new: New tag

@@ -5,21 +5,21 @@ module PortfoliosHelper
 
     tax = 0.0
 
-    t1_taxable = [total_return_amount, 6_000].min
+    t1_taxable = [ total_return_amount, 6_000 ].min
     tax += t1_taxable * 0.19
 
     if total_return_amount > 6_000
-      t2_taxable = [total_return_amount - 6_000, 44_000].min
+      t2_taxable = [ total_return_amount - 6_000, 44_000 ].min
       tax += t2_taxable * 0.21
     end
 
     if total_return_amount > 50_000
-      t3_taxable = [total_return_amount - 50_000, 150_000].min
+      t3_taxable = [ total_return_amount - 50_000, 150_000 ].min
       tax += t3_taxable * 0.23
     end
 
     if total_return_amount > 200_000
-      t4_taxable = [total_return_amount - 200_000, 100_000].min
+      t4_taxable = [ total_return_amount - 200_000, 100_000 ].min
       tax += t4_taxable * 0.27
     end
 

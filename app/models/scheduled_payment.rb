@@ -242,282 +242,282 @@ class ScheduledPayment < ApplicationRecord
 
   private
 
-  def link_historical_entries!(source_entry: nil)
-    # A future start date controls generation, but must not prevent linking the
-    # existing transaction from which the schedule was created or its history.
-    amount_value = amount.abs
-    tolerance = amount_value * historical_amount_tolerance
-    min_amount = amount_value - tolerance
-    max_amount = amount_value + tolerance
-    expected_tag_ids = tag_ids.map(&:to_s).sort
+    def link_historical_entries!(source_entry: nil)
+      # A future start date controls generation, but must not prevent linking the
+      # existing transaction from which the schedule was created or its history.
+      amount_value = amount.abs
+      tolerance = amount_value * historical_amount_tolerance
+      min_amount = amount_value - tolerance
+      max_amount = amount_value + tolerance
+      expected_tag_ids = tag_ids.map(&:to_s).sort
 
-    candidates = family.entries
-      .where(entryable_type: "Transaction")
-      .where(account_id: account_id)
-      .where("entries.date <= ?", Date.current)
-      .where(currency: currency)
-      .where("ABS(entries.amount) BETWEEN ? AND ?", min_amount, max_amount)
-      .where(income? ? "entries.amount < 0" : "entries.amount >= 0")
-      .where("TRIM(LOWER(entries.name)) = TRIM(LOWER(?))", title)
-      .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
-      .where(transactions: { category_id: category_id, merchant_id: merchant_id })
-      .preload(entryable: :tags)
+      candidates = family.entries
+        .where(entryable_type: "Transaction")
+        .where(account_id: account_id)
+        .where("entries.date <= ?", Date.current)
+        .where(currency: currency)
+        .where("ABS(entries.amount) BETWEEN ? AND ?", min_amount, max_amount)
+        .where(income? ? "entries.amount < 0" : "entries.amount >= 0")
+        .where("TRIM(LOWER(entries.name)) = TRIM(LOWER(?))", title)
+        .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
+        .where(transactions: { category_id: category_id, merchant_id: merchant_id })
+        .preload(entryable: :tags)
 
-    linked_count = 0
+      linked_count = 0
 
-    source_result = :not_provided
-    if source_entry
-      # Entry#transaction is the delegated financial transaction reader, so
-      # Entry#with_lock never yields. Use the payment's enclosing transaction
-      # and acquire the row lock directly before reading or writing links.
-      source_entry.lock!
-      source_result = link_historical_source_entry!(source_entry)
-      linked_count += 1 if source_result == :linked
+      source_result = :not_provided
+      if source_entry
+        # Entry#transaction is the delegated financial transaction reader, so
+        # Entry#with_lock never yields. Use the payment's enclosing transaction
+        # and acquire the row lock directly before reading or writing links.
+        source_entry.lock!
+        source_result = link_historical_source_entry!(source_entry)
+        linked_count += 1 if source_result == :linked
+      end
+
+      candidates = candidates.where.not(id: source_entry.id) if source_entry
+      candidate_count = candidates.count
+      candidate_results = Hash.new(0)
+      candidates.each do |entry|
+        entry.lock!
+        result = link_historical_entry!(entry, expected_tag_ids: expected_tag_ids)
+        candidate_results[result] += 1
+        linked_count += 1 if result == :linked
+      end
+
+      # Do not jump over an unpaid gap just because a later charge was linked.
+      while active? && scheduled_payment_entries.confirmed.exists?(scheduled_date: next_run_date)
+        advance_next_run_date!(count_occurrence: false)
+      end
+
+      Rails.logger.info(
+        "Scheduled payment historical matching completed: " \
+          "payment=#{id} source=#{source_result} candidates=#{candidate_count} " \
+          "candidate_results=#{candidate_results.sort.to_h} linked=#{linked_count}"
+      )
+      linked_count
     end
 
-    candidates = candidates.where.not(id: source_entry.id) if source_entry
-    candidate_count = candidates.count
-    candidate_results = Hash.new(0)
-    candidates.each do |entry|
-      entry.lock!
-      result = link_historical_entry!(entry, expected_tag_ids: expected_tag_ids)
-      candidate_results[result] += 1
-      linked_count += 1 if result == :linked
+    def find_historical_source_entry(user, source_entry_id)
+      return if source_entry_id.blank?
+
+      family.entries
+        .joins(:account)
+        .merge(Account.writable_by(user))
+        .where(entryable_type: "Transaction")
+        .find(source_entry_id)
     end
 
-    # Do not jump over an unpaid gap just because a later charge was linked.
-    while active? && scheduled_payment_entries.confirmed.exists?(scheduled_date: next_run_date)
-      advance_next_run_date!(count_occurrence: false)
+    def link_historical_entry!(entry, expected_tag_ids:)
+      return :already_linked if entry.from_scheduled_payment?
+      return :account_or_currency unless entry.account_id == account_id && entry.currency == currency
+      correct_direction = income? ? entry.amount.negative? : entry.amount >= 0
+      return :direction unless correct_direction
+      return :tags if entry.entryable.tags.map { |tag| tag.id.to_s }.sort != expected_tag_ids
+
+      transfer = entry.entryable.transfer
+      if transfer?
+        correct_accounts = transfer &&
+          transfer.from_account.id == account_id &&
+          transfer.to_account.id == target_account_id
+        return :transfer_accounts unless correct_accounts
+        return :already_linked if transfer.inflow_transaction.entry.from_scheduled_payment?
+      elsif transfer
+        return :unexpected_transfer
+      end
+
+      search_range = (entry.date - HISTORICAL_DATE_TOLERANCE_DAYS.days)..
+        (entry.date + HISTORICAL_DATE_TOLERANCE_DAYS.days)
+      matching_occurrences = schedule_dates_in(search_range)
+      return :date if matching_occurrences.empty?
+
+      nearest_date = matching_occurrences.min_by { |date| (date - entry.date).abs }
+      scheduled_entry = scheduled_payment_entries.find_or_initialize_by(scheduled_date: nearest_date)
+      return :occupied if scheduled_entry.persisted? && !scheduled_entry.pending?
+
+      scheduled_entry.assign_attributes(status: "confirmed", entry: entry, rejection_reason: nil)
+      scheduled_entry.transfer_entry = transfer.inflow_transaction.entry if transfer
+      scheduled_entry.save!
+      :linked
     end
 
-    Rails.logger.info(
-      "Scheduled payment historical matching completed: " \
-        "payment=#{id} source=#{source_result} candidates=#{candidate_count} " \
-        "candidate_results=#{candidate_results.sort.to_h} linked=#{linked_count}"
-    )
-    linked_count
-  end
+    # The user explicitly selected this transaction as the source of the
+    # schedule. Do not make that deliberate choice pass through the heuristic
+    # filters used to discover additional history.
+    def link_historical_source_entry!(entry)
+      return :already_linked if entry.from_scheduled_payment?
 
-  def find_historical_source_entry(user, source_entry_id)
-    return if source_entry_id.blank?
+      transfer = entry.entryable.transfer
+      transfer_entry = transfer&.inflow_transaction&.entry
+      return :already_linked if transfer_entry&.from_scheduled_payment?
 
-    family.entries
-      .joins(:account)
-      .merge(Account.writable_by(user))
-      .where(entryable_type: "Transaction")
-      .find(source_entry_id)
-  end
+      search_range = (entry.date - HISTORICAL_DATE_TOLERANCE_DAYS.days)..
+        (entry.date + HISTORICAL_DATE_TOLERANCE_DAYS.days)
+      scheduled_date = schedule_dates_in(search_range).min_by { |date| (date - entry.date).abs }
+      scheduled_date ||= entry.date
 
-  def link_historical_entry!(entry, expected_tag_ids:)
-    return :already_linked if entry.from_scheduled_payment?
-    return :account_or_currency unless entry.account_id == account_id && entry.currency == currency
-    correct_direction = income? ? entry.amount.negative? : entry.amount >= 0
-    return :direction unless correct_direction
-    return :tags if entry.entryable.tags.map { |tag| tag.id.to_s }.sort != expected_tag_ids
+      scheduled_entry = scheduled_payment_entries.find_or_initialize_by(scheduled_date: scheduled_date)
+      return :occupied if scheduled_entry.persisted? && !scheduled_entry.pending?
 
-    transfer = entry.entryable.transfer
-    if transfer?
-      correct_accounts = transfer &&
-        transfer.from_account.id == account_id &&
-        transfer.to_account.id == target_account_id
-      return :transfer_accounts unless correct_accounts
-      return :already_linked if transfer.inflow_transaction.entry.from_scheduled_payment?
-    elsif transfer
-      return :unexpected_transfer
+      scheduled_entry.assign_attributes(
+        status: "confirmed",
+        entry: entry,
+        transfer_entry: transfer_entry,
+        rejection_reason: nil
+      )
+      scheduled_entry.save!
+      :linked
     end
 
-    search_range = (entry.date - HISTORICAL_DATE_TOLERANCE_DAYS.days)..
-      (entry.date + HISTORICAL_DATE_TOLERANCE_DAYS.days)
-    matching_occurrences = schedule_dates_in(search_range)
-    return :date if matching_occurrences.empty?
-
-    nearest_date = matching_occurrences.min_by { |date| (date - entry.date).abs }
-    scheduled_entry = scheduled_payment_entries.find_or_initialize_by(scheduled_date: nearest_date)
-    return :occupied if scheduled_entry.persisted? && !scheduled_entry.pending?
-
-    scheduled_entry.assign_attributes(status: "confirmed", entry: entry, rejection_reason: nil)
-    scheduled_entry.transfer_entry = transfer.inflow_transaction.entry if transfer
-    scheduled_entry.save!
-    :linked
-  end
-
-  # The user explicitly selected this transaction as the source of the
-  # schedule. Do not make that deliberate choice pass through the heuristic
-  # filters used to discover additional history.
-  def link_historical_source_entry!(entry)
-    return :already_linked if entry.from_scheduled_payment?
-
-    transfer = entry.entryable.transfer
-    transfer_entry = transfer&.inflow_transaction&.entry
-    return :already_linked if transfer_entry&.from_scheduled_payment?
-
-    search_range = (entry.date - HISTORICAL_DATE_TOLERANCE_DAYS.days)..
-      (entry.date + HISTORICAL_DATE_TOLERANCE_DAYS.days)
-    scheduled_date = schedule_dates_in(search_range).min_by { |date| (date - entry.date).abs }
-    scheduled_date ||= entry.date
-
-    scheduled_entry = scheduled_payment_entries.find_or_initialize_by(scheduled_date: scheduled_date)
-    return :occupied if scheduled_entry.persisted? && !scheduled_entry.pending?
-
-    scheduled_entry.assign_attributes(
-      status: "confirmed",
-      entry: entry,
-      transfer_entry: transfer_entry,
-      rejection_reason: nil
-    )
-    scheduled_entry.save!
-    :linked
-  end
-
-  def historical_amount_tolerance
-    amount_estimated? ? ESTIMATED_AMOUNT_TOLERANCE : FIXED_AMOUNT_TOLERANCE
-  end
-
-  def schedule_dates_in(date_range)
-    date_range.select { |date| date_on_schedule?(date) }
-  end
-
-  def date_on_schedule?(date)
-    return false if start_date.blank?
-    return false if end_date.present? && date > end_date
-
-    case frequency
-    when "once"
-      date == start_date
-    when "daily"
-      true
-    when "weekly"
-      ((date - start_date).to_i % 7).zero?
-    when "biweekly"
-      ((date - start_date).to_i % 14).zero?
-    when "monthly", "quarterly", "yearly"
-      months = { "monthly" => 1, "quarterly" => 3, "yearly" => 12 }.fetch(frequency)
-      month_offset = (date.year - start_date.year) * 12 + date.month - start_date.month
-      expected_day = [ frequency_day || start_date.day, date.end_of_month.day ].min
-
-      (month_offset % months).zero? && date.day == expected_day
-    else
-      false
-    end
-  end
-
-  def occurrence_for_date!(date)
-    existing = scheduled_payment_entries.find_by(scheduled_date: date)
-    return existing if existing
-    raise ArgumentError, "Date is outside the schedule" unless occurrences_in(date..date).include?(date)
-
-    scheduled_payment_entries.build(scheduled_date: date)
-  end
-
-  # Jump to the requested window, so an old daily schedule doesn't exhaust
-  # the iteration cap before reaching the month being displayed.
-  def first_occurrence_on_or_after(date)
-    return start_date if date <= start_date
-
-    current = if (days = { "daily" => 1, "weekly" => 7, "biweekly" => 14 }[frequency])
-      start_date + ((date - start_date).to_i / days) * days
-    elsif (months = { "monthly" => 1, "quarterly" => 3, "yearly" => 12 }[frequency])
-      elapsed_months = (date.year - start_date.year) * 12 + date.month - start_date.month
-      cycles = elapsed_months / months
-      cycles.zero? ? start_date : safe_advance_months(start_date, cycles * months, frequency_day)
-    else
-      return start_date
+    def historical_amount_tolerance
+      amount_estimated? ? ESTIMATED_AMOUNT_TOLERANCE : FIXED_AMOUNT_TOLERANCE
     end
 
-    current < date ? calculate_next_date(current) : current
-  end
-
-  def occurrences_per_year
-    case frequency
-    when "daily" then BigDecimal("365.25")
-    when "weekly" then BigDecimal("365.25") / BigDecimal("7")
-    when "biweekly" then BigDecimal("365.25") / BigDecimal("14")
-    when "monthly" then BigDecimal("12")
-    when "quarterly" then BigDecimal("4")
-    when "yearly" then BigDecimal("1")
-    else BigDecimal("0")
+    def schedule_dates_in(date_range)
+      date_range.select { |date| date_on_schedule?(date) }
     end
-  end
 
-  def associations_belong_to_family
-    return if family_id.blank?
+    def date_on_schedule?(date)
+      return false if start_date.blank?
+      return false if end_date.present? && date > end_date
 
-    { account: account, target_account: target_account, category: category }.each do |attribute, record|
-      errors.add(attribute, :invalid) if record && record.family_id != family_id
+      case frequency
+      when "once"
+        date == start_date
+      when "daily"
+        true
+      when "weekly"
+        ((date - start_date).to_i % 7).zero?
+      when "biweekly"
+        ((date - start_date).to_i % 14).zero?
+      when "monthly", "quarterly", "yearly"
+        months = { "monthly" => 1, "quarterly" => 3, "yearly" => 12 }.fetch(frequency)
+        month_offset = (date.year - start_date.year) * 12 + date.month - start_date.month
+        expected_day = [ frequency_day || start_date.day, date.end_of_month.day ].min
+
+        (month_offset % months).zero? && date.day == expected_day
+      else
+        false
+      end
     end
-    if merchant.is_a?(FamilyMerchant) && merchant.family_id != family_id
-      errors.add(:merchant, :invalid)
+
+    def occurrence_for_date!(date)
+      existing = scheduled_payment_entries.find_by(scheduled_date: date)
+      return existing if existing
+      raise ArgumentError, "Date is outside the schedule" unless occurrences_in(date..date).include?(date)
+
+      scheduled_payment_entries.build(scheduled_date: date)
     end
-    errors.add(:tags, :invalid) if tags.any? { |tag| tag.family_id != family_id }
-  end
 
-  def frequency_day_within_range
-    return unless frequency.present? && frequency_day.present?
+    # Jump to the requested window, so an old daily schedule doesn't exhaust
+    # the iteration cap before reaching the month being displayed.
+    def first_occurrence_on_or_after(date)
+      return start_date if date <= start_date
 
-    max = case frequency
-          when "weekly", "biweekly" then 6
-          when "monthly", "quarterly", "yearly" then 31
-          when "daily" then 0
-          end
+      current = if (days = { "daily" => 1, "weekly" => 7, "biweekly" => 14 }[frequency])
+        start_date + ((date - start_date).to_i / days) * days
+      elsif (months = { "monthly" => 1, "quarterly" => 3, "yearly" => 12 }[frequency])
+        elapsed_months = (date.year - start_date.year) * 12 + date.month - start_date.month
+        cycles = elapsed_months / months
+        cycles.zero? ? start_date : safe_advance_months(start_date, cycles * months, frequency_day)
+      else
+        return start_date
+      end
 
-    if max && frequency_day > max
-      errors.add(:frequency_day, "must be between 0 and #{max} for #{frequency} frequency")
+      current < date ? calculate_next_date(current) : current
     end
-  end
 
-  def next_weekday_from(from_date, weeks)
-    target_wday = frequency_day
-    # Find next occurrence of target_wday strictly after from_date
-    days_ahead = (target_wday - from_date.wday) % 7
-    days_ahead = 7 if days_ahead == 0
-    first_occurrence = from_date + days_ahead.days
-    # For biweekly, add extra week(s)
-    first_occurrence += (weeks - 1).weeks
-    first_occurrence
-  end
+    def occurrences_per_year
+      case frequency
+      when "daily" then BigDecimal("365.25")
+      when "weekly" then BigDecimal("365.25") / BigDecimal("7")
+      when "biweekly" then BigDecimal("365.25") / BigDecimal("14")
+      when "monthly" then BigDecimal("12")
+      when "quarterly" then BigDecimal("4")
+      when "yearly" then BigDecimal("1")
+      else BigDecimal("0")
+      end
+    end
 
-  def safe_next_month(from, day)
-    next_m = from.next_month
-    Date.new(next_m.year, next_m.month, [day, next_m.end_of_month.day].min)
-  end
+    def associations_belong_to_family
+      return if family_id.blank?
 
-  def safe_advance_months(from, months, day)
-    target = from >> months
-    Date.new(target.year, target.month, [day, target.end_of_month.day].min)
-  end
+      { account: account, target_account: target_account, category: category }.each do |attribute, record|
+        errors.add(attribute, :invalid) if record && record.family_id != family_id
+      end
+      if merchant.is_a?(FamilyMerchant) && merchant.family_id != family_id
+        errors.add(:merchant, :invalid)
+      end
+      errors.add(:tags, :invalid) if tags.any? { |tag| tag.family_id != family_id }
+    end
 
-  def target_account_different_from_source
-    errors.add(:target_account, "must be different from source account") if target_account_id == account_id
-  end
+    def frequency_day_within_range
+      return unless frequency.present? && frequency_day.present?
 
-  def estimated_amount_requires_manual_confirmation
-    errors.add(:auto_confirm, :invalid) if amount_estimated? && auto_confirm?
-  end
+      max = case frequency
+      when "weekly", "biweekly" then 6
+      when "monthly", "quarterly", "yearly" then 31
+      when "daily" then 0
+      end
 
-  def monetizable_currency
-    currency
-  end
+      if max && frequency_day > max
+        errors.add(:frequency_day, "must be between 0 and #{max} for #{frequency} frequency")
+      end
+    end
 
-  def set_frequency_day_from_start_date
-    self.frequency_day = case frequency
-                         when "daily" then 0
-                         when "weekly", "biweekly" then start_date.wday
-                         when "monthly", "quarterly", "yearly" then start_date.day
-                         else 0
-                         end
-  end
+    def next_weekday_from(from_date, weeks)
+      target_wday = frequency_day
+      # Find next occurrence of target_wday strictly after from_date
+      days_ahead = (target_wday - from_date.wday) % 7
+      days_ahead = 7 if days_ahead == 0
+      first_occurrence = from_date + days_ahead.days
+      # For biweekly, add extra week(s)
+      first_occurrence += (weeks - 1).weeks
+      first_occurrence
+    end
 
-  def sync_next_run_date_with_start_date
-    # Reset next_run_date to match the new start_date
-    # If start_date is in the past, the job will catch up and generate entries
-    self.next_run_date = start_date
-  end
+    def safe_next_month(from, day)
+      next_m = from.next_month
+      Date.new(next_m.year, next_m.month, [ day, next_m.end_of_month.day ].min)
+    end
 
-  def reset_next_run_date?
-    !next_run_date_changed? && (start_date_changed? || (frequency_changed? && once?))
-  end
+    def safe_advance_months(from, months, day)
+      target = from >> months
+      Date.new(target.year, target.month, [ day, target.end_of_month.day ].min)
+    end
 
-  def clear_end_date_for_once
-    self.end_date = nil
-  end
+    def target_account_different_from_source
+      errors.add(:target_account, "must be different from source account") if target_account_id == account_id
+    end
+
+    def estimated_amount_requires_manual_confirmation
+      errors.add(:auto_confirm, :invalid) if amount_estimated? && auto_confirm?
+    end
+
+    def monetizable_currency
+      currency
+    end
+
+    def set_frequency_day_from_start_date
+      self.frequency_day = case frequency
+      when "daily" then 0
+      when "weekly", "biweekly" then start_date.wday
+      when "monthly", "quarterly", "yearly" then start_date.day
+      else 0
+      end
+    end
+
+    def sync_next_run_date_with_start_date
+      # Reset next_run_date to match the new start_date
+      # If start_date is in the past, the job will catch up and generate entries
+      self.next_run_date = start_date
+    end
+
+    def reset_next_run_date?
+      !next_run_date_changed? && (start_date_changed? || (frequency_changed? && once?))
+    end
+
+    def clear_end_date_for_once
+      self.end_date = nil
+    end
 end

@@ -18,8 +18,8 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     body = response.body
-    more_idx = body.index(family_with_more.name)
-    fewer_idx = body.index(family_with_fewer.name)
+    more_idx = body.index("id=\"family_#{family_with_more.id}\"")
+    fewer_idx = body.index("id=\"family_#{family_with_fewer.id}\"")
 
     assert_not_nil more_idx
     assert_not_nil fewer_idx
@@ -695,7 +695,7 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input[name=confirmation_text][required]"
     assert_includes response.body, family.name
-    assert_includes response.body, "also delete"
+    assert_includes response.body, "will also be deleted"
     assert_includes response.body, "1 account"
   end
 

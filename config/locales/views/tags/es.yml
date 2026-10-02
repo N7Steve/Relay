@@ -19,6 +19,10 @@ es:
       delete_all: Eliminar todas
     new:
       new: Nueva etiqueta
+    menu:
+      label: Editar etiquetas
+      loading: Cargando etiquetas...
+      filter: "Filtrar por %{name}"
     tag:
       delete: Eliminar
       edit: Editar

@@ -147,10 +147,10 @@ class ScheduledPaymentsController < ApplicationController
 
     # Lógica de fecha preseleccionada
     @default_date = if @scheduled_date && @scheduled_date >= Date.current
-                      Date.current
-                    else
-                      @scheduled_date || Date.current
-                    end
+      Date.current
+    else
+      @scheduled_date || Date.current
+    end
 
     @default_amount = @scheduled_payment.amount.abs
     render layout: false
@@ -232,87 +232,89 @@ class ScheduledPaymentsController < ApplicationController
 
   private
 
-  def set_agenda_breadcrumbs
-    @breadcrumbs = [
-      [ t("breadcrumbs.home"), root_path ],
-      [ t("scheduled_payments.agenda.title"), nil ]
-    ]
-  end
-
-  def prepare_forecast
-    @forecast_accounts = Current.family.accounts.accessible_by(Current.user).default_transaction_visible
-      .where(accountable_type: "Depository").alphabetically.to_a
-    wealth_available = Current.family.accounts.visible.included_in_reports
-      .included_in_finances_for(Current.user).assets.exists?
-    @wealth_forecast = params[:account_id] == "wealth" || (@forecast_accounts.empty? && wealth_available)
-    requested_account = @forecast_accounts.find do |account|
-      account.id.to_s == params[:account_id].to_s
+    def set_agenda_breadcrumbs
+      @breadcrumbs = [
+        [ t("breadcrumbs.home"), root_path ],
+        [ t("scheduled_payments.agenda.title"), nil ]
+      ]
     end
-    default_account_id = Current.user.default_account_for_transactions&.id
-    default_account = @forecast_accounts.find do |account|
-      account.id == default_account_id
-    end
-    @forecast_account = requested_account || default_account || @forecast_accounts.first unless @wealth_forecast
 
-    if @wealth_forecast
-      @forecast = ScheduledPayment::WealthForecast.new(
+    def prepare_forecast
+      @forecast_accounts = Current.family.accounts.accessible_by(Current.user).default_transaction_visible
+        .where(accountable_type: "Depository").alphabetically.to_a
+      wealth_available = Current.family.accounts.visible.included_in_reports
+        .included_in_finances_for(Current.user).assets.exists?
+      @wealth_forecast = params[:account_id] == "wealth" || (@forecast_accounts.empty? && wealth_available)
+      requested_account = @forecast_accounts.find do |account|
+        account.id.to_s == params[:account_id].to_s
+      end
+      default_account_id = Current.user.default_account_for_transactions&.id
+      default_account = @forecast_accounts.find do |account|
+        account.id == default_account_id
+      end
+      @forecast_account = requested_account || default_account || @forecast_accounts.first unless @wealth_forecast
+
+      if @wealth_forecast
+        @forecast = ScheduledPayment::WealthForecast.new(
+          family: Current.family,
+          user: Current.user,
+          horizon_months: params[:horizon]
+        )
+        return
+      end
+
+      return unless @forecast_account
+
+      @forecast = ScheduledPayment::Forecast.new(
         family: Current.family,
         user: Current.user,
+        account: @forecast_account,
         horizon_months: params[:horizon]
       )
-      return
     end
 
-    return unless @forecast_account
+    def agenda_return_path
+      return scheduled_payments_path unless params[:agenda_view].present? || params[:agenda_month].present?
 
-    @forecast = ScheduledPayment::Forecast.new(
-      family: Current.family,
-      user: Current.user,
-      account: @forecast_account,
-      horizon_months: params[:horizon]
-    )
-  end
-
-  def agenda_return_path
-    return scheduled_payments_path unless params[:agenda_view].present? || params[:agenda_month].present?
-
-    view = ScheduledPayment::Agenda::VIEWS.include?(params[:agenda_view]) ? params[:agenda_view] : "overview"
-    scheduled_payments_path(
-      view: view,
-      month: ScheduledPayment::Agenda.month_from(params[:agenda_month]).iso8601,
-      account_id: (params[:agenda_account_id] if view == "forecast"),
-      horizon: (params[:agenda_horizon] if view == "forecast")
-    )
-  end
-
-  def find_scheduled_payment
-    payment = Current.family.scheduled_payments.writable_by(Current.user).find(params[:id])
-    payment.ensure_writable_by!(Current.user)
-    payment
-  end
-
-  def find_pending_entry
-    sp = find_scheduled_payment
-    sp.scheduled_payment_entries.where(status: %w[pending skipped rejected]).find(params[:entry_id])
-  end
-
-  def scheduled_payment_params
-    attributes = params.require(:scheduled_payment).permit(
-      :title, :amount, :currency, :frequency,
-      :start_date, :end_date, :account_id, :category_id,
-      :merchant_id, :target_account_id, :payment_type, :auto_confirm, :amount_estimated,
-      :from_entry_id, tag_ids: []
-    )
-    %i[account_id target_account_id].each do |key|
-      Current.family.accounts.writable_by(Current.user).find(attributes[key]) if attributes[key].present?
+      view = ScheduledPayment::Agenda::VIEWS.include?(params[:agenda_view]) ? params[:agenda_view] : "overview"
+      scheduled_payments_path(
+        view: view,
+        month: ScheduledPayment::Agenda.month_from(params[:agenda_month]).iso8601,
+        account_id: (params[:agenda_account_id] if view == "forecast"),
+        horizon: (params[:agenda_horizon] if view == "forecast")
+      )
     end
-    Current.family.categories.find(attributes[:category_id]) if attributes[:category_id].present?
-    Current.family.available_merchants_for(Current.user).find(attributes[:merchant_id]) if attributes[:merchant_id].present?
-    Current.family.tags.find(attributes[:tag_ids].reject(&:blank?)) if attributes[:tag_ids].present?
-    attributes
-  end
 
-  def invalid_payment_operation
-    redirect_to agenda_return_path, alert: t("scheduled_payments.invalid_operation")
-  end
+    def find_scheduled_payment
+      payment = Current.family.scheduled_payments.writable_by(Current.user).find(params[:id])
+      payment.ensure_writable_by!(Current.user)
+      payment
+    end
+
+    def find_pending_entry
+      sp = find_scheduled_payment
+      sp.scheduled_payment_entries.where(status: %w[pending skipped rejected]).find(params[:entry_id])
+    end
+
+    def scheduled_payment_params
+      attributes = params.require(:scheduled_payment).permit(
+        :title, :amount, :currency, :frequency,
+        :start_date, :end_date, :category_id,
+        :merchant_id, :target_account_id, :payment_type, :auto_confirm, :amount_estimated,
+        :from_entry_id, tag_ids: []
+      )
+      if params[:scheduled_payment].key?(:account_id)
+        account_id = params[:scheduled_payment][:account_id]
+        attributes[:account_id] = account_id.present? ? Current.family.accounts.writable_by(Current.user).find(account_id).id : nil
+      end
+      Current.family.accounts.writable_by(Current.user).find(attributes[:target_account_id]) if attributes[:target_account_id].present?
+      Current.family.categories.find(attributes[:category_id]) if attributes[:category_id].present?
+      Current.family.available_merchants_for(Current.user).find(attributes[:merchant_id]) if attributes[:merchant_id].present?
+      Current.family.tags.find(attributes[:tag_ids].reject(&:blank?)) if attributes[:tag_ids].present?
+      attributes
+    end
+
+    def invalid_payment_operation
+      redirect_to agenda_return_path, alert: t("scheduled_payments.invalid_operation")
+    end
 end

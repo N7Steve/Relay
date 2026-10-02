@@ -107,7 +107,7 @@
 
       <%# Target account (only visible for transfers) %>
       <div data-scheduled-payment-form-target="transferFields"
-           class="<%= 'hidden' unless scheduled_payment.transfer? %>">
+           class="<%= "hidden" unless scheduled_payment.transfer? %>">
         <%= f.collection_select :target_account_id,
             Current.family.accounts.writable_by(Current.user).navigation_visible.alphabetically,
             :id, :name,
@@ -133,13 +133,13 @@
       </div>
 
       <%# End date %>
-      <div data-scheduled-payment-form-target="endDateFields" class="<%= 'hidden' if scheduled_payment.once? %>">
+      <div data-scheduled-payment-form-target="endDateFields" class="<%= "hidden" if scheduled_payment.once? %>">
         <%= f.date_field :end_date,
             label: t("scheduled_payments.form.end_date_label", default: "End date (optional)") %>
       </div>
 
       <%# Auto confirm toggle %>
-      <div data-scheduled-payment-form-target="autoConfirmFields" class="md:col-span-2 <%= 'hidden' if scheduled_payment.amount_estimated? %>">
+      <div data-scheduled-payment-form-target="autoConfirmFields" class="md:col-span-2 <%= "hidden" if scheduled_payment.amount_estimated? %>">
         <div class="flex items-center justify-between gap-3 p-3 bg-container-inset rounded-lg">
           <div>
             <p class="form-field__label"><%= t("scheduled_payments.form.auto_confirm_label", default: "Auto confirm") %></p>

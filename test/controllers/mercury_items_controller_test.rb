@@ -6,6 +6,7 @@ class MercuryItemsControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in users(:family_admin)
     Rails.cache.clear
+    Rails.cache.stubs(:write).with("rails-settings-cached/v1", anything, anything).returns(true)
     SyncJob.stubs(:perform_later)
 
     @family = families(:dylan_family)

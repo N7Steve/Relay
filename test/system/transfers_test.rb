@@ -29,7 +29,7 @@ class TransfersTest < ApplicationSystemTestCase
     click_button "Create transfer"
 
     within "#entry-group-#{transfer_date}" do
-      assert_text "Payment to"
+      assert_text "Credit Card"
     end
 
     transfer = Transfer.order(:created_at).last
@@ -85,15 +85,18 @@ class TransfersTest < ApplicationSystemTestCase
     # Should redirect and show transfer created
     assert_current_path transactions_url
     within "#entry-group-#{transfer_date}" do
-      assert_text "Transfer to"
+      assert_text "EUR Savings"
     end
+    transfer = Transfer.order(:created_at).last
+    assert_equal 100, transfer.outflow_transaction.entry.amount
+    assert_equal(-92, transfer.inflow_transaction.entry.amount)
   end
 
   private
 
     def select_ds(label_text, record)
       field_label = find("label", exact_text: label_text)
-      container = field_label.ancestor("div.relative")
+      container = field_label.find(:xpath, "ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' relative ')][1]")
 
       # Click the button to open the dropdown
       container.find("button").click

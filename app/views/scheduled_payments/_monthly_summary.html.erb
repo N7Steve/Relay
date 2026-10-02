@@ -1,7 +1,7 @@
 <%= render DS::Card.new(data: { agenda_month_summary: true }) do %>
   <div class="grid gap-4 sm:grid-cols-3">
     <% agenda_metrics.each_with_index do |metric, index| %>
-      <div class="flex min-w-0 items-start gap-3 <%= 'sm:border-l sm:border-primary sm:pl-4' if index.positive? %>">
+      <div class="flex min-w-0 items-start gap-3 <%= "sm:border-l sm:border-primary sm:pl-4" if index.positive? %>">
         <span class="shrink-0 rounded-lg bg-surface-inset p-2 text-secondary"><%= icon metric[:icon], size: "sm" %></span>
         <div class="min-w-0">
           <h2 class="text-xs font-medium text-secondary"><%= t("scheduled_payments.agenda.metrics.#{metric[:key]}") %></h2>

@@ -434,6 +434,27 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to imports_path
   end
 
+  test "accepts Sure backups larger than ten megabytes with the default limit" do
+    content = { type: "Account", data: {
+      id: "large-backup-account", name: "Large backup", accountable_type: "Depository",
+      balance: "1000", currency: "USD", notes: "x" * 11.megabytes
+    } }.to_json
+    file = Rack::Test::UploadedFile.new(
+      StringIO.new(content), "application/x-ndjson", original_filename: "all.ndjson"
+    )
+
+    with_env_overrides("SURE_IMPORT_MAX_NDJSON_SIZE_MB" => nil) do
+      assert_difference "SureImport.count", 1 do
+        post imports_url, params: { import: { type: "SureImport", import_file: file } }
+      end
+    end
+
+    import = @user.family.imports.order(:created_at).last
+    assert_redirected_to import_url(import)
+    assert_equal content.bytesize, import.ndjson_file.blob.byte_size
+    assert_equal 1, import.rows_count
+  end
+
   test "respects SURE_IMPORT_MAX_NDJSON_SIZE_MB when creating Sure import (#3010)" do
     configured_limit = 2.megabytes
     SureImport.stubs(:max_ndjson_size).returns(configured_limit)

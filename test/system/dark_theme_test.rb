@@ -14,8 +14,10 @@ class DarkThemeTest < ApplicationSystemTestCase
       find("#q_search").evaluate_script("getComputedStyle(this, '::placeholder').color")
 
     click_on "New transaction"
-    assert_equal element_style("bg-overlay", "backgroundColor"),
+    assert_equal "rgba(0, 0, 0, 0)",
       find("dialog[open]").evaluate_script("getComputedStyle(this, '::backdrop').backgroundColor")
+    assert_equal element_style("theme-dark:bg-alpha-black-900", "backgroundColor"),
+      find("dialog[open] [data-DS--dialog-target='backdrop']", visible: :all).evaluate_script("getComputedStyle(this).backgroundColor")
   end
 
   private

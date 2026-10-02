@@ -49,6 +49,8 @@ class Entry < ApplicationRecord
       entryable_type: "Transaction",
       entryable_id: Transaction.where(kind: Transaction::TRANSFER_KINDS).select(:id)
     )
+      .where.not(entryable_type: "Transaction", entryable_id: Transfer.select(:inflow_transaction_id))
+      .where.not(entryable_type: "Transaction", entryable_id: Transfer.select(:outflow_transaction_id))
   }
 
   scope :chronological, -> {

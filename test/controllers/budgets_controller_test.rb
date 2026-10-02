@@ -125,7 +125,7 @@ class BudgetsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a[href=?]", plan_path, count: 0
-    assert_select "a[href=?]", budgets_path, minimum: 1
+    assert_select "nav a[href=?]", budgets_path, count: 0
   end
   # --- Lot A3: cash on hand ---
 

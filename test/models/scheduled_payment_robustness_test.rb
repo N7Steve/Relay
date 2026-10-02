@@ -174,7 +174,7 @@ class ScheduledPaymentRobustnessTest < ActiveSupport::TestCase
     assert payment.errors[:payment_type].any?
   end
 
-  test "deleting either transfer account removes the schedule before its ledger entries" do
+  test "deleting either transfer account removes the schedule and preserves the surviving ledger" do
     [ :source, :destination ].each do |side|
       source = @family.accounts.create!(name: "Source #{side}", balance: 0, currency: "USD", accountable: Depository.new)
       destination = @family.accounts.create!(name: "Destination #{side}", balance: 0, currency: "USD", accountable: Depository.new)
@@ -186,7 +186,11 @@ class ScheduledPaymentRobustnessTest < ActiveSupport::TestCase
 
       assert_not ScheduledPayment.exists?(payment.id)
       assert_not ScheduledPaymentEntry.exists?(occurrence.id)
-      assert_empty Entry.where(id: entry_ids)
+      remaining = Entry.where(id: entry_ids)
+      assert_equal 1, remaining.count
+      assert_equal(side == :source ? destination.id : source.id, remaining.first.account_id)
+      assert_equal "standard", remaining.first.transaction.kind
+      assert_nil remaining.first.transaction.transfer
     end
   end
 

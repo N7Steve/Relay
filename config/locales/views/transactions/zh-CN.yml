@@ -157,14 +157,9 @@ zh-CN:
       edit_merchants: 编辑商户
       edit_tags: 编辑标签
       import: 导入
-    transaction:
-      general_merchant: "General"
-      linked_with_provider: 已与 %{provider} 关联
-    index:
-      import: 导入
-      include_hidden_accounts: 包含已归档和财务范围外的账户
     index:
       title: 交易
+      include_hidden_accounts: 包含已归档和财务范围外的账户
       transaction: 交易
       transactions: 交易
       import: 导入
@@ -343,6 +338,7 @@ zh-CN:
     potential_duplicate_description: 这笔待处理交易可能与下方已入账交易相同。如是，请合并以避免重复计算。
     transaction:
       pending: 待处理
+      general_merchant: "General"
       pending_tooltip: 待处理交易，入账后可能变化
       linked_with_provider: 已关联 %{provider}
       activity_type_tooltip: 投资活动类型

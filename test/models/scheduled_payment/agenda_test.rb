@@ -28,7 +28,7 @@ class ScheduledPayment::AgendaTest < ActiveSupport::TestCase
   end
 
   test "planning totals normalize recurring expenses and keep currencies separate" do
-    housing = categories(:housing)
+    housing = categories(:one)
     create_payment(amount: 120, frequency: "monthly", category: housing)
     create_payment(amount: 300, frequency: "quarterly", category: housing, amount_estimated: true)
     create_payment(amount: 1200, frequency: "yearly", currency: "EUR")

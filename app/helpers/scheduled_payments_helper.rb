@@ -98,5 +98,4 @@ module ScheduledPaymentsHelper
       "bg-info/10 text-info"
     end
   end
-
 end

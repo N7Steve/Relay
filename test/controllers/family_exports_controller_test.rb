@@ -1,6 +1,7 @@
 require "test_helper"
 
 class FamilyExportsControllerTest < ActionDispatch::IntegrationTest
+  include ActionView::RecordIdentifier
   setup do
     @admin = users(:family_admin)
     @non_admin = users(:family_member)
@@ -61,7 +62,7 @@ class FamilyExportsControllerTest < ActionDispatch::IntegrationTest
     sign_in @non_admin
     post cancel_family_export_path(export)
 
-    assert_redirected_to root_path
+    assert_response :not_found
     assert_equal "processing", export.reload.status
   end
 
@@ -214,9 +215,9 @@ class FamilyExportsControllerTest < ActionDispatch::IntegrationTest
     get family_exports_path
 
     assert_response :success
-    assert_match own_export.filename, response.body
-    assert_no_match backup.filename, response.body
-    assert_no_match other_custom_export.filename, response.body
+    assert_select "##{dom_id(own_export)}", count: 1
+    assert_select "##{dom_id(backup)}", count: 0
+    assert_select "##{dom_id(other_custom_export)}", count: 0
   end
 
   test "admin can download completed export" do

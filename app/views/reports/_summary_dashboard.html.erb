@@ -156,7 +156,7 @@
 
     <% if shared_expenses[:has_data] %>
       <div class="space-y-2">
-        <p class="text-2xl font-semibold privacy-sensitive <%= shared_expenses[:pending_debt].amount > 0 ? 'text-warning' : 'text-success' %>">
+        <p class="text-2xl font-semibold privacy-sensitive <%= shared_expenses[:pending_debt].amount > 0 ? "text-warning" : "text-success" %>">
           <%= shared_expenses[:pending_debt].format %>
         </p>
         <p class="text-sm text-subdued">

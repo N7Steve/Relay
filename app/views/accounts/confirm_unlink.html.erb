@@ -1,4 +1,4 @@
-<%= render DS::Dialog.new do |dialog| %>
+<%= render DS::Dialog.new(close_on_submit: true) do |dialog| %>
   <% dialog.with_header(title: t("accounts.confirm_unlink.title")) %>
 
   <% dialog.with_body do %>

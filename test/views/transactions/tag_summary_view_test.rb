@@ -115,6 +115,18 @@ class Transactions::TagSummaryViewTest < ActionView::TestCase
     assert summary.at_css("[aria-describedby] [tabindex='0']"), "read-only trigger should be keyboard focusable"
   end
 
+  test "editable tag menu preserves quick filtering" do
+    tag = create_tags(1).first
+    @transaction.update!(tag_ids: [ tag.id ])
+
+    html = Nokogiri::HTML.fragment(render_row)
+    link = html.at_css("a[href='#{transactions_path(q: { tags: [ tag.name ] })}']")
+
+    assert link
+    assert_equal I18n.t("tags.menu.filter", name: tag.name), link.text.strip
+    assert_equal "_top", link["data-turbo-frame"]
+  end
+
   test "editable rows keep the picker and add no extra tab stop" do
     tags = create_tags(2)
     @transaction.update!(tag_ids: tags.map(&:id))

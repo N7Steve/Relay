@@ -60,7 +60,7 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
       assert_not Setting.ai_features_enabled?
       follow_redirect!
       assert_response :success
-      assert_select "input[name='setting[ai_features_enabled]']:not(:checked)"
+      assert_select "input[type=checkbox][name='setting[ai_features_enabled]']:not([checked])"
       assert_select "input[name='setting[openai_access_token]']", count: 0
       assert_select "input[name='setting[anthropic_access_token]']", count: 0
       assert_not_includes response.body, I18n.t("settings.hostings.show.ai_assistant")
@@ -102,7 +102,7 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to settings_hosting_url
       assert Setting.ai_features_enabled?
       follow_redirect!
-      assert_select "input[name='setting[ai_features_enabled]']:checked"
+      assert_select "input[type=checkbox][name='setting[ai_features_enabled]'][checked]"
       assert_select "input[name='setting[openai_access_token]']"
     end
   end

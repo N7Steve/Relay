@@ -3,7 +3,7 @@ class MigrateBidirectionalExcludedTransfers < ActiveRecord::Migration[7.1]
 
   def up
     puts "Starting to migrate bidirectional excluded transfers..."
-    
+
     # Track how many we update
     updated_count = 0
 
@@ -43,16 +43,16 @@ class MigrateBidirectionalExcludedTransfers < ActiveRecord::Migration[7.1]
       if destination_account
         # Old logic equivalent
         old_outflow_kind = if destination_account.excluded?
-                             "transfer_to_excluded"
-                           elsif destination_account.loan?
-                             "loan_payment"
-                           elsif destination_account.credit_card? || destination_account.liability?
-                             "cc_payment"
-                           elsif destination_account.investment? || destination_account.crypto?
-                             "investment_contribution"
-                           else
-                             "funds_movement"
-                           end
+          "transfer_to_excluded"
+        elsif destination_account.loan?
+          "loan_payment"
+        elsif destination_account.credit_card? || destination_account.liability?
+          "cc_payment"
+        elsif destination_account.investment? || destination_account.crypto?
+          "investment_contribution"
+        else
+          "funds_movement"
+        end
 
         old_inflow_kind = "funds_movement"
 

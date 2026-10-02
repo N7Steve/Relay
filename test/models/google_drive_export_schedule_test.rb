@@ -17,6 +17,14 @@ class GoogleDriveExportScheduleTest < ActiveSupport::TestCase
     )
   end
 
+  test "rejects line breaks in export filenames" do
+    schedule = build_schedule(filename: "transactions.csv\nother.csv")
+
+    assert_not schedule.valid?
+    assert schedule.errors[:filename].any?
+    assert build_schedule(filename: "transactions.CSV").valid?
+  end
+
   test "calculates a daily next run in the configured timezone" do
     schedule = build_schedule(run_at: "06:30", timezone: "Europe/Madrid")
 

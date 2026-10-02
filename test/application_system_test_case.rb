@@ -138,7 +138,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # Capybara's built-in `select(value, from:)` does not work with it.
     def select_ds(label_text, record)
       field_label = find("label", exact_text: label_text)
-      container = field_label.ancestor("div.relative")
+      container = field_label.find(:xpath, "ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' relative ')][1]")
       container.find("button").click
       if container.has_selector?("input[type='search']", visible: true)
         container.find("input[type='search']", visible: true).set(record.name)

@@ -6,6 +6,7 @@ class BrexItemsControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in users(:family_admin)
     SyncJob.stubs(:perform_later)
+    Rails.cache.stubs(:write).returns(true)
 
     @family = families(:dylan_family)
     clear_brex_cache_entries

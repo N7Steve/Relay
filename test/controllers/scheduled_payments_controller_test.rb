@@ -137,7 +137,7 @@ class ScheduledPaymentsControllerTest < ActionDispatch::IntegrationTest
   test "new from a transaction renders the compact tag selector" do
     tag = tags(:one)
     transaction = Transaction.create!(category: @category, tags: [ tag ])
-    entry = @family.entries.create!(
+    entry = @account.entries.create!(
       account: @account,
       date: Date.current,
       name: "Tagged subscription",
@@ -159,7 +159,7 @@ class ScheduledPaymentsControllerTest < ActionDispatch::IntegrationTest
       tag = tags(:one)
       merchant = merchants(:netflix)
       transaction = Transaction.create!
-      entry = @family.entries.create!(
+      entry = @account.entries.create!(
         account: @account,
         date: Date.new(2026, 9, 6),
         name: "Provider-specific Suno description",
@@ -189,7 +189,7 @@ class ScheduledPaymentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "invalid create from a transaction preserves the history-linking context" do
-    entry = @family.entries.create!(
+    entry = @account.entries.create!(
       account: @account,
       date: Date.current,
       name: "Source payment",

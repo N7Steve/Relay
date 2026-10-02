@@ -7,13 +7,8 @@ zh-CN:
   accounts:
     not_authorized: 您没有权限管理此账户
     account:
-      link_lunchflow: 关联 Lunch Flow 账户
-      link_provider: 关联服务提供商
-      troubleshoot: 故障排查
-      unlink_provider: 解除提供商关联
       archive: 归档账户
       unarchive: 取消归档账户
-      default_label: 默认
       disabled_label: 已停用
       archived_label: 已归档
       complete_setup: 完成设置
@@ -55,12 +50,6 @@ zh-CN:
       archive_description: 归档的账户将从侧边栏隐藏，但仍计入您的净资产和报告中。
     accountable_group:
       archived_badge: （已归档）
-    index:
-      accounts: 账户管理
-      account_groups:
-        total: 总计
-        active: 活跃
-        archived: 已归档
       name_placeholder: 示例账户名称
       additional_details: 其他详情
       institution_name_label: 金融机构名称
@@ -71,6 +60,10 @@ zh-CN:
       notes_placeholder: 存储其他信息，例如账号、排序码、IBAN、路由号码等。
     index:
       accounts: 账户
+      account_groups:
+        total: 总计
+        active: 活跃
+        archived: 已归档
       manual_accounts:
         other_accounts: 其他账户
       new_account: 新建账户

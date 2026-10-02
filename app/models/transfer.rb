@@ -123,9 +123,6 @@ class Transfer < ApplicationRecord
   end
 
   def destroy!
-    inflow_entry = inflow_transaction&.entry
-    outflow_entry = outflow_transaction&.entry
-
     Transfer.transaction do
       [ inflow_transaction, outflow_transaction ].each do |transaction|
         next if transaction.nil?
@@ -145,8 +142,6 @@ class Transfer < ApplicationRecord
         end
       end
       super
-      inflow_entry&.destroy!
-      outflow_entry&.destroy!
     end
   end
 

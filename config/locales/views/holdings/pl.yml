@@ -31,9 +31,6 @@ pl:
       shares: "%{qty} akcji"
       unknown: "--"
     index:
-      positions:
-        one: "%{count} pozycja"
-        other: "%{count} pozycje"
       average_cost: Średni koszt
       holdings: Pozycje
       name: Nazwa

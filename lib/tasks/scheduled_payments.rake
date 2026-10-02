@@ -7,7 +7,7 @@ namespace :scheduled_payments do
   end
 
   desc "Generate scheduled payments as if today were a specific date (for testing)"
-  task :generate_as, [:date] => :environment do |_t, args|
+  task :generate_as, [ :date ] => :environment do |_t, args|
     target_date = Date.parse(args[:date])
     puts "Running scheduled payments generation as if today were #{target_date}..."
 

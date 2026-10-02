@@ -7,6 +7,8 @@ being changed. These guides hold the detailed conventions and procedures.
 | --- | --- |
 | Understand the domain and write Rails code | [Architecture and conventions](architecture.md) |
 | Set up an environment, run checks or prepare a PR | [Development and verification](development.md) |
+| Run local Linux tests and checks from Windows with Docker | [Docker tests](docker-tests.md) |
+| Start the app locally in Windows and test it in Chrome | [Local Docker app](docker-local-app.md) |
 | Write behavioral tests and fixtures | [Testing](testing.md) |
 | Change design tokens or `DS::*` primitives | [Design system](design-system.md) |
 | Change views, components, CSS, Stimulus or localization | [UI](ui.md) |

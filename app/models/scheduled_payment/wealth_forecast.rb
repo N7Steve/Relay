@@ -179,7 +179,9 @@ class ScheduledPayment::WealthForecast
 
     def cashflow_month_breakdown
       @cashflow_month_breakdown ||= begin
-        first_activity = historical_entries.map(&:date).min
+        # An old exceptional purchase must not extend the observation window
+        # and dilute the trend with months without ordinary activity.
+        first_activity = ordinary_cashflow_entries.map(&:date).min
         periods = first_activity ? cashflow_periods.drop_while { |period| period.end < first_activity } : []
         periods.map do |period|
           entries = historical_entries.select { |entry| period.cover?(entry.date) }

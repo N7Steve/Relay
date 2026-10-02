@@ -56,10 +56,8 @@ class PropertiesEditTest < ApplicationSystemTestCase
     end
 
     def open_new_account_modal
-      within "[data-controller='DS--tabs']" do
-        click_button "All"
-        click_link "New account"
-      end
+      visit accounts_path
+      click_link I18n.t("accounts.index.new_account"), match: :first
     end
 
     def create_new_property_account

@@ -55,10 +55,9 @@ class ScheduledPaymentEntry < ApplicationRecord
 
       if transfer && transfer_entry_to_destroy
         transfer.destroy!
-      else
-        entry_to_destroy&.destroy!
-        transfer_entry_to_destroy&.destroy!
       end
+      entry_to_destroy&.destroy!
+      transfer_entry_to_destroy&.destroy!
       sync_entries_after_commit([ entry_to_destroy, transfer_entry_to_destroy ].compact)
     end
   end
@@ -96,107 +95,107 @@ class ScheduledPaymentEntry < ApplicationRecord
 
   private
 
-  def ensure_unlinked!
-    return if entry_id.nil? && transfer_entry_id.nil?
+    def ensure_unlinked!
+      return if entry_id.nil? && transfer_entry_id.nil?
 
-    errors.add(:entry, :invalid)
-    raise ActiveRecord::RecordInvalid, self
-  end
-
-  def restore_future!
-    ensure_unlinked!
-    sp = scheduled_payment
-    destroy!
-    restores_cursor = sp.once? ? scheduled_date == sp.next_run_date : scheduled_date < sp.next_run_date
-    if restores_cursor && sp.occurrences_in(scheduled_date..scheduled_date).include?(scheduled_date)
-      sp.update!(next_run_date: scheduled_date, status: sp.completed? ? "active" : sp.status)
+      errors.add(:entry, :invalid)
+      raise ActiveRecord::RecordInvalid, self
     end
-  end
 
-  # All state transitions lock the series first, then reload the occurrence.
-  # A stale request must see a confirmation committed by a previous request.
-  def with_payment_lock
-    scheduled_payment.with_lock do
-      lock!
-      yield
+    def restore_future!
+      ensure_unlinked!
+      sp = scheduled_payment
+      destroy!
+      restores_cursor = sp.once? ? scheduled_date == sp.next_run_date : scheduled_date < sp.next_run_date
+      if restores_cursor && sp.occurrences_in(scheduled_date..scheduled_date).include?(scheduled_date)
+        sp.update!(next_run_date: scheduled_date, status: sp.completed? ? "active" : sp.status)
+      end
     end
-  end
 
-  def sync_entries_after_commit(entries)
-    ActiveRecord.after_all_transactions_commit do
-      entries.uniq(&:account_id).each(&:sync_account_later)
+    # All state transitions lock the series first, then reload the occurrence.
+    # A stale request must see a confirmation committed by a previous request.
+    def with_payment_lock
+      scheduled_payment.with_lock do
+        lock!
+        yield
+      end
     end
-  end
 
-  def create_transaction_entry!(date_override: nil, amount_override: nil)
-    sp = scheduled_payment
-    effective_amount = amount_override || sp.amount.abs
-    amount_value = sp.expense? ? effective_amount.abs : -effective_amount.abs
-    effective_date = date_override || scheduled_date
-
-    transaction = Transaction.create!(
-      category: sp.category,
-      merchant: sp.merchant
-    )
-
-    created_entry = sp.account.entries.create!(
-      date: effective_date,
-      amount: amount_value,
-      currency: sp.currency,
-      name: sp.title,
-      entryable: transaction
-    )
-
-    update!(entry: created_entry)
-
-    # Apply scheduled payment tags to the created transaction
-    if sp.tags.any?
-      created_entry.entryable.tags = sp.tags
-      created_entry.entryable.save!
+    def sync_entries_after_commit(entries)
+      ActiveRecord.after_all_transactions_commit do
+        entries.uniq(&:account_id).each(&:sync_account_later)
+      end
     end
-  end
 
-  def create_transfer_entries!(date_override: nil, amount_override: nil)
-    sp = scheduled_payment
-    effective_amount = (amount_override || sp.amount).abs
-    effective_date = date_override || scheduled_date
+    def create_transaction_entry!(date_override: nil, amount_override: nil)
+      sp = scheduled_payment
+      effective_amount = amount_override || sp.amount.abs
+      amount_value = sp.expense? ? effective_amount.abs : -effective_amount.abs
+      effective_date = date_override || scheduled_date
 
-    outflow_txn = Transaction.create!(
-      category: sp.category,
-      kind: Transfer.outflow_kind_for(sp.account, sp.target_account)
-    )
-    outflow_entry = sp.account.entries.create!(
-      date: effective_date,
-      amount: effective_amount,
-      currency: sp.currency,
-      name: sp.title,
-      entryable: outflow_txn
-    )
+      transaction = Transaction.create!(
+        category: sp.category,
+        merchant: sp.merchant
+      )
 
-    inflow_txn = Transaction.create!(
-      category: sp.category,
-      kind: Transfer.inflow_kind_for(sp.account, sp.target_account)
-    )
-    inflow_currency = sp.target_account.currency
-    converted_amount = Money.new(effective_amount, sp.currency).exchange_to(inflow_currency, date: effective_date).amount
-    inflow_amount = -converted_amount
+      created_entry = sp.account.entries.create!(
+        date: effective_date,
+        amount: amount_value,
+        currency: sp.currency,
+        name: sp.title,
+        entryable: transaction
+      )
 
-    inflow_entry = sp.target_account.entries.create!(
-      date: effective_date,
-      amount: inflow_amount,
-      currency: inflow_currency,
-      name: sp.title,
-      entryable: inflow_txn
-    )
+      update!(entry: created_entry)
 
-    Transfer.create!(
-      inflow_transaction: inflow_txn,
-      outflow_transaction: outflow_txn,
-      status: "confirmed"
-    )
+      # Apply scheduled payment tags to the created transaction
+      if sp.tags.any?
+        created_entry.entryable.tags = sp.tags
+        created_entry.entryable.save!
+      end
+    end
 
-    update!(entry: outflow_entry, transfer_entry: inflow_entry)
+    def create_transfer_entries!(date_override: nil, amount_override: nil)
+      sp = scheduled_payment
+      effective_amount = (amount_override || sp.amount).abs
+      effective_date = date_override || scheduled_date
 
-    [ outflow_txn, inflow_txn ].each { |transaction| transaction.tags = sp.tags } if sp.tags.any?
-  end
+      outflow_txn = Transaction.create!(
+        category: sp.category,
+        kind: Transfer.outflow_kind_for(sp.account, sp.target_account)
+      )
+      outflow_entry = sp.account.entries.create!(
+        date: effective_date,
+        amount: effective_amount,
+        currency: sp.currency,
+        name: sp.title,
+        entryable: outflow_txn
+      )
+
+      inflow_txn = Transaction.create!(
+        category: sp.category,
+        kind: Transfer.inflow_kind_for(sp.account, sp.target_account)
+      )
+      inflow_currency = sp.target_account.currency
+      converted_amount = Money.new(effective_amount, sp.currency).exchange_to(inflow_currency, date: effective_date).amount
+      inflow_amount = -converted_amount
+
+      inflow_entry = sp.target_account.entries.create!(
+        date: effective_date,
+        amount: inflow_amount,
+        currency: inflow_currency,
+        name: sp.title,
+        entryable: inflow_txn
+      )
+
+      Transfer.create!(
+        inflow_transaction: inflow_txn,
+        outflow_transaction: outflow_txn,
+        status: "confirmed"
+      )
+
+      update!(entry: outflow_entry, transfer_entry: inflow_entry)
+
+      [ outflow_txn, inflow_txn ].each { |transaction| transaction.tags = sp.tags } if sp.tags.any?
+    end
 end

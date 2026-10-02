@@ -3,6 +3,7 @@ require "test_helper"
 class Transactions::MergedBadgeViewTest < ActionView::TestCase
   # Render the transactions/_transaction partial and verify the merged badge does not appear
   test "does not render merged badge after was_merged column removal" do
+    Current.session = Session.create!(user: users(:family_admin))
     account = accounts(:depository)
 
     transaction = Transaction.create!

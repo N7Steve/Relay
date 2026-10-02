@@ -209,7 +209,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
                 },
                 raw_file_content: {
                   type: :string,
-                  description: 'Raw Sure NDJSON content. Each chunk is limited to 10MB.'
+                  description: 'Raw Sure NDJSON content. Each chunk is limited to 500MB by default; configure SURE_IMPORT_MAX_NDJSON_SIZE_MB to change the limit.'
                 }
               }
             }
@@ -232,7 +232,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
                 file: {
                   type: :string,
                   format: :binary,
-                  description: 'Multipart Sure NDJSON file upload. Each chunk is limited to 10MB.'
+                  description: 'Multipart Sure NDJSON file upload. Each chunk is limited to 500MB by default; configure SURE_IMPORT_MAX_NDJSON_SIZE_MB to change the limit.'
                 }
               }
             }

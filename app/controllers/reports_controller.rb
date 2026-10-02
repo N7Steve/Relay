@@ -264,7 +264,7 @@ class ReportsController < ApplicationController
       when :ytd
         Date.current.beginning_of_year.to_date
       when :last_6_months
-        Current.family.custom_month_start_for(6.months.ago.to_date)
+        Current.family.custom_month_start_for(5.months.ago.to_date)
       when :custom
         1.month.ago.to_date
       else
@@ -330,6 +330,11 @@ class ReportsController < ApplicationController
         next_params[:start_date] = next_start
         next_end_month_start = Current.family.custom_month_start_for(next_start + 5.months + 15.days)
         next_params[:end_date] = Current.family.custom_month_end_for(next_end_month_start)
+        current_month_start = Current.family.custom_month_start_for(Date.current)
+        if next_params[:end_date] + 1.day >= current_month_start
+          next_params[:start_date] = current_month_start - 5.months
+          next_params[:end_date] = Current.family.custom_month_end_for(current_month_start)
+        end
 
       when :ytd
         prev_start = (@start_date - 1.year).beginning_of_year.to_date

@@ -30,7 +30,7 @@ class SharedExpensesCalculator
     end
 
     half_expenses = total_expenses / 2.0
-    pending_debt = [half_expenses - total_income, 0].max
+    pending_debt = [ half_expenses - total_income, 0 ].max
 
     {
       pending_debt: Money.new(pending_debt, family_currency),
@@ -78,7 +78,7 @@ class SharedExpensesCalculator
     return zero_money unless category
 
     # Include the category itself and all its subcategories
-    category_ids = [category.id] + @family.categories.where(parent_id: category.id).pluck(:id)
+    category_ids = [ category.id ] + @family.categories.where(parent_id: category.id).pluck(:id)
 
     # Income transactions: amount < 0, in the given category
     income_scope = Transaction
@@ -101,44 +101,44 @@ class SharedExpensesCalculator
 
   private
 
-  def zero_money
-    Money.new(0, @family.currency)
-  end
-
-  def base_tagged_scope(tag)
-    Transaction
-      .joins(:entry)
-      .joins(entry: :account)
-      .joins(:taggings)
-      .where(accounts: { family_id: @family.id })
-      .merge(Account.visible.included_in_reports)
-      .where(taggings: { tag_id: tag.id })
-      .where(entries: { entryable_type: "Transaction", excluded: false })
-      .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
-  end
-
-  def expense_transactions_scope(date_range)
-    Transaction
-      .joins(:entry)
-      .joins(entry: :account)
-      .where(accounts: { family_id: @family.id })
-      .merge(Account.visible.included_in_reports)
-      .where(entries: { entryable_type: "Transaction", excluded: false, date: date_range })
-      .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
-      .where("entries.amount > 0")
-  end
-
-  def sum_expenses(scope, family_currency)
-    total = 0
-    scope.includes(:entry).find_each do |txn|
-      total += convert_amount(txn.entry.amount, txn.entry.currency, family_currency)
+    def zero_money
+      Money.new(0, @family.currency)
     end
-    total
-  end
 
-  def convert_amount(amount, currency, target_currency)
-    Money.new(amount, currency).exchange_to(target_currency).amount
-  rescue Money::ConversionError
-    amount
-  end
+    def base_tagged_scope(tag)
+      Transaction
+        .joins(:entry)
+        .joins(entry: :account)
+        .joins(:taggings)
+        .where(accounts: { family_id: @family.id })
+        .merge(Account.visible.included_in_reports)
+        .where(taggings: { tag_id: tag.id })
+        .where(entries: { entryable_type: "Transaction", excluded: false })
+        .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+    end
+
+    def expense_transactions_scope(date_range)
+      Transaction
+        .joins(:entry)
+        .joins(entry: :account)
+        .where(accounts: { family_id: @family.id })
+        .merge(Account.visible.included_in_reports)
+        .where(entries: { entryable_type: "Transaction", excluded: false, date: date_range })
+        .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+        .where("entries.amount > 0")
+    end
+
+    def sum_expenses(scope, family_currency)
+      total = 0
+      scope.includes(:entry).find_each do |txn|
+        total += convert_amount(txn.entry.amount, txn.entry.currency, family_currency)
+      end
+      total
+    end
+
+    def convert_amount(amount, currency, target_currency)
+      Money.new(amount, currency).exchange_to(target_currency).amount
+    rescue Money::ConversionError
+      amount
+    end
 end

@@ -231,7 +231,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     investment_account = accounts(:investment)
     entry = entries(:trade)
 
-    get account_url(investment_account)
+    get account_url(investment_account, tab: "activity")
 
     assert_response :success
     doc = Nokogiri::HTML::Document.parse(response.body)
@@ -485,8 +485,6 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     get transactions_url
-    assert_response :redirect
-    follow_redirect!
     assert_response :success
     assert_select "select[name='per_page'] option[value='50'][selected]"
   end

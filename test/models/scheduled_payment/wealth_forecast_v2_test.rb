@@ -66,7 +66,7 @@ class ScheduledPayment::WealthForecastV2Test < ActiveSupport::TestCase
     forecast = build_forecast
     forecast.stubs(:investment_periods).returns([ period ])
     forecast.stubs(:investment_balance_rows).returns([ valuation_gain ])
-    forecast.stubs(:balance_only_investment_ids).returns(Set[ @investment.id ])
+    forecast.stubs(:balance_only_investment_ids).returns(Set[@investment.id])
 
     assert_operator forecast.send(:investment_monthly_log_returns).sole, :>, 0
     assert_predicate forecast, :investment_return_available?

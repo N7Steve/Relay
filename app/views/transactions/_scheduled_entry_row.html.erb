@@ -1,7 +1,7 @@
 <%# locals: (pending:) %>
 <% sp = pending.scheduled_payment %>
 <% is_dismissed = pending.skipped? || pending.rejected? %>
-<div class="group flex lg:grid lg:grid-cols-12 items-center text-sm font-medium p-3 lg:p-4 <%= is_dismissed ? 'opacity-50 bg-surface-inset' : 'text-primary' %>">
+<div class="group flex lg:grid lg:grid-cols-12 items-center text-sm font-medium p-3 lg:p-4 <%= is_dismissed ? "opacity-50 bg-surface-inset" : "text-primary" %>">
   <%# Name + badge %>
   <div class="pr-4 lg:pr-10 flex items-center gap-3 lg:gap-4 col-span-6 min-w-0">
     <% if (merchant_logo_url = sp.merchant&.display_logo_url(family: Current.family)).present? %>
@@ -14,7 +14,7 @@
       <div class="flex items-center gap-1 min-w-0">
         <div class="truncate flex-shrink"><%= sp.title %></div>
         <% if is_dismissed %>
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 flex-shrink-0">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-container-inset text-secondary flex-shrink-0">
             <%= t("scheduled_payments.badge_skipped", default: "Skipped") %>
           </span>
         <% else %>
@@ -37,7 +37,7 @@
 
   <%# Amount %>
   <div class="col-span-2 ml-auto text-right shrink-0">
-    <p class="font-medium privacy-sensitive <%= is_dismissed ? 'text-secondary line-through' : (sp.income? ? 'text-success' : 'text-subdued') %>">
+    <p class="font-medium privacy-sensitive <%= is_dismissed ? "text-secondary line-through" : (sp.income? ? "text-success" : "text-subdued") %>">
       <%= format_money(sp.expense? ? -sp.amount_money : sp.amount_money) %>
     </p>
   </div>

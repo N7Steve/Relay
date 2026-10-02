@@ -15,6 +15,19 @@
       <% end %>
 
       <% popover.with_custom_content do %>
+        <% if variant.to_sym == :desktop && transaction.tags.any? %>
+          <div class="p-3 space-y-2 border-b border-primary">
+            <% current_q = params.fetch(:q, {}).to_unsafe_h if params[:q].respond_to?(:to_unsafe_h) %>
+            <% current_q ||= {} %>
+            <% transaction.tags.each do |tag| %>
+              <%= render DS::Link.new(
+                text: t(".filter", name: tag.name),
+                href: transactions_path(q: current_q.merge("tags" => (Array(current_q["tags"]) + [ tag.name ]).uniq)),
+                frame: "_top",
+                icon: "filter") %>
+            <% end %>
+          </div>
+        <% end %>
         <%= turbo_frame_tag "tag_dropdown", src: tag_dropdown_path(entry_id: entry.id), loading: :lazy do %>
           <div class="p-6 flex items-center justify-center">
             <p class="text-sm text-secondary animate-pulse"><%= t(".loading") %></p>

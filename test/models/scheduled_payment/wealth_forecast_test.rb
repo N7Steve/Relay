@@ -59,6 +59,7 @@ class ScheduledPayment::WealthForecastTest < ActiveSupport::TestCase
   end
 
   test "one-time transactions do not affect the historical trend" do
+    original_savings = build_forecast.historical_monthly_savings.amount
     transaction = Transaction.create!(kind: "one_time")
     accounts(:depository).entries.create!(
       date: Date.new(2026, 2, 15),
@@ -69,7 +70,7 @@ class ScheduledPayment::WealthForecastTest < ActiveSupport::TestCase
     )
     forecast = build_forecast
 
-    assert_equal 0, forecast.historical_monthly_savings.amount
+    assert_equal original_savings, forecast.historical_monthly_savings.amount
     assert_equal 1, forecast.ignored_one_time_count
   end
 

@@ -121,7 +121,7 @@ class Provider::FamilyGeneratorTest < ActiveSupport::TestCase
     assert_not_includes rendered, "turbo_frame_request?"
     assert_includes rendered, %(render_provider_panel("gocardless", alert: @gocardless_item.errors.full_messages.join(", ")))
     assert_includes rendered, 'render_provider_panel("gocardless", notice: t(".success"'
-    assert_match(/if @gocardless_item\.save\n\s+redirect_to settings_providers_path, notice:/, rendered)
+    assert_match(/if @gocardless_item\.save\r?\n\s+redirect_to settings_providers_path, notice:/, rendered)
   end
 
   # Bank sync builds its connection rows and drawers from FAMILY_PANELS, so a

@@ -7,8 +7,8 @@ class DS::DialogTest < ViewComponent::TestCase
     end
 
     assert_selector "dialog[data-controller~='DS--dialog']"
-    assert_selector "dialog > [data-DS--dialog-target='backdrop']"
-    assert_selector "dialog [data-DS--dialog-target='content']", text: "Dialog body"
+    assert_selector "dialog > [data-ds--dialog-target='backdrop']", visible: :all
+    assert_selector "dialog [data-ds--dialog-target='content']", text: "Dialog body", visible: :all
   end
 
   test "can close before submitting a form" do

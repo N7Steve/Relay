@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+require "uri"
+
+task = ARGV.shift || "unit"
+unless %w[unit system checks build].include?(task)
+  abort "Unknown test task: #{task}"
+end
+
+database = URI.parse(ENV.fetch("DATABASE_URL", ""))
+unless ENV["RAILS_ENV"] == "test" &&
+    ENV["DB_HOST"] == "db" &&
+    ENV["POSTGRES_DB"] == "sure_test" &&
+    database.host == "db" && database.path == "/sure_test" &&
+    ENV["REDIS_URL"] == "redis://redis:6379/0"
+  abort "This runner only operates against its isolated Docker test services."
+end
+
+def run!(*command)
+  puts "Running: #{command.join(' ')}"
+  $stdout.flush
+  system(*command)
+  exit($?.exitstatus || 1) unless $?.success?
+end
+
+def rails!(*arguments)
+  run!("bundle", "exec", "ruby", "bin/rails", *arguments)
+end
+
+case task
+when "unit", "system", "build"
+  # Only the dedicated sure_test database inside this Compose project.
+  # Load the current schema for fixtures without running historical migrations.
+  rails!("db:create")
+  rails!("db:schema:load")
+  rails!("assets:precompile")
+
+  case task
+  when "unit"
+    rails!("test", *ARGV)
+  when "system"
+    if ARGV.empty?
+      rails!("test:system")
+    else
+      rails!("test", *ARGV)
+    end
+  when "build"
+    # Assets were compiled above, including on a clean image.
+  end
+when "checks"
+  commands = [
+    [ "bundle", "exec", "ruby", "bin/rubocop" ],
+    [ "bundle", "exec", "erb_lint", "--lint-all" ],
+    [ "bundle", "exec", "ruby", "bin/brakeman", "--no-pager" ],
+    [ "npm", "run", "lint" ]
+  ]
+  failed = commands.filter_map do |command|
+    puts "Running: #{command.join(' ')}"
+    $stdout.flush
+    command.join(" ") unless system(*command)
+  end
+  abort "Failed checks: #{failed.join(', ')}" if failed.any?
+end

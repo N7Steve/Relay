@@ -57,7 +57,13 @@ class Transactions::BulkUpdatesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk update preloads transaction records" do
-    transaction_ids = @user.family.entries.transactions.limit(4).pluck(:id)
+    3.times do |index|
+      accounts(:depository).entries.create!(
+        name: "Bulk transaction #{index}", date: Date.current,
+        amount: 10, currency: "USD", entryable: Transaction.new
+      )
+    end
+    transaction_ids = @user.family.entries.transactions.excluding_transfer_transactions.limit(4).pluck(:id)
 
     queries = capture_sql_queries do
       post transactions_bulk_update_url, params: {
@@ -75,7 +81,7 @@ class Transactions::BulkUpdatesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk update preserves tags when tag_ids not provided" do
-    transaction_entry = @user.family.entries.transactions.first
+    transaction_entry = @user.family.entries.transactions.excluding_transfer_transactions.first
     original_tags = [ Tag.first, Tag.second ]
     transaction_entry.transaction.tags = original_tags
     transaction_entry.transaction.save!
@@ -97,7 +103,7 @@ class Transactions::BulkUpdatesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk update clears tags when tag_ids is blank string array (web multi-select None)" do
-    transaction_entry = @user.family.entries.transactions.first
+    transaction_entry = @user.family.entries.transactions.excluding_transfer_transactions.first
     original_tags = [ Tag.first, Tag.second ]
     transaction_entry.transaction.tags = original_tags
     transaction_entry.transaction.save!
@@ -119,7 +125,7 @@ class Transactions::BulkUpdatesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk update clears tags when empty tag_ids explicitly provided (JSON)" do
-    transaction_entry = @user.family.entries.transactions.first
+    transaction_entry = @user.family.entries.transactions.excluding_transfer_transactions.first
     transaction_entry.transaction.tags = [ Tag.first, Tag.second ]
     transaction_entry.transaction.save!
 
@@ -141,7 +147,7 @@ class Transactions::BulkUpdatesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "bulk update replaces tags when tag_ids explicitly provided" do
-    transaction_entry = @user.family.entries.transactions.first
+    transaction_entry = @user.family.entries.transactions.excluding_transfer_transactions.first
     transaction_entry.transaction.tags = [ Tag.first ]
     transaction_entry.transaction.save!
 

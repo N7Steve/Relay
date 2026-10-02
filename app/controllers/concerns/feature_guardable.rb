@@ -12,7 +12,7 @@ module FeatureGuardable
 
   class_methods do
     def guard_feature(**options)
-      before_action :guard_feature, **options
+      before_action -> { guard_feature }, **options
     end
   end
 

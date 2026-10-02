@@ -10,8 +10,8 @@ class TransferTest < ActiveSupport::TestCase
 
   test "transfer destroyed if either transaction is destroyed" do
     assert_difference "Transfer.count", -1 do
-      assert_difference "Transaction.count", -2 do
-        assert_difference "Entry.count", -2 do
+      assert_difference "Transaction.count", -1 do
+        assert_difference "Entry.count", -1 do
           @outflow.entry.destroy
         end
       end
@@ -172,24 +172,24 @@ class TransferTest < ActiveSupport::TestCase
     assert_equal "funds_movement", transfer.inflow_transaction.reload.kind
   end
 
-  test "kind_for_account returns investment_contribution for investment accounts" do
-    assert_equal "investment_contribution", Transfer.kind_for_account(accounts(:investment))
+  test "outflow_kind_for returns investment_contribution for investment accounts" do
+    assert_equal "investment_contribution", Transfer.outflow_kind_for(accounts(:depository), accounts(:investment))
   end
 
-  test "kind_for_account returns investment_contribution for crypto accounts" do
-    assert_equal "investment_contribution", Transfer.kind_for_account(accounts(:crypto))
+  test "outflow_kind_for returns investment_contribution for crypto accounts" do
+    assert_equal "investment_contribution", Transfer.outflow_kind_for(accounts(:depository), accounts(:crypto))
   end
 
-  test "kind_for_account returns loan_payment for loan accounts" do
-    assert_equal "loan_payment", Transfer.kind_for_account(accounts(:loan))
+  test "outflow_kind_for returns loan_payment for loan accounts" do
+    assert_equal "loan_payment", Transfer.outflow_kind_for(accounts(:depository), accounts(:loan))
   end
 
-  test "kind_for_account returns cc_payment for credit card accounts" do
-    assert_equal "cc_payment", Transfer.kind_for_account(accounts(:credit_card))
+  test "outflow_kind_for returns cc_payment for credit card accounts" do
+    assert_equal "cc_payment", Transfer.outflow_kind_for(accounts(:depository), accounts(:credit_card))
   end
 
-  test "kind_for_account returns funds_movement for depository accounts" do
-    assert_equal "funds_movement", Transfer.kind_for_account(accounts(:depository))
+  test "outflow_kind_for returns funds_movement for depository accounts" do
+    assert_equal "funds_movement", Transfer.outflow_kind_for(accounts(:investment), accounts(:depository))
   end
 
   test "has_source_fee? returns true when source fee present" do

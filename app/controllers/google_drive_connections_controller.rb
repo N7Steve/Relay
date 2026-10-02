@@ -18,12 +18,16 @@ class GoogleDriveConnectionsController < ApplicationController
       "started_at" => Time.current.to_i
     }
 
-    redirect_to GoogleDrive::Client.authorization_url(
+    authorization_uri = URI(GoogleDrive::Client.authorization_url(
       redirect_uri: callback_google_drive_connection_url,
       state: state,
       code_challenge: pkce[:challenge],
       configuration: configuration
-    ), allow_other_host: true
+    ))
+    unless authorization_uri.scheme == "https" && authorization_uri.host == "accounts.google.com"
+      raise ArgumentError, "Unexpected Google OAuth authorization host"
+    end
+    redirect_to "https://accounts.google.com/o/oauth2/v2/auth?#{authorization_uri.query}", allow_other_host: true
   end
 
   def callback

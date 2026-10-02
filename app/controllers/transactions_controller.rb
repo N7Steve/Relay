@@ -115,7 +115,6 @@ class TransactionsController < ApplicationController
       Current.family.recurring_transactions.accessible_by(Current.user)
                     .where(id: projected_recurring_ids).includes(:merchant).to_a
     end
-
   end
 
   def clear_filter
@@ -149,7 +148,7 @@ class TransactionsController < ApplicationController
       @entry = Current.family.entries.new(entry_params)
       @entry.valid?
       set_new_transaction_form_options
-      render :new, status: :unprocessable_entity
+      render :new, formats: [ :html ], status: :unprocessable_entity
       return
     end
 
@@ -178,7 +177,7 @@ class TransactionsController < ApplicationController
       respond_with_created_entry(@entry)
     else
       set_new_transaction_form_options
-      render :new, status: :unprocessable_entity
+      render :new, formats: [ :html ], status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotUnique
     # Concurrent-request backstop: two near-simultaneous submissions both

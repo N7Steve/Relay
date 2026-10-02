@@ -50,6 +50,8 @@ class IncomeStatement::Sankey
     def category_key(category)
       return "uncategorized" if category.uncategorized?
       return "other_investments" if category.other_investments?
+      return "transfer_to_excluded" if category.transfer_to_excluded?
+      return "transfer_from_excluded" if category.transfer_from_excluded?
       category.id
     end
 

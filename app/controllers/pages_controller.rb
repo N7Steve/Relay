@@ -339,12 +339,11 @@ class PagesController < ApplicationController
     def dashboard_period_for(section_key)
       requested_key = params[dashboard_period_param(section_key)]
       saved_key = Current.user.dashboard_widget_period(section_key)
+      return @period unless Period.valid_key?(requested_key) || Period.valid_key?(saved_key)
       period_key = if Period.valid_key?(requested_key)
         requested_key
       elsif Period.valid_key?(saved_key)
         saved_key
-      else
-        @period.key
       end
 
       case period_key
@@ -362,7 +361,7 @@ class PagesController < ApplicationController
         period_key = params[dashboard_period_param(section_key)]
         periods[section_key] = period_key if Period.valid_key?(period_key)
       end
-      Current.user.update_dashboard_preferences("dashboard_widget_periods" => selected) if selected.any?
+      Current.user.update_dashboard_preferences({ "dashboard_widget_periods" => selected }) if selected.any?
     end
 
     def dashboard_period_param(section_key)
@@ -663,11 +662,11 @@ class PagesController < ApplicationController
         previous_label: I18n.l(dashboard_display_month(previous_month_start), format: :month_year).capitalize,
         previous_comparison_day: previous_comparison_day,
         previous_comparison_range: if previous_comparison_day && Current.family.month_start_day != 1
-          Period.custom(
-            start_date: previous_month_start,
-            end_date: previous_month_start + previous_comparison_day - 1
-          ).label_range
-        end,
+                                     Period.custom(
+                                       start_date: previous_month_start,
+                                       end_date: previous_month_start + previous_comparison_day - 1
+                                     ).label_range
+                                   end,
         date_range_short: spending_trend_compact_date_range(current_period)
       }
     end

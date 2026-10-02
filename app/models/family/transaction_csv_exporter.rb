@@ -24,7 +24,7 @@ class Family::TransactionCsvExporter
 
   def generate
     count = 0
-    csv_data = CSV.generate(col_sep: column_separator) do |csv|
+    csv_data = CSV.generate(encoding: Encoding::UTF_8, col_sep: column_separator) do |csv|
       csv << headers
 
       export_transactions.each do |transaction|

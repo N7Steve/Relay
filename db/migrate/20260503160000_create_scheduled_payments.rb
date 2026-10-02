@@ -23,8 +23,8 @@ class CreateScheduledPayments < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :scheduled_payments, [:family_id, :status]
-    add_index :scheduled_payments, [:next_run_date]
-    add_index :scheduled_payments, [:family_id, :next_run_date], where: "status = 'active'"
+    add_index :scheduled_payments, [ :family_id, :status ]
+    add_index :scheduled_payments, [ :next_run_date ]
+    add_index :scheduled_payments, [ :family_id, :next_run_date ], where: "status = 'active'"
   end
 end

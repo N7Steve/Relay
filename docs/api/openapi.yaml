@@ -3506,6 +3506,7 @@ components:
           required:
           - account_statements
           - family_exports
+          - google_drive_export_schedules
           - imports
           - import_sessions
           - import_source_mappings
@@ -3533,6 +3534,7 @@ components:
           - tags
           - taggings
           - merchants
+          - merchant_customizations
           - family_merchant_associations
           - provider_items
           - active_storage_attachments
@@ -3545,6 +3547,9 @@ components:
               type: integer
               minimum: 0
             family_exports:
+              type: integer
+              minimum: 0
+            google_drive_export_schedules:
               type: integer
               minimum: 0
             imports:
@@ -3626,6 +3631,9 @@ components:
               type: integer
               minimum: 0
             merchants:
+              type: integer
+              minimum: 0
+            merchant_customizations:
               type: integer
               minimum: 0
             family_merchant_associations:
@@ -7224,7 +7232,9 @@ paths:
                   description: Client-provided idempotency key for this chunk.
                 raw_file_content:
                   type: string
-                  description: Raw Sure NDJSON content. Each chunk is limited to 10MB.
+                  description: Raw Sure NDJSON content. Each chunk is limited to 500MB
+                    by default; configure SURE_IMPORT_MAX_NDJSON_SIZE_MB to change
+                    the limit.
           multipart/form-data:
             schema:
               type: object
@@ -7245,7 +7255,8 @@ paths:
                   type: string
                   format: binary
                   description: Multipart Sure NDJSON file upload. Each chunk is limited
-                    to 10MB.
+                    to 500MB by default; configure SURE_IMPORT_MAX_NDJSON_SIZE_MB
+                    to change the limit.
       parameters: []
       responses:
         '201':

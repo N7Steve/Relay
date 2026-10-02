@@ -13,6 +13,14 @@ en:
         unnamed_family: "Unnamed Family/Group"
         no_subscription: "No subscription"
         family_summary: "%{members} members · %{accounts} accounts · %{transactions} transactions"
+        manage_current_family: Manage current family
+        instance_context:
+          title: Instance-wide administration
+          description: "You are viewing every family and user in this installation. Your current family is %{family}."
+          manage_family: "Manage %{family}"
+        badges:
+          current_family: Your family
+          demo_family: Demo data
         filters:
           role: "Role"
           role_all: "All roles"
@@ -110,6 +118,15 @@ en:
         warning: "This immediately revokes access and schedules permanent deletion of the user and their data. This cannot be undone."
         instruction: "Type %{email} to confirm."
         email_label: "User email"
+        family_name_label: Family name
+        family_warning_title: "%{family} will also be deleted"
+        family_warning_body: "This is the last user in the family. Removing them permanently deletes the family, including %{accounts} and %{transactions}."
+        account_count:
+          one: "%{formatted_count} account"
+          other: "%{formatted_count} accounts"
+        transaction_count:
+          one: "%{formatted_count} transaction"
+          other: "%{formatted_count} transactions"
         cancel: "Cancel"
         submit: "Permanently remove user"
     families:

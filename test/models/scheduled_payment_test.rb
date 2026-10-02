@@ -220,7 +220,7 @@ class ScheduledPaymentTest < ActiveSupport::TestCase
   end
 
   test "sync_confirmed_entries! updates name, category, and merchant on linked entries" do
-    category2 = categories(:housing)
+    category2 = categories(:one)
     merchant  = FamilyMerchant.find_or_create_by!(family: @family, name: "New Merchant")
 
     sp = @family.scheduled_payments.create!(
@@ -272,7 +272,7 @@ class ScheduledPaymentTest < ActiveSupport::TestCase
     spe.confirm!
 
     tag = @family.tags.create!(name: "Updated Tag")
-    sp.tags = [tag]
+    sp.tags = [ tag ]
     sp.sync_confirmed_entries!
 
     assert_includes spe.reload.entry.entryable.tags, tag
@@ -280,7 +280,7 @@ class ScheduledPaymentTest < ActiveSupport::TestCase
 
   test "link_matching_entries! finds and links historical entries" do
     # Create entries to match
-    e1 = @family.entries.create!(
+    e1 = @account.entries.create!(
       account: @account,
       date: Date.new(2026, 1, 14),
       name: "Netflix",
@@ -289,7 +289,7 @@ class ScheduledPaymentTest < ActiveSupport::TestCase
       entryable: Transaction.new
     )
 
-    e2 = @family.entries.create!(
+    e2 = @account.entries.create!(
       account: @account,
       date: Date.new(2026, 2, 16),
       name: "Netflix",
@@ -320,7 +320,7 @@ class ScheduledPaymentTest < ActiveSupport::TestCase
 
   test "link_matching_entries! respects ±5 day tolerance" do
     # Entry on Jan 22 with SP day 15 → should NOT match (7 days off)
-    e1 = @family.entries.create!(
+    e1 = @account.entries.create!(
       account: @account,
       date: Date.new(2026, 1, 22),
       name: "Netflix",
@@ -489,7 +489,7 @@ class ScheduledPaymentTest < ActiveSupport::TestCase
 
     def create_historical_transaction(name:, date:, amount:, category: nil, merchant: nil, tags: [])
       transaction = Transaction.create!(category: category, merchant: merchant, tags: tags)
-      @family.entries.create!(
+      @account.entries.create!(
         account: @account,
         date: date,
         name: name,

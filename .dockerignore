@@ -6,10 +6,17 @@
 
 # Ignore bundler config.
 /.bundle
+/vendor/bundle/
+/coverage/
+/gcp-storage-keyfile.json
+/.claude/settings.local.json
 
 # Ignore all environment files (except templates).
 /.env*
 !/.env*.erb
+!/.env.example
+!/.env.local.example
+!/.env.test.example
 
 # Ignore all default key files.
 /config/master.key

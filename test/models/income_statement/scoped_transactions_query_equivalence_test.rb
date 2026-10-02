@@ -126,6 +126,5 @@ class IncomeStatement::ScopedTransactionsQueryEquivalenceTest < ActiveSupport::T
       ]
 
       rows.map { |row| row.to_h.slice(*upstream_fields) }.sort_by(&:inspect)
-      rows.map(&:to_h).sort_by(&:inspect)
     end
 end

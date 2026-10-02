@@ -2,7 +2,7 @@ class SureImport < Import
   NotPublishableError = Class.new(StandardError)
   PreflightError = Class.new(StandardError)
 
-  DEFAULT_MAX_NDJSON_SIZE_MB = 10
+  DEFAULT_MAX_NDJSON_SIZE_MB = 500
   DEFAULT_MAX_ROW_COUNT = 100_000
   IMPORTABLE_NDJSON_TYPES = {
     "Account" => :accounts,

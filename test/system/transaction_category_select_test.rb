@@ -38,7 +38,7 @@ class TransactionCategorySelectTest < ApplicationSystemTestCase
 
       nested_option = find("[role='option'][data-category-id='#{subcategory.id}']")
 
-      assert_includes nested_option[:class].split, "pl-8"
+      assert nested_option.has_selector?("[data-testid='category-select-subcategory-indicator']")
       assert_equal subcategory.display_name_with_parent,
                    nested_option["data-category-search-name"]
       assert_text subcategory.display_name

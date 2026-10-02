@@ -21,7 +21,7 @@ class TransferMatchesController < ApplicationController
       destination_account = @transfer.inflow_transaction.entry.account
       outflow_kind = Transfer.outflow_kind_for(source_account, destination_account)
       inflow_kind = Transfer.inflow_kind_for(source_account, destination_account)
-      
+
       outflow_attrs = { kind: outflow_kind }
 
       if outflow_kind == "investment_contribution"

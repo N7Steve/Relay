@@ -19,7 +19,7 @@ class Transactions::BulkDeletionsControllerTest < ActionDispatch::IntegrationTes
     end
 
     assert_redirected_to transactions_url
-    assert_equal "#{delete_count} transactions deleted", flash[:notice]
+    assert_equal "#{delete_count} transaction#{delete_count == 1 ? '' : 's'} deleted", flash[:notice]
   end
 
   test "bulk delete removes the complete transfer when one displayed leg is selected" do
@@ -54,7 +54,7 @@ class Transactions::BulkDeletionsControllerTest < ActionDispatch::IntegrationTes
     sp_entry_id = spe.reload.entry.id
 
     post transactions_bulk_deletion_url,
-         params: { bulk_delete: { entry_ids: [sp_entry_id] } }
+         params: { bulk_delete: { entry_ids: [ sp_entry_id ] } }
 
     assert Entry.exists?(sp_entry_id), "Scheduled payment entry should not be deleted in bulk"
   end

@@ -31,7 +31,11 @@ class Transactions::BulkDeletionsController < ApplicationController
       destroyed_entries = entries_scope
         .excluding_transfer_transactions
         .destroy_by(id: requested_entry_ids)
-      transfers.each(&:destroy!)
+      transfers.each do |transfer|
+        transfer_entries = [ transfer.outflow_transaction.entry, transfer.inflow_transaction.entry ]
+        transfer.destroy!
+        transfer_entries.each(&:destroy!)
+      end
     end
 
     (affected_accounts + destroyed_entries.map(&:account)).compact.uniq.each(&:sync_later)

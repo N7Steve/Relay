@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+require "uri"
+
+database = URI.parse(ENV.fetch("DATABASE_URL", ""))
+unless ENV["RAILS_ENV"] == "development" && ENV["DB_HOST"] == "db" &&
+    ENV["POSTGRES_DB"] == "sure_local" && database.host == "db" &&
+    database.path == "/sure_local" && ENV["REDIS_URL"] == "redis://redis:6379/0"
+  abort "This runner only operates against its isolated Docker development services."
+end
+
+def rails!(*arguments)
+  system("bundle", "exec", "ruby", "bin/rails", *arguments)
+  exit($?.exitstatus || 1) unless $?.success?
+end
+
+case ARGV.shift || "web"
+when "web"
+  rails!("db:prepare")
+  rails!("assets:precompile")
+  exec("bundle", "exec", "ruby", "bin/rails", "server", "-b", "0.0.0.0", "-p", "3000")
+when "worker"
+  exec("bundle", "exec", "sidekiq")
+else
+  abort "Unknown local development task."
+end

@@ -23,14 +23,14 @@ class MigrateTransfersToExcludedAccounts < ActiveRecord::Migration[7.1]
       destination_account = transaction.entryable&.inflow_transaction&.entry&.account
       if destination_account
         new_kind = if destination_account.loan?
-                     "loan_payment"
-                   elsif destination_account.credit_card? || destination_account.liability?
-                     "cc_payment"
-                   elsif destination_account.investment? || destination_account.crypto?
-                     "investment_contribution"
-                   else
-                     "funds_movement"
-                   end
+          "loan_payment"
+        elsif destination_account.credit_card? || destination_account.liability?
+          "cc_payment"
+        elsif destination_account.investment? || destination_account.crypto?
+          "investment_contribution"
+        else
+          "funds_movement"
+        end
         transaction.update_columns(kind: new_kind)
       end
     end

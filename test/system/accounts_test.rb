@@ -98,10 +98,8 @@ class AccountsTest < ApplicationSystemTestCase
   private
 
     def open_new_account_modal
-      within "[data-controller='DS--tabs']" do
-        click_button "All"
-        click_link "New account"
-      end
+      visit accounts_path
+      click_link I18n.t("accounts.index.new_account"), match: :first
     end
 
     # The account page reloads its scoped Turbo Frame after account sync.
@@ -138,7 +136,9 @@ class AccountsTest < ApplicationSystemTestCase
     end
 
     def assert_account_created(accountable_type, &block)
-      click_link Accountable.from_type(accountable_type).singular_display_name
+      within "#modal dialog[open]" do
+        click_link Accountable.from_type(accountable_type).singular_display_name
+      end
       click_link "Enter account balance" if accountable_type.in?(%w[Depository Investment Crypto Loan CreditCard])
 
       account_name = "[system test] #{accountable_type} Account"
@@ -157,12 +157,7 @@ class AccountsTest < ApplicationSystemTestCase
 
       click_button "Create Account"
 
-      within_testid("account-sidebar-tabs") do
-        click_on "All"
-        find("details", text: Accountable.from_type(accountable_type).display_name).click
-        assert_text account_name
-      end
-
+      assert_no_selector "dialog[open]"
       visit accounts_url
       assert_text account_name
 

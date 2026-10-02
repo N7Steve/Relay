@@ -6,11 +6,11 @@ Este documento identifica la funcionalidad propia de este fork frente al reposit
 
 ## Restricción operativa del entorno local
 
-En este entorno de desarrollo **no se deben intentar ejecutar Rails ni herramientas que dependan del bundle de Ruby**. Esto incluye `bin/rails`, pruebas Minitest o RSpec, tareas Rake, RuboCop, Brakeman, migraciones, consola, servidor y comandos equivalentes. El bundle local no es ejecutable de forma fiable y esos intentos sólo producen fallos de dependencias conocidos.
+En Windows **no se deben intentar ejecutar Rails ni herramientas que dependan del bundle Ruby nativo**. Esto incluye `bin/rails`, pruebas Minitest o RSpec, tareas Rake, RuboCop, Brakeman, migraciones, consola, servidor y comandos equivalentes. El bundle nativo no es ejecutable de forma fiable y esos intentos sólo producen fallos de dependencias conocidos.
 
-- Añadir o actualizar pruebas cuando el cambio lo requiera, pero dejarlas pendientes de ejecución.
-- Limitar la validación local a revisiones estáticas que no carguen Rails ni Bundler, como inspección del diff, `git diff --check` y comprobaciones de sintaxis aisladas cuando sean compatibles.
-- Indicar expresamente al entregar cada cambio qué validaciones quedaron pendientes. Las pruebas Rails y el resto de comprobaciones dependientes del bundle deben ejecutarse posteriormente en CI o en un entorno compatible, salvo que el usuario revoque explícitamente esta restricción.
+- Ejecutar las pruebas y comprobaciones dependientes del bundle dentro del [entorno Docker de pruebas](docs/llm-guides/docker-tests.md), disponible desde el 2 de octubre de 2026. Esta restricción no se aplica al bundle Linux del contenedor.
+- Fuera de Docker, limitar la validación local a revisiones estáticas que no carguen Rails ni Bundler, como inspección del diff, `git diff --check` y comprobaciones de sintaxis aisladas cuando sean compatibles.
+- Indicar expresamente al entregar cada cambio qué validaciones pasaron, fallaron o quedaron pendientes. Si Docker no está disponible, usar CI u otro entorno compatible.
 
 ## Foto de referencia
 
@@ -363,6 +363,7 @@ Archivos principales: `categories_controller.rb`, `category/dropdowns_controller
 - Los filtros se conservan exclusivamente en la URL: el historial del navegador puede restaurarlos, pero una nueva entrada a Transacciones comienza sin filtros. Los chips incluyen una acción «Borrar todo» y el tamaño inicial de página es de 20 movimientos.
 - Detalle enriquecido con edición automática, indicadores, posibles duplicados, protección, contexto de transferencias/pagos programados y permisos de anotación.
 - Actualización rápida de categoría, etiquetas y actividad de inversión.
+- Las etiquetas del listado usan el resumen adaptable compartido y conservan la edición rápida. El menú de escritorio permite filtrar por una etiqueta manteniendo los demás filtros activos; no duplicar las columnas ni perder este acceso al filtro.
 - Borrado masivo y vistas Turbo actualizadas.
 
 Archivos principales: `transactions_controller.rb`, `transactions/bulk_deletions_controller.rb`, `transactions/categorizes_controller.rb`, `transactions/descriptions_controller.rb`, `user.rb`, `transaction.rb`, `transaction/search.rb`, `entry_search.rb`, `config/routes.rb`, vistas `transactions/` —en especial `_compact_view_toggle.html.erb` y `_list.html.erb`—, helpers, controladores Stimulus relacionados y `test/controllers/transactions_controller_test.rb`.
@@ -377,6 +378,7 @@ Archivos principales: `transactions_controller.rb`, `transactions/bulk_deletions
 - Conversión de transacciones a trades y restauración/retracción donde aplica.
 - División (`splitting`) de transacciones con selector de categoría, bloqueo de hijos/padres y vistas coherentes.
 - Las transferencias pueden seleccionarse individualmente desde el listado, duplicarse y eliminarse mediante el menú contextual. El duplicado abre el formulario de transferencia con ambas cuentas, importe, nombre, categoría y etiquetas precompletados, la fecha actual como en el duplicado de una transacción normal y siempre que el usuario tenga acceso a las dos cuentas. El borrado seleccionado resuelve la transferencia desde cualquiera de sus patas y elimina el par completo con las mismas protecciones de permisos y Agenda que el resto del flujo. La edición masiva permanece oculta si la selección contiene una transferencia, porque modificar una sola pata rompería su coherencia.
+- Desvincular o rechazar una transferencia conserva sus movimientos y los devuelve a tipo ordinario. Borrar una cuenta conserva el movimiento de la cuenta superviviente. La eliminación explícita del par y la retracción desde Agenda eliminan ambos movimientos de forma transaccional; no mezclar esas operaciones con la mera desvinculación.
 - Migración correctiva bidireccional para transferencias ya existentes.
 
 Puntos principales: `transfer.rb`, `transfer/creator.rb`, `transaction/transferable.rb`, `transfers_controller.rb`, `transfer_matches_controller.rb`, `splits_controller.rb`, vistas `transfers/` y `splits/`, y pruebas de transferencia/división.
@@ -386,6 +388,7 @@ Puntos principales: `transfer.rb`, `transfer/creator.rb`, `transaction/transfera
 Funcionalidad propia incorporada en agosto de 2026:
 
 - Dos tipos de exportación: copia completa y CSV personalizado de transacciones.
+- Las importaciones de backups NDJSON admiten 500 MB por defecto, tanto por web como por API. `SURE_IMPORT_MAX_NDJSON_SIZE_MB` permite ajustar el límite; conservar la cobertura de subidas mayores de 10 MB en `test/controllers/imports_controller_test.rb` y no recuperar el límite upstream de 10 MB.
 - Rango de fechas, filtros JSON, usuario solicitante, tipo y número de registros.
 - Generación asíncrona y descarga desde la UI.
 - Endpoint API adaptado a las nuevas opciones.

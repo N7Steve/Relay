@@ -59,7 +59,7 @@ class Family::AccountSnapshotCsvExporter
 
   def generate
     selected_accounts = accounts.to_a
-    csv_data = CSV.generate(col_sep: ",") do |csv|
+    csv_data = CSV.generate(encoding: Encoding::UTF_8, col_sep: ",") do |csv|
       csv << HEADERS
       selected_accounts.each { |account| csv << serialize(account) }
     end

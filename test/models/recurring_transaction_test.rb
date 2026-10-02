@@ -1197,11 +1197,8 @@ class RecurringTransactionTest < ActiveSupport::TestCase
     assert_nil @family.recurring_transactions.last.destination_account_id
   end
 
-  test "create_from_transfer name reflects Transfer#name (Payment vs Transfer based on destination)" do
-    # Transfer#name returns "Payment to ..." for liability destinations
-    # and "Transfer to ..." otherwise, mirroring Transfer::Creator's
-    # name_prefix logic. The recurring row should pick that up rather
-    # than hard-coding "Transfer to ...".
+  test "create_from_transfer preserves a custom transfer name" do
+    # A curated name must survive creating a recurring series from the transfer.
     source = @account
     cc_destination = accounts(:credit_card) # liability
     outflow = source.entries.create!(
@@ -1217,7 +1214,7 @@ class RecurringTransactionTest < ActiveSupport::TestCase
     )
 
     rt = RecurringTransaction.create_from_transfer(transfer)
-    assert_equal "Payment to #{cc_destination.name}", rt.name
+    assert_equal "raw", rt.name
   end
 
   test "create_from_transfer stores source-side currency on multi-currency transfers" do

@@ -59,12 +59,12 @@ class UI::AccountPage < ApplicationComponent
     base_tabs = case account.accountable_type
     when "Investment"
       if account.managed_portfolio?
-        [ :activity ]
+        [ :activity, :statements ]
       else
-        [ :holdings ]
+        [ :holdings, :activity, :statements ]
       end
     when "Crypto"
-      [ :holdings ]
+      [ :holdings, :activity, :statements ]
     when "Loan"
       account.loan.amortizable? ? [ :activity, :overview, :schedule ] : [ :activity, :overview ]
     when "Property", "Vehicle"
@@ -73,7 +73,7 @@ class UI::AccountPage < ApplicationComponent
       [ :activity ]
     end
 
-    base_tabs
+    base_tabs | [ :statements ]
   end
 
   def fx_coverage_start_date

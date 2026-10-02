@@ -28,7 +28,7 @@ class GoogleDriveExportSchedule < ApplicationRecord
   }, default: :all_history, validate: true, prefix: true
 
   validates :name, :filename, :run_at, :timezone, :next_run_at, presence: true
-  validates :filename, format: { with: /\.csv\z/i }
+  validates :filename, format: { with: /\A[^\r\n]+\.csv\z/i }
   validates :weekday, inclusion: { in: 0..6 }, allow_nil: true
   validates :day_of_month, inclusion: { in: 1..31 }, allow_nil: true
   validates :rolling_days, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 3_650 }, allow_nil: true

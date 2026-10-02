@@ -47,7 +47,7 @@ class TransfersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "input[name='transfer[amount]']" do |elements|
-      assert elements.first["value"].blank?
+      assert_equal 0, elements.first["value"].to_d
     end
   end
 

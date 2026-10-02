@@ -15,7 +15,7 @@ class ScheduledPayment::EstimateUncertaintyTest < ActiveSupport::TestCase
   end
 
   test "uses learned robust error dispersion after four confirmations" do
-    [ 80, 90, 110, 120 ].each_with_index { |amount, index| add_confirmation(amount, index.months.ago.to_date) }
+    [ 80, 90, 110, 120 ].each_with_index { |amount, index| add_confirmation(amount, (index + 1).months.ago.to_date) }
 
     uncertainty = ScheduledPayment::EstimateUncertainty.for(@payment, before: Date.current)
 

@@ -6,7 +6,7 @@ class Transactions::DescriptionsController < ApplicationController
     end
 
     @account = Current.family.accounts.find_by(id: params[:account_id])
-    
+
     if @account.nil?
       render json: []
       return

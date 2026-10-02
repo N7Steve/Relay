@@ -13,6 +13,31 @@ class DsOverlayMorphTest < ApplicationSystemTestCase
     sign_in @user = users(:family_admin)
   end
 
+  test "background morph preserves an open dialog but a successful submit releases it" do
+    visit tags_url
+    click_on I18n.t("tags.index.new"), match: :first
+    assert_selector "#modal dialog[open]"
+
+    assert page.evaluate_script(<<~JS)
+      (() => {
+        const frame = document.getElementById("modal");
+        const event = new CustomEvent("turbo:before-morph-element", {
+          bubbles: true, cancelable: true,
+          detail: { newElement: document.createElement("turbo-frame") }
+        });
+        frame.dispatchEvent(event);
+        return event.defaultPrevented;
+      })()
+    JS
+
+    fill_in "tag_name", with: "Saved from a dialog"
+    within "#modal" do
+      find("[type='submit']").click
+    end
+    assert_no_selector "#modal dialog[open]"
+    assert_text "Saved from a dialog"
+  end
+
   test "DS::Menu reopens correctly after a morph resets it to hidden" do
     visit tags_url
 

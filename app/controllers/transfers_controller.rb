@@ -139,7 +139,11 @@ class TransfersController < ApplicationController
     return unless require_account_permission!(outflow_account, redirect_path: transactions_url)
     return unless require_account_permission!(inflow_account, redirect_path: transactions_url)
 
-    @transfer.destroy!
+    Transfer.transaction do
+      @transfer.destroy!
+      outflow_entry.destroy!
+      inflow_entry.destroy!
+    end
 
     outflow_account.sync_later
     inflow_account.sync_later

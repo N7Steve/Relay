@@ -1,0 +1,37 @@
+# syntax=docker/dockerfile:1
+FROM node:24-bookworm-slim AS node
+
+FROM ruby:3.4.9-slim-bookworm
+
+RUN apt-get update -qq \
+    && apt-get install --no-install-recommends -y \
+      build-essential git libpq-dev libyaml-dev libvips42 \
+      postgresql-client poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+
+WORKDIR /rails
+
+ENV RAILS_ENV=test \
+    BUNDLE_PATH=/usr/local/bundle \
+    BUNDLE_FROZEN=true
+
+COPY .ruby-version Gemfile Gemfile.lock ./
+RUN gem install bundler -v 2.6.7 --no-document \
+    && bundle install
+
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
+
+# Snapshot of Windows sources, with dependencies cached in earlier layers.
+# No live source mount across the Windows/Linux filesystem boundary.
+COPY . .
+# Match a Linux checkout even when Windows Git writes CRLF working files.
+RUN ruby -e 'Dir.glob("{app,bin,config,db,lib,spec,test}/**/*").each { |path| next unless File.file?(path) && (path.start_with?("bin/") || %w[.rb .erb .rake .yml .yaml .json .csv .js .css .html .txt .tt .sh].include?(File.extname(path))); content = File.binread(path); File.binwrite(path, content.gsub("\r\n", "\n")) if content.include?("\r\n") }'
+RUN chmod +x bin/*
+
+ENTRYPOINT ["ruby", "bin/docker-test-entrypoint"]
+CMD ["unit"]

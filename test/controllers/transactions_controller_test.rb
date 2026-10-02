@@ -1830,7 +1830,7 @@ end
     )
 
     assert_response :redirect
-    assert_includes response.location, "filter_cleared=1"
+    assert_equal transactions_path, URI.parse(response.location).path
     assert_no_match(/ai_status/, response.location)
   end
 
@@ -1845,7 +1845,8 @@ end
           amount: 100,
           nature: "inflow",
           entryable_type: "Transaction",
-          idempotency_key: SecureRandom.uuid
+          idempotency_key: SecureRandom.uuid,
+          entryable_attributes: { kind: "standard" }
         }
       }
     end
