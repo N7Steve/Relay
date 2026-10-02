@@ -9,10 +9,10 @@ services:
       DISABLE_PARALLELIZATION: "true"
       DB_HOST: db
       DB_PORT: "5432"
-      POSTGRES_DB: sure_test
-      POSTGRES_USER: sure_test
+      POSTGRES_DB: relay_test
+      POSTGRES_USER: relay_test
       POSTGRES_PASSWORD: local-test-only
-      DATABASE_URL: postgres://sure_test:local-test-only@db:5432/sure_test
+      DATABASE_URL: postgres://relay_test:local-test-only@db:5432/relay_test
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY_BASE: docker-tests-only-not-a-production-secret-000000000000000000000000
       PLAID_CLIENT_ID: test_client_id
@@ -30,13 +30,13 @@ services:
   db:
     image: postgres:16-bookworm
     environment:
-      POSTGRES_DB: sure_test
-      POSTGRES_USER: sure_test
+      POSTGRES_DB: relay_test
+      POSTGRES_USER: relay_test
       POSTGRES_PASSWORD: local-test-only
     volumes:
       - test-db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sure_test -d sure_test"]
+      test: ["CMD-SHELL", "pg_isready -U relay_test -d relay_test"]
       interval: 2s
       timeout: 5s
       retries: 30

@@ -5,7 +5,7 @@
         defaults: '2025-11-30',
         person_profiles: 'always', // or 'identified_only'
         loaded: function(client) {
-            client.register({ sure_version: <%= raw json_escape(Sure.version.to_s.to_json) %> });
+            client.register({ sure_version: <%= raw json_escape(Relay.version.to_s.to_json) %> });
             document.dispatchEvent(new Event('posthog:ready'));
         },
     })

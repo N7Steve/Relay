@@ -1,6 +1,6 @@
 services:
   app:
-    image: sure-local-app
+    image: relay-local-app
     build:
       context: .
       dockerfile: Dockerfile.test
@@ -11,16 +11,16 @@ services:
       SELF_HOSTED: "true"
       ONBOARDING_STATE: open
       DB_HOST: db
-      POSTGRES_DB: sure_local
-      POSTGRES_USER: sure_local
+      POSTGRES_DB: relay_local
+      POSTGRES_USER: relay_local
       POSTGRES_PASSWORD: local-development-only
-      DATABASE_URL: postgres://sure_local:local-development-only@db:5432/sure_local
+      DATABASE_URL: postgres://relay_local:local-development-only@db:5432/relay_local
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY_BASE: local-development-only-stable-key-000000000000000000000000000000000000
       ACTIVE_STORAGE_SERVICE: local
       PORT: "3000"
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3002:3000"
     volumes:
       - local-storage:/rails/storage
     depends_on:
@@ -36,7 +36,7 @@ services:
       retries: 30
 
   worker:
-    image: sure-local-app
+    image: relay-local-app
     entrypoint: ["ruby", "bin/docker-local-entrypoint"]
     command: ["worker"]
     environment: *local-environment
@@ -49,13 +49,13 @@ services:
   db:
     image: postgres:16-bookworm
     environment:
-      POSTGRES_DB: sure_local
-      POSTGRES_USER: sure_local
+      POSTGRES_DB: relay_local
+      POSTGRES_USER: relay_local
       POSTGRES_PASSWORD: local-development-only
     volumes:
       - local-db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sure_local -d sure_local"]
+      test: ["CMD-SHELL", "pg_isready -U relay_local -d relay_local"]
       interval: 2s
       timeout: 5s
       retries: 30

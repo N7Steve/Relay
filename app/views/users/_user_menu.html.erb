@@ -34,10 +34,10 @@
         <div class="px-4 py-3 border-t border-tertiary">
           <p class="text-sm">
             <span class="font-medium text-primary"><%= t(".version") %>:</span>
-            <%= link_to Sure.version.to_release_tag, "https://github.com/we-promise/sure/releases/tag/#{Sure.version.to_release_tag}", target: "_blank", class: "hover:underline" %>
+            <%= link_to Relay.version.to_release_tag, "https://github.com/we-promise/sure/releases/tag/#{Relay.version.to_release_tag}", target: "_blank", class: "hover:underline" %>
 
-            <% if Sure.commit_sha.present? %>
-              (<%= link_to Sure.commit_sha.first(7), "https://github.com/N7Steve/Relay/commit/#{Sure.commit_sha}", target: "_blank", class: "hover:underline" %>)
+            <% if Relay.commit_sha.present? %>
+              (<%= link_to Relay.commit_sha.first(7), "https://github.com/N7Steve/Relay/commit/#{Relay.commit_sha}", target: "_blank", class: "hover:underline" %>)
             <% end %>
           </p>
         </div>

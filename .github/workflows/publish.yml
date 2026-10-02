@@ -570,7 +570,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION_FILE=".sure-version"
+          VERSION_FILE=".relay-version"
           CHART_FILE="charts/sure/Chart.yaml"
 
           # Ensure version file exists
@@ -609,7 +609,7 @@ jobs:
           echo "$NEW_VERSION" > "$VERSION_FILE"
 
           # Verify the change
-          echo "Updated .sure-version:"
+          echo "Updated .relay-version:"
           cat "$VERSION_FILE"
 
           # Update Helm chart version and appVersion
@@ -631,7 +631,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add .sure-version
+          git add .relay-version
           git add charts/sure/Chart.yaml
 
           # Check if there are changes to commit
@@ -693,7 +693,7 @@ jobs:
 
           git push --force-with-lease origin HEAD:"refs/heads/${BUMP_BRANCH}"
 
-          PR_BODY="This automated PR bumps .sure-version and charts/sure/Chart.yaml after the ${REF_NAME} pre-release. It was opened because the workflow could not push directly to ${SOURCE_BRANCH}."
+          PR_BODY="This automated PR bumps .relay-version and charts/sure/Chart.yaml after the ${REF_NAME} pre-release. It was opened because the workflow could not push directly to ${SOURCE_BRANCH}."
 
           set +e
           pr_create_output=$(gh pr create \

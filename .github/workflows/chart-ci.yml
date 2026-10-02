@@ -5,14 +5,14 @@ on:
   pull_request:
     paths:
       - 'charts/**'
-      - '.sure-version'
+      - '.relay-version'
       - '.github/workflows/chart-ci.yml'
   push:
     branches:
       - main
     paths:
       - 'charts/**'
-      - '.sure-version'
+      - '.relay-version'
       - '.github/workflows/chart-ci.yml'
 
 jobs:
@@ -30,15 +30,15 @@ jobs:
         run: |
           set -euo pipefail
 
-          RAILS_VERSION=$(cat .sure-version | tr -d '[:space:]')
+          RAILS_VERSION=$(cat .relay-version | tr -d '[:space:]')
           if [ -z "$RAILS_VERSION" ]; then
-            echo "::error::Could not read version from .sure-version"
+            echo "::error::Could not read version from .relay-version"
             exit 1
           fi
           CHART_VERSION=$(sed -n 's/^version: //p' charts/sure/Chart.yaml | head -n 1)
           APP_VERSION=$(sed -n 's/^appVersion: "\{0,1\}\([^"]*\)"\{0,1\}/\1/p' charts/sure/Chart.yaml | head -n 1)
 
-          echo "App version (.sure-version):     $RAILS_VERSION"
+          echo "App version (.relay-version):     $RAILS_VERSION"
           echo "Helm chart version (Chart.yaml): $CHART_VERSION"
           echo "Helm appVersion (Chart.yaml):    $APP_VERSION"
 
@@ -56,7 +56,7 @@ jobs:
 
           if [ "$ERRORS" -gt 0 ]; then
             echo ""
-            echo "To fix: ensure version in .sure-version matches"
+            echo "To fix: ensure version in .relay-version matches"
             echo "both 'version' and 'appVersion' in charts/sure/Chart.yaml"
             exit 1
           fi

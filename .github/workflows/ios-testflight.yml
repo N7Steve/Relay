@@ -160,7 +160,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          IOS_VERSION="$(tr -d '[:space:]' < ../.sure-version | sed 's/-.*$//')"
+          IOS_VERSION="$(tr -d '[:space:]' < ../.relay-version | sed 's/-.*$//')"
           IOS_BUILD_NUMBER="$(date -u +%Y%m%d%H%M)"
           ARCHIVE_PATH="$RUNNER_TEMP/Runner.xcarchive"
           EXPORT_PATH="$PWD/build/ios/ipa"
@@ -227,7 +227,7 @@ jobs:
           EOF
 
           if [ -z "$IOS_VERSION" ]; then
-            echo "::error::.sure-version is empty or unreadable"
+            echo "::error::.relay-version is empty or unreadable"
             exit 1
           fi
 

@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'relay-v2';
 const OFFLINE_ASSETS = [
   '/offline.html',
-  '/logo-offline.svg'
+  '/relay-logo.png'
 ];
 
 // Install event - cache the offline page and assets

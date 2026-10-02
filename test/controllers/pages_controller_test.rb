@@ -642,11 +642,11 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :ok
-    assert_select "[data-controller='release-highlight'][data-release-highlight-tag-value=?]", Sure.version.to_release_tag
+    assert_select "[data-controller='release-highlight'][data-release-highlight-tag-value=?]", Relay.version.to_release_tag
   end
 
   test "dashboard omits the release highlight once the deployed release was seen" do
-    @user.mark_release_seen!(Sure.version.to_release_tag)
+    @user.mark_release_seen!(Relay.version.to_release_tag)
 
     get root_path
 

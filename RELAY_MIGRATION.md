@@ -84,6 +84,55 @@ proveedores, namespaces, APIs, paquetes móviles ni identificadores de clientes.
 Los logos e iconos existentes siguen siendo heredados: su sustitución requiere
 una identidad visual propia y pertenece a la fase siguiente.
 
+## Segunda entrega: marca visual y aislamiento local
+
+Alcance de la segunda entrega sobre la primera (`8066175`):
+
+- Logo original en `app/assets/images/relay.png` y banner original en
+  `docs/branding/relay-banner.png`, sin modificar los archivos proporcionados.
+- Logo Relay en acceso, navegación, onboarding, autorización y suscripciones.
+  Se conservan las dimensiones y estilos existentes; los logos web obsoletos
+  se retiran. Los recursos propios de clientes nativos siguen pendientes.
+- Favicon, iconos Apple/Android/PWA y mosaico Windows derivados del logo.
+  Fondo opaco para launchers; arte al 72% del lienzo, o 55% para maskable.
+  Este último cabe dentro del círculo central seguro del 80%. Favicon al 90%.
+  Exportación con Pillow/Lanczos desde el bounding box del canal alfa original;
+  no hay nueva dependencia de ejecución de la aplicación.
+- Pantalla offline con el logo nuevo y caché del service worker `relay-v2`.
+  Las URLs del manifest y cabecera versionan los iconos para renovar la marca.
+- README breve en inglés que presenta Relay como proyecto personal basado en
+  Sure y conserva procedencia y licencia.
+- Namespace Rails `Relay`, lectores y stubs coordinados; `.relay-version`
+  sustituye `.sure-version` en runtime y workflows. Se conserva la versión
+  heredada `0.7.6-alpha.1`, sin crear una release ni publicar etiquetas.
+- Paquete npm raíz `relay`, sin cambios de dependencias.
+- Entorno local `relay-local`, imagen `relay-local-app`, usuario/base
+  `relay_local` y puerto **127.0.0.1:3002**; el puerto interno sigue en 3000.
+  Pruebas `relay-tests` con usuario/base `relay_test`; guards y scripts alineados.
+  Los volúmenes quedan aislados por proyecto. No se trasladan los datos locales
+  de Sure ni se arranca la aplicación como parte de esta entrega.
+
+Compatibilidad y reversión:
+
+- El nombre por defecto de la base de producción permanece `sure_production`
+  para no seleccionar silenciosamente una base vacía en instalaciones existentes.
+  Una nueva instalación Relay debe definir `POSTGRES_DB` explícitamente; el
+  traslado de una instalación requiere backup, restauración y validación aparte.
+- No cambian `SureImport`, STI/constraints, contratos de exportación, variables
+  `SURE_*`, cabeceras API, claves, issuer MFA, ni identificadores/callbacks nativos.
+  Las propiedades analíticas `sure_version` y el atributo Stimulus homónimo se
+  conservan como contratos, aunque su valor ya lo proporciona `Relay.version`.
+- El namespace puede cambiar el nombre por defecto de la cookie Rails; revisar
+  una posible nueva autenticación en despliegues. No se rotan claves ni se
+  altera la cookie de autenticación explícita `session_token`.
+- El rollback del código se hace revirtiendo este commit, sin migración de datos.
+  Volver a `sure-local` selecciona sus antiguos volúmenes: no copiar ni borrar
+  volúmenes automáticamente. Los archivos gráficos originales quedan conservados.
+
+El inventario siguiente conserva los nombres de partida como mapa de búsqueda.
+Marca web, Rails/versión, npm raíz y aislamiento Docker ya avanzaron; los tokens,
+clientes, datos persistidos y distribución siguen en las fases siguientes.
+
 ## Inventario técnico de la separación
 
 | Área | Puntos principales | Tratamiento |
@@ -229,30 +278,33 @@ sea suficiente para saber qué contenido ya está integrado.
 
 ## Validación y seguimiento
 
-Las herramientas Rails/Bundler se ejecutan en Docker/Linux. La primera entrega
-usa los proyectos Compose **`relay-unit-tests`** (suite completa final) y
-**`relay-tests`** (sistema y comprobaciones), con `compose.test.yml` y
-`docker/test.env`. Cada proyecto tiene su propia base; ambas conservan el nombre
-interno `sure_test` para respetar el guard del runner. Así las ejecuciones no se
-interfieren ni comparten el entorno `sure-tests` del origen. Este ajuste de
-ejecución no cambia los scripts heredados, pendientes de la fase 3.
+Las herramientas Rails/Bundler se ejecutan en Docker/Linux. La segunda entrega
+usa proyectos nuevos **`relay-identity-unit`** (suite completa) y
+**`relay-identity-system`** (navegador), con `compose.test.yml` y `docker/test.env`.
+Cada proyecto tiene su propia base `relay_test`, alineada con el guard del runner.
+Los scripts para uso habitual ya usan `relay-tests`.
+
+La primera entrega usó `relay-unit-tests` y `relay-tests` con el nombre interno
+`sure_test`. Sus volúmenes conservan el esquema/usuario anteriores: no
+reutilizarlos con el Compose nuevo sin preparar explícitamente una base de
+pruebas nueva. Ninguna ejecución comparte el entorno `sure-tests` del origen.
 
 Desde la raíz de Relay, con Docker Desktop en contenedores Linux:
 
 ```powershell
 # Suite completa sobre su propia base de pruebas.
-docker --context desktop-linux compose --project-name relay-unit-tests --env-file docker/test.env --file compose.test.yml build runner
-docker --context desktop-linux compose --project-name relay-unit-tests --env-file docker/test.env --file compose.test.yml up --detach --wait db redis
-docker --context desktop-linux compose --project-name relay-unit-tests --env-file docker/test.env --file compose.test.yml run --rm runner unit
+docker --context desktop-linux compose --project-name relay-identity-unit --env-file docker/test.env --file compose.test.yml build runner
+docker --context desktop-linux compose --project-name relay-identity-unit --env-file docker/test.env --file compose.test.yml up --detach --wait db redis
+docker --context desktop-linux compose --project-name relay-identity-unit --env-file docker/test.env --file compose.test.yml run --rm runner unit
 
 # Navegador, sobre otra base para evitar interferencias con la suite completa.
-docker --context desktop-linux compose --project-name relay-tests --env-file docker/test.env --file compose.test.yml build runner
-docker --context desktop-linux compose --project-name relay-tests --env-file docker/test.env --file compose.test.yml --profile browser up --detach --wait db redis selenium
-docker --context desktop-linux compose --project-name relay-tests --env-file docker/test.env --file compose.test.yml --profile browser run --rm --use-aliases -e SELENIUM_REMOTE_URL=http://selenium:4444 -e CAPYBARA_APP_HOST=runner -e CAPYBARA_SERVER_PORT=3001 runner system test/system/onboardings_test.rb test/system/admin/system_health_test.rb
+docker --context desktop-linux compose --project-name relay-identity-system --env-file docker/test.env --file compose.test.yml build runner
+docker --context desktop-linux compose --project-name relay-identity-system --env-file docker/test.env --file compose.test.yml --profile browser up --detach --wait db redis selenium
+docker --context desktop-linux compose --project-name relay-identity-system --env-file docker/test.env --file compose.test.yml --profile browser run --rm --use-aliases -e SELENIUM_REMOTE_URL=http://selenium:4444 -e CAPYBARA_APP_HOST=runner -e CAPYBARA_SERVER_PORT=3001 runner system test/system/onboardings_test.rb test/system/admin/system_health_test.rb
 
 # Detener únicamente las pruebas de Relay, conservando sus volúmenes.
-docker --context desktop-linux compose --project-name relay-unit-tests --env-file docker/test.env --file compose.test.yml down
-docker --context desktop-linux compose --project-name relay-tests --env-file docker/test.env --file compose.test.yml --profile browser down
+docker --context desktop-linux compose --project-name relay-identity-unit --env-file docker/test.env --file compose.test.yml down
+docker --context desktop-linux compose --project-name relay-identity-system --env-file docker/test.env --file compose.test.yml --profile browser down
 ```
 
 El entrypoint de pruebas crea/carga únicamente el esquema de su base aislada;
@@ -264,7 +316,7 @@ Brakeman según [development.md](docs/llm-guides/development.md). Verificar buil
 tokens, contratos y pruebas de compatibilidad según el área; registrar resultados
 reales y distinguir pendientes. No ocultar fallos heredados como validación.
 
-Validación completada el 2 de octubre de 2026:
+Validación de la primera entrega, completada el 2 de octubre de 2026:
 
 | Comprobación | Resultado |
 | --- | --- |
@@ -288,6 +340,30 @@ un único commit propio sobre la base importada. CI remoto se comprueba después
 del push; estos resultados son locales y no certifican un despliegue, una nueva
 imagen de producción ni las fases técnicas pendientes. No se abre una PR en
 esta entrega ni se afirma haber ejecutado todo el checklist de futuras PRs.
+
+### Validación de la segunda entrega
+
+Ejecutada el 2 de octubre de 2026, en contenedores Linux aislados:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite completa Rails/Minitest | 10.777 pruebas, 45.639 aserciones, 0 fallos, 0 errores, 33 omisiones |
+| Sistema: onboarding y salud de administración en Chromium | 19 pruebas, 87 aserciones, sin fallos, errores ni omisiones |
+| Revisión visual temporal en Chromium | Acceso y dashboard: logo descargado/renderizado; 1 prueba y 4 aserciones, sin fallos; capturas inspeccionadas |
+| RuboCop | Los 11 archivos Ruby modificados pasan |
+| ERB lint | Las 14 vistas modificadas pasan |
+| Biome | 142 archivos comprobados, sin cambios automáticos |
+| Brakeman | 0 errores y 0 avisos activos; conserva 8 avisos ignorados por la configuración heredada |
+| Configuración | Compose local/test válido; ambos scripts PowerShell parsean; 19 workflows YAML válidos; service worker con sintaxis JavaScript válida |
+| Recursos visuales | Originales verificados mediante SHA-256; 8 PNG opacos con dimensiones esperadas; geometría maskable y recorte circular verificados |
+| Whitespace | `git diff --cached --check` sin incidencias |
+
+Los logs y capturas de revisión se guardan localmente bajo `tmp/`, fuera de Git.
+Las pruebas cargan el esquema exclusivamente en sus bases aisladas. La revisión
+visual temporal no añade pruebas al producto. No se arrancó el entorno local
+Relay ni se aplicaron migraciones a instalaciones existentes. Se detienen los
+servicios de pruebas sin borrar volúmenes y se conserva Sure intacto.
+Los resultados son locales; no equivalen a una release o despliegue de clientes.
 
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia

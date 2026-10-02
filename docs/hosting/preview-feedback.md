@@ -72,7 +72,7 @@ registering a survey does not automatically instrument the feature.
 
 These are the events **currently implemented for Sankey**. All include
 `preview_version: cash_flow_v1` and `sure_version` (the deployed release string
-from `.sure-version`, including any prerelease suffix):
+from `.relay-version`, including any prerelease suffix):
 
 | Event | Trigger | Additional properties |
 | --- | --- | --- |
