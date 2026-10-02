@@ -128,7 +128,7 @@ pl:
       page_title: Skonfiguruj rachunek Trade Republic
       status:
         fetching_accounts: Pobieranie konta z Trade Republic...
-        no_accounts_found_description: Sure nie mogło znaleźć konta Trade Republic.
+        no_accounts_found_description: Relay nie mogło znaleźć konta Trade Republic.
           Sprawdź, czy Twoja sesja jest nadal ważna.
         no_accounts_found_title: Nie znaleziono konta.
       subtitle: Połącz swój rachunek inwestycyjny Trade Republic.
@@ -159,7 +159,7 @@ pl:
     trade_republic_item:
       accounts_need_setup: Rachunek wymaga konfiguracji
       accounts_need_setup_description: Twój rachunek Trade Republic musi zostać połączony
-        z rachunkiem Sure.
+        z rachunkiem Relay.
       data_quality:
         events:
           few: "%{count} aktywności"

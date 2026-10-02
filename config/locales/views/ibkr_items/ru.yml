@@ -18,7 +18,7 @@ ru:
     ibkr_item:
       accounts_need_setup: Требуется настройка счетов
       accounts_need_setup_description: Некоторые счета из IBKR нужно связать с счетами
-        в Sure.
+        в Relay.
       delete: Удалить
       deletion_in_progress: Удаление в процессе
       error: Ошибка
@@ -81,7 +81,7 @@ ru:
       page_title: Настройка счетов Interactive Brokers
       status:
         fetching_accounts: Получение счетов из Interactive Brokers...
-        no_accounts_found_description: Sure не удалось найти счета IBKR в последнем
+        no_accounts_found_description: Relay не удалось найти счета IBKR в последнем
           отчёте Flex.
         no_accounts_found_title: Счета не найдены.
       subtitle: Выберите, какие брокерские счета IBKR связать.

@@ -78,7 +78,7 @@ fr:
       difference: Différence
       download: Télécharger
       institution_name_hint: Indice d'établissement
-      ledger_amount: Solde Sure
+      ledger_amount: Solde Relay
       link_suggestion: Suggestion de lien
       linked_to: Lié à %{account}.
       linking_title: Lien du compte
@@ -89,7 +89,7 @@ fr:
       period_start_on: Début de période
       reconciliation_title: Réconciliation
       reconciliation_unavailable: Ajoutez une période de relevé et un solde d’ouverture
-        ou de clôture, puis assurez-vous que Sure dispose d’un historique de solde
+        ou de clôture, puis assurez-vous que Relay dispose d’un historique de solde
         pour ces dates.
       reject: Rejeter
       save: Enregistrer l'instruction

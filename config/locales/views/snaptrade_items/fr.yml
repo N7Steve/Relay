@@ -32,8 +32,8 @@ fr:
       oauth_setup_step_2_html: 'Pour le flux navigateur uniquement : ajoutez l''URL de rappel de cette application (<code>%{callback_url}</code>) comme URI de redirection enregistrée'
       oauth_setup_step_3: Définissez SNAPTRADE_OAUTH_CLIENT_ID dans votre environnement et redémarrez. Cela suffit à activer le flux par code d'appareil ; ajoutez SNAPTRADE_OAUTH_CLIENT_SECRET pour activer aussi le flux navigateur
       oauth_status_authorized: Autorisé avec SnapTrade.
-      oauth_status_ready: Utilisez un code d'appareil pour autoriser Sure pour SnapTrade.
-      oauth_status_ready_device: Autorisez Sure avec un code d'appareil pour lire les données de votre compte SnapTrade.
+      oauth_status_ready: Utilisez un code d'appareil pour autoriser Relay pour SnapTrade.
+      oauth_status_ready_device: Autorisez Relay avec un code d'appareil pour lire les données de votre compte SnapTrade.
       oauth_title: SnapTrade OAuth
       orphaned_connection: Connexion orpheline (non synchronisée localement)
       setup_accounts_button: Configurer les comptes
@@ -118,7 +118,7 @@ fr:
       missing_client_id: L'OAuth SnapTrade n'est pas configuré. Ajoutez SNAPTRADE_OAUTH_CLIENT_ID à .env.local, redémarrez l'application, puis réessayez.
       open_snaptrade: Ouvrir SnapTrade
       start_button: Lancer l'autorisation
-      subtitle: Autorisez Sure auprès de SnapTrade avec un code d'appareil.
+      subtitle: Autorisez Relay auprès de SnapTrade avec un code d'appareil.
       title: Connecter SnapTrade
     preload_accounts:
       not_configured: SnapTrade n'est pas configuré.
@@ -195,7 +195,7 @@ fr:
       requires_update: Connexion à mettre à jour
       setup_accounts_menu: Configurer les comptes
       setup_action: Configurer les comptes
-      setup_description: Certains comptes de SnapTrade doivent être liés à des comptes Sure.
+      setup_description: Certains comptes de SnapTrade doivent être liés à des comptes Relay.
       setup_needed: Comptes à configurer
       status: Dernière synchronisation il y a %{timestamp} - %{summary}
       status_never: Jamais synchronisé

@@ -70,7 +70,7 @@ pl:
       page_title: Konfiguracja konta Trading 212
       status:
         fetching_accounts: Pobieranie konta z Trading 212...
-        no_accounts_found_description: Sure nie znalazł konta Trading 212. Sprawdź,
+        no_accounts_found_description: Relay nie znalazł konta Trading 212. Sprawdź,
           czy klucz API jest prawidłowy.
         no_accounts_found_title: Nie znaleziono konta.
       subtitle: Połącz swoje konto inwestycyjne Trading 212.
@@ -97,7 +97,7 @@ pl:
     trading212_item:
       accounts_need_setup: Konto wymaga konfiguracji
       accounts_need_setup_description: Twoje konto Trading 212 musi zostać połączone
-        z kontem Sure.
+        z kontem Relay.
       delete: Usuń
       deletion_in_progress: Usuwanie w toku
       environment_label_demo: Konto demo

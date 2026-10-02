@@ -63,7 +63,7 @@ tr:
           yapılandırın. Şifreleme olmadan, token'lar düz metin olarak saklanır.
         title: Veritabanı şifrelemesi yapılandırılmamış
       instructions:
-        copy_token_html: Token'ı kopyalayın ve aşağıya yapıştırın. Sure bunu yalnızca
+        copy_token_html: Token'ı kopyalayın ve aşağıya yapıştırın. Relay bunu yalnızca
           bakiyelerinizi ve işlemlerinizi eşitlemek için kullanır.
         create_token: Salt okunur erişimle yeni bir kişisel API token'ı oluşturun
         open_tokens: Settings → Connect and manage apps → Developer tools → API tokens bölümüne gidin
@@ -85,13 +85,13 @@ tr:
         copied: Kopyalandı!
         generate: Anahtar çifti oluştur
         regenerate: Anahtar çiftini yeniden oluştur
-        regenerate_confirm: Bu işlem yeni bir anahtar çifti oluşturur. Wise, önceki açık anahtarı siz Wise hesabınızdan kaldırana kadar kabul etmeye devam eder — Sure bu anahtarı uzaktan iptal edemez. Hesap özetlerinin yeniden eşitlenebilmesi için yeni açık anahtarı Wise'a kaydetmeniz gerekir. Devam edilsin mi?
+        regenerate_confirm: Bu işlem yeni bir anahtar çifti oluşturur. Wise, önceki açık anahtarı siz Wise hesabınızdan kaldırana kadar kabul etmeye devam eder — Relay bu anahtarı uzaktan iptal edemez. Hesap özetlerinin yeniden eşitlenebilmesi için yeni açık anahtarı Wise'a kaydetmeniz gerekir. Devam edilsin mi?
     select_accounts:
       cancel: İptal
       description: "%{product_name} hesabınıza bağlamak istediğiniz Wise para birimi
         bakiyesini seçin."
       link_account: Bakiyeyi bağla
-      no_accounts_found: Tüm Wise bakiyeleri zaten Sure hesaplarına bağlı.
+      no_accounts_found: Tüm Wise bakiyeleri zaten Relay hesaplarına bağlı.
       no_connection: Wise bağlantısı bulunamadı. Lütfen önce Sağlayıcı Ayarlarında
         Wise'ı bağlayın.
       title: Wise Bakiyesini Seç
@@ -106,17 +106,17 @@ tr:
       already_connected_label: Zaten bağlı
       cancel: İptal
       connect: Seçilen profilleri bağla
-      description: Wise hesabınızın birden fazla profili var. Sure ile eşitlemek istediklerinizi
+      description: Wise hesabınızın birden fazla profili var. Relay ile eşitlemek istediklerinizi
         seçin.
       session_expired: Oturum süresi doldu. Lütfen tekrar bağlanmayı deneyin.
       subtitle: Hangi profillerin bağlanacağını seçin
       title: Wise Profillerini Seç
       unnamed_profile: "(Adsız profil)"
     setup_accounts:
-      all_accounts_linked: Tüm Wise para birimi bakiyeleriniz Sure hesaplarına bağlandı.
+      all_accounts_linked: Tüm Wise para birimi bakiyeleriniz Relay hesaplarına bağlandı.
       create_account: Hesap Oluştur
       description: Takip etmek istediğiniz her Wise para birimi bakiyesi için bir
-        Sure hesabı oluşturun. Her para birimi kendi hesabı olur.
+        Relay hesabı oluşturun. Her para birimi kendi hesabı olur.
       done: Bitti
       no_accounts_to_setup: Tüm hesaplar kuruldu
       subtitle: Wise para birimi bakiyelerinizi bağlayın
@@ -160,11 +160,11 @@ tr:
       deletion_in_progress: silme işlemi devam ediyor...
       error: Eşitleme hatası
       no_accounts_description: Wise bakiyelerinizi keşfetmek için bir eşitleme çalıştırın,
-        ardından bunları Sure hesaplarına bağlayın.
+        ardından bunları Relay hesaplarına bağlayın.
       no_accounts_title: Henüz bağlı hesap yok
       setup_action: Hesapları Kur
       setup_description: "%{total} hesaptan %{linked} tanesi bağlandı. Wise para birimi
-        bakiyeleriniz için Sure hesapları oluşturun."
+        bakiyeleriniz için Relay hesapları oluşturun."
       setup_needed: Kurulmaya hazır yeni hesaplar var
       status: "%{timestamp} önce eşitlendi"
       status_never: Hiç eşitlenmedi

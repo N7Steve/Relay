@@ -121,7 +121,7 @@ ru:
       fetch_failed: Не удалось получить счета
       no_accounts_to_setup: Нет счетов для настройки
       no_credentials: Сначала настройте учётные данные Akahu.
-      subtitle: Выберите, как каждый счёт Akahu будет отображаться в Sure.
+      subtitle: Выберите, как каждый счёт Akahu будет отображаться в Relay.
       title: Настройка счетов Akahu
     update:
       success: Подключение Akahu обновлено.

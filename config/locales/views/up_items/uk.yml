@@ -85,7 +85,7 @@ uk:
       no_account_selected: Виберіть рахунок Up для пов'язування.
     setup_accounts:
       title: Пов'язати рахунки Up
-      subtitle: Виберіть, як кожен рахунок Up має відображатися в Sure.
+      subtitle: Виберіть, як кожен рахунок Up має відображатися в Relay.
       no_credentials: Спочатку налаштуйте облікові дані Up.
       api_error: Не вдалося завантажити рахунки Up.
       fetch_failed: Не вдалося завантажити рахунки

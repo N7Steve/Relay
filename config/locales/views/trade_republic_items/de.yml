@@ -22,7 +22,7 @@ de:
       setup_accounts: "Konten einrichten"
       delete: "Löschen"
       accounts_need_setup: "Konto muss eingerichtet werden"
-      accounts_need_setup_description: "Dein Trade-Republic-Konto muss mit einem Sure-Konto verknüpft werden."
+      accounts_need_setup_description: "Dein Trade-Republic-Konto muss mit einem Relay-Konto verknüpft werden."
       no_accounts_discovered: "Noch kein Trade-Republic-Konto entdeckt."
       no_accounts_discovered_description: "Schließe die Anmeldung ab und starte einen Sync, um dein Konto zu entdecken."
       data_quality:
@@ -67,7 +67,7 @@ de:
       status:
         fetching_accounts: "Konto wird von Trade Republic abgerufen …"
         no_accounts_found_title: "Kein Konto gefunden."
-        no_accounts_found_description: "Sure hat kein Trade-Republic-Konto gefunden. Prüf, ob deine Trade-Republic-Sitzung noch gültig ist."
+        no_accounts_found_description: "Relay hat kein Trade-Republic-Konto gefunden. Prüf, ob deine Trade-Republic-Sitzung noch gültig ist."
       available_accounts:
         title: "Verfügbares Konto"
         account_summary: "%{account_type} • Saldo: %{balance}"

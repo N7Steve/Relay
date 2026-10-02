@@ -52,7 +52,7 @@ pt-PT:
       new:
         title: "Criar Chave de API"
         create_new_api_key: "Criar Nova Chave de API"
-        subtitle: "Gere uma nova chave de API para aceder aos seus dados do Sure programaticamente."
+        subtitle: "Gere uma nova chave de API para aceder aos seus dados do Relay programaticamente."
         description: "Configure a sua nova chave de API com uma designação descritiva e permissões adequadas."
         name_label: "Designação da Chave de API"
         name_placeholder: "ex.: A Minha Aplicação de Orçamento, Gestor de Carteira"

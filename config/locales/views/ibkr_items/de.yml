@@ -19,7 +19,7 @@ de:
       setup_accounts: Konten einrichten
       delete: Löschen
       accounts_need_setup: Konten müssen eingerichtet werden
-      accounts_need_setup_description: Einige Konten von IBKR müssen mit Sure-Konten verknüpft werden.
+      accounts_need_setup_description: Einige Konten von IBKR müssen mit Relay-Konten verknüpft werden.
       no_accounts_discovered: Noch keine IBKR-Konten gefunden.
       no_accounts_discovered_description: Starte nach dem Einrichten deiner Flex-Abfrage einen Sync, damit Konten gefunden werden.
     setup_accounts:
@@ -36,7 +36,7 @@ de:
       status:
         fetching_accounts: Konten werden von Interactive Brokers abgerufen...
         no_accounts_found_title: Keine Konten gefunden.
-        no_accounts_found_description: Sure konnte im neuesten Flex-Bericht keine IBKR-Konten finden.
+        no_accounts_found_description: Relay konnte im neuesten Flex-Bericht keine IBKR-Konten finden.
       available_accounts:
         title: Verfügbare Konten
         account_type_investment: Investment

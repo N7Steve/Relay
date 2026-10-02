@@ -69,7 +69,7 @@ pl:
         tylko ostatniego roku.
       import_all_history_label: Importuj pełną historię transakcji
       instructions:
-        copy_token_html: Skopiuj token i wklej go poniżej. Sure używa go tylko do
+        copy_token_html: Skopiuj token i wklej go poniżej. Relay używa go tylko do
           synchronizacji sald i transakcji.
         create_token: Utwórz nowy osobisty token API z dostępem tylko do odczytu
         open_tokens: Przejdź do Settings → Connect and manage apps → Developer tools
@@ -89,7 +89,7 @@ pl:
         regenerate: Wygeneruj ponownie parę kluczy
         regenerate_confirm: Spowoduje to wygenerowanie nowej pary kluczy. Wise będzie
           nadal akceptować poprzedni klucz publiczny, dopóki sam go nie usuniesz w
-          swoim koncie Wise — Sure nie ma możliwości zdalnego cofnięcia go. Przed
+          swoim koncie Wise — Relay nie ma możliwości zdalnego cofnięcia go. Przed
           ponownym rozpoczęciem synchronizacji wyciągów będziesz musiał zarejestrować
           nowy klucz publiczny w Wise. Kontynuować?
         registered_help_html: 'Zarejestruj ten klucz w Wise: Settings → Connect and
@@ -107,7 +107,7 @@ pl:
       cancel: Anuluj
       description: Wybierz saldo walutowe Wise, które chcesz połączyć z kontem %{product_name}.
       link_account: Połącz saldo
-      no_accounts_found: Wszystkie salda Wise są już połączone z kontami Sure.
+      no_accounts_found: Wszystkie salda Wise są już połączone z kontami Relay.
       no_connection: Nie znaleziono połączenia Wise. Najpierw połącz Wise w ustawieniach
         dostawcy.
       title: Wybierz saldo Wise
@@ -123,16 +123,16 @@ pl:
       cancel: Anuluj
       connect: Połącz wybrane profile
       description: Twoje konto Wise ma wiele profili. Wybierz te, które chcesz synchronizować
-        z Sure.
+        z Relay.
       session_expired: Sesja wygasła. Spróbuj połączyć ponownie.
       subtitle: Wybierz, które profile połączyć
       title: Wybierz profile Wise
       unnamed_profile: "(Profil bez nazwy)"
     setup_accounts:
       all_accounts_linked: Wszystkie salda walutowe Wise zostały połączone z kontami
-        Sure.
+        Relay.
       create_account: Utwórz konto
-      description: Utwórz konto Sure dla każdego salda walutowego Wise, które chcesz
+      description: Utwórz konto Relay dla każdego salda walutowego Wise, które chcesz
         śledzić. Każda waluta staje się osobnym kontem.
       done: Gotowe
       no_accounts_to_setup: Wszystkie konta są skonfigurowane
@@ -189,10 +189,10 @@ pl:
       deletion_in_progress: trwa usuwanie...
       error: Błąd synchronizacji
       no_accounts_description: Uruchom synchronizację, aby odkryć salda Wise, a następnie
-        połącz je z kontami Sure.
+        połącz je z kontami Relay.
       no_accounts_title: Brak połączonych kont
       setup_action: Konfiguruj konta
-      setup_description: "%{linked} z %{total} kont połączonych. Utwórz konta Sure
+      setup_description: "%{linked} z %{total} kont połączonych. Utwórz konta Relay
         dla swoich sald walutowych Wise."
       setup_needed: Nowe konta gotowe do konfiguracji
       status: Zsynchronizowano %{timestamp} temu

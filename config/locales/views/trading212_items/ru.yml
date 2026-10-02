@@ -20,7 +20,7 @@ ru:
       setup_accounts: Настроить счета
       delete: Удалить
       accounts_need_setup: Требуется настройка счёта
-      accounts_need_setup_description: Ваш счёт Trading 212 нужно связать со счётом Sure.
+      accounts_need_setup_description: Ваш счёт Trading 212 нужно связать со счётом Relay.
       no_accounts_discovered: Счёт Trading 212 ещё не найден.
       no_accounts_discovered_description: Сохраните API-ключ и запустите синхронизацию, чтобы найти счёт.
     setup_accounts:
@@ -36,7 +36,7 @@ ru:
       status:
         fetching_accounts: Получение счёта из Trading 212...
         no_accounts_found_title: Счёт не найден.
-        no_accounts_found_description: Sure не удалось найти счёт Trading 212. Проверьте, что ваш API-ключ действителен.
+        no_accounts_found_description: Relay не удалось найти счёт Trading 212. Проверьте, что ваш API-ключ действителен.
       available_accounts:
         title: Доступный счёт
         account_type_investment: Инвестиционный

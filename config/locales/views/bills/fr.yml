@@ -117,7 +117,7 @@ fr:
         one: À payer demain, %{date}
         other: À payer dans %{count} jours, %{date}
     feed:
-      calendar_name: Factures Sure
+      calendar_name: Factures Relay
     find_payment: Trouver le paiement
     index:
       accept: Appliquer
@@ -136,11 +136,11 @@ fr:
       dormant: Inactive
       empty:
         action: Trouver les transactions récurrentes
-        description: Les factures sont vos dépenses récurrentes. Sure les détecte
+        description: Les factures sont vos dépenses récurrentes. Relay les détecte
           automatiquement dans votre historique de transactions, et vous pouvez ajouter
           un lien de paiement à chacune pour régler directement depuis ici.
         no_history_description: Aucune transaction pour l'instant. Connectez un compte
-          ou importez un historique et Sure trouvera vos factures automatiquement,
+          ou importez un historique et Relay trouvera vos factures automatiquement,
           ou ajoutez-en une manuellement.
         title: Aucune facture pour l'instant
       hero_next_seven: "%{amount} à payer dans les 7 prochains jours"

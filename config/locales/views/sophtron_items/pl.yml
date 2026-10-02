@@ -309,7 +309,7 @@ pl:
           class="link">Sophtron</a>, aby uzyskać dane uwierzytelniające API
         step_2: Skopiuj identyfikator użytkownika i klucz dostępu z ustawień konta
           Sophtron
-        step_3: Wklej dane uwierzytelniające poniżej i kliknij Zapisz; Sure automatycznie
+        step_3: Wklej dane uwierzytelniające poniżej i kliknij Zapisz; Relay automatycznie
           utworzy lub ponownie użyje Twojego identyfikatora klienta Sophtron
       setup_instructions_title: 'Instrukcje konfiguracji:'
       update: Aktualizuj konfigurację

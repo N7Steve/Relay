@@ -80,7 +80,7 @@ pt-PT:
         sign_in_html: "Visite %{link} e inicie sessão na sua conta"
         open_tokens: "Vá a Settings → Connect and manage apps → Developer tools → API tokens"
         create_token: "Crie um novo token de API pessoal com acesso só de leitura"
-        copy_token_html: "Copie o token e cole-o abaixo. A Sure utiliza-o apenas para sincronizar os seus saldos e transações."
+        copy_token_html: "Copie o token e cole-o abaixo. A Relay utiliza-o apenas para sincronizar os seus saldos e transações."
     provider_connection:
       default_name: Wise
       default_description: Ligue a sua conta multimoeda da Wise
@@ -97,7 +97,7 @@ pt-PT:
       session_expired: Sessão expirada. Tente ligar novamente.
       title: Selecionar Perfis da Wise
       subtitle: Escolha os perfis a ligar
-      description: A sua conta da Wise tem vários perfis. Selecione os que pretende sincronizar com a Sure.
+      description: A sua conta da Wise tem vários perfis. Selecione os que pretende sincronizar com a Relay.
       unnamed_profile: "(Perfil sem designação)"
       already_connected_label: Já ligado
       connect: Ligar perfis selecionados
@@ -111,22 +111,22 @@ pt-PT:
       status_with_summary: "Última sincronização há %{timestamp} — %{summary}"
       delete: Desligar
       setup_needed: Novas contas prontas para configurar
-      setup_description: "%{linked} de %{total} contas ligadas. Crie contas Sure para os seus saldos em moeda da Wise."
+      setup_description: "%{linked} de %{total} contas ligadas. Crie contas Relay para os seus saldos em moeda da Wise."
       setup_action: Configurar Contas
       no_accounts_title: Ainda não existem contas ligadas
-      no_accounts_description: Execute uma sincronização para descobrir os seus saldos da Wise e, depois, associe-os a contas Sure.
+      no_accounts_description: Execute uma sincronização para descobrir os seus saldos da Wise e, depois, associe-os a contas Relay.
     setup_accounts:
       title: Configurar Contas da Wise
       subtitle: Associe os seus saldos em moeda da Wise
-      description: Crie uma conta Sure para cada saldo em moeda da Wise que pretenda acompanhar. Cada moeda torna-se na sua própria conta.
+      description: Crie uma conta Relay para cada saldo em moeda da Wise que pretenda acompanhar. Cada moeda torna-se na sua própria conta.
       no_accounts_to_setup: Todas as contas estão configuradas
-      all_accounts_linked: Todos os seus saldos em moeda da Wise foram associados a contas Sure.
+      all_accounts_linked: Todos os seus saldos em moeda da Wise foram associados a contas Relay.
       create_account: Criar Conta
       done: Concluído
     select_accounts:
       title: Selecionar Saldo da Wise
       description: Selecione o saldo em moeda da Wise que pretende associar à sua conta %{product_name}.
-      no_accounts_found: Todos os saldos da Wise já estão associados a contas Sure.
+      no_accounts_found: Todos os saldos da Wise já estão associados a contas Relay.
       no_connection: Não foi encontrada nenhuma ligação à Wise. Associe a Wise nas Definições do Serviço primeiro.
       link_account: Associar saldo
       cancel: Cancelar

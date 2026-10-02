@@ -309,7 +309,7 @@ fr:
         step_2: Copiez votre identifiant utilisateur et votre clé d'accès à partir
           des paramètres de votre compte Sophtron
         step_3: Collez les informations d'identification ci-dessous et cliquez sur
-          Enregistrer ; Sure, votre identifiant client Sophtron sera automatiquement
+          Enregistrer ; Relay, votre identifiant client Sophtron sera automatiquement
           créé ou réutilisé.
       setup_instructions_title: 'Instructions de configuration :'
       update: Mettre à jour la configuration

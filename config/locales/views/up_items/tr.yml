@@ -99,7 +99,7 @@ tr:
       fetch_failed: Hesaplar getirilemedi
       no_accounts_to_setup: Kurulacak hesap yok
       no_credentials: Önce Up kimlik bilgilerini yapılandırın.
-      subtitle: Her Up hesabının Sure'da nasıl görüneceğini seçin.
+      subtitle: Her Up hesabının Relay'da nasıl görüneceğini seçin.
       title: Up Hesaplarını Bağla
     up_item:
       delete: Sil

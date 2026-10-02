@@ -259,7 +259,7 @@ zh-TW:
       setup_instructions:
         step_1_html: 前往 <a href="%{url}" target="_blank" rel="noopener noreferrer" class="link">Sophtron</a> 取得您的 API 憑證
         step_2: 從您的 Sophtron 帳戶設定中複製 User ID 與 Access Key
-        step_3: 將憑證貼到下方並按下儲存；Sure 會自動建立或沿用您的 Sophtron Customer ID
+        step_3: 將憑證貼到下方並按下儲存；Relay 會自動建立或沿用您的 Sophtron Customer ID
       field_descriptions_title: 欄位說明：
       field_descriptions:
         user_id_html: <strong>User ID：</strong>您的 Sophtron User ID 憑證

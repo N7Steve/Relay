@@ -44,7 +44,7 @@ tr:
             bağlanabilirsiniz.
           title: Harici asistan bağlantısı kesilsin mi?
         description: Sohbet asistanının nasıl yanıt vereceğini seçin. Yerleşik, yapılandırdığınız
-          LLM sağlayıcısını doğrudan kullanır. Harici, MCP aracılığıyla Sure'un finansal
+          LLM sağlayıcısını doğrudan kullanır. Harici, MCP aracılığıyla Relay'un finansal
           araçlarını çağırabilen uzak bir yapay zeka ajanına devreder.
         disconnect_button: Bağlantıyı kes
         disconnect_description: Harici asistan bağlantısını kaldırın ve yerleşik asistana
@@ -191,7 +191,7 @@ tr:
         model_function_calling_help: Yapay zeka asistanı verilerinizi fonksiyon çağrılarıyla okur; bu nedenle sağlayıcınızın araç/fonksiyon çağırmayı desteklediğini belirttiği bir model seçin. Bu desteği olmayan modellerde sohbet, anlaşılması güç bir sağlayıcı hatasıyla başarısız olur.
         model_function_calling_link: Yapılandırılan modeli kontrol et
         timeout_heading: Zaman aşımları
-        timeout_description: OpenAI uyumlu model çağrılarının Sure vazgeçmeden önce ne kadar süre çalışabileceğini belirler. Yavaş bir donanımda yerel model çalıştırıyorsanız bu değerleri artırın.
+        timeout_description: OpenAI uyumlu model çağrılarının Relay vazgeçmeden önce ne kadar süre çalışabileceğini belirler. Yavaş bir donanımda yerel model çalıştırıyorsanız bu değerleri artırın.
         openai_request_timeout_label: Saniye Cinsinden İstek Zaman Aşımı (İsteğe Bağlı)
         openai_request_timeout_help: 'Varsayılan: 60. Otomatik kategorizasyon, satıcı tespiti, sohbet, PDF işleme ve vektör deposu çağrıları dahil her OpenAI uyumlu HTTP isteğine uygulanır. OPENAI_REQUEST_TIMEOUT bu alanı geçersiz kılar.'
         ai_response_timeout_label: Saniye Cinsinden Yanıt Zaman Aşımı (İsteğe Bağlı)
@@ -351,7 +351,7 @@ tr:
         status_healthy: Yahoo Finance etkin ve çalışıyor.
         status_rate_limited: Yahoo Finance istekleri geçici olarak sınırlıyor.
         rate_limited_title: Yahoo Finance istek sınırına ulaşıldı.
-        rate_limited_message: Herhangi bir işlem yapmanız gerekmez. Sure 30 dakika boyunca ek durum kontrollerinden kaçınacak. Fiyat ve döviz kuru işlemleri bundan bağımsız olarak devam eder.
+        rate_limited_message: Herhangi bir işlem yapmanız gerekmez. Relay 30 dakika boyunca ek durum kontrollerinden kaçınacak. Fiyat ve döviz kuru işlemleri bundan bağımsız olarak devam eder.
         status_unavailable: Yahoo Finance şu anda kullanılamıyor.
         unavailable_title: Yahoo Finance doğrulanamadı.
         unavailable_message: Yahoo Finance'e ulaşılamadı veya beklenmeyen bir yanıt döndü. İnternet bağlantınızı kontrol edip daha sonra tekrar deneyin.

@@ -106,7 +106,7 @@ uk:
         account_label: "Рахунок"
         name_label: "Назва"
         note_label: "Примітка"
-        no_security_provider_warning: "Постачальника цін на цінні папери не налаштовано. Ваш імпорт угод працюватиме, але Sure не заповнюватиме історію цін. Будь ласка, перейдіть до налаштувань, щоб налаштувати це."
+        no_security_provider_warning: "Постачальника цін на цінні папери не налаштовано. Ваш імпорт угод працюватиме, але Relay не заповнюватиме історію цін. Будь ласка, перейдіть до налаштувань, щоб налаштувати це."
         date_format_label: "Формат дати"
         apply_configuration: "Застосувати конфігурацію"
       category_import:
@@ -344,7 +344,7 @@ uk:
       merchant_import: "Імпорт продавців"
       pdf_import: "Імпорт PDF"
       document_import: "Імпорт документів"
-      sure_import: "Імпорт Sure"
+      sure_import: "Імпорт Relay"
     steps:
       upload: "Завантажити"
       configure: "Налаштувати"
@@ -380,7 +380,7 @@ uk:
           merchant_import: "Продавець"
           pdf_import: "PDF"
           document_import: "Документ"
-          sure_import: "Sure"
+          sure_import: "Relay"
         status:
           in_progress: "В процесі"
           uploading: "Обробка рядків"
@@ -410,7 +410,7 @@ uk:
       import_rules: "Імпорт правил"
       import_transactions: "Імпорт транзакцій"
       import_qif: "Імпорт з Quicken (QIF)"
-      import_sure: "Імпорт з Sure"
+      import_sure: "Імпорт з Relay"
       import_sure_description: "Файл .ndjson повного експорту"
       import_file: "Імпорт документа"
       import_file_description: "Аналіз на основі ШІ для PDF та завантаження файлів з можливістю пошуку"

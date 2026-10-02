@@ -20,7 +20,7 @@ tr:
       setup_accounts: Hesapları kur
       delete: Sil
       accounts_need_setup: Hesabın kurulması gerekiyor
-      accounts_need_setup_description: Trading 212 hesabınızın bir Sure hesabına bağlanması gerekiyor.
+      accounts_need_setup_description: Trading 212 hesabınızın bir Relay hesabına bağlanması gerekiyor.
       no_accounts_discovered: Henüz Trading 212 hesabı bulunamadı.
       no_accounts_discovered_description: Hesabınızı bulmak için API anahtarınızı kaydettikten sonra bir senkronizasyon çalıştırın.
     setup_accounts:
@@ -36,7 +36,7 @@ tr:
       status:
         fetching_accounts: Hesap Trading 212'den getiriliyor...
         no_accounts_found_title: Hesap bulunamadı.
-        no_accounts_found_description: Sure bir Trading 212 hesabı bulamadı. API anahtarınızın geçerli olduğunu kontrol edin.
+        no_accounts_found_description: Relay bir Trading 212 hesabı bulamadı. API anahtarınızın geçerli olduğunu kontrol edin.
       available_accounts:
         title: Kullanılabilir hesap
         account_type_investment: Yatırım

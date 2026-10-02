@@ -137,7 +137,7 @@ pl:
       no_accounts_to_setup: Brak kont do skonfigurowania
       no_credentials: Najpierw skonfiguruj dane uwierzytelniające Monobank.
       subtitle: Wybierz, jak każda karta lub skarbonka Monobank ma być wyświetlana
-        w Sure.
+        w Relay.
       title: Połącz konta Monobank
     update:
       success: Połączenie Monobank zaktualizowane.

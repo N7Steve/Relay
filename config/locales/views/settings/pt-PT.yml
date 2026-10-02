@@ -237,7 +237,7 @@ pt-PT:
           body: Tem a certeza de que pretende repor a sua conta? Isto eliminará todas as suas contas, categorias, comerciantes, etiquetas e outros dados. Esta ação é irreversível.
           title: Repor conta?
         confirm_reset_with_sample_data:
-          body: Tem a certeza de que pretende repor a sua conta e carregar dados de exemplo? Isto eliminará os seus dados existentes e substituí-los-á por dados de demonstração para poder explorar o Sure em segurança.
+          body: Tem a certeza de que pretende repor a sua conta e carregar dados de exemplo? Isto eliminará os seus dados existentes e substituí-los-á por dados de demonstração para poder explorar o Relay em segurança.
           title: Repor conta e carregar dados de exemplo?
         confirm_remove_invitation:
           body: Tem a certeza de que pretende remover o convite para %{email}?
@@ -306,16 +306,16 @@ pt-PT:
       show:
         page_title: Servidor MCP
         connect_title: Ligar um assistente de IA
-        connect_subtitle: Cole este URL no Claude.ai (ou em qualquer cliente compatível com MCP) para o ligar à sua conta Sure.
+        connect_subtitle: Cole este URL no Claude.ai (ou em qualquer cliente compatível com MCP) para o ligar à sua conta Relay.
         copy_url: Copiar
         copied: Copiado!
         how_to_connect_title: Como ligar o Claude
         step_1: "Abra o Claude.ai e vá a Definições → Personalizar → Conectores."
         step_2: Clique em "Adicionar conector" e cole o URL do servidor MCP acima.
-        step_3: Clique em Ligar — será redirecionado para o Sure para iniciar sessão e autorizar o acesso.
+        step_3: Clique em Ligar — será redirecionado para o Relay para iniciar sessão e autorizar o acesso.
         step_4: Uma vez autorizado, o Claude pode ler os seus dados de contas, transações e saldo.
         connected_title: Clientes ligados
-        connected_subtitle: Estas aplicações têm atualmente acesso aos seus dados Sure. Revogue qualquer uma que já não utilize.
+        connected_subtitle: Estas aplicações têm atualmente acesso aos seus dados Relay. Revogue qualquer uma que já não utilize.
         unknown_client: Cliente desconhecido
         connected_ago: "Ligado há %{time}"
         revoke: Revogar
@@ -373,7 +373,7 @@ pt-PT:
       not_authorized: Não autorizado
       bank_sync:
         page_title: Sincronização bancária
-        lede: Associe as suas contas externas para sincronizar automaticamente transações, saldos e posições com o Sure.
+        lede: Associe as suas contas externas para sincronizar automaticamente transações, saldos e posições com o Relay.
       status:
         ok: Ligado
         warn: Requer ação
@@ -382,8 +382,8 @@ pt-PT:
       maturity:
         beta: Beta
         alpha: Alpha
-      drawer_trust_statement: "Acesso apenas de leitura. O Sure nunca pode mover dinheiro e as suas credenciais são armazenadas encriptadas."
-      drawer_trust_statement_encryption_unconfigured: "Acesso apenas de leitura. O Sure nunca pode mover dinheiro. Configure chaves de encriptação explícitas antes de armazenar credenciais de serviços em produção."
+      drawer_trust_statement: "Acesso apenas de leitura. O Relay nunca pode mover dinheiro e as suas credenciais são armazenadas encriptadas."
+      drawer_trust_statement_encryption_unconfigured: "Acesso apenas de leitura. O Relay nunca pode mover dinheiro. Configure chaves de encriptação explícitas antes de armazenar credenciais de serviços em produção."
       provider_setup_encryption_warning:
         title: Faltam as chaves de encriptação
         message: "Esta instalação autoalojada não configurou chaves de encriptação explícitas do Active Record. Configure primary_key, deterministic_key e key_derivation_salt antes de guardar credenciais de serviços em produção."
@@ -471,7 +471,7 @@ pt-PT:
         step2: "Crie uma nova chave de API apenas com a permissão Ativar Leitura"
         step3: "Cole abaixo a sua Chave de API e Segredo"
         no_withdraw_title: "Apenas chave de leitura"
-        no_withdraw_body: "Não ative as permissões de levantamento ao criar a sua chave de API Binance. O Sure precisa apenas de acesso de leitura."
+        no_withdraw_body: "Não ative as permissões de levantamento ao criar a sua chave de API Binance. O Relay precisa apenas de acesso de leitura."
         ip_hint_title: "Lista de permissões de IP necessária"
         ip_hint_body: "Adicione o IP de saída do servidor da aplicação à lista de permissões da Chave de API Binance:"
         ip_hint_contact_admin: "Contacte o seu administrador para obter o endereço IP de saída do servidor da aplicação."
@@ -492,7 +492,7 @@ pt-PT:
         step2: "Crie uma chave de API apenas com Query Funds e Query Closed Orders & Trades."
         step3: "Cole abaixo a chave de API e a chave privada."
         read_only_title: "Apenas sincronização de exchange de leitura"
-        read_only_body: "Não conceda permissões de negociação, cancelamento, levantamento, exportação, ledger, Earn, staking ou transferência. O Sure importa apenas saldos, posições e execuções de negociação à vista."
+        read_only_body: "Não conceda permissões de negociação, cancelamento, levantamento, exportação, ledger, Earn, staking ou transferência. O Relay importa apenas saldos, posições e execuções de negociação à vista."
         default_connection_name: Kraken
         add_connection: Adicionar ligação Kraken
         update_connection: Atualizar ligação
@@ -519,7 +519,7 @@ pt-PT:
         etherscan_hint: As leituras do Ethereum funcionam sem chave. Adicionar uma chave Etherscan apenas aumenta o limite de frequência para o Ethereum.
         keep_etherscan_api_key: Deixe em branco para manter a chave existente
         manage_wallets: Gerir carteiras
-        keyless_body: O Sure apenas lê dados públicos da cadeia. Não estão envolvidas chaves, frases-semente ou assinaturas, e nada pode ser gasto.
+        keyless_body: O Relay apenas lê dados públicos da cadeia. Não estão envolvidas chaves, frases-semente ou assinaturas, e nada pode ser gasto.
         keyless_title: Apenas leitura, sem necessidade de chaves
         save: Guardar
         sync_start_date_hint: As transferências anteriores a esta data são ignoradas. Deixe em branco para importar tudo o que o explorador reportar.
@@ -592,7 +592,7 @@ pt-PT:
         steps:
           step_1: 'No seu Client Portal IBKR, navegue até "Performance & Reports" > "Flex Queries".'
           step_2: 'Clique no ícone "+" na secção "Activity Flex Query" para criar uma nova consulta.'
-          step_3: 'Dê um nome à consulta (por exemplo, "Sure Sync"), reveja depois os detalhes da Flex Query abaixo e ative as secções, campos e opções de configuração listados.'
+          step_3: 'Dê um nome à consulta (por exemplo, "Relay Sync"), reveja depois os detalhes da Flex Query abaixo e ative as secções, campos e opções de configuração listados.'
           step_4: 'Guarde a consulta, anote o seu "Query ID" e utilize depois o ícone de engrenagem na secção "Flex Web Service Configuration" para gerar um Token de acesso.'
           step_5: "Cole abaixo o seu Query ID e Token, guarde a configuração e aceda depois a Contas para ligar as contas IBKR descobertas."
         flex_query_details:
@@ -628,7 +628,7 @@ pt-PT:
           date_time_separator: "Separador Data/Hora: ; (ponto e vírgula)"
           profit_and_loss: "Ganhos e Perdas: Predefinição"
           all_other_options: 'Todas as outras opções de configuração: "No"'
-        report_window_note: "Os relatórios Flex IBKR estão limitados à janela de consulta que configurou no IBKR. O Sure importará as posições atuais completas mais até aos últimos 365 dias de atividade deste relatório."
+        report_window_note: "Os relatórios Flex IBKR estão limitados à janela de consulta que configurou no IBKR. O Relay importará as posições atuais completas mais até aos últimos 365 dias de atividade deste relatório."
         sync: Sincronizar
         disconnect_confirm: Desligar Interactive Brokers?
         query_id_label: Query ID

@@ -68,7 +68,7 @@ fr:
         security_warning: Votre clé API sera affichée uniquement une fois après sa création. Gardez-la en sécurité et ne la partagez jamais publiquement. Si vous l'avez perdue, vous devrez en créer une nouvelle.
         security_warning_body: Votre clé API ne sera affichée qu'une seule fois après sa création. Assurez-vous de la copier et de la stocker en toute sécurité. Toute personne ayant accès à cette clé peut accéder à vos données selon les autorisations que vous sélectionnez.
         security_warning_title: Avertissement important de sécurité
-        subtitle: Générez une nouvelle clé API pour accéder à vos données Sure par programmation.
+        subtitle: Générez une nouvelle clé API pour accéder à vos données Relay par programmation.
         title: Créer une clé API
       shared:
         active: Actif
@@ -113,7 +113,7 @@ fr:
           your_api_key: Votre clé API
         no_api_key:
           create_api_key: Créer une clé API
-          description: Accédez de manière programmée à vos données Sure avec une clé API sécurisée.
+          description: Accédez de manière programmée à vos données Relay avec une clé API sécurisée.
           feature_1: Accéder à vos données de compte de manière automatisée
           feature_2: Construire des intégrations et applications personnalisées
           feature_3: Automatiser la récupération et l'analyse des données

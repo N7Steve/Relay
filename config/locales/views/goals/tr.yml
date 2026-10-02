@@ -161,7 +161,7 @@ tr:
       new_goal: Yeni hedef
       ongoing_section:
         heading: Hedefler
-      pending_pledges_callout: Bekleyen taahhütleriniz var. Sure bir sonraki eşitlemede
+      pending_pledges_callout: Bekleyen taahhütleriniz var. Relay bir sonraki eşitlemede
         bunları onaylayacak.
       search:
         aria_label: Hedeflerde ara
@@ -226,7 +226,7 @@ tr:
       delete: Sil
       edit: Düzenle
       empty:
-        body: Bağlı hesabınıza bir transfer yapın. Sure bir sonraki eşitlemede bunu
+        body: Bağlı hesabınıza bir transfer yapın. Relay bir sonraki eşitlemede bunu
           yakalayacak. Ya da manuel hesap bakiyenizi güncelleyin.
         heading: Henüz yatırma yok
       funding_accounts:
@@ -258,7 +258,7 @@ tr:
         title: Bu hedef duraklatılmış
       pending_pledge:
         body_manual: Bir sonraki manuel bakiye düzenlemenizde onaylanır.
-        body_transfer: Sure bir sonraki eşitlemede eşleşen bir yatırma tespit ettiğinde
+        body_transfer: Relay bir sonraki eşitlemede eşleşen bir yatırma tespit ettiğinde
           otomatik olarak onaylanır.
         cancel: İptal
         confirm_cancel_body: "%{amount} taahhüdü kaldırılacaktır. İstediğiniz zaman

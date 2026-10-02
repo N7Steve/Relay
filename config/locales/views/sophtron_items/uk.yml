@@ -269,7 +269,7 @@ uk:
       setup_instructions:
         step_1_html: 'Відвідайте <a href="%{url}" target="_blank" rel="noopener noreferrer" class="link">Sophtron</a>, щоб отримати свої облікові дані API'
         step_2: "Скопіюйте свій ID користувача та ключ доступу з налаштувань вашого облікового запису Sophtron"
-        step_3: "Вставте облікові дані нижче та натисніть Зберегти; Sure автоматично створить або повторно використає ваш ID клієнта Sophtron"
+        step_3: "Вставте облікові дані нижче та натисніть Зберегти; Relay автоматично створить або повторно використає ваш ID клієнта Sophtron"
       field_descriptions_title: "Описи полів:"
       field_descriptions:
         user_id_html: "<strong>ID користувача:</strong> Ваш ID користувача Sophtron (облікові дані)"

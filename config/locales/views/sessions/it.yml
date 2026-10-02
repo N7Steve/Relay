@@ -24,7 +24,7 @@ it:
       forgot_password: Hai dimenticato la password?
       password: Password
       submit: Accedi
-      title: Sure
+      title: Relay
       password_placeholder: Inserisci la tua password
       openid_connect: Accedi con OpenID Connect
       oidc: Accedi con OpenID Connect

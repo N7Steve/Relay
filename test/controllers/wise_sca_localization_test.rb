@@ -15,7 +15,7 @@ class WiseScaLocalizationTest < ActiveSupport::TestCase
     "copied" => "Kopiert!",
     "generate" => "Schlüsselpaar erzeugen",
     "regenerate" => "Neues Schlüsselpaar erzeugen",
-    "regenerate_confirm" => "Dadurch wird ein neues Schlüsselpaar erzeugt. Wise akzeptiert den bisherigen öffentlichen Schlüssel weiterhin, bis du ihn selbst in deinem Wise-Konto entfernst – Sure kann ihn nicht aus der Ferne widerrufen. Du musst den neuen öffentlichen Schlüssel bei Wise registrieren, bevor Kontoauszüge wieder synchronisiert werden können. Fortfahren?"
+    "regenerate_confirm" => "Dadurch wird ein neues Schlüsselpaar erzeugt. Wise akzeptiert den bisherigen öffentlichen Schlüssel weiterhin, bis du ihn selbst in deinem Wise-Konto entfernst – Relay kann ihn nicht aus der Ferne widerrufen. Du musst den neuen öffentlichen Schlüssel bei Wise registrieren, bevor Kontoauszüge wieder synchronisiert werden können. Fortfahren?"
   }.freeze
 
   test "German Wise SCA copy matches the expected translations" do

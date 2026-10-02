@@ -106,7 +106,7 @@ ru:
       fetch_failed: Не удалось получить счета
       no_accounts_to_setup: Нет счетов для настройки
       no_credentials: Сначала настройте учётные данные Up.
-      subtitle: Выберите, как каждый счёт Up будет отображаться в Sure.
+      subtitle: Выберите, как каждый счёт Up будет отображаться в Relay.
       title: Связать счета Up
     up_item:
       delete: Удалить

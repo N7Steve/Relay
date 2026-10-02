@@ -39,8 +39,8 @@ ca:
       oauth_setup_step_2_html: 'Només per al flux del navegador: afegeix l''URL de retorn d''aquesta aplicació (<code>%{callback_url}</code>) com a URI de redirecció registrat'
       oauth_setup_step_3: Defineix SNAPTRADE_OAUTH_CLIENT_ID al teu entorn i reinicia. Només amb això s'activa el flux amb codi de dispositiu; afegeix també SNAPTRADE_OAUTH_CLIENT_SECRET per al flux del navegador
       oauth_title: OAuth de SnapTrade
-      oauth_status_ready: Autoritza Sure a llegir les dades del teu compte de SnapTrade.
-      oauth_status_ready_device: Autoritza Sure amb un codi de dispositiu per llegir les dades del teu compte de SnapTrade.
+      oauth_status_ready: Autoritza Relay a llegir les dades del teu compte de SnapTrade.
+      oauth_status_ready_device: Autoritza Relay amb un codi de dispositiu per llegir les dades del teu compte de SnapTrade.
       oauth_status_authorized: Autoritzat amb SnapTrade.
       oauth_connect_button: Connecta amb SnapTrade
       oauth_device_button: Utilitza un codi de dispositiu
@@ -184,7 +184,7 @@ ca:
       setup_accounts_menu: Configura comptes
       setup_action: Configura comptes
       setup_description: Alguns comptes de SnapTrade necessiten ser enllaçats a comptes
-        de Sure.
+        de Relay.
       setup_needed: Els comptes necessiten configuració
       status: Darrera sincronització fa %{timestamp} - %{summary}
       status_never: Mai sincronitzat
@@ -198,7 +198,7 @@ ca:
       failed: No s'ha pogut completar l'autorització de SnapTrade. Torna-ho a provar.
     oauth_device_flow:
       title: Connecta SnapTrade
-      subtitle: Autoritza Sure a accedir a SnapTrade amb un codi de dispositiu.
+      subtitle: Autoritza Relay a accedir a SnapTrade amb un codi de dispositiu.
       instructions: Obre SnapTrade, confirma aquest codi de dispositiu i torna aquí per acabar.
       code_label: Codi de dispositiu
       open_snaptrade: Obre SnapTrade

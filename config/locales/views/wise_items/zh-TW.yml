@@ -76,7 +76,7 @@ zh-TW:
         sign_in_html: 前往 %{link} 並登入您的帳號
         open_tokens: 前往 Settings → API tokens
         create_token: 建立一個唯讀存取的個人 API Token
-        copy_token_html: 複製 Token 並貼到下方。Sure 只會用它來同步您的餘額與交易。
+        copy_token_html: 複製 Token 並貼到下方。Relay 只會用它來同步您的餘額與交易。
     provider_connection:
       default_name: Wise
       default_description: 連接您的 Wise 多幣別帳戶
@@ -93,7 +93,7 @@ zh-TW:
       session_expired: 工作階段已逾時。請重新連接。
       title: 選擇 Wise 個人檔案
       subtitle: 選擇要連接的個人檔案
-      description: 您的 Wise 帳戶有多個個人檔案。請選擇要與 Sure 同步的項目。
+      description: 您的 Wise 帳戶有多個個人檔案。請選擇要與 Relay 同步的項目。
       unnamed_profile: （未命名的個人檔案）
       already_connected_label: 已連接
       connect: 連接所選的個人檔案
@@ -107,22 +107,22 @@ zh-TW:
       status_with_summary: 上次同步於 %{timestamp}前 — %{summary}
       delete: 中斷連線
       setup_needed: 有新帳戶可以設定
-      setup_description: 已連結 %{total} 個帳戶中的 %{linked} 個。為您的 Wise 幣別餘額建立 Sure 帳戶。
+      setup_description: 已連結 %{total} 個帳戶中的 %{linked} 個。為您的 Wise 幣別餘額建立 Relay 帳戶。
       setup_action: 設定帳戶
       no_accounts_title: 尚未連結任何帳戶
-      no_accounts_description: 執行一次同步以偵測您的 Wise 餘額，再連結到 Sure 帳戶。
+      no_accounts_description: 執行一次同步以偵測您的 Wise 餘額，再連結到 Relay 帳戶。
     setup_accounts:
       title: 設定 Wise 帳戶
       subtitle: 連結您的 Wise 幣別餘額
-      description: 為每個您想追蹤的 Wise 幣別餘額建立一個 Sure 帳戶。每種幣別各自成為一個帳戶。
+      description: 為每個您想追蹤的 Wise 幣別餘額建立一個 Relay 帳戶。每種幣別各自成為一個帳戶。
       no_accounts_to_setup: 所有帳戶都已設定完成
-      all_accounts_linked: 您所有的 Wise 幣別餘額都已連結到 Sure 帳戶。
+      all_accounts_linked: 您所有的 Wise 幣別餘額都已連結到 Relay 帳戶。
       create_account: 建立帳戶
       done: 完成
     select_accounts:
       title: 選擇 Wise 餘額
       description: 選擇您想連結到 %{product_name} 帳戶的 Wise 幣別餘額。
-      no_accounts_found: 所有 Wise 餘額都已連結到 Sure 帳戶。
+      no_accounts_found: 所有 Wise 餘額都已連結到 Relay 帳戶。
       no_connection: 找不到 Wise 連線。請先在供應商設定中連接 Wise。
       link_account: 連結餘額
       cancel: 取消

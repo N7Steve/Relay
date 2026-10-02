@@ -20,7 +20,7 @@ vi:
       setup_accounts: "Thiết lập tài khoản"
       delete: "Xóa"
       accounts_need_setup: "Tài khoản cần được thiết lập"
-      accounts_need_setup_description: "Tài khoản Trade Republic của bạn cần được liên kết với tài khoản Sure."
+      accounts_need_setup_description: "Tài khoản Trade Republic của bạn cần được liên kết với tài khoản Relay."
       no_accounts_discovered: "Chưa phát hiện tài khoản Trade Republic."
       no_accounts_discovered_description: "Hoàn tất đăng nhập và chạy đồng bộ để phát hiện tài khoản."
       data_quality:

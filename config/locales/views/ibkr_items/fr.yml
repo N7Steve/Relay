@@ -16,7 +16,7 @@ fr:
     ibkr_item:
       accounts_need_setup: Les comptes doivent être configurés
       accounts_need_setup_description: Certains comptes d'IBKR doivent être liés à
-        des comptes Sure.
+        des comptes Relay.
       delete: Supprimer
       deletion_in_progress: Suppression en cours
       error: Erreur
@@ -82,7 +82,7 @@ fr:
       page_title: Configurer des comptes Interactive Brokers
       status:
         fetching_accounts: Récupération de comptes auprès d'Interactive Brokers...
-        no_accounts_found_description: Sure n'a trouvé aucun compte IBKR
+        no_accounts_found_description: Relay n'a trouvé aucun compte IBKR
           dans le dernier rapport Flex.
         no_accounts_found_title: Aucun compte trouvé.
       subtitle: Sélectionnez les comptes de courtage IBKR à lier.

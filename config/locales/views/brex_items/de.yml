@@ -107,7 +107,7 @@ de:
         title: Datenbankverschlüsselung ist nicht konfiguriert
         message: Richte die Active-Record-Verschlüsselungsschlüssel ein, bevor du im Produktivbetrieb Brex-Tokens hinterlegst. Ohne Verschlüsselung liegen die Tokens im Klartext.
       instructions:
-        copy_token_html: Kopier das Token und füg es unten als benannte Verbindung hinzu. Sure speichert das Token nur zur Synchronisierung dieser Familie.
+        copy_token_html: Kopier das Token und füg es unten als benannte Verbindung hinzu. Relay speichert das Token nur zur Synchronisierung dieser Familie.
         create_token: 'Erstell ein API-Token mit diesen schreibgeschützten Scopes: accounts.cash.readonly, accounts.card.readonly, transactions.cash.readonly, transactions.card.readonly'
         open_tokens: Geh zu den Brex-Entwickler- und API-Token-Einstellungen des Unternehmens, das du verbinden willst
         sign_in_html: Öffne %{link} und meld dich bei dem Konto an, das du verbinden willst

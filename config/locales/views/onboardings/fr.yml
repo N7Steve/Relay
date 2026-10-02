@@ -65,10 +65,10 @@ fr:
         vos données.
       in_45_days: Dans 45 jours (%{date})
       in_45_days_description: Nous supprimons vos données — contribuez pour continuer
-        à utiliser Sure ici !
-      title: Essayez Sure pendant 45 jours
+        à utiliser Relay ici !
+      title: Essayez Relay pendant 45 jours
       today: Aujourd'hui
-      today_description: Vous aurez un accès gratuit à Sure pendant 45 jours sur notre
+      today_description: Vous aurez un accès gratuit à Relay pendant 45 jours sur notre
         AWS.
-      try_button: Essayer Sure pendant 45 jours
+      try_button: Essayer Relay pendant 45 jours
       upgrade: Mettre à niveau

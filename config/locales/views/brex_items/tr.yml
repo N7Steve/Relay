@@ -121,13 +121,13 @@ tr:
       disconnect_label: "%{name} bağlantısını kes"
       encryption_warning:
         message: Üretimde Brex anahtarlarını eklemeden önce Active Record şifreleme
-          anahtarlarını yapılandırın. Şifreleme anahtarları olmadan Sure, Brex sağlayıcı
+          anahtarlarını yapılandırın. Şifreleme anahtarları olmadan Relay, Brex sağlayıcı
           kimlik bilgilerini ve anlık görüntülerini diğer sağlayıcı kayıtları gibi
           düz metin olarak saklar.
         title: Veritabanı şifrelemesi yapılandırılmamış
       instructions:
         copy_token_html: Anahtarı kopyalayın ve aşağıda adlandırılmış bir bağlantı
-          olarak ekleyin. Sure, anahtarı yalnızca bu aileyi senkronize etmek için
+          olarak ekleyin. Relay, anahtarı yalnızca bu aileyi senkronize etmek için
           saklar.
         create_token: 'Şu salt okunur kapsamlara sahip bir API anahtarı oluşturun:
           accounts.cash.readonly, accounts.card.readonly, transactions.cash.readonly,

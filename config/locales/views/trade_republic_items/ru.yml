@@ -19,7 +19,7 @@ ru:
       setup_accounts: "Настроить счета"
       delete: "Удалить"
       accounts_need_setup: "Требуется настройка счёта"
-      accounts_need_setup_description: "Ваш счёт Trade Republic нужно связать со счётом Sure."
+      accounts_need_setup_description: "Ваш счёт Trade Republic нужно связать со счётом Relay."
       no_accounts_discovered: "Счёт Trade Republic ещё не найден."
       no_accounts_discovered_description: "Завершите вход и запустите синхронизацию, чтобы найти счёт."
       data_quality:
@@ -85,7 +85,7 @@ ru:
       status:
         fetching_accounts: Получение счёта из Trade Republic...
         no_accounts_found_title: Счёт не найден.
-        no_accounts_found_description: Sure не удалось найти счёт Trade Republic. Проверьте, что ваш сеанс всё ещё действителен.
+        no_accounts_found_description: Relay не удалось найти счёт Trade Republic. Проверьте, что ваш сеанс всё ещё действителен.
       available_accounts:
         title: Доступный счёт
         account_type_investment: Инвестиционный портфель

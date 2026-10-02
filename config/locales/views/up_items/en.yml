@@ -80,7 +80,7 @@ en:
       no_account_selected: Select an Up account to link.
     setup_accounts:
       title: Link Up Accounts
-      subtitle: Choose how each Up account should appear in Sure.
+      subtitle: Choose how each Up account should appear in Relay.
       no_credentials: Configure Up credentials first.
       api_error: Could not fetch Up accounts.
       fetch_failed: Could not fetch accounts

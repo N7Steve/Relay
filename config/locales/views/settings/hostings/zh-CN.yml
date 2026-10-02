@@ -130,7 +130,7 @@ zh-CN:
         troubleshooting: 请检查您的互联网连接和防火墙设置。Yahoo Finance 可能暂时不可用。
       assistant_settings:
         title: AI 助手
-        description: 配置 Sure 使用的 AI 助手模式。
+        description: 配置 Relay 使用的 AI 助手模式。
         type_label: 助手类型
         type_builtin: 内置（直接调用 LLM）
         type_external: 外部（远程代理）
@@ -156,7 +156,7 @@ zh-CN:
           body: 断开后将无法继续使用此远程助手。
       llm_provider_selector:
         title: AI 提供商
-        description: 选择 Sure 调用的 LLM 提供商。
+        description: 选择 Relay 调用的 LLM 提供商。
         env_configured_message: 已通过环境变量配置 LLM 提供商。
         provider_label: 当前 LLM 提供商
         provider_openai: OpenAI

@@ -45,7 +45,7 @@ fr:
       setup_accounts: "Configurer les comptes"
       delete: "Supprimer"
       accounts_need_setup: "Compte à configurer"
-      accounts_need_setup_description: "Votre compte Trade Republic doit être lié à un compte Sure."
+      accounts_need_setup_description: "Votre compte Trade Republic doit être lié à un compte Relay."
       no_accounts_discovered: "Aucun compte Trade Republic découvert pour le moment."
       no_accounts_discovered_description: "Terminez la connexion et lancez une synchronisation pour découvrir votre compte."
       data_quality:
@@ -95,7 +95,7 @@ fr:
       page_title: "Configurer le compte Trade Republic"
       status:
         fetching_accounts: Récupération du compte depuis Trade Republic...
-        no_accounts_found_description: Sure n'a trouvé aucun compte Trade Republic. Vérifiez que votre session est toujours valide.
+        no_accounts_found_description: Relay n'a trouvé aucun compte Trade Republic. Vérifiez que votre session est toujours valide.
         no_accounts_found_title: Aucun compte trouvé.
       subtitle: "Lier votre compte d’investissement Trade Republic."
       available_accounts:

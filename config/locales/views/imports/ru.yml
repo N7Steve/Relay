@@ -94,7 +94,7 @@ ru:
         leave_empty: Оставить пустым
         name_label: Имя
         no_security_provider_warning: Поставщик цен на ценные бумаги не настроен.
-          Ваши импорты торгов будут работать, но Sure не будет заполнять историю цен.
+          Ваши импорты торгов будут работать, но Relay не будет заполнять историю цен.
           Пожалуйста, перейдите в настройки, чтобы настроить это.
         note_label: Заметка
         price_label: Цена
@@ -390,7 +390,7 @@ ru:
       import_portfolio: Импорт инвестиций
       import_qif: Импорт из Quicken (QIF)
       import_rules: Импорт правил
-      import_sure: Импорт из Sure
+      import_sure: Импорт из Relay
       import_sure_description: Полный экспорт .ndjson файл
       import_transactions: Импорт операций
       import_ynab: Импорт из YNAB
@@ -545,7 +545,7 @@ ru:
           pdf_import: PDF
           qif_import: QIF
           rule_import: Правило
-          sure_import: Sure
+          sure_import: Relay
           trade_import: Сделка
           transaction_import: Операция
           ynab_import: YNAB
@@ -560,7 +560,7 @@ ru:
       pdf_import: Импорт PDF
       qif_import: Импорт QIF
       rule_import: Импорт правил
-      sure_import: Импорт Sure
+      sure_import: Импорт Relay
       trade_import: Импорт сделок
       transaction_import: Импорт операций
       ynab_import: Импорт из YNAB

@@ -12,7 +12,7 @@ zh-TW:
       subtitle: 為重要的事情存錢。
       new_goal: 新增目標
       empty_filtered: 沒有符合的目標。
-      pending_pledges_callout: 您有待確認投入，Sure 會在下次同步時確認。
+      pending_pledges_callout: 您有待確認投入，Relay 會在下次同步時確認。
       kpi:
         contributed_label: 已投入 · 近 30 天
         velocity_delta_up: ↑ 比前 30 天多 %{percent}%%
@@ -125,7 +125,7 @@ zh-TW:
           zero: 待確認：%{amount} 存入 %{account} · 今天到期
           one: 待確認：%{amount} 存入 %{account} · 剩 1 天
           other: 待確認：%{amount} 存入 %{account} · 剩 %{count} 天
-        body_transfer: Sure 在下次同步發現相符的存入時會自動確認。
+        body_transfer: Relay 在下次同步發現相符的存入時會自動確認。
         body_manual: 會在您下次手動編輯餘額時確認。
         pledged_at: '%{time_ago}前記錄'
         extend: 延長 7 天
@@ -195,7 +195,7 @@ zh-TW:
         cta: 設定目標日期
       empty:
         heading: 還沒有任何存入
-        body: 轉一筆錢到您已連結的帳戶，Sure 會在下次同步時抓到。或者直接更新您手動帳戶的餘額。
+        body: 轉一筆錢到您已連結的帳戶，Relay 會在下次同步時抓到。或者直接更新您手動帳戶的餘額。
     errors:
       not_found: 找不到這個目標，它可能已經被刪除了。
     states:

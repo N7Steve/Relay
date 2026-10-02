@@ -100,7 +100,7 @@ en:
       no_account_selected: Select a Monobank account to link.
     setup_accounts:
       title: Link Monobank Accounts
-      subtitle: Choose how each Monobank card or jar should appear in Sure.
+      subtitle: Choose how each Monobank card or jar should appear in Relay.
       no_credentials: Configure Monobank credentials first.
       api_error: Could not refresh accounts from Monobank, so the accounts saved by the last sync are shown instead.
       no_accounts_to_setup: No accounts to set up

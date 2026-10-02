@@ -26,7 +26,7 @@ pt-PT:
           queued: "Notificação de teste em fila. Atualize os resultados abaixo para consultar o estado."
           hosted_only: "As notificações push estão disponíveis apenas no modo alojado."
           ineligible: "Apenas um superadministrador ativo pode enviar uma notificação de teste."
-          no_devices: "Ative as notificações push na aplicação iOS Sure para esta conta para enviar um teste."
+          no_devices: "Ative as notificações push na aplicação iOS Relay para esta conta para enviar um teste."
           disabled: "O operador desativou o envio de notificações push."
           not_configured: "As credenciais APNs não estão configuradas."
           cooldown: "Aguarde 30 segundos antes de enviar outro teste."
@@ -42,8 +42,8 @@ pt-PT:
           enqueue_failed: "Não foi possível colocar em fila; verifique o Sidekiq"
           expired: "Expirou sem resultado final"
       push_notification:
-        title: "Notificação de teste Sure"
-        body: "Esta é uma notificação push de teste para a sua conta Sure."
+        title: "Notificação de teste Relay"
+        body: "Esta é uma notificação push de teste para a sua conta Relay."
       show:
         title: Estado do sistema
         tabs:
@@ -87,16 +87,16 @@ pt-PT:
               message: O endpoint configurado não passou na verificação de funcionamento /v1/vector_stores. A maioria dos endpoints locais e compatíveis com OpenAI não implementa essa API. O chat e o processamento de PDF podem continuar a funcionar; para a configuração local habitual, utilize pgvector com um endpoint de embeddings separado. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
             llm_probe_failed:
               title: A verificação em direto do serviço de AI falhou
-              message: A Sure não conseguiu verificar tanto o endpoint como o modelo configurados. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
+              message: A Relay não conseguiu verificar tanto o endpoint como o modelo configurados. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
             pdf_text_extraction_failed:
               title: A verificação sintética de extração de texto de PDF falhou
-              message: A Sure não conseguiu concluir o percurso de extração de texto que extrai localmente o texto incorporado no PDF e o envia para o modelo configurado. Não foram enviados dados de clientes. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
+              message: A Relay não conseguiu concluir o percurso de extração de texto que extrai localmente o texto incorporado no PDF e o envia para o modelo configurado. Não foram enviados dados de clientes. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
             pdf_vision_processing_failed:
               title: A verificação sintética de visão/nativo de PDF falhou
-              message: A Sure não conseguiu concluir o percurso de imagem ou documento nativo em PDF através do modelo configurado. Não foram enviados dados de clientes. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
+              message: A Relay não conseguiu concluir o percurso de imagem ou documento nativo em PDF através do modelo configurado. Não foram enviados dados de clientes. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
             vector_probe_failed:
               title: A verificação em direto da pesquisa de documentos falhou
-              message: A Sure não conseguiu verificar o armazenamento de vetores selecionado e todos os serviços de embeddings exigidos. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
+              message: A Relay não conseguiu verificar o armazenamento de vetores selecionado e todos os serviços de embeddings exigidos. A falha foi registada em Definições → Registos de depuração e no Rails.logger.
             qdrant:
               title: O suporte para Qdrant ainda não está implementado
               message: O adaptador Qdrant está estruturado, mas as operações de carregamento e pesquisa de documentos falham atualmente. Selecione OpenAI ou pgvector para a pesquisa de documentos.

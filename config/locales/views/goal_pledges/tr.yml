@@ -2,17 +2,17 @@
 tr:
   goal_pledges:
     create:
-      success: Taahhüt kaydedildi. Sure bir sonraki senkronizasyonda bunu onaylayacak.
+      success: Taahhüt kaydedildi. Relay bir sonraki senkronizasyonda bunu onaylayacak.
     destroy:
       not_open: Yalnızca açık taahhütler iptal edilebilir.
       success: Taahhüt iptal edildi.
     new:
       account_label: Hesaba
       amount_label: Tutar
-      helper_manual: Sure bunu bir sonraki manuel bakiye düzenlemenizde kaydedecek
+      helper_manual: Relay bunu bir sonraki manuel bakiye düzenlemenizde kaydedecek
         ve katkıyı onaylayacaktır.
-      helper_transfer: Sure, bağlı hesabınızda eşleşen bir yatırma işlemi arayacaktır.
-        Taahhüt 7 gün boyunca beklemede kalır, Sure onu tespit ettiğinde otomatik
+      helper_transfer: Relay, bağlı hesabınızda eşleşen bir yatırma işlemi arayacaktır.
+        Taahhüt 7 gün boyunca beklemede kalır, Relay onu tespit ettiğinde otomatik
         olarak onaylanır.
       preview_nonzero: "{target} hedefinin yüzde {percent}'ine ulaşılıyor, {newTotal}."
       preview_reached: "{target} hedefinize ulaşıldı. Hedef tamamlandı."

@@ -108,7 +108,7 @@ uk:
       no_account_selected: Виберіть рахунок Monobank для підключення.
     setup_accounts:
       title: Підключення рахунків Monobank
-      subtitle: Виберіть, як кожна картка або банка Monobank має відображатися у Sure.
+      subtitle: Виберіть, як кожна картка або банка Monobank має відображатися у Relay.
       no_credentials: Спершу налаштуйте доступ до Monobank.
       api_error: Не вдалося оновити рахунки з Monobank, тому показані рахунки, збережені під час останньої синхронізації.
       no_accounts_to_setup: Немає рахунків для налаштування

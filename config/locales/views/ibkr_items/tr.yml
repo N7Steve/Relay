@@ -15,7 +15,7 @@ tr:
       success: Interactive Brokers bağlantısı silinmek üzere zamanlandı.
     ibkr_item:
       accounts_need_setup: Hesaplar kurulum gerektiriyor
-      accounts_need_setup_description: IBKR'den bazı hesapların Sure hesaplarıyla
+      accounts_need_setup_description: IBKR'den bazı hesapların Relay hesaplarıyla
         bağlantılandırılması gerekiyor.
       delete: Sil
       deletion_in_progress: Silme işlemi devam ediyor
@@ -79,7 +79,7 @@ tr:
       page_title: Interactive Brokers Hesaplarını Kur
       status:
         fetching_accounts: Interactive Brokers'tan hesaplar alınıyor...
-        no_accounts_found_description: Sure, en son Flex raporunda herhangi bir IBKR
+        no_accounts_found_description: Relay, en son Flex raporunda herhangi bir IBKR
           hesabı bulamadı.
         no_accounts_found_title: Hesap bulunamadı.
       subtitle: Bağlanacak IBKR aracı kurum hesaplarını seçin.

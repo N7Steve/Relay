@@ -106,7 +106,7 @@ pl:
       fetch_failed: Nie można pobrać kont
       no_accounts_to_setup: Brak kont do skonfigurowania
       no_credentials: Najpierw skonfiguruj dane uwierzytelniające Up.
-      subtitle: Wybierz, jak każde konto Up ma być wyświetlane w Sure.
+      subtitle: Wybierz, jak każde konto Up ma być wyświetlane w Relay.
       title: Połącz konta Up
     up_item:
       delete: Usuń

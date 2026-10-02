@@ -14,15 +14,15 @@ en:
       coming_soon: Intro experience coming soon
       description: We're building a richer onboarding journey to learn about your
         goals, milestones, and day-to-day needs. For now, head over to the chat sidebar
-        to start a conversation with Sure and let us know where you are in your financial
+        to start a conversation with Relay and let us know where you are in your financial
         journey.
       start_chatting: Start chatting
     redis_configuration_error:
-      page_title: Redis Configuration Required - Sure
+      page_title: Redis Configuration Required - Relay
       heading: Redis Configuration Required
-      subheading: Your self-hosted Sure installation needs Redis to be properly configured.
+      subheading: Your self-hosted Relay installation needs Redis to be properly configured.
       why_required_title: Why is Redis required?
-      why_required_body: Sure uses Redis to power Sidekiq background jobs for tasks
+      why_required_body: Relay uses Redis to power Sidekiq background jobs for tasks
         like syncing account data, processing imports, and other background operations
         that keep your financial data up to date.
       view_setup_guide: View Setup Guide

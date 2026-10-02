@@ -135,7 +135,7 @@ pl:
       coming_soon: Wprowadzenie już wkrótce
       description: Pracujemy nad bogatszym wprowadzeniem, które pozna Twoje cele,
         kamienie milowe i codzienne potrzeby. Na razie przejdź do czatu w panelu bocznym,
-        aby porozmawiać z Sure i powiedzieć, na jakim etapie finansowej podróży jesteś.
+        aby porozmawiać z Relay i powiedzieć, na jakim etapie finansowej podróży jesteś.
       not_authorized: Wprowadzenie jest dostępne tylko dla użytkowników gościnnych.
       start_chatting: Rozpocznij rozmowę
       welcome: Witaj!
@@ -145,14 +145,14 @@ pl:
       title: Polityka prywatności
     redis_configuration_error:
       heading: Wymagana konfiguracja Redis
-      page_title: Wymagana konfiguracja Redis - Sure
+      page_title: Wymagana konfiguracja Redis - Relay
       refresh_hint: Po skonfigurowaniu Redis odśwież tę stronę, aby kontynuować.
       refresh_page: Odśwież stronę
       setup_guide_hint: Skonfiguruj Redis według naszego pełnego przewodnika Docker
-      subheading: Twoja samodzielnie hostowana instalacja Sure wymaga poprawnie skonfigurowanego
+      subheading: Twoja samodzielnie hostowana instalacja Relay wymaga poprawnie skonfigurowanego
         Redis.
       view_setup_guide: Zobacz przewodnik konfiguracji
-      why_required_body: Sure używa Redis do obsługi zadań Sidekiq w tle, takich jak
+      why_required_body: Relay używa Redis do obsługi zadań Sidekiq w tle, takich jak
         synchronizacja danych kont, przetwarzanie importów i inne operacje utrzymujące
         aktualność Twoich danych finansowych.
       why_required_title: Dlaczego Redis jest wymagany?

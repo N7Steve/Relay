@@ -12,7 +12,7 @@ zh-CN:
       subtitle: 为重要目标储蓄。
       new_goal: 新建目标
       empty_filtered: 没有匹配的目标。
-      pending_pledges_callout: 你有待确认的承诺。Sure 会在下次同步时确认。
+      pending_pledges_callout: 你有待确认的承诺。Relay 会在下次同步时确认。
       kpi:
         contributed_label: 已投入 · 最近 30 天
         velocity_delta_up: 较前 30 天 ↑ %{percent}%%
@@ -125,7 +125,7 @@ zh-CN:
           zero: 待确认：%{amount} 存入 %{account} · 今天过期
           one: 待确认：%{amount} 存入 %{account} · 剩余 1 天
           other: 待确认：%{amount} 存入 %{account} · 剩余 %{count} 天
-        body_transfer: Sure 在下次同步发现匹配存款时会自动确认。
+        body_transfer: Relay 在下次同步发现匹配存款时会自动确认。
         body_manual: 会在你下次手动编辑余额时确认。
         pledged_at: "%{time_ago} 前承诺"
         extend: 延长 7 天
@@ -195,7 +195,7 @@ zh-CN:
         cta: 设置目标日期
       empty:
         heading: 还没有存入资金
-        body: 向关联账户转入资金。Sure 会在下次同步时识别，或你也可以更新手动账户余额。
+        body: 向关联账户转入资金。Relay 会在下次同步时识别，或你也可以更新手动账户余额。
     errors:
       not_found: 找不到该目标。它可能已被删除。
     states:

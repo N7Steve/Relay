@@ -10,7 +10,7 @@ tr:
       none_found: Yeni yinelenen ödeme bulunamadı. Faturaları elle ekleyebilirsiniz.
       already_running: Tespit zaten çalışıyor. Birazdan tekrar kontrol edin.
     feed:
-      calendar_name: Sure Faturaları
+      calendar_name: Relay Faturaları
     ai_prompts:
       due_before_paycheck: Bir sonraki maaşımdan önce hangi ödemeler var?
       subscriptions_up: Bu yıl hangi aboneliklerin fiyatı arttı?
@@ -306,6 +306,6 @@ tr:
         other: '%{count} tanesi sizi bekliyor'
       empty:
         title: Henüz fatura yok
-        description: Faturalar yinelenen giderlerinizdir. Sure bunları işlem geçmişinizden otomatik olarak bulur; her birine bir ödeme bağlantısı ekleyerek doğrudan buradan ödeyebilirsiniz.
+        description: Faturalar yinelenen giderlerinizdir. Relay bunları işlem geçmişinizden otomatik olarak bulur; her birine bir ödeme bağlantısı ekleyerek doğrudan buradan ödeyebilirsiniz.
         action: Yinelenen işlemleri bul
-        no_history_description: Henüz işlem yok. Bir hesap bağlayın veya geçmişi içe aktarın, Sure faturalarınızı otomatik olarak bulsun ya da elle bir fatura ekleyin.
+        no_history_description: Henüz işlem yok. Bir hesap bağlayın veya geçmişi içe aktarın, Relay faturalarınızı otomatik olarak bulsun ya da elle bir fatura ekleyin.

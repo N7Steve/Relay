@@ -64,7 +64,7 @@ fr:
       page_title: Configurer le compte Trading 212
       status:
         fetching_accounts: Récupération du compte depuis Trading 212...
-        no_accounts_found_description: Sure n'a trouvé aucun compte Trading 212. Vérifiez que votre clé d'API est valide.
+        no_accounts_found_description: Relay n'a trouvé aucun compte Trading 212. Vérifiez que votre clé d'API est valide.
         no_accounts_found_title: Aucun compte trouvé.
       subtitle: Liez votre compte d'investissement Trading 212.
     sync:
@@ -85,7 +85,7 @@ fr:
       partial: "%{linked} liés, %{unlinked} à configurer"
     trading212_item:
       accounts_need_setup: Compte à configurer
-      accounts_need_setup_description: Votre compte Trading 212 doit être lié à un compte Sure.
+      accounts_need_setup_description: Votre compte Trading 212 doit être lié à un compte Relay.
       delete: Supprimer
       deletion_in_progress: Suppression en cours
       environment_label_demo: Compte de démonstration

@@ -26,7 +26,7 @@ tr:
           queued: Test bildirimi kuyruğa alındı. Durumunu görmek için aşağıdaki sonuçları yenileyin.
           hosted_only: Anlık bildirimler yalnızca barındırılan modda kullanılabilir.
           ineligible: Test bildirimini yalnızca aktif bir süper yönetici gönderebilir.
-          no_devices: Test göndermek için bu hesapta Sure iOS uygulamasından anlık bildirimleri etkinleştirin.
+          no_devices: Test göndermek için bu hesapta Relay iOS uygulamasından anlık bildirimleri etkinleştirin.
           disabled: Anlık bildirim gönderimi operatör tarafından devre dışı bırakıldı.
           not_configured: APNs kimlik bilgileri yapılandırılmamış.
           cooldown: Yeni bir test göndermeden önce lütfen 30 saniye bekleyin.
@@ -42,8 +42,8 @@ tr:
           enqueue_failed: Kuyruğa alınamadı; Sidekiq'i kontrol edin
           expired: Kesin sonuç alınmadan süresi doldu
       push_notification:
-        title: Sure test bildirimi
-        body: Bu, Sure hesabınız için bir test anlık bildirimidir.
+        title: Relay test bildirimi
+        body: Bu, Relay hesabınız için bir test anlık bildirimidir.
       verify_worker_ai:
         queued: Çalışan kontrolü kuyruğa alındı. Bir çalışan işlemi onu aldığında, genellikle birkaç saniye içinde aşağıda görünecek.
       show:
@@ -95,37 +95,37 @@ tr:
               message: Uç nokta tools parametresini kabul etti, ancak model sağlık kontrolü aracını çağırmak yerine metinle yanıt verdi. AI asistanı araç çağrıları olmadan finansal verileri okuyamaz, bu yüzden sohbet boş yanıt verebilir veya uydurma rakamlar sunabilir. Sağlayıcısı fonksiyon çağırma desteğini belgeleyen bir model tercih edin.
             llm_probe_failed:
               title: LLM canlı kontrolü başarısız oldu
-              message: Sure, yapılandırılan uç noktayı ve modeli birlikte doğrulayamadı. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
+              message: Relay, yapılandırılan uç noktayı ve modeli birlikte doğrulayamadı. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
             llm_model_not_available:
               title: Yapılandırılan AI modeli kullanılamıyor
               message: Uç nokta yanıt verdi, ancak yapılandırılan modeli listelemedi veya sunmadı. Seçilen sağlayıcı için aktif bir model seçin, ardından kontrolleri yeniden çalıştırın. OpenAI uyumlu bir çeviri katmanı üzerinden Gemini kullanıyorsanız gemini-2.5-flash gibi şu anda desteklenen bir model kullanın.
             pdf_text_extraction_failed:
               title: Sentetik PDF metin çıkarma kontrolü başarısız oldu
-              message: Sure, gömülü PDF metnini yerel olarak çıkarıp yapılandırılan modele gönderen metin öncelikli yolu tamamlayamadı. Hiçbir müşteri verisi gönderilmedi. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
+              message: Relay, gömülü PDF metnini yerel olarak çıkarıp yapılandırılan modele gönderen metin öncelikli yolu tamamlayamadı. Hiçbir müşteri verisi gönderilmedi. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
             pdf_vision_processing_failed:
               title: Sentetik PDF görsel/yerel işleme kontrolü başarısız oldu
-              message: Sure, görüntü veya yerel belge PDF yolunu yapılandırılan model üzerinden tamamlayamadı. Hiçbir müşteri verisi gönderilmedi. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
+              message: Relay, görüntü veya yerel belge PDF yolunu yapılandırılan model üzerinden tamamlayamadı. Hiçbir müşteri verisi gönderilmedi. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
             vector_probe_failed:
               title: Belge arama canlı kontrolü başarısız oldu
-              message: Sure, seçilen vektör deposunu ve gerekli tüm embedding hizmetlerini doğrulayamadı. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
+              message: Relay, seçilen vektör deposunu ve gerekli tüm embedding hizmetlerini doğrulayamadı. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
             pgvector_extension_not_enabled:
               title: PostgreSQL vector uzantısı etkin değil
               message: pgvector adaptörü seçili, ancak PostgreSQL bu veritabanı için vector uzantısını etkinleştirmemiş. pgvector içeren bir PostgreSQL imajı kullanın, ardından uzantıyı veritabanı sahibi veya süper kullanıcı olarak etkinleştirin ve migration'ları VECTOR_STORE_PROVIDER=pgvector ile yeniden çalıştırın.
             pgvector_table_not_found:
               title: vector_store_chunks tablosu eksik
-              message: pgvector uzantısı etkin, ancak parça (chunk) tablosu bulunamadı. Migration durumunu kontrol edin, ardından Sure'un vector_store_chunks tablosunu oluşturabilmesi için vektör deposu migration'ını VECTOR_STORE_PROVIDER=pgvector ile yeniden çalıştırın.
+              message: pgvector uzantısı etkin, ancak parça (chunk) tablosu bulunamadı. Migration durumunu kontrol edin, ardından Relay'un vector_store_chunks tablosunu oluşturabilmesi için vektör deposu migration'ını VECTOR_STORE_PROVIDER=pgvector ile yeniden çalıştırın.
             pgvector_probe_failed:
               title: pgvector depolama kontrolü başarısız oldu
-              message: Sure, pgvector parça tablosunu sorgulayamadı. PostgreSQL izinlerini, vector uzantısını ve vector_store_chunks migration'ını kontrol edin. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
+              message: Relay, pgvector parça tablosunu sorgulayamadı. PostgreSQL izinlerini, vector uzantısını ve vector_store_chunks migration'ını kontrol edin. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
             embedding_dimensions_mismatch:
               title: Embedding boyutları eşleşmiyor
-              message: Embedding uç noktası, uzunluğu EMBEDDING_DIMENSIONS ile eşleşmeyen bir vektör döndürdü. EMBEDDING_MODEL ve EMBEDDING_DIMENSIONS değerlerini modelin belgelenmiş vektör boyutuna ayarlayın, ortam değişkenlerinin kalıcı olması için Sure'u yeniden başlatın, ardından pgvector embedding sütununu/tablosunu değiştirin veya yeniden oluşturun ve mevcut veriler farklı bir boyut kullanıyorsa belgeleri yeniden embed edin.
+              message: Embedding uç noktası, uzunluğu EMBEDDING_DIMENSIONS ile eşleşmeyen bir vektör döndürdü. EMBEDDING_MODEL ve EMBEDDING_DIMENSIONS değerlerini modelin belgelenmiş vektör boyutuna ayarlayın, ortam değişkenlerinin kalıcı olması için Relay'u yeniden başlatın, ardından pgvector embedding sütununu/tablosunu değiştirin veya yeniden oluşturun ve mevcut veriler farklı bir boyut kullanıyorsa belgeleri yeniden embed edin.
             embedding_probe_timeout:
               title: Embedding canlı kontrolü zaman aşımına uğradı
-              message: Embedding uç noktası AI_HEALTH_PROBE_TIMEOUT süresi dolmadan yanıt vermedi. Sağlayıcı yavaşsa bu sağlık kontrolü zaman aşımını artırın, ardından ortam değişkenlerinin her işlemde kalıcı olması için Sure'u yeniden başlatın. Normal AI sohbet çağrıları da zaman aşımına uğruyorsa OPENAI_REQUEST_TIMEOUT değerini ayrıca yükseltin.
+              message: Embedding uç noktası AI_HEALTH_PROBE_TIMEOUT süresi dolmadan yanıt vermedi. Sağlayıcı yavaşsa bu sağlık kontrolü zaman aşımını artırın, ardından ortam değişkenlerinin her işlemde kalıcı olması için Relay'u yeniden başlatın. Normal AI sohbet çağrıları da zaman aşımına uğruyorsa OPENAI_REQUEST_TIMEOUT değerini ayrıca yükseltin.
             embedding_probe_failed:
               title: Embedding canlı kontrolü başarısız oldu
-              message: Sure, yapılandırılan uç nokta ve model üzerinden kısa bir test embedding'i oluşturamadı. EMBEDDING_URI_BASE, EMBEDDING_MODEL, EMBEDDING_ACCESS_TOKEN değerlerini ve embedding sağlayıcısının günlüklerini kontrol edin. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
+              message: Relay, yapılandırılan uç nokta ve model üzerinden kısa bir test embedding'i oluşturamadı. EMBEDDING_URI_BASE, EMBEDDING_MODEL, EMBEDDING_ACCESS_TOKEN değerlerini ve embedding sağlayıcısının günlüklerini kontrol edin. Hata, Ayarlar → Hata ayıklama günlükleri ve Rails.logger'a kaydedildi.
             qdrant:
               title: Qdrant desteği henüz uygulanmadı
               message: Qdrant adaptörünün iskeleti hazır, ancak belge yükleme ve arama işlemleri şu anda başarısız oluyor. Belge arama için OpenAI veya pgvector seçin.

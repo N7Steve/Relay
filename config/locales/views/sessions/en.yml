@@ -25,7 +25,7 @@ en:
       forgot_password: Forgot your password?
       password: Password
       submit: Log in
-      title: Sure
+      title: Relay
       password_placeholder: Enter your password
       openid_connect: Sign in with OpenID Connect
       oidc: Sign in with OpenID Connect

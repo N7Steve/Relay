@@ -113,7 +113,7 @@ de:
       fetch_failed: Konten ließen sich nicht abrufen
       no_accounts_to_setup: Keine Konten einzurichten
       no_credentials: Richte zuerst deine Akahu-Zugangsdaten ein.
-      subtitle: Leg fest, wie jedes Akahu-Konto in Sure erscheinen soll.
+      subtitle: Leg fest, wie jedes Akahu-Konto in Relay erscheinen soll.
       title: Akahu-Konten einrichten
     update:
       success: Akahu-Verbindung aktualisiert.

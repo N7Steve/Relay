@@ -20,7 +20,7 @@ pt-BR:
       setup_accounts: "Configurar contas"
       delete: "Excluir"
       accounts_need_setup: "A conta precisa ser configurada"
-      accounts_need_setup_description: "Sua conta da Trade Republic precisa ser vinculada a uma conta Sure."
+      accounts_need_setup_description: "Sua conta da Trade Republic precisa ser vinculada a uma conta Relay."
       no_accounts_discovered: "Nenhuma conta da Trade Republic foi descoberta ainda."
       no_accounts_discovered_description: "Conclua o login e execute uma sincronização para descobrir sua conta."
       data_quality:

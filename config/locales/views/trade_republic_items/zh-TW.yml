@@ -20,7 +20,7 @@ zh-TW:
       setup_accounts: "設定帳戶"
       delete: "刪除"
       accounts_need_setup: "帳戶需要設定"
-      accounts_need_setup_description: "您的 Trade Republic 帳戶需要連結至 Sure 帳戶。"
+      accounts_need_setup_description: "您的 Trade Republic 帳戶需要連結至 Relay 帳戶。"
       no_accounts_discovered: "尚未發現 Trade Republic 帳戶。"
       no_accounts_discovered_description: "完成登入並執行同步以發現您的帳戶。"
       data_quality:

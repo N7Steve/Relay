@@ -32,7 +32,7 @@ ca:
           title: Vols desconnectar l'assistent extern?
         description: Tria com respon l'assistent del xat. Integrat utilitza el teu
           proveïdor d'LLM configurat directament. Extern delega en un agent d'IA remot
-          que pot retrucar a les eines financeres de Sure via MCP.
+          que pot retrucar a les eines financeres de Relay via MCP.
         disconnect_button: Desconnecta
         disconnect_description: Elimina la connexió a l'assistent extern i torna a
           l'assistent integrat.
@@ -154,7 +154,7 @@ ca:
         model_function_calling_help: L'assistent d'IA llegeix les teves dades mitjançant crides a funcions, així que tria un model que el teu proveïdor documenti com a compatible amb eines/crides a funcions. Els models que no ho admeten fan fallar el xat amb un error poc clar del proveïdor.
         model_function_calling_link: Comprova el model configurat
         timeout_heading: Temps d'espera
-        timeout_description: Controla quant de temps poden durar les crides a models compatibles amb OpenAI abans que Sure les abandoni. Augmenta aquests valors si executes un model local en maquinari lent.
+        timeout_description: Controla quant de temps poden durar les crides a models compatibles amb OpenAI abans que Relay les abandoni. Augmenta aquests valors si executes un model local en maquinari lent.
         openai_request_timeout_label: Temps d'espera de la sol·licitud en segons (opcional)
         openai_request_timeout_help: 'Per defecte: 60. S''aplica a cada sol·licitud HTTP compatible amb OpenAI, incloent-hi l''autocategorització, la detecció de comerços, el xat, el processament de PDF i les crides al magatzem de vectors. OPENAI_REQUEST_TIMEOUT té prioritat sobre aquest camp.'
         ai_response_timeout_label: Temps d'espera de la resposta en segons (opcional)
@@ -289,7 +289,7 @@ ca:
         status_healthy: Yahoo Finance està actiu i funciona.
         status_rate_limited: Yahoo Finance està limitant temporalment les sol·licituds.
         rate_limited_title: S'ha arribat al límit de sol·licituds de Yahoo Finance.
-        rate_limited_message: No cal fer res. Sure evitarà comprovacions d'estat addicionals durant 30 minuts. Les operacions de preus i tipus de canvi continuen de manera independent.
+        rate_limited_message: No cal fer res. Relay evitarà comprovacions d'estat addicionals durant 30 minuts. Les operacions de preus i tipus de canvi continuen de manera independent.
         status_unavailable: Yahoo Finance no està disponible en aquest moment.
         unavailable_title: No s'ha pogut verificar Yahoo Finance.
         unavailable_message: No s'ha pogut accedir a Yahoo Finance o ha retornat una resposta inesperada. Comprova la connexió a Internet i torna-ho a provar més tard.

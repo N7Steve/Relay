@@ -75,7 +75,7 @@ pt-PT:
       difference: Diferença
       download: Descarregar
       institution_name_hint: Sugestão da instituição
-      ledger_amount: Registo do Sure
+      ledger_amount: Registo do Relay
       linked_to: Ligado a %{account}.
       linking_title: Ligação de conta
       link_suggestion: Sugestão de ligação
@@ -85,7 +85,7 @@ pt-PT:
       period_end_on: Fim do período
       period_start_on: Início do período
       reconciliation_title: Reconciliação
-      reconciliation_unavailable: Adicione um período de extrato e um saldo de abertura ou de fecho e certifique-se de que o Sure tem histórico de saldos para essas datas.
+      reconciliation_unavailable: Adicione um período de extrato e um saldo de abertura ou de fecho e certifique-se de que o Relay tem histórico de saldos para essas datas.
       reject: Rejeitar
       save: Guardar extrato
       statement_amount: Extrato

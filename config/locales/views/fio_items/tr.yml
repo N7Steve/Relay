@@ -50,7 +50,7 @@ tr:
       one_account_notice: Bir token yalnızca bir Fio hesabına erişir; bu nedenle takip etmek istediğiniz her hesap için bir bağlantı ekleyin. Bir token 30 saniyede bir kullanılabilir; daha erken gelen bir senkronizasyon bir sonrakine devredilir.
       connected_account: Bağlı hesap
       no_account_yet: Henüz hesap yok — ilk senkronizasyon bu token'ın eriştiği hesabı bulur.
-      account_needs_setup: Henüz bir Sure hesabına bağlı değil.
+      account_needs_setup: Henüz bir Relay hesabına bağlı değil.
       requires_update: Yeni token gerekli
       requires_update_notice: Fio bu token'ı reddetti. Token'lar, her bankacılık girişinde otomatik olarak uzatılmadıkça en fazla 180 gün geçerlidir; bu nedenle Ayarlar → API altından yeni bir salt okunur token oluşturun ve aşağıya yapıştırın.
       last_synced: '%{timestamp} önce senkronize edildi'
@@ -70,10 +70,10 @@ tr:
       unlink_failed: Fio banka bağlantısı kesilemedi
     select_accounts:
       title: Fio hesabınızı bağlayın
-      description: Bu token tek bir hesaba erişir. Sure'da nasıl takip edileceğini seçin.
+      description: Bu token tek bir hesaba erişir. Relay'da nasıl takip edileceğini seçin.
       account_type_label: Hesap türü
       awaiting_first_sync: Fio bu token için henüz bir hesap bildirmedi. Bir senkronizasyon çalıştırın ve tekrar gelin.
-      already_linked: Bu bağlantının hesabı zaten bir Sure hesabına bağlı.
+      already_linked: Bu bağlantının hesabı zaten bir Relay hesabına bağlı.
       sync_now: Şimdi senkronize et
       no_credentials_configured: Önce sağlayıcı ayarlarından Fio banka'yı yapılandırın.
       cancel: İptal
@@ -88,7 +88,7 @@ tr:
       title: Fio hesabını %{account_name} hesabına bağla
       description: Bu token'ın eriştiği hesabı seçtiğiniz hesaba bağlayın.
       awaiting_first_sync: Fio bu token için henüz bir hesap bildirmedi. Bir senkronizasyon çalıştırın ve tekrar gelin.
-      already_linked: Bu bağlantının hesabı zaten bir Sure hesabına bağlı.
+      already_linked: Bu bağlantının hesabı zaten bir Relay hesabına bağlı.
       sync_now: Şimdi senkronize et
       no_credentials_configured: Önce sağlayıcı ayarlarından Fio banka'yı yapılandırın.
       account_already_linked: Bu hesap zaten bir sağlayıcıya bağlı.
@@ -102,7 +102,7 @@ tr:
       unsupported_account_type: Fio yalnızca nakit ve kredi hesaplarını senkronize edebilir.
     setup_accounts:
       title: Fio hesabınızı bağlayın
-      subtitle: Bu token'ın eriştiği hesabın Sure'da nasıl görüneceğini seçin.
+      subtitle: Bu token'ın eriştiği hesabın Relay'da nasıl görüneceğini seçin.
       choose_account_type: Bir hesap türü seçin
       choose_account_type_description: Bu hesabı takip etmek istemiyorsanız atlayın.
       account_type_label: Hesap türü
@@ -121,7 +121,7 @@ tr:
       skipped: Fio hesabı atlandı.
       no_account: Kurulması gereken bir Fio hesabı yoktu.
       unsupported_account_type: Fio bu hesap türünü desteklemiyor.
-      creation_failed: Sure hesabı oluşturulamadı.
+      creation_failed: Relay hesabı oluşturulamadı.
     fio_item:
       deletion_in_progress: Silme işlemi devam ediyor
       syncing: Senkronize ediliyor
@@ -134,7 +134,7 @@ tr:
       requires_update_description: Fio bu bağlantının token'ını reddetti. İnternet bankacılığında Ayarlar → API altından yeni bir salt okunur token oluşturun.
       update_token: Token'ı güncelle
       setup_needed: Hesap kurulumu gerekli
-      setup_description: Bu token'ın eriştiği hesap henüz bir Sure hesabına bağlı değil.
+      setup_description: Bu token'ın eriştiği hesap henüz bir Relay hesabına bağlı değil.
       setup_action: Hesabı kur
       no_accounts_title: Henüz içe aktarılmış hesap yok
       no_accounts_description: Fio hesabı yalnızca bir ekstre içinde bildirir; bu nedenle hesap ilk başarılı senkronizasyondan sonra görünür.

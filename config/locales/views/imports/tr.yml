@@ -96,7 +96,7 @@ tr:
         leave_empty: Boş bırak
         name_label: Ad
         no_security_provider_warning: Menkul kıymet fiyat sağlayıcısı yapılandırılmamış.
-          Alım satım içe aktarmalarınız çalışacak, ancak Sure geçmiş fiyat verilerini
+          Alım satım içe aktarmalarınız çalışacak, ancak Relay geçmiş fiyat verilerini
           geriye dönük olarak doldurmayacaktır. Bunu yapılandırmak için lütfen ayarlarınıza
           gidin.
         note_label: Not
@@ -390,7 +390,7 @@ tr:
       import_portfolio: Yatırımları içe aktar
       import_qif: Quicken'dan içe aktar (QIF)
       import_rules: Kuralları içe aktar
-      import_sure: Sure'dan içe aktar
+      import_sure: Relay'dan içe aktar
       import_sure_description: Tam dışa aktarma .ndjson dosyası
       import_transactions: İşlemleri içe aktar
       import_ynab: YNAB'dan içe aktar
@@ -536,7 +536,7 @@ tr:
           pdf_import: PDF
           qif_import: QIF
           rule_import: Kural
-          sure_import: Sure
+          sure_import: Relay
           trade_import: Alım Satım
           transaction_import: İşlem
           ynab_import: YNAB
@@ -551,7 +551,7 @@ tr:
       pdf_import: PDF içe aktarma
       qif_import: QIF içe aktarma
       rule_import: Kural içe aktarma
-      sure_import: Sure içe aktarma
+      sure_import: Relay içe aktarma
       trade_import: Alım satım içe aktarma
       transaction_import: İşlem içe aktarma
       ynab_import: YNAB içe aktarma

@@ -62,7 +62,7 @@ zh-TW:
         securities_provider_label: 證券（股價）資料供應商
       assistant_settings:
         title: AI 助手
-        description: 選擇聊天助手的回應方式。內建模式會直接使用您設定的 LLM 供應商；外部模式則交給遠端 AI 代理處理，該代理可以透過 MCP 回頭呼叫 Sure 的財務工具。
+        description: 選擇聊天助手的回應方式。內建模式會直接使用您設定的 LLM 供應商；外部模式則交給遠端 AI 代理處理，該代理可以透過 MCP 回頭呼叫 Relay 的財務工具。
         type_label: 助手類型
         type_builtin: 內建（直接使用 LLM）
         type_external: 外部（遠端代理）
@@ -150,7 +150,7 @@ zh-TW:
         status_healthy: Yahoo Finance 運作正常。
         status_rate_limited: Yahoo Finance 暫時限制了請求速率。
         rate_limited_title: 已達 Yahoo Finance 的速率限制。
-        rate_limited_message: 不需要處理。Sure 會在 30 分鐘內避免額外的健康檢查。價格與匯率作業會獨立繼續執行。
+        rate_limited_message: 不需要處理。Relay 會在 30 分鐘內避免額外的健康檢查。價格與匯率作業會獨立繼續執行。
         status_unavailable: Yahoo Finance 目前無法使用。
         unavailable_title: 無法驗證 Yahoo Finance。
         unavailable_message: 無法連線至 Yahoo Finance，或收到非預期的回應。請檢查您的網路連線，稍後再試。

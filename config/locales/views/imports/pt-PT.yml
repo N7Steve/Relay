@@ -102,7 +102,7 @@ pt-PT:
         account_label: Conta
         name_label: Designação
         note_label: Nota
-        no_security_provider_warning: O serviço de preços de valores mobiliários não está configurado.  As suas importações de negociações funcionarão, mas a Sure não preencherá o histórico de preços.  Vá às suas definições para configurar isto.
+        no_security_provider_warning: O serviço de preços de valores mobiliários não está configurado.  As suas importações de negociações funcionarão, mas a Relay não preencherá o histórico de preços.  Vá às suas definições para configurar isto.
         date_format_label: Formato de data
         apply_configuration: Aplicar configuração
       category_import:
@@ -361,7 +361,7 @@ pt-PT:
       merchant_import: "Importação de comerciantes"
       pdf_import: "Importação de PDF"
       document_import: "Importação de documentos"
-      sure_import: "Importação da Sure"
+      sure_import: "Importação da Relay"
     steps:
       upload: Carregar
       configure: Configurar
@@ -396,7 +396,7 @@ pt-PT:
           merchant_import: "Comerciante"
           pdf_import: "PDF"
           document_import: "Documento"
-          sure_import: "Sure"
+          sure_import: "Relay"
         status:
           in_progress: Em curso
           uploading: A processar linhas
@@ -426,7 +426,7 @@ pt-PT:
       import_rules: Importar regras
       import_transactions: Importar transações
       import_qif: Importar do Quicken (QIF)
-      import_sure: Importar da Sure
+      import_sure: Importar da Relay
       import_sure_description: Ficheiro .ndjson de exportação completa
       import_file: Importar documento
       import_file_description: Análise com IA para PDFs e carregamento de ficheiros pesquisáveis

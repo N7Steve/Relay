@@ -63,10 +63,10 @@ tr:
       in_40_days_description: Verilerinizi dışa aktarmanızı hatırlatmak için sizi
         bilgilendireceğiz.
       in_45_days: 45 gün içinde (%{date})
-      in_45_days_description: Verilerinizi siliyoruz — Sure'u burada kullanmaya devam
+      in_45_days_description: Verilerinizi siliyoruz — Relay'u burada kullanmaya devam
         etmek için katkıda bulunun!
-      title: Sure'u 45 gün deneyin
+      title: Relay'u 45 gün deneyin
       today: Bugün
-      today_description: AWS'mizde Sure'a 45 gün ücretsiz erişim elde edeceksiniz.
-      try_button: Sure'u 45 gün dene
+      today_description: AWS'mizde Relay'a 45 gün ücretsiz erişim elde edeceksiniz.
+      try_button: Relay'u 45 gün dene
       upgrade: Yükselt

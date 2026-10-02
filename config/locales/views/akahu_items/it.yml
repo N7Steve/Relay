@@ -89,7 +89,7 @@ it:
       akahu_account_already_linked: Questo conto Akahu è già collegato.
     setup_accounts:
       title: Configura conti Akahu
-      subtitle: Scegli come ogni conto Akahu deve apparire in Sure.
+      subtitle: Scegli come ogni conto Akahu deve apparire in Relay.
       no_credentials: Configura prima le credenziali Akahu.
       api_error: Impossibile recuperare i conti Akahu.
       fetch_failed: Impossibile recuperare i conti

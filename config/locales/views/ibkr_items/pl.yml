@@ -18,7 +18,7 @@ pl:
     ibkr_item:
       accounts_need_setup: Konta wymagają konfiguracji
       accounts_need_setup_description: Niektóre konta z IBKR wymagają połączenia z
-        kontami Sure.
+        kontami Relay.
       delete: Usuń
       deletion_in_progress: Trwa usuwanie
       error: Błąd
@@ -82,7 +82,7 @@ pl:
       page_title: Konfiguruj konta Interactive Brokers
       status:
         fetching_accounts: Pobieranie kont z Interactive Brokers...
-        no_accounts_found_description: Sure nie znalazł żadnych kont IBKR w najnowszym
+        no_accounts_found_description: Relay nie znalazł żadnych kont IBKR w najnowszym
           raporcie Flex.
         no_accounts_found_title: Nie znaleziono kont.
       subtitle: Wybierz, które konta maklerskie IBKR połączyć.

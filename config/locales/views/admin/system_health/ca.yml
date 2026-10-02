@@ -26,7 +26,7 @@ ca:
           queued: Notificació de prova a la cua. Actualitza els resultats de sota per comprovar-ne l'estat.
           hosted_only: Les notificacions push només estan disponibles en el mode allotjat.
           ineligible: Només un superadministrador actiu pot enviar una notificació de prova.
-          no_devices: Activa les notificacions push a l'app de Sure per a iOS per a aquest compte per enviar una prova.
+          no_devices: Activa les notificacions push a l'app de Relay per a iOS per a aquest compte per enviar una prova.
           disabled: L'operador ha desactivat l'enviament de notificacions push.
           not_configured: Les credencials d'APNs no estan configurades.
           cooldown: Espera 30 segons abans d'enviar una altra prova.
@@ -42,8 +42,8 @@ ca:
           enqueue_failed: No s'ha pogut posar a la cua; comprova Sidekiq
           expired: Ha caducat sense un resultat final
       push_notification:
-        title: Notificació de prova de Sure
-        body: Aquesta és una notificació push de prova per al teu compte de Sure.
+        title: Notificació de prova de Relay
+        body: Aquesta és una notificació push de prova per al teu compte de Relay.
       verify_worker_ai:
         queued: Comprovació del worker a la cua. Apareixerà a sota quan un procés worker l'agafi, normalment en pocs segons.
       show:
@@ -95,37 +95,37 @@ ca:
               message: L'endpoint ha acceptat el paràmetre tools, però el model ha respost amb text en lloc de cridar l'eina de comprovació. L'assistent d'IA no pot llegir dades financeres sense crides a eines, així que el xat pot respondre en blanc o amb xifres inventades. És preferible un model el proveïdor del qual documenti la compatibilitat amb la crida a funcions.
             llm_probe_failed:
               title: La comprovació en directe de l'LLM ha fallat
-              message: Sure no ha pogut verificar alhora l'endpoint i el model configurats. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
+              message: Relay no ha pogut verificar alhora l'endpoint i el model configurats. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
             llm_model_not_available:
               title: El model d'IA configurat no està disponible
               message: L'endpoint ha respost, però no ha llistat ni servit el model configurat. Tria un model actiu per al proveïdor seleccionat i torna a executar les comprovacions. Per a Gemini mitjançant una capa de traducció compatible amb OpenAI, fes servir un model admès actualment, com ara gemini-2.5-flash.
             pdf_text_extraction_failed:
               title: La comprovació d'extracció de text amb un PDF sintètic ha fallat
-              message: Sure no ha pogut completar la via d'extracció de text, que extreu localment el text incrustat del PDF i l'envia al model configurat. No s'ha enviat cap dada de clients. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
+              message: Relay no ha pogut completar la via d'extracció de text, que extreu localment el text incrustat del PDF i l'envia al model configurat. No s'ha enviat cap dada de clients. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
             pdf_vision_processing_failed:
               title: La comprovació de visió/nativa amb un PDF sintètic ha fallat
-              message: Sure no ha pogut completar la via de PDF com a imatge o document natiu amb el model configurat. No s'ha enviat cap dada de clients. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
+              message: Relay no ha pogut completar la via de PDF com a imatge o document natiu amb el model configurat. No s'ha enviat cap dada de clients. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
             vector_probe_failed:
               title: La comprovació en directe de la cerca de documents ha fallat
-              message: Sure no ha pogut verificar el magatzem vectorial seleccionat ni tots els serveis d'embeddings necessaris. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
+              message: Relay no ha pogut verificar el magatzem vectorial seleccionat ni tots els serveis d'embeddings necessaris. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
             pgvector_extension_not_enabled:
               title: L'extensió vector de PostgreSQL no està activada
               message: L'adaptador pgvector està seleccionat, però PostgreSQL no té activada l'extensió vector per a aquesta base de dades. Fes servir una imatge de PostgreSQL que inclogui pgvector, activa l'extensió com a propietari de la base de dades o superusuari i torna a executar les migracions amb VECTOR_STORE_PROVIDER=pgvector.
             pgvector_table_not_found:
               title: Falta la taula vector_store_chunks
-              message: L'extensió pgvector està activada, però no s'ha trobat la taula de fragments. Comprova l'estat de les migracions i torna a executar la migració del magatzem vectorial amb VECTOR_STORE_PROVIDER=pgvector perquè Sure pugui crear vector_store_chunks.
+              message: L'extensió pgvector està activada, però no s'ha trobat la taula de fragments. Comprova l'estat de les migracions i torna a executar la migració del magatzem vectorial amb VECTOR_STORE_PROVIDER=pgvector perquè Relay pugui crear vector_store_chunks.
             pgvector_probe_failed:
               title: La comprovació de l'emmagatzematge pgvector ha fallat
-              message: Sure no ha pogut consultar la taula de fragments de pgvector. Comprova els permisos de PostgreSQL, l'extensió vector i la migració de vector_store_chunks. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
+              message: Relay no ha pogut consultar la taula de fragments de pgvector. Comprova els permisos de PostgreSQL, l'extensió vector i la migració de vector_store_chunks. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
             embedding_dimensions_mismatch:
               title: Les dimensions de l'embedding no coincideixen
-              message: L'endpoint d'embeddings ha retornat un vector la longitud del qual no coincideix amb EMBEDDING_DIMENSIONS. Defineix EMBEDDING_MODEL i EMBEDDING_DIMENSIONS amb la mida de vector documentada del model, reinicia Sure perquè l'entorn es mantingui i, després, modifica o torna a crear la columna/taula d'embeddings de pgvector i torna a generar els embeddings dels documents si les dades existents feien servir una altra mida.
+              message: L'endpoint d'embeddings ha retornat un vector la longitud del qual no coincideix amb EMBEDDING_DIMENSIONS. Defineix EMBEDDING_MODEL i EMBEDDING_DIMENSIONS amb la mida de vector documentada del model, reinicia Relay perquè l'entorn es mantingui i, després, modifica o torna a crear la columna/taula d'embeddings de pgvector i torna a generar els embeddings dels documents si les dades existents feien servir una altra mida.
             embedding_probe_timeout:
               title: La comprovació en directe dels embeddings ha excedit el temps d'espera
-              message: L'endpoint d'embeddings no ha respost abans d'AI_HEALTH_PROBE_TIMEOUT. Augmenta aquest temps d'espera de la comprovació si el proveïdor és lent i reinicia Sure perquè l'entorn es mantingui en tots els processos. Si les crides normals al xat d'IA també excedeixen el temps d'espera, augmenta OPENAI_REQUEST_TIMEOUT per separat.
+              message: L'endpoint d'embeddings no ha respost abans d'AI_HEALTH_PROBE_TIMEOUT. Augmenta aquest temps d'espera de la comprovació si el proveïdor és lent i reinicia Relay perquè l'entorn es mantingui en tots els processos. Si les crides normals al xat d'IA també excedeixen el temps d'espera, augmenta OPENAI_REQUEST_TIMEOUT per separat.
             embedding_probe_failed:
               title: La comprovació en directe dels embeddings ha fallat
-              message: Sure no ha pogut crear un embedding breu de prova amb l'endpoint i el model configurats. Comprova EMBEDDING_URI_BASE, EMBEDDING_MODEL, EMBEDDING_ACCESS_TOKEN i els registres del proveïdor d'embeddings. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
+              message: Relay no ha pogut crear un embedding breu de prova amb l'endpoint i el model configurats. Comprova EMBEDDING_URI_BASE, EMBEDDING_MODEL, EMBEDDING_ACCESS_TOKEN i els registres del proveïdor d'embeddings. L'error s'ha registrat a Configuració → Registres de depuració i a Rails.logger.
             qdrant:
               title: La compatibilitat amb Qdrant encara no està implementada
               message: L'adaptador de Qdrant té l'estructura bàsica, però ara mateix les operacions de pujada i cerca de documents fallen. Selecciona OpenAI o pgvector per a la cerca de documents.

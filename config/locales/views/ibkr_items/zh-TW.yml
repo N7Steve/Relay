@@ -19,7 +19,7 @@ zh-TW:
       setup_accounts: 設定帳戶
       delete: 刪除
       accounts_need_setup: 帳戶需要設定
-      accounts_need_setup_description: 有些來自 IBKR 的帳戶需要連結到 Sure 的帳戶。
+      accounts_need_setup_description: 有些來自 IBKR 的帳戶需要連結到 Relay 的帳戶。
       no_accounts_discovered: 還沒有偵測到任何 IBKR 帳戶。
       no_accounts_discovered_description: 設定好您的 Flex query 之後執行一次同步，就能偵測到帳戶。
     setup_accounts:
@@ -36,7 +36,7 @@ zh-TW:
       status:
         fetching_accounts: 正在從 Interactive Brokers 取得帳戶...
         no_accounts_found_title: 找不到帳戶。
-        no_accounts_found_description: Sure 在最新的 Flex 報表中找不到任何 IBKR 帳戶。
+        no_accounts_found_description: Relay 在最新的 Flex 報表中找不到任何 IBKR 帳戶。
       available_accounts:
         title: 可用的帳戶
         account_type_investment: 投資帳戶

@@ -2,7 +2,7 @@
 hu:
   concerns:
     self_hostable:
-      redis_configured: "A Redis most megfelelően van konfigurálva! Mostantól beállíthatod a Sure alkalmazásodat."
+      redis_configured: "A Redis most megfelelően van konfigurálva! Mostantól beállíthatod a Relay alkalmazásodat."
   shared:
     dot_separator: "·"
     confirm_modal:

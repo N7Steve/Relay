@@ -80,7 +80,7 @@ pt-PT:
       no_account_selected: Selecione uma conta Up para associar.
     setup_accounts:
       title: Associar contas Up
-      subtitle: Escolha a forma como cada conta Up deve aparecer na Sure.
+      subtitle: Escolha a forma como cada conta Up deve aparecer na Relay.
       no_credentials: Configure primeiro as credenciais Up.
       api_error: Não foi possível obter as contas Up.
       fetch_failed: Não foi possível obter as contas

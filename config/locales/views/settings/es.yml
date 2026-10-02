@@ -181,7 +181,7 @@ es:
           body: ¿Estás seguro de que deseas restablecer tu cuenta? Esto eliminará todas tus cuentas, categorías, comerciantes, etiquetas y otros datos. Esta acción no se puede deshacer.
           title: ¿Restablecer cuenta?
         confirm_reset_with_sample_data:
-          body: ¿Estás seguro de que deseas restablecer tu cuenta y cargar datos de ejemplo? Esto eliminará tus datos existentes y los reemplazará con datos de demostración para que puedas explorar Sure de forma segura.
+          body: ¿Estás seguro de que deseas restablecer tu cuenta y cargar datos de ejemplo? Esto eliminará tus datos existentes y los reemplazará con datos de demostración para que puedas explorar Relay de forma segura.
           title: ¿Restablecer cuenta y cargar datos de ejemplo?
         confirm_remove_invitation:
           body: ¿Estás seguro de que deseas eliminar la invitación para %{email}?
@@ -252,16 +252,16 @@ es:
       show:
         page_title: Servidor MCP
         connect_title: Conecta un asistente de IA
-        connect_subtitle: Pega esta URL en Claude.ai (o en cualquier cliente compatible con MCP) para conectarlo a tu cuenta de Sure.
+        connect_subtitle: Pega esta URL en Claude.ai (o en cualquier cliente compatible con MCP) para conectarlo a tu cuenta de Relay.
         copy_url: Copiar
         copied: ¡Copiado!
         how_to_connect_title: Cómo conectar Claude
         step_1: Abre Claude.ai y ve a Ajustes → Integraciones.
         step_2: Haz clic en "Añadir integración" y pega la URL del servidor MCP de arriba.
-        step_3: 'Haz clic en Conectar: se te redirigirá a Sure para iniciar sesión y autorizar el acceso.'
+        step_3: 'Haz clic en Conectar: se te redirigirá a Relay para iniciar sesión y autorizar el acceso.'
         step_4: Una vez autorizado, Claude podrá leer tus cuentas, transacciones y datos de saldo.
         connected_title: Clientes conectados
-        connected_subtitle: Estas aplicaciones tienen acceso actualmente a tus datos de Sure. Revoca las que ya no uses.
+        connected_subtitle: Estas aplicaciones tienen acceso actualmente a tus datos de Relay. Revoca las que ya no uses.
         unknown_client: Cliente desconocido
         connected_ago: Conectado hace %{time}
         revoke: Revocar
@@ -324,7 +324,7 @@ es:
       not_authorized: No autorizado
       bank_sync:
         page_title: Sincronización bancaria
-        lede: Conecta cuentas externas para que las transacciones, saldos y posiciones lleguen a Sure automáticamente.
+        lede: Conecta cuentas externas para que las transacciones, saldos y posiciones lleguen a Relay automáticamente.
       status:
         ok: Conectado
         warn: Requiere acción
@@ -333,7 +333,7 @@ es:
       maturity:
         beta: Beta
         alpha: Alfa
-      drawer_trust_statement: Acceso de solo lectura. Sure nunca puede mover dinero y tus credenciales se guardan cifradas.
+      drawer_trust_statement: Acceso de solo lectura. Relay nunca puede mover dinero y tus credenciales se guardan cifradas.
       setup_steps:
         eyebrow: Configuración
         need_help: ¿Necesitas ayuda?
@@ -415,7 +415,7 @@ es:
         step2: Crea una nueva clave API solo con el permiso Enable Reading (lectura)
         step3: Pega tu API Key y tu Secret abajo
         no_withdraw_title: Solo claves de lectura
-        no_withdraw_body: No actives permisos de retirada al crear tu clave API de Binance. Sure solo necesita acceso de lectura.
+        no_withdraw_body: No actives permisos de retirada al crear tu clave API de Binance. Relay solo necesita acceso de lectura.
         ip_hint_title: Se requiere lista blanca de IP
         ip_hint_body: 'Añade la IP de salida del servidor de la aplicación a la lista blanca de la clave API de Binance:'
         ip_hint_contact_admin: Contacta con tu administrador para obtener la IP de salida del servidor de la aplicación.
@@ -436,7 +436,7 @@ es:
         step2: Crea una clave API solo con Query Funds y Query Closed Orders & Trades.
         step3: Pega la clave API y la clave privada abajo.
         read_only_title: Sincronización de exchange solo en lectura
-        read_only_body: No concedas permisos de trading, cancelación, retirada, exportación, libro mayor, Earn, staking ni transferencias. Sure solo importa saldos, posiciones y operaciones spot ejecutadas.
+        read_only_body: No concedas permisos de trading, cancelación, retirada, exportación, libro mayor, Earn, staking ni transferencias. Relay solo importa saldos, posiciones y operaciones spot ejecutadas.
         default_connection_name: Kraken
         add_connection: Añadir conexión de Kraken
         update_connection: Actualizar conexión
@@ -521,7 +521,7 @@ es:
         steps:
           step_1: En tu Client Portal de IBKR, ve a "Performance & Reports" > "Flex Queries".
           step_2: Haz clic en el icono "+" de la sección "Activity Flex Query" para crear una nueva consulta.
-          step_3: Ponle un nombre a tu consulta (p. ej. "Sure Sync"), luego revisa los detalles de la Flex Query más abajo y activa las secciones, campos y opciones de configuración indicados.
+          step_3: Ponle un nombre a tu consulta (p. ej. "Relay Sync"), luego revisa los detalles de la Flex Query más abajo y activa las secciones, campos y opciones de configuración indicados.
           step_4: Guarda la consulta, anota tu "Query ID" y usa el icono del engranaje en la sección "Flex Web Service Configuration" para generar un token de acceso.
           step_5: Pega tu Query ID y tu token abajo, guarda la configuración y luego ve a Cuentas para vincular las cuentas de IBKR detectadas.
         flex_query_details:
@@ -557,7 +557,7 @@ es:
           date_time_separator: 'Separador fecha/hora: ; (punto y coma)'
           profit_and_loss: 'Profit and Loss: Default'
           all_other_options: 'Todas las demás opciones de configuración: "No"'
-        report_window_note: Los informes Flex de IBKR se limitan a la ventana de consulta que configuraste en IBKR. Sure importará todas las posiciones actuales más hasta los últimos 365 días de actividad de este informe.
+        report_window_note: Los informes Flex de IBKR se limitan a la ventana de consulta que configuraste en IBKR. Relay importará todas las posiciones actuales más hasta los últimos 365 días de actividad de este informe.
         sync: Sincronizar
         disconnect_confirm: ¿Desconectar Interactive Brokers?
         query_id_label: Query ID

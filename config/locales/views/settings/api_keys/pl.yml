@@ -72,7 +72,7 @@ pl:
           wybranymi uprawnieniami.
         security_warning_title: Ważna informacja o bezpieczeństwie
         subtitle: Wygeneruj nowy klucz API, aby uzyskać programistyczny dostęp do
-          danych Sure.
+          danych Relay.
         title: Utwórz klucz API
       shared:
         active: Aktywny
@@ -120,7 +120,7 @@ pl:
           your_api_key: Twój klucz API
         no_api_key:
           create_api_key: Utwórz klucz API
-          description: Uzyskaj programowy dostęp do danych Sure za pomocą bezpiecznego
+          description: Uzyskaj programowy dostęp do danych Relay za pomocą bezpiecznego
             klucza API.
           feature_1: Uzyskiwać programowy dostęp do danych konta
           feature_2: Budować własne integracje i aplikacje

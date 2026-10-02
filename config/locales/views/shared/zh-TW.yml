@@ -2,7 +2,7 @@
 zh-TW:
   concerns:
     self_hostable:
-      redis_configured: Redis 已經設定好了！現在可以開始設定您的 Sure 應用程式。
+      redis_configured: Redis 已經設定好了！現在可以開始設定您的 Relay 應用程式。
   shared:
     dot_separator: "·"
     preview: 預覽

@@ -100,7 +100,7 @@ tr:
       no_account_selected: Bağlamak için bir Monobank hesabı seçin.
     setup_accounts:
       title: Monobank Hesaplarını Bağla
-      subtitle: Her Monobank kartının veya kumbarasının Sure'da nasıl görüneceğini seçin.
+      subtitle: Her Monobank kartının veya kumbarasının Relay'da nasıl görüneceğini seçin.
       no_credentials: Önce Monobank kimlik bilgilerini yapılandırın.
       api_error: Hesaplar Monobank'tan yenilenemedi; bu nedenle son senkronizasyonda kaydedilen hesaplar gösteriliyor.
       no_accounts_to_setup: Kurulacak hesap yok

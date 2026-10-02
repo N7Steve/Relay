@@ -2,8 +2,8 @@
 pt-PT:
   goal_pledges:
     new:
-      helper_transfer: A Sure procurará um depósito correspondente na sua conta associada. O compromisso permanece por confirmar durante 7 dias e é confirmado automaticamente quando a Sure o detetar.
-      helper_manual: A Sure registará isto na próxima vez que atualizar o saldo manualmente e confirmará a contribuição.
+      helper_transfer: A Relay procurará um depósito correspondente na sua conta associada. O compromisso permanece por confirmar durante 7 dias e é confirmado automaticamente quando a Relay o detetar.
+      helper_manual: A Relay registará isto na próxima vez que atualizar o saldo manualmente e confirmará a contribuição.
       amount_label: Montante
       account_label: Para a conta
       submit: Registar contribuição
@@ -11,7 +11,7 @@ pt-PT:
       preview_nonzero: "Atinge {percent}%, {newTotal} de {target}."
       preview_reached: "Atinge o seu objetivo de {target}. Objetivo alcançado."
     create:
-      success: Contribuição registada. A Sure confirmá-la-á na próxima sincronização.
+      success: Contribuição registada. A Relay confirmá-la-á na próxima sincronização.
     renew:
       success: Janela do compromisso alargada 7 dias.
       not_open: Apenas compromissos por confirmar podem ser alargados.

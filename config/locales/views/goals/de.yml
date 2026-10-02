@@ -135,7 +135,7 @@ de:
       new_goal: Neues Ziel
       ongoing_section:
         heading: Ziele
-      pending_pledges_callout: Du hast offene Zusagen. Sure bestätigt sie beim nächsten Sync.
+      pending_pledges_callout: Du hast offene Zusagen. Relay bestätigt sie beim nächsten Sync.
       search:
         aria_label: Ziele suchen
         clear_search: Suche zurücksetzen
@@ -190,7 +190,7 @@ de:
       delete: Löschen
       edit: Bearbeiten
       empty:
-        body: Überweis Geld auf dein verknüpftes Konto. Sure erkennt es beim nächsten Sync. Oder aktualisier den Saldo deines manuellen Kontos.
+        body: Überweis Geld auf dein verknüpftes Konto. Relay erkennt es beim nächsten Sync. Oder aktualisier den Saldo deines manuellen Kontos.
         heading: Noch keine Einzahlungen
       funding_accounts:
         earmarked_of: "%{earmarked} von %{balance} vorgemerkt"
@@ -220,7 +220,7 @@ de:
         title: Dieses Ziel ist pausiert
       pending_pledge:
         body_manual: Bestätigt sich, sobald du den Saldo das nächste Mal selbst anpasst.
-        body_transfer: Bestätigt sich automatisch, sobald Sure beim nächsten Sync eine passende Einzahlung findet.
+        body_transfer: Bestätigt sich automatisch, sobald Relay beim nächsten Sync eine passende Einzahlung findet.
         cancel: Abbrechen
         confirm_cancel_body: Die Zusage über %{amount} wird entfernt. Du kannst jederzeit eine neue erfassen.
         confirm_cancel_cta: Zusage zurückziehen

@@ -96,7 +96,7 @@ pl:
         leave_empty: Zostaw puste
         name_label: Nazwa
         no_security_provider_warning: Dostawca cen papierów wartościowych nie jest
-          skonfigurowany. Import transakcji zadziała, ale Sure nie uzupełni historii
+          skonfigurowany. Import transakcji zadziała, ale Relay nie uzupełni historii
           cen. Skonfiguruj to w ustawieniach.
         note_label: Notatka
         price_label: Cena
@@ -404,7 +404,7 @@ pl:
       import_portfolio: Importuj inwestycje
       import_qif: Importuj z Quicken (QIF)
       import_rules: Importuj reguły
-      import_sure: Importuj z Sure
+      import_sure: Importuj z Relay
       import_sure_description: Pełny plik eksportu .ndjson
       import_transactions: Importuj transakcje
       import_ynab: Importuj z YNAB
@@ -590,7 +590,7 @@ pl:
           pdf_import: PDF
           qif_import: QIF
           rule_import: Reguła
-          sure_import: Sure
+          sure_import: Relay
           trade_import: Transakcja giełdowa
           transaction_import: Transakcja
           ynab_import: YNAB
@@ -605,7 +605,7 @@ pl:
       pdf_import: Import PDF
       qif_import: Import QIF
       rule_import: Import reguł
-      sure_import: Import z Sure
+      sure_import: Import z Relay
       trade_import: Import transakcji giełdowych
       transaction_import: Import transakcji
       ynab_import: Import z YNAB

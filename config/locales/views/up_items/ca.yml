@@ -80,7 +80,7 @@ ca:
       no_account_selected: Selecciona un compte Up per enllaçar.
     setup_accounts:
       title: Enllaça comptes Up
-      subtitle: Tria com vols que aparegui cada compte Up a Sure.
+      subtitle: Tria com vols que aparegui cada compte Up a Relay.
       no_credentials: Primer, configura les credencials d'Up.
       api_error: No s'han pogut obtenir els comptes Up.
       fetch_failed: No s'han pogut obtenir els comptes

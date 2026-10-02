@@ -139,10 +139,10 @@ tr:
         revoked: Bağlantı iptal edildi.
       show:
         connect_subtitle: Bu URL'yi Claude.ai'ye (veya herhangi bir MCP uyumlu istemciye)
-          yapıştırarak Sure hesabınıza bağlayın.
+          yapıştırarak Relay hesabınıza bağlayın.
         connect_title: Bir yapay zeka asistanı bağlayın
         connected_ago: "%{time} önce bağlandı"
-        connected_subtitle: Bu uygulamalar şu anda Sure verilerinize erişebiliyor.
+        connected_subtitle: Bu uygulamalar şu anda Relay verilerinize erişebiliyor.
           Artık kullanmadıklarınızın erişimini iptal edin.
         connected_title: Bağlı istemciler
         copied: Kopyalandı!
@@ -154,7 +154,7 @@ tr:
         step_1: Claude.ai'yi açın ve Ayarlar → Özelleştir → Bağlayıcılar'a gidin.
         step_2: '"Bağlayıcı ekle"ye tıklayın ve yukarıdaki MCP sunucu URL''sini
           yapıştırın.'
-        step_3: Bağlan'a tıklayın — giriş yapmak ve erişimi yetkilendirmek için Sure'a
+        step_3: Bağlan'a tıklayın — giriş yapmak ve erişimi yetkilendirmek için Relay'a
           yönlendirileceksiniz.
         step_4: Yetkilendirildikten sonra Claude, hesaplarınızı, işlemlerinizi ve
           bakiye verilerinizi okuyabilir.
@@ -269,7 +269,7 @@ tr:
           title: Hesap sıfırlansın mı?
         confirm_reset_with_sample_data:
           body: Hesabınızı sıfırlamak ve örnek veri yüklemek istediğinizden emin misiniz?
-            Bu işlem mevcut verilerinizi silecek ve Sure'u güvenle keşfedebilmeniz
+            Bu işlem mevcut verilerinizi silecek ve Relay'u güvenle keşfedebilmeniz
             için demo verilerle değiştirecektir.
           title: Hesap sıfırlansın ve örnek veri yüklensin mi?
         danger_zone_title: Tehlikeli Alan
@@ -302,7 +302,7 @@ tr:
           hesabınızı koruyacaktır.
         reset_account_with_sample_data: Hesabı sıfırla ve örnek veri yükle
         reset_account_with_sample_data_warning: Hesabınızı sıfırlamak mevcut tüm verilerinizi
-          silecek ve önceden doldurulmuş bir ortamda Sure'u keşfedebilmeniz için yeni
+          silecek ve önceden doldurulmuş bir ortamda Relay'u keşfedebilmeniz için yeni
           örnek veriler yükleyecektir.
         save: Kaydet
         unconfirmed_email_notice_html: E-postanızı %{email} olarak değiştirmeyi talep
@@ -315,7 +315,7 @@ tr:
         step_3: Token'ları aşağıya yapıştırın, kaydedin, ardından senkronize hesaplarınızı
           bağlayın.
       bank_sync:
-        lede: İşlemlerin, bakiyelerin ve varlıkların otomatik olarak Sure'a akması
+        lede: İşlemlerin, bakiyelerin ve varlıkların otomatik olarak Relay'a akması
           için harici hesapları bağlayın.
         page_title: Banka senkronizasyonu
       binance_panel:
@@ -333,7 +333,7 @@ tr:
           iletişime geçin.
         ip_hint_title: IP beyaz listeye alma gerekli
         no_withdraw_body: Binance API anahtarınızı oluştururken çekme izinlerini etkinleştirmeyin.
-          Sure yalnızca okuma erişimine ihtiyaç duyar.
+          Relay yalnızca okuma erişimine ihtiyaç duyar.
         no_withdraw_title: Yalnızca salt okunur anahtar
         setup_instructions: 'Binance''ı bağlamak için salt okunur bir API anahtarı
           oluşturun:'
@@ -367,7 +367,7 @@ tr:
         sync: Senkronize et
         syncing: Senkronize ediliyor...
       connect: Bağlan
-      drawer_trust_statement: Salt okunur erişim. Sure asla para transferi yapamaz
+      drawer_trust_statement: Salt okunur erişim. Relay asla para transferi yapamaz
         ve kimlik bilgileriniz şifrelenmiş olarak saklanır.
       empty_filter: Filtrenizle eşleşen sağlayıcı yok.
       enable_banking_panel:
@@ -439,7 +439,7 @@ tr:
         query_id_placeholder_existing: Mevcut Sorgu ID'sini korumak için boş bırakın
         query_id_placeholder_new: IBKR Flex Query ID'nizi girin
         report_window_note: IBKR Flex raporları, IBKR'de yapılandırdığınız sorgu penceresiyle
-          sınırlıdır. Sure, bu rapordan mevcut tüm varlıkları ve son 365 güne kadar
+          sınırlıdır. Relay, bu rapordan mevcut tüm varlıkları ve son 365 güne kadar
           olan işlem geçmişini içe aktaracaktır.
         save_configuration: Yapılandırmayı Kaydet
         sections:
@@ -474,7 +474,7 @@ tr:
             bölümüne gidin.
           step_2: Yeni bir sorgu oluşturmak için "Activity Flex Query" bölümündeki
             "+" simgesine tıklayın.
-          step_3: Sorgunuza bir ad verin (ör. "Sure Sync"), ardından aşağıdaki Flex
+          step_3: Sorgunuza bir ad verin (ör. "Relay Sync"), ardından aşağıdaki Flex
             Query ayrıntılarını inceleyin ve listelenen bölümleri, alanları ve yapılandırma
             seçeneklerini etkinleştirin.
           step_4: Sorguyu kaydedin, "Query ID"nizi not edin, ardından bir erişim Token'ı
@@ -502,7 +502,7 @@ tr:
         keep_api_key_placeholder: Mevcut API anahtarını korumak için boş bırakın
         keep_api_secret_placeholder: Mevcut özel anahtarı korumak için boş bırakın
         read_only_body: İşlem yapma, iptal etme, çekme, dışa aktarma, defter, Earn,
-          stake etme veya transfer izinleri vermeyin. Sure yalnızca bakiyeleri, varlıkları
+          stake etme veya transfer izinleri vermeyin. Relay yalnızca bakiyeleri, varlıkları
           ve spot işlem gerçekleşmelerini içe aktarır.
         read_only_title: Salt okunur borsa senkronizasyonu
         setup_accounts: Hesabı kur
@@ -626,7 +626,7 @@ tr:
       update:
         no_changes: Herhangi bir değişiklik yapılmadı
         updated_successfully: Sağlayıcı ayarları başarıyla güncellendi
-      drawer_trust_statement_encryption_unconfigured: Salt okunur erişim. Sure asla para transferi yapamaz. Üretim ortamında sağlayıcı kimlik bilgilerini saklamadan önce açık şifreleme anahtarlarını yapılandırın.
+      drawer_trust_statement_encryption_unconfigured: Salt okunur erişim. Relay asla para transferi yapamaz. Üretim ortamında sağlayıcı kimlik bilgilerini saklamadan önce açık şifreleme anahtarlarını yapılandırın.
       provider_setup_encryption_warning:
         title: Şifreleme anahtarları eksik
         message: Bu kendi sunucunuzda barındırılan kurulumda açık Active Record şifreleme anahtarları yapılandırılmamış. Üretim ortamında sağlayıcı kimlik bilgilerini kaydetmeden önce primary_key, deterministic_key ve key_derivation_salt değerlerini yapılandırın.
@@ -635,7 +635,7 @@ tr:
         step2: Bakiyelere ve geçmişe salt okunur erişimi olan bir API anahtarı oluşturun.
         step3: API anahtarını ve gizli anahtarı aşağıya yapıştırın.
         read_only_title: Salt okunur borsa senkronizasyonu
-        read_only_body: Gönderme, para çekme, alım satım veya transfer izinleri vermeyin. Sure yalnızca bakiyeleri, AUD değerlerini, transferleri, para yatırma, para çekme ve tamamlanmış emir geçmişini içe aktarır.
+        read_only_body: Gönderme, para çekme, alım satım veya transfer izinleri vermeyin. Relay yalnızca bakiyeleri, AUD değerlerini, transferleri, para yatırma, para çekme ve tamamlanmış emir geçmişini içe aktarır.
         default_connection_name: CoinSpot
         add_connection: CoinSpot bağlantısı ekle
         update_connection: Bağlantıyı güncelle
@@ -662,7 +662,7 @@ tr:
         etherscan_hint: Ethereum verileri anahtar olmadan da okunabilir. Etherscan anahtarı eklemek yalnızca Ethereum için hız sınırını yükseltir.
         keep_etherscan_api_key: Mevcut anahtarı korumak için boş bırakın
         manage_wallets: Cüzdanları yönet
-        keyless_body: Sure yalnızca herkese açık zincir verilerini okur. Hiçbir anahtar, kurtarma ifadesi veya imza kullanılmaz ve hiçbir şey harcanamaz.
+        keyless_body: Relay yalnızca herkese açık zincir verilerini okur. Hiçbir anahtar, kurtarma ifadesi veya imza kullanılmaz ve hiçbir şey harcanamaz.
         keyless_title: Salt okunur, anahtar gerekmez
         save: Kaydet
         sync_start_date_hint: Bu tarihten önceki transferler yok sayılır. Blok gezgininin bildirdiği her şeyi içe aktarmak için boş bırakın.
@@ -695,10 +695,10 @@ tr:
         complete_login: Devam et
         authenticator_code_label: Doğrulama kodu (istenirse)
         authenticator_code_placeholder: 6 haneli kod
-        push_login_notice: Girişi şimdi Trade Republic uygulamanızda onaylayın. Sure arka planda otomatik olarak kontrol eder. Durumu kendiniz de kontrol edebilirsiniz.
+        push_login_notice: Girişi şimdi Trade Republic uygulamanızda onaylayın. Relay arka planda otomatik olarak kontrol eder. Durumu kendiniz de kontrol edebilirsiniz.
         check_login_status: Durumu şimdi kontrol et
         authenticator_code_notice: Doğrulama uygulamanızdaki kodu girin.
-        approval_pending: Giriş başlatıldı. Trade Republic uygulamasında onaylayın; Sure otomatik olarak kontrol ediyor.
+        approval_pending: Giriş başlatıldı. Trade Republic uygulamasında onaylayın; Relay otomatik olarak kontrol ediyor.
         awaiting_confirmation: Trade Republic uygulamasında onay bekleniyor.
         awaiting_authenticator_code: Doğrulama kodu gerekli.
         login_expired: Onay isteğinin süresi doldu.
@@ -706,14 +706,14 @@ tr:
         connection_success:
           title: Trade Republic başarıyla bağlandı
           message: Trade Republic bağlantınız hazır.
-          description: Sure, Trade Republic verilerinizi arka planda senkronize ediyor.
+          description: Relay, Trade Republic verilerinizi arka planda senkronize ediyor.
           close: Bitti
         qr_login: QR kodla giriş yap
         qr_cancel: QR girişini iptal et
         qr_back_to_credentials: Telefon numarası ve PIN'e veya şifreye dön
         qr_loading: QR kod hazırlanıyor …
         qr_instruction: QR kodu Trade Republic uygulamanızla tarayın ve girişi onaylayın.
-        qr_success: Giriş onaylandı. Sure sağlayıcı sayfasını yeniliyor.
+        qr_success: Giriş onaylandı. Relay sağlayıcı sayfasını yeniliyor.
         qr_error: QR girişi başlatılamadı. Lütfen tekrar deneyin.
         add_account: "Başka bir bağlantı ekle"
         save_configuration: Kaydet ve Girişi Başlat

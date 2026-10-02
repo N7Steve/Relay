@@ -103,9 +103,9 @@ it:
       disconnect_confirm: "Disconnettere %{name}?"
       encryption_warning:
         title: La crittografia del database non è configurata
-        message: Configura le chiavi di crittografia di Active Record prima di aggiungere token Brex in produzione. Senza chiavi di crittografia, Sure archivia le credenziali del provider Brex in chiaro.
+        message: Configura le chiavi di crittografia di Active Record prima di aggiungere token Brex in produzione. Senza chiavi di crittografia, Relay archivia le credenziali del provider Brex in chiaro.
       instructions:
-        copy_token_html: "Copia il token e aggiungilo come connessione nominata qui sotto. Sure memorizza il token solo per sincronizzare questa famiglia."
+        copy_token_html: "Copia il token e aggiungilo come connessione nominata qui sotto. Relay memorizza il token solo per sincronizzare questa famiglia."
         create_token: "Crea un token API con questi scope in sola lettura: accounts.cash.readonly, accounts.card.readonly, transactions.cash.readonly, transactions.card.readonly"
         open_tokens: Vai alle impostazioni sviluppatore/token API Brex per l'azienda che vuoi connettere
         sign_in_html: "Visita %{link} e accedi all'account che vuoi connettere"

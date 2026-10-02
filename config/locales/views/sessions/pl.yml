@@ -37,7 +37,7 @@ pl:
       password: Hasło
       password_placeholder: Wpisz hasło
       submit: Zaloguj się
-      title: Sure
+      title: Relay
     openid_connect:
       account_linked: Konto zostało pomyślnie połączone z %{provider}
       failed: Nie udało się uwierzytelnić przez OpenID Connect.

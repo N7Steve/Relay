@@ -103,7 +103,7 @@ en:
         file_missing: The linked file was deleted, moved to trash, or is no longer accessible.
         permission_denied: Google no longer allows this application to update the file.
         access_changed: Your account access changed. Review the selected accounts.
-        transient_error: Google Drive is temporarily unavailable. Sure will retry the job.
+        transient_error: Google Drive is temporarily unavailable. Relay will retry the job.
         export_failed: The export failed. Review the settings and try again.
   activerecord:
     errors:

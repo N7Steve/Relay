@@ -85,7 +85,7 @@ de:
         format_label: Format
         leave_empty: Leer lassen
         name_label: Name
-        no_security_provider_warning: Der Anbieter für Wertpapierkurse ist nicht eingerichtet. Deine Trade-Importe funktionieren trotzdem, Sure ergänzt aber keine Kurshistorie. Richte den Anbieter in den Einstellungen ein.
+        no_security_provider_warning: Der Anbieter für Wertpapierkurse ist nicht eingerichtet. Deine Trade-Importe funktionieren trotzdem, Relay ergänzt aber keine Kurshistorie. Richte den Anbieter in den Einstellungen ein.
         note_label: Notiz
         price_label: Kurs
         quantity_label: Stückzahl
@@ -284,7 +284,7 @@ de:
           pdf_import: PDF
           qif_import: QIF
           rule_import: Regel
-          sure_import: Sure
+          sure_import: Relay
           trade_import: Trade
           transaction_import: Transaktion
           ynab_import: YNAB
@@ -306,7 +306,7 @@ de:
       title: Neuer CSV-Import
       import_actual: Aus Actual Budget importieren
       import_merchants: Händler importieren
-      import_sure: Aus Sure importieren
+      import_sure: Aus Relay importieren
       import_sure_description: Vollexport als .ndjson-Datei
       import_ynab: Aus YNAB importieren
       tab_financial_tools: Finanz-Tools & Dateien
@@ -479,7 +479,7 @@ de:
       pdf_import: PDF-Import
       qif_import: QIF-Import
       rule_import: Regelimport
-      sure_import: Sure-Import
+      sure_import: Relay-Import
       trade_import: Trade-Import
       transaction_import: Transaktionsimport
       ynab_import: YNAB-Import

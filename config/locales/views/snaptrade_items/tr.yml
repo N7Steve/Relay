@@ -45,7 +45,7 @@ tr:
       oauth_connect_button: SnapTrade ile bağlan
       oauth_reauthorize_button: Yeniden yetkilendir
       oauth_status_authorized: SnapTrade ile yetkilendirildi.
-      oauth_status_ready: SnapTrade hesap verilerinizi okuması için Sure'u yetkilendirin.
+      oauth_status_ready: SnapTrade hesap verilerinizi okuması için Relay'u yetkilendirin.
       oauth_title: SnapTrade OAuth
       orphaned_connection: Yetim bağlantı (yerel olarak senkronize edilmedi)
       orphaned_user: Yetim Kayıt
@@ -74,7 +74,7 @@ tr:
       oauth_setup_step_1_html: <a href="https://dashboard.snaptrade.com" target="_blank" rel="noopener noreferrer" class="underline">dashboard.snaptrade.com</a> adresinde bir OAuth uygulaması kaydedin
       oauth_setup_step_2_html: 'Yalnızca tarayıcı akışı için: bu uygulamanın geri çağırma URL''sini (<code>%{callback_url}</code>) kayıtlı bir yönlendirme URI''si olarak ekleyin'
       oauth_setup_step_3: Ortamınızda SNAPTRADE_OAUTH_CLIENT_ID değerini ayarlayıp yeniden başlatın. Cihaz kodu akışı için bu yeterlidir; tarayıcı akışı için SNAPTRADE_OAUTH_CLIENT_SECRET de ekleyin
-      oauth_status_ready_device: SnapTrade hesap verilerinizi okuması için Sure'u bir cihaz koduyla yetkilendirin.
+      oauth_status_ready_device: SnapTrade hesap verilerinizi okuması için Relay'u bir cihaz koduyla yetkilendirin.
       oauth_device_button: Cihaz kodu kullan
       manage_at_snaptrade: Bağlantıları SnapTrade'de yönet
   snaptrade_item:
@@ -162,7 +162,7 @@ tr:
         tekrar deneyin.
       open_snaptrade: SnapTrade'i aç
       start_button: Yetkilendirmeyi başlat
-      subtitle: Sure'u SnapTrade için bir cihaz koduyla yetkilendirin.
+      subtitle: Relay'u SnapTrade için bir cihaz koduyla yetkilendirin.
       title: SnapTrade'e Bağlan
     preload_accounts:
       not_configured: SnapTrade yapılandırılmamış.
@@ -240,7 +240,7 @@ tr:
       requires_update: Bağlantının güncellenmesi gerekiyor
       setup_accounts_menu: Hesapları Kur
       setup_action: Hesapları Kur
-      setup_description: SnapTrade'den bazı hesapların Sure hesaplarıyla bağlanması
+      setup_description: SnapTrade'den bazı hesapların Relay hesaplarıyla bağlanması
         gerekiyor.
       setup_needed: Hesapların kurulması gerekiyor
       status: 'Son senkronizasyon: %{timestamp} önce - %{summary}'

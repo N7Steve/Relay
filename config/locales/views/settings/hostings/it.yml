@@ -57,7 +57,7 @@ it:
           tinkoff_invest: T-Invest (T-Bank)
       assistant_settings:
         title: Assistente IA
-        description: Scegli come risponde l'assistente chat. Integrato usa il tuo provider LLM configurato direttamente. Esterno delega a un agente IA remoto che può richiamare gli strumenti finanziari di Sure tramite MCP.
+        description: Scegli come risponde l'assistente chat. Integrato usa il tuo provider LLM configurato direttamente. Esterno delega a un agente IA remoto che può richiamare gli strumenti finanziari di Relay tramite MCP.
         type_label: Tipo di assistente
         type_builtin: Integrato (LLM diretto)
         type_external: Esterno (agente remoto)

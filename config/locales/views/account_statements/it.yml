@@ -75,7 +75,7 @@ it:
       difference: Differenza
       download: Scarica
       institution_name_hint: Suggerimento istituzione
-      ledger_amount: Libro contabile Sure
+      ledger_amount: Libro contabile Relay
       linked_to: Collegato a %{account}.
       linking_title: Collegamento conto
       link_suggestion: Suggerimento collegamento
@@ -85,7 +85,7 @@ it:
       period_end_on: Fine periodo
       period_start_on: Inizio periodo
       reconciliation_title: Riconciliazione
-      reconciliation_unavailable: Aggiungi un periodo e il saldo iniziale o finale dell'estratto, poi assicurati che Sure abbia la cronologia saldi per quelle date.
+      reconciliation_unavailable: Aggiungi un periodo e il saldo iniziale o finale dell'estratto, poi assicurati che Relay abbia la cronologia saldi per quelle date.
       reject: Rifiuta
       save: Salva estratto conto
       statement_amount: Estratto conto

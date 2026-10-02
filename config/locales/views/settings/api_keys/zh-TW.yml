@@ -67,7 +67,7 @@ zh-TW:
         no_api_key:
           title: API 金鑰
           heading: 用程式存取您的帳戶資料
-          description: 透過安全的 API 金鑰，用程式存取您的 Sure 資料。
+          description: 透過安全的 API 金鑰，用程式存取您的 Relay 資料。
           what_you_can_do: 您可以使用 API 執行以下操作：
           feature_1: 以程式化方式存取您的帳戶資料
           feature_2: 建立自訂整合功能與應用程式
@@ -78,7 +78,7 @@ zh-TW:
       new:
         title: 建立 API 金鑰
         create_new_api_key: 建立新的 API 金鑰
-        subtitle: 產生一組新的 API 金鑰，以程式化的方式存取您的 Sure 資料。
+        subtitle: 產生一組新的 API 金鑰，以程式化的方式存取您的 Relay 資料。
         description: 為您的新 API 金鑰設定一個易於辨識的名稱與適當的權限。
         name_label: API 金鑰名稱
         name_placeholder: 例如：My Budget App、Portfolio Tracker

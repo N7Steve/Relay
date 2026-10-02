@@ -19,7 +19,7 @@ uk:
       setup_accounts: "Налаштувати рахунки"
       delete: "Видалити"
       accounts_need_setup: "Рахунки потребують налаштування"
-      accounts_need_setup_description: "Деякі рахунки з IBKR потрібно прив'язати до рахунків Sure."
+      accounts_need_setup_description: "Деякі рахунки з IBKR потрібно прив'язати до рахунків Relay."
       no_accounts_discovered: "Рахунків IBKR ще не знайдено."
       no_accounts_discovered_description: "Запустіть синхронізацію після налаштування вашого запиту Flex, щоб знайти рахунки."
     setup_accounts:
@@ -36,7 +36,7 @@ uk:
       status:
         fetching_accounts: "Отримання рахунків з Interactive Brokers..."
         no_accounts_found_title: "Рахунків не знайдено."
-        no_accounts_found_description: "Sure не зміг знайти жодного рахунку IBKR в останньому звіті Flex."
+        no_accounts_found_description: "Relay не зміг знайти жодного рахунку IBKR в останньому звіті Flex."
       available_accounts:
         title: "Доступні рахунки"
         account_type_investment: "Інвестиції"

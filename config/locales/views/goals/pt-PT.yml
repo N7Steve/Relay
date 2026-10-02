@@ -12,7 +12,7 @@ pt-PT:
       subtitle: Poupe para o que realmente importa.
       new_goal: Novo objetivo
       empty_filtered: Nenhum objetivo encontrado.
-      pending_pledges_callout: Tem contribuições prometidas por confirmar. Sure confirmá-las-á na próxima sincronização.
+      pending_pledges_callout: Tem contribuições prometidas por confirmar. Relay confirmá-las-á na próxima sincronização.
       kpi:
         contributed_label: Contribuído · últimos 30 dias
         velocity_delta_up: "↑ %{percent}%% vs. 30 dias anteriores"
@@ -156,7 +156,7 @@ pt-PT:
           zero: "Por confirmar: %{amount} em %{account} · expira hoje"
           one: "Por confirmar: %{amount} em %{account} · falta 1 dia"
           other: "Por confirmar: %{amount} em %{account} · faltam %{count} dias"
-        body_transfer: Confirma-se automaticamente quando a Sure detetar um depósito correspondente na próxima sincronização.
+        body_transfer: Confirma-se automaticamente quando a Relay detetar um depósito correspondente na próxima sincronização.
         body_manual: Confirma-se na próxima vez que atualizar o saldo manualmente.
         pledged_at: "Contribuição registada há %{time_ago}"
         extend: Alargar 7 dias
@@ -235,7 +235,7 @@ pt-PT:
         cta: Definir data-alvo
       empty:
         heading: Ainda não existem depósitos
-        body: Faça uma transferência para a sua conta associada. A Sure detetá-la-á na próxima sincronização. Ou atualize o saldo da sua conta manualmente.
+        body: Faça uma transferência para a sua conta associada. A Relay detetá-la-á na próxima sincronização. Ou atualize o saldo da sua conta manualmente.
     errors:
       not_found: Não foi possível encontrar este objetivo. Pode ter sido eliminado.
     states:

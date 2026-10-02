@@ -103,9 +103,9 @@ zh-TW:
       disconnect_confirm: 確定要中斷 %{name} 嗎？
       encryption_warning:
         title: 資料庫加密未設定
-        message: 在正式環境加入 Brex Token 之前，請先設定 Active Record 加密金鑰。沒有加密金鑰時，Sure 會像其他供應商的紀錄一樣，以明文儲存 Brex 的憑證與快照。
+        message: 在正式環境加入 Brex Token 之前，請先設定 Active Record 加密金鑰。沒有加密金鑰時，Relay 會像其他供應商的紀錄一樣，以明文儲存 Brex 的憑證與快照。
       instructions:
-        copy_token_html: 複製 Token，並在下方新增成一個具名連線。Sure 只會為了同步這個家庭而儲存這組 Token。
+        copy_token_html: 複製 Token，並在下方新增成一個具名連線。Relay 只會為了同步這個家庭而儲存這組 Token。
         create_token: 建立一組具備這些唯讀 scope 的 API Token：accounts.cash.readonly、accounts.card.readonly、transactions.cash.readonly、transactions.card.readonly
         open_tokens: 前往您想連結的那家公司的 Brex 開發者／API Token 設定
         sign_in_html: 前往 %{link} 並登入您想連結的帳號

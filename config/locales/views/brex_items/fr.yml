@@ -125,13 +125,13 @@ fr:
       disconnect_label: Déconnecter %{name}
       encryption_warning:
         message: Configurez les clés de chiffrement Active Record avant d’ajouter
-          des jetons Brex en production. Sans clés de chiffrement, Sure stocke les
+          des jetons Brex en production. Sans clés de chiffrement, Relay stocke les
           informations d’identification et les instantanés du fournisseur Brex en
           texte brut, comme les enregistrements des autres fournisseurs.
         title: Le chiffrement de la base de données n'est pas configuré
       instructions:
         copy_token_html: Copiez le jeton et ajoutez-le en tant que connexion nommée
-          ci-dessous. Sure stocke le jeton uniquement pour synchroniser cette
+          ci-dessous. Relay stocke le jeton uniquement pour synchroniser cette
           entreprise.
         create_token: 'Créez un jeton API avec ces étendues en lecture seule : accounts.cash.readonly,
           accounts.card.readonly, transactions.cash.readonly, transactions.card.readonly'

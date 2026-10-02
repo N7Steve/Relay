@@ -101,7 +101,7 @@ de:
       add_another_brokerage: "Weiteren Broker verbinden"
       delete: "Löschen"
       setup_needed: "Konten müssen eingerichtet werden"
-      setup_description: "Einige Konten von SnapTrade müssen Sure-Konten zugeordnet werden."
+      setup_description: "Einige Konten von SnapTrade müssen Relay-Konten zugeordnet werden."
       setup_action: "Konten einrichten"
       setup_accounts_menu: "Konten einrichten"
       manage_connections: "Verbindungen verwalten"
@@ -119,7 +119,7 @@ de:
       success: SnapTrade-Freigabe abgeschlossen.
     oauth_device_flow:
       title: SnapTrade verbinden
-      subtitle: Gib Sure mit einem Gerätecode den Zugriff auf SnapTrade frei.
+      subtitle: Gib Relay mit einem Gerätecode den Zugriff auf SnapTrade frei.
       instructions: Öffne SnapTrade, bestätige diesen Gerätecode und komm dann hierher zurück, um die Freigabe abzuschließen.
       code_label: Gerätecode
       open_snaptrade: SnapTrade öffnen
@@ -175,8 +175,8 @@ de:
       oauth_setup_step_2_html: "Nur für die Browser-Freigabe: Trag die Callback-URL dieser App (<code>%{callback_url}</code>) als zulässige Redirect-URI ein"
       oauth_setup_step_3: Setz SNAPTRADE_OAUTH_CLIENT_ID in deiner Umgebung und starte neu. Das allein aktiviert die Freigabe per Gerätecode. Füg für die Browser-Freigabe zusätzlich SNAPTRADE_OAUTH_CLIENT_SECRET hinzu.
       oauth_status_authorized: Bei SnapTrade freigegeben.
-      oauth_status_ready: Gib Sure den Lesezugriff auf deine SnapTrade-Kontodaten frei.
-      oauth_status_ready_device: Gib Sure mit einem Gerätecode Lesezugriff auf deine SnapTrade-Kontodaten.
+      oauth_status_ready: Gib Relay den Lesezugriff auf deine SnapTrade-Kontodaten frei.
+      oauth_status_ready_device: Gib Relay mit einem Gerätecode Lesezugriff auf deine SnapTrade-Kontodaten.
       oauth_title: SnapTrade OAuth
 
   snaptrade_item:

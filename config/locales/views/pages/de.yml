@@ -106,20 +106,20 @@ de:
       title: Feedback
     intro:
       coming_soon: Die Einführung kommt bald
-      description: 'Wir bauen gerade einen ausführlicheren Einstieg, der deine Ziele, Meilensteine und den Alltag kennenlernt. Bis dahin: Öffne die Chat-Leiste und erzähl Sure, wo du finanziell gerade stehst.'
+      description: 'Wir bauen gerade einen ausführlicheren Einstieg, der deine Ziele, Meilensteine und den Alltag kennenlernt. Bis dahin: Öffne die Chat-Leiste und erzähl Relay, wo du finanziell gerade stehst.'
       not_authorized: Die Einführung gibt es nur für Gastnutzer.
       start_chatting: Chat starten
       welcome: Willkommen!
     redis_configuration_error:
       heading: Redis muss eingerichtet werden
-      page_title: Redis muss eingerichtet werden – Sure
+      page_title: Redis muss eingerichtet werden – Relay
       refresh_hint: Sobald Redis läuft, lade diese Seite neu.
       refresh_page: Seite neu laden
       setup_guide_hint: Folge unserer Docker-Anleitung, um Redis einzurichten
-      subheading: Deine selbst gehostete Sure-Installation braucht ein richtig eingerichtetes Redis.
+      subheading: Deine selbst gehostete Relay-Installation braucht ein richtig eingerichtetes Redis.
       view_setup_guide: Anleitung öffnen
-      why_required_body: 'Sure nutzt Redis für die Sidekiq-Hintergrundjobs: Kontodaten abgleichen, Importe verarbeiten und alles andere, was deine Finanzdaten aktuell hält.'
-      why_required_title: Wofür braucht Sure Redis?
+      why_required_body: 'Relay nutzt Redis für die Sidekiq-Hintergrundjobs: Kontodaten abgleichen, Importe verarbeiten und alles andere, was deine Finanzdaten aktuell hält.'
+      why_required_title: Wofür braucht Relay Redis?
     release_notes_unavailable:
       body_html: "<p>Die aktuellen Release Notes lassen sich gerade nicht abrufen. Versuch es später noch einmal oder öffne direkt unsere <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>GitHub-Release-Seite</a>.</p>"
       name: Release Notes nicht verfügbar

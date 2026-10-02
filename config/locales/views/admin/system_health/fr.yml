@@ -26,7 +26,7 @@ fr:
           queued: "Notification de test mise en file. Actualisez les résultats ci-dessous pour consulter son état."
           hosted_only: "Les notifications push sont disponibles uniquement en mode hébergé."
           ineligible: "Seul un super-administrateur actif peut envoyer une notification de test."
-          no_devices: "Activez les notifications push dans l’application iOS Sure pour ce compte afin d’envoyer un test."
+          no_devices: "Activez les notifications push dans l’application iOS Relay pour ce compte afin d’envoyer un test."
           disabled: "L’opérateur a désactivé l’envoi des notifications push."
           not_configured: "Les identifiants APNs ne sont pas configurés."
           cooldown: "Veuillez patienter 30 secondes avant d’envoyer un autre test."
@@ -42,8 +42,8 @@ fr:
           enqueue_failed: "Mise en file impossible ; vérifiez Sidekiq"
           expired: "Expiré sans résultat final"
       push_notification:
-        title: "Notification de test Sure"
-        body: "Ceci est une notification push de test pour votre compte Sure."
+        title: "Notification de test Relay"
+        body: "Ceci est une notification push de test pour votre compte Relay."
       show:
         ai:
           adapters:
@@ -55,13 +55,13 @@ fr:
               message: Le point de terminaison configuré n'a pas passé le test de disponibilité /v1/vector_stores. La plupart des points de terminaison locaux et compatibles OpenAI n'implémentent pas cette API. Le chat et le traitement des PDF peuvent tout de même fonctionner ; utilisez pgvector avec un point de terminaison d'embeddings distinct pour une installation locale classique. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
               title: La vérification du magasin de vecteurs hébergé a échoué sur ce point de terminaison personnalisé
             embedding_dimensions_mismatch:
-              message: Le point de terminaison d'embeddings a renvoyé un vecteur dont la longueur ne correspond pas à EMBEDDING_DIMENSIONS. Définissez EMBEDDING_MODEL et EMBEDDING_DIMENSIONS avec la taille de vecteur documentée du modèle, redémarrez Sure pour que l'environnement soit pris en compte, puis modifiez ou recréez la colonne / la table d'embeddings pgvector et réindexez les documents si les données existantes utilisaient une autre taille.
+              message: Le point de terminaison d'embeddings a renvoyé un vecteur dont la longueur ne correspond pas à EMBEDDING_DIMENSIONS. Définissez EMBEDDING_MODEL et EMBEDDING_DIMENSIONS avec la taille de vecteur documentée du modèle, redémarrez Relay pour que l'environnement soit pris en compte, puis modifiez ou recréez la colonne / la table d'embeddings pgvector et réindexez les documents si les données existantes utilisaient une autre taille.
               title: Les dimensions d'embedding ne correspondent pas
             embedding_probe_failed:
-              message: Sure n'a pas pu créer un court embedding de test via le point de terminaison et le modèle configurés. Vérifiez EMBEDDING_URI_BASE, EMBEDDING_MODEL, EMBEDDING_ACCESS_TOKEN et les journaux du fournisseur d'embeddings. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
+              message: Relay n'a pas pu créer un court embedding de test via le point de terminaison et le modèle configurés. Vérifiez EMBEDDING_URI_BASE, EMBEDDING_MODEL, EMBEDDING_ACCESS_TOKEN et les journaux du fournisseur d'embeddings. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
               title: La vérification en direct des embeddings a échoué
             embedding_probe_timeout:
-              message: Le point de terminaison d'embeddings n'a pas répondu avant AI_HEALTH_PROBE_TIMEOUT. Augmentez ce délai de vérification si le fournisseur est lent, puis redémarrez Sure pour que l'environnement soit pris en compte dans tous les processus. Si les appels de chat IA normaux expirent aussi, augmentez OPENAI_REQUEST_TIMEOUT séparément.
+              message: Le point de terminaison d'embeddings n'a pas répondu avant AI_HEALTH_PROBE_TIMEOUT. Augmentez ce délai de vérification si le fournisseur est lent, puis redémarrez Relay pour que l'environnement soit pris en compte dans tous les processus. Si les appels de chat IA normaux expirent aussi, augmentez OPENAI_REQUEST_TIMEOUT séparément.
               title: La vérification en direct des embeddings a expiré
             function_calling_not_used:
               message: 'Le point de terminaison a accepté le paramètre tools, mais le modèle a répondu par du texte au lieu d''appeler l''outil de vérification. L''assistant IA ne peut pas lire les données financières sans appels d''outils : le chat risque donc de ne rien répondre ou d''inventer des chiffres. Préférez un modèle dont le fournisseur documente la prise en charge des appels de fonctions.'
@@ -73,25 +73,25 @@ fr:
               message: Le point de terminaison a répondu, mais il n'a ni listé ni servi le modèle configuré. Choisissez un modèle actif pour le fournisseur sélectionné, puis relancez les vérifications. Pour Gemini via une couche de traduction compatible OpenAI, utilisez un modèle actuellement pris en charge, par exemple gemini-2.5-flash.
               title: Le modèle d'IA configuré n'est pas disponible
             llm_probe_failed:
-              message: Sure n'a pas pu vérifier à la fois le point de terminaison et le modèle configurés. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
+              message: Relay n'a pas pu vérifier à la fois le point de terminaison et le modèle configurés. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
               title: La vérification en direct du LLM a échoué
             missing_vector_store:
               message: Les documents téléversés ne peuvent être ni indexés ni recherchés tant qu'un adaptateur de magasin de vecteurs et ses prérequis ne sont pas configurés.
               title: Aucun magasin de vecteurs n'est configuré
             pdf_text_extraction_failed:
-              message: Sure n'a pas pu mener à bien le traitement « texte d'abord », qui extrait localement le texte intégré au PDF et l'envoie au modèle configuré. Aucune donnée client n'a été envoyée. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
+              message: Relay n'a pas pu mener à bien le traitement « texte d'abord », qui extrait localement le texte intégré au PDF et l'envoie au modèle configuré. Aucune donnée client n'a été envoyée. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
               title: La vérification d'extraction de texte sur PDF synthétique a échoué
             pdf_vision_processing_failed:
-              message: Sure n'a pas pu mener à bien le traitement par image ou par document natif du PDF via le modèle configuré. Aucune donnée client n'a été envoyée. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
+              message: Relay n'a pas pu mener à bien le traitement par image ou par document natif du PDF via le modèle configuré. Aucune donnée client n'a été envoyée. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
               title: La vérification vision / natif sur PDF synthétique a échoué
             pgvector_extension_not_enabled:
               message: L'adaptateur pgvector est sélectionné, mais PostgreSQL n'a pas activé l'extension vector pour cette base de données. Utilisez une image PostgreSQL qui inclut pgvector, puis activez l'extension en tant que propriétaire de la base ou superutilisateur et relancez les migrations avec VECTOR_STORE_PROVIDER=pgvector.
               title: L'extension vector de PostgreSQL n'est pas activée
             pgvector_probe_failed:
-              message: Sure n'a pas pu interroger la table de fragments pgvector. Vérifiez les permissions PostgreSQL, l'extension vector et la migration vector_store_chunks. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
+              message: Relay n'a pas pu interroger la table de fragments pgvector. Vérifiez les permissions PostgreSQL, l'extension vector et la migration vector_store_chunks. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
               title: La vérification du stockage pgvector a échoué
             pgvector_table_not_found:
-              message: L'extension pgvector est activée, mais la table de fragments est introuvable. Vérifiez l'état des migrations, puis relancez la migration du magasin de vecteurs avec VECTOR_STORE_PROVIDER=pgvector pour que Sure puisse créer vector_store_chunks.
+              message: L'extension pgvector est activée, mais la table de fragments est introuvable. Vérifiez l'état des migrations, puis relancez la migration du magasin de vecteurs avec VECTOR_STORE_PROVIDER=pgvector pour que Relay puisse créer vector_store_chunks.
               title: La table vector_store_chunks est absente
             qdrant:
               message: L'adaptateur Qdrant est ébauché, mais le téléversement et la recherche de documents échouent pour l'instant. Sélectionnez OpenAI ou pgvector pour la recherche documentaire.
@@ -100,7 +100,7 @@ fr:
               message: Vérifiez les prérequis de l'adaptateur ci-dessous. Pour pgvector, la base de données doit fournir l'extension vector ou une table vector_store_chunks existante.
               title: Le magasin de vecteurs sélectionné est indisponible
             vector_probe_failed:
-              message: Sure n'a pas pu vérifier le magasin de vecteurs sélectionné ni l'ensemble des services d'embeddings requis. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
+              message: Relay n'a pas pu vérifier le magasin de vecteurs sélectionné ni l'ensemble des services d'embeddings requis. L'échec a été consigné dans Paramètres → Journaux de débogage et dans Rails.logger.
               title: La vérification en direct de la recherche documentaire a échoué
           failure_codes:
             dimensions_mismatch: Les dimensions du vecteur d'embedding ne correspondent pas aux dimensions configurées

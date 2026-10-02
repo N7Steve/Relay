@@ -12,7 +12,7 @@ ca:
       subtitle: Estalvia per al que t'importa.
       new_goal: Nou objectiu
       empty_filtered: Cap objectiu coincideix.
-      pending_pledges_callout: Tens aportacions pendents. Sure les confirmarà a la propera sincronització.
+      pending_pledges_callout: Tens aportacions pendents. Relay les confirmarà a la propera sincronització.
       kpi:
         contributed_label: Aportat · últims 30 d
         velocity_delta_up: ↑ %{percent}%% vs. 30 d anteriors
@@ -156,7 +156,7 @@ ca:
           zero: 'Pendent: %{amount} a %{account} · caduca avui'
           one: 'Pendent: %{amount} a %{account} · queda %{count} dia'
           other: 'Pendent: %{amount} a %{account} · queden %{count} dies'
-        body_transfer: Es confirma automàticament quan Sure detecta un ingrés coincident a la propera sincronització.
+        body_transfer: Es confirma automàticament quan Relay detecta un ingrés coincident a la propera sincronització.
         body_manual: Es confirma la propera vegada que editis manualment el saldo.
         pledged_at: Registrada fa %{time_ago}
         extend: Amplia 7 dies
@@ -235,7 +235,7 @@ ca:
         cta: Fixa la data objectiu
       empty:
         heading: Encara no hi ha ingressos
-        body: Fes una transferència al teu compte enllaçat. Sure la detectarà a la propera sincronització. O actualitza el saldo del teu compte manual.
+        body: Fes una transferència al teu compte enllaçat. Relay la detectarà a la propera sincronització. O actualitza el saldo del teu compte manual.
     errors:
       not_found: No s'ha trobat aquest objectiu. És possible que s'hagi eliminat.
     states:

@@ -1,0 +1,4 @@
+es:
+  layouts:
+    doorkeeper:
+      authorization: "Autorización de %{product_name}"

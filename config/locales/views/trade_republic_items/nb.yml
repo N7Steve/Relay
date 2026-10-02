@@ -20,7 +20,7 @@ nb:
       setup_accounts: "Konfigurer kontoer"
       delete: "Slett"
       accounts_need_setup: "Konto må konfigureres"
-      accounts_need_setup_description: "Trade Republic-kontoen din må kobles til en Sure-konto."
+      accounts_need_setup_description: "Trade Republic-kontoen din må kobles til en Relay-konto."
       no_accounts_discovered: "Ingen Trade Republic-konto er oppdaget ennå."
       no_accounts_discovered_description: "Fullfør påloggingen og kjør en synkronisering for å finne kontoen."
       data_quality:

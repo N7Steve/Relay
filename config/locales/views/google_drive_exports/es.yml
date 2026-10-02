@@ -103,7 +103,7 @@ es:
         file_missing: El archivo enlazado se ha eliminado, está en la papelera o ya no es accesible.
         permission_denied: Google ya no permite que esta aplicación actualice el archivo.
         access_changed: Han cambiado tus permisos de acceso. Revisa las cuentas seleccionadas.
-        transient_error: Google Drive no está disponible temporalmente. Sure reintentará el proceso.
+        transient_error: Google Drive no está disponible temporalmente. Relay reintentará el proceso.
         export_failed: La exportación ha fallado. Revisa la configuración e inténtalo de nuevo.
   activerecord:
     errors:

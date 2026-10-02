@@ -2,7 +2,7 @@
 tr:
   concerns:
     self_hostable:
-      redis_configured: Redis artık düzgün şekilde yapılandırıldı! Artık Sure uygulamanızı
+      redis_configured: Redis artık düzgün şekilde yapılandırıldı! Artık Relay uygulamanızı
         kurabilirsiniz.
   shared:
     dot_separator: "·"

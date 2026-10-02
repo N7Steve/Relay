@@ -53,7 +53,7 @@ de:
       disconnect_confirm: Diese Questrade-Verbindung wirklich trennen? Dadurch werden alle synchronisierten Kontodaten entfernt.
       eyebrow: Questrade
       field_descriptions: 'Erläuterung der Felder:'
-      help_text: Sure nutzt diese Zugangsdaten nur, um deine Questrade-Konten, Bestände und Aktivitäten zu synchronisieren.
+      help_text: Relay nutzt diese Zugangsdaten nur, um deine Questrade-Konten, Bestände und Aktivitäten zu synchronisieren.
       fields:
         api_server:
           description: Dein Questrade-API-Server

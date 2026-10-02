@@ -7,18 +7,18 @@ pt-PT:
       page_title: "Atualizar"
       account_settings: "Definições da conta"
       sign_out: "Terminar sessão"
-      contribute_and_support_sure: "Contribuir e apoiar o Sure"
+      contribute_and_support_sure: "Contribuir e apoiar o Relay"
       cta: "Continue a apoiar o desenvolvimento desta base de código!"
       header:
         support: "Apoiar"
-        sure: "Sure"
+        sure: "Relay"
         today: "hoje"
       redirect_to_stripe: "No passo seguinte, será redirecionado para o Stripe, que processa os cartões de crédito por nós."
       trialing: "Os seus dados serão eliminados em %{days} dias"
       trial_over: "O seu período experimental terminou"
     create:
-      welcome: "Bem-vindo ao Sure!"
+      welcome: "Bem-vindo ao Relay!"
       trial_already_used: "Já iniciou ou concluiu um período experimental. Atualize para continuar."
     success:
-      welcome_with_contribution: "Bem-vindo ao Sure! A sua contribuição é apreciada."
+      welcome_with_contribution: "Bem-vindo ao Relay! A sua contribuição é apreciada."
       contribution_failed: "Ocorreu um erro ao processar a sua contribuição. Tente novamente."

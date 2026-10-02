@@ -45,6 +45,8 @@ permissions:
 
 jobs:
   ci:
+    # Relay enables its own publishing destinations in a later migration phase.
+    if: github.repository == 'we-promise/sure'
     uses: ./.github/workflows/ci.yml
     with:
       require_js_dependency_audit: false

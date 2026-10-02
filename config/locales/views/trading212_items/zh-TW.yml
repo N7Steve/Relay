@@ -20,7 +20,7 @@ zh-TW:
       setup_accounts: 設定帳戶
       delete: 刪除
       accounts_need_setup: 帳戶需要設定
-      accounts_need_setup_description: 您的 Trading 212 帳戶需要連結到一個 Sure 帳戶。
+      accounts_need_setup_description: 您的 Trading 212 帳戶需要連結到一個 Relay 帳戶。
       no_accounts_discovered: 尚未偵測到任何 Trading 212 帳戶。
       no_accounts_discovered_description: 儲存 API 金鑰後執行一次同步以偵測您的帳戶。
     setup_accounts:
@@ -36,7 +36,7 @@ zh-TW:
       status:
         fetching_accounts: 正在從 Trading 212 取得帳戶...
         no_accounts_found_title: 找不到帳戶。
-        no_accounts_found_description: Sure 找不到 Trading 212 帳戶。請確認您的 API 金鑰有效。
+        no_accounts_found_description: Relay 找不到 Trading 212 帳戶。請確認您的 API 金鑰有效。
       available_accounts:
         title: 可用的帳戶
         account_type_investment: 投資帳戶

@@ -50,7 +50,7 @@ ca:
       one_account_notice: Un token dona accés a un sol compte de Fio, així que afegeix una connexió per a cada compte que vulguis seguir. Un token es pot fer servir una vegada cada 30 segons; una sincronització que arribi abans l'agafarà la següent.
       connected_account: Compte connectat
       no_account_yet: 'Encara no hi ha cap compte: la primera sincronització detecta el compte al qual dona accés aquest token.'
-      account_needs_setup: Encara no està enllaçat a cap compte de Sure.
+      account_needs_setup: Encara no està enllaçat a cap compte de Relay.
       requires_update: Cal un token nou
       requires_update_notice: Fio ha rebutjat aquest token. Els tokens són vàlids fins a 180 dies, tret que s'ampliïn automàticament a cada inici de sessió a la banca, així que crea un token nou de només lectura a Configuració → API i enganxa'l a sota.
       last_synced: Sincronitzat fa %{timestamp}
@@ -70,10 +70,10 @@ ca:
       unlink_failed: No s'ha pogut desconnectar la connexió de Fio banka
     select_accounts:
       title: Enllaça el teu compte de Fio
-      description: Aquest token dona accés a un sol compte. Tria com s'ha de seguir a Sure.
+      description: Aquest token dona accés a un sol compte. Tria com s'ha de seguir a Relay.
       account_type_label: Tipus de compte
       awaiting_first_sync: Fio encara no ha informat del compte d'aquest token. Fes una sincronització i torna més tard.
-      already_linked: El compte d'aquesta connexió ja està enllaçat a un compte de Sure.
+      already_linked: El compte d'aquesta connexió ja està enllaçat a un compte de Relay.
       sync_now: Sincronitza ara
       no_credentials_configured: Primer configura Fio banka a la configuració de proveïdors.
       cancel: Cancel·la
@@ -88,7 +88,7 @@ ca:
       title: Enllaça el compte de Fio a %{account_name}
       description: Connecta el compte al qual dona accés aquest token amb el compte que has triat.
       awaiting_first_sync: Fio encara no ha informat del compte d'aquest token. Fes una sincronització i torna més tard.
-      already_linked: El compte d'aquesta connexió ja està enllaçat a un compte de Sure.
+      already_linked: El compte d'aquesta connexió ja està enllaçat a un compte de Relay.
       sync_now: Sincronitza ara
       no_credentials_configured: Primer configura Fio banka a la configuració de proveïdors.
       account_already_linked: Aquest compte ja està enllaçat a un proveïdor.
@@ -102,7 +102,7 @@ ca:
       unsupported_account_type: Fio només pot sincronitzar comptes d'efectiu i de préstec.
     setup_accounts:
       title: Enllaça el teu compte de Fio
-      subtitle: Tria com ha d'aparèixer a Sure el compte al qual dona accés aquest token.
+      subtitle: Tria com ha d'aparèixer a Relay el compte al qual dona accés aquest token.
       choose_account_type: Tria un tipus de compte
       choose_account_type_description: Omet-lo si no vols seguir aquest compte.
       account_type_label: Tipus de compte
@@ -121,7 +121,7 @@ ca:
       skipped: S'ha omès el compte de Fio.
       no_account: No calia configurar cap compte de Fio.
       unsupported_account_type: Fio no admet aquest tipus de compte.
-      creation_failed: No s'ha pogut crear el compte de Sure.
+      creation_failed: No s'ha pogut crear el compte de Relay.
     fio_item:
       deletion_in_progress: Eliminació en curs
       syncing: Sincronitzant
@@ -134,7 +134,7 @@ ca:
       requires_update_description: Fio ha rebutjat el token d'aquesta connexió. Crea un token nou de només lectura a Configuració → API a la banca en línia.
       update_token: Actualitza el token
       setup_needed: Cal configurar el compte
-      setup_description: El compte al qual dona accés aquest token encara no està enllaçat a cap compte de Sure.
+      setup_description: El compte al qual dona accés aquest token encara no està enllaçat a cap compte de Relay.
       setup_action: Configura el compte
       no_accounts_title: Encara no s'ha importat cap compte
       no_accounts_description: Fio només informa del compte en un extracte, així que apareixerà després de la primera sincronització correcta.

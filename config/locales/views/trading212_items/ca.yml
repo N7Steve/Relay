@@ -20,7 +20,7 @@ ca:
       setup_accounts: Configura els comptes
       delete: Elimina
       accounts_need_setup: El compte necessita configuració
-      accounts_need_setup_description: El teu compte de Trading 212 s'ha d'enllaçar amb un compte de Sure.
+      accounts_need_setup_description: El teu compte de Trading 212 s'ha d'enllaçar amb un compte de Relay.
       no_accounts_discovered: Encara no s'ha descobert cap compte de Trading 212.
       no_accounts_discovered_description: Executa una sincronització després de desar la clau API per descobrir el teu compte.
     setup_accounts:
@@ -36,7 +36,7 @@ ca:
       status:
         fetching_accounts: Obtenint el compte de Trading 212...
         no_accounts_found_title: No s'ha trobat cap compte.
-        no_accounts_found_description: Sure no ha trobat cap compte de Trading 212. Comprova que la clau API sigui vàlida.
+        no_accounts_found_description: Relay no ha trobat cap compte de Trading 212. Comprova que la clau API sigui vàlida.
       available_accounts:
         title: Compte disponible
         account_type_investment: Inversió

@@ -20,7 +20,7 @@ en:
       setup_accounts: Set up accounts
       delete: Delete
       accounts_need_setup: Account needs setup
-      accounts_need_setup_description: Your Trading 212 account needs to be linked to a Sure account.
+      accounts_need_setup_description: Your Trading 212 account needs to be linked to a Relay account.
       no_accounts_discovered: No Trading 212 account discovered yet.
       no_accounts_discovered_description: Run a sync after saving your API key to discover your account.
     setup_accounts:
@@ -36,7 +36,7 @@ en:
       status:
         fetching_accounts: Fetching account from Trading 212...
         no_accounts_found_title: No account found.
-        no_accounts_found_description: Sure could not find a Trading 212 account. Check that your API key is valid.
+        no_accounts_found_description: Relay could not find a Trading 212 account. Check that your API key is valid.
       available_accounts:
         title: Available account
         account_type_investment: Investment

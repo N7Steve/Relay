@@ -5,7 +5,7 @@ ca:
         open_tokens: Ves a Settings → Connect and manage apps → Developer tools → API tokens
         sign_in_html: Visita %{link} i inicia sessió al teu compte
         create_token: Crea un nou token API personal amb accés només de lectura
-        copy_token_html: Copia el token i enganxa'l a continuació. Sure només l'utilitza per sincronitzar els teus saldos i transaccions.
+        copy_token_html: Copia el token i enganxa'l a continuació. Relay només l'utilitza per sincronitzar els teus saldos i transaccions.
       add_connection: Afegeix connexió Wise
       token_label: Token API
       token_placeholder: Enganxa el teu token API personal de Wise
@@ -36,7 +36,7 @@ ca:
         copied: Copiat!
         generate: Genera un parell de claus
         regenerate: Regenera el parell de claus
-        regenerate_confirm: Això genera un nou parell de claus. Wise continuarà acceptant la clau pública anterior fins que l'eliminis tu mateix del teu compte de Wise; Sure no la pot revocar a distància. Hauràs de registrar la nova clau pública a Wise perquè els extractes es tornin a sincronitzar. Vols continuar?
+        regenerate_confirm: Això genera un nou parell de claus. Wise continuarà acceptant la clau pública anterior fins que l'eliminis tu mateix del teu compte de Wise; Relay no la pot revocar a distància. Hauràs de registrar la nova clau pública a Wise perquè els extractes es tornin a sincronitzar. Vols continuar?
     profile_types:
       personal: Personal
       business: Empresa
@@ -106,7 +106,7 @@ ca:
       session_expired: La sessió ha caducat. Torna a provar de connectar-te.
       title: Selecciona perfils de Wise
       subtitle: Tria quins perfils vols connectar
-      description: El teu compte de Wise té diversos perfils. Selecciona els que vulguis sincronitzar amb Sure.
+      description: El teu compte de Wise té diversos perfils. Selecciona els que vulguis sincronitzar amb Relay.
       unnamed_profile: (Perfil sense nom)
       already_connected_label: Ja connectat
       connect: Connecta els perfils seleccionats
@@ -120,22 +120,22 @@ ca:
       status_with_summary: Darrera sincronització fa %{timestamp} — %{summary}
       delete: Desconnecta
       setup_needed: Nous comptes a punt per configurar
-      setup_description: '%{linked} de %{total} comptes enllaçats. Crea comptes de Sure per als saldos en cada divisa de Wise.'
+      setup_description: '%{linked} de %{total} comptes enllaçats. Crea comptes de Relay per als saldos en cada divisa de Wise.'
       setup_action: Configura comptes
       no_accounts_title: Encara no hi ha comptes enllaçats
-      no_accounts_description: Executa una sincronització per descobrir els teus saldos de Wise i després enllaça'ls amb comptes de Sure.
+      no_accounts_description: Executa una sincronització per descobrir els teus saldos de Wise i després enllaça'ls amb comptes de Relay.
     setup_accounts:
       title: Configura comptes Wise
       subtitle: Enllaça els teus saldos en divises de Wise
-      description: Crea un compte de Sure per a cada saldo en divisa de Wise que vulguis seguir. Cada divisa es converteix en un compte propi.
+      description: Crea un compte de Relay per a cada saldo en divisa de Wise que vulguis seguir. Cada divisa es converteix en un compte propi.
       no_accounts_to_setup: Tots els comptes estan configurats
-      all_accounts_linked: Tots els teus saldos en divises de Wise s'han enllaçat amb comptes de Sure.
+      all_accounts_linked: Tots els teus saldos en divises de Wise s'han enllaçat amb comptes de Relay.
       create_account: Crea compte
       done: Fet
     select_accounts:
       title: Selecciona un saldo de Wise
       description: Selecciona el saldo en divisa de Wise que vols enllaçar al teu compte de %{product_name}.
-      no_accounts_found: Tots els saldos de Wise ja estan enllaçats amb comptes de Sure.
+      no_accounts_found: Tots els saldos de Wise ja estan enllaçats amb comptes de Relay.
       no_connection: No s'ha trobat cap connexió Wise. Primer, connecta Wise a la configuració dels proveïdors.
       link_account: Enllaça el saldo
       cancel: Cancel·la

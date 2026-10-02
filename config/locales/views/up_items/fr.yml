@@ -98,7 +98,7 @@ fr:
       fetch_failed: Impossible de récupérer les comptes
       no_accounts_to_setup: Aucun compte à configurer
       no_credentials: Configurez d'abord les identifiants Up.
-      subtitle: Choisissez comment chaque compte Up doit apparaître dans Sure.
+      subtitle: Choisissez comment chaque compte Up doit apparaître dans Relay.
       title: Lier les comptes Up
     up_item:
       delete: Supprimer

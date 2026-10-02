@@ -158,7 +158,7 @@ fr:
       new_goal: Nouvel objectif
       ongoing_section:
         heading: Objectifs
-      pending_pledges_callout: Vous avez des promesses en attente. Sure les confirmera lors de la prochaine synchronisation.
+      pending_pledges_callout: Vous avez des promesses en attente. Relay les confirmera lors de la prochaine synchronisation.
       search:
         aria_label: Rechercher des objectifs
         clear_search: Effacer la recherche
@@ -242,7 +242,7 @@ fr:
       edit: Modifier
       consume: J'ai utilisé une partie de cet argent
       empty:
-        body: Effectuez un virement sur votre compte lié. Sure le détectera lors de la prochaine synchronisation. Ou mettez à jour manuellement le solde du compte.
+        body: Effectuez un virement sur votre compte lié. Relay le détectera lors de la prochaine synchronisation. Ou mettez à jour manuellement le solde du compte.
         heading: Aucun dépôt pour l'instant
       funding_accounts:
         earmarked_of: "%{earmarked} affectés sur %{balance}"
@@ -272,7 +272,7 @@ fr:
         title: Cet objectif est en pause
       pending_pledge:
         body_manual: Se confirme lors de votre prochaine modification manuelle de solde.
-        body_transfer: Se confirme automatiquement lorsque Sure détecte un dépôt correspondant lors de la prochaine synchronisation.
+        body_transfer: Se confirme automatiquement lorsque Relay détecte un dépôt correspondant lors de la prochaine synchronisation.
         cancel: Annuler
         confirm_cancel_body: La promesse de %{amount} sera supprimée. Vous pourrez en enregistrer une nouvelle à tout moment.
         confirm_cancel_cta: Annuler la promesse

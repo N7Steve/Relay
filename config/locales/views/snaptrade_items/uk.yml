@@ -34,7 +34,7 @@ uk:
       not_configured: "SnapTrade не налаштовано."
     oauth_device_flow:
       title: "Підключити SnapTrade"
-      subtitle: "Авторизувати Sure для SnapTrade"
+      subtitle: "Авторизувати Relay для SnapTrade"
       instructions: "Відкрийте SnapTrade і підтвердьте цей код пристрою, потім поверніться сюди, щоб завершити авторизацію."
       code_label: "Код пристрою"
       open_snaptrade: "Відкрити SnapTrade"
@@ -135,7 +135,7 @@ uk:
       add_another_brokerage: "Підключити іншого брокера"
       delete: "Видалити"
       setup_needed: "Рахунки потребують налаштування"
-      setup_description: "Деякі рахунки з SnapTrade потрібно пов'язати з рахунками Sure."
+      setup_description: "Деякі рахунки з SnapTrade потрібно пов'язати з рахунками Relay."
       setup_action: "Налаштувати рахунки"
       setup_accounts_menu: "Налаштувати рахунки"
       manage_connections: "Керувати з'єднаннями"
@@ -166,7 +166,7 @@ uk:
       step_4: "Перейдіть на сторінку Рахунки та використовуйте 'Підключити іншого брокера', щоб пов'язати свої інвестиційні рахунки"
       free_tier_warning: "Безкоштовний рівень SnapTrade охоплює 20 брокерських з'єднань."
       oauth_title: "SnapTrade OAuth"
-      oauth_status_ready: "Використовуйте код пристрою для авторизації Sure для SnapTrade."
+      oauth_status_ready: "Використовуйте код пристрою для авторизації Relay для SnapTrade."
       oauth_status_authorized: "Авторизовано за допомогою SnapTrade."
       oauth_connect_button: "Підключитися за допомогою SnapTrade"
       oauth_reauthorize_button: "Повторно авторизувати"
@@ -224,7 +224,7 @@ uk:
       oauth_setup_step_1_html: Зареєструйте OAuth-застосунок на <a href="https://dashboard.snaptrade.com" target="_blank" rel="noopener noreferrer" class="underline">dashboard.snaptrade.com</a>
       oauth_setup_step_2_html: 'Лише для входу через браузер: додайте URL зворотного виклику цього застосунку (<code>%{callback_url}</code>) як зареєстрований redirect URI'
       oauth_setup_step_3: Задайте SNAPTRADE_OAUTH_CLIENT_ID у своєму середовищі та перезапустіть застосунок. Цього достатньо для входу за кодом пристрою; для входу через браузер також додайте SNAPTRADE_OAUTH_CLIENT_SECRET
-      oauth_status_ready_device: Авторизуйте Sure за допомогою коду пристрою, щоб отримувати дані ваших рахунків SnapTrade.
+      oauth_status_ready_device: Авторизуйте Relay за допомогою коду пристрою, щоб отримувати дані ваших рахунків SnapTrade.
       oauth_device_button: Використати код пристрою
       manage_at_snaptrade: Керувати з'єднаннями в SnapTrade
 

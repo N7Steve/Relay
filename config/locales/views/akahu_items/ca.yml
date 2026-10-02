@@ -89,7 +89,7 @@ ca:
       akahu_account_already_linked: Aquest compte d'Akahu ja està enllaçat.
     setup_accounts:
       title: Configura els comptes d'Akahu
-      subtitle: Tria com ha d'aparèixer cada compte d'Akahu a Sure.
+      subtitle: Tria com ha d'aparèixer cada compte d'Akahu a Relay.
       no_credentials: Primer configura les credencials d'Akahu.
       api_error: No s'han pogut obtenir els comptes d'Akahu.
       fetch_failed: No s'han pogut obtenir els comptes

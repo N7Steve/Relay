@@ -60,7 +60,7 @@ pt-PT:
           frankfurter: Frankfurter
       assistant_settings:
         title: Assistente de IA
-        description: Escolha como o assistente de chat responde. O incorporado utiliza diretamente o seu serviço de AI configurado. O externo delega num agente de IA remoto que pode invocar as ferramentas financeiras da Sure via MCP.
+        description: Escolha como o assistente de chat responde. O incorporado utiliza diretamente o seu serviço de AI configurado. O externo delega num agente de IA remoto que pode invocar as ferramentas financeiras da Relay via MCP.
         type_label: Tipo de assistente
         type_builtin: Incorporado (LLM direto)
         type_external: Externo (agente remoto)
@@ -152,7 +152,7 @@ pt-PT:
         status_healthy: O Yahoo Finance está ativo e a funcionar.
         status_rate_limited: O Yahoo Finance está temporariamente a limitar os pedidos.
         rate_limited_title: Limite de pedidos do Yahoo Finance atingido.
-        rate_limited_message: Não é necessária qualquer ação. A Sure evitará verificações de estado adicionais durante 30 minutos. As operações de preço e de taxa de câmbio continuam de forma independente.
+        rate_limited_message: Não é necessária qualquer ação. A Relay evitará verificações de estado adicionais durante 30 minutos. As operações de preço e de taxa de câmbio continuam de forma independente.
         status_unavailable: O Yahoo Finance está atualmente indisponível.
         unavailable_title: Não foi possível verificar o Yahoo Finance.
         unavailable_message: Não foi possível contactar o Yahoo Finance ou este devolveu uma resposta inesperada. Verifique a sua ligação à internet e tente novamente mais tarde.

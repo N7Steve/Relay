@@ -9,7 +9,7 @@ class TradeRepublicItemsLocalizationTest < ActiveSupport::TestCase
     "info_box.items.item_3" => "Ein- und Auszahlungen sowie Zinsgutschriften",
     "status.fetching_accounts" => "Konto wird von Trade Republic abgerufen …",
     "status.no_accounts_found_title" => "Kein Konto gefunden.",
-    "status.no_accounts_found_description" => "Sure hat kein Trade-Republic-Konto gefunden. Prüf, ob deine Trade-Republic-Sitzung noch gültig ist.",
+    "status.no_accounts_found_description" => "Relay hat kein Trade-Republic-Konto gefunden. Prüf, ob deine Trade-Republic-Sitzung noch gültig ist.",
     "available_accounts.title" => "Verfügbares Konto",
     "available_accounts.account_summary" => "%{account_type} • Saldo: %{balance}",
     "available_accounts.account_id" => "Konto-ID: %{account_id}",

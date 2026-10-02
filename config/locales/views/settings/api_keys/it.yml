@@ -38,7 +38,7 @@ it:
         no_api_key:
           title: "Chiave API"
           heading: "Accedi ai dati del tuo account in modo programmatico"
-          description: "Ottieni accesso programmatico ai tuoi dati Sure con una chiave API sicura."
+          description: "Ottieni accesso programmatico ai tuoi dati Relay con una chiave API sicura."
           what_you_can_do: "Cosa puoi fare con l'API:"
           feature_1: "Accedi ai dati del tuo account in modo programmatico"
           feature_2: "Crea integrazioni e applicazioni personalizzate"
@@ -82,7 +82,7 @@ it:
       new:
         title: "Crea chiave API"
         create_new_api_key: "Crea nuova chiave API"
-        subtitle: "Genera una nuova chiave API per accedere ai tuoi dati Sure in modo programmatico."
+        subtitle: "Genera una nuova chiave API per accedere ai tuoi dati Relay in modo programmatico."
         description: "Configura la tua nuova chiave API con un nome descrittivo e i permessi appropriati."
         name_label: "Nome chiave API"
         name_placeholder: "es., La mia app budget, Tracker portafoglio"

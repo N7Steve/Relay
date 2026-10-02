@@ -100,7 +100,7 @@ es:
         account_label: Cuenta
         name_label: Nombre
         note_label: Nota
-        no_security_provider_warning: El proveedor de precios de valores no está configurado. Tus importaciones de operaciones funcionarán, pero Sure no rellenará el histórico de precios. Ve a tus ajustes para configurarlo.
+        no_security_provider_warning: El proveedor de precios de valores no está configurado. Tus importaciones de operaciones funcionarán, pero Relay no rellenará el histórico de precios. Ve a tus ajustes para configurarlo.
         date_format_label: Formato de fecha
         apply_configuration: Aplicar configuración
       category_import:
@@ -314,7 +314,7 @@ es:
       merchant_import: Importación de comercios
       pdf_import: Importación PDF
       document_import: Importación de documentos
-      sure_import: Importación de Sure
+      sure_import: Importación de Relay
     steps:
       upload: Subir
       configure: Configurar
@@ -349,7 +349,7 @@ es:
           merchant_import: Comercio
           pdf_import: PDF
           document_import: Documento
-          sure_import: Sure
+          sure_import: Relay
         status:
           in_progress: En progreso
           uploading: Procesando filas
@@ -377,7 +377,7 @@ es:
       import_rules: Importar reglas
       import_transactions: Importar transacciones
       import_qif: Importar desde Quicken (QIF)
-      import_sure: Importar desde Sure
+      import_sure: Importar desde Relay
       import_sure_description: Archivo .ndjson de exportación completa
       import_file: Importar documento
       import_file_description: Análisis potenciado por IA para PDFs y subida con búsqueda para otros archivos compatibles

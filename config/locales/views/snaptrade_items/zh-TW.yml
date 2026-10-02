@@ -108,7 +108,7 @@ zh-TW:
       add_another_brokerage: 再連結一家券商
       delete: 刪除
       setup_needed: 帳戶需要設定
-      setup_description: 有些來自 SnapTrade 的帳戶需要連結到 Sure 的帳戶。
+      setup_description: 有些來自 SnapTrade 的帳戶需要連結到 Relay 的帳戶。
       setup_action: 設定帳戶
       setup_accounts_menu: 設定帳戶
       manage_connections: 管理連線
@@ -127,7 +127,7 @@ zh-TW:
       oauth_setup_step_3: 在環境變數中設定 SNAPTRADE_OAUTH_CLIENT_ID 與 SNAPTRADE_OAUTH_CLIENT_SECRET，然後重新啟動
       free_tier_warning: SnapTrade 的免費方案涵蓋 20 個券商連線。
       oauth_title: SnapTrade OAuth
-      oauth_status_ready: 授權 Sure 讀取您的 SnapTrade 帳戶資料。
+      oauth_status_ready: 授權 Relay 讀取您的 SnapTrade 帳戶資料。
       oauth_status_authorized: 已完成 SnapTrade 授權。
       oauth_connect_button: 連接 SnapTrade
       oauth_reauthorize_button: 重新授權

@@ -81,7 +81,7 @@ fr:
         format_label: Formater
         leave_empty: Laisser vide
         name_label: Nom
-        no_security_provider_warning: Le fournisseur de prix des titres n'est pas configuré. Vos importations de transactions boursières fonctionneront, mais Sure ne remplira pas l'historique des prix. Veuillez accéder à vos paramètres pour configurer cela.
+        no_security_provider_warning: Le fournisseur de prix des titres n'est pas configuré. Vos importations de transactions boursières fonctionneront, mais Relay ne remplira pas l'historique des prix. Veuillez accéder à vos paramètres pour configurer cela.
         note_label: Remarque
         price_label: Prix
         quantity_label: Quantité
@@ -337,7 +337,7 @@ fr:
       import_portfolio: Importer les investissements
       import_qif: Importer depuis Quicken (QIF)
       import_rules: Importer les règles
-      import_sure: Importer depuis Sure
+      import_sure: Importer depuis Relay
       import_sure_description: Fichier .ndjson d'export complet
       import_transactions: Importer les transactions
       import_ynab: Importer depuis YNAB
@@ -486,7 +486,7 @@ fr:
           pdf_import: PDF
           qif_import: QIF
           rule_import: Règle
-          sure_import: Sure
+          sure_import: Relay
           trade_import: Transaction boursière
           transaction_import: Transaction
           ynab_import: YNAB
@@ -501,7 +501,7 @@ fr:
       pdf_import: Import PDF
       qif_import: Import QIF
       rule_import: Import de règles
-      sure_import: Import Sure
+      sure_import: Import Relay
       trade_import: Import de transactions boursières
       transaction_import: Import de transactions
       ynab_import: Importation YNAB

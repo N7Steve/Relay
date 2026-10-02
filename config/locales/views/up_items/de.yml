@@ -98,7 +98,7 @@ de:
       fetch_failed: Konten ließen sich nicht abrufen
       no_accounts_to_setup: Keine Konten einzurichten
       no_credentials: Richte zuerst deine Up-Zugangsdaten ein.
-      subtitle: Leg fest, wie jedes Up-Konto in Sure erscheinen soll.
+      subtitle: Leg fest, wie jedes Up-Konto in Relay erscheinen soll.
       title: Up-Konten verknüpfen
     up_item:
       delete: Löschen

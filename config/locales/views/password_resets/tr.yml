@@ -1,7 +1,7 @@
 ---
 tr:
   password_resets:
-    disabled: Sure üzerinden şifre sıfırlama devre dışı bırakılmıştır. Lütfen şifrenizi
+    disabled: Relay üzerinden şifre sıfırlama devre dışı bırakılmıştır. Lütfen şifrenizi
       kimlik sağlayıcınız üzerinden sıfırlayın.
     edit:
       title: Şifreyi sıfırla

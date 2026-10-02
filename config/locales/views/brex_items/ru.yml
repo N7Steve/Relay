@@ -135,12 +135,12 @@ ru:
       disconnect_label: Отключить %{name}
       encryption_warning:
         message: Настройте ключи шифрования Active Record перед добавлением токенов
-          Brex в продакшн. Без ключей шифрования Sure хранит учётные данные провайдера
+          Brex в продакшн. Без ключей шифрования Relay хранит учётные данные провайдера
           Brex и снимки в открытом виде, как и другие записи провайдера.
         title: Шифрование базы данных не настроено
       instructions:
         copy_token_html: Скопируйте токен и добавьте его как именованное подключение
-          ниже. Sure хранит токен только для синхронизации этой семьи.
+          ниже. Relay хранит токен только для синхронизации этой семьи.
         create_token: 'Создайте API токен с этими правами только для чтения: accounts.cash.readonly,
           accounts.card.readonly, transactions.cash.readonly, transactions.card.readonly'
         open_tokens: Перейдите в настройки разработчика/API токена Brex для компании,

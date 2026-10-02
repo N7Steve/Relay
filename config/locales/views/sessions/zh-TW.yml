@@ -24,7 +24,7 @@ zh-TW:
       forgot_password: 忘記密碼？
       password: 密碼
       submit: 登入
-      title: Sure
+      title: Relay
       password_placeholder: 輸入您的密碼
       openid_connect: 透過 OpenID Connect 登入
       oidc: 透過 OpenID Connect 登入

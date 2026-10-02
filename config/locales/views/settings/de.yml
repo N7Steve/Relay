@@ -118,7 +118,7 @@ de:
           body: Bist du sicher, dass du dein Konto zurücksetzen möchtest? Dadurch werden alle Konten, Kategorien, Händler, Tags und andere Daten gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.
           title: Konto zurücksetzen?
         confirm_reset_with_sample_data:
-          body: Bist du sicher, dass du dein Konto zurücksetzen und Beispieldaten laden möchtest? Dadurch werden deine vorhandenen Daten gelöscht und durch Demo-Daten ersetzt, sodass du Sure sicher erkunden kannst.
+          body: Bist du sicher, dass du dein Konto zurücksetzen und Beispieldaten laden möchtest? Dadurch werden deine vorhandenen Daten gelöscht und durch Demo-Daten ersetzt, sodass du Relay sicher erkunden kannst.
           title: Konto zurücksetzen und Beispieldaten laden?
         confirm_remove_invitation:
           body: Bist du sicher, dass du die Einladung für %{email} entfernen möchtest?
@@ -281,7 +281,7 @@ de:
         step_2: Kopier deinen App-Token und deinen User-Token.
         step_3: Füg die Tokens unten ein, speichere und verknüpf dann deine synchronisierten Konten.
       bank_sync:
-        lede: Verbinde externe Konten, damit Transaktionen, Salden und Bestände automatisch in Sure landen.
+        lede: Verbinde externe Konten, damit Transaktionen, Salden und Bestände automatisch in Relay landen.
         page_title: Bank-Sync
       binance_panel:
         api_key_label: API-Key
@@ -295,7 +295,7 @@ de:
         ip_hint_body: 'Trag die ausgehende IP-Adresse des App-Servers in die Whitelist des Binance-API-Keys ein:'
         ip_hint_contact_admin: Frag deine Administration nach der ausgehenden IP-Adresse des App-Servers.
         ip_hint_title: IP-Freigabe erforderlich
-        no_withdraw_body: Erlaube beim Anlegen des Binance-API-Keys keine Auszahlungen. Sure braucht nur Lesezugriff.
+        no_withdraw_body: Erlaube beim Anlegen des Binance-API-Keys keine Auszahlungen. Relay braucht nur Lesezugriff.
         no_withdraw_title: Nur Lesezugriff
         setup_instructions: 'Erstelle einen API-Key mit Lesezugriff, um Binance zu verbinden:'
         step1_html: Öffne die <a href="https://www.binance.com/en/my/settings/api-management" target="_blank" rel="noopener noreferrer" class="underline">Binance-API-Verwaltung</a>
@@ -307,8 +307,8 @@ de:
         syncing: Sync läuft…
       clear_filter: Filter löschen
       connect: Verbinden
-      drawer_trust_statement: Nur Lesezugriff. Sure kann kein Geld bewegen, und deine Zugangsdaten liegen verschlüsselt.
-      drawer_trust_statement_encryption_unconfigured: Nur Lesezugriff. Sure kann kein Geld bewegen. Konfiguriere explizite Verschlüsselungsschlüssel, bevor du Provider-Zugangsdaten in Produktion speicherst.
+      drawer_trust_statement: Nur Lesezugriff. Relay kann kein Geld bewegen, und deine Zugangsdaten liegen verschlüsselt.
+      drawer_trust_statement_encryption_unconfigured: Nur Lesezugriff. Relay kann kein Geld bewegen. Konfiguriere explizite Verschlüsselungsschlüssel, bevor du Provider-Zugangsdaten in Produktion speicherst.
       empty_filter: Kein Anbieter passt zu deinem Filter.
       provider_setup_encryption_warning:
         title: Verschlüsselungsschlüssel fehlen
@@ -344,7 +344,7 @@ de:
         query_id_label: Query ID
         query_id_placeholder_existing: Leer lassen, um die bisherige Query ID zu behalten
         query_id_placeholder_new: IBKR-Flex-Query-ID eintragen
-        report_window_note: IBKR-Flex-Berichte sind auf den Zeitraum begrenzt, den du in IBKR eingestellt hast. Sure importiert die vollständigen aktuellen Bestände und bis zu 365 Tage Aktivität aus diesem Bericht.
+        report_window_note: IBKR-Flex-Berichte sind auf den Zeitraum begrenzt, den du in IBKR eingestellt hast. Relay importiert die vollständigen aktuellen Bestände und bis zu 365 Tage Aktivität aus diesem Bericht.
         save_configuration: Konfiguration speichern
         sections:
           account_information: 'Account Information: Account ID, Currency'
@@ -369,7 +369,7 @@ de:
         steps:
           step_1: Öffne im IBKR Client Portal „Performance & Reports“ > „Flex Queries“.
           step_2: Klick im Bereich „Activity Flex Query“ auf das Plus-Symbol, um eine neue Abfrage anzulegen.
-          step_3: Gib deiner Abfrage einen Namen (etwa „Sure Sync“), sieh dir dann unten die Details zur Flex Query an und aktivier die aufgeführten Abschnitte, Felder und Optionen.
+          step_3: Gib deiner Abfrage einen Namen (etwa „Relay Sync“), sieh dir dann unten die Details zur Flex Query an und aktivier die aufgeführten Abschnitte, Felder und Optionen.
           step_4: Speichere die Abfrage, notier dir die „Query ID“ und erzeug über das Zahnrad im Bereich „Flex Web Service Configuration“ einen Zugriffstoken.
           step_5: Füg Query ID und Token unten ein, speichere die Konfiguration und geh dann zu den Konten, um die gefundenen IBKR-Konten zu verknüpfen.
         sync: Sync
@@ -390,7 +390,7 @@ de:
         disconnect_confirm: "%{name} wirklich trennen?"
         keep_api_key_placeholder: Leer lassen, um den bisherigen API-Key zu behalten
         keep_api_secret_placeholder: Leer lassen, um den bisherigen Private Key zu behalten
-        read_only_body: Erteile keine Rechte für Handel, Stornierung, Auszahlung, Export, Ledger, Earn, Staking oder Überträge. Sure importiert ausschließlich Guthaben, Bestände und ausgeführte Spot-Trades.
+        read_only_body: Erteile keine Rechte für Handel, Stornierung, Auszahlung, Export, Ledger, Earn, Staking oder Überträge. Relay importiert ausschließlich Guthaben, Bestände und ausgeführte Spot-Trades.
         read_only_title: Nur lesender Börsen-Sync
         setup_accounts: Konto einrichten
         step1_html: Öffne die <a href="https://pro.kraken.com/app/settings/api" target="_blank" rel="noopener noreferrer" class="underline">Kraken-API-Einstellungen</a>
@@ -530,10 +530,10 @@ de:
         complete_login: Fortfahren
         authenticator_code_label: Authenticator-Code (falls angefordert)
         authenticator_code_placeholder: 6-stelliger Code
-        push_login_notice: Bestätige jetzt den Login in deiner Trade-Republic-App. Sure prüft automatisch im Hintergrund. Du kannst den Status auch direkt selbst prüfen.
+        push_login_notice: Bestätige jetzt den Login in deiner Trade-Republic-App. Relay prüft automatisch im Hintergrund. Du kannst den Status auch direkt selbst prüfen.
         check_login_status: Status jetzt prüfen
         authenticator_code_notice: Gib den Code deiner Authenticator-App ein.
-        approval_pending: Login gestartet. Bestätige ihn in der Trade-Republic-App; Sure prüft automatisch.
+        approval_pending: Login gestartet. Bestätige ihn in der Trade-Republic-App; Relay prüft automatisch.
         awaiting_confirmation: Bestätigung in der Trade-Republic-App ausstehend.
         awaiting_authenticator_code: Authenticator-Code erforderlich.
         login_expired: Die Bestätigung ist abgelaufen.
@@ -541,14 +541,14 @@ de:
         connection_success:
           title: Trade Republic erfolgreich verbunden
           message: Deine Trade-Republic-Verbindung ist eingerichtet.
-          description: Sure synchronisiert deine Trade-Republic-Daten jetzt im Hintergrund.
+          description: Relay synchronisiert deine Trade-Republic-Daten jetzt im Hintergrund.
           close: Fertig
         qr_login: Mit QR-Code einloggen
         qr_cancel: QR-Login abbrechen
         qr_back_to_credentials: Zurück zu Telefonnummer und PIN oder Passwort
         qr_loading: QR-Code wird vorbereitet …
         qr_instruction: Scanne den QR-Code mit deiner Trade-Republic-App und bestätige die Anmeldung.
-        qr_success: Anmeldung bestätigt. Sure lädt die Provider-Übersicht neu.
+        qr_success: Anmeldung bestätigt. Relay lädt die Provider-Übersicht neu.
         qr_error: Der QR-Login konnte nicht gestartet werden. Bitte versuche es erneut.
         add_account: Weitere Verbindung hinzufügen
         save_configuration: Speichern und Login starten
@@ -684,10 +684,10 @@ de:
       revoke:
         revoked: Verbindung entzogen.
       show:
-        connect_subtitle: Füge diese URL in Claude.ai ein oder in einen anderen MCP-fähigen Client, um ihn mit deinem Sure-Konto zu verbinden.
+        connect_subtitle: Füge diese URL in Claude.ai ein oder in einen anderen MCP-fähigen Client, um ihn mit deinem Relay-Konto zu verbinden.
         connect_title: KI-Assistenten verbinden
         connected_ago: Verbunden vor %{time}
-        connected_subtitle: Diese Apps haben derzeit Zugriff auf deine Sure-Daten. Entzieh den Zugriff, wo du ihn nicht mehr brauchst.
+        connected_subtitle: Diese Apps haben derzeit Zugriff auf deine Relay-Daten. Entzieh den Zugriff, wo du ihn nicht mehr brauchst.
         connected_title: Verbundene Clients
         copied: Kopiert!
         copy_url: Kopieren
@@ -697,6 +697,6 @@ de:
         revoke_confirm: Zugriff für diesen Client entziehen?
         step_1: Öffne Claude.ai und geh zu Einstellungen → Integrationen.
         step_2: Klick auf „Integration hinzufügen“ und füge die MCP-Server-URL von oben ein.
-        step_3: Klick auf Verbinden. Du wirst zu Sure weitergeleitet, um dich anzumelden und den Zugriff freizugeben.
+        step_3: Klick auf Verbinden. Du wirst zu Relay weitergeleitet, um dich anzumelden und den Zugriff freizugeben.
         step_4: Nach der Freigabe kann Claude deine Konten, Transaktionen und Salden lesen.
         unknown_client: Unbekannter Client

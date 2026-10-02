@@ -82,7 +82,7 @@ pl:
       difference: Różnica
       download: Pobierz
       institution_name_hint: Podpowiedź instytucji
-      ledger_amount: Księga Sure
+      ledger_amount: Księga Relay
       link_suggestion: Sugestia powiązania
       linked_to: Powiązane z %{account}.
       linking_title: Powiązanie konta
@@ -93,7 +93,7 @@ pl:
       period_start_on: Początek okresu
       reconciliation_title: Uzgodnienie
       reconciliation_unavailable: Dodaj okres wyciągu oraz saldo początkowe lub końcowe,
-        a następnie upewnij się, że Sure ma historię sald dla tych dat.
+        a następnie upewnij się, że Relay ma historię sald dla tych dat.
       reject: Odrzuć
       save: Zapisz wyciąg
       statement_amount: Wyciąg

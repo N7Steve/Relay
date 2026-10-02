@@ -206,7 +206,7 @@ pl:
       new_goal: Nowy cel
       ongoing_section:
         heading: Cele
-      pending_pledges_callout: Masz oczekujące zobowiązania. Sure potwierdzi je przy
+      pending_pledges_callout: Masz oczekujące zobowiązania. Relay potwierdzi je przy
         następnej synchronizacji.
       search:
         aria_label: Szukaj celów
@@ -277,7 +277,7 @@ pl:
       delete: Usuń
       edit: Edytuj
       empty:
-        body: Wykonaj przelew na swoje powiązane konto. Sure wykryje go przy następnej
+        body: Wykonaj przelew na swoje powiązane konto. Relay wykryje go przy następnej
           synchronizacji. Lub zaktualizuj saldo ręcznego konta.
         heading: Brak wpłat
       funding_accounts:
@@ -308,7 +308,7 @@ pl:
         title: Ten cel jest wstrzymany
       pending_pledge:
         body_manual: Potwierdza się przy następnej ręcznej edycji salda.
-        body_transfer: Automatycznie potwierdza się, gdy Sure wykryje pasujący depozyt
+        body_transfer: Automatycznie potwierdza się, gdy Relay wykryje pasujący depozyt
           przy następnej synchronizacji.
         cancel: Anuluj
         confirm_cancel_body: Zobowiązanie %{amount} zostanie usunięte. Możesz w każdej

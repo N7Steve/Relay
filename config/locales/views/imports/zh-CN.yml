@@ -100,7 +100,7 @@ zh-CN:
         account_label: 账户
         name_label: 名称
         note_label: 备注
-        no_security_provider_warning: 证券价格提供方尚未配置。您的交易导入仍可进行，但 Sure 不会回填价格历史。请前往设置进行配置。
+        no_security_provider_warning: 证券价格提供方尚未配置。您的交易导入仍可进行，但 Relay 不会回填价格历史。请前往设置进行配置。
         date_format_label: 日期格式
         apply_configuration: 应用配置
       category_import:
@@ -287,7 +287,7 @@ zh-CN:
           merchant_import: 商户
           pdf_import: PDF
           document_import: 文档
-          sure_import: Sure
+          sure_import: Relay
       empty: 暂无导入记录。
     new:
       description: 您可以通过 CSV 手动导入多种类型数据，或使用我们的导入模板（如 Mint 格式）。
@@ -306,8 +306,8 @@ zh-CN:
       import_merchants: 导入商户
       import_actual: 从 Actual Budget 导入
       import_qif: 从 Quicken（QIF）导入
-      import_sure: 从 Sure 导入
-      import_sure_description: 导入 Sure 导出的数据文件。
+      import_sure: 从 Relay 导入
+      import_sure_description: 导入 Relay 导出的数据文件。
       import_file: 导入文档
       import_file_description: 上传账单、CSV 或其他财务文档。
       requires_account: 导入前需要先创建账户。
@@ -369,7 +369,7 @@ zh-CN:
       merchant_import: 商户导入
       pdf_import: PDF 导入
       document_import: 文档导入
-      sure_import: Sure 导入
+      sure_import: Relay 导入
     steps:
       upload: 上传
       configure: 配置

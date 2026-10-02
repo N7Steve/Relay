@@ -95,7 +95,7 @@ uk:
       akahu_account_already_linked: "Цей рахунок Akahu вже прив'язано."
     setup_accounts:
       title: "Налаштувати рахунки Akahu"
-      subtitle: "Виберіть, як кожен рахунок Akahu має відображатися в Sure."
+      subtitle: "Виберіть, як кожен рахунок Akahu має відображатися в Relay."
       no_credentials: "Спочатку налаштуйте облікові дані Akahu."
       api_error: "Не вдалося отримати рахунки Akahu."
       fetch_failed: "Не вдалося отримати рахунки"

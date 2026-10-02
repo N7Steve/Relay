@@ -129,7 +129,7 @@ tr:
     intro:
       coming_soon: Tanıtım deneyimi yakında geliyor
       description: Hedeflerinizi, kilometre taşlarınızı ve günlük ihtiyaçlarınızı
-        öğrenmek için daha zengin bir kurulum deneyimi geliştiriyoruz. Şimdilik, Sure
+        öğrenmek için daha zengin bir kurulum deneyimi geliştiriyoruz. Şimdilik, Relay
         ile bir sohbet başlatmak için sohbet kenar çubuğuna gidin ve finansal yolculuğunuzda
         nerede olduğunuzu bize bildirin.
       not_authorized: Tanıtım yalnızca misafir kullanıcılar için kullanılabilir.
@@ -141,15 +141,15 @@ tr:
       title: Gizlilik Politikası
     redis_configuration_error:
       heading: Redis Yapılandırması Gerekiyor
-      page_title: Redis Yapılandırması Gerekiyor - Sure
+      page_title: Redis Yapılandırması Gerekiyor - Relay
       refresh_hint: Redis'i yapılandırdıktan sonra, devam etmek için bu sayfayı yenileyin.
       refresh_page: Sayfayı Yenile
       setup_guide_hint: Redis'i yapılandırmak için eksiksiz Docker kurulum kılavuzumuzu
         izleyin
-      subheading: Kendi sunucunuzda barındırdığınız Sure kurulumunun düzgün yapılandırılmış
+      subheading: Kendi sunucunuzda barındırdığınız Relay kurulumunun düzgün yapılandırılmış
         bir Redis'e ihtiyacı var.
       view_setup_guide: Kurulum Kılavuzunu Görüntüle
-      why_required_body: Sure, hesap verilerini senkronize etme, içe aktarmaları işleme
+      why_required_body: Relay, hesap verilerini senkronize etme, içe aktarmaları işleme
         ve finansal verilerinizi güncel tutan diğer arka plan işlemleri gibi görevler
         için Sidekiq arka plan işlerini çalıştırmak amacıyla Redis kullanır.
       why_required_title: Redis neden gereklidir?

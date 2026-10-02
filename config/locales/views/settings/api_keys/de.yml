@@ -18,7 +18,7 @@ de:
         no_api_key:
           title: API-Schlüssel
           heading: Greife programmatisch auf deine Kontodaten zu
-          description: Erhalte programmatischen Zugriff auf deine Sure-Daten mit einem sicheren API-Schlüssel.
+          description: Erhalte programmatischen Zugriff auf deine Relay-Daten mit einem sicheren API-Schlüssel.
           what_you_can_do: "Was du mit der API tun kannst:"
           feature_1: Greife programmatisch auf deine Kontodaten zu.
           feature_2: Erstelle eigene Integrationen und Anwendungen.
@@ -81,7 +81,7 @@ de:
         scope_read_write: Lesen/Schreiben
         scope_read_write_description: Daten ansehen und neue Transaktionen anlegen
         security_warning_body: Dein API-Key wird nach dem Anlegen nur ein einziges Mal angezeigt. Kopier ihn und bewahr ihn sicher auf. Wer diesen Key hat, kommt im Rahmen der gewählten Rechte an deine Daten.
-        subtitle: Erzeug einen neuen API-Key für den programmatischen Zugriff auf deine Sure-Daten.
+        subtitle: Erzeug einen neuen API-Key für den programmatischen Zugriff auf deine Relay-Daten.
       created:
         title: API-Schlüssel erstellt
         success_title: API-Schlüssel erfolgreich erstellt

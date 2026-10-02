@@ -34,7 +34,7 @@ ca:
       password: Contrasenya
       password_placeholder: Introdueix la teva contrasenya
       submit: Inicia sessió
-      title: Sure
+      title: Relay
       passkey_button: Inicia sessió amb una clau d'accés
       passkey_unsupported: Aquest navegador no admet claus d'accés.
     openid_connect:

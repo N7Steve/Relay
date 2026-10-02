@@ -20,7 +20,7 @@ ro:
       setup_accounts: "Configurează conturile"
       delete: "Șterge"
       accounts_need_setup: "Contul necesită configurare"
-      accounts_need_setup_description: "Contul tău Trade Republic trebuie asociat unui cont Sure."
+      accounts_need_setup_description: "Contul tău Trade Republic trebuie asociat unui cont Relay."
       no_accounts_discovered: "Niciun cont Trade Republic nu a fost descoperit încă."
       no_accounts_discovered_description: "Finalizează autentificarea și rulează o sincronizare pentru a descoperi contul."
       data_quality:

@@ -20,7 +20,7 @@ pt-PT:
       setup_accounts: Configurar contas
       delete: Eliminar
       accounts_need_setup: A conta precisa de configuração
-      accounts_need_setup_description: A sua conta Trading 212 precisa de ser associada a uma conta Sure.
+      accounts_need_setup_description: A sua conta Trading 212 precisa de ser associada a uma conta Relay.
       no_accounts_discovered: Ainda não foi detetada nenhuma conta Trading 212.
       no_accounts_discovered_description: Execute uma sincronização depois de guardar a sua chave de API para detetar a sua conta.
     setup_accounts:
@@ -36,7 +36,7 @@ pt-PT:
       status:
         fetching_accounts: A obter a conta da Trading 212...
         no_accounts_found_title: Não foi encontrada nenhuma conta.
-        no_accounts_found_description: A Sure não conseguiu encontrar uma conta Trading 212. Verifique se a sua chave de API é válida.
+        no_accounts_found_description: A Relay não conseguiu encontrar uma conta Trading 212. Verifique se a sua chave de API é válida.
       available_accounts:
         title: Conta disponível
         account_type_investment: Investimento

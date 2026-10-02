@@ -43,7 +43,7 @@ pl:
           title: Rozłączyć zewnętrznego asystenta?
         description: Wybierz, jak odpowiada asystent czatu. Wbudowany asystent korzysta
           bezpośrednio ze skonfigurowanego dostawcy LLM. Zewnętrzny deleguje zapytania
-          do zdalnego agenta AI, który może korzystać z narzędzi finansowych Sure
+          do zdalnego agenta AI, który może korzystać z narzędzi finansowych Relay
           przez MCP.
         disconnect_button: Rozłącz
         disconnect_description: Usuń połączenie z zewnętrznym asystentem i przełącz
@@ -230,7 +230,7 @@ pl:
           nadpisuje to pole.'
         openai_request_timeout_label: Limit czasu żądania w sekundach (opcjonalnie)
         timeout_description: Określa, jak długo mogą trwać wywołania modeli zgodnych
-          z OpenAI, zanim Sure zrezygnuje. Zwiększ te wartości, jeśli uruchamiasz
+          z OpenAI, zanim Relay zrezygnuje. Zwiększ te wartości, jeśli uruchamiasz
           lokalny model na wolnym sprzęcie.
         timeout_heading: Limity czasu
         title: OpenAI
@@ -401,7 +401,7 @@ pl:
         connection_failed: Nie można połączyć z Yahoo Finance
         description: Yahoo Finance zapewnia bezpłatny dostęp do cen akcji, kursów
           walut i danych finansowych bez potrzeby klucza API.
-        rate_limited_message: Nie jest wymagane żadne działanie. Sure wstrzyma dodatkowe
+        rate_limited_message: Nie jest wymagane żadne działanie. Relay wstrzyma dodatkowe
           kontrole stanu na 30 minut. Operacje na cenach i kursach wymiany działają
           niezależnie.
         rate_limited_title: Osiągnięto limit zapytań Yahoo Finance.

@@ -82,7 +82,7 @@ ru:
       difference: Разница
       download: Скачать
       institution_name_hint: Подсказка учреждения
-      ledger_amount: Книга Sure
+      ledger_amount: Книга Relay
       link_suggestion: Предложение привязки
       linked_to: Привязано к %{account}.
       linking_title: Привязка счёта
@@ -93,7 +93,7 @@ ru:
       period_start_on: Начало периода
       reconciliation_title: Сверка
       reconciliation_unavailable: Добавьте период выписки и начальный или закрывающий
-        баланс, затем убедитесь, что Sure имеет историю баланса за эти даты.
+        баланс, затем убедитесь, что Relay имеет историю баланса за эти даты.
       reject: Отклонить
       save: Сохранить выписку
       statement_amount: Выписка

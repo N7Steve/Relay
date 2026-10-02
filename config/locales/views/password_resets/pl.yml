@@ -1,7 +1,7 @@
 ---
 pl:
   password_resets:
-    disabled: Resetowanie hasła przez Sure jest wyłączone. Zresetuj hasło przez swojego
+    disabled: Resetowanie hasła przez Relay jest wyłączone. Zresetuj hasło przez swojego
       dostawcę tożsamości.
     edit:
       title: Zresetuj hasło

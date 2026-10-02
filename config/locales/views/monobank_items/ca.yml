@@ -100,7 +100,7 @@ ca:
       no_account_selected: Selecciona un compte de Monobank per enllaçar.
     setup_accounts:
       title: Enllaça comptes de Monobank
-      subtitle: Tria com ha d'aparèixer a Sure cada targeta o guardiola de Monobank.
+      subtitle: Tria com ha d'aparèixer a Relay cada targeta o guardiola de Monobank.
       no_credentials: Primer configura les credencials de Monobank.
       api_error: No s'han pogut actualitzar els comptes de Monobank, així que es mostren els comptes desats a l'última sincronització.
       no_accounts_to_setup: No hi ha comptes per configurar

@@ -24,7 +24,7 @@ uk:
       forgot_password: Забули пароль?
       password: Пароль
       submit: Увійти
-      title: Sure
+      title: Relay
       password_placeholder: Введіть свій пароль
       openid_connect: Увійти за допомогою OpenID Connect
       oidc: Увійти за допомогою OpenID Connect

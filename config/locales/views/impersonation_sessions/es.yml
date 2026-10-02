@@ -1,6 +1,9 @@
 ---
 es:
   impersonation_sessions:
+    approval_bar:
+      request_description: "El equipo de soporte de %{product_name} ha solicitado acceso a tu cuenta, probablemente para ayudarte con una solicitud de soporte. Si apruebas la solicitud, toda su actividad quedará registrada por motivos de seguridad y auditoría."
+      session_description: "Una persona del equipo de %{product_name} está viendo tus datos. Puedes finalizar la sesión en cualquier momento."
     approve:
       success: Solicitud aprobada
     complete:

@@ -36,7 +36,7 @@ ru:
       password: Пароль
       password_placeholder: Введите ваш пароль
       submit: Войти
-      title: Sure
+      title: Relay
       passkey_button: Войти с ключом доступа
       passkey_unsupported: Этот браузер не поддерживает ключи доступа.
     openid_connect:

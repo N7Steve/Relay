@@ -75,7 +75,7 @@ zh-TW:
       difference: 差額
       download: 下載
       institution_name_hint: 機構名稱提示
-      ledger_amount: Sure 帳務紀錄
+      ledger_amount: Relay 帳務紀錄
       linked_to: 已連結到 %{account}。
       linking_title: 帳戶連結
       link_suggestion: 連結建議
@@ -85,7 +85,7 @@ zh-TW:
       period_end_on: 期間結束
       period_start_on: 期間開始
       reconciliation_title: 對帳
-      reconciliation_unavailable: 請填入對帳單期間以及期初或期末餘額，並確認 Sure 有這些日期的餘額歷史資料。
+      reconciliation_unavailable: 請填入對帳單期間以及期初或期末餘額，並確認 Relay 有這些日期的餘額歷史資料。
       reject: 拒絕
       save: 儲存對帳單
       statement_amount: 對帳單

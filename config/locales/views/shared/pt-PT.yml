@@ -2,7 +2,7 @@
 pt-PT:
   concerns:
     self_hostable:
-      redis_configured: "O Redis está agora configurado corretamente! Pode agora configurar a sua aplicação Sure."
+      redis_configured: "O Redis está agora configurado corretamente! Pode agora configurar a sua aplicação Relay."
   shared:
     preview: Preview
     dot_separator: "·"

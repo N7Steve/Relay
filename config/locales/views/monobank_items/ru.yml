@@ -108,7 +108,7 @@ ru:
       no_account_selected: Выберите счёт Monobank для связывания.
     setup_accounts:
       title: Связать счета Monobank
-      subtitle: Выберите, как каждая карта или «банка» Monobank будет отображаться в Sure.
+      subtitle: Выберите, как каждая карта или «банка» Monobank будет отображаться в Relay.
       no_credentials: Сначала настройте учётные данные Monobank.
       api_error: Не удалось обновить счета из Monobank, поэтому показаны счета, сохранённые при последней синхронизации.
       no_accounts_to_setup: Нет счетов для настройки

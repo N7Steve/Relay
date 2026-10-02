@@ -2,7 +2,7 @@
 fr:
   concerns:
     self_hostable:
-      redis_configured: Redis est maintenant correctement configuré ! Vous pouvez maintenant configurer votre application Sure.
+      redis_configured: Redis est maintenant correctement configuré ! Vous pouvez maintenant configurer votre application Relay.
   shared:
     dot_separator: "·"
     cancel: Annuler

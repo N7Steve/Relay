@@ -224,7 +224,7 @@ zh-TW:
           body: 您確定要重設帳號嗎？這將刪除您所有的帳戶、分類、商家、標籤及其他資料。此操作無法復原。
           title: 重設帳號？
         confirm_reset_with_sample_data:
-          body: 您確定要重設帳號並載入範例資料嗎？這將刪除您現有的資料，並替換為示範資料，讓您可以安全地探索 Sure 的功能。
+          body: 您確定要重設帳號並載入範例資料嗎？這將刪除您現有的資料，並替換為示範資料，讓您可以安全地探索 Relay 的功能。
           title: 重設帳號並載入範例資料？
         confirm_remove_invitation:
           body: 您確定要移除對 %{email} 的邀請嗎？
@@ -292,16 +292,16 @@ zh-TW:
       show:
         page_title: MCP Server
         connect_title: 連接 AI 助手
-        connect_subtitle: 將這個網址貼到 Claude.ai（或任何支援 MCP 的用戶端），即可連接到您的 Sure 帳號。
+        connect_subtitle: 將這個網址貼到 Claude.ai（或任何支援 MCP 的用戶端），即可連接到您的 Relay 帳號。
         copy_url: 複製
         copied: 已複製！
         how_to_connect_title: 如何連接 Claude
         step_1: 開啟 Claude.ai，前往 Settings → Customize → Connectors。
         step_2: 點選「Add connector」，貼上上方的 MCP 伺服器網址。
-        step_3: 點選 Connect — 您會被導向 Sure 登入並授權存取。
+        step_3: 點選 Connect — 您會被導向 Relay 登入並授權存取。
         step_4: 授權完成後，Claude 就能讀取您的帳戶、交易與餘額資料。
         connected_title: 已連接的用戶端
-        connected_subtitle: 這些應用程式目前可以存取您的 Sure 資料。不再使用的請撤銷。
+        connected_subtitle: 這些應用程式目前可以存取您的 Relay 資料。不再使用的請撤銷。
         unknown_client: 未知用戶端
         connected_ago: 於 %{time}前連接
         revoke: 撤銷
@@ -358,7 +358,7 @@ zh-TW:
       not_authorized: 沒有權限
       bank_sync:
         page_title: 銀行同步
-        lede: 連結外部帳戶，讓交易、餘額與持股自動流入 Sure。
+        lede: 連結外部帳戶，讓交易、餘額與持股自動流入 Relay。
       status:
         ok: 已連線
         warn: 需要處理
@@ -367,7 +367,7 @@ zh-TW:
       maturity:
         beta: Beta
         alpha: Alpha
-      drawer_trust_statement: 唯讀存取。Sure 永遠無法動用您的資金，您的憑證也是加密儲存的。
+      drawer_trust_statement: 唯讀存取。Relay 永遠無法動用您的資金，您的憑證也是加密儲存的。
       setup_steps:
         eyebrow: 設定
         need_help: 需要協助嗎？
@@ -451,7 +451,7 @@ zh-TW:
         step2: 建立一組新的 API 金鑰，只勾選 Enable Reading 權限
         step3: 將您的 API Key 與 Secret 貼到下方
         no_withdraw_title: 只用唯讀金鑰
-        no_withdraw_body: 建立 Binance API 金鑰時，請不要啟用提領權限。Sure 只需要讀取權限。
+        no_withdraw_body: 建立 Binance API 金鑰時，請不要啟用提領權限。Relay 只需要讀取權限。
         ip_hint_title: 需要設定 IP 白名單
         ip_hint_body: 請將這台應用程式伺服器的對外 IP 加入 Binance API 金鑰的白名單：
         ip_hint_contact_admin: 請聯絡您的管理員取得應用程式伺服器的對外 IP 位址。
@@ -472,7 +472,7 @@ zh-TW:
         step2: 建立一組 API 金鑰，只勾選 Query Funds 與 Query Closed Orders & Trades。
         step3: 將 API 金鑰與私密金鑰貼到下方。
         read_only_title: 只做唯讀的交易所同步
-        read_only_body: 請不要授予交易、取消、提領、匯出、帳本、Earn、質押或轉帳權限。Sure 只會匯入餘額、持倉與現貨成交紀錄。
+        read_only_body: 請不要授予交易、取消、提領、匯出、帳本、Earn、質押或轉帳權限。Relay 只會匯入餘額、持倉與現貨成交紀錄。
         default_connection_name: Kraken
         add_connection: 新增 Kraken 連線
         update_connection: 更新連線
@@ -557,7 +557,7 @@ zh-TW:
         steps:
           step_1: 在您的 IBKR Client Portal 中，前往「Performance & Reports」>「Flex Queries」。
           step_2: 點選「Activity Flex Query」區塊中的「+」圖示，建立一個新查詢。
-          step_3: 為查詢命名（例如「Sure Sync」），然後對照下方的 Flex Query 明細，啟用列出的區塊、欄位與設定選項。
+          step_3: 為查詢命名（例如「Relay Sync」），然後對照下方的 Flex Query 明細，啟用列出的區塊、欄位與設定選項。
           step_4: 儲存查詢並記下您的「Query ID」，再用「Flex Web Service Configuration」區塊中的齒輪圖示產生 Access Token。
           step_5: 將您的 Query ID 與 Token 貼到下方，儲存設定後前往「帳戶」連結已偵測到的 IBKR 帳戶。
         flex_query_details:
@@ -593,7 +593,7 @@ zh-TW:
           date_time_separator: Date/Time Separator：; (semi-colon)
           profit_and_loss: Profit and Loss：Default
           all_other_options: 其他所有設定選項：「No」
-        report_window_note: IBKR Flex 報表的範圍受限於您在 IBKR 設定的查詢區間。Sure 會從這份報表匯入完整的目前持股，以及最多近 365 天的活動。
+        report_window_note: IBKR Flex 報表的範圍受限於您在 IBKR 設定的查詢區間。Relay 會從這份報表匯入完整的目前持股，以及最多近 365 天的活動。
         sync: 同步
         disconnect_confirm: 要中斷 Interactive Brokers 連線嗎？
         query_id_label: Query ID

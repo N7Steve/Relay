@@ -3,7 +3,7 @@ pl:
   concerns:
     self_hostable:
       redis_configured: Redis jest teraz poprawnie skonfigurowany! Możesz teraz skonfigurować
-        aplikację Sure.
+        aplikację Relay.
   shared:
     cancel: Anuluj
     confirm_modal:

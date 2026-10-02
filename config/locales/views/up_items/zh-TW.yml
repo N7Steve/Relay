@@ -80,7 +80,7 @@ zh-TW:
       no_account_selected: 請選擇要連結的 Up 帳戶。
     setup_accounts:
       title: 連結 Up 帳戶
-      subtitle: 選擇每個 Up 帳戶要如何顯示在 Sure 中。
+      subtitle: 選擇每個 Up 帳戶要如何顯示在 Relay 中。
       no_credentials: 請先設定 Up 憑證。
       api_error: 無法取得 Up 帳戶。
       fetch_failed: 無法取得帳戶

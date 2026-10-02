@@ -4,20 +4,20 @@ pl:
     create:
       trial_already_used: Okres próbny już się rozpoczął albo zakończył. Przejdź na
         wersję płatną, aby kontynuować.
-      welcome: Witaj w Sure!
+      welcome: Witaj w Relay!
     self_hosted_alert: "%{product_name} nie jest dostępny w trybie self-hosted."
     success:
       contribution_failed: Coś poszło nie tak podczas przetwarzania Twojej wpłaty.
         Spróbuj ponownie.
-      welcome_with_contribution: Witaj w Sure! Doceniamy Twoją wpłatę.
+      welcome_with_contribution: Witaj w Relay! Doceniamy Twoją wpłatę.
     upgrade:
       account_settings: Ustawienia konta
       already_contributing: Już wspierasz projekt. Dziękujemy!
-      contribute_and_support_sure: Wspieraj i rozwijaj Sure
+      contribute_and_support_sure: Wspieraj i rozwijaj Relay
       cta: Wesprzyj dalszy rozwój tej bazy kodu!
       header:
         support: Wesprzyj
-        sure: Sure
+        sure: Relay
         today: już dziś
       page_title: Uaktualnij
       redirect_to_stripe: W kolejnym kroku nastąpi przekierowanie do Stripe, który

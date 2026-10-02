@@ -114,7 +114,7 @@ tr:
       fetch_failed: Hesaplar alınamadı
       no_accounts_to_setup: Kurulacak hesap yok
       no_credentials: Önce Akahu kimlik bilgilerini yapılandırın.
-      subtitle: Her Akahu hesabının Sure'da nasıl görüneceğini seçin.
+      subtitle: Her Akahu hesabının Relay'da nasıl görüneceğini seçin.
       title: Akahu Hesaplarını Kurun
     update:
       success: Akahu bağlantısı güncellendi.

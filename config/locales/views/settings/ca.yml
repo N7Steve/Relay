@@ -235,7 +235,7 @@ ca:
         confirm_reset_with_sample_data:
           body: Segur que vols restablir el teu compte i carregar dades d'exemple?
             Això eliminarà les teves dades existents i les substituirà per dades de
-            demostració perquè puguis explorar Sure amb seguretat.
+            demostració perquè puguis explorar Relay amb seguretat.
           title: Vols restablir el compte i carregar dades d'exemple?
         danger_zone_title: Zona perillosa
         delete_account: Elimina el compte
@@ -272,7 +272,7 @@ ca:
     providers:
       bank_sync:
         lede: Connecta comptes externs perquè transaccions, saldos i posicions flueixin
-          automàticament a Sure.
+          automàticament a Relay.
         page_title: Sincronització bancària
       binance_panel:
         api_key_label: Clau API
@@ -288,7 +288,7 @@ ca:
           de sortida del servidor de l'aplicació.
         ip_hint_title: Cal incloure la IP a la llista blanca
         no_withdraw_body: No activis permisos de retirada en crear la teva clau API
-          de Binance. Sure només necessita accés de lectura.
+          de Binance. Relay només necessita accés de lectura.
         no_withdraw_title: Només clau de lectura
         setup_instructions: 'Per connectar Binance, crea una clau API de només lectura:'
         step1_html: Ves a <a href="https://www.binance.com/en/my/settings/api-management"
@@ -321,7 +321,7 @@ ca:
         sync: Sincronitza
         syncing: Sincronitzant...
       connect: Connecta
-      drawer_trust_statement: Accés només de lectura. Sure mai no pot moure diners
+      drawer_trust_statement: Accés només de lectura. Relay mai no pot moure diners
         i les teves credencials s'emmagatzemen xifrades.
       empty_filter: Cap proveïdor coincideix amb el teu filtre.
       enable_banking_panel:
@@ -394,7 +394,7 @@ ca:
         query_id_placeholder_existing: Deixa en blanc per mantenir l'ID actual
         query_id_placeholder_new: Introdueix el teu ID de Flex Query d'IBKR
         report_window_note: Els informes Flex d'IBKR estan limitats a la finestra
-          de consulta configurada a IBKR. Sure importarà les posicions actuals completes
+          de consulta configurada a IBKR. Relay importarà les posicions actuals completes
           més fins a 365 dies d'activitat d'aquest informe.
         save_configuration: Desa la configuració
         sections:
@@ -429,7 +429,7 @@ ca:
             Queries".
           step_2: Fes clic a la icona "+" a la secció "Activity Flex Query" per crear
             una nova consulta.
-          step_3: Anomena la teva consulta (p. ex., "Sure Sync"), després revisa els
+          step_3: Anomena la teva consulta (p. ex., "Relay Sync"), després revisa els
             detalls de la Flex Query a sota i activa les seccions, camps i opcions
             de configuració llistades.
           step_4: Desa la consulta, anota el teu "Query ID", després usa la icona
@@ -456,7 +456,7 @@ ca:
         keep_api_key_placeholder: Deixa en blanc per mantenir la clau API existent
         keep_api_secret_placeholder: Deixa en blanc per mantenir la clau privada existent
         read_only_body: No atorguis permisos de trading, cancel·lació, retirada, exportació,
-          llibre major, Earn, staking o transferència. Sure només importa saldos,
+          llibre major, Earn, staking o transferència. Relay només importa saldos,
           posicions i operacions spot.
         read_only_title: Sincronització només de lectura amb l'exchange
         setup_accounts: Configura compte
@@ -570,7 +570,7 @@ ca:
       update:
         no_changes: No s'ha fet cap canvi
         updated_successfully: Configuració del proveïdor actualitzada correctament
-      drawer_trust_statement_encryption_unconfigured: Accés només de lectura. Sure mai no pot moure diners. Configura claus de xifratge explícites abans de desar credencials de proveïdors en producció.
+      drawer_trust_statement_encryption_unconfigured: Accés només de lectura. Relay mai no pot moure diners. Configura claus de xifratge explícites abans de desar credencials de proveïdors en producció.
       provider_setup_encryption_warning:
         title: Falten les claus de xifratge
         message: Aquesta instal·lació autoallotjada no té configurades claus de xifratge explícites d'Active Record. Configura primary_key, deterministic_key i key_derivation_salt abans de desar credencials de proveïdors en producció.
@@ -581,7 +581,7 @@ ca:
         step2: Crea una clau API amb accés de només lectura a saldos i historial.
         step3: Enganxa la clau API i el secret a continuació.
         read_only_title: Només sincronització de lectura amb l'exchange
-        read_only_body: No atorguis permisos d'enviament, retirada, trading ni transferència. Sure només importa saldos, valors en AUD, transferències, dipòsits, retirades i l'historial d'ordres executades.
+        read_only_body: No atorguis permisos d'enviament, retirada, trading ni transferència. Relay només importa saldos, valors en AUD, transferències, dipòsits, retirades i l'historial d'ordres executades.
         default_connection_name: CoinSpot
         add_connection: Afegeix una connexió de CoinSpot
         update_connection: Actualitza la connexió
@@ -608,7 +608,7 @@ ca:
         etherscan_hint: Les lectures d'Ethereum funcionen sense clau. Afegir una clau d'Etherscan només augmenta el límit de sol·licituds per a Ethereum.
         keep_etherscan_api_key: Deixa-ho en blanc per mantenir la clau existent
         manage_wallets: Gestiona les carteres
-        keyless_body: Sure només llegeix dades públiques de la cadena de blocs. No intervenen claus, frases de recuperació ni signatures, i no es pot gastar res.
+        keyless_body: Relay només llegeix dades públiques de la cadena de blocs. No intervenen claus, frases de recuperació ni signatures, i no es pot gastar res.
         keyless_title: Només lectura, sense claus
         save: Desa
         sync_start_date_hint: Les transferències anteriors a aquesta data s'ignoren. Deixa-ho en blanc per importar tot el que mostri l'explorador.
@@ -649,10 +649,10 @@ ca:
         complete_login: Continua
         authenticator_code_label: Codi d'autenticació (si se't demana)
         authenticator_code_placeholder: Codi de 6 dígits
-        push_login_notice: Aprova ara l'inici de sessió a l'aplicació de Trade Republic. Sure ho comprova automàticament en segon pla. També pots comprovar-ne l'estat tu mateix.
+        push_login_notice: Aprova ara l'inici de sessió a l'aplicació de Trade Republic. Relay ho comprova automàticament en segon pla. També pots comprovar-ne l'estat tu mateix.
         check_login_status: Comprova l'estat ara
         authenticator_code_notice: Introdueix el codi de la teva aplicació d'autenticació.
-        approval_pending: Inici de sessió en curs. Aprova'l a l'aplicació de Trade Republic; Sure ho comprova automàticament.
+        approval_pending: Inici de sessió en curs. Aprova'l a l'aplicació de Trade Republic; Relay ho comprova automàticament.
         awaiting_confirmation: L'aprovació a l'aplicació de Trade Republic està pendent.
         awaiting_authenticator_code: Cal el codi d'autenticació.
         login_expired: La sol·licitud d'aprovació ha caducat.
@@ -660,14 +660,14 @@ ca:
         connection_success:
           title: Trade Republic s'ha connectat correctament
           message: La teva connexió de Trade Republic està a punt.
-          description: Sure està sincronitzant les teves dades de Trade Republic en segon pla.
+          description: Relay està sincronitzant les teves dades de Trade Republic en segon pla.
           close: Fet
         qr_login: Inicia sessió amb codi QR
         qr_cancel: Cancel·la l'inici de sessió amb QR
         qr_back_to_credentials: Torna al número de telèfon i PIN
         qr_loading: Preparant el codi QR…
         qr_instruction: Escaneja el codi QR amb l'aplicació de Trade Republic i aprova l'inici de sessió.
-        qr_success: Inici de sessió aprovat. Sure està actualitzant la pàgina del proveïdor.
+        qr_success: Inici de sessió aprovat. Relay està actualitzant la pàgina del proveïdor.
         qr_error: No s'ha pogut iniciar la sessió amb QR. Torna-ho a provar.
         add_account: "Afegeix una altra connexió"
         save_configuration: Desa i inicia sessió
@@ -747,16 +747,16 @@ ca:
       show:
         page_title: Servidor MCP
         connect_title: Connecta un assistent d'IA
-        connect_subtitle: Enganxa aquest URL a Claude.ai (o a qualsevol client compatible amb MCP) per connectar-lo al teu compte de Sure.
+        connect_subtitle: Enganxa aquest URL a Claude.ai (o a qualsevol client compatible amb MCP) per connectar-lo al teu compte de Relay.
         copy_url: Copia
         copied: Copiat!
         how_to_connect_title: Com connectar Claude
         step_1: Obre Claude.ai i ves a Settings → Customize → Connectors.
         step_2: Fes clic a "Add connector" i enganxa l'URL del servidor MCP de dalt.
-        step_3: 'Fes clic a Connect: se''t redirigirà a Sure per iniciar sessió i autoritzar l''accés.'
+        step_3: 'Fes clic a Connect: se''t redirigirà a Relay per iniciar sessió i autoritzar l''accés.'
         step_4: Un cop autoritzat, Claude podrà llegir els teus comptes, transaccions i saldos.
         connected_title: Clients connectats
-        connected_subtitle: Aquestes aplicacions tenen accés a les teves dades de Sure. Revoca les que ja no facis servir.
+        connected_subtitle: Aquestes aplicacions tenen accés a les teves dades de Relay. Revoca les que ja no facis servir.
         unknown_client: Client desconegut
         connected_ago: Connectat fa %{time}
         revoke: Revoca

@@ -198,10 +198,10 @@ pl:
         revoked: Połączenie cofnięte.
       show:
         connect_subtitle: Wklej ten URL do Claude.ai (albo dowolnego klienta kompatybilnego
-          z MCP), aby połączyć go z Twoim kontem Sure.
+          z MCP), aby połączyć go z Twoim kontem Relay.
         connect_title: Połącz asystenta AI
         connected_ago: Połączono %{time} temu
-        connected_subtitle: Te aplikacje mają obecnie dostęp do Twoich danych Sure.
+        connected_subtitle: Te aplikacje mają obecnie dostęp do Twoich danych Relay.
           Cofnij dostęp tym, których już nie używasz.
         connected_title: Połączeni klienci
         copied: Skopiowano!
@@ -212,7 +212,7 @@ pl:
         revoke_confirm: Cofnąć dostęp temu klientowi?
         step_1: Otwórz Claude.ai i przejdź do Ustawienia → Dostosuj → Konektory.
         step_2: Kliknij "Dodaj konektor" i wklej powyższy URL serwera MCP.
-        step_3: Kliknij Połącz. Zostaniesz przekierowany do Sure, aby się zalogować
+        step_3: Kliknij Połącz. Zostaniesz przekierowany do Relay, aby się zalogować
           i autoryzować dostęp.
         step_4: Po autoryzacji Claude będzie mógł odczytywać Twoje konta, transakcje
           i dane o saldach.
@@ -327,7 +327,7 @@ pl:
         confirm_reset_with_sample_data:
           body: Czy na pewno chcesz zresetować swoje konto i załadować przykładowe
             dane? Spowoduje to usunięcie istniejących danych i zastąpienie ich danymi
-            demonstracyjnymi, aby bezpiecznie poznawać Sure.
+            demonstracyjnymi, aby bezpiecznie poznawać Relay.
           title: Zresetować konto i załadować przykładowe dane?
         danger_zone_title: Strefa ryzyka
         delete_account: Usuń konto
@@ -371,7 +371,7 @@ pl:
           konta.
       bank_sync:
         lede: Połącz konta zewnętrzne, aby transakcje, salda i posiadane aktywa trafiały
-          do Sure automatycznie.
+          do Relay automatycznie.
         page_title: Synchronizacja banku
       binance_panel:
         api_key_label: Klucz API
@@ -388,7 +388,7 @@ pl:
           IP wyjściowy serwera aplikacji.
         ip_hint_title: Wymagane dodanie do białej listy IP
         no_withdraw_body: Nie włączaj uprawnień do wypłat podczas tworzenia klucza
-          API Binance. Sure potrzebuje tylko dostępu do odczytu.
+          API Binance. Relay potrzebuje tylko dostępu do odczytu.
         no_withdraw_title: Tylko klucz do odczytu
         setup_instructions: 'Aby połączyć Binance, utwórz klucz API tylko do odczytu:'
         step1_html: Przejdź do <a href="https://www.binance.com/en/my/settings/api-management"
@@ -421,9 +421,9 @@ pl:
         sync: Synchronizuj
         syncing: Synchronizacja...
       connect: Połącz
-      drawer_trust_statement: Dostęp tylko do odczytu. Sure nigdy nie może przenosić
+      drawer_trust_statement: Dostęp tylko do odczytu. Relay nigdy nie może przenosić
         pieniędzy, a Twoje dane uwierzytelniające są przechowywane w postaci zaszyfrowanej.
-      drawer_trust_statement_encryption_unconfigured: Dostęp tylko do odczytu. Sure
+      drawer_trust_statement_encryption_unconfigured: Dostęp tylko do odczytu. Relay
         nigdy nie może przenosić pieniędzy. Skonfiguruj jawne klucze szyfrowania,
         zanim zaczniesz przechowywać dane uwierzytelniające dostawców w środowisku
         produkcyjnym.
@@ -499,7 +499,7 @@ pl:
         query_id_placeholder_existing: Zostaw puste, aby zachować bieżący Query ID
         query_id_placeholder_new: Wpisz swój Query ID z IBKR Flex
         report_window_note: Raporty IBKR Flex są ograniczone do okresu zapytania skonfigurowanego
-          w IBKR. Sure zaimportuje pełny bieżący stan posiadania oraz do 365 ostatnich
+          w IBKR. Relay zaimportuje pełny bieżący stan posiadania oraz do 365 ostatnich
           dni aktywności z tego raportu.
         save_configuration: Zapisz konfigurację
         sections:
@@ -534,7 +534,7 @@ pl:
             Queries".
           step_2: Kliknij ikonę "+" w sekcji "Activity Flex Query", aby utworzyć nowe
             zapytanie.
-          step_3: Nadaj zapytaniu nazwę (np. "Sure Sync"), a następnie sprawdź poniższe
+          step_3: Nadaj zapytaniu nazwę (np. "Relay Sync"), a następnie sprawdź poniższe
             szczegóły Flex Query i włącz wymienione sekcje, pola oraz opcje konfiguracji.
           step_4: Zapisz zapytanie, zanotuj swój "Query ID", a następnie użyj ikony
             koła zębatego w sekcji "Flex Web Service Configuration", aby wygenerować
@@ -560,7 +560,7 @@ pl:
         keep_api_key_placeholder: Zostaw puste, aby zachować obecny API Key
         keep_api_secret_placeholder: Zostaw puste, aby zachować obecny Private Key
         read_only_body: Nie nadawaj uprawnień do handlu, anulowania, wypłat, eksportu,
-          rejestru, Earn, stakingu ani przelewów. Sure importuje wyłącznie salda,
+          rejestru, Earn, stakingu ani przelewów. Relay importuje wyłącznie salda,
           posiadane aktywa i zrealizowane transakcje spot.
         read_only_title: Tylko synchronizacja giełdy w trybie odczytu
         setup_accounts: Skonfiguruj konto
@@ -614,7 +614,7 @@ pl:
         etherscan_hint: Odczyt danych Ethereum działa bez klucza. Dodanie klucza Etherscan
           tylko podnosi limit zapytań dla Ethereum.
         keep_etherscan_api_key: Zostaw puste, aby zachować obecny klucz
-        keyless_body: Sure wyłącznie odczytuje publiczne dane blockchaina. Nie są
+        keyless_body: Relay wyłącznie odczytuje publiczne dane blockchaina. Nie są
           potrzebne żadne klucze, frazy seed ani podpisy, i nic nie może zostać wydane.
         keyless_title: Tylko odczyt, bez wymaganych kluczy
         manage_wallets: Zarządzaj portfelami
@@ -716,7 +716,7 @@ pl:
           other: Wykryto %{count} kont Trade Republic.
         accounts_tab: Konta
         approval_pending: Logowanie rozpoczęte. Zatwierdź je w aplikacji Trade Republic
-          — Sure sprawdza to automatycznie.
+          — Relay sprawdza to automatycznie.
         authenticator_code_label: Kod z aplikacji uwierzytelniającej (jeśli wymagany)
         authenticator_code_notice: Wpisz kod z aplikacji uwierzytelniającej.
         authenticator_code_placeholder: Kod 6-cyfrowy
@@ -728,7 +728,7 @@ pl:
         connect: Zaloguj się
         connection_success:
           close: Gotowe
-          description: Sure synchronizuje teraz Twoje dane z Trade Republic w tle.
+          description: Relay synchronizuje teraz Twoje dane z Trade Republic w tle.
           message: Twoje połączenie z Trade Republic jest gotowe.
           title: Trade Republic połączono pomyślnie
         currency_label: Waluta konta
@@ -751,7 +751,7 @@ pl:
         pin_label: PIN lub hasło
         pin_placeholder_existing: Zostaw puste, aby zachować bieżący PIN lub hasło
         pin_placeholder_new: Twój PIN lub hasło z aplikacji Trade Republic
-        push_login_notice: Zatwierdź teraz logowanie w aplikacji Trade Republic. Sure
+        push_login_notice: Zatwierdź teraz logowanie w aplikacji Trade Republic. Relay
           sprawdza to automatycznie w tle. Możesz też sprawdzić status samodzielnie.
         qr_back_to_credentials: Wróć do numeru telefonu i PIN-u lub hasła
         qr_cancel: Anuluj logowanie kodem QR
@@ -759,7 +759,7 @@ pl:
         qr_instruction: Zeskanuj kod QR aplikacją Trade Republic i zatwierdź logowanie.
         qr_loading: Przygotowywanie kodu QR…
         qr_login: Zaloguj się kodem QR
-        qr_success: Logowanie zatwierdzone. Sure odświeża stronę dostawcy.
+        qr_success: Logowanie zatwierdzone. Relay odświeża stronę dostawcy.
         restart_login: Rozpocznij logowanie ponownie
         add_account: "Dodaj kolejne połączenie"
         save_configuration: Zapisz i rozpocznij logowanie

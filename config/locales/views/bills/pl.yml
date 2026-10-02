@@ -126,7 +126,7 @@ pl:
         one: Termin jutro, %{date}
         other: Termin za %{count} dni, %{date}
     feed:
-      calendar_name: Rachunki Sure
+      calendar_name: Rachunki Relay
     find_payment: Znajdź płatność
     index:
       accept: Zastosuj
@@ -148,11 +148,11 @@ pl:
       dormant: Uśpione
       empty:
         action: Znajdź transakcje cykliczne
-        description: Rachunki to Twoje cykliczne wydatki. Sure wykrywa je automatycznie
+        description: Rachunki to Twoje cykliczne wydatki. Relay wykrywa je automatycznie
           na podstawie historii transakcji, a do każdego możesz dodać link do płatności,
           żeby zapłacić bezpośrednio stąd.
         no_history_description: Brak transakcji. Połącz konto lub zaimportuj historię,
-          a Sure automatycznie znajdzie Twoje rachunki, albo dodaj jeden ręcznie.
+          a Relay automatycznie znajdzie Twoje rachunki, albo dodaj jeden ręcznie.
         title: Brak rachunków
       hero_next_seven: "%{amount} do zapłaty w ciągu 7 dni"
       hero_past_due: "%{amount} zaległe"

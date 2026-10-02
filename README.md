@@ -1,137 +1,50 @@
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/we-promise/sure)
-[![View performance data on Skylight](https://badges.skylight.io/typical/s6PEZSKwcklL.svg)](https://oss.skylight.io/app/applications/s6PEZSKwcklL)
-[![Dosu](https://raw.githubusercontent.com/dosu-ai/assets/main/dosu-badge.svg)](https://app.dosu.dev/a72bdcfd-15f5-4edc-bd85-ea0daa6c3adc/ask)
-[![Pipelock Security Scan](https://github.com/we-promise/sure/actions/workflows/pipelock.yml/badge.svg)](https://github.com/we-promise/sure/actions/workflows/pipelock.yml)
+# Relay
 
-<img width="1270" height="1140" alt="sure_shot" src="https://github.com/user-attachments/assets/9c6e03cc-3490-40ab-9a68-52e042c51293" />
+Relay es una aplicación independiente de finanzas personales que evoluciona
+nuestro fork de [Sure](https://github.com/N7Steve/sure), basado en
+[Sure Finance](https://github.com/we-promise/sure) y
+[Maybe Finance](https://github.com/maybe-finance/maybe).
 
-<p align="center">
-  <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://readme-i18n.com/de/we-promise/sure">Deutsch</a> | 
-  <a href="https://readme-i18n.com/es/we-promise/sure">Español</a> | 
-  <a href="https://readme-i18n.com/fr/we-promise/sure">Français</a> | 
-  <a href="https://readme-i18n.com/ja/we-promise/sure">日本語</a> | 
-  <a href="https://readme-i18n.com/ko/we-promise/sure">한국어</a> | 
-  <a href="https://readme-i18n.com/pt/we-promise/sure">Português</a> | 
-  <a href="https://readme-i18n.com/ru/we-promise/sure">Русский</a> | 
-  <a href="https://readme-i18n.com/zh/we-promise/sure">中文</a>
-</p>
+Sus prioridades son la exactitud de los datos, Agenda, las previsiones, los
+informes y una visión comprensible de los compromisos y la liquidez futura.
+Las mejoras de upstream se evalúan e incorporan de forma selectiva.
 
-# Sure: The personal finance app for everyone
+## Estado de la separación
 
-<b>Get
-involved: [Discord](https://discord.gg/36ZGBsxYEK) • [Website](https://sure.am) • [Issues](https://github.com/we-promise/sure/issues)</b>
+El historial se conserva íntegro. La primera entrega introduce el nombre Relay
+en la marca web y los textos traducidos. Los nombres técnicos, la versión,
+los logos y los clientes heredados se migrarán por fases.
 
-> [!IMPORTANT]
-> This repository is a community fork of the now-abandoned Maybe Finance project. <br />
-> Learn more in their [final release](https://github.com/maybe-finance/maybe/releases/tag/v0.6.0) doc.
+El plan, el inventario de referencias, los riesgos de compatibilidad y los
+criterios de validación están en [RELAY_MIGRATION.md](RELAY_MIGRATION.md).
+Las decisiones del producto están en [FORK_EVOLUTION.md](FORK_EVOLUTION.md) y el
+mapa de funciones propias en [FORK_CUSTOMIZATIONS.md](FORK_CUSTOMIZATIONS.md).
 
-## Backstory
+## Desarrollo y validación
 
-The [Maybe Finance](https://github.com/maybe-finance/maybe) (archived/abandoned repo) team spent most of 2021–2022 building a full-featured personal finance and wealth management app. It even included an “Ask an Advisor” feature that connected users with a real CFP/CFA — all included with your subscription.
+- [Guías de desarrollo](docs/llm-guides/README.md).
+- [Arquitectura](docs/llm-guides/architecture.md).
+- [Pruebas en Docker desde Windows](docs/llm-guides/docker-tests.md).
+- [Aplicación local con Docker](docs/llm-guides/docker-local-app.md).
+- [Contribuciones](CONTRIBUTING.md) y [convenciones del repositorio](AGENTS.md).
 
-The business end of things didn't work out, and so they stopped developing the app in mid-2023.
+Los scripts locales conservan todavía nombres de proyecto `sure-local` y
+`sure-tests`. Antes de arrancar Relay junto a Sure, aislar proyectos y puertos
+como describe el plan. Las pruebas de esta entrega usan `relay-tests` mediante
+Compose explícitamente.
 
-After spending nearly $1 million on development (employees, contractors, data providers, infra, etc.), the team open-sourced the app. Their goal was to let users self-host it for free — and eventually launch a hosted version for a small fee.
+## Instalación y clientes
 
-They actually did launch that hosted version … briefly.
+Las [guías de hosting](docs/hosting/docker.md) y el
+[inventario de clientes](docs/clients.md) se conservan como referencia heredada.
+Sus imágenes, dominios, callbacks y canales de distribución aún pueden apuntar
+a Sure. Consultar el plan antes de utilizarlos para desplegar Relay.
 
-That also didn’t work out — at least not as a sustainable B2C business — so now here we are: hosting a community-maintained fork to keep the codebase alive and see where this can go next.
+La primera publicación del código no publica imágenes ni lanza una nueva
+versión móvil o de escritorio. Relay ejecuta CI en su rama `main`.
 
-Join us!
+## Procedencia y licencia
 
-## Hosting Sure
-
-Sure is a fully working personal finance app that can be [self hosted with Docker](docs/hosting/docker.md).
-Sure can be accessed from a browser, the macOS desktop app, the mobile app, API
-clients, and LLM agents. See [Sure Clients](docs/clients.md) for an overview.
-
-## Forking and Attribution
-
-This repo is a community fork of the archived Maybe Finance repo.
-You’re free to fork it under the AGPLv3 license — but we’d love it if you stuck around and contributed here instead.
-
-To stay compliant and avoid trademark issues:
-
-- Be sure to include the original [AGPLv3 license](https://github.com/maybe-finance/maybe/blob/main/LICENSE) and clearly state in your README that your fork is based on Maybe Finance but is **not affiliated with or endorsed by** Maybe Finance Inc.
-- "Maybe" is a trademark of Maybe Finance Inc. and therefore, use of it is NOT allowed in forked repositories (or the logo)
-
-## Performance Issues
-
-With data-heavy apps, inevitably, there are performance issues. We've set up a public dashboard showing the problematic requests seen on the demo site, along with the stacktraces to help debug them.
-
-[https://www.skylight.io/app/applications/s6PEZSKwcklL/recent/6h/endpoints](https://oss.skylight.io/app/applications/s6PEZSKwcklL/recent/6h/endpoints)
-
-Any contributions that help improve performance are very much welcome.
-
-## Local Development Setup
-
-**If you are trying to _self-host_ the app, [read this guide to get started](docs/hosting/docker.md).**
-
-The instructions below are for developers to get started with contributing to the app.
-
-### Requirements
-
-- See `.ruby-version` file for required Ruby version
-- PostgreSQL >9.3 (latest stable version recommended)
-- Redis > 5.4 (latest stable version recommended)
-
-### Getting Started
-```sh
-cd sure
-cp .env.local.example .env.local
-bin/setup
-bin/dev
-
-# Optionally, load demo data
-rake demo_data:default
-```
-
-Visit http://localhost:3000 to view the app.
-
-If you loaded the optional demo data, log in with these credentials:
-
-- Email: `user@example.com`
-- Password: `Password1!`
-
-For further instructions, see guides below.
-
-### Setup Guides
-
-- [Mac dev setup](https://github.com/we-promise/sure/wiki/Mac-Dev-Setup-Guide)
-- [Linux dev setup](https://github.com/we-promise/sure/wiki/Linux-Dev-Setup-Guide)
-- [Windows dev setup](https://github.com/we-promise/sure/wiki/Windows-Dev-Setup-Guide)
-- Dev containers - visit [this guide](https://code.visualstudio.com/docs/devcontainers/containers)
-
-### One-click Install
-
-Render expects each button target branch to have a `render.yaml` at the repository root. The branch-ready Blueprint files live in `branches/<branch-name>/render.yaml` in a separate repo and can be copied to each corresponding branch root.
-
-| Option | What it deploys | `latest` | `stable` |
-| --- | --- | --- | --- |
-| **Sure - No AI** | Sure web, Sidekiq worker, Render Postgres, and Render Key Value. AI tokens are intentionally blank. | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/we-promise/sure-render-templates/tree/sure-no-ai-latest) | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/we-promise/sure-render-templates/tree/sure-no-ai) |
-| **Sure - Simple AI** | Sure with OpenAI-backed AI settings, pgvector-ready Postgres, Sidekiq, and Render Key Value. Render prompts for the OpenAI token. | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/we-promise/sure-render-templates/tree/sure-simple-ai-latest) | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/we-promise/sure-render-templates/tree/sure-simple-ai) |
-| **Sure - External AI** | Sure with external assistant settings plus AlphaClaw, which manages the OpenClaw gateway on Render. | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/we-promise/sure-render-templates/tree/sure-external-ai-latest) | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/we-promise/sure-render-templates/tree/sure-external-ai) |
-
-[![Run on PikaPods](https://www.pikapods.com/static/run-button.svg)](https://www.pikapods.com/pods?run=sure)
-
-[![Deploy on Hostim](https://hostim.dev/img/deploy-button.svg)](https://console.hostim.dev/dashboard?preview=1&modal=1&template=sure)
-
-## License and Trademarks
-
-Maybe and Sure are both distributed under
-an [AGPLv3 license](https://github.com/we-promise/sure/blob/main/LICENSE).
-- "Maybe" is a trademark of Maybe Finance, Inc.
-- "Sure" is not, and refers to this community fork.
-
-![Alt](https://repobeats.axiom.co/api/embed/3a9753cff07501fba8a6749d0ebd567ff63848c8.svg "Repobeats analytics image")
-
-<p align="center">
-  <a href="https://gittensor.io/miners/repository?name=we-promise%2Fsure">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/we-promise/sure/gittensor-impact-assets/gittensor-impact-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/we-promise/sure/gittensor-impact-assets/gittensor-impact-light.svg">
-      <img src="https://raw.githubusercontent.com/we-promise/sure/gittensor-impact-assets/gittensor-impact-light.svg" alt="Gittensor contributor impact for Sure repo" width="600">
-    </picture>
-  </a>
-</p>
+Relay conserva la [licencia AGPLv3](LICENSE), el historial y las atribuciones
+heredadas. Es un proyecto independiente, sin afiliación ni respaldo de
+Maybe Finance Inc. ni del equipo de Sure Finance.

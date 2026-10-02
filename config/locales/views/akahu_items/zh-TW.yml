@@ -89,7 +89,7 @@ zh-TW:
       akahu_account_already_linked: 這個 Akahu 帳戶已經連結過了。
     setup_accounts:
       title: 設定 Akahu 帳戶
-      subtitle: 選擇每個 Akahu 帳戶要以什麼形式出現在 Sure 中。
+      subtitle: 選擇每個 Akahu 帳戶要以什麼形式出現在 Relay 中。
       no_credentials: 請先設定 Akahu 憑證。
       api_error: 無法取得 Akahu 帳戶。
       fetch_failed: 無法取得帳戶

@@ -24,7 +24,7 @@ pt-PT:
       forgot_password: Esqueceu-se da sua palavra-passe?
       password: Palavra-passe
       submit: Iniciar sessão
-      title: Sure
+      title: Relay
       password_placeholder: Introduza a sua palavra-passe
       openid_connect: Iniciar sessão com OpenID Connect
       oidc: Iniciar sessão com OpenID Connect

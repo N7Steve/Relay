@@ -12,14 +12,14 @@ pt-PT:
       not_authorized: "A Introdução está disponível apenas para utilizadores convidados."
       welcome: "Bem-vindo(a)!"
       coming_soon: A experiência de introdução chega em breve
-      description: "Estamos a desenvolver uma jornada de integração mais completa para conhecer os seus objetivos, marcos e necessidades do dia a dia. Por agora, dirija-se à barra lateral de chat para iniciar uma conversa com a Sure e diga-nos em que ponto está da sua jornada financeira."
+      description: "Estamos a desenvolver uma jornada de integração mais completa para conhecer os seus objetivos, marcos e necessidades do dia a dia. Por agora, dirija-se à barra lateral de chat para iniciar uma conversa com a Relay e diga-nos em que ponto está da sua jornada financeira."
       start_chatting: Começar a conversar
     redis_configuration_error:
-      page_title: Configuração de Redis Necessária - Sure
+      page_title: Configuração de Redis Necessária - Relay
       heading: Configuração de Redis Necessária
-      subheading: A sua instalação da Sure com alojamento próprio precisa que o Redis esteja configurado corretamente.
+      subheading: A sua instalação da Relay com alojamento próprio precisa que o Redis esteja configurado corretamente.
       why_required_title: Porque é que o Redis é necessário?
-      why_required_body: A Sure utiliza o Redis para potenciar os trabalhos em segundo plano do Sidekiq para tarefas como sincronizar dados de contas, processar importações e outras operações em segundo plano que mantêm os seus dados financeiros atualizados.
+      why_required_body: A Relay utiliza o Redis para potenciar os trabalhos em segundo plano do Sidekiq para tarefas como sincronizar dados de contas, processar importações e outras operações em segundo plano que mantêm os seus dados financeiros atualizados.
       view_setup_guide: Ver Guia de Configuração
       setup_guide_hint: Siga o nosso guia completo de configuração Docker para configurar o Redis
       refresh_hint: "Depois de configurar o Redis, atualize esta página para continuar."

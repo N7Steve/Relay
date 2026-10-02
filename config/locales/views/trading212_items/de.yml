@@ -64,7 +64,7 @@ de:
       page_title: Trading-212-Konto einrichten
       status:
         fetching_accounts: Konto wird von Trading 212 abgerufen …
-        no_accounts_found_description: Sure hat kein Trading-212-Konto gefunden. Prüf, ob dein API-Key gültig ist.
+        no_accounts_found_description: Relay hat kein Trading-212-Konto gefunden. Prüf, ob dein API-Key gültig ist.
         no_accounts_found_title: Kein Konto gefunden.
       subtitle: Verknüpf dein Trading-212-Depot.
     sync:
@@ -85,7 +85,7 @@ de:
       partial: "%{linked} verknüpft, %{unlinked} müssen eingerichtet werden"
     trading212_item:
       accounts_need_setup: Konto muss eingerichtet werden
-      accounts_need_setup_description: Dein Trading-212-Konto muss noch mit einem Sure-Konto verknüpft werden.
+      accounts_need_setup_description: Dein Trading-212-Konto muss noch mit einem Relay-Konto verknüpft werden.
       delete: Löschen
       deletion_in_progress: Wird gelöscht
       environment_label_demo: Demokonto

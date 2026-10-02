@@ -121,7 +121,7 @@ pl:
       fetch_failed: Nie można pobrać kont
       no_accounts_to_setup: Brak kont do skonfigurowania
       no_credentials: Najpierw skonfiguruj dane uwierzytelniające Akahu.
-      subtitle: Wybierz, jak każde konto Akahu ma być wyświetlane w Sure.
+      subtitle: Wybierz, jak każde konto Akahu ma być wyświetlane w Relay.
       title: Konfiguruj konta Akahu
     update:
       success: Połączenie Akahu zaktualizowane.

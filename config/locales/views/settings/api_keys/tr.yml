@@ -91,7 +91,7 @@ tr:
           emin olun. Bu anahtara erişimi olan herkes, seçtiğiniz izinlere göre verilerinize
           erişebilir.
         security_warning_title: Önemli Güvenlik Uyarısı
-        subtitle: Sure verilerinize programatik olarak erişmek için yeni bir API anahtarı
+        subtitle: Relay verilerinize programatik olarak erişmek için yeni bir API anahtarı
           oluşturun.
         title: API Anahtarı Oluştur
       no_api_key:

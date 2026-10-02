@@ -1,7 +1,7 @@
 uk:
   concerns:
     self_hostable:
-      redis_configured: "Redis тепер налаштовано правильно! Тепер ви можете налаштувати свою програму Sure."
+      redis_configured: "Redis тепер налаштовано правильно! Тепер ви можете налаштувати свою програму Relay."
   shared:
     preview: Попередній перегляд
     dot_separator: "·"

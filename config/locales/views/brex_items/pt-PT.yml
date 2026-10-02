@@ -103,9 +103,9 @@ pt-PT:
       disconnect_confirm: "Desligar %{name}?"
       encryption_warning:
         title: A encriptação da base de dados não está configurada
-        message: Configure as chaves de encriptação do Active Record antes de adicionar tokens da Brex em produção. Sem chaves de encriptação, o Sure armazena as credenciais e os instantâneos do serviço Brex em texto não encriptado, tal como outros registos de serviços.
+        message: Configure as chaves de encriptação do Active Record antes de adicionar tokens da Brex em produção. Sem chaves de encriptação, o Relay armazena as credenciais e os instantâneos do serviço Brex em texto não encriptado, tal como outros registos de serviços.
       instructions:
-        copy_token_html: "Copie o token e adicione-o abaixo como uma ligação nomeada. O Sure armazena o token apenas para sincronizar esta família."
+        copy_token_html: "Copie o token e adicione-o abaixo como uma ligação nomeada. O Relay armazena o token apenas para sincronizar esta família."
         create_token: "Crie um token de API com estes âmbitos de só leitura: accounts.cash.readonly, accounts.card.readonly, transactions.cash.readonly, transactions.card.readonly"
         open_tokens: Aceda às definições de tokens de programador/API da Brex da empresa que pretende ligar
         sign_in_html: "Visite %{link} e inicie sessão na conta que pretende ligar"

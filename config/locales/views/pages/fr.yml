@@ -105,7 +105,7 @@ fr:
       title: Commentaires
     intro:
       coming_soon: Expérience d'introduction à venir
-      description: Nous construisons un parcours d'intégration plus riche pour en savoir plus sur vos objectifs, vos étapes et vos besoins quotidiens. Pour l’instant, rendez-vous dans la barre latérale de discussion pour démarrer une conversation avec Sure et dites-nous où vous en êtes dans votre parcours financier.
+      description: Nous construisons un parcours d'intégration plus riche pour en savoir plus sur vos objectifs, vos étapes et vos besoins quotidiens. Pour l’instant, rendez-vous dans la barre latérale de discussion pour démarrer une conversation avec Relay et dites-nous où vous en êtes dans votre parcours financier.
       not_authorized: L'intro n'est disponible que pour les utilisateurs invités.
       start_chatting: Commencez à discuter
       welcome: Bienvenue !
@@ -115,13 +115,13 @@ fr:
       title: Politique de confidentialité
     redis_configuration_error:
       heading: Configuration Redis requise
-      page_title: Configuration Redis requise - Sure
+      page_title: Configuration Redis requise - Relay
       refresh_hint: Une fois que vous avez configuré Redis, actualisez cette page pour continuer.
       refresh_page: Actualiser la page
       setup_guide_hint: Suivez notre guide de configuration complet de Docker pour configurer Redis
-      subheading: Votre installation Sure auto-hébergée nécessite que Redis soit correctement configuré.
+      subheading: Votre installation Relay auto-hébergée nécessite que Redis soit correctement configuré.
       view_setup_guide: Afficher le guide de configuration
-      why_required_body: Sure utilise Redis pour alimenter les tâches en arrière-plan de Sidekiq pour des tâches telles que la synchronisation des données de compte, le traitement des importations et d'autres opérations en arrière-plan qui maintiennent vos données financières à jour.
+      why_required_body: Relay utilise Redis pour alimenter les tâches en arrière-plan de Sidekiq pour des tâches telles que la synchronisation des données de compte, le traitement des importations et d'autres opérations en arrière-plan qui maintiennent vos données financières à jour.
       why_required_title: Pourquoi Redis est-il requis ?
     release_notes_unavailable:
       body_html: "<p>Impossible de récupérer les dernières notes de mise à jour pour le moment. Veuillez réessayer plus tard ou visiter directement notre <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>page de versions GitHub</a>.</p>"

@@ -77,7 +77,7 @@ tr:
       difference: Fark
       download: İndir
       institution_name_hint: Kurum ipucu
-      ledger_amount: Sure defteri
+      ledger_amount: Relay defteri
       link_suggestion: Bağlama önerisi
       linked_to: "%{account} hesabına bağlandı."
       linking_title: Hesap bağlantısı
@@ -88,7 +88,7 @@ tr:
       period_start_on: Dönem başlangıcı
       reconciliation_title: Mutabakat
       reconciliation_unavailable: Bir ekstre dönemi ile açılış veya kapanış bakiyesi
-        ekleyin, ardından Sure'un bu tarihler için bakiye geçmişine sahip olduğundan
+        ekleyin, ardından Relay'un bu tarihler için bakiye geçmişine sahip olduğundan
         emin olun.
       reject: Reddet
       save: Ekstreyi kaydet

@@ -113,7 +113,7 @@ fr:
       fetch_failed: Impossible de récupérer les comptes
       no_accounts_to_setup: Aucun compte à configurer
       no_credentials: Configurez d'abord les identifiants Akahu.
-      subtitle: Choisissez comment chaque compte Akahu doit apparaître dans Sure.
+      subtitle: Choisissez comment chaque compte Akahu doit apparaître dans Relay.
       title: Configurer les comptes Akahu
     update:
       success: Connexion Akahu mise à jour.

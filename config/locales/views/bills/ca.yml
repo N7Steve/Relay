@@ -10,7 +10,7 @@ ca:
       none_found: No s'han trobat patrons recurrents nous. Pots afegir factures manualment.
       already_running: La detecció ja s'està executant. Torna-hi d'aquí a un moment.
     feed:
-      calendar_name: Factures de Sure
+      calendar_name: Factures de Relay
     ai_prompts:
       due_before_paycheck: Què venç abans del meu proper cobrament?
       subscriptions_up: Quines subscripcions han pujat de preu aquest any?
@@ -306,6 +306,6 @@ ca:
         other: '%{count} requereixen la teva atenció'
       empty:
         title: Encara no hi ha factures
-        description: Les factures són les teves despeses recurrents. Sure les troba automàticament a partir del teu historial de transaccions, i pots afegir un enllaç de pagament a cadascuna per pagar-la directament des d'aquí.
+        description: Les factures són les teves despeses recurrents. Relay les troba automàticament a partir del teu historial de transaccions, i pots afegir un enllaç de pagament a cadascuna per pagar-la directament des d'aquí.
         action: Cerca transaccions recurrents
-        no_history_description: Encara no hi ha transaccions. Connecta un compte o importa l'historial i Sure trobarà les teves factures automàticament, o afegeix-ne una manualment.
+        no_history_description: Encara no hi ha transaccions. Connecta un compte o importa l'historial i Relay trobarà les teves factures automàticament, o afegeix-ne una manualment.

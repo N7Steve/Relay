@@ -20,13 +20,13 @@ pl:
             embedding_dimensions_mismatch:
               message: Endpoint embeddingów zwrócił wektor, którego długość nie zgadza
                 się z EMBEDDING_DIMENSIONS. Ustaw EMBEDDING_MODEL i EMBEDDING_DIMENSIONS
-                na udokumentowany rozmiar wektora danego modelu, zrestartuj Sure,
+                na udokumentowany rozmiar wektora danego modelu, zrestartuj Relay,
                 aby zmienne środowiskowe się utrwaliły, a następnie zmień lub odtwórz
                 kolumnę/tabelę embeddingów pgvector i ponownie wygeneruj embeddingi
                 dokumentów, jeśli istniejące dane używały innego rozmiaru.
               title: Wymiary embeddingów się nie zgadzają
             embedding_probe_failed:
-              message: Sure nie mógł utworzyć krótkiego testowego embeddingu przez
+              message: Relay nie mógł utworzyć krótkiego testowego embeddingu przez
                 skonfigurowany endpoint i model. Sprawdź EMBEDDING_URI_BASE, EMBEDDING_MODEL,
                 EMBEDDING_ACCESS_TOKEN oraz logi dostawcy embeddingów. Błąd zapisano
                 w Ustawienia → Logi debugowania oraz w Rails.logger.
@@ -34,7 +34,7 @@ pl:
             embedding_probe_timeout:
               message: Endpoint embeddingów nie odpowiedział przed upływem AI_HEALTH_PROBE_TIMEOUT.
                 Jeśli dostawca jest wolny, zwiększ ten limit czasu testu kondycji,
-                a następnie zrestartuj Sure, aby zmienne środowiskowe utrwaliły się
+                a następnie zrestartuj Relay, aby zmienne środowiskowe utrwaliły się
                 we wszystkich procesach. Jeśli zwykłe wywołania czatu AI również przekraczają
                 limit czasu, zwiększ osobno OPENAI_REQUEST_TIMEOUT.
               title: Test działania embeddingów przekroczył limit czasu
@@ -61,7 +61,7 @@ pl:
                 aktualnie obsługiwanego modelu, np. gemini-2.5-flash.
               title: Skonfigurowany model AI jest niedostępny
             llm_probe_failed:
-              message: Sure nie mógł zweryfikować skonfigurowanego endpointu ani modelu.
+              message: Relay nie mógł zweryfikować skonfigurowanego endpointu ani modelu.
                 Błąd zapisano w Ustawienia → Logi debugowania oraz w Rails.logger.
               title: Test na żywo modelu LLM nie powiódł się
             missing_vector_store:
@@ -69,13 +69,13 @@ pl:
                 dopóki nie skonfigurujesz adaptera magazynu wektorowego i jego wymagań.
               title: Brak skonfigurowanego magazynu wektorowego
             pdf_text_extraction_failed:
-              message: Sure nie ukończył ścieżki opartej na tekście, która lokalnie
+              message: Relay nie ukończył ścieżki opartej na tekście, która lokalnie
                 wyodrębnia tekst z PDF i wysyła go do skonfigurowanego modelu. Żadne
                 dane klienta nie zostały wysłane. Błąd zapisano w Ustawienia → Logi
                 debugowania oraz w Rails.logger.
               title: Test wyodrębniania tekstu z syntetycznego PDF nie powiódł się
             pdf_vision_processing_failed:
-              message: Sure nie ukończył ścieżki obrazu lub natywnego dokumentu PDF
+              message: Relay nie ukończył ścieżki obrazu lub natywnego dokumentu PDF
                 przez skonfigurowany model. Żadne dane klienta nie zostały wysłane.
                 Błąd zapisano w Ustawienia → Logi debugowania oraz w Rails.logger.
               title: Test wizyjny/natywny syntetycznego PDF nie powiódł się
@@ -86,14 +86,14 @@ pl:
                 a następnie uruchom ponownie migracje z VECTOR_STORE_PROVIDER=pgvector.
               title: Rozszerzenie vector PostgreSQL nie jest włączone
             pgvector_probe_failed:
-              message: Sure nie mógł odpytać tabeli fragmentów pgvector. Sprawdź uprawnienia
+              message: Relay nie mógł odpytać tabeli fragmentów pgvector. Sprawdź uprawnienia
                 PostgreSQL, rozszerzenie vector oraz migrację vector_store_chunks.
                 Błąd zapisano w Ustawienia → Logi debugowania oraz w Rails.logger.
               title: Test magazynu pgvector nie powiódł się
             pgvector_table_not_found:
               message: Rozszerzenie pgvector jest włączone, ale nie znaleziono tabeli
                 fragmentów. Sprawdź stan migracji, a następnie uruchom ponownie migrację
-                magazynu wektorów z VECTOR_STORE_PROVIDER=pgvector, aby Sure mógł
+                magazynu wektorów z VECTOR_STORE_PROVIDER=pgvector, aby Relay mógł
                 utworzyć vector_store_chunks.
               title: Brak tabeli vector_store_chunks
             qdrant:
@@ -106,7 +106,7 @@ pl:
                 musi udostępniać rozszerzenie vector albo istniejącą tabelę vector_store_chunks.
               title: Wybrany magazyn wektorowy jest niedostępny
             vector_probe_failed:
-              message: Sure nie mógł zweryfikować wybranego magazynu wektorowego ani
+              message: Relay nie mógł zweryfikować wybranego magazynu wektorowego ani
                 wymaganych usług embeddingów. Błąd zapisano w Ustawienia → Logi debugowania
                 oraz w Rails.logger.
               title: Test na żywo wyszukiwania dokumentów nie powiódł się

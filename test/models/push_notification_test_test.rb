@@ -38,8 +38,8 @@ class PushNotificationTestTest < ActiveJob::TestCase
     client = mock
     Apns::Client.expects(:new).with(environment: "sandbox").returns(client)
     client.expects(:deliver_test).with(
-      token: @subscription.token, title: "Sure test notification",
-      body: "This is a test push notification for your Sure account.", request_id: @test.latest[:id]
+      token: @subscription.token, title: "Relay test notification",
+      body: "This is a test push notification for your Relay account.", request_id: @test.latest[:id]
     ).returns(stub(ok?: true))
 
     assert_no_difference "Insight.count" do
@@ -53,8 +53,8 @@ class PushNotificationTestTest < ActiveJob::TestCase
     @user.update!(locale: "de")
     @test.request!
     Apns::Client.any_instance.expects(:deliver_test).with(
-      token: @subscription.token, title: "Sure-Testbenachrichtigung",
-      body: "Dies ist eine Testbenachrichtigung für dein Sure-Konto.", request_id: @test.latest[:id]
+      token: @subscription.token, title: "Relay-Testbenachrichtigung",
+      body: "Dies ist eine Testbenachrichtigung für dein Relay-Konto.", request_id: @test.latest[:id]
     ).returns(stub(ok?: true))
     deliver
     assert_equal "accepted", result_status

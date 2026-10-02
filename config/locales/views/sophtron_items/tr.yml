@@ -296,7 +296,7 @@ tr:
           rel="noopener noreferrer" class="link">Sophtron</a>'u ziyaret edin
         step_2: Kullanıcı Kimliğinizi ve Erişim Anahtarınızı Sophtron hesap ayarlarınızdan
           kopyalayın
-        step_3: Kimlik bilgilerini aşağıya yapıştırın ve Kaydet'e tıklayın; Sure,
+        step_3: Kimlik bilgilerini aşağıya yapıştırın ve Kaydet'e tıklayın; Relay,
           Sophtron Müşteri Kimliğinizi otomatik olarak oluşturacak veya yeniden kullanacaktır
       setup_instructions_title: 'Kurulum talimatları:'
       update: Yapılandırmayı Güncelle

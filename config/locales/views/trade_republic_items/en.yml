@@ -24,7 +24,7 @@ en:
       setup_accounts: Set up accounts
       delete: Delete
       accounts_need_setup: Account needs setup
-      accounts_need_setup_description: Your Trade Republic account needs to be linked to a Sure account.
+      accounts_need_setup_description: Your Trade Republic account needs to be linked to a Relay account.
       no_accounts_discovered: No Trade Republic account discovered yet.
       no_accounts_discovered_description: Complete the login and run a sync to discover your account.
       data_quality:
@@ -69,7 +69,7 @@ en:
       status:
         fetching_accounts: Fetching account from Trade Republic...
         no_accounts_found_title: No account found.
-        no_accounts_found_description: Sure could not find a Trade Republic account. Check that your session is still valid.
+        no_accounts_found_description: Relay could not find a Trade Republic account. Check that your session is still valid.
       available_accounts:
         title: Available account
         account_type_investment: Investment portfolio

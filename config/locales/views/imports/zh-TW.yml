@@ -100,7 +100,7 @@ zh-TW:
         account_label: 帳戶
         name_label: 名稱
         note_label: 備註
-        no_security_provider_warning: 尚未設定證券價格供應商。您的交易匯入仍可運作，但 Sure 不會回補價格歷史。請前往設定完成設定。
+        no_security_provider_warning: 尚未設定證券價格供應商。您的交易匯入仍可運作，但 Relay 不會回補價格歷史。請前往設定完成設定。
         date_format_label: 日期格式
         apply_configuration: 套用設定
       category_import:
@@ -317,7 +317,7 @@ zh-TW:
       merchant_import: 商家匯入
       pdf_import: PDF 匯入
       document_import: 文件匯入
-      sure_import: Sure 匯入
+      sure_import: Relay 匯入
     steps:
       upload: 上傳
       configure: 設定
@@ -352,7 +352,7 @@ zh-TW:
           merchant_import: 商家
           pdf_import: PDF
           document_import: 文件
-          sure_import: Sure
+          sure_import: Relay
         status:
           in_progress: 進行中
           uploading: 正在處理資料列
@@ -382,7 +382,7 @@ zh-TW:
       import_rules: 匯入規則
       import_transactions: 匯入交易
       import_qif: 從 Quicken 匯入 (QIF)
-      import_sure: 從 Sure 匯入
+      import_sure: 從 Relay 匯入
       import_sure_description: 完整匯出的 .ndjson 檔案
       import_file: 匯入文件
       import_file_description: 以 AI 分析 PDF，並可上傳檔案供搜尋

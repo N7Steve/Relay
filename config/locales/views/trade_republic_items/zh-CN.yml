@@ -20,7 +20,7 @@ zh-CN:
       setup_accounts: "设置账户"
       delete: "删除"
       accounts_need_setup: "账户需要设置"
-      accounts_need_setup_description: "您的 Trade Republic 账户需要关联到 Sure 账户。"
+      accounts_need_setup_description: "您的 Trade Republic 账户需要关联到 Relay 账户。"
       no_accounts_discovered: "尚未发现 Trade Republic 账户。"
       no_accounts_discovered_description: "完成登录并运行同步以发现您的账户。"
       data_quality:

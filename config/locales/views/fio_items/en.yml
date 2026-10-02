@@ -50,7 +50,7 @@ en:
       one_account_notice: One token reaches one Fio account, so add a connection for each account you want to track. A token may be used once every 30 seconds; a sync that arrives sooner is picked up by the next one.
       connected_account: Connected account
       no_account_yet: No account yet — the first sync discovers the account this token reaches.
-      account_needs_setup: Not linked to a Sure account yet.
+      account_needs_setup: Not linked to a Relay account yet.
       requires_update: New token needed
       requires_update_notice: Fio rejected this token. Tokens are valid for up to 180 days unless they are auto-extended on each banking login, so create a new read-only token under Settings → API and paste it below.
       last_synced: Synced %{timestamp} ago
@@ -70,10 +70,10 @@ en:
       unlink_failed: Could not disconnect Fio banka connection
     select_accounts:
       title: Link your Fio account
-      description: This token reaches one account. Choose how it should be tracked in Sure.
+      description: This token reaches one account. Choose how it should be tracked in Relay.
       account_type_label: Account type
       awaiting_first_sync: Fio has not reported the account for this token yet. Run a sync and come back.
-      already_linked: This connection's account is already linked to a Sure account.
+      already_linked: This connection's account is already linked to a Relay account.
       sync_now: Sync now
       no_credentials_configured: Configure Fio banka in provider settings first.
       cancel: Cancel
@@ -88,7 +88,7 @@ en:
       title: "Link Fio account to %{account_name}"
       description: Connect the account this token reaches to the account you picked.
       awaiting_first_sync: Fio has not reported the account for this token yet. Run a sync and come back.
-      already_linked: This connection's account is already linked to a Sure account.
+      already_linked: This connection's account is already linked to a Relay account.
       sync_now: Sync now
       no_credentials_configured: Configure Fio banka in provider settings first.
       account_already_linked: This account is already linked to a provider.
@@ -102,7 +102,7 @@ en:
       unsupported_account_type: Fio can only sync cash and loan accounts.
     setup_accounts:
       title: Link your Fio account
-      subtitle: Choose how the account this token reaches should appear in Sure.
+      subtitle: Choose how the account this token reaches should appear in Relay.
       choose_account_type: Choose an account type
       choose_account_type_description: Skip it if you do not want to track this account.
       account_type_label: Account type
@@ -121,7 +121,7 @@ en:
       skipped: The Fio account was skipped.
       no_account: No Fio account needed setting up.
       unsupported_account_type: Fio does not support that account type.
-      creation_failed: Could not create the Sure account.
+      creation_failed: Could not create the Relay account.
     fio_item:
       deletion_in_progress: Deletion in progress
       syncing: Syncing
@@ -134,7 +134,7 @@ en:
       requires_update_description: Fio rejected the token for this connection. Create a new read-only token under Settings → API in internet banking.
       update_token: Update token
       setup_needed: Account setup needed
-      setup_description: The account this token reaches is not linked to a Sure account yet.
+      setup_description: The account this token reaches is not linked to a Relay account yet.
       setup_action: Setup account
       no_accounts_title: No account imported yet
       no_accounts_description: Fio reports the account only in a statement, so it appears after the first successful sync.

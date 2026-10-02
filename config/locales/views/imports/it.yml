@@ -100,7 +100,7 @@ it:
         account_label: Conto
         name_label: Nome
         note_label: Nota
-        no_security_provider_warning: Il provider di prezzi dei titoli non è configurato. Le importazioni di operazioni funzioneranno, ma Sure non recupererà la cronologia dei prezzi. Vai nelle impostazioni per configurarlo.
+        no_security_provider_warning: Il provider di prezzi dei titoli non è configurato. Le importazioni di operazioni funzioneranno, ma Relay non recupererà la cronologia dei prezzi. Vai nelle impostazioni per configurarlo.
         date_format_label: Formato data
         apply_configuration: Applica configurazione
       category_import:
@@ -314,7 +314,7 @@ it:
       merchant_import: "Importazione esercenti"
       pdf_import: "Importazione PDF"
       document_import: "Importazione documento"
-      sure_import: "Importazione Sure"
+      sure_import: "Importazione Relay"
     steps:
       upload: Carica
       configure: Configura
@@ -349,7 +349,7 @@ it:
           merchant_import: "Esercente"
           pdf_import: "PDF"
           document_import: "Documento"
-          sure_import: "Sure"
+          sure_import: "Relay"
         status:
           in_progress: In corso
           uploading: Elaborazione righe
@@ -377,7 +377,7 @@ it:
       import_rules: Importa regole
       import_transactions: Importa transazioni
       import_qif: Importa da Quicken (QIF)
-      import_sure: Importa da Sure
+      import_sure: Importa da Relay
       import_sure_description: File .ndjson esportazione completa
       import_file: Importa documento
       import_file_description: Analisi con AI per PDF e caricamento file ricercabili

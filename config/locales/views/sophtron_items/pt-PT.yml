@@ -260,7 +260,7 @@ pt-PT:
       setup_instructions:
         step_1_html: 'Aceda a <a href="%{url}" target="_blank" rel="noopener noreferrer" class="link">Sophtron</a> para obter as suas credenciais de API'
         step_2: "Copie o seu ID de utilizador e a sua chave de acesso das definições da sua conta da Sophtron"
-        step_3: "Cole as credenciais abaixo e clique em Guardar; o Sure criará ou reutilizará o seu ID de cliente da Sophtron automaticamente"
+        step_3: "Cole as credenciais abaixo e clique em Guardar; o Relay criará ou reutilizará o seu ID de cliente da Sophtron automaticamente"
       field_descriptions_title: "Descrições dos campos:"
       field_descriptions:
         user_id_html: "<strong>ID de utilizador:</strong> A sua credencial de ID de utilizador da Sophtron"

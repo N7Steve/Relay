@@ -80,7 +80,7 @@ it:
       no_account_selected: Seleziona un conto Up da collegare.
     setup_accounts:
       title: Collega conti Up
-      subtitle: Scegli come deve apparire ogni conto Up in Sure.
+      subtitle: Scegli come deve apparire ogni conto Up in Relay.
       no_credentials: Configura prima le credenziali Up.
       api_error: Impossibile recuperare i conti Up.
       fetch_failed: Impossibile recuperare i conti

@@ -19,7 +19,7 @@ tr:
       setup_accounts: "Hesapları kur"
       delete: "Sil"
       accounts_need_setup: "Hesap kurulumu gerekli"
-      accounts_need_setup_description: "Trade Republic hesabınız bir Sure hesabına bağlanmalıdır."
+      accounts_need_setup_description: "Trade Republic hesabınız bir Relay hesabına bağlanmalıdır."
       no_accounts_discovered: "Henüz Trade Republic hesabı keşfedilmedi."
       no_accounts_discovered_description: "Hesabınızı keşfetmek için girişi tamamlayıp senkronizasyon çalıştırın."
       data_quality:
@@ -79,7 +79,7 @@ tr:
       status:
         fetching_accounts: Hesap Trade Republic'ten alınıyor...
         no_accounts_found_title: Hesap bulunamadı.
-        no_accounts_found_description: Sure bir Trade Republic hesabı bulamadı. Oturumunuzun hâlâ geçerli olduğunu kontrol edin.
+        no_accounts_found_description: Relay bir Trade Republic hesabı bulamadı. Oturumunuzun hâlâ geçerli olduğunu kontrol edin.
       link_existing:
         description: Veya keşfedilen Trade Republic hesabını mevcut bir manuel yatırım hesabına bağlayın.
         manual_account_option: '%{name} (%{balance})'

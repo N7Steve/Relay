@@ -48,8 +48,8 @@ pl:
         Samo to włącza przepływ z kodem urządzenia. Dodaj też SNAPTRADE_OAUTH_CLIENT_SECRET,
         żeby włączyć przepływ przeglądarkowy
       oauth_status_authorized: Autoryzowano w SnapTrade.
-      oauth_status_ready: Autoryzuj Sure do odczytu danych konta SnapTrade.
-      oauth_status_ready_device: Autoryzuj Sure kodem urządzenia, żeby odczytać dane
+      oauth_status_ready: Autoryzuj Relay do odczytu danych konta SnapTrade.
+      oauth_status_ready_device: Autoryzuj Relay kodem urządzenia, żeby odczytać dane
         konta SnapTrade.
       oauth_title: SnapTrade OAuth
       orphaned_connection: Osierocone połączenie (niezsynchronizowane lokalnie)
@@ -157,7 +157,7 @@ pl:
         do .env.local, zrestartuj aplikację i spróbuj ponownie.
       open_snaptrade: Otwórz SnapTrade
       start_button: Rozpocznij autoryzację
-      subtitle: Autoryzuj Sure dla SnapTrade kodem urządzenia.
+      subtitle: Autoryzuj Relay dla SnapTrade kodem urządzenia.
       title: Połącz SnapTrade
     preload_accounts:
       not_configured: SnapTrade nie jest skonfigurowane.
@@ -243,7 +243,7 @@ pl:
       setup_accounts_menu: Skonfiguruj konta
       setup_action: Konfiguruj konta
       setup_description: Niektóre konta z SnapTrade muszą zostać połączone z kontami
-        Sure.
+        Relay.
       setup_needed: Konta wymagają konfiguracji
       status: Ostatnia synchronizacja %{timestamp} temu — %{summary}
       status_never: Nigdy nie synchronizowano

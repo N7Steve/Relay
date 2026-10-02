@@ -137,12 +137,12 @@ pl:
       disconnect_label: Rozłącz %{name}
       encryption_warning:
         message: Skonfiguruj klucze szyfrowania Active Record przed dodaniem tokenów
-          Brex w produkcji. Bez kluczy szyfrowania Sure przechowuje dane uwierzytelniające
+          Brex w produkcji. Bez kluczy szyfrowania Relay przechowuje dane uwierzytelniające
           Brex w postaci zwykłego tekstu.
         title: Szyfrowanie bazy danych nie jest skonfigurowane
       instructions:
         copy_token_html: Skopiuj token i dodaj go jako nazwane połączenie poniżej.
-          Sure przechowuje token wyłącznie do synchronizacji tej rodziny.
+          Relay przechowuje token wyłącznie do synchronizacji tej rodziny.
         create_token: 'Utwórz token API z następującymi zakresami tylko do odczytu:
           accounts.cash.readonly, accounts.card.readonly, transactions.cash.readonly,
           transactions.card.readonly'

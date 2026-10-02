@@ -89,7 +89,7 @@ zh-CN:
       akahu_account_already_linked: 此 Akahu 账户已关联。
     setup_accounts:
       title: 设置 Akahu 账户
-      subtitle: 选择每个 Akahu 账户在 Sure 中的显示方式。
+      subtitle: 选择每个 Akahu 账户在 Relay 中的显示方式。
       no_credentials: 请先配置 Akahu 凭据。
       api_error: 无法获取 Akahu 账户。
       fetch_failed: 无法获取账户

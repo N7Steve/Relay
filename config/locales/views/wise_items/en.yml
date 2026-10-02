@@ -80,7 +80,7 @@ en:
         sign_in_html: "Visit %{link} and log in to your account"
         open_tokens: "Go to Settings → Connect and manage apps → Developer tools → API tokens"
         create_token: "Create a new personal API token with read-only access"
-        copy_token_html: "Copy the token and paste it below. Sure uses it only to sync your balances and transactions."
+        copy_token_html: "Copy the token and paste it below. Relay uses it only to sync your balances and transactions."
       sca:
         title: Strong Customer Authentication (SCA)
         description: Wise requires a signed one-time-token challenge to read full transaction statements, including incoming payments. Generate a keypair here and register the public key with Wise to enable this.
@@ -90,7 +90,7 @@ en:
         copied: Copied!
         generate: Generate keypair
         regenerate: Regenerate keypair
-        regenerate_confirm: "This generates a new keypair. Wise will keep accepting the previous public key until you remove it yourself in your Wise account — Sure has no way to revoke it remotely. You'll need to register the new public key with Wise before statements can sync again. Continue?"
+        regenerate_confirm: "This generates a new keypair. Wise will keep accepting the previous public key until you remove it yourself in your Wise account — Relay has no way to revoke it remotely. You'll need to register the new public key with Wise before statements can sync again. Continue?"
     provider_connection:
       default_name: Wise
       default_description: Connect your Wise multi-currency account
@@ -107,7 +107,7 @@ en:
       session_expired: Session expired. Please try connecting again.
       title: Select Wise Profiles
       subtitle: Choose which profiles to connect
-      description: Your Wise account has multiple profiles. Select the ones you want to sync with Sure.
+      description: Your Wise account has multiple profiles. Select the ones you want to sync with Relay.
       unnamed_profile: "(Unnamed profile)"
       already_connected_label: Already connected
       connect: Connect selected profiles
@@ -121,22 +121,22 @@ en:
       status_with_summary: "Last synced %{timestamp} ago — %{summary}"
       delete: Disconnect
       setup_needed: New accounts ready to set up
-      setup_description: "%{linked} of %{total} accounts linked. Create Sure accounts for your Wise currency balances."
+      setup_description: "%{linked} of %{total} accounts linked. Create Relay accounts for your Wise currency balances."
       setup_action: Set Up Accounts
       no_accounts_title: No accounts linked yet
-      no_accounts_description: Run a sync to discover your Wise balances, then link them to Sure accounts.
+      no_accounts_description: Run a sync to discover your Wise balances, then link them to Relay accounts.
     setup_accounts:
       title: Set Up Wise Accounts
       subtitle: Link your Wise currency balances
-      description: Create a Sure account for each Wise currency balance you want to track. Each currency becomes its own account.
+      description: Create a Relay account for each Wise currency balance you want to track. Each currency becomes its own account.
       no_accounts_to_setup: All accounts are set up
-      all_accounts_linked: All your Wise currency balances have been linked to Sure accounts.
+      all_accounts_linked: All your Wise currency balances have been linked to Relay accounts.
       create_account: Create Account
       done: Done
     select_accounts:
       title: Select Wise Balance
       description: Select the Wise currency balance you want to link to your %{product_name} account.
-      no_accounts_found: All Wise balances are already linked to Sure accounts.
+      no_accounts_found: All Wise balances are already linked to Relay accounts.
       no_connection: No Wise connection found. Please connect Wise in Provider Settings first.
       link_account: Link balance
       cancel: Cancel

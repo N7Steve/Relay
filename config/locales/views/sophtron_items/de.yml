@@ -260,7 +260,7 @@ de:
       setup_instructions:
         step_1_html: Öffne <a href="%{url}" target="_blank" rel="noopener noreferrer" class="link">Sophtron</a>, um deine API-Zugangsdaten zu erhalten
         step_2: Kopier deine Benutzer-ID und deinen Zugriffsschlüssel aus deinen Sophtron-Kontoeinstellungen
-        step_3: Füg die Zugangsdaten unten ein und klick auf Speichern; Sure erstellt oder verwendet deine Sophtron-Kunden-ID automatisch
+        step_3: Füg die Zugangsdaten unten ein und klick auf Speichern; Relay erstellt oder verwendet deine Sophtron-Kunden-ID automatisch
       field_descriptions_title: "Feldbeschreibungen:"
       field_descriptions:
         user_id_html: "<strong>Benutzer-ID:</strong> deine Sophtron-Benutzer-ID-Zugangsdaten"
