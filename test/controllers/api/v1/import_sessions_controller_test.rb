@@ -89,6 +89,22 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "SureImport", JSON.parse(response.body).dig("data", "type")
   end
 
+  test "members cannot attach or publish complete snapshots" do
+    session = @family.import_sessions.create!(import_type: "SureImport")
+    content = Family::Backup.new(Family.create!(name: "Backup source")).generate_ndjson
+    @user.update!(role: "member")
+    assert_no_difference("Import.count") do
+      post chunks_api_v1_import_session_url(session), params: { sequence: 1, raw_file_content: content }, headers: api_headers(@api_key)
+    end
+    assert_response :forbidden
+
+    session.attach_chunk!(sequence: 1, content: content, filename: "all.ndjson", content_type: "application/x-ndjson")
+    assert_no_enqueued_jobs do
+      post publish_api_v1_import_session_url(session), headers: api_headers(@api_key)
+    end
+    assert_response :forbidden
+  end
+
   test "creates an idempotent Sure import session" do
     assert_difference("ImportSession.count", 1) do
       post api_v1_import_sessions_url,
@@ -115,6 +131,23 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal first_id, JSON.parse(response.body).dig("data", "id")
+  end
+
+  test "ZIP chunks are normalized and idempotent with extracted NDJSON" do
+    session = @family.import_sessions.create!(expected_chunks: 1)
+    source = Family.create!(name: "ZIP chunk source")
+    bytes = Family::DataExporter.new(source).generate_export.string
+    file = Rack::Test::UploadedFile.new(StringIO.new(bytes), "application/zip", original_filename: "relay_export.zip")
+    post chunks_api_v1_import_session_url(session), params: { sequence: 1, file: file }, headers: api_headers(@api_key)
+    assert_response :created
+    import = session.imports.sole
+    assert_instance_of RelayImport, import
+    assert import.full_backup?
+    content = import.ndjson_file.download
+    assert_no_difference "Import.count" do
+      post chunks_api_v1_import_session_url(session), params: { sequence: 1, raw_file_content: content }, headers: api_headers(@api_key)
+    end
+    assert_response :created
   end
 
   test "rejects unsupported import session types" do

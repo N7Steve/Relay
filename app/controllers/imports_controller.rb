@@ -33,6 +33,8 @@ class ImportsController < ApplicationController
   end
 
   def publish
+    return head(:forbidden) if @import.is_a?(SureImport) && @import.full_backup? && !Current.user.admin?
+
     @import.publish_later
 
     redirect_to import_path(@import), notice: t(".started")
@@ -257,19 +259,9 @@ class ImportsController < ApplicationController
     end
 
     def create_sure_import(file)
-      if file.size > SureImport.max_ndjson_size
-        redirect_to new_import_path, alert: t("imports.create.file_too_large", max_size: SureImport.max_ndjson_size / 1.megabyte)
-        return
-      end
+      content, filename, content_type = SureImport::Upload.read(file)
+      return head(:forbidden) if Family::Backup.snapshot?(content) && !Current.user.admin?
 
-      ext = File.extname(file.original_filename.to_s).downcase
-      unless ext.in?(%w[.ndjson .json])
-        redirect_to new_import_path, alert: t("imports.create.invalid_ndjson_file_type")
-        return
-      end
-
-      content = file.read
-      file.rewind
       unless SureImport.valid_ndjson_first_line?(content)
         redirect_to new_import_path, alert: t("imports.create.invalid_ndjson_file_type")
         return
@@ -278,12 +270,15 @@ class ImportsController < ApplicationController
       import = Current.family.imports.create!(type: "RelayImport")
       import.ndjson_file.attach(
         io: StringIO.new(content),
-        filename: file.original_filename,
-        content_type: file.content_type
+        filename: filename,
+        content_type: content_type
       )
       import.sync_ndjson_rows_count!
 
       redirect_to import_path(import), notice: t("imports.create.ndjson_uploaded")
+    rescue SureImport::Upload::Error => error
+      key = error.code == "file_too_large" ? "file_too_large" : "invalid_ndjson_file_type"
+      redirect_to new_import_path, alert: t("imports.create.#{key}", max_size: SureImport.max_ndjson_size / 1.megabyte)
     end
 
     def valid_pdf_file?(file)
