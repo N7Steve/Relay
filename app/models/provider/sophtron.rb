@@ -7,7 +7,7 @@ class Provider::Sophtron < Provider
   include HTTParty
 
   DEFAULT_BASE_URL = "https://api.sophtron.com/api"
-  USER_AGENT = "Sure Finance Sophtron Client"
+  USER_AGENT = "Relay Finance Sophtron Client"
   FAILURE_JOB_STATUSES = %w[Completed Timeout Failed Failure Error].freeze
 
   headers "User-Agent" => USER_AGENT

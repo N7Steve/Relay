@@ -28,7 +28,7 @@ it:
       title: Novità
     release_notes_unavailable:
       name: Note di rilascio non disponibili
-      body_html: "<p>Impossibile recuperare le ultime note di rilascio al momento. Riprova più tardi o visita direttamente la nostra <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>pagina rilasci su GitHub</a>.</p>"
+      body_html: "<p>Impossibile recuperare le ultime note di rilascio al momento. Riprova più tardi o visita direttamente la nostra <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>pagina rilasci su GitHub</a>.</p>"
     privacy:
       title: Informativa sulla privacy
       heading: Informativa sulla privacy

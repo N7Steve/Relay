@@ -43,9 +43,22 @@ class FamilyExportTest < ActiveSupport::TestCase
   test "filename is generated correctly" do
     travel_to Time.zone.local(2024, 1, 15, 14, 30, 0) do
       export = @family.family_exports.create!
-      expected_filename = "sure_export_20240115_143000.zip"
+      expected_filename = "relay_export_20240115_143000.zip"
       assert_equal expected_filename, export.filename
     end
+  end
+
+  test "preserves the filename of an existing Sure backup" do
+    @export.export_file.attach(
+      io: StringIO.new("legacy backup"),
+      filename: "sure_export_20240115_143000.zip",
+      content_type: "application/zip"
+    )
+    @export.update!(status: :completed)
+
+    assert_equal "sure_export_20240115_143000.zip", @export.reload.filename
+    assert @export.downloadable?
+    assert_equal "legacy backup", @export.export_file.download
   end
 
   test "downloadable? returns true for completed export with file" do

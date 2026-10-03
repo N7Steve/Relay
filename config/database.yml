@@ -16,6 +16,5 @@ test:
   database: <%= ENV.fetch("POSTGRES_DB") { "relay_test" } %>
 
 production:
-  # Preserve existing deployments; new Relay installs should set POSTGRES_DB explicitly.
   <<: *default
-  database: <%= ENV.fetch("POSTGRES_DB") { "sure_production" } %>
+  database: <%= ENV.fetch("POSTGRES_DB") { "relay_production" } %>

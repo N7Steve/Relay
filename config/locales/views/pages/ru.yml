@@ -153,7 +153,7 @@ ru:
       why_required_title: Зачем нужен Redis?
     release_notes_unavailable:
       body_html: "<p>Не удалось получить последние заметки о выпуске. Пожалуйста,
-        попробуйте позже или посетите <a href='https://github.com/we-promise/sure/releases'
+        попробуйте позже или посетите <a href='https://github.com/N7Steve/Relay/releases'
         target='_blank' rel='noopener noreferrer'>страницу релизов на GitHub</a>.</p>"
       name: Заметки о выпуске недоступны
     terms:

@@ -14,7 +14,8 @@ services:
       POSTGRES_DB: relay_local
       POSTGRES_USER: relay_local
       POSTGRES_PASSWORD: local-development-only
-      DATABASE_URL: postgres://relay_local:local-development-only@db:5432/relay_local
+      # Fixed credentials for the isolated local development database only.
+      DATABASE_URL: postgres://relay_local:local-development-only@db:5432/relay_local # pipelock:ignore PostgreSQL Connection String
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY_BASE: local-development-only-stable-key-000000000000000000000000000000000000
       ACTIVE_STORAGE_SERVICE: local

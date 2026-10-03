@@ -34,6 +34,19 @@ Lookbook is mounted at `/design-system` outside production; see
 [`config/routes.rb`](../../config/routes.rb). Letter Opener supports development
 email previews. Use Docker/devcontainers where useful for consistent environments.
 
+## Publishing confirmed changes
+
+Work directly on `main`, following [AGENTS.md](../../AGENTS.md). Do not create a
+branch, worktree or PR unless the user explicitly requests an exception. Prepare
+and validate the changes, present the concrete result, and wait for confirmation
+before committing and pushing directly to `origin/main`. An explicit instruction
+to commit or push is sufficient confirmation for its stated scope.
+
+Synchronize with `origin/main` using fast-forward when possible, preserving user
+changes. Resolve divergence without resetting, discarding work or force-pushing.
+The full Rails suite must be green before any push; run other checks appropriate
+to the changed files. The PR checklist below applies to explicitly requested PRs.
+
 ## Before opening a pull request
 
 Run these checks locally before **every** PR. All required checks must pass before

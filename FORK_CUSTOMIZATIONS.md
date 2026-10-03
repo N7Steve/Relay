@@ -112,6 +112,39 @@ previo; el formato de los archivos JavaScript modificados sí pasa.
 | Gestión familiar y usuarios | Propia, todavía sin commit | Claridad de roles/alcance y borrado seguro de la última persona de una familia |
 | Workflows, scripts y documentos auxiliares | Revisar caso a caso | Están en el diff del fork, pero no todos son funcionalidad de producto |
 
+## Identidad y configuración Relay: cierre preparatorio
+
+Actualizado el 3 de octubre de 2026. Se conservan todas las funciones financieras
+inventariadas; se actualizan destinos de soporte/releases, etiquetas del asistente,
+proveedores y altas MFA. MFA conserva secretos y valida códigos ya enrolados.
+Por decisión de Steve, telemetría, encuestas y monitorización externa están
+desactivadas, incluso si hay variables heredadas configuradas. No inicializar
+PostHog, Sentry, Skylight ni Logtail al integrar upstream; conservar logs locales
+y diagnósticos de proveedores. Las dependencias inertes se limpiarán después de
+estabilizar la instalación, sin reactivar sus SDK por variables de entorno.
+
+Relay empieza en 0.1.0. Las plantillas Docker exigen imagen, contraseña y clave
+explícitas, usan `relay_production`/`relay_user` y permiten build desde Git con
+`compose.source.yml`. La instalación Sure de TrueNAS 25.10.4 no se modifica.
+Los clientes web/PWA, Flutter, Tauri y Apple conservan sus funciones, reciben
+marca Relay y mantienen paquetes, callbacks e identificadores externos actuales.
+El CI de Helm heredado está archivado en `docs/archive/sure/workflows/chart-ci.yml`;
+no reactivar checks que acoplen versiones Relay al chart Sure en el alcance Docker.
+`compose.truenas.yml` permite instalación desde un solo YAML, con revisión Git
+fija, credenciales/cifrado persistentes generados en init y volúmenes del proyecto.
+Conservar el orden init → base/Redis → web con `db:prepare` → worker saludable.
+Las actualizaciones no regeneran claves ni cambian nombres de base/volúmenes;
+la pérdida de configuración con una base existente detiene la inicialización.
+Ver [instalación y actualización TrueNAS](docs/hosting/truenas.md).
+La tarea de webhooks Plaid EU
+requiere destino HTTPS de la instalación, sin dominio alojado de Sure por defecto.
+Lectores históricos STI/GlobalID, identificadores Sophtron/asistente externos y
+contratos nativos se distinguen de aliases de tareas/variables ya retirados.
+Los identificadores externos pendientes requieren inventariar primero las
+integraciones/clientes en uso. Ver [procedimiento](docs/migration/final-runbook.md),
+[decisiones](docs/migration/final-decisions.md) y novena entrega de
+[RELAY_MIGRATION.md](RELAY_MIGRATION.md).
+
 ## Puerta global de integraciones de IA
 
 El fork conserva el código upstream de IA para facilitar futuras integraciones, pero no lo ofrece como funcionalidad de producto por defecto. La única autoridad es `Setting.ai_features_enabled?`, un ajuste de instancia que se administra en **Configuración de instancia → Configuración general**. No crear puertas paralelas por controlador, proveedor o variable de entorno.
@@ -388,7 +421,10 @@ Puntos principales: `transfer.rb`, `transfer/creator.rb`, `transaction/transfera
 Funcionalidad propia incorporada en agosto de 2026:
 
 - Dos tipos de exportación: copia completa y CSV personalizado de transacciones.
-- Las importaciones de backups NDJSON admiten 500 MB por defecto, tanto por web como por API. `SURE_IMPORT_MAX_NDJSON_SIZE_MB` permite ajustar el límite; conservar la cobertura de subidas mayores de 10 MB en `test/controllers/imports_controller_test.rb` y no recuperar el límite upstream de 10 MB.
+- Las importaciones de backups NDJSON admiten 500 MB por defecto, tanto por web como por API. `RELAY_IMPORT_MAX_NDJSON_SIZE_MB` permite ajustar el límite; los nombres `SURE_IMPORT_MAX_*` ya no se leen (3 de octubre de 2026, instancia única). `RELAY_IMPORT_MAX_ROWS` conserva el default de 100.000 registros. Conservar la cobertura de subidas mayores de 10 MB y de precedencia web/API; no recuperar el límite upstream de 10 MB.
+- Desde el 3 de octubre de 2026, los nuevos backups usan `relay_export_*`; los adjuntos existentes conservan su nombre real, incluido `sure_export_*`. La mejora de backups completos eleva el ZIP a v3, conservando los CSV y archivos remotos de Drive. El listado precarga los adjuntos para evitar consultas por fila.
+- Web/API/preflight y sesiones admiten los dos nombres de backup, pero todas las creaciones nuevas usan `RelayImport`, también al omitir el tipo de sesión. La API devuelve el tipo real, sin negociación para clientes/versiones antiguos: Relay se prepara para una instancia única por decisión del usuario del 3 de octubre de 2026. `RelayImport < SureImport` y `backup_import_sti.rb` conservan la lectura de registros y GlobalID existentes; el filtro API por cualquiera de los nombres incluye ambos dentro de la familia. Las migraciones nuevas `20261003120000_allow_relay_import_sessions.rb` y `20261003130000_use_relay_import_session_default.rb` amplían el constraint y cambian el default a Relay, sin convertir datos. La primera se niega a revertir si hay sesiones Relay. Los reintentos conservan el tipo original bajo bloqueo de fila y los chunks nuevos usan el tipo de su sesión. Conservar adjuntos de tipo `Import`, mappings, claves de origen de sesiones e idempotencia; no retirar el lector legacy mientras existan sus datos/jobs. Ver [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
+- Backups completos (3 de octubre de 2026): adaptación autorizada de `N7Steve/sure@8e768c39661c1999fd0bf6ffe3b26c851c8f72c6`. El snapshot relacional incluye Agenda, cuentas y permisos, históricos, reglas, preferencias, conexiones y originales Active Storage. Web/API/preflight/sesiones aceptan ZIP directo o NDJSON con límites sobre bytes descomprimidos. La restauración exige administrador y familia sin datos financieros, remapea UUID, verifica atributos y archivos y conserva el acceso del administrador destino. No sincroniza automáticamente ni permite revertir como importación de movimientos. Los lectores históricos y nombres STI se conservan. Ver [backups completos](docs/llm-guides/backups.md).
 - Rango de fechas, filtros JSON, usuario solicitante, tipo y número de registros.
 - Generación asíncrona y descarga desde la UI.
 - Endpoint API adaptado a las nuevas opciones.
@@ -458,7 +494,7 @@ Esta funcionalidad permite que cada familia sustituya las imágenes automáticas
 - `Merchant::Customizer` coordina de forma transaccional la edición del comercio y su personalización. Renombrar un `ProviderMerchant` conserva el comportamiento anterior y lo convierte en `FamilyMerchant`; cambiar únicamente su imagen no provoca esa conversión.
 - El concern `CustomLogoAttachable` comparte las restricciones: JPEG, PNG o WebP, máximo 5 MB, con variante cuadrada de 128×128 en WebP. El formulario permite previsualizar el archivo local, cambiarlo y marcar la restauración del logo automático.
 - La autorización de Active Storage cubre ambos tipos de adjunto: una cuenta debe ser accesible por `Current.user` y una personalización de comercio debe pertenecer a `Current.family`. No se deben exponer URLs de blobs de otras familias.
-- `Family::FinancialDataReset` elimina también las personalizaciones de comercio y sus adjuntos. Los archivos binarios siguen administrados por Active Storage y no se añaden como payload al formato actual de exportación familiar.
+- `Family::FinancialDataReset` elimina también las personalizaciones de comercio y sus adjuntos. Los backups v3 incluyen los originales binarios de estos logos y los restauran sobre su propietario, conservando el aislamiento por familia.
 - Para evitar consultas repetidas al representar listas, `Family` mantiene cachés en memoria durante la petición para personalizaciones de comercios y cuentas con logo propio. Cualquier alta, cambio o borrado debe invalidar el caché correspondiente.
 
 Archivos principales: `app/models/concerns/custom_logo_attachable.rb`, `app/models/merchant_customization.rb`, `app/models/merchant/customizer.rb`, `app/models/{account,merchant,family}.rb`, `app/controllers/concerns/accountable_resource.rb`, `app/controllers/family_merchants_controller.rb`, `app/views/shared/_custom_logo_field.html.erb`, `app/javascript/controllers/custom_logo_preview_controller.js`, `config/initializers/active_storage_authorization.rb` y las vistas que llaman a `display_logo_url`.
@@ -504,6 +540,7 @@ Rutas afectadas: `app/models/concerns/syncable.rb`, modelos/importers/syncers de
 - Workflows: se conserva `.github/workflows/pipelock.yml`. Gittensor y los workflows heredados de distribución/publicación están archivados en `docs/archive/sure/workflows/`; ya no se ejecutan en Relay (3 de octubre de 2026).
 - Documentación/operación: `docs/archive/sure/rollback-instructions.md` e `docs/archive/sure/informe_scheduled_payments.md`.
 - Scripts de diagnóstico: `script/debug_subtypes.rb` y `script/debug_currency_methods.rb`.
+- Las 12 tareas antes llamadas `sure:*` usan solo `relay:*`; se retiran aliases legacy y fallbacks `SURE_*` el 3 de octubre de 2026 según la decisión de instancia única. La tarea de cifrado acepta `RELAY_BATCH_SIZE`, `RELAY_LIMIT` y `RELAY_DRY_RUN`, manteniendo argumentos y overrides sin prefijo; el dry-run predeterminado sigue activo. Ver [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
 - `conflicts.txt` se retiró el 3 de octubre de 2026: era una lista UTF-16 de diez rutas de conflictos antiguos, sin consumidores ni comportamiento. Se conserva en Git; no restaurarla en futuras integraciones.
 
 ## Migraciones propias
