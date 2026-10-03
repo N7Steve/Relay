@@ -298,6 +298,8 @@ class ImportSession < ApplicationRecord
     end
 
     def enqueue_family_sync
+      return if imports.any?(&:full_backup?)
+
       family.sync_later
     rescue => error
       update!(error_details: sync_enqueue_error_details)
@@ -401,6 +403,9 @@ class ImportSession < ApplicationRecord
 
     def validate_publishable_chunks!
       raise ConflictError, "import session has no chunks" unless imports.exists?
+      if imports.any?(&:full_backup?) && imports.count > 1
+        raise ConflictError, "A full backup must be restored as a single self-contained chunk"
+      end
       raise Import::MaxRowCountExceededError if row_count_exceeded?
       validate_expected_chunk_sequences!
     end
@@ -463,6 +468,7 @@ class ImportSession < ApplicationRecord
 
     def merge_summary!(totals, summary)
       summary.each do |entity_type, counts|
+        next if entity_type == "backup_restore"
         next unless counts.respond_to?(:each)
 
         totals[entity_type] ||= {}

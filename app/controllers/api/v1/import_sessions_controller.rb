@@ -32,6 +32,9 @@ class Api::V1::ImportSessionsController < Api::V1::BaseController
   def create_chunk
     content, filename, content_type = sure_import_upload_attributes
     return unless content
+    if Family::Backup.snapshot?(content) && !current_resource_owner.admin?
+      return render_error("forbidden", "Full backup restoration requires a family administrator.", :forbidden)
+    end
 
     @import_session.attach_chunk!(
       sequence: sequence_param,
@@ -55,6 +58,9 @@ class Api::V1::ImportSessionsController < Api::V1::BaseController
   end
 
   def publish
+    if @import_session.imports.any?(&:full_backup?) && !current_resource_owner.admin?
+      return render_error("forbidden", "Full backup restoration requires a family administrator.", :forbidden)
+    end
     @import_session.publish_later
     @import_session.reload
     render_import_session(status: :accepted)
@@ -103,26 +109,11 @@ class Api::V1::ImportSessionsController < Api::V1::BaseController
     end
 
     def sure_import_file_upload_attributes(file)
-      if file.size > SureImport.max_ndjson_size
-        render_error(
-          "file_too_large",
-          "File is too large. Maximum size is #{SureImport.max_ndjson_size / 1.megabyte}MB.",
-          :unprocessable_entity
-        )
-        return
-      end
-
-      extension = File.extname(file.original_filename.to_s).downcase
-      unless SureImport::ALLOWED_NDJSON_CONTENT_TYPES.include?(file.content_type) || extension.in?(%w[.ndjson .json])
-        render_error("invalid_file_type", "Invalid file type. Please upload a backup NDJSON file.", :unprocessable_entity)
-        return
-      end
-
-      sure_import_validated_attributes(
-        content: file.read,
-        filename: file.original_filename.presence || "relay-import.ndjson",
-        content_type: file.content_type.presence || "application/x-ndjson"
-      )
+      content, filename, content_type = SureImport::Upload.read(file)
+      sure_import_validated_attributes(content: content, filename: filename, content_type: content_type)
+    rescue SureImport::Upload::Error => error
+      render_error(error.code, error.message, :unprocessable_entity)
+      nil
     end
 
     def sure_import_raw_content_attributes(content)
