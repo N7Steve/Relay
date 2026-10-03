@@ -138,7 +138,9 @@ Pasos de la integración:
 
 1. Registrar las funcionalidades aprobadas y sus límites. Comprobar si el fork o
    upstream cambiaron desde el análisis y si eso afecta a la propuesta.
-2. Trabajar en una rama propia, respetando los cambios existentes del usuario.
+2. Trabajar directamente en `main`, respetando los cambios existentes del usuario.
+   No crear ramas ni PR salvo petición expresa; hacer commit y push a `origin/main`
+   solo cuando el usuario confirme los cambios preparados y validados.
    Mantener separadas las unidades funcionales cuando puedan integrarse solas.
 3. Elegir por propuesta entre cherry-pick, adaptación parcial o implementación
    equivalente. Un cherry-pick es una herramienta; no obliga a aceptar todo el

@@ -371,7 +371,7 @@ final class SureStore {
           id: "live-debt-ratio",
           type: ratio > 0.5 ? "cash_flow_warning" : "budget_on_track",
           title: ratio > 0.5 ? "Liabilities need attention" : "Your balance sheet looks resilient",
-          body: "Liabilities are \((ratio * 100).formatted(.number.precision(.fractionLength(0))))% of assets, based on your live Sure balances.",
+          body: "Liabilities are \((ratio * 100).formatted(.number.precision(.fractionLength(0))))% of assets, based on your live Relay balances.",
           priority: ratio > 0.5 ? "high" : "low",
           status: "active"
         ))

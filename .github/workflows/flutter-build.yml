@@ -42,7 +42,7 @@ jobs:
         working-directory: mobile
         run: flutter pub get
 
-      - name: Copy Sure icons from public/
+      - name: Copy Relay icons from public/
         run: cp public/android-chrome-512x512.png mobile/assets/icon/app_icon.png
 
       - name: Generate app icons
@@ -139,7 +139,7 @@ jobs:
         working-directory: mobile
         run: flutter pub get
 
-      - name: Copy Sure icons from public/
+      - name: Copy Relay icons from public/
         run: cp public/android-chrome-512x512.png mobile/assets/icon/app_icon.png
 
       - name: Generate app icons

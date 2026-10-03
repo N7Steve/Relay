@@ -34,7 +34,7 @@ class Provider::Monobank < Provider
   # whole window was covered.
   MAX_STATEMENT_ITEMS = 500
 
-  headers "User-Agent" => "Sure Finance Monobank Client (https://github.com/we-promise/sure)"
+  headers "User-Agent" => "Relay Finance Monobank Client (https://github.com/N7Steve/Relay)"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   attr_reader :access_token

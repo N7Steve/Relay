@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-namespace :sure do
+namespace :relay do
   namespace :simplefin do
     desc "Unlink all provider links for a SimpleFin item so its accounts move to 'Other accounts'. Args: item_id, dry_run=true"
     task :unlink_item, [ :item_id, :dry_run ] => :environment do |_, args|
@@ -23,7 +23,7 @@ namespace :sure do
       end
 
       unless item_id.present?
-        puts({ ok: false, error: "usage", example: "bin/rails 'sure:simplefin:unlink_item[ITEM_UUID,true]'" }.to_json)
+        puts({ ok: false, error: "usage", example: "bin/rails 'relay:simplefin:unlink_item[ITEM_UUID,true]'" }.to_json)
         exit 1
       end
 

@@ -3,12 +3,12 @@
 require "json"
 require "time"
 
-namespace :sure do
+namespace :relay do
   namespace :simplefin do
     desc "Print last N raw SimpleFin transactions for a given item/account name. Args: item_id, account_name, limit (default 15)"
     task :tx_debug, [ :item_id, :account_name, :limit ] => :environment do |_, args|
       unless args[:item_id].present? && args[:account_name].present?
-        puts({ error: "usage", example: "bin/rails sure:simplefin:tx_debug[ITEM_ID,ACCOUNT_NAME,15]" }.to_json)
+        puts({ error: "usage", example: "bin/rails relay:simplefin:tx_debug[ITEM_ID,ACCOUNT_NAME,15]" }.to_json)
         exit 1
       end
 
@@ -67,7 +67,7 @@ namespace :sure do
     desc "Print last N imported Entries for an account by name (linked to SimpleFin). Args: account_name, limit (default 15)"
     task :entries_debug, [ :account_name, :limit ] => :environment do |_, args|
       unless args[:account_name].present?
-        puts({ error: "usage", example: "bin/rails sure:simplefin:entries_debug[ACCOUNT_NAME,15]" }.to_json)
+        puts({ error: "usage", example: "bin/rails relay:simplefin:entries_debug[ACCOUNT_NAME,15]" }.to_json)
         exit 1
       end
 

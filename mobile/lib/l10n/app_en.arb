@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
 
-  "appTitle": "Sure Finances",
+  "appTitle": "Relay",
   "@appTitle": { "description": "Application title shown in the OS task switcher." },
 
   "commonCancel": "Cancel",
@@ -365,10 +365,10 @@
   "@ssoOnboardingTitle": { "description": "App bar title for the SSO onboarding screen." },
 
   "ssoOnboardingTabLink": "Link existing",
-  "@ssoOnboardingTabLink": { "description": "Tab label for linking an existing Sure account via SSO." },
+  "@ssoOnboardingTabLink": { "description": "Tab label for linking an existing Relay account via SSO." },
 
   "ssoOnboardingTabCreate": "Create new",
-  "@ssoOnboardingTabCreate": { "description": "Tab label for creating a new Sure account via SSO." },
+  "@ssoOnboardingTabCreate": { "description": "Tab label for creating a new Relay account via SSO." },
 
   "ssoOnboardingFirstNameLabel": "First Name",
   "@ssoOnboardingFirstNameLabel": { "description": "Label for the first-name field on the SSO onboarding screen." },
@@ -436,13 +436,13 @@
   "backendConfigTitle": "Configuration",
   "@backendConfigTitle": { "description": "Headline on the backend configuration screen." },
 
-  "backendConfigSubtitle": "Update your Sure server URL",
+  "backendConfigSubtitle": "Update your Relay server URL",
   "@backendConfigSubtitle": { "description": "Subtitle below the headline on the backend configuration screen." },
 
   "backendConfigExampleUrlsLabel": "Example URLs",
   "@backendConfigExampleUrlsLabel": { "description": "Label for the example URLs info box on the config screen." },
 
-  "backendConfigUrlLabel": "Sure server URL",
+  "backendConfigUrlLabel": "Relay server URL",
   "@backendConfigUrlLabel": { "description": "Label for the server URL field on the config screen." },
 
   "backendConfigUrlHint": "https://app.sure.am",
@@ -724,7 +724,7 @@
   "loginOrDivider": "or",
   "@loginOrDivider": { "description": "Divider label between primary and alternate sign-in options." },
 
-  "loginServerUrlHeading": "Sure server URL:",
+  "loginServerUrlHeading": "Relay server URL:",
   "@loginServerUrlHeading": { "description": "Heading above the displayed server URL on the login screen." },
 
   "loginApiKeyLoginButton": "API-Key Login",
@@ -823,7 +823,7 @@
   "transactionFormDateHelper": "Optional (default: today)",
   "@transactionFormDateHelper": { "description": "Helper text for the date field in the create form." },
 
-  "transactionFormNameHelper": "Optional (default: SureApp)",
+  "transactionFormNameHelper": "Optional (default: RelayApp)",
   "@transactionFormNameHelper": { "description": "Helper text for the name field in the create form." },
 
   "transactionFormCategoryLoading": "Loading categories…",
@@ -919,7 +919,7 @@
   "backendConfigSuccess": "Connection successful!",
   "@backendConfigSuccess": { "description": "Message shown when the connection test succeeds." },
 
-  "backendConfigServerError": "Server responded with status {code}. Please check if this is a Sure backend server.",
+  "backendConfigServerError": "Server responded with status {code}. Please check if this is a Relay backend server.",
   "@backendConfigServerError": {
     "description": "Error shown when the server returns a non-success status during the connection test.",
     "placeholders": { "code": { "type": "int" } }
