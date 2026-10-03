@@ -55,7 +55,7 @@ class Import::Preflight
     type = preflight_import_type
     return invalid_import_type_response unless type
 
-    type == "SureImport" ? sure_import_response : csv_import_response(type)
+    type == "RelayImport" ? sure_import_response : csv_import_response(type)
   rescue PreflightError => e
     Response.new(status: e.status, payload: e.payload)
   end
@@ -67,7 +67,9 @@ class Import::Preflight
       type = params[:type].to_s
       return "TransactionImport" if type.blank?
 
-      Import.storage_type(type) if IMPORT_TYPES.include?(type)
+      return "RelayImport" if type.in?(Import::BACKUP_TYPES)
+
+      type if IMPORT_TYPES.include?(type)
     end
 
     def invalid_import_type_response
@@ -246,7 +248,7 @@ class Import::Preflight
       warnings << "Row count exceeds this import type's publish limit." if stats[:rows_count] > SureImport.max_row_count
 
       {
-        type: "SureImport",
+        type: "RelayImport",
         valid: result.valid?,
         content: content_payload(filename, content_type, content),
         stats: stats,

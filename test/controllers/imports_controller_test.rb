@@ -35,7 +35,7 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "Relay backup upload keeps the legacy stored type for older workers" do
+  test "Relay backup upload stores the Relay type" do
     content = { type: "Account", data: { id: "compat-web-account", name: "Relay checking" } }.to_json
     file = Rack::Test::UploadedFile.new(StringIO.new(content), "application/x-ndjson", original_filename: "all.ndjson")
 
@@ -45,17 +45,17 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
 
     import = @user.family.imports.ordered.first
     assert_redirected_to import_url(import)
-    assert_instance_of SureImport, import
+    assert_instance_of RelayImport, import
     assert_equal content, import.ndjson_file.download
     assert_equal 1, import.rows_count
   end
 
-  test "Relay backup without a file opens the legacy compatible upload workflow" do
+  test "Relay backup without a file opens the Relay upload workflow" do
     post imports_url, params: { import: { type: "RelayImport" } }
 
     import = @user.family.imports.ordered.first
     assert_redirected_to import_upload_url(import)
-    assert_equal "SureImport", import.type
+    assert_equal "RelayImport", import.type
   end
 
   test "Relay STI records appear in the list and backup preview" do

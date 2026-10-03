@@ -44,12 +44,6 @@ class Import < ApplicationRecord
   SIGNAGE_CONVENTIONS = %w[inflows_positive inflows_negative]
   SEPARATORS = [ [ "Comma (,)", "," ], [ "Semicolon (;)", ";" ] ].freeze
 
-  # Accept Relay's name before changing persisted types. Older workers and the
-  # import_sessions constraint must remain compatible during the reader rollout.
-  def self.storage_type(type)
-    type == "RelayImport" ? "SureImport" : type
-  end
-
   def self.separator_options
     [
       [ I18n.t("activerecord.attributes.import.col_seps.comma"), "," ],

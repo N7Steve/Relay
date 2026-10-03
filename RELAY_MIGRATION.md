@@ -319,6 +319,101 @@ manualmente registros STI o jobs GlobalID Relay, inventariarlos antes de volver
 al código anterior, que no los entiende. No usar `RelayImport.create!` ni
 cambiar tipos manualmente mientras convivan workers antiguos.
 
+## Sexta entrega: ampliación compatible del esquema de sesiones
+
+Bloque del **3 de octubre de 2026**, sobre `fc55d3dfb`:
+
+- Nueva migración Rails 8.1 `20261003120000_allow_relay_import_sessions.rb`:
+  el constraint validado de `import_sessions.import_type` admite `SureImport`
+  y `RelayImport`, conservando NOT NULL y el default `SureImport`.
+- No cambian escritores web/API, preflight, chunks ni validación del modelo.
+  Las sesiones y jobs normales siguen usando el nombre legacy. La ampliación
+  prepara el esquema; no activa todavía la escritura Relay.
+- La reversión bloquea la tabla antes de comprobar los tipos. Si existe alguna
+  sesión no legacy, se niega mediante `ActiveRecord::IrreversibleMigration`,
+  conservando datos y constraint. Sin esas sesiones restaura la restricción
+  validada anterior. Nunca convierte ni borra filas para facilitar la reversión.
+- Minitest ensaya upgrade, reversión, rechazo de tipos no permitidos/NULL,
+  preservación de atributos/default e idempotencia y escritura legacy de chunks.
+  El DDL se ejecuta dentro de transacciones de test en PostgreSQL aislado.
+
+No se modifican migraciones históricas ni tipos STI de importaciones, contratos
+API, adjuntos, mappings o payloads. No se aplican migraciones a instalaciones
+existentes ni se arrancan servidores, despliegan lectores o publican artefactos.
+Ambas direcciones necesitan un bloqueo exclusivo y validan filas existentes:
+planificar su aplicación teniendo en cuenta el tamaño y actividad de la tabla.
+
+### Estado actual y siguiente bloque
+
+La fase 4 cuenta con lectores y una migración preparada para ampliar el esquema.
+Quedan pendientes su ensayo sobre una copia de una instalación y el despliegue
+coordinado, seguido del cambio de escritura/defaults y compatibilidad de clientes.
+La versión propia, distribución y fases 5–6 mantienen sus pendientes anteriores.
+
+Siguiente bloque de código: coordinar escritores de importaciones, sesiones y
+chunks para los dos nombres; conservar el tipo de la sesión al reintentar su
+`client_session_id`, y resolver las respuestas para clientes cuyo enum solo
+acepta `SureImport`. No realizar backfill automático. La puesta en operación
+debe desplegar primero lectores en todos los procesos y aplicar después esta
+migración como operación aparte, antes de activar escritores nuevos.
+
+Reversión del código: restaurar el esquema anterior únicamente si la reversión
+de la migración puede completarse; si hay sesiones Relay, mantener la ampliación
+hasta definir cómo tratarlas. Revertir archivos de Git no revierte una base.
+
+## Séptima entrega: escritores Relay para la instancia única
+
+Bloque del **3 de octubre de 2026**, sobre la sexta entrega preparada:
+
+- Decisión del usuario: no mantener compatibilidad con versiones antiguas
+  para despliegues mixtos ni clientes anteriores. Relay tendrá una instancia
+  única que puede adaptarse directamente. Se conserva acceso a datos existentes.
+- Web/API escriben `RelayImport` en todas las importaciones nuevas de backup.
+  También las solicitudes con el nombre anterior se normalizan a Relay; no
+  se añade negociación de respuestas, flags de transición ni cabeceras nuevas.
+  La API devuelve el tipo guardado y preflight devuelve `RelayImport`.
+- Las sesiones nuevas usan Relay con cualquiera de los nombres de entrada o
+  sin tipo. La migración Rails 8.1 `20261003130000_use_relay_import_session_default.rb`
+  cambia únicamente el default después de la ampliación del constraint.
+  Revertir el default no convierte filas ni retira el constraint ampliado.
+- Reintentar un `client_session_id` mantiene el tipo de su sesión original y
+  sus chunks. Un bloqueo de fila protege la comprobación/completado de
+  `expected_chunks`, también ante un insert duplicado. Los conflictos de
+  conteo siguen rechazándose y no se cambia el tipo de sesiones existentes.
+- Los chunks nuevos usan el tipo de su sesión; los anteriores mantienen el
+  suyo. La publicación admite chunks de ambos tipos y los nuevos backups
+  encolan GlobalID Relay. El lector Sure sigue para datos y jobs existentes.
+- Cobertura de escrituras/defaults, reintentos normales y con carreras,
+  publicación de chunks mixtos, permisos, tenancy y recorrido web.
+  Specs rswag documentales y esquema OpenAPI actualizados.
+
+Se elimina `Import.storage_type`, que forzaba los escritores al nombre anterior.
+No se convierten tipos persistidos ni se reescriben migraciones históricas.
+Se conservan payload NDJSON/ZIP, adjuntos `Import`, mappings, claves de origen,
+verificación de lectura posterior, tenancy y autenticación. Las migraciones
+se preparan en código y se ensayan solo en bases aisladas de pruebas; no se
+aplican a ninguna instalación existente.
+
+### Estado actual, continuación y reversión
+
+La fase 4 tiene implementados lectores, constraint, default y escritores Relay.
+La aplicación efectiva de las migraciones y el ensayo sobre una copia real
+siguen pendientes. La decisión de instancia única sustituye la recomendación
+anterior de mantener respuestas legacy y coordinar un despliegue por lectores
+y escritores: la instalación se actualizará con web/workers a la misma versión.
+No hay garantías para ejecutar versiones anteriores junto con estos escritores.
+
+Siguiente bloque: auditar servicios/hosting e instrucciones activas heredadas
+y preparar configuración de instalación Relay coherente con los artefactos
+disponibles. Publicación, dominios, canales y clientes nativos siguen necesitando
+destinos reales; no inventarlos ni activar los workflows Sure archivados.
+
+Reversión: volver a código con lectores Relay conserva acceso a las nuevas
+importaciones/jobs. Revertir solo el default mantiene válidas las sesiones
+Relay; estrechar el constraint se rechaza mientras existan. Revertir a código
+anterior a los lectores exigiría tratar datos/jobs explícitamente. No hacer
+backfill ni borrar filas para forzar un rollback.
+
 ## Inventario técnico de la separación
 
 | Área | Puntos principales | Tratamiento |
@@ -642,6 +737,63 @@ bases aisladas de pruebas; no se migran instalaciones existentes ni se despliega
 la aplicación. Las pruebas de navegador usan su servidor temporal de Capybara.
 Los servicios de estos dos proyectos se detienen conservando los volúmenes al
 terminar. Los resultados son locales; no certifican CI remoto ni distribución.
+
+### Validación de la sexta entrega
+
+Ejecutada el 3 de octubre de 2026 en el proyecto nuevo `relay-import-schema`,
+con PostgreSQL 16 y su base `relay_test` aislada:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Focalizadas: migración, sesiones, lector STI y API de sesiones | 58 pruebas, 295 aserciones, sin fallos, errores ni omisiones |
+| Suite completa Rails/Minitest | 10.814 pruebas, 45.893 aserciones, 0 fallos, 0 errores, 33 omisiones heredadas |
+| RuboCop completo | 2.924 archivos, sin infracciones |
+| ERB lint completo | 779 plantillas, sin errores |
+| Biome | 142 archivos, sin errores |
+| Brakeman | 0 errores, 0 avisos activos; conserva las 8 exclusiones heredadas |
+
+Las pruebas de la migración ejecutan upgrade y reversión dentro de sus
+transacciones; el runner carga el esquema en su propia base, sin ejecutar el
+historial de migraciones. Assets se compilan correctamente en ambas ejecuciones;
+`git diff --check` pasa. No se ejecuta suite de navegador: no cambia el flujo
+web ni la escritura del producto. No se modifican instalaciones existentes. Los logs
+permanecen en `tmp/`, fuera de Git. Las comprobaciones son locales y no
+certifican un despliegue, CI remoto ni una release. La definición de la tabla
+`import_sessions` coincide con el dump de Rails/PostgreSQL. El dump completo
+también reordena y normaliza otras definiciones heredadas; esas diferencias
+ajenas al bloque no se trasladan a `db/schema.rb`. Los servicios del proyecto
+de pruebas se detienen al terminar, conservando sus volúmenes.
+
+### Validación de la séptima entrega
+
+Ejecutada el 3 de octubre de 2026 en `relay-import-writers` y
+`relay-import-writers-system`, con bases `relay_test` independientes:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Focalizadas: migraciones, lectores, escritores, sesiones y web/API | 238 pruebas, 1.251 aserciones, sin fallos, errores ni omisiones |
+| Suite completa Rails/Minitest final | 10.821 pruebas, 45.938 aserciones, 0 fallos, 0 errores, 33 omisiones heredadas |
+| Sistema: importaciones y drag/drop, incluido backup Relay | 8 pruebas, 32 aserciones, sin fallos, errores ni omisiones |
+| RuboCop completo | 2.926 archivos, sin infracciones |
+| ERB lint completo | 779 plantillas, sin errores |
+| Biome | 142 archivos, sin errores |
+| Brakeman | 0 errores, 0 avisos activos; conserva las 8 exclusiones heredadas |
+| OpenAPI | Regenerado: 435 ejemplos, 0 fallos, 89 pendientes documentales heredados |
+| Esquema | Tabla `import_sessions` y versión coinciden con el dump de Rails/PostgreSQL |
+| API | Verificador de consistencia correcto; Minitest con `X-Api-Key`, rswag documental |
+
+La primera ejecución focalizada pasa. Tras simplificar la selección interna del
+tipo, la suite completa valida el código final. Los cambios OpenAPI se limitan
+a las descripciones de escritores/preflight/chunks y el enum de sesiones.
+Los 89 pendientes documentales y las desviaciones globales heredadas de
+FinanceKit/transfers recogidas en la quinta entrega no se resuelven en este bloque.
+
+Assets se compilan en ambas bases. Los tests de migraciones cambian y revierten
+el esquema solo dentro de transacciones de pruebas; no se ejecuta `db:migrate`
+ni se opera una instalación existente. El navegador usa el servidor temporal
+de Capybara. Logs y dump quedan en `tmp/`, fuera de Git. `git diff --check`
+pasa; los servicios de ambos proyectos se detienen conservando los volúmenes.
+La validación local no certifica CI remoto, publicación ni despliegue.
 
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia

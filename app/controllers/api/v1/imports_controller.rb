@@ -66,9 +66,10 @@ class Api::V1::ImportsController < Api::V1::BaseController
     family = current_resource_owner.family
 
     # 1. Determine type and validate
-    type = Import.storage_type(params[:type].to_s)
+    type = params[:type].to_s
+    type = "RelayImport" if type.in?(Import::BACKUP_TYPES)
     type = "TransactionImport" unless Import::TYPES.include?(type)
-    return create_sure_import(family) if type == "SureImport"
+    return create_sure_import(family) if type == "RelayImport"
 
     # 2. Build the import object with permitted config attributes
     @import = family.imports.build(import_config_params.merge(type: type))
@@ -283,7 +284,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
 
     def persist_sure_import!(family, content, filename, content_type)
       import = nil
-      import = family.imports.create!(type: "SureImport")
+      import = family.imports.create!(type: "RelayImport")
       import.ndjson_file.attach(
         io: StringIO.new(content),
         filename: filename,

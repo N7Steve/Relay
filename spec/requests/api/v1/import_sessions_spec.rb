@@ -41,7 +41,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
 
   path '/api/v1/import_sessions' do
     post 'Create import session' do
-      description 'Create or retrieve a backup session keyed by client_session_id. RelayImport and SureImport address the same session; its stored and returned type remains SureImport during the reader rollout.'
+      description 'Create or retrieve a backup session keyed by client_session_id. New sessions use RelayImport. Retries preserve the stored type and chunks of the original session, including existing SureImport sessions. Responses expose the stored type.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -53,7 +53,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
           type: {
             type: :string,
             enum: Import::BACKUP_TYPES,
-            description: 'Backup type. RelayImport and SureImport are accepted; omitted type defaults to SureImport. Responses currently use SureImport.'
+            description: 'Backup type. RelayImport and SureImport are accepted; new sessions always use RelayImport, also when type is omitted. Existing sessions keep their stored type.'
           },
           client_session_id: {
             type: :string,
@@ -184,7 +184,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:id) { import_session.id }
 
     post 'Upload import session chunk' do
-      description 'Attach an ordered backup NDJSON chunk to an import session. Chunks are stored as SureImport and are idempotent by sequence and client_chunk_id with content verification.'
+      description 'Attach an ordered backup NDJSON chunk to an import session. New chunks use the stored session type. Existing chunks keep their type and are idempotent by sequence and client_chunk_id with content verification.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'

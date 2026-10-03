@@ -15,12 +15,12 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
     Redis.new.del("api_rate_limit:#{@read_only_api_key.id}")
   end
 
-  test "Relay sessions remain idempotent across both names and publish legacy-compatible chunks" do
+  test "Relay sessions remain idempotent across both names and publish Relay chunks" do
     params = { type: "RelayImport", client_session_id: "relay-compatible-session", expected_chunks: 2 }
     post api_v1_import_sessions_url, params: params, headers: api_headers(@api_key)
     assert_response :created
     data = JSON.parse(response.body)["data"]
-    assert_equal "SureImport", data["type"]
+    assert_equal "RelayImport", data["type"]
     session = @family.import_sessions.find(data["id"])
 
     [ entity_records, transaction_records ].each_with_index do |records, index|
@@ -33,7 +33,7 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_response :created
     assert_equal session.id, JSON.parse(response.body).dig("data", "id")
-    assert_equal [ "SureImport", "SureImport" ], session.imports.pluck(:type)
+    assert_equal [ "RelayImport", "RelayImport" ], session.imports.pluck(:type)
 
     post api_v1_import_sessions_url, params: params.merge(expected_chunks: 3), headers: api_headers(@api_key)
     assert_response :conflict
@@ -56,6 +56,37 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
       post api_v1_import_sessions_url, params: { type: "RelayImport" }, headers: api_headers(@read_only_api_key)
       assert_response :forbidden
     end
+  end
+
+  test "omitted type creates a Relay session and returns its stored type" do
+    post api_v1_import_sessions_url, params: { expected_chunks: 1 }, headers: api_headers(@api_key)
+
+    assert_response :created
+    data = JSON.parse(response.body)["data"]
+    assert_equal "RelayImport", data["type"]
+    assert_equal "RelayImport", @family.import_sessions.find(data["id"]).import_type
+  end
+
+  test "legacy session retries and responses retain the stored type" do
+    session = @family.import_sessions.create!(import_type: "SureImport", client_session_id: "old-session", expected_chunks: 1)
+
+    assert_no_difference "ImportSession.count" do
+      post api_v1_import_sessions_url,
+           params: { type: "RelayImport", client_session_id: "old-session", expected_chunks: 1 },
+           headers: api_headers(@api_key)
+    end
+
+    assert_response :created
+    assert_equal session.id, JSON.parse(response.body).dig("data", "id")
+    assert_equal "SureImport", JSON.parse(response.body).dig("data", "type")
+    post chunks_api_v1_import_session_url(session), params: { sequence: 1, raw_file_content: build_ndjson(entity_records) }, headers: api_headers(@api_key)
+    assert_response :created
+    assert_equal "SureImport", session.reload.import_type
+    assert_equal [ "SureImport" ], session.imports.pluck(:type)
+
+    get api_v1_import_session_url(session), headers: api_headers(@read_only_api_key)
+    assert_response :success
+    assert_equal "SureImport", JSON.parse(response.body).dig("data", "type")
   end
 
   test "creates an idempotent Sure import session" do
@@ -204,7 +235,7 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     data = JSON.parse(response.body)["data"]
     assert_equal session.id, data["id"]
-    assert_equal "SureImport", data["type"]
+    assert_equal "RelayImport", data["type"]
   end
 
   test "shows chunks in sequence order" do

@@ -23,7 +23,7 @@ class ImportsTest < ApplicationSystemTestCase
     click_on "Check status"
     assert_text "Import successful"
     assert_equal @user.family, Account.find_by!(name: "Relay browser checking").family
-    assert_instance_of SureImport, @user.family.imports.ordered.first
+    assert_instance_of RelayImport, @user.family.imports.ordered.first
   end
 
   test "transaction import" do

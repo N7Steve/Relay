@@ -100,7 +100,8 @@ class ImportsController < ApplicationController
       return
     end
 
-    type = Import.storage_type(params.dig(:import, :type).to_s)
+    type = params.dig(:import, :type).to_s
+    type = "RelayImport" if type.in?(Import::BACKUP_TYPES)
     type = "TransactionImport" unless Import::TYPES.include?(type)
 
     account = accessible_accounts.find_by(id: params.dig(:import, :account_id))
@@ -274,7 +275,7 @@ class ImportsController < ApplicationController
         return
       end
 
-      import = Current.family.imports.create!(type: "SureImport")
+      import = Current.family.imports.create!(type: "RelayImport")
       import.ndjson_file.attach(
         io: StringIO.new(content),
         filename: file.original_filename,

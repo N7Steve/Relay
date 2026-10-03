@@ -62,7 +62,7 @@ class RelayImportTest < ActiveSupport::TestCase
   end
 
   test "session workers read Relay chunks without changing source mappings" do
-    session = ImportSession.create_or_find_for!(family: families(:empty), import_type: "RelayImport", client_session_id: "compat-session", expected_chunks: 1)
+    session = families(:empty).import_sessions.create!(import_type: "SureImport", client_session_id: "compat-session", expected_chunks: 1)
     chunk = session.attach_chunk!(sequence: 1, content: file_fixture("imports/relay.ndjson").read, filename: "all.ndjson", content_type: "application/x-ndjson")
     chunk.update!(type: "RelayImport")
 

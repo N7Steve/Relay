@@ -2450,6 +2450,7 @@ components:
         type:
           type: string
           enum:
+          - RelayImport
           - SureImport
         status:
           type: string
@@ -7098,8 +7099,9 @@ paths:
     post:
       summary: Create import session
       description: Create or retrieve a backup session keyed by client_session_id.
-        RelayImport and SureImport address the same session; its stored and returned
-        type remains SureImport during the reader rollout.
+        New sessions use RelayImport. Retries preserve the stored type and chunks
+        of the original session, including existing SureImport sessions. Responses
+        expose the stored type.
       tags:
       - Import Sessions
       security:
@@ -7148,7 +7150,8 @@ paths:
                   - RelayImport
                   - SureImport
                   description: Backup type. RelayImport and SureImport are accepted;
-                    omitted type defaults to SureImport. Responses currently use SureImport.
+                    new sessions always use RelayImport, also when type is omitted.
+                    Existing sessions keep their stored type.
                 client_session_id:
                   type: string
                   nullable: true
@@ -7211,9 +7214,9 @@ paths:
         type: string
     post:
       summary: Upload import session chunk
-      description: Attach an ordered backup NDJSON chunk to an import session. Chunks
-        are stored as SureImport and are idempotent by sequence and client_chunk_id
-        with content verification.
+      description: Attach an ordered backup NDJSON chunk to an import session. New
+        chunks use the stored session type. Existing chunks keep their type and are
+        idempotent by sequence and client_chunk_id with content verification.
       tags:
       - Import Sessions
       security:
@@ -7428,9 +7431,9 @@ paths:
     post:
       summary: Create import
       description: Create an import from CSV or backup NDJSON content or a multipart
-        backup file. RelayImport and SureImport are accepted; backup imports are currently
-        stored and returned as SureImport for worker compatibility. CSV content is
-        limited to 10MB.
+        backup file. Backup requests use RelayImport for storage, responses and queued
+        jobs, including requests using the old SureImport name. CSV content is limited
+        to 10MB.
       tags:
       - Imports
       security:
@@ -7777,8 +7780,8 @@ paths:
     post:
       summary: Validate import content without creating an import
       description: Validate CSV or backup NDJSON without persisting an import or enqueueing
-        jobs. RelayImport and SureImport use the same backup validation and currently
-        return type SureImport. CSV content is limited to 10MB.
+        jobs. Backup preflight returns type RelayImport, including requests using
+        the old SureImport name. CSV content is limited to 10MB.
       tags:
       - Imports
       security:

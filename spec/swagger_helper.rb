@@ -1327,7 +1327,7 @@ RSpec.configure do |config|
             required: %w[id type status chunks_count summary chunks created_at updated_at],
             properties: {
               id: { type: :string, format: :uuid },
-              type: { type: :string, enum: %w[SureImport] },
+              type: { type: :string, enum: Import::BACKUP_TYPES },
               status: { type: :string, enum: %w[pending importing complete failed] },
               client_session_id: { type: :string, nullable: true },
               expected_chunks: { type: :integer, nullable: true, minimum: 1 },

@@ -347,7 +347,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal '[{"action_type":"set_transaction_category","value":"Groceries"}]', row.actions
   end
 
-  test "Relay import requests queue legacy-compatible jobs and publish NDJSON" do
+  test "Relay import requests queue Relay jobs and publish NDJSON" do
     content = [
       { type: "Account", data: {
         id: "relay-api-account", name: "Relay API checking", balance: "100", currency: "USD", accountable_type: "Depository"
@@ -363,12 +363,12 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     data = JSON.parse(response.body)["data"]
-    assert_equal "SureImport", data["type"]
+    assert_equal "RelayImport", data["type"]
     import = @family.imports.find(data["id"])
-    assert_instance_of SureImport, import
+    assert_instance_of RelayImport, import
     job = enqueued_jobs.find { |entry| entry[:job] == ImportJob && entry[:args].first["_aj_globalid"] == import.to_global_id.to_s }
     assert_not_nil job
-    assert_includes job[:args].first["_aj_globalid"], "/SureImport/"
+    assert_includes job[:args].first["_aj_globalid"], "/RelayImport/"
 
     perform_enqueued_jobs(only: ImportJob)
     assert import.reload.complete?, import.error
@@ -383,7 +383,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     import = @family.imports.find(JSON.parse(response.body).dig("data", "id"))
-    assert_equal "SureImport", import.type
+    assert_equal "RelayImport", import.type
     assert_equal content, import.ndjson_file.download
     assert_equal "relay-backup.ndjson", import.ndjson_file.filename.to_s
   end
@@ -419,6 +419,8 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
       get api_v1_imports_url(type: type), headers: api_headers(@read_only_api_key)
       assert_response :success
       ids = JSON.parse(response.body)["data"].pluck("id")
+      returned_types = JSON.parse(response.body)["data"].to_h { |data| [ data["id"], data["type"] ] }
+      backups.each { |import| assert_equal import.type, returned_types.fetch(import.id) }
       backups.each { |import| assert_includes ids, import.id }
       assert_not_includes ids, @import.id
       assert_not_includes ids, foreign_import.id
@@ -453,7 +455,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     data = JSON.parse(response.body)["data"]
-    assert_equal "SureImport", data["type"]
+    assert_equal "RelayImport", data["type"]
     assert_equal true, data["valid"]
     assert_equal 1, data.dig("stats", "entity_counts", "accounts")
   end
@@ -475,7 +477,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     json_response = JSON.parse(response.body)
     import = Import.find(json_response["data"]["id"])
 
-    assert_instance_of SureImport, import
+    assert_instance_of RelayImport, import
     assert import.ndjson_file.attached?
     assert_equal 1, import.rows_count
     assert_equal "pending", import.status
@@ -532,7 +534,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
 
     import = Import.find(JSON.parse(response.body)["data"]["id"])
-    assert_instance_of SureImport, import
+    assert_instance_of RelayImport, import
     assert import.ndjson_file.attached?
     assert_equal 1, import.rows_count
   end
@@ -613,7 +615,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
 
   test "should clean up Sure import if row sync fails" do
     ndjson_content = { type: "Account", data: { id: "account_1", name: "Checking" } }.to_json
-    SureImport.any_instance.stubs(:sync_ndjson_rows_count!).raises(StandardError, "sync failed")
+    RelayImport.any_instance.stubs(:sync_ndjson_rows_count!).raises(StandardError, "sync failed")
 
     assert_no_difference("Import.count") do
       post api_v1_imports_url,
@@ -633,7 +635,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     ndjson_content = { type: "Account", data: { id: "account_1", name: "Checking" } }.to_json
     invalid_import = SureImport.new
     invalid_import.errors.add(:base, "invalid rows")
-    SureImport.any_instance.stubs(:sync_ndjson_rows_count!).raises(ActiveRecord::RecordInvalid.new(invalid_import))
+    RelayImport.any_instance.stubs(:sync_ndjson_rows_count!).raises(ActiveRecord::RecordInvalid.new(invalid_import))
 
     assert_no_difference("Import.count") do
       post api_v1_imports_url,
@@ -678,7 +680,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "publish_failed", json_response["error"]
 
     import = Import.find(json_response["import_id"])
-    assert_instance_of SureImport, import
+    assert_instance_of RelayImport, import
     assert import.ndjson_file.attached?
     assert_equal 1, import.rows_count
     assert_equal "pending", import.status
@@ -718,7 +720,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
 
   test "should preserve Sure import and return not publishable when auto publish has no records" do
     ndjson_content = { type: "Account", data: { id: "account_1", name: "Checking" } }.to_json
-    SureImport.any_instance.stubs(:publish_later).raises(
+    RelayImport.any_instance.stubs(:publish_later).raises(
       SureImport::NotPublishableError,
       "raw publishability failure with internal state"
     )
@@ -741,7 +743,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "raw publishability failure"
 
     import = Import.find(json_response["import_id"])
-    assert_instance_of SureImport, import
+    assert_instance_of RelayImport, import
     assert import.ndjson_file.attached?
     assert_equal 1, import.rows_count
     assert_equal "pending", import.status
@@ -773,7 +775,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
 
   test "should preserve Sure import if auto publish exceeds row count" do
     ndjson_content = { type: "Account", data: { id: "account_1", name: "Checking" } }.to_json
-    SureImport.any_instance.stubs(:publish_later).raises(Import::MaxRowCountExceededError)
+    RelayImport.any_instance.stubs(:publish_later).raises(Import::MaxRowCountExceededError)
 
     assert_difference("Import.count") do
       post api_v1_imports_url,
@@ -790,7 +792,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "max_row_count_exceeded", json_response["error"]
 
     import = Import.find(json_response["import_id"])
-    assert_instance_of SureImport, import
+    assert_instance_of RelayImport, import
     assert import.ndjson_file.attached?
     assert_equal 1, import.rows_count
   end
@@ -1067,7 +1069,7 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     data = JSON.parse(response.body)["data"]
 
-    assert_equal "SureImport", data["type"]
+    assert_equal "RelayImport", data["type"]
     assert_equal true, data["valid"]
     assert_equal 2, data["stats"]["rows_count"]
     assert_equal 1, data["stats"]["entity_counts"]["accounts"]

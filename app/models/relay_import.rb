@@ -1,5 +1,4 @@
-# Reader compatibility for Relay STI records and GlobalIDs. Web/API writers
-# still use Import.storage_type until all workers and session constraints are
-# ready for the write transition. Keep SureImport for existing records/jobs.
+# Share backup behavior while keeping SureImport readable for legacy records
+# and queued GlobalIDs. New backup writers use RelayImport.
 class RelayImport < SureImport
 end

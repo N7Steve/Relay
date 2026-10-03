@@ -69,24 +69,27 @@ unchanged. Restore a legacy or Relay backup by extracting its `all.ndjson` and
 using the existing backup import workflow. The ZIP filename is not a format
 marker; importing a ZIP directly is not added by this change.
 
-## Backup import names: reader rollout
+## Backup import names: Relay writers
 
 Web and API requests accept both `RelayImport` and `SureImport`. Both use the
 same NDJSON validation, limits, upload, preflight and publication workflow.
 The web upload form now submits `RelayImport`; old links still work. Routes,
 `X-Api-Key`/OAuth authentication and family permissions remain unchanged.
 
-This release deploys compatible readers **before** changing stored types:
+Relay targets a single installation. New backup writers use Relay directly;
+there is no response negotiation or support for running older application
+versions alongside this writer release. Readers retain existing stored data.
 
 | Surface | Current behavior |
 | --- | --- |
-| Web/API import creation | Both names write `SureImport` through `Import.storage_type` |
-| API preflight | Both names return `data.type: SureImport`; no data/jobs are created |
+| Web/API import creation | Both input names write `RelayImport` |
+| API preflight | Both names return `data.type: RelayImport`; no data/jobs are created |
 | API import type filter | Either name selects both stored backup types, within the current family |
 | API import details/list | `type` reflects the stored type; readers support both names |
-| Session creation/retry | Both input names resolve to `SureImport`, including retries with the other name |
-| Session/chunk writes | Keep `SureImport`, the session default and its existing database constraint |
-| Jobs queued by web/API | Keep legacy `SureImport` GlobalIDs; session jobs keep `ImportSession` |
+| New session creation | Both input names and an omitted type write `RelayImport`; database default is `RelayImport` |
+| Session retry | Preserves the original stored type, chunks and idempotency key, even with the other input name |
+| New chunks | Use the stored session type; existing chunks keep their type |
+| Jobs queued by web/API | New backups use `RelayImport` GlobalIDs; session jobs keep `ImportSession` |
 
 `RelayImport < SureImport` adds a real STI reader without duplicating the backup
 implementation. It reads records with type `RelayImport`; the legacy parent
@@ -97,28 +100,49 @@ and localized keys stay available. Attachments still use polymorphic record
 type `Import`; no files are moved or reattached. Session source mappings and
 the `sure_import_session:<id>` source key stay intact.
 
-The tests exercise both STI names, their GlobalIDs, serialized import/revert
-jobs, attachments, preflight, verification and session workers. Relay-type
-records are created **only in isolated tests** to validate the future reader.
-Normal writers in this release do not create them. Do not use
-`RelayImport.create!` or change types manually on an installation while older
-workers are still running. No data backfill or migration is included here.
+The tests exercise both stored STI names, their GlobalIDs, serialized
+import/revert jobs, attachments, preflight, verification and session workers.
+No data backfill is included. Existing `SureImport` records and sessions are
+not converted: preserving a session's type on retry prevents changes to its
+already uploaded chunks. A row lock protects expected-chunk reconciliation in
+both normal retries and duplicate-insert races. Conflicting counts still fail.
 
-### Next rollout steps
+### Session schema expansion
 
-1. Deploy this reader release to every web and worker process. Verify versions
-   and queued/retrying/scheduled jobs; restarting only web is insufficient.
-2. Add a new current-version migration to expand the session type constraint
-   to both names. Keep legacy records valid and test upgrade/reversal on an
-   isolated copy. Do not alter historical migrations. This schema expansion
-   must precede writing new session types; it need not rewrite data.
-3. Coordinate the writer change, database defaults and clients. Preserve the
-   original session type when an idempotency key is retried with the other name,
-   and test mixed legacy/new chunks and old GlobalIDs. Account for older clients
-   whose response enums only accept `SureImport` before returning new types.
-4. A backfill is optional and separate: old types can remain readable. If one
-   is needed, define batching, backup, counts, queued jobs and rollback first.
-   Retain the legacy class and reader while legacy records or jobs exist.
+`20261003120000_allow_relay_import_sessions.rb` expands the session check constraint
+to `SureImport` and `RelayImport`. It does not change the default or update rows,
+chunks, mappings, attachments or jobs. Rails runs the replacement
+in its normal migration transaction; the validated constraint rejects other
+types and the existing NOT NULL constraint remains in force.
+
+The reverse migration takes an exclusive table lock before checking for nonlegacy
+sessions. It refuses with `ActiveRecord::IrreversibleMigration` if any exist,
+preserving their data and the expanded constraint. Without such rows, it restores
+the validated `SureImport` constraint, keeping the same default. It never converts
+or deletes sessions to make rollback succeed. Both directions take an exclusive
+table lock and validate existing rows: account for blocking when scheduling this
+migration on a large installation.
+
+`20261003130000_use_relay_import_session_default.rb` then changes the session
+default from `SureImport` to `RelayImport`. It is independently reversible and
+does not convert existing sessions. Reversing the default leaves the expanded
+constraint in place so existing Relay rows remain valid.
+
+Upgrade and reversal are exercised inside test transactions in an isolated
+PostgreSQL database. Adding these migrations to the repository does not apply
+them to an installation.
+
+### Applying this release to the single installation
+
+1. Back up and rehearse against an isolated copy of the installation.
+2. Schedule the update of web and workers together. Apply the two included
+   migrations in timestamp order before running the new writers. Do not keep
+   older web/worker versions running alongside this release.
+3. Verify upload, session retries, publication, readback and revert. The API
+   returns stored types directly; any client in use must accept `RelayImport`.
+   No compatibility header or alternate response representation is provided.
+4. Keep old stored types readable. Renaming existing data is unnecessary and
+   would require a separate plan for records, jobs and rollback.
 
 The release/channel and deployment decisions are outside this code change.
 Nothing here starts a server or migrates an existing database.
@@ -131,9 +155,8 @@ and Relay backup payloads remain readable. Before reverting, switch configured
 task names: the older application does not know the new names. No data migration
 is required.
 
-Reverting this reader release also requires clients/forms to send `SureImport`
-again. It is data-compatible while normal writers have kept the legacy type.
-If an operator has manually created Relay STI records or queued Relay GlobalIDs,
-older code cannot read them: inspect those records/jobs before reverting. Once
-new session types are written in a later rollout, narrowing the constraint is
-not safe until those rows are handled explicitly.
+Reverting this writer release requires code that can still read `RelayImport`
+records and queued GlobalIDs. Reversing the default does not rewrite data or
+change this requirement. Do not narrow the session constraint while Relay
+sessions exist; its reverse migration refuses to do so. Reverting files in Git
+does not revert an installation's database.

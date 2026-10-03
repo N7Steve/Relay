@@ -123,7 +123,7 @@ RSpec.describe 'API V1 Imports', type: :request do
     end
 
     post 'Create import' do
-      description 'Create an import from CSV or backup NDJSON content or a multipart backup file. RelayImport and SureImport are accepted; backup imports are currently stored and returned as SureImport for worker compatibility. CSV content is limited to 10MB.'
+      description 'Create an import from CSV or backup NDJSON content or a multipart backup file. Backup requests use RelayImport for storage, responses and queued jobs, including requests using the old SureImport name. CSV content is limited to 10MB.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -381,7 +381,7 @@ RSpec.describe 'API V1 Imports', type: :request do
 
   path '/api/v1/imports/preflight' do
     post 'Validate import content without creating an import' do
-      description 'Validate CSV or backup NDJSON without persisting an import or enqueueing jobs. RelayImport and SureImport use the same backup validation and currently return type SureImport. CSV content is limited to 10MB.'
+      description 'Validate CSV or backup NDJSON without persisting an import or enqueueing jobs. Backup preflight returns type RelayImport, including requests using the old SureImport name. CSV content is limited to 10MB.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
