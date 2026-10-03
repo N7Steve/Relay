@@ -964,6 +964,45 @@ se archiva `chart-ci.yml` en `docs/archive/sure/workflows/`: no se adapta ni
 publica el chart histórico para aparentar soporte Helm de Relay. Los workflows
 Rails y móvil permanecen activos; sus resultados remotos se verifican aparte.
 
+### Décima entrega: instalación TrueNAS desde un YAML
+
+Steve solicita un YAML completo, instalación inicial automática y bases estables
+para actualizaciones futuras. `compose.truenas.yml` y `docs/hosting/truenas.md`
+definen una Custom App nueva llamada `relay`, puerto host 3002, sin rutas locales
+obligatorias ni `.env` externo. El build remoto fija la revisión validada
+`caba5bf58823f8d2571bc8b1bd617a09c0775359` (Relay y Mobile CI pasan); no se publica
+una imagen remota ni se usa `main` flotante.
+
+Un servicio init idempotente genera contraseña, secreto de sesiones y tres
+claves de cifrado en el volumen privado `relay-config`, sin imprimirlas. Si la
+base existe y faltan las claves, se detiene en vez de regenerarlas. PostgreSQL
+16 lee su contraseña de archivo; web y worker usan la misma configuración.
+Persisten base, adjuntos y Redis AOF en otros tres volúmenes del proyecto.
+Web prepara la base mediante el entrypoint vigente y worker espera `/up` saludable.
+Las actualizaciones cambian la revisión/etiqueta, conservando nombre de app y
+volúmenes. Backups, TLS y restauración Sure se explican por separado.
+
+Validado el 3 de octubre de 2026 en `relay-truenas-validation` local aislado:
+
+- `docker compose config --quiet` acepta el YAML sin variables externas.
+- Build desde la URL Git con SHA completo termina y compila assets de producción.
+- Init termina con código 0; PostgreSQL/Redis/web saludables y Sidekiq arranca.
+- Base efectiva `relay_production`, versión 0.1.0, UI y `/up` responden HTTP 200.
+- Tras recrear todos los contenedores usando la imagen realmente construida desde
+  Git, persisten un registro de prueba en PostgreSQL, un archivo cifrado de
+  almacenamiento y la huella de configuración. El archivo sigue descifrando con
+  las mismas claves. `BUILD_COMMIT_SHA` coincide y telemetría sigue desactivada.
+- Puerto de validación local 127.0.0.1:32002; el YAML entregado expone 3002.
+- `git diff --check` pasa. No cambia código Rails ni migraciones: la suite completa
+  y CI verdes del código fijado siguen siendo la referencia de comportamiento.
+
+El ensayo arranca Rails y prepara únicamente una base local nueva, autorizado
+por la petición de instalación y validación del despliegue. No se opera TrueNAS,
+Sure ni datos reales. Los contenedores del ensayo se detienen al terminar,
+conservando volúmenes y logs en `tmp/`. Se prueba recreación, no una migración
+futura de esquema ni restauración de la base Sure. La importación completa sigue
+requiriendo comprobar cifrado/almacenamiento del origen antes de reemplazar datos.
+
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia
 activa a Sure esté sustituida o tenga una razón documentada para permanecer:

@@ -1,5 +1,9 @@
 # Self-hosting Relay with Docker
 
+For a complete pasteable TrueNAS Custom App, use
+[`compose.truenas.yml`](../../compose.truenas.yml) and the
+[TrueNAS installation and update guide](truenas.md).
+
 Relay is built from this repository. There is no selected public release channel
 or default upstream application image. The standard and AI Compose examples
 require `RELAY_IMAGE` explicitly and use the same image for web and worker.

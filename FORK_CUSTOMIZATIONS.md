@@ -130,6 +130,12 @@ Los clientes web/PWA, Flutter, Tauri y Apple conservan sus funciones, reciben
 marca Relay y mantienen paquetes, callbacks e identificadores externos actuales.
 El CI de Helm heredado está archivado en `docs/archive/sure/workflows/chart-ci.yml`;
 no reactivar checks que acoplen versiones Relay al chart Sure en el alcance Docker.
+`compose.truenas.yml` permite instalación desde un solo YAML, con revisión Git
+fija, credenciales/cifrado persistentes generados en init y volúmenes del proyecto.
+Conservar el orden init → base/Redis → web con `db:prepare` → worker saludable.
+Las actualizaciones no regeneran claves ni cambian nombres de base/volúmenes;
+la pérdida de configuración con una base existente detiene la inicialización.
+Ver [instalación y actualización TrueNAS](docs/hosting/truenas.md).
 La tarea de webhooks Plaid EU
 requiere destino HTTPS de la instalación, sin dominio alojado de Sure por defecto.
 Lectores históricos STI/GlobalID, identificadores Sophtron/asistente externos y
