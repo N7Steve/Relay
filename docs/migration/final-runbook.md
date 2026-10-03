@@ -6,6 +6,13 @@ Relay 0.1.0 para pruebas en TrueNAS, conservar clientes/funciones, desactivar
 telemetría e importar los datos después de estabilizar la instalación. La
 configuración y rutas del despliegue se concretan más adelante.
 
+**Actualización del 4 de octubre de 2026:** Steve confirma que Relay ya está
+desplegado, con los datos Sure importados y funcionamiento estable. La instalación
+vigente está descrita en [TrueNAS](../hosting/truenas.md); el inventario y evidencia
+de inicio de la poda están en [fase 0](pruning-phase-0.md). Los pasos siguientes
+siguen sirviendo como procedimiento de ensayo/recuperación, no como estado pendiente
+del traslado ya confirmado.
+
 ## 1. Inventario y punto de recuperación
 
 Registrar revisión de Sure, imagen/digest, Compose y nombre de proyecto, motor y
@@ -17,9 +24,12 @@ No rotarlas durante el traslado ni imprimirlas en logs.
 
 Para cumplir «todos los datos necesarios», preparar una exportación completa de
 la instalación: dump PostgreSQL y copia consistente del almacenamiento
-binario (o snapshot del bucket). El ZIP financiero de `Family::DataExporter`
-contiene manifiesto de adjuntos, pero no sus binarios, y no sustituye un backup
-completo de la instalación. Registrar fecha, tamaño y checksum de los backups.
+binario (o snapshot del bucket). El ZIP de `Family::DataExporter` versión 3
+incluye el snapshot relacional y los bytes originales de adjuntos disponibles;
+los exports anteriores no recuperan archivos que el origen nunca incluyó.
+Este backup familiar no sustituye un backup completo de instalación: configuración,
+claves, autenticación y colas tienen alcance distinto. Ver
+[backups completos](../llm-guides/backups.md). Registrar fecha, tamaño y checksum de los backups.
 Planificar quiescencia de escrituras/worker para el snapshot final. Las tareas
 Redis pendientes necesitan un tratamiento concreto según el inventario; no
 conectar el ensayo al Redis de producción ni ejecutar sus jobs accidentalmente.

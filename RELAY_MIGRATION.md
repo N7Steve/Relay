@@ -2,6 +2,27 @@
 
 Fecha de inicio: **2 de octubre de 2026**.
 
+## Estado consolidado al 4 de octubre de 2026
+
+Steve confirma que Relay está desplegado, con los datos de Sure importados,
+correctos y estables, y que conserva un backup local. La salida facilitada desde
+TrueNAS confirma que web y worker ejecutan
+`1e279bd8f6fe05d295c074180efccbcd59195ad5`, la referencia de inicio de la poda.
+
+Las entregas posteriores a la décima incorporaron backups completos versión 3
+con originales disponibles y restauración ZIP, además de instalación TrueNAS
+en `/mnt/AppsPool/relay` y actualización desde Git con backup previo.
+El ensayo documentado de un archivo Sure restauró 42.244 registros y 6 originales;
+el inventario de pruebas actual queda en el [registro de fase 0](docs/migration/pruning-phase-0.md).
+
+Los estados «pendientes» dentro de las entregas siguientes son fotografías
+históricas. La separación técnica y el traslado están completados según la
+confirmación del usuario; la simplificación funcional se ejecutará mediante el
+[plan de poda](docs/migration/pruning-plan.md). No se ha inspeccionado directamente
+la base TrueNAS ni certificado aquí su recuperación completa de instalación.
+Google Drive y Brandfetch son funciones utilizadas y deben preservarse.
+
+
 ## Propósito y alcance
 
 Relay es la evolución independiente de nuestro fork de Sure. Su prioridad son

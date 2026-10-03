@@ -4,6 +4,13 @@ Preparado el 3 de octubre de 2026. Estado: respondido por Steve el 3 de octubre 
 Las respuestas de la última columna prevalecen sobre las opciones iniciales.
 No incluyas contraseñas, tokens ni claves privadas en el inventario pendiente.
 
+**Estado posterior, 4 de octubre de 2026:** Relay ya está desplegado y los datos
+están importados y estables según Steve. La limpieza aplazada se inicia ahora con
+la fase 0 del [plan de poda](pruning-plan.md). Google Drive y Brandfetch se usan;
+la APK experimental se contempla como posible uso futuro. Las respuestas iniciales
+de esta tabla son históricas: las decisiones y comprobaciones actuales se registran
+en [fase 0](pruning-phase-0.md), sin ampliar autorización para despliegues o borrados.
+
 La instancia será única y adaptable. No se propone compatibilidad con versiones
 antiguas. Los lectores históricos de datos evitan perder los backups existentes.
 Las respuestas autorizan publicar commits en main y preparar la versión de prueba.

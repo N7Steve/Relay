@@ -4,6 +4,22 @@ Este documento identifica la funcionalidad propia de este fork frente al reposit
 
 > Este inventario describe diferencias funcionales, no implica que debamos conservar ciegamente cada línea. Si `upstream` incorpora una solución equivalente, se debe comparar el comportamiento y retirar la duplicación de forma consciente.
 
+## Inventario de uso para la poda — 4 de octubre de 2026
+
+Steve confirma uso de Google Drive y Brandfetch. Preservar exportaciones Drive
+propias, OAuth por usuario, programaciones/destinos y resolución Brandfetch durante
+la poda; no confundir falta de uso de bancos/IA con falta de uso de estas conexiones.
+Actualmente usa web; solo contempla quizá la APK experimental entre clientes
+nativos. No declara uso del resto de integraciones/funciones opcionales consultadas
+(bancos/brokers, cotizaciones/divisas externas, IA/MCP, Bills, presupuestos/Goals,
+login externo). Esto es inventario de uso, no aprobación de eliminar cada módulo,
+ni prueba de ausencia de registros históricos en la base.
+
+La decisión histórica de conservar clientes no se revoca automáticamente. Las
+funciones propias financieras, Agenda, inversiones y permisos siguen protegidas.
+Ver [fase 0](docs/migration/pruning-phase-0.md) y
+[plan de poda](docs/migration/pruning-plan.md).
+
 ## Restricción operativa del entorno local
 
 En Windows **no se deben intentar ejecutar Rails ni herramientas que dependan del bundle Ruby nativo**. Esto incluye `bin/rails`, pruebas Minitest o RSpec, tareas Rake, RuboCop, Brakeman, migraciones, consola, servidor y comandos equivalentes. El bundle nativo no es ejecutable de forma fiable y esos intentos sólo producen fallos de dependencias conocidos.
