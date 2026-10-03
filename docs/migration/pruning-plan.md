@@ -3,8 +3,10 @@
 Preparado el 4 de octubre de 2026 sobre
 `1e279bd8f6fe05d295c074180efccbcd59195ad5`.
 Base: [análisis de migración y poda](pruning-analysis.md).
-Estado: fase 0 completada el 4 de octubre de 2026; evidencia y límites en
-[registro de fase 0](pruning-phase-0.md). Fases 1–11 pendientes.
+Estado: fases 0 y 1 completadas, validadas y publicadas en `origin/main`
+el 4 de octubre de 2026. Evidencia y límites en los
+[registros de fase 0](pruning-phase-0.md) y [fase 1](pruning-phase-1.md).
+Fases 2–11 pendientes.
 
 La petición autoriza preparar este plan. La selección de una fase autorizará
 su implementación dentro del alcance descrito. Commit/push y operaciones sobre
@@ -352,7 +354,10 @@ actualización y recuperación de datos soportadas y probadas.
 
 ## Registro de ejecución
 
-La fase 0 queda completada; las fases 1–11 siguen pendientes.
+La fase 0 está publicada en `eb538dae3`; la fase 1 está completada, validada
+y publicada. Su [punto de continuación](pruning-phase-1.md#punto-de-continuación-para-otro-chat)
+permite retomar en fase 2. Las fases 2–11 siguen pendientes. No se ha desplegado
+la poda en TrueNAS en estas entregas.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |
@@ -366,7 +371,7 @@ Para cada fase/subfase registrar:
 | Reversión | Código/configuración, recuperación de datos y límites |
 | Cierre | Confirmación de que se puede detener aquí con Relay utilizable |
 
-La siguiente ejecución recomendada es **fase 1**. **Fase 1** y **fase 2**
-construyen la base segura; **fase 3** es la primera retirada de dependencias.
+La siguiente ejecución recomendada es **fase 2**. Las fases 1 y 2 construyen
+la base segura; **fase 3** es la primera retirada de dependencias.
 El avance a cualquier fase requiere cerrar la anterior aplicable, sin trasladar
 fallos, contratos rotos ni decisiones pendientes que bloqueen su funcionamiento.

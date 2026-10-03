@@ -30,21 +30,22 @@ class Family::Backup::Restorer
     @records.each do |row|
       data = row.fetch("data")
       fail_backup("Invalid backup record") unless data.is_a?(Hash)
-      model = Family::Backup.models[data["model"]]
+      name = data["model"]
+      model = Family::Backup.models[name]
       fail_backup("Unsupported backup model #{data['model']}") unless model
       attrs = data.fetch("attributes")
-      fail_backup("Invalid attributes for #{model.name}") unless attrs.is_a?(Hash) && attrs["id"].present?
-      fail_backup("Duplicate source id #{model.name}:#{attrs['id']}") if @source_records.key?(source_key(model.name, attrs["id"]))
-      fail_backup("Unknown attributes for #{model.name}") if (attrs.keys - model.column_names).any?
-      fail_backup("Excluded attributes for #{model.name}") if (attrs.keys & (Family::Backup::EXCLUDED_ATTRIBUTES[model.name] || [])).any?
+      fail_backup("Invalid attributes for #{name}") unless attrs.is_a?(Hash) && attrs["id"].present?
+      fail_backup("Duplicate source id #{name}:#{attrs['id']}") if @source_records.key?(source_key(name, attrs["id"]))
+      fail_backup("Unknown attributes for #{name}") if (attrs.keys - model.column_names).any?
+      fail_backup("Excluded attributes for #{name}") if (attrs.keys & (Family::Backup::EXCLUDED_ATTRIBUTES[name] || [])).any?
       if attrs["family_id"].present? && attrs["family_id"] != @manifest["family_id"]
-        fail_backup("#{model.name} belongs to another family")
+        fail_backup("#{name} belongs to another family")
       end
       if model == Merchant
         fail_backup("Invalid merchant type") unless attrs["type"].in?(%w[FamilyMerchant ProviderMerchant])
         fail_backup("Family merchant is missing family") if attrs["type"] == "FamilyMerchant" && attrs["family_id"].blank?
       elsif model.column_names.include?("family_id")
-        fail_backup("#{model.name} is missing family") if attrs["family_id"].blank?
+        fail_backup("#{name} is missing family") if attrs["family_id"].blank?
       end
       if model == Import
         fail_backup("Invalid import type") unless attrs["type"].in?(Import::TYPES)
@@ -54,7 +55,10 @@ class Family::Backup::Restorer
       elsif model == User
         fail_backup("Invalid family member role") unless attrs["role"].in?(User.roles.keys)
       end
-      @source_records[source_key(model.name, attrs["id"])] = data
+      if (types = Family::Backup::ConversationRecords::TYPES[name])
+        fail_backup("Invalid historical #{name} type") unless attrs["type"].in?(types)
+      end
+      @source_records[source_key(name, attrs["id"])] = data
     end
     families = @records.select { |row| row.dig("data", "model") == "Family" }
     fail_backup("Backup must contain its family") unless families.one? && families.first.dig("data", "attributes", "id") == @manifest["family_id"]
@@ -179,15 +183,15 @@ class Family::Backup::Restorer
     def references(data)
       model = Family::Backup.models.fetch(data["model"])
       attrs = data["attributes"]
-      excluded = Family::Backup::EXCLUDED_ATTRIBUTES[model.name] || []
+      excluded = Family::Backup::EXCLUDED_ATTRIBUTES[data["model"]] || []
       initial = attrs.key?("family_id") ? { "family_id" => "Family" } : {}
       model.reflect_on_all_associations(:belongs_to).each_with_object(initial) do |association, refs|
         field = association.foreign_key
         next if excluded.include?(field) || !attrs.key?(field)
-        target_name = association.polymorphic? ? attrs[association.foreign_type] : association.class_name
+        target_name = association.polymorphic? ? attrs[association.foreign_type] : association.class_name.delete_prefix("::")
         next if target_name.blank? && attrs[field].blank?
         target_name = "Merchant" if target_name.in?(%w[FamilyMerchant ProviderMerchant])
-        fail_backup("Unsupported reference #{model.name}.#{field}") unless Family::Backup::MODEL_NAMES.include?(target_name)
+        fail_backup("Unsupported reference #{data['model']}.#{field}") unless Family::Backup::MODEL_NAMES.include?(target_name)
         refs[field] = target_name
       end
     end
@@ -381,7 +385,7 @@ class Family::Backup::Restorer
         expected.each do |field, value|
           next if field == "password_digest"
           cast = model.type_for_attribute(field).cast(value)
-          fail_backup("Restored #{model.name}.#{field} differs from backup") unless actual[field] == cast
+          fail_backup("Restored #{data['model']}.#{field} differs from backup") unless actual[field] == cast
         end
       end
     end

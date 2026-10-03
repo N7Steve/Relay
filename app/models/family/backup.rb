@@ -93,7 +93,14 @@ class Family::Backup
   end
 
   def self.models
-    @models ||= MODEL_NAMES.index_with(&:constantize).freeze
+    @models ||= MODEL_NAMES.index_with do |name|
+      case name
+      when "Chat" then ConversationRecords::Chat
+      when "Message" then ConversationRecords::Message
+      when "ToolCall" then ConversationRecords::ToolCall
+      else name.constantize
+      end
+    end.freeze
   end
 
   def self.attachment_model(name, attributes)
@@ -113,7 +120,7 @@ class Family::Backup
   def records
     self.class.models.flat_map do |name, model|
       scope_for(name).map do |record|
-        { type: "BackupRecord", data: { model: name, attributes: attributes_for(record, model) } }
+        { type: "BackupRecord", data: { model: name, attributes: attributes_for(record, name) } }
       end
     end
   end
@@ -170,8 +177,8 @@ class Family::Backup
   end
 
   private
-    def attributes_for(record, model)
-      record.attributes.except(*(EXCLUDED_ATTRIBUTES[model.name] || [])).transform_values do |value|
+    def attributes_for(record, name)
+      record.attributes.except(*(EXCLUDED_ATTRIBUTES[name] || [])).transform_values do |value|
         value.respond_to?(:iso8601) && !value.is_a?(Date) ? value.iso8601(6) : value
       end
     end

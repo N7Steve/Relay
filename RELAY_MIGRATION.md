@@ -22,6 +22,15 @@ confirmación del usuario; la simplificación funcional se ejecutará mediante e
 la base TrueNAS ni certificado aquí su recuperación completa de instalación.
 Google Drive y Brandfetch son funciones utilizadas y deben preservarse.
 
+### Continuación de la poda
+
+**Fases 0 y 1 completadas, validadas y publicadas. El siguiente trabajo es la fase 2:**
+separar recálculo local y operaciones externas. La fase 0 está publicada en
+`eb538dae3`; Steve autorizó commit/push de la fase 1 el 4 de octubre de 2026.
+Consultar el [registro y punto de continuación de fase 1](docs/migration/pruning-phase-1.md#punto-de-continuación-para-otro-chat)
+y el [plan por fases](docs/migration/pruning-plan.md). No repetir las fases
+cerradas ni confundir su publicación en Git con un despliegue en TrueNAS.
+
 
 ## Propósito y alcance
 

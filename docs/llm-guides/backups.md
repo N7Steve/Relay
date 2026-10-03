@@ -75,6 +75,17 @@ documented exclusions when adding a model. The table-coverage test fails when a
 new family-owned table has no disposition. New columns on existing models are
 included automatically; generated columns are verified but not written.
 
+Backup model names are stable persisted keys, independent of the implementation
+class. Conversation history uses the minimal
+`Family::Backup::ConversationRecords` persistence readers rather than active
+assistant models; STI values are retained as data and checked against the known
+historical types. Do not replace their wire names with the readers' Ruby namespaces.
+The snapshot/ZIP versions and current assistant behavior are unchanged.
+See [pruning recovery contracts](../migration/pruning-backup-contracts.md) for
+per-module dispositions, dependencies and the required recovery rehearsal before
+removing models. Historical readers still require their tables; they are not
+permission to drop data or to silently skip unsupported rows.
+
 Run the backup round-trip tests plus the exporter, importer, SureImport,
 ImportSession and web/API import controller suites. Tests cover actual bytes,
 relationships, histories, settings, import retries and rollback after late errors.

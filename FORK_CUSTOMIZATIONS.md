@@ -20,6 +20,15 @@ funciones propias financieras, Agenda, inversiones y permisos siguen protegidas.
 Ver [fase 0](docs/migration/pruning-phase-0.md) y
 [plan de poda](docs/migration/pruning-plan.md).
 
+## Contratos de recuperación durante la poda
+
+La fase 1 de poda prepara lectores de persistencia independientes para el
+historial Chat/Message/ToolCall y mantiene sus nombres en backups. No elimina IA,
+MCP ni datos; conserva funcionamiento actual, STI histórico, relaciones y rechazos
+de entradas inválidas. Disposiciones y límites en
+[contratos de backup](docs/migration/pruning-backup-contracts.md) y
+[registro de fase 1](docs/migration/pruning-phase-1.md).
+
 ## Restricción operativa del entorno local
 
 En Windows **no se deben intentar ejecutar Rails ni herramientas que dependan del bundle Ruby nativo**. Esto incluye `bin/rails`, pruebas Minitest o RSpec, tareas Rake, RuboCop, Brakeman, migraciones, consola, servidor y comandos equivalentes. El bundle nativo no es ejecutable de forma fiable y esos intentos sólo producen fallos de dependencias conocidos.
