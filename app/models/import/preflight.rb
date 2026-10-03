@@ -67,7 +67,7 @@ class Import::Preflight
       type = params[:type].to_s
       return "TransactionImport" if type.blank?
 
-      type if IMPORT_TYPES.include?(type)
+      Import.storage_type(type) if IMPORT_TYPES.include?(type)
     end
 
     def invalid_import_type_response
@@ -220,7 +220,7 @@ class Import::Preflight
 
       [
         file.read,
-        file.original_filename.presence || "sure-import.ndjson",
+        file.original_filename.presence || "relay-import.ndjson",
         file.content_type.presence || "application/x-ndjson"
       ]
     end
@@ -228,7 +228,7 @@ class Import::Preflight
     def sure_import_raw_content_attributes(content)
       raise_response sure_content_too_large_response if content.bytesize > SureImport.max_ndjson_size
 
-      [ content, "sure-import.ndjson", "application/x-ndjson" ]
+      [ content, "relay-import.ndjson", "application/x-ndjson" ]
     end
 
     def sure_import_preflight_payload(content, filename, content_type)
@@ -330,7 +330,7 @@ class Import::Preflight
         status: :unprocessable_entity,
         payload: {
           error: "missing_content",
-          message: "Provide a Sure NDJSON file or raw_file_content."
+          message: "Provide a backup NDJSON file or raw_file_content."
         }
       )
     end
@@ -390,7 +390,7 @@ class Import::Preflight
         status: :unprocessable_entity,
         payload: {
           error: "invalid_file_type",
-          message: "Invalid file type. Please upload a Sure NDJSON file."
+          message: "Invalid file type. Please upload a backup NDJSON file."
         }
       )
     end
@@ -404,7 +404,7 @@ class Import::Preflight
         status: :unprocessable_entity,
         payload: {
           error: "unsupported_import_type",
-          message: "Preflight supports CSV import types and SureImport."
+          message: "Preflight supports CSV import types, RelayImport and SureImport."
         }
       )
     end

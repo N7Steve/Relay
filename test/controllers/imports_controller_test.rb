@@ -26,6 +26,52 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#modal"
   end
 
+  test "both backup links offer the Relay upload form" do
+    Import::BACKUP_TYPES.each do |type|
+      get new_import_url(type: type)
+
+      assert_response :success
+      assert_select "input[name='import[type]'][value='RelayImport']", count: 1
+    end
+  end
+
+  test "Relay backup upload keeps the legacy stored type for older workers" do
+    content = { type: "Account", data: { id: "compat-web-account", name: "Relay checking" } }.to_json
+    file = Rack::Test::UploadedFile.new(StringIO.new(content), "application/x-ndjson", original_filename: "all.ndjson")
+
+    assert_difference "Import.count", 1 do
+      post imports_url, params: { import: { type: "RelayImport", import_file: file } }
+    end
+
+    import = @user.family.imports.ordered.first
+    assert_redirected_to import_url(import)
+    assert_instance_of SureImport, import
+    assert_equal content, import.ndjson_file.download
+    assert_equal 1, import.rows_count
+  end
+
+  test "Relay backup without a file opens the legacy compatible upload workflow" do
+    post imports_url, params: { import: { type: "RelayImport" } }
+
+    import = @user.family.imports.ordered.first
+    assert_redirected_to import_upload_url(import)
+    assert_equal "SureImport", import.type
+  end
+
+  test "Relay STI records appear in the list and backup preview" do
+    import = @user.family.imports.create!(type: "RelayImport")
+    import.ndjson_file.attach(io: StringIO.new('{"type":"Account","data":{"id":"preview","name":"Checking"}}'), filename: "all.ndjson", content_type: "application/x-ndjson")
+    import.sync_ndjson_rows_count!
+
+    get imports_url
+    assert_response :success
+    assert_select "##{dom_id(import)}", count: 1
+
+    get import_url(import)
+    assert_response :success
+    assert_includes response.body, I18n.t("imports.ready.title")
+  end
+
   test "global AI gate hides document imports" do
     Setting.stubs(:ai_features_enabled?).returns(false)
 

@@ -100,7 +100,7 @@ class ImportsController < ApplicationController
       return
     end
 
-    type = params.dig(:import, :type).to_s
+    type = Import.storage_type(params.dig(:import, :type).to_s)
     type = "TransactionImport" unless Import::TYPES.include?(type)
 
     account = accessible_accounts.find_by(id: params.dig(:import, :account_id))
@@ -252,7 +252,7 @@ class ImportsController < ApplicationController
     end
 
     def sure_import_request?
-      params.dig(:import, :type) == "SureImport"
+      params.dig(:import, :type).in?(Import::BACKUP_TYPES)
     end
 
     def create_sure_import(file)

@@ -3,6 +3,8 @@
 require "test_helper"
 
 class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   setup do
     @user = users(:family_admin)
     @family = @user.family
@@ -343,6 +345,117 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "2024-01-01", row.effective_date
     assert_equal '[{"condition_type":"transaction_name","operator":"like","value":"grocery"}]', row.conditions
     assert_equal '[{"action_type":"set_transaction_category","value":"Groceries"}]', row.actions
+  end
+
+  test "Relay import requests queue legacy-compatible jobs and publish NDJSON" do
+    content = [
+      { type: "Account", data: {
+        id: "relay-api-account", name: "Relay API checking", balance: "100", currency: "USD", accountable_type: "Depository"
+      } },
+      { type: "Valuation", data: {
+        id: "relay-api-valuation", account_id: "relay-api-account", date: "2024-01-01", amount: "100", currency: "USD", kind: "opening_anchor"
+      } }
+    ].map(&:to_json).join("\n")
+
+    assert_difference("Import.count", 1) do
+      post api_v1_imports_url, params: { type: "RelayImport", raw_file_content: content, publish: "true" }, headers: api_headers(@api_key)
+    end
+
+    assert_response :created
+    data = JSON.parse(response.body)["data"]
+    assert_equal "SureImport", data["type"]
+    import = @family.imports.find(data["id"])
+    assert_instance_of SureImport, import
+    job = enqueued_jobs.find { |entry| entry[:job] == ImportJob && entry[:args].first["_aj_globalid"] == import.to_global_id.to_s }
+    assert_not_nil job
+    assert_includes job[:args].first["_aj_globalid"], "/SureImport/"
+
+    perform_enqueued_jobs(only: ImportJob)
+    assert import.reload.complete?, import.error
+    assert_equal "matched", import.verification_status
+    assert_equal @family, import.accounts.sole.family
+  end
+
+  test "Relay import accepts multipart backup content" do
+    content = '{"type":"Account","data":{"id":"multipart","name":"Checking"}}'
+    file = Rack::Test::UploadedFile.new(StringIO.new(content), "application/x-ndjson", original_filename: "relay-backup.ndjson")
+    post api_v1_imports_url, params: { type: "RelayImport", file: file }, headers: api_headers(@api_key)
+
+    assert_response :created
+    import = @family.imports.find(JSON.parse(response.body).dig("data", "id"))
+    assert_equal "SureImport", import.type
+    assert_equal content, import.ndjson_file.download
+    assert_equal "relay-backup.ndjson", import.ndjson_file.filename.to_s
+  end
+
+  test "Relay import keeps authentication and write scope requirements" do
+    params = { type: "RelayImport", raw_file_content: '{"type":"Account","data":{}}' }
+    assert_no_difference("Import.count") do
+      post api_v1_imports_url, params: params
+      assert_response :unauthorized
+
+      post api_v1_imports_url, params: params, headers: api_headers(@read_only_api_key)
+      assert_response :forbidden
+    end
+  end
+
+  test "Relay import rejects missing and malformed backup content" do
+    assert_no_difference("Import.count") do
+      post api_v1_imports_url, params: { type: "RelayImport" }, headers: api_headers(@api_key)
+      assert_response :unprocessable_entity
+      assert_equal "missing_content", JSON.parse(response.body)["error"]
+
+      post api_v1_imports_url, params: { type: "RelayImport", raw_file_content: "invalid" }, headers: api_headers(@api_key)
+      assert_response :unprocessable_entity
+      assert_equal "invalid_ndjson", JSON.parse(response.body)["error"]
+    end
+  end
+
+  test "either backup type filter includes both stored names within the family" do
+    backups = Import::BACKUP_TYPES.map { |type| @family.imports.create!(type: type) }
+    foreign_import = families(:empty).imports.create!(type: "RelayImport")
+
+    Import::BACKUP_TYPES.each do |type|
+      get api_v1_imports_url(type: type), headers: api_headers(@read_only_api_key)
+      assert_response :success
+      ids = JSON.parse(response.body)["data"].pluck("id")
+      backups.each { |import| assert_includes ids, import.id }
+      assert_not_includes ids, @import.id
+      assert_not_includes ids, foreign_import.id
+    end
+  end
+
+  test "Relay STI details retain verification and family isolation" do
+    import = @family.imports.create!(type: "RelayImport")
+    get api_v1_import_url(import), headers: api_headers(@read_only_api_key)
+
+    assert_response :success
+    data = JSON.parse(response.body)["data"]
+    assert_equal "RelayImport", data["type"]
+    assert_equal({}, data.dig("verification", "readback"))
+    assert_equal({}, data.dig("verification", "expected_record_counts"))
+
+    foreign_import = families(:empty).imports.create!(type: "RelayImport")
+    get api_v1_import_url(foreign_import), headers: api_headers(@api_key)
+    assert_response :not_found
+  end
+
+  test "Relay preflight uses backup validation without storing data or jobs" do
+    content = { type: "Account", data: {
+      id: "relay-preflight", name: "Relay checking", balance: "100", currency: "USD", accountable_type: "Depository"
+    } }.to_json
+
+    assert_no_difference("Import.count") do
+      assert_no_enqueued_jobs do
+        post preflight_api_v1_imports_url, params: { type: "RelayImport", raw_file_content: content }, headers: api_headers(@read_only_api_key)
+      end
+    end
+
+    assert_response :success
+    data = JSON.parse(response.body)["data"]
+    assert_equal "SureImport", data["type"]
+    assert_equal true, data["valid"]
+    assert_equal 1, data.dig("stats", "entity_counts", "accounts")
   end
 
   test "should create Sure import with raw NDJSON content" do

@@ -19,7 +19,8 @@ class Api::V1::ImportsController < Api::V1::BaseController
     end
 
     if params[:type].present?
-      imports_query = imports_query.where(type: params[:type])
+      types = params[:type].in?(Import::BACKUP_TYPES) ? Import::BACKUP_TYPES : params[:type]
+      imports_query = imports_query.where(type: types)
     end
 
     # Pagination
@@ -65,7 +66,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
     family = current_resource_owner.family
 
     # 1. Determine type and validate
-    type = params[:type].to_s
+    type = Import.storage_type(params[:type].to_s)
     type = "TransactionImport" unless Import::TYPES.include?(type)
     return create_sure_import(family) if type == "SureImport"
 
@@ -233,7 +234,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
         }, status: :unprocessable_entity
         return
       rescue StandardError => e
-        Rails.logger.error "Sure import creation failed: #{e.message}"
+        Rails.logger.error "Backup import creation failed: #{e.message}"
         render json: {
           error: "internal_server_error",
           message: "Import could not be created"
@@ -253,13 +254,13 @@ class Api::V1::ImportsController < Api::V1::BaseController
       rescue SureImport::PreflightError
         render json: {
           error: "preflight_failed",
-          message: "Import was uploaded but did not pass Sure NDJSON preflight.",
+          message: "Import was uploaded but did not pass backup NDJSON preflight.",
           errors: sure_import_error_lines,
           import_id: @import.id
         }, status: :unprocessable_entity
         return
       rescue SureImport::NotPublishableError => e
-        Rails.logger.warn "Sure import not publishable for import #{@import.id}: #{e.message}"
+        Rails.logger.warn "Backup import not publishable for import #{@import.id}: #{e.message}"
         render json: {
           error: "not_publishable",
           message: "Import was uploaded but has no publishable records.",
@@ -267,7 +268,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
         }, status: :unprocessable_entity
         return
       rescue StandardError => e
-        Rails.logger.error "Sure import publish failed for import #{@import.id}: #{e.message}"
+        Rails.logger.error "Backup import publish failed for import #{@import.id}: #{e.message}"
         restore_pending_sure_import_after_publish_failure
         render json: {
           error: "publish_failed",
@@ -322,7 +323,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
       else
         render json: {
           error: "missing_content",
-          message: "Provide a Sure NDJSON file or raw_file_content."
+          message: "Provide a backup NDJSON file or raw_file_content."
         }, status: :unprocessable_entity
         nil
       end
@@ -341,7 +342,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
       unless SureImport::ALLOWED_NDJSON_CONTENT_TYPES.include?(file.content_type) || extension.in?(%w[.ndjson .json])
         render json: {
           error: "invalid_file_type",
-          message: "Invalid file type. Please upload a Sure NDJSON file."
+          message: "Invalid file type. Please upload a backup NDJSON file."
         }, status: :unprocessable_entity
         return
       end
@@ -349,7 +350,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
       content = file.read
       sure_import_validated_attributes(
         content: content,
-        filename: file.original_filename.presence || "sure-import.ndjson",
+        filename: file.original_filename.presence || "relay-import.ndjson",
         content_type: file.content_type.presence || "application/x-ndjson"
       )
     end
@@ -365,7 +366,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
 
       sure_import_validated_attributes(
         content: content,
-        filename: "sure-import.ndjson",
+        filename: "relay-import.ndjson",
         content_type: "application/x-ndjson"
       )
     end
@@ -374,7 +375,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
       unless SureImport.valid_ndjson_first_line?(content)
         render json: {
           error: "invalid_ndjson",
-          message: "Invalid Sure NDJSON content."
+          message: "Invalid backup NDJSON content."
         }, status: :unprocessable_entity
         return
       end

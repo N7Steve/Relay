@@ -260,6 +260,65 @@ o mantener ambos con valores equivalentes, y volver a invocar `sure:*`: el
 código anterior desconoce los nombres nuevos. El payload de backups Relay
 sigue siendo compatible con el formato anterior.
 
+## Quinta entrega: lectores de importación compatibles
+
+Bloque del **3 de octubre de 2026**, sobre la cuarta entrega
+`1f3e3713941c43b5d446a0096a37e790fcd1ff01`:
+
+- Web, creación API, preflight y creación de sesiones aceptan `RelayImport` y
+  `SureImport`. El formulario web envía el nombre Relay; los enlaces anteriores
+  siguen funcionando.
+- `Import::BACKUP_TYPES` reúne ambos nombres. `Import.storage_type` normaliza
+  las entradas nuevas a `SureImport`; importaciones, sesiones, chunks y GlobalID
+  escritos por los flujos normales siguen siendo compatibles con workers
+  anteriores. Preflight también devuelve `SureImport` durante esta etapa.
+- `RelayImport < SureImport` incorpora un lector STI real sin duplicar la
+  implementación NDJSON. El initializer `backup_import_sti.rb` carga el
+  subtipo mediante `to_prepare`, también con carga diferida y tras recargas.
+  El lector padre y los GlobalID legacy pueden encontrar registros Relay.
+- El filtro API por cualquiera de los nombres incluye ambos tipos guardados,
+  siempre dentro de la familia. Detalles y listados devuelven el tipo real del
+  registro; ambos conservan la verificación de lectura posterior.
+- Las sesiones reutilizan el mismo `client_session_id` al alternar los nombres,
+  preservando chunks, límites y conflictos de `expected_chunks`. Se conservan
+  sus mappings y la clave de origen `sure_import_session:<id>`.
+- Se limpian mensajes API y descripciones OpenAPI que presentaban el formato
+  como exclusivo de Sure. Los nombres por defecto de adjuntos API nuevos son
+  `relay-import.ndjson`; no se cambia ningún adjunto existente.
+- Minitest cubre los dos tipos STI, adjuntos, GlobalID y jobs serializados de
+  publicación/reversión, lectores de chunks, web, API, permisos y sesiones.
+  OpenAPI describe la diferencia entre nombres aceptados y tipo escrito. El
+  recorrido de backup Relay tiene cobertura de navegador.
+
+No cambia el esquema: `import_sessions` mantiene default y constraint de
+`SureImport`. Los adjuntos siguen usando el tipo polimórfico `Import`. Se
+conservan preflight/excepciones y claves de traducción heredadas, payload NDJSON,
+ZIP v2, rutas, scopes y tenancy. Los tipos Relay usados para ensayar lectores
+se crean únicamente en bases aisladas de test. No se reescriben datos ni
+migraciones históricas; tampoco se opera la instalación existente.
+
+### Estado actual, siguiente bloque y reversión
+
+La fase 4 completa la aceptación de nombres y la preparación de lectores. El
+cambio de escritura/defaults/restricciones sigue pendiente. Las fases 0–3
+conservan el avance anterior; versión y distribución propias y fases 5–6
+continúan pendientes.
+
+El siguiente bloque debe añadir una migración nueva, con versión Rails actual,
+que amplíe el constraint de sesiones a ambos nombres antes de cambiar escritores.
+Ensayar upgrade y reversión en una base aislada; desplegar primero los lectores
+en todos los procesos web/worker. La escritura Relay debe coordinar defaults,
+chunks, clientes que solo admiten respuestas `SureImport` e idempotencia de
+sesiones existentes sin cambiarles el tipo al reintentar. El backfill de datos
+es opcional y requiere un plan aparte; no es necesario para admitir nombres
+nuevos. El procedimiento está en [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
+
+Revertir este bloque conserva los datos generados por los flujos normales;
+clientes/formularios deben volver a enviar `SureImport`. Si se hubieran creado
+manualmente registros STI o jobs GlobalID Relay, inventariarlos antes de volver
+al código anterior, que no los entiende. No usar `RelayImport.create!` ni
+cambiar tipos manualmente mientras convivan workers antiguos.
+
 ## Inventario técnico de la separación
 
 | Área | Puntos principales | Tratamiento |
@@ -546,6 +605,43 @@ de mantenimiento en instalaciones existentes, migraciones históricas,
 despliegues ni el servidor local. Los logs permanecen en `tmp/`, fuera de Git;
 los servicios de pruebas se detienen al terminar, sin borrar volúmenes. Los
 resultados son locales; CI remoto y distribución no quedan certificados.
+
+### Validación de la quinta entrega
+
+Ejecutada el 3 de octubre de 2026 en `relay-import-compat` y
+`relay-import-compat-system`, con bases `relay_test` independientes:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Focalizadas: STI, GlobalID, jobs, sesiones e importaciones web/API | 233 pruebas, 1.200 aserciones, sin fallos, errores ni omisiones |
+| Suite completa Rails/Minitest | 10.809 pruebas, 45.867 aserciones, 0 fallos, 0 errores, 33 omisiones heredadas |
+| Sistema: importaciones y subida desde Transacciones, incluido backup Relay | 8 pruebas, 32 aserciones, sin fallos, errores ni omisiones |
+| RuboCop completo | 2.922 archivos, sin infracciones |
+| ERB lint completo | 779 plantillas, sin errores |
+| Biome | 142 archivos, sin errores |
+| Brakeman | 0 errores, 0 avisos activos; conserva las 8 exclusiones heredadas |
+| Assets y tokens | Compilación correcta en ambas suites; CSS/Dart pasan `tokens:check` |
+| Carga diferida STI | Arranque sin `CI` confirma `RelayImport` en los descendientes de `SureImport` sin forzar la carga desde la comprobación |
+| OpenAPI | Regenerado: 435 ejemplos documentales, 0 fallos, 89 pendientes heredados; diff limitado a esquemas/descripciones de importación |
+| API modificada | Cobertura Minitest con `X-Api-Key`; specs rswag documentales; verificador de guía correcto |
+
+El inventario global `verify_api_endpoint_consistency.rb --compliance` señala
+dos desviaciones preexistentes fuera del bloque: Bearer de publicador en
+`financekit_spec.rb` y aserciones en `transfers_spec.rb`. Los archivos modificados
+no las introducen; no se presenta el inventario global como totalmente conforme.
+La generación OpenAPI conserva sus 89 pendientes documentales.
+
+La primera ejecución focalizada detectó expectativas nuevas que suponían que
+un backup con solo una cuenta no generaba una valoración inicial. Se completaron
+los datos de prueba con una valoración explícita y se corrigió el mensaje de una
+aserción de sesión; la repetición final pasa sin modificar el importador ni la
+verificación del producto.
+
+Los logs están en `tmp/`, fuera de Git. Se carga el esquema únicamente en las
+bases aisladas de pruebas; no se migran instalaciones existentes ni se despliega
+la aplicación. Las pruebas de navegador usan su servidor temporal de Capybara.
+Los servicios de estos dos proyectos se detienen conservando los volúmenes al
+terminar. Los resultados son locales; no certifican CI remoto ni distribución.
 
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia

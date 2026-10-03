@@ -30,7 +30,7 @@
     <% end %>
 
     <%
-      financial_tool_types = %w[MintImport ActualImport YnabImport QifImport SureImport DocumentImport PdfImport]
+      financial_tool_types = %w[MintImport ActualImport YnabImport QifImport DocumentImport PdfImport] + Import::BACKUP_TYPES
       import_type = params[:type].presence || @pending_import&.type
       active_tab = import_type.present? && !import_type.in?(financial_tool_types) ? "raw_data" : "financial_tools"
     %>
@@ -63,10 +63,10 @@
               </li>
             <% end %>
 
-            <% if params[:type].nil? || params[:type] == "SureImport" %>
+            <% if params[:type].nil? || params[:type].in?(Import::BACKUP_TYPES) %>
               <li>
                 <%= styled_form_with url: imports_path, scope: :import, multipart: true, class: "w-full", data: { turbo: false } do |form| %>
-                  <%= form.hidden_field :type, value: "SureImport" %>
+                  <%= form.hidden_field :type, value: "RelayImport" %>
                   <label class="flex items-center justify-between p-4 group cursor-pointer w-full">
                     <div class="flex items-center gap-2">
                       <div class="bg-cyan-500/5 rounded-md w-8 h-8 flex items-center justify-center">

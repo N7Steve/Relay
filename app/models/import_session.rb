@@ -101,7 +101,7 @@ class ImportSession < ApplicationRecord
   end
 
   def self.create_or_find_for!(family:, import_type:, client_session_id:, expected_chunks:)
-    import_type = import_type.presence || "SureImport"
+    import_type = Import.storage_type(import_type.presence || "SureImport")
     expected_chunks = normalize_positive_integer(expected_chunks)
     unless IMPORT_TYPES.include?(import_type)
       session = new(import_type: import_type)

@@ -10,6 +10,22 @@ class ImportsTest < ApplicationSystemTestCase
     Security.stubs(:provider).returns(nil)
   end
 
+  test "Relay backup import" do
+    visit new_import_path(type: "RelayImport")
+    assert_selector "input[name='import[type]'][value='RelayImport']", visible: :all
+    attach_file "import[import_file]", file_fixture("imports/relay.ndjson"), make_visible: true
+
+    assert_selector "h1", text: "Confirm your import data"
+    click_on "Publish import"
+    assert_text "Import in progress"
+
+    perform_enqueued_jobs(only: ImportJob)
+    click_on "Check status"
+    assert_text "Import successful"
+    assert_equal @user.family, Account.find_by!(name: "Relay browser checking").family
+    assert_instance_of SureImport, @user.family.imports.ordered.first
+  end
+
   test "transaction import" do
     visit new_import_path
 

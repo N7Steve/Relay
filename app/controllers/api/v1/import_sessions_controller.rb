@@ -97,7 +97,7 @@ class Api::V1::ImportSessionsController < Api::V1::BaseController
       elsif params[:raw_file_content].present?
         sure_import_raw_content_attributes(params[:raw_file_content].to_s)
       else
-        render_error("missing_content", "Provide a Sure NDJSON file or raw_file_content.", :unprocessable_entity)
+        render_error("missing_content", "Provide a backup NDJSON file or raw_file_content.", :unprocessable_entity)
         nil
       end
     end
@@ -114,13 +114,13 @@ class Api::V1::ImportSessionsController < Api::V1::BaseController
 
       extension = File.extname(file.original_filename.to_s).downcase
       unless SureImport::ALLOWED_NDJSON_CONTENT_TYPES.include?(file.content_type) || extension.in?(%w[.ndjson .json])
-        render_error("invalid_file_type", "Invalid file type. Please upload a Sure NDJSON file.", :unprocessable_entity)
+        render_error("invalid_file_type", "Invalid file type. Please upload a backup NDJSON file.", :unprocessable_entity)
         return
       end
 
       sure_import_validated_attributes(
         content: file.read,
-        filename: file.original_filename.presence || "sure-import.ndjson",
+        filename: file.original_filename.presence || "relay-import.ndjson",
         content_type: file.content_type.presence || "application/x-ndjson"
       )
     end
@@ -137,14 +137,14 @@ class Api::V1::ImportSessionsController < Api::V1::BaseController
 
       sure_import_validated_attributes(
         content: content,
-        filename: "sure-import.ndjson",
+        filename: "relay-import.ndjson",
         content_type: "application/x-ndjson"
       )
     end
 
     def sure_import_validated_attributes(content:, filename:, content_type:)
       unless SureImport.valid_ndjson_first_line?(content)
-        render_error("invalid_ndjson", "Invalid Sure NDJSON content.", :unprocessable_entity)
+        render_error("invalid_ndjson", "Invalid backup NDJSON content.", :unprocessable_entity)
         return
       end
 

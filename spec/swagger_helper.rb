@@ -1075,7 +1075,7 @@ RSpec.configure do |config|
           },
           ImportVerificationReadback: {
             type: :object,
-            description: 'SureImport only. Expected NDJSON counts compared to family-scoped database readback after publish.',
+            description: 'RelayImport/SureImport backups only. Expected NDJSON counts compared to family-scoped database readback after publish.',
             properties: {
               status: { type: :string, enum: %w[not_verified matched mismatch failed reverted] },
               checked_at: { type: :string, format: :'date-time', nullable: true },
@@ -1115,7 +1115,7 @@ RSpec.configure do |config|
           },
           ImportVerification: {
             type: :object,
-            description: 'SureImport only. Captured at upload and completed after import publish.',
+            description: 'RelayImport/SureImport backups only. Captured at upload and completed after import publish.',
             required: %w[expected_record_counts readback],
             properties: {
               expected_record_counts: {
@@ -1154,12 +1154,12 @@ RSpec.configure do |config|
               valid_rows_count: {
                 type: :integer,
                 minimum: 0,
-                description: 'SureImport only. Valid NDJSON records.'
+                description: 'RelayImport/SureImport backups only. Valid NDJSON records.'
               },
               invalid_rows_count: {
                 type: :integer,
                 minimum: 0,
-                description: 'SureImport only. Invalid NDJSON records. CSV malformed content returns a 422 instead.'
+                description: 'RelayImport/SureImport backups only. Invalid NDJSON records. CSV malformed content returns a 422 instead.'
               },
               entity_counts: {
                 type: :object,

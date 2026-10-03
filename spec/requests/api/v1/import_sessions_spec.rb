@@ -41,7 +41,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
 
   path '/api/v1/import_sessions' do
     post 'Create import session' do
-      description 'Create or idempotently retrieve a multi-file SureImport session keyed by client_session_id.'
+      description 'Create or retrieve a backup session keyed by client_session_id. RelayImport and SureImport address the same session; its stored and returned type remains SureImport during the reader rollout.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -52,8 +52,8 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
         properties: {
           type: {
             type: :string,
-            enum: %w[SureImport],
-            description: 'Import session type. Only SureImport is supported.'
+            enum: Import::BACKUP_TYPES,
+            description: 'Backup type. RelayImport and SureImport are accepted; omitted type defaults to SureImport. Responses currently use SureImport.'
           },
           client_session_id: {
             type: :string,
@@ -184,7 +184,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:id) { import_session.id }
 
     post 'Upload import session chunk' do
-      description 'Attach an ordered Sure NDJSON chunk to an import session. Chunks are idempotent by sequence and client_chunk_id with content verification.'
+      description 'Attach an ordered backup NDJSON chunk to an import session. Chunks are stored as SureImport and are idempotent by sequence and client_chunk_id with content verification.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -209,7 +209,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
                 },
                 raw_file_content: {
                   type: :string,
-                  description: 'Raw Sure NDJSON content. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a fallback when the Relay variable is unset.'
+                  description: 'Raw backup NDJSON content. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a fallback when the Relay variable is unset.'
                 }
               }
             }
@@ -232,7 +232,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
                 file: {
                   type: :string,
                   format: :binary,
-                  description: 'Multipart Sure NDJSON file upload. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a fallback when the Relay variable is unset.'
+                  description: 'Multipart backup NDJSON file upload. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a fallback when the Relay variable is unset.'
                 }
               }
             }
@@ -324,7 +324,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:id) { import_session.id }
 
     post 'Publish import session' do
-      description 'Queue ordered chunk processing for a SureImport session. Later chunks can reference source IDs mapped by earlier chunks.'
+      description 'Queue ordered backup chunk processing for an import session. Later chunks can reference source IDs mapped by earlier chunks.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
