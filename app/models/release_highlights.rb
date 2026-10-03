@@ -1,6 +1,6 @@
 # Rollout policy for the "What's new" release highlight popup.
 #
-# The popup is keyed to the exact deployed release tag (Sure.version), so it
+# The popup is keyed to the exact deployed release tag (Relay.version), so it
 # can never show or mark notes for a release the user is not actually running.
 module ReleaseHighlights
   class << self
@@ -19,7 +19,7 @@ module ReleaseHighlights
     def pending_tag_for(user)
       return unless user
 
-      version = Sure.version
+      version = Relay.version
       return unless eligible?(version)
 
       tag = version.to_release_tag

@@ -16,7 +16,7 @@
 class Provider::Questrade
   include HTTParty
 
-  headers "User-Agent" => "Sure Finance Questrade Client"
+  headers "User-Agent" => "Relay Finance Questrade Client"
   default_options.merge!(verify: true, ssl_verify_mode: OpenSSL::SSL::VERIFY_PEER, timeout: 120)
 
   LOGIN_URL         = "https://login.questrade.com/oauth2/token"

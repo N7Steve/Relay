@@ -11,7 +11,7 @@ class Provider::Brex
   # Transaction syncs are date-window bounded; this is only a runaway cursor guard.
   MAX_PAGES = 25
 
-  headers "User-Agent" => "Sure Finance Brex Client"
+  headers "User-Agent" => "Relay Finance Brex Client"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   attr_reader :token, :base_url

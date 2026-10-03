@@ -74,7 +74,7 @@ Esto evita que cada carga de Ruby cruce la frontera entre los sistemas de
 archivos Windows y Linux. Docker explica esa diferencia de rendimiento en sus
 [recomendaciones para WSL 2](https://docs.docker.com/desktop/features/wsl/best-practices/).
 
-El proyecto Compose se llama `sure-tests`. PostgreSQL y Redis no publican puertos
+El proyecto Compose se llama `relay-tests`. PostgreSQL y Redis no publican puertos
 en Windows. No interfieren con el PostgreSQL local ni acceden a TrueNAS. El
 script rechaza motores Docker remotos y ejecuta únicamente contra sus servicios
 `db` y `redis`. Los valores de acceso incluidos son exclusivos de este entorno.
@@ -83,7 +83,7 @@ Compose usa un archivo de variables vacío explícito. La imagen excluye `.env*`
 claves de Rails, almacenamiento y otros datos locales mediante `.dockerignore`.
 No añadir credenciales reales ni montar volúmenes de producción.
 
-Las tareas de pruebas cargan `db/schema.rb` sobre su base `sure_test` antes de
+Las tareas de pruebas cargan `db/schema.rb` sobre su base `relay_test` antes de
 ejecutar; reemplazan los datos de esa base de pruebas. No ejecutan migraciones
 históricas, despliegues, el servidor de desarrollo ni workers programados.
 Las pruebas de interfaz arrancan su servidor temporal mediante Capybara.

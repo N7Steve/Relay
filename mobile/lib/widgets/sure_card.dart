@@ -7,7 +7,7 @@ import '../theme/sure_tokens.dart';
 /// Sure design-system card — a tokenized content surface mirroring the web card
 /// chrome (`bg-container` + a hairline border + rounded corners + the subtle DS
 /// shadow). Use it instead of a Material [Card] so the chrome stays in lockstep
-/// with `sure.tokens.json` and reads correctly in light and dark.
+/// with `relay.tokens.json` and reads correctly in light and dark.
 ///
 /// Colors resolve from the active [SureColors] palette (brightness-aware). When
 /// [onTap] is provided the whole card is tappable, with a flat ink response

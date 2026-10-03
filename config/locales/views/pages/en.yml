@@ -34,7 +34,7 @@ en:
     release_notes_unavailable:
       name: Release notes unavailable
       body_html: "<p>Unable to fetch the latest release notes at this time. Please
-        check back later or visit our <a href='https://github.com/we-promise/sure/releases'
+        check back later or visit our <a href='https://github.com/N7Steve/Relay/releases'
         target='_blank' rel='noopener noreferrer'>GitHub releases page</a> directly.</p>"
     privacy:
       title: Privacy Policy

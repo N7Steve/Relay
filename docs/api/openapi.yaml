@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.3
 info:
-  title: Sure API
+  title: Relay API
   version: v1
   description: OpenAPI documentation generated from executable request specs.
 servers:
@@ -2020,8 +2020,9 @@ components:
           minimum: 0
     ImportVerificationReadback:
       type: object
-      description: SureImport only. Expected NDJSON counts compared to family-scoped
-        database readback after publish.
+      description: RelayImport/SureImport backups only. Legacy imports compare NDJSON
+        counts against database readback. Full snapshots verify restored attributes
+        and original attachment bytes.
       properties:
         status:
           type: string
@@ -2035,6 +2036,20 @@ components:
           type: string
           format: date-time
           nullable: true
+        verified_records:
+          type: integer
+          minimum: 0
+          description: Full snapshots only. Restored records whose attributes were
+            verified, including the family.
+        verified_attachments:
+          type: integer
+          minimum: 0
+          description: Full snapshots only. Original files whose metadata and bytes
+            were verified.
+        warnings:
+          type: array
+          items:
+            "$ref": "#/components/schemas/BackupRestoreWarning"
         expected_record_counts:
           type: object
           additionalProperties:
@@ -2072,8 +2087,8 @@ components:
           nullable: true
     ImportVerification:
       type: object
-      description: SureImport only. Captured at upload and completed after import
-        publish.
+      description: RelayImport/SureImport backups only. Captured at upload and completed
+        after import publish.
       required:
       - expected_record_counts
       - readback
@@ -2084,6 +2099,19 @@ components:
             type: integer
         readback:
           "$ref": "#/components/schemas/ImportVerificationReadback"
+    BackupRestoreWarning:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
     ImportPreflightContent:
       type: object
       required:
@@ -2120,12 +2148,12 @@ components:
         valid_rows_count:
           type: integer
           minimum: 0
-          description: SureImport only. Valid NDJSON records.
+          description: RelayImport/SureImport backups only. Valid NDJSON records.
         invalid_rows_count:
           type: integer
           minimum: 0
-          description: SureImport only. Invalid NDJSON records. CSV malformed content
-            returns a 422 instead.
+          description: RelayImport/SureImport backups only. Invalid NDJSON records.
+            CSV malformed content returns a 422 instead.
         entity_counts:
           type: object
           additionalProperties:
@@ -2160,6 +2188,7 @@ components:
           - MerchantImport
           - PdfImport
           - QifImport
+          - RelayImport
           - SureImport
         valid:
           type: boolean
@@ -2252,6 +2281,7 @@ components:
           - MerchantImport
           - PdfImport
           - QifImport
+          - RelayImport
           - SureImport
         status:
           type: string
@@ -2309,6 +2339,7 @@ components:
           - MerchantImport
           - PdfImport
           - QifImport
+          - RelayImport
           - SureImport
         status:
           type: string
@@ -2447,6 +2478,7 @@ components:
         type:
           type: string
           enum:
+          - RelayImport
           - SureImport
         status:
           type: string
@@ -7094,8 +7126,10 @@ paths:
   "/api/v1/import_sessions":
     post:
       summary: Create import session
-      description: Create or idempotently retrieve a multi-file SureImport session
-        keyed by client_session_id.
+      description: Create or retrieve a backup session keyed by client_session_id.
+        New sessions use RelayImport. Retries preserve the stored type and chunks
+        of the original session, including existing SureImport sessions. Responses
+        expose the stored type.
       tags:
       - Import Sessions
       security:
@@ -7141,8 +7175,11 @@ paths:
                 type:
                   type: string
                   enum:
+                  - RelayImport
                   - SureImport
-                  description: Import session type. Only SureImport is supported.
+                  description: Backup type. RelayImport and SureImport are accepted;
+                    new sessions always use RelayImport, also when type is omitted.
+                    Existing sessions keep their stored type.
                 client_session_id:
                   type: string
                   nullable: true
@@ -7205,8 +7242,11 @@ paths:
         type: string
     post:
       summary: Upload import session chunk
-      description: Attach an ordered Sure NDJSON chunk to an import session. Chunks
-        are idempotent by sequence and client_chunk_id with content verification.
+      description: Attach an ordered backup NDJSON chunk to an import session. New
+        chunks use the stored session type. Existing chunks keep their type and are
+        idempotent by sequence and client_chunk_id with content verification. Full
+        backups require a family administrator and one self-contained ZIP or NDJSON
+        chunk.
       tags:
       - Import Sessions
       security:
@@ -7232,9 +7272,9 @@ paths:
                   description: Client-provided idempotency key for this chunk.
                 raw_file_content:
                   type: string
-                  description: Raw Sure NDJSON content. Each chunk is limited to 500MB
-                    by default; configure SURE_IMPORT_MAX_NDJSON_SIZE_MB to change
-                    the limit.
+                  description: Raw backup NDJSON content. Each chunk is limited to
+                    500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to
+                    change the limit.
           multipart/form-data:
             schema:
               type: object
@@ -7254,8 +7294,9 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: Multipart Sure NDJSON file upload. Each chunk is limited
-                    to 500MB by default; configure SURE_IMPORT_MAX_NDJSON_SIZE_MB
+                  description: Multipart backup ZIP or NDJSON file upload. The size
+                    limit also applies to decompressed NDJSON. Each chunk is limited
+                    to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB
                     to change the limit.
       parameters: []
       responses:
@@ -7305,8 +7346,9 @@ paths:
         type: string
     post:
       summary: Publish import session
-      description: Queue ordered chunk processing for a SureImport session. Later
-        chunks can reference source IDs mapped by earlier chunks.
+      description: Queue ordered backup chunk processing for an import session. Later
+        chunks can reference source IDs mapped by earlier chunks. Full snapshots require
+        a family administrator and a destination without financial data.
       tags:
       - Import Sessions
       security:
@@ -7391,7 +7433,8 @@ paths:
       - name: type
         in: query
         required: false
-        description: Filter by import type
+        description: Filter by import type. RelayImport and SureImport both select
+          backup imports under either stored name.
         schema:
           type: string
           enum:
@@ -7406,6 +7449,7 @@ paths:
           - MerchantImport
           - PdfImport
           - QifImport
+          - RelayImport
           - SureImport
       responses:
         '200':
@@ -7416,8 +7460,11 @@ paths:
                 "$ref": "#/components/schemas/ImportCollection"
     post:
       summary: Create import
-      description: Create a new import from raw CSV content, inline Sure NDJSON content,
-        or an uploaded Sure NDJSON file. CSV content is limited to 10MB.
+      description: Create an import from CSV or backup NDJSON content or a multipart
+        backup ZIP/NDJSON file. Version 3 full backups include original file bytes
+        and require a family administrator and a destination without financial data.
+        Backup requests use RelayImport for storage, responses and queued jobs, including
+        requests using the old SureImport name. CSV content is limited to 10MB.
       tags:
       - Imports
       security:
@@ -7430,6 +7477,12 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ImportResponse"
+        '403':
+          description: full backup restoration requires an administrator
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
         '422':
           description: validation error or publish rejection
           content:
@@ -7452,9 +7505,9 @@ paths:
               properties:
                 raw_file_content:
                   type: string
-                  description: Raw CSV or Sure NDJSON content as a string. CSV content
-                    is limited to 10MB. Required for SureImport unless a multipart
-                    file is uploaded.
+                  description: Raw CSV or backup NDJSON content as a string. CSV content
+                    is limited to 10MB. Required for RelayImport or SureImport unless
+                    a multipart file is uploaded.
                 type:
                   type: string
                   enum:
@@ -7469,6 +7522,7 @@ paths:
                   - MerchantImport
                   - PdfImport
                   - QifImport
+                  - RelayImport
                   - SureImport
                   description: Import type (defaults to TransactionImport)
                 account_id:
@@ -7563,9 +7617,9 @@ paths:
               properties:
                 raw_file_content:
                   type: string
-                  description: Raw CSV or Sure NDJSON content as a string. CSV content
-                    is limited to 10MB. Required for SureImport unless a multipart
-                    file is uploaded.
+                  description: Raw CSV or backup NDJSON content as a string. CSV content
+                    is limited to 10MB. Required for RelayImport or SureImport unless
+                    a multipart file is uploaded.
                 type:
                   type: string
                   enum:
@@ -7580,6 +7634,7 @@ paths:
                   - MerchantImport
                   - PdfImport
                   - QifImport
+                  - RelayImport
                   - SureImport
                   description: Import type (defaults to TransactionImport)
                 account_id:
@@ -7678,8 +7733,9 @@ paths:
         type: string
     get:
       summary: Retrieve an import
-      description: Retrieve detailed information about a specific import, including
-        configuration, row statistics, and SureImport readback verification when available.
+      description: Retrieve detailed information about an import, including configuration,
+        row statistics and backup readback verification for both RelayImport and SureImport.
+        The response type reflects the stored type.
       tags:
       - Imports
       security:
@@ -7760,9 +7816,10 @@ paths:
   "/api/v1/imports/preflight":
     post:
       summary: Validate import content without creating an import
-      description: Validate CSV or Sure NDJSON import content and return counts, headers,
-        warnings, and validation errors without persisting an import or enqueueing
-        jobs. CSV content is limited to 10MB.
+      description: Validate CSV or backup ZIP/NDJSON without persisting an import
+        or enqueueing jobs. Full backups verify the manifest, graph and original file
+        checksums. Backup preflight returns type RelayImport, including requests using
+        the old SureImport name. CSV content is limited to 10MB.
       tags:
       - Imports
       security:
@@ -7801,13 +7858,14 @@ paths:
               properties:
                 raw_file_content:
                   type: string
-                  description: Raw CSV or Sure NDJSON content as a string. CSV content
+                  description: Raw CSV or backup NDJSON content as a string. CSV content
                     is limited to 10MB.
                 file:
                   type: string
                   format: binary
-                  description: CSV or Sure NDJSON upload when using multipart/form-data.
-                    CSV files are limited to 10MB.
+                  description: CSV or backup ZIP/NDJSON upload when using multipart/form-data.
+                    The backup limit applies to uploaded and decompressed bytes. CSV
+                    files are limited to 10MB.
                 type:
                   type: string
                   enum:
@@ -7822,6 +7880,7 @@ paths:
                   - MerchantImport
                   - PdfImport
                   - QifImport
+                  - RelayImport
                   - SureImport
                   description: Import type to validate (defaults to TransactionImport)
                 account_id:
@@ -7916,13 +7975,14 @@ paths:
               properties:
                 raw_file_content:
                   type: string
-                  description: Raw CSV or Sure NDJSON content as a string. CSV content
+                  description: Raw CSV or backup NDJSON content as a string. CSV content
                     is limited to 10MB.
                 file:
                   type: string
                   format: binary
-                  description: CSV or Sure NDJSON upload when using multipart/form-data.
-                    CSV files are limited to 10MB.
+                  description: CSV or backup ZIP/NDJSON upload when using multipart/form-data.
+                    The backup limit applies to uploaded and decompressed bytes. CSV
+                    files are limited to 10MB.
                 type:
                   type: string
                   enum:
@@ -7937,6 +7997,7 @@ paths:
                   - MerchantImport
                   - PdfImport
                   - QifImport
+                  - RelayImport
                   - SureImport
                   description: Import type to validate (defaults to TransactionImport)
                 account_id:

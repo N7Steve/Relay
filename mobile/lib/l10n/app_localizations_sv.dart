@@ -9,7 +9,7 @@ class AppLocalizationsSv extends AppLocalizations {
   AppLocalizationsSv([String locale = 'sv']) : super(locale);
 
   @override
-  String get appTitle => 'Sure Finances';
+  String get appTitle => 'Relay';
 
   @override
   String get commonCancel => 'Avbryt';
@@ -468,13 +468,13 @@ class AppLocalizationsSv extends AppLocalizations {
   String get backendConfigTitle => 'Konfiguration';
 
   @override
-  String get backendConfigSubtitle => 'Uppdatera adressen till din Sure-server';
+  String get backendConfigSubtitle => 'Uppdatera adressen till din Relay-server';
 
   @override
   String get backendConfigExampleUrlsLabel => 'Exempeladresser';
 
   @override
-  String get backendConfigUrlLabel => 'Adress till Sure-servern';
+  String get backendConfigUrlLabel => 'Adress till Relay-servern';
 
   @override
   String get backendConfigUrlHint => 'https://app.sure.am';
@@ -782,7 +782,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get loginOrDivider => 'eller';
 
   @override
-  String get loginServerUrlHeading => 'Adress till Sure-servern:';
+  String get loginServerUrlHeading => 'Adress till Relay-servern:';
 
   @override
   String get loginApiKeyLoginButton => 'Logga in med API-nyckel';
@@ -886,7 +886,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get transactionFormDateHelper => 'Valfritt (standard: i dag)';
 
   @override
-  String get transactionFormNameHelper => 'Valfritt (standard: SureApp)';
+  String get transactionFormNameHelper => 'Valfritt (standard: RelayApp)';
 
   @override
   String get transactionFormCategoryLoading => 'Läser in kategorier…';
@@ -989,7 +989,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String backendConfigServerError(int code) {
-    return 'Servern svarade med status $code. Kontrollera att det är en Sure-server.';
+    return 'Servern svarade med status $code. Kontrollera att det är en Relay-server.';
   }
 
   @override

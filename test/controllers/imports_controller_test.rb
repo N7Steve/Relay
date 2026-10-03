@@ -8,6 +8,23 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     ensure_tailwind_build
   end
 
+  test "members cannot upload or publish complete backups" do
+    @user.update!(role: "member")
+    content = Family::Backup.new(Family.create!(name: "Backup source")).generate_ndjson
+    file = Rack::Test::UploadedFile.new(StringIO.new(content), "application/x-ndjson", original_filename: "all.ndjson")
+    assert_no_difference("Import.count") do
+      post imports_url, params: { import: { type: "SureImport", import_file: file } }
+    end
+    assert_response :forbidden
+
+    import = @user.family.imports.create!(type: "SureImport")
+    import.ndjson_file.attach(io: StringIO.new(content), filename: "all.ndjson", content_type: "application/x-ndjson")
+    assert_no_enqueued_jobs do
+      post publish_import_url(import)
+    end
+    assert_response :forbidden
+  end
+
   test "gets index" do
     get imports_url
 
@@ -18,12 +35,80 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "administrator restores a full Sure ZIP directly into an empty family" do
+    sign_in users(:empty)
+    source = Family.create!(name: "ZIP source")
+    source.accounts.create!(name: "Portable checking", accountable: Depository.new, balance: 25, currency: "EUR")
+    bytes = Family::DataExporter.new(source).generate_export.string
+    file = Rack::Test::UploadedFile.new(StringIO.new(bytes), "application/zip", original_filename: "sure_export.zip")
+
+    post imports_url, params: { import: { type: "RelayImport", import_file: file } }
+    import = users(:empty).family.imports.ordered.first
+    assert_redirected_to import_url(import)
+    assert_instance_of RelayImport, import
+    assert import.full_backup?
+    get import_url(import)
+    assert_response :success
+    assert_includes response.body, I18n.t("imports.ready.full_backup_title")
+
+    perform_enqueued_jobs(only: ImportJob) { post publish_import_url(import) }
+    assert import.reload.complete?, import.error
+    assert_equal "matched", import.verification_status
+    assert_equal "Portable checking", users(:empty).family.accounts.sole.name
+  end
+
   test "gets new" do
     get new_import_url
 
     assert_response :success
 
     assert_select "turbo-frame#modal"
+  end
+
+  test "both backup links offer the Relay upload form" do
+    Import::BACKUP_TYPES.each do |type|
+      get new_import_url(type: type)
+
+      assert_response :success
+      assert_select "input[name='import[type]'][value='RelayImport']", count: 1
+    end
+  end
+
+  test "Relay backup upload stores the Relay type" do
+    content = { type: "Account", data: { id: "compat-web-account", name: "Relay checking" } }.to_json
+    file = Rack::Test::UploadedFile.new(StringIO.new(content), "application/x-ndjson", original_filename: "all.ndjson")
+
+    assert_difference "Import.count", 1 do
+      post imports_url, params: { import: { type: "RelayImport", import_file: file } }
+    end
+
+    import = @user.family.imports.ordered.first
+    assert_redirected_to import_url(import)
+    assert_instance_of RelayImport, import
+    assert_equal content, import.ndjson_file.download
+    assert_equal 1, import.rows_count
+  end
+
+  test "Relay backup without a file opens the Relay upload workflow" do
+    post imports_url, params: { import: { type: "RelayImport" } }
+
+    import = @user.family.imports.ordered.first
+    assert_redirected_to import_upload_url(import)
+    assert_equal "RelayImport", import.type
+  end
+
+  test "Relay STI records appear in the list and backup preview" do
+    import = @user.family.imports.create!(type: "RelayImport")
+    import.ndjson_file.attach(io: StringIO.new('{"type":"Account","data":{"id":"preview","name":"Checking"}}'), filename: "all.ndjson", content_type: "application/x-ndjson")
+    import.sync_ndjson_rows_count!
+
+    get imports_url
+    assert_response :success
+    assert_select "##{dom_id(import)}", count: 1
+
+    get import_url(import)
+    assert_response :success
+    assert_includes response.body, I18n.t("imports.ready.title")
   end
 
   test "global AI gate hides document imports" do
@@ -453,6 +538,20 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to import_url(import)
     assert_equal content.bytesize, import.ndjson_file.blob.byte_size
     assert_equal 1, import.rows_count
+  end
+
+  test "Relay upload limit overrides the legacy limit on the web" do
+    file = Rack::Test::UploadedFile.new(
+      StringIO.new("x" * (1.megabyte + 1)), "application/x-ndjson", original_filename: "all.ndjson"
+    )
+    with_env_overrides("RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => "1", "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "2") do
+      assert_no_difference "Import.count" do
+        post imports_url, params: { import: { type: "SureImport", import_file: file } }
+      end
+    end
+
+    assert_redirected_to new_import_url
+    assert_equal I18n.t("imports.create.file_too_large", max_size: 1), flash[:alert]
   end
 
   test "respects SURE_IMPORT_MAX_NDJSON_SIZE_MB when creating Sure import (#3010)" do
