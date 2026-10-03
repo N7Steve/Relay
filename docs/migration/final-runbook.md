@@ -1,8 +1,10 @@
 # Procedimiento de la fase final
 
 Este documento prepara el traslado de una instancia única. No ejecuta comandos
-sobre la instalación existente ni autoriza un despliegue. Completar primero el
-[formulario](final-decisions.md). El destino, datos, URL y clientes siguen pendientes.
+sobre la instalación existente ni autoriza un despliegue. Las decisiones de Steve constan en el [formulario](final-decisions.md): publicar
+Relay 0.1.0 para pruebas en TrueNAS, conservar clientes/funciones, desactivar
+telemetría e importar los datos después de estabilizar la instalación. La
+configuración y rutas del despliegue se concretan más adelante.
 
 ## 1. Inventario y punto de recuperación
 
@@ -13,7 +15,8 @@ Guardar configuración y claves en almacenamiento privado: `SECRET_KEY_BASE`,
 claves de cifrado ActiveRecord y cualquier master key/credencial utilizada.
 No rotarlas durante el traslado ni imprimirlas en logs.
 
-Preparar un dump completo PostgreSQL y una copia consistente del almacenamiento
+Para cumplir «todos los datos necesarios», preparar una exportación completa de
+la instalación: dump PostgreSQL y copia consistente del almacenamiento
 binario (o snapshot del bucket). El ZIP financiero de `Family::DataExporter`
 contiene manifiesto de adjuntos, pero no sus binarios, y no sustituye un backup
 completo de la instalación. Registrar fecha, tamaño y checksum de los backups.

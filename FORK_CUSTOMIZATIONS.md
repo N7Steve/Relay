@@ -117,18 +117,24 @@ previo; el formato de los archivos JavaScript modificados sí pasa.
 Actualizado el 3 de octubre de 2026. Se conservan todas las funciones financieras
 inventariadas; se actualizan destinos de soporte/releases, etiquetas del asistente,
 proveedores y altas MFA. MFA conserva secretos y valida códigos ya enrolados.
-Feedback opcional no usa un destino Sure incorporado: requiere proyecto/encuesta
-propios y respeta opt-out; metadatos usan `relay_version` sin campos duales.
-La allowlist y el aislamiento de datos financieros del cliente permanecen intactos.
-No reintroducir token/encuesta compartidos upstream en futuras integraciones.
+Por decisión de Steve, telemetría, encuestas y monitorización externa están
+desactivadas, incluso si hay variables heredadas configuradas. No inicializar
+PostHog, Sentry, Skylight ni Logtail al integrar upstream; conservar logs locales
+y diagnósticos de proveedores. Las dependencias inertes se limpiarán después de
+estabilizar la instalación, sin reactivar sus SDK por variables de entorno.
 
-Las plantillas Docker exigen imagen explícita. La tarea de webhooks Plaid EU
+Relay empieza en 0.1.0. Las plantillas Docker exigen imagen, contraseña y clave
+explícitas, usan `relay_production`/`relay_user` y permiten build desde Git con
+`compose.source.yml`. La instalación Sure de TrueNAS 25.10.4 no se modifica.
+Los clientes web/PWA, Flutter, Tauri y Apple conservan sus funciones, reciben
+marca Relay y mantienen paquetes, callbacks e identificadores externos actuales.
+La tarea de webhooks Plaid EU
 requiere destino HTTPS de la instalación, sin dominio alojado de Sure por defecto.
 Lectores históricos STI/GlobalID, identificadores Sophtron/asistente externos y
 contratos nativos se distinguen de aliases de tareas/variables ya retirados.
 Los identificadores externos pendientes requieren inventariar primero las
 integraciones/clientes en uso. Ver [procedimiento](docs/migration/final-runbook.md),
-[formulario](docs/migration/final-decisions.md) y octava entrega de
+[decisiones](docs/migration/final-decisions.md) y novena entrega de
 [RELAY_MIGRATION.md](RELAY_MIGRATION.md).
 
 ## Puerta global de integraciones de IA

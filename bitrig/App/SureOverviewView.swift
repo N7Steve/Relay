@@ -21,7 +21,7 @@ struct SureOverviewView: View {
                   .padding(.vertical, 4)
                   .background(Color.sureMint.opacity(0.12), in: .capsule)
               }
-              Text("Proactive signals from your latest Sure data")
+              Text("Proactive signals from your latest Relay data")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 

@@ -885,6 +885,78 @@ Logs de validación quedan en `tmp/`, fuera de Git. La instalación Sure existen
 no se toca. Los cambios se dejan revisables en el árbol de trabajo, sin commit,
 push, tags ni publicación de imágenes.
 
+### Novena entrega: decisiones aplicadas y Relay 0.1.0
+
+El 3 de octubre de 2026 Steve autoriza preparar commits y publicarlos en `main`.
+La octava entrega se publica como `cdca804fb6b5e99b8e0c08eac0c1c6045a86efa2`;
+su [CI remoto](https://github.com/N7Steve/Relay/actions/runs/37118875855) pasa.
+El [formulario respondido](docs/migration/final-decisions.md) fija Docker,
+TrueNAS, clientes/funciones actuales, telemetría desactivada y versión propia
+0.1.0. Primero se prueba una instalación limpia; los datos se trasladan después
+de estabilizarla. La limpieza funcional y de dependencias queda para después.
+
+Cambios de este bloque:
+
+- `.relay-version`, metadatos npm y Flutter comienzan la serie 0.1.0.
+- Marca, textos e iconos Relay en Flutter, Tauri y Apple; se conservan paquetes,
+  clases y callbacks externos para los clientes actuales.
+- PostHog, Sentry, Skylight y Logtail no se inicializan; las variables heredadas
+  no los activan. Se retiran SDK web, encuestas, bootstrap y eventos del Sankey.
+  Se conservan comparación, ampliación y gráficos. Flutter tampoco inicializa
+  telemetría con un DSN configurado. Logs locales y diagnósticos siguen disponibles.
+- Las nuevas plantillas y el default de producción usan `relay_production`;
+  Compose usa `relay_user` y red Relay. Imagen, contraseña y clave son explícitas.
+  No se renombra ninguna base existente.
+- `compose.source.yml` permite construir web/worker desde la misma revisión Git.
+  TrueNAS 25.10.4 tiene `sure-web-test`, imagen local `sure-staging-web-test`,
+  puerto host 3001 → 3000. No se presupone un registro remoto ni se inicia Relay.
+- Las guías de hosting/telemetría, decisiones y runbook reflejan el alcance real.
+  El ZIP financiero no incluye binarios ni sustituye un backup de instalación:
+  el traslado completo requiere PostgreSQL, almacenamiento y configuración
+  privada, con inventario y restauración aislada antes del corte.
+
+Archivos afectados: inicializadores/configuración Rails, helper de feedback,
+autenticación, cabecera y preview Sankey, controlador Stimulus y sus pruebas;
+plantillas de entorno/Compose y workflows de validación; clientes `mobile/`,
+`desktop/` y `bitrig/`; metadatos de versión y documentación citada. No cambian
+endpoints API, esquema ni migraciones en este bloque.
+
+### Validación de la novena entrega
+
+Ejecutada en Linux Docker el 3 de octubre de 2026 con proyectos independientes
+`relay-release-test` y `relay-release-browser`, sin usar la instalación Sure:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite completa Rails/Minitest | 10.818 pruebas, 45.893 aserciones, 0 fallos, 0 errores, 33 omisiones existentes; 589 segundos |
+| Focalizadas de feedback, preview y sesiones | 57 pruebas, 233 aserciones, sin fallos, errores ni omisiones |
+| Sistema: ajustes y cash flow | 12 pruebas, 120 aserciones, sin fallos, errores ni omisiones; navegación/ampliación sin eventos de analítica |
+| RuboCop | 2.926 archivos, sin infracciones |
+| ERB lint | 777 plantillas, sin errores |
+| Biome | 142 archivos, sin errores de lint |
+| Brakeman | 0 errores, 0 avisos activos; conserva 8 exclusiones existentes |
+| Flutter 3.32.4 | 181 pruebas pasan; análisis sin errores ni warnings, con 3 infos existentes de `intro_screen_web.dart` |
+| Frontend de escritorio | 6 pruebas Node pasan; TypeScript y build Vite correctos |
+| Docker de producción | Imagen local `relay-release-test:validation` construida con assets |
+| Arranque de producción sin red | Confirma Relay 0.1.0, default `relay_production` y SDK remotos no inicializados, incluso con variables heredadas |
+| Compose estándar/AI y override Git | Configuraciones válidas con valores de validación explícitos |
+| Whitespace | `git diff --check` correcto |
+
+La reducción de tests respecto al bloque anterior corresponde a las encuestas
+y analítica retiradas, no a omitir cobertura restante. La suite completa valida
+el código de comportamiento; el ajuste posterior del default de base de
+producción se verifica mediante el arranque aislado. No se inicia un servidor
+de aplicación ni se ejecutan migraciones sobre datos reales. Capybara usa su
+servidor temporal de pruebas. No se compilan aquí los binarios Swift/Tauri ni
+se publican clientes en tiendas. Logs y artefactos quedan en `tmp/`, fuera de Git.
+
+La imagen de validación no se publica; el canal autorizado es el repositorio
+Git en `main`. Despliegue TrueNAS, exportación/importación real y corte siguen
+pendientes de su fase operativa. Los proyectos de pruebas se detienen conservando
+sus volúmenes. Para revertir este bloque de código puede usarse Git revert;
+tras admitir escrituras reales, el rollback de datos requiere el procedimiento
+del runbook y no consiste solamente en sustituir la imagen.
+
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia
 activa a Sure esté sustituida o tenga una razón documentada para permanecer:
