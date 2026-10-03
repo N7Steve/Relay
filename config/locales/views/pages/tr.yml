@@ -155,7 +155,7 @@ tr:
       why_required_title: Redis neden gereklidir?
     release_notes_unavailable:
       body_html: "<p>Şu anda en son sürüm notları alınamıyor. Lütfen daha sonra tekrar
-        kontrol edin veya doğrudan <a href='https://github.com/we-promise/sure/releases'
+        kontrol edin veya doğrudan <a href='https://github.com/N7Steve/Relay/releases'
         target='_blank' rel='noopener noreferrer'>GitHub sürümler sayfamızı</a> ziyaret
         edin.</p>"
       name: Sürüm notları kullanılamıyor

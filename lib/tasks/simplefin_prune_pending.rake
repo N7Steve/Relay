@@ -15,16 +15,16 @@
 #
 # Usage examples:
 #   # Preview (no writes) across all SimpleFin accounts
-#   bin/rails 'sure:simplefin:prune_pending[dry_run=true]'
+#   bin/rails 'relay:simplefin:prune_pending[dry_run=true]'
 #
 #   # Execute across all SimpleFin accounts (writes enabled)
-#   bin/rails 'sure:simplefin:prune_pending[dry_run=false]'
+#   bin/rails 'relay:simplefin:prune_pending[dry_run=false]'
 #
 #   # Limit to one item or one linked account
-#   bin/rails 'sure:simplefin:prune_pending[item_id=ec255931-62ff-4a68-abda-16067fad0429,dry_run=false]'
-#   bin/rails 'sure:simplefin:prune_pending[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,dry_run=false]'
+#   bin/rails 'relay:simplefin:prune_pending[item_id=ec255931-62ff-4a68-abda-16067fad0429,dry_run=false]'
+#   bin/rails 'relay:simplefin:prune_pending[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,dry_run=false]'
 
-namespace :sure do
+namespace :relay do
   namespace :simplefin do
     desc "Prune pending transactions from SimpleFin raw_transactions_payload. Args (named): item_id, account_id, dry_run=true"
     task :prune_pending, [ :item_id, :account_id, :dry_run ] => :environment do |_, args|

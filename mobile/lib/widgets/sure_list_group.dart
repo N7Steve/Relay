@@ -12,7 +12,7 @@ import 'sure_icon.dart';
 /// and separated by `border-divider`).
 ///
 /// Colors resolve from the active [SureColors] palette, so the chrome stays in
-/// lockstep with `sure.tokens.json` and reads correctly in light and dark.
+/// lockstep with `relay.tokens.json` and reads correctly in light and dark.
 ///
 /// ```dart
 /// SureListGroup(

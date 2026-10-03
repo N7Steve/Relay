@@ -20,7 +20,7 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 1. On the Home page, find the section labeled "Learn how to build with Plaid" and click **Unlock real data**.
 2. Enter your real name and phone number.
 3. In the description box, write a statement such as:  
-   This is for personal use only on a self-hosted version of the Sure Finance software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
+   This is for personal use only on a self-hosted version of the Relay software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
 4. Leave the "Additional products" section **unchecked**.
 5. Click **Request Access**.
 6. Wait for your request to be approved (this may take more than 24 hours).
@@ -37,7 +37,7 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 1. In the left sidebar on the Plaid dashboard, click **Get production access**.
 2. Enter your real address.
 3. For the business profile, write:  
-   This is for personal use only on a self-hosted version of the Sure Finance software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
+   This is for personal use only on a self-hosted version of the Relay software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
 4. Leave the company website field **blank**.
 5. Enter your real name, phone number, email address, and date of birth.
 6. Click **Next**.
@@ -49,9 +49,9 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 12. Upload any photo as the logo (must be 1024x1024px and under 4MB).
 13. Leave the brand color as **#22CCEE**.
 14. Set the Website URL to:  
-    https://github.com/we-promise/sure
+    https://github.com/N7Steve/Relay
 15. In the "Reason for data access" box, enter:  
-    This is for personal use only on a self-hosted version of the Sure Finance software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
+    This is for personal use only on a self-hosted version of the Relay software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
 16. Enter your real email address as the support email.
 17. Click **Next**.
 18. For the "Where do you want to launch?" section, enter your country.
@@ -69,7 +69,7 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 26. Click **Next**.
 27. Click **Start Security Practices Questionnaire**.
 28. For each question, select **Other - please see comments**, then write in the notes:  
-    This is for personal use only on a self-hosted version of the Sure Finance software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
+    This is for personal use only on a self-hosted version of the Relay software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
 29. Click **Next**.
 30. Repeat the process from step 28 for each new section of the questionnaire.
 31. Continue clicking **Next** and repeating step 28 until the questionnaire is finished.

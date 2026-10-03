@@ -377,8 +377,8 @@ es:
       import_rules: Importar reglas
       import_transactions: Importar transacciones
       import_qif: Importar desde Quicken (QIF)
-      import_sure: Importar desde Relay
-      import_sure_description: Archivo .ndjson de exportación completa
+      import_sure: Restaurar un backup de Relay o Sure
+      import_sure_description: ZIP o NDJSON. Los backups completos requieren un administrador y un destino sin datos financieros.
       import_file: Importar documento
       import_file_description: Análisis potenciado por IA para PDFs y subida con búsqueda para otros archivos compatibles
       requires_account: Importa cuentas primero para desbloquear esta opción.
@@ -398,12 +398,21 @@ es:
       invalid_document_file_type: Tipo de archivo de documento no válido para el almacén de vectores activo.
       document_uploaded: Documento subido correctamente.
       document_upload_failed: No hemos podido subir el documento al almacén de vectores. Por favor, inténtalo de nuevo.
-      invalid_ndjson_file_type: Tipo o formato de archivo no válido. Sube un archivo de exportación .ndjson o .json válido.
+      invalid_ndjson_file_type: Backup no válido. Sube un ZIP válido que contenga all.ndjson, o un archivo de exportación NDJSON o JSON.
       document_provider_not_configured: No hay ningún almacén de vectores configurado para la subida de documentos.
     show:
       finalize_upload: Por favor, finaliza la subida de tu archivo.
       finalize_mappings: Por favor, finaliza tus mapeos antes de continuar.
     ready:
+      full_backup_title: Restauración completa
+      full_backup_counts:
+        one: Un registro de datos, más los adjuntos originales.
+        other: "%{count} registros de datos, más los adjuntos originales."
+      historical_account_title: Hay importaciones históricas sin cuenta disponible
+      historical_account_description: Estas importaciones antiguas apuntan a cuentas ausentes del backup. Se restaurarán su historial y sus archivos sin vincularlos a otra cuenta. Los registros financieros siguen exigiendo referencias válidas a sus cuentas.
+      full_backup_description: Se restaurarán los datos, preferencias, conexiones y adjuntos de la familia. El destino debe estar sin datos financieros. Este proceso conserva tu acceso y no se puede deshacer desde Importaciones.
+      missing_originals_title: Hay documentos sin archivo original
+      missing_originals_description: La app de origen no conservó algunos archivos. Se restaurarán sus metadatos, pero esos originales no están disponibles en el backup.
       description: Aquí tienes un resumen de los nuevos elementos que se añadirán a tu cuenta una vez publiques esta importación.
       title: Confirma tus datos de importación
       summary_item_label: Elemento

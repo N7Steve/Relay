@@ -5,8 +5,8 @@
     <div class="bg-container border border-primary rounded-xl p-6 sm:p-8 shadow-sm">
       <!-- Icon and Header -->
       <div class="text-center mb-8">
-        <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-          <%= icon "alert-triangle", class: "w-8 h-8 text-red-600" %>
+        <div class="mx-auto w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mb-4">
+          <%= icon "alert-triangle", class: "w-8 h-8 text-warning" %>
         </div>
         <h1 class="text-xl sm:text-2xl font-bold text-primary mb-2"><%= t(".heading") %></h1>
         <p class="text-sm sm:text-base text-subdued"><%= t(".subheading") %></p>
@@ -22,7 +22,7 @@
         <div class="text-center space-y-4">
           <%= render DS::Link.new(
             text: t(".view_setup_guide"),
-            href: "https://github.com/we-promise/sure/blob/main/docs/hosting/docker.md",
+            href: "https://github.com/N7Steve/Relay/blob/main/docs/hosting/docker.md",
             variant: "primary",
             size: "lg",
             icon: "external-link",

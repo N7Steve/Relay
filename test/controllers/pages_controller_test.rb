@@ -642,11 +642,11 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :ok
-    assert_select "[data-controller='release-highlight'][data-release-highlight-tag-value=?]", Sure.version.to_release_tag
+    assert_select "[data-controller='release-highlight'][data-release-highlight-tag-value=?]", Relay.version.to_release_tag
   end
 
   test "dashboard omits the release highlight once the deployed release was seen" do
-    @user.mark_release_seen!(Sure.version.to_release_tag)
+    @user.mark_release_seen!(Relay.version.to_release_tag)
 
     get root_path
 
@@ -655,11 +655,10 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "changelog" do
-    VCR.use_cassette("git_repository_provider/fetch_latest_release_notes") do
-      get changelog_path
-      assert_response :ok
-      assert_select "[data-breadcrumbs]", text: /What's new/
-    end
+    Provider::Registry.stubs(:get_provider).with(:github).returns(stub(fetch_latest_release_notes: nil))
+    get changelog_path
+    assert_response :ok
+    assert_select "[data-breadcrumbs]", text: /What's new/
   end
 
   test "changelog with nil release notes" do
@@ -671,7 +670,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     get changelog_path
     assert_response :ok
     assert_select "h2", text: "Release notes unavailable"
-    assert_select "a[href='https://github.com/we-promise/sure/releases']"
+    assert_select "a[href='https://github.com/N7Steve/Relay/releases']"
   end
 
   test "changelog with incomplete release notes" do
@@ -697,6 +696,8 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     get feedback_path
     assert_response :ok
     assert_select "[data-breadcrumbs]", text: /Feedback/
+    assert_select "a[href='https://github.com/N7Steve/Relay/issues/new']", count: 2
+    assert_select "a[href*='we-promise'], a[href*='discord.gg']", count: 0
   end
 
   test "dashboard renders spending trend widget" do

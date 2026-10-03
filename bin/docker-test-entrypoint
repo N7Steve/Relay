@@ -9,8 +9,8 @@ end
 database = URI.parse(ENV.fetch("DATABASE_URL", ""))
 unless ENV["RAILS_ENV"] == "test" &&
     ENV["DB_HOST"] == "db" &&
-    ENV["POSTGRES_DB"] == "sure_test" &&
-    database.host == "db" && database.path == "/sure_test" &&
+    ENV["POSTGRES_DB"] == "relay_test" &&
+    database.host == "db" && database.path == "/relay_test" &&
     ENV["REDIS_URL"] == "redis://redis:6379/0"
   abort "This runner only operates against its isolated Docker test services."
 end
@@ -28,7 +28,7 @@ end
 
 case task
 when "unit", "system", "build"
-  # Only the dedicated sure_test database inside this Compose project.
+  # Only the dedicated relay_test database inside this Compose project.
   # Load the current schema for fixtures without running historical migrations.
   rails!("db:create")
   rails!("db:schema:load")

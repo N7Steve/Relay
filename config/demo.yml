@@ -1,8 +1,5 @@
 default: &default
-  hosts:
-    - sure-demo.pikapod.net
-    - demo.sure.am
-    - app.sure.am
+  hosts: []
   email: user@example.com
   password: Password1!
 

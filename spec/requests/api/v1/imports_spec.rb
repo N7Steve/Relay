@@ -96,7 +96,7 @@ RSpec.describe 'API V1 Imports', type: :request do
                 description: 'Filter by status',
                 schema: { type: :string, enum: %w[pending complete importing reverting revert_failed failed] }
       parameter name: :type, in: :query, required: false,
-                description: 'Filter by import type',
+                description: 'Filter by import type. RelayImport and SureImport both select backup imports under either stored name.',
                 schema: { type: :string, enum: Import::TYPES }
 
       response '200', 'imports listed' do
@@ -123,7 +123,7 @@ RSpec.describe 'API V1 Imports', type: :request do
     end
 
     post 'Create import' do
-      description 'Create a new import from raw CSV content, inline Sure NDJSON content, or an uploaded Sure NDJSON file. CSV content is limited to 10MB.'
+      description 'Create an import from CSV or backup NDJSON content or a multipart backup ZIP/NDJSON file. Version 3 full backups include original file bytes and require a family administrator and a destination without financial data. Backup requests use RelayImport for storage, responses and queued jobs, including requests using the old SureImport name. CSV content is limited to 10MB.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -134,7 +134,7 @@ RSpec.describe 'API V1 Imports', type: :request do
         properties: {
           raw_file_content: {
             type: :string,
-            description: 'Raw CSV or Sure NDJSON content as a string. CSV content is limited to 10MB. Required for SureImport unless a multipart file is uploaded.'
+            description: 'Raw CSV or backup NDJSON content as a string. CSV content is limited to 10MB. Required for RelayImport or SureImport unless a multipart file is uploaded.'
           },
           type: {
             type: :string,
@@ -250,6 +250,14 @@ RSpec.describe 'API V1 Imports', type: :request do
         run_test!
       end
 
+      response '403', 'full backup restoration requires an administrator' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+        let(:body) do
+          { type: 'SureImport', raw_file_content: { type: 'BackupManifest', data: { version: 1 } }.to_json }
+        end
+        run_test!
+      end
+
       response '422', 'validation error or publish rejection' do
         schema oneOf: [
           { '$ref' => '#/components/schemas/ErrorResponse' },
@@ -299,7 +307,7 @@ RSpec.describe 'API V1 Imports', type: :request do
     parameter name: :id, in: :path, type: :string, required: true, description: 'Import ID'
 
     get 'Retrieve an import' do
-      description 'Retrieve detailed information about a specific import, including configuration, row statistics, and SureImport readback verification when available.'
+      description 'Retrieve detailed information about an import, including configuration, row statistics and backup readback verification for both RelayImport and SureImport. The response type reflects the stored type.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -381,7 +389,7 @@ RSpec.describe 'API V1 Imports', type: :request do
 
   path '/api/v1/imports/preflight' do
     post 'Validate import content without creating an import' do
-      description 'Validate CSV or Sure NDJSON import content and return counts, headers, warnings, and validation errors without persisting an import or enqueueing jobs. CSV content is limited to 10MB.'
+      description 'Validate CSV or backup ZIP/NDJSON without persisting an import or enqueueing jobs. Full backups verify the manifest, graph and original file checksums. Backup preflight returns type RelayImport, including requests using the old SureImport name. CSV content is limited to 10MB.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -392,12 +400,12 @@ RSpec.describe 'API V1 Imports', type: :request do
         properties: {
           raw_file_content: {
             type: :string,
-            description: 'Raw CSV or Sure NDJSON content as a string. CSV content is limited to 10MB.'
+            description: 'Raw CSV or backup NDJSON content as a string. CSV content is limited to 10MB.'
           },
           file: {
             type: :string,
             format: :binary,
-            description: 'CSV or Sure NDJSON upload when using multipart/form-data. CSV files are limited to 10MB.'
+            description: 'CSV or backup ZIP/NDJSON upload when using multipart/form-data. The backup limit applies to uploaded and decompressed bytes. CSV files are limited to 10MB.'
           },
           type: {
             type: :string,

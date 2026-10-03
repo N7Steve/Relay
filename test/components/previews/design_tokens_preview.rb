@@ -1,6 +1,6 @@
 class DesignTokensPreview < ViewComponent::Preview
   # Each section is its own preview so the Lookbook nav groups them.
-  # Source of truth: design/tokens/sure.tokens.json.
+  # Source of truth: design/tokens/relay.tokens.json.
   #
   # All values are pre-resolved in this class (refs and {ref|N%} expanded to
   # final hex / rgba strings) so templates iterate over plain data with no
@@ -107,14 +107,14 @@ class DesignTokensPreview < ViewComponent::Preview
         next unless yield(name)
         ext = node["$extensions"] || {}
         light_raw = node["$value"]
-        dark_raw = ext["sure.dark"]
+        dark_raw = ext["relay.dark"]
         {
           name: path[1..].join("-"),
           light_value: light_raw,
           dark_value: dark_raw,
           light_resolved: light_raw.is_a?(String) ? resolve_template(light_raw) : nil,
           dark_resolved:  dark_raw.is_a?(String) ? resolve_template(dark_raw) : nil,
-          compose: ext["sure.compose"]
+          compose: ext["relay.compose"]
         }
       end
     end
@@ -127,7 +127,7 @@ class DesignTokensPreview < ViewComponent::Preview
           name: path.last,
           light_resolved: resolve_value(node),
           light_raw: node["$value"],
-          dark_raw: node.dig("$extensions", "sure.dark")
+          dark_raw: node.dig("$extensions", "relay.dark")
         }
       end
     end
@@ -146,14 +146,14 @@ class DesignTokensPreview < ViewComponent::Preview
         light_resolved: resolve_value(node) || node["$value"],
         light_raw: node["$value"],
         dark_resolved: resolve_dark(node),
-        dark_raw: node.dig("$extensions", "sure.dark")
+        dark_raw: node.dig("$extensions", "relay.dark")
       }
     end
 
     # ─── Token walker ───────────────────────────────────────────────────────
 
     def tokens
-      @tokens ||= JSON.parse(Rails.root.join("design/tokens/sure.tokens.json").read)
+      @tokens ||= JSON.parse(Rails.root.join("design/tokens/relay.tokens.json").read)
     end
 
     def walked
@@ -190,7 +190,7 @@ class DesignTokensPreview < ViewComponent::Preview
     end
 
     def resolve_dark(node)
-      raw = node.dig("$extensions", "sure.dark")
+      raw = node.dig("$extensions", "relay.dark")
       raw ? resolve_template(raw) : nil
     end
 

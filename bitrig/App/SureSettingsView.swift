@@ -27,7 +27,7 @@ struct SureSettingsView: View {
               .onChange(of: insightNotifications) {
                 Task { await updateNotificationPreference() }
               }
-            Text("Get notified when Sure finds a new proactive financial insight. You stay in control in iOS Settings.")
+            Text("Get notified when Relay finds a new proactive financial insight. You stay in control in iOS Settings.")
               .font(.subheadline)
               .foregroundStyle(.secondary)
             if !notificationStatus.isEmpty {

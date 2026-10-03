@@ -6,15 +6,15 @@
 #
 # Examples:
 #   # By SimpleFin item id (process all linked accounts under the item)
-#   # bin/rails 'sure:simplefin:backfill_holdings[item_id=ec255931-62ff-4a68-abda-16067fad0429,dry_run=true]'
+#   # bin/rails 'relay:simplefin:backfill_holdings[item_id=ec255931-62ff-4a68-abda-16067fad0429,dry_run=true]'
 #   # Apply:
-#   # bin/rails 'sure:simplefin:backfill_holdings[item_id=ec255931-62ff-4a68-abda-16067fad0429,dry_run=false]'
+#   # bin/rails 'relay:simplefin:backfill_holdings[item_id=ec255931-62ff-4a68-abda-16067fad0429,dry_run=false]'
 #
 #   # By Account name contains (e.g., "Robinhood")
-#   # bin/rails 'sure:simplefin:backfill_holdings[account_name=Robinhood,dry_run=true]'
+#   # bin/rails 'relay:simplefin:backfill_holdings[account_name=Robinhood,dry_run=true]'
 #
 #   # By Account id (UUID in your DB)
-#   # bin/rails 'sure:simplefin:backfill_holdings[account_id=<ACCOUNT_UUID>,dry_run=false]'
+#   # bin/rails 'relay:simplefin:backfill_holdings[account_id=<ACCOUNT_UUID>,dry_run=false]'
 #
 # Args (named or positional key=value):
 #   item_id      - SimplefinItem id
@@ -23,7 +23,7 @@
 #   dry_run      - default true; when true, do not write, just report what would be processed
 #   sleep_ms     - per-account sleep to be polite to quotas (default 200ms)
 
-namespace :sure do
+namespace :relay do
   namespace :simplefin do
     desc "Backfill holdings for SimpleFin-linked investment accounts. Args: item_id, account_id, account_name, dry_run=true, sleep_ms=200"
     task :backfill_holdings, [ :item_id, :account_id, :account_name, :dry_run, :sleep_ms ] => :environment do |_, args|

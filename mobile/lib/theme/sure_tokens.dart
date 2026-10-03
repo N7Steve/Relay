@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT EDIT BY HAND.
-// Source: design/tokens/sure.tokens.json
-// Build: node mobile/tool/generate_sure_tokens.mjs
+// Source: design/tokens/relay.tokens.json
+// Build: node mobile/tool/generate_relay_tokens.mjs
 
 import 'package:flutter/painting.dart';
 
@@ -12,7 +12,7 @@ class SureTokens {
   static const String fontMono = 'Geist Mono';
 
   // Keep the existing Flutter fallback behavior until native mobile font assets
-  // are registered. The canonical web stack remains in sure.tokens.json.
+  // are registered. The canonical web stack remains in relay.tokens.json.
   static const List<String> fontFallback = <String>[
     'Inter',
     'Arial',
