@@ -23,7 +23,7 @@ class Provider::Coinstats < Provider
   INITIAL_RETRY_DELAY = 1
   MAX_RETRY_DELAY = 10
 
-  headers "User-Agent" => "Sure Finance CoinStats Client (https://github.com/we-promise/sure)"
+  headers "User-Agent" => "Relay Finance CoinStats Client (https://github.com/N7Steve/Relay)"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   attr_reader :api_key

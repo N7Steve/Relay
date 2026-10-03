@@ -19,7 +19,8 @@ class Api::V1::ImportsController < Api::V1::BaseController
     end
 
     if params[:type].present?
-      imports_query = imports_query.where(type: params[:type])
+      types = params[:type].in?(Import::BACKUP_TYPES) ? Import::BACKUP_TYPES : params[:type]
+      imports_query = imports_query.where(type: types)
     end
 
     # Pagination
@@ -66,8 +67,9 @@ class Api::V1::ImportsController < Api::V1::BaseController
 
     # 1. Determine type and validate
     type = params[:type].to_s
+    type = "RelayImport" if type.in?(Import::BACKUP_TYPES)
     type = "TransactionImport" unless Import::TYPES.include?(type)
-    return create_sure_import(family) if type == "SureImport"
+    return create_sure_import(family) if type == "RelayImport"
 
     # 2. Build the import object with permitted config attributes
     @import = family.imports.build(import_config_params.merge(type: type))
@@ -222,6 +224,9 @@ class Api::V1::ImportsController < Api::V1::BaseController
     def create_sure_import(family)
       content, filename, content_type = sure_import_upload_attributes
       return unless content
+      if Family::Backup.snapshot?(content) && !current_resource_owner.admin?
+        return render json: { error: "forbidden", message: "Full backup restoration requires a family administrator." }, status: :forbidden
+      end
 
       begin
         @import = persist_sure_import!(family, content, filename, content_type)
@@ -233,7 +238,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
         }, status: :unprocessable_entity
         return
       rescue StandardError => e
-        Rails.logger.error "Sure import creation failed: #{e.message}"
+        Rails.logger.error "Backup import creation failed: #{e.message}"
         render json: {
           error: "internal_server_error",
           message: "Import could not be created"
@@ -253,13 +258,13 @@ class Api::V1::ImportsController < Api::V1::BaseController
       rescue SureImport::PreflightError
         render json: {
           error: "preflight_failed",
-          message: "Import was uploaded but did not pass Sure NDJSON preflight.",
+          message: "Import was uploaded but did not pass backup NDJSON preflight.",
           errors: sure_import_error_lines,
           import_id: @import.id
         }, status: :unprocessable_entity
         return
       rescue SureImport::NotPublishableError => e
-        Rails.logger.warn "Sure import not publishable for import #{@import.id}: #{e.message}"
+        Rails.logger.warn "Backup import not publishable for import #{@import.id}: #{e.message}"
         render json: {
           error: "not_publishable",
           message: "Import was uploaded but has no publishable records.",
@@ -267,7 +272,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
         }, status: :unprocessable_entity
         return
       rescue StandardError => e
-        Rails.logger.error "Sure import publish failed for import #{@import.id}: #{e.message}"
+        Rails.logger.error "Backup import publish failed for import #{@import.id}: #{e.message}"
         restore_pending_sure_import_after_publish_failure
         render json: {
           error: "publish_failed",
@@ -282,7 +287,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
 
     def persist_sure_import!(family, content, filename, content_type)
       import = nil
-      import = family.imports.create!(type: "SureImport")
+      import = family.imports.create!(type: "RelayImport")
       import.ndjson_file.attach(
         io: StringIO.new(content),
         filename: filename,
@@ -322,36 +327,18 @@ class Api::V1::ImportsController < Api::V1::BaseController
       else
         render json: {
           error: "missing_content",
-          message: "Provide a Sure NDJSON file or raw_file_content."
+          message: "Provide a backup NDJSON file or raw_file_content."
         }, status: :unprocessable_entity
         nil
       end
     end
 
     def sure_import_file_upload_attributes(file)
-      if file.size > SureImport.max_ndjson_size
-        render json: {
-          error: "file_too_large",
-          message: "File is too large. Maximum size is #{SureImport.max_ndjson_size / 1.megabyte}MB."
-        }, status: :unprocessable_entity
-        return
-      end
-
-      extension = File.extname(file.original_filename.to_s).downcase
-      unless SureImport::ALLOWED_NDJSON_CONTENT_TYPES.include?(file.content_type) || extension.in?(%w[.ndjson .json])
-        render json: {
-          error: "invalid_file_type",
-          message: "Invalid file type. Please upload a Sure NDJSON file."
-        }, status: :unprocessable_entity
-        return
-      end
-
-      content = file.read
-      sure_import_validated_attributes(
-        content: content,
-        filename: file.original_filename.presence || "sure-import.ndjson",
-        content_type: file.content_type.presence || "application/x-ndjson"
-      )
+      content, filename, content_type = SureImport::Upload.read(file)
+      sure_import_validated_attributes(content: content, filename: filename, content_type: content_type)
+    rescue SureImport::Upload::Error => error
+      render json: { error: error.code, message: error.message }, status: :unprocessable_entity
+      nil
     end
 
     def sure_import_raw_content_attributes(content)
@@ -365,7 +352,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
 
       sure_import_validated_attributes(
         content: content,
-        filename: "sure-import.ndjson",
+        filename: "relay-import.ndjson",
         content_type: "application/x-ndjson"
       )
     end
@@ -374,7 +361,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
       unless SureImport.valid_ndjson_first_line?(content)
         render json: {
           error: "invalid_ndjson",
-          message: "Invalid Sure NDJSON content."
+          message: "Invalid backup NDJSON content."
         }, status: :unprocessable_entity
         return
       end

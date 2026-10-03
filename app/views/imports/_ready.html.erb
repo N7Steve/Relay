@@ -1,7 +1,8 @@
 <%# locals: (import:) %>
 <% dry_run = import.dry_run %>
+<% full_backup = import.is_a?(SureImport) && import.full_backup? %>
 <% resources_with_counts = dry_run.select { |_, count| count > 0 }.filter_map { |key, count| [dry_run_resource(key), count] if dry_run_resource(key) } %>
-<% import_summary_empty = resources_with_counts.empty? %>
+<% import_summary_empty = resources_with_counts.empty? && !(full_backup && dry_run.values.sum.positive?) %>
 <% sure_preflight_result = import.is_a?(SureImport) ? import.sure_preflight : nil %>
 <% missing_merchant_count = sure_preflight_result&.skipped_missing_merchant_count.to_i %>
 <% skipped_recurring_count = sure_preflight_result&.skipped_unnamed_recurring_count.to_i %>
@@ -14,6 +15,18 @@
 </div>
 
 <div class="mx-auto max-w-2xl space-y-4">
+  <% if full_backup %>
+    <%= render DS::Alert.new(variant: :warning, title: t(".full_backup_title"), message: [t(".full_backup_description"), t(".full_backup_counts", count: dry_run.values.sum)].join(" ")) %>
+    <% if sure_preflight_result.warnings.any? { |warning| warning[:code] == "source_original_unavailable" } %>
+      <%= render DS::Alert.new(variant: :warning, title: t(".missing_originals_title"), message: t(".missing_originals_description")) %>
+    <% end %>
+    <% if sure_preflight_result.warnings.any? { |warning| warning[:code] == "historical_import_account_unavailable" } %>
+      <%= render DS::Alert.new(variant: :warning, title: t(".historical_account_title"), message: t(".historical_account_description")) %>
+    <% end %>
+  <% end %>
+  <% if sure_preflight_result && !sure_preflight_result.valid? %>
+    <%= render DS::Alert.new(variant: :error, message: sure_preflight_result.error_message) %>
+  <% end %>
   <% if missing_merchant_count > 0 || skipped_recurring_count > 0 %>
     <%= render DS::Alert.new(
       variant: :warning,
@@ -99,7 +112,7 @@
     </div>
   </div>
 
-  <% if import_summary_empty %>
+  <% if import_summary_empty || (sure_preflight_result && !sure_preflight_result.valid?) %>
     <%= render DS::Button.new(text: t(".back_to_imports"), href: imports_path, variant: :secondary, full_width: true) %>
   <% else %>
     <%= render DS::Button.new(text: t(".publish_import"), href: publish_import_path(import), method: :post, full_width: true) %>

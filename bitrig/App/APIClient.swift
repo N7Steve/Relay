@@ -103,7 +103,7 @@ enum SureAPIError: LocalizedError, Equatable {
     case .invalidResponse: "The server returned an invalid response."
     case let .server(status, message):
       message ?? "The server returned an error (\(status))."
-    case let .decoding(message): "Sure returned data this app could not read: \(message)"
+    case let .decoding(message): "Relay returned data this app could not read: \(message)"
     }
   }
 }

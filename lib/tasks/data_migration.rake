@@ -3,6 +3,12 @@ namespace :data_migration do
   # 2025-02-07: EU Plaid items need to be moved over to a new webhook URL so that we can
   # instantiate the correct Plaid client for verification based on which Plaid instance it comes from
   task eu_plaid_webhooks: :environment do
+    webhook_url = ENV.fetch("PLAID_EU_WEBHOOK_URL")
+    uri = URI.parse(webhook_url)
+    unless uri.is_a?(URI::HTTPS) && uri.host.present? && uri.userinfo.nil? && uri.fragment.nil?
+      raise ArgumentError, "PLAID_EU_WEBHOOK_URL must be an HTTPS URL without credentials or fragment"
+    end
+
     Provider::PlaidEuAdapter.ensure_configuration_loaded
     provider = Provider::Plaid.new(Rails.application.config.plaid_eu, region: :eu)
 
@@ -11,7 +17,7 @@ namespace :data_migration do
     eu_items.find_each do |item|
       request = Plaid::ItemWebhookUpdateRequest.new(
         access_token: item.access_token,
-        webhook: "https://app.sure.am/webhooks/plaid_eu"
+        webhook: webhook_url
       )
 
       provider.client.item_webhook_update(request)

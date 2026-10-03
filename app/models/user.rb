@@ -884,7 +884,7 @@ class User < ApplicationRecord
     end
 
     def totp
-      ROTP::TOTP.new(otp_secret, issuer: "Sure Finances")
+      ROTP::TOTP.new(otp_secret, issuer: "Relay")
     end
 
     # Two requests carrying the same code can both pass verify before either

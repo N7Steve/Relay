@@ -1,0 +1,13 @@
+# Build Relay from the checked-out Git revision instead of pulling a registry image.
+# Combine with compose.example.yml (or compose.example.ai.yml).
+x-relay-build: &relay_build
+  context: .
+  dockerfile: Dockerfile
+  args:
+    BUILD_COMMIT_SHA: ${RELAY_COMMIT_SHA:-}
+
+services:
+  web:
+    build: *relay_build
+  worker:
+    build: *relay_build

@@ -4,13 +4,11 @@ module Authentication
   included do
     before_action :set_request_details
     before_action :authenticate_user!
-    before_action :set_sentry_user
   end
 
   class_methods do
     def skip_authentication(**options)
       skip_before_action :authenticate_user!, **options
-      skip_before_action :set_sentry_user, **options
     end
   end
 
@@ -74,18 +72,5 @@ module Authentication
     def set_request_details
       Current.user_agent = request.user_agent
       Current.ip_address = request.ip
-    end
-
-    def set_sentry_user
-      return unless defined?(Sentry) && ENV["SENTRY_DSN"].present?
-
-      if Current.user
-        Sentry.set_user(
-          id: Current.user.id,
-          email: Current.user.email,
-          username: Current.user.display_name,
-          ip_address: Current.ip_address
-        )
-      end
     end
 end

@@ -16,10 +16,10 @@ void main() {
   });
 
   group('TelemetryService', () {
-    test('runs app normally when no Sentry DSN is configured', () async {
+    test('runs app normally even when legacy Sentry configuration is supplied', () async {
       final service = TelemetryService(
         config: const TelemetryConfig(
-          dsn: '',
+          dsn: 'https://legacy@example.test/1',
           environment: 'test',
           release: '',
           tracesSampleRate: 0.25,
@@ -33,6 +33,7 @@ void main() {
       });
 
       expect(appStarted, isTrue);
+      expect(service.isConfigured, isFalse);
       expect(service.isActive, isFalse);
       expect(service.navigatorObservers, isEmpty);
     });

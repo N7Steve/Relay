@@ -1,24 +1,30 @@
-# Sure design tokens
+# Relay design tokens
 
 This is where the design system actually lives. Tailwind reads from here, and any external tooling (Figma Tokens Studio, AI design tools, anything that shows up later) is meant to read the same JSON.
 
 ## Files
 
-- `design/tokens/sure.tokens.json`: every token, hand-edited.
+- `design/tokens/relay.tokens.json`: every token, hand-edited.
 - `bin/tokens.mjs`: plain Node script. Compiles the JSON into Tailwind v4 CSS.
-- `app/assets/tailwind/sure-design-system/_generated.css`: the build output. Generated, do not edit by hand.
+- `app/assets/tailwind/relay-design-system/_generated.css`: the build output. Generated, do not edit by hand.
+- `mobile/tool/generate_relay_tokens.mjs`: compiles the same source into
+  `mobile/lib/theme/sure_tokens.dart`. The Flutter class/file names remain
+  compatible with the existing client until its identity migration.
 
 ## Workflow
 
 ```bash
 # Edit a token:
-$EDITOR design/tokens/sure.tokens.json
+$EDITOR design/tokens/relay.tokens.json
 
-# Regenerate the CSS:
+# Regenerate web CSS and mobile Dart tokens:
 npm run tokens:build
 
-# Commit both files together:
-git add design/tokens/sure.tokens.json app/assets/tailwind/sure-design-system/_generated.css
+# Verify both outputs without changing files (also runs in CI):
+npm run tokens:check
+
+# Commit the source and both outputs together:
+git add design/tokens/relay.tokens.json app/assets/tailwind/relay-design-system/_generated.css mobile/lib/theme/sure_tokens.dart
 ```
 
 `bin/setup` runs the build automatically on a fresh checkout.
@@ -28,7 +34,7 @@ git add design/tokens/sure.tokens.json app/assets/tailwind/sure-design-system/_g
 The root `$version` field follows semver, scoped to the token contract:
 
 - **Major** (`X.0.0`): breaking changes — token removed or renamed, value type changed, dark variant removed, semantic meaning changed.
-- **Minor** (`1.X.0`): additive changes — new tokens, new `$extensions.sure.*` keys, new top-level groups.
+- **Minor** (`1.X.0`): additive changes — new tokens, new `$extensions.relay.*` keys, new top-level groups.
 - **Patch** (`1.0.X`): cosmetic / value tweaks that consumers don't need to know about — a hex shifts a few points without changing intent.
 
 Bump it when you commit. External consumers (Tokens Studio, future Figma sync, etc.) read this to decide whether their cached snapshot is stale.
@@ -47,7 +53,7 @@ The file uses the [W3C DTCG token format](https://design-tokens.github.io/commun
     "success": {
       "$value": "{color.green.600}",
       "$type": "color",
-      "$extensions": { "sure.dark": "{color.green.500}" }
+      "$extensions": { "relay.dark": "{color.green.500}" }
     }
   }
 }
@@ -65,15 +71,15 @@ The file uses the [W3C DTCG token format](https://design-tokens.github.io/commun
 | `animate` | named animations |
 | `utility` | Tailwind `@utility` blocks: semantic surfaces, foregrounds, borders, button backgrounds, etc. |
 
-### Custom `$extensions.sure.*`
+### Custom `$extensions.relay.*`
 
 | Extension | Where | What it does |
 |-----------|-------|--------------|
-| `sure.dark` | any token | Dark-mode override value. Same template syntax as `$value`. |
-| `sure.alpha` | reserved | Currently unused; alpha is expressed inline via `{ref\|N%}`. Reserved for structured alpha if it's ever needed. |
-| `sure.utility.prefix` | `utility.*` only | The Tailwind utility family (`bg`, `text`, `border`). Tells the build which `@apply` class to emit. |
-| `sure.utility.raw` | `utility.*` only | A CSS property name (`background-color`, `box-shadow`, etc.) when the utility emits raw CSS instead of `@apply`. |
-| `sure.compose` | `utility.*` only | Array of class names to `@apply`. For example, `bg-loader` is `["bg-surface-inset", "animate-pulse"]`. |
+| `relay.dark` | any token | Dark-mode override value. Same template syntax as `$value`. |
+| `relay.alpha` | reserved | Currently unused; alpha is expressed inline via `{ref\|N%}`. Reserved for structured alpha if it's ever needed. |
+| `relay.utility.prefix` | `utility.*` only | The Tailwind utility family (`bg`, `text`, `border`). Tells the build which `@apply` class to emit. |
+| `relay.utility.raw` | `utility.*` only | A CSS property name (`background-color`, `box-shadow`, etc.) when the utility emits raw CSS instead of `@apply`. |
+| `relay.compose` | `utility.*` only | Array of class names to `@apply`. For example, `bg-loader` is `["bg-surface-inset", "animate-pulse"]`. |
 
 ### Template strings
 
@@ -101,8 +107,8 @@ The pre-resolved alpha tints (`color.gray.tint-5`, `color.gray.tint-10`, `color.
 
 1. Pick the right top-level group.
 2. Add the `$value` (raw or `{ref}`) and `$type`.
-3. If it should change in dark mode, add `$extensions.sure.dark`.
-4. If it's a utility, add `$extensions.sure.utility.prefix` (or `raw`, or `compose`).
+3. If it should change in dark mode, add `$extensions.relay.dark`.
+4. If it's a utility, add `$extensions.relay.utility.prefix` (or `raw`, or `compose`).
 5. Run `npm run tokens:build`.
 6. Look at the diff in `_generated.css` and confirm it's what you expected.
 7. Commit both files.
@@ -111,15 +117,15 @@ The pre-resolved alpha tints (`color.gray.tint-5`, `color.gray.tint-10`, `color.
 
 - `color.gray.DEFAULT`: the `DEFAULT` segment is dropped in the CSS variable name (`--color-gray`, not `--color-gray-DEFAULT`). DTCG convention; matches Tailwind.
 - `utility.border-divider`: the value is a plain class string (`border-tertiary`) instead of a `{ref}`. The build treats values without `{}` as raw `@apply` arguments.
-- `utility.bg-overlay`: uses `sure.utility.raw: "background-color"` because it needs alpha rendering instead of `@apply`.
-- `utility.bg-loader`: uses `sure.compose` to apply two utilities together (`bg-surface-inset animate-pulse`).
-- `utility.*` with `sure.dark`: the value switches through a `--utility-<name>` variable, declared in `@theme` and overridden in the dark block like the color tokens, so pseudo-element variants (`placeholder:text-secondary`, `backdrop:bg-overlay`) get the dark value. A nested `@variant theme-dark` can't reach a pseudo-element. The light value stays as the utility's first declaration so Tailwind's sort order doesn't change: a plain utility on the same element still wins.
+- `utility.bg-overlay`: uses `relay.utility.raw: "background-color"` because it needs alpha rendering instead of `@apply`.
+- `utility.bg-loader`: uses `relay.compose` to apply two utilities together (`bg-surface-inset animate-pulse`).
+- `utility.*` with `relay.dark`: the value switches through a `--utility-<name>` variable, declared in `@theme` and overridden in the dark block like the color tokens, so pseudo-element variants (`placeholder:text-secondary`, `backdrop:bg-overlay`) get the dark value. A nested `@variant theme-dark` can't reach a pseudo-element. The light value stays as the utility's first declaration so Tailwind's sort order doesn't change: a plain utility on the same element still wins.
 - `utility.button-bg-ghost-hover`: its dark value is a multi-class string (`bg-gray-800 text-inverse`), not a single ref. The build accepts both forms, but a class list can't be a variable, so this one keeps the nested `@variant theme-dark` and doesn't get its dark value under a pseudo-element variant.
 
 ## Consumers
 
 - Rails / Tailwind: via the generated CSS, automatically.
-- Lookbook reference page: `/design-system/inspect/design_tokens/*` reads `sure.tokens.json` at request time.
+- Lookbook reference page: `/design-system/inspect/design_tokens/*` reads `relay.tokens.json` at request time.
 - External tools (Figma Tokens Studio, AI design tools, etc.): point them at this file.
 
 If a consumer wants a different shape, transform the JSON in their tooling rather than editing the source here.
