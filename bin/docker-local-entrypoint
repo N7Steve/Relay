@@ -3,8 +3,8 @@ require "uri"
 
 database = URI.parse(ENV.fetch("DATABASE_URL", ""))
 unless ENV["RAILS_ENV"] == "development" && ENV["DB_HOST"] == "db" &&
-    ENV["POSTGRES_DB"] == "sure_local" && database.host == "db" &&
-    database.path == "/sure_local" && ENV["REDIS_URL"] == "redis://redis:6379/0"
+    ENV["POSTGRES_DB"] == "relay_local" && database.host == "db" &&
+    database.path == "/relay_local" && ENV["REDIS_URL"] == "redis://redis:6379/0"
   abort "This runner only operates against its isolated Docker development services."
 end
 

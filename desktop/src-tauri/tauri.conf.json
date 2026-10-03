@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Sure",
+  "productName": "Relay",
   "version": "0.1.0",
   "identifier": "app.sure.desktop",
   "build": {
@@ -16,7 +16,7 @@
       {
         "label": "main",
         "create": false,
-        "title": "Sure",
+        "title": "Relay",
         "width": 1200,
         "height": 800,
         "minWidth": 900,

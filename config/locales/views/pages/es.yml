@@ -28,7 +28,7 @@ es:
       title: Novedades
     release_notes_unavailable:
       name: Notas de la versión no disponibles
-      body_html: <p>No se han podido obtener las últimas notas de la versión en este momento. Vuelve a intentarlo más tarde o visita directamente nuestra <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>página de versiones en GitHub</a>.</p>
+      body_html: <p>No se han podido obtener las últimas notas de la versión en este momento. Vuelve a intentarlo más tarde o visita directamente nuestra <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>página de versiones en GitHub</a>.</p>
     privacy:
       title: Política de privacidad
       heading: Política de privacidad

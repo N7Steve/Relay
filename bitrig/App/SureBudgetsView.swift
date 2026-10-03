@@ -38,7 +38,7 @@ struct SureBudgetsView: View {
             ContentUnavailableView(
               "No budgets yet",
               systemImage: "chart.pie",
-              description: Text("Create a budget in Sure to track it here.")
+              description: Text("Create a budget in Relay to track it here.")
             )
           }
         }

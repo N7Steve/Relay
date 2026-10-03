@@ -7,11 +7,11 @@ class ReleaseHighlightsTest < ActiveSupport::TestCase
   end
 
   test "pending tag when the deployed release is unseen" do
-    assert_equal Sure.version.to_release_tag, ReleaseHighlights.pending_tag_for(@user)
+    assert_equal Relay.version.to_release_tag, ReleaseHighlights.pending_tag_for(@user)
   end
 
   test "no pending tag once the deployed release was seen" do
-    @user.mark_release_seen!(Sure.version.to_release_tag)
+    @user.mark_release_seen!(Relay.version.to_release_tag)
 
     assert_nil ReleaseHighlights.pending_tag_for(@user)
   end
@@ -19,7 +19,7 @@ class ReleaseHighlightsTest < ActiveSupport::TestCase
   test "pending tag returns when only a different release was seen" do
     @user.mark_release_seen!("v0.0.0-some-older-release")
 
-    assert_equal Sure.version.to_release_tag, ReleaseHighlights.pending_tag_for(@user)
+    assert_equal Relay.version.to_release_tag, ReleaseHighlights.pending_tag_for(@user)
   end
 
   test "no pending tag without a user" do
@@ -27,7 +27,7 @@ class ReleaseHighlightsTest < ActiveSupport::TestCase
   end
 
   test "unparseable local version yields no pending tag" do
-    Sure.stubs(:version).raises(ArgumentError)
+    Relay.stubs(:version).raises(ArgumentError)
 
     assert_nil ReleaseHighlights.pending_tag_for(@user)
   end

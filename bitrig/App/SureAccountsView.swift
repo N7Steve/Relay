@@ -15,7 +15,7 @@ struct SureAccountsView: View {
             ContentUnavailableView(
               "No accounts",
               systemImage: "building.columns",
-              description: Text("Add or link an account in Sure, then pull to refresh.")
+              description: Text("Add or link an account in Relay, then pull to refresh.")
             )
           }
         }

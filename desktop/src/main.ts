@@ -23,7 +23,7 @@ function goToServer(url: string) {
 }
 
 function fill() {
-  ($("logo") as HTMLImageElement).src = new URL("./assets/logomark.svg", import.meta.url).href;
+  ($("logo") as HTMLImageElement).src = new URL("./assets/logomark.png", import.meta.url).href;
   $("title").textContent = S.title;
   $("url-label").textContent = S.serverLabel;
   ($("server-url") as HTMLInputElement).placeholder = S.urlPlaceholder;
