@@ -38,7 +38,7 @@ class Provider::Fio < Provider
   # sync only ever spends one request. Callers treat RateLimitError as "try next sync".
   MIN_REQUEST_INTERVAL = 30.0
 
-  headers "User-Agent" => "Sure Finance Fio Client (https://github.com/we-promise/sure)"
+  headers "User-Agent" => "Relay Finance Fio Client (https://github.com/N7Steve/Relay)"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   RETRYABLE_ERRORS = [

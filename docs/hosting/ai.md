@@ -1778,13 +1778,13 @@ Upgrading: deployments that set only the URL and token keep working. When no age
 - [Ollama Documentation](https://github.com/ollama/ollama)
 - [OpenRouter Documentation](https://openrouter.ai/docs)
 - [Langfuse Documentation](https://langfuse.com/docs)
-- [Sure GitHub Repository](https://github.com/we-promise/sure)
+- [Relay GitHub Repository](https://github.com/N7Steve/Relay)
 
 ## Support
 
 For issues with AI features:
 1. Check this documentation first
-2. Search [existing GitHub issues](https://github.com/we-promise/sure/issues)
+2. Search [existing GitHub issues](https://github.com/N7Steve/Relay/issues)
 3. Open a new issue with:
    - Your configuration (redact API keys!)
    - Error messages

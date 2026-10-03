@@ -10,7 +10,7 @@ RSpec.configure do |config|
     'openapi.yaml' => {
       openapi: '3.0.3',
       info: {
-        title: 'Sure API',
+        title: 'Relay API',
         version: 'v1',
         description: 'OpenAPI documentation generated from executable request specs.'
       },
@@ -1075,10 +1075,13 @@ RSpec.configure do |config|
           },
           ImportVerificationReadback: {
             type: :object,
-            description: 'SureImport only. Expected NDJSON counts compared to family-scoped database readback after publish.',
+            description: 'RelayImport/SureImport backups only. Legacy imports compare NDJSON counts against database readback. Full snapshots verify restored attributes and original attachment bytes.',
             properties: {
               status: { type: :string, enum: %w[not_verified matched mismatch failed reverted] },
               checked_at: { type: :string, format: :'date-time', nullable: true },
+              verified_records: { type: :integer, minimum: 0, description: 'Full snapshots only. Restored records whose attributes were verified, including the family.' },
+              verified_attachments: { type: :integer, minimum: 0, description: 'Full snapshots only. Original files whose metadata and bytes were verified.' },
+              warnings: { type: :array, items: { '$ref' => '#/components/schemas/BackupRestoreWarning' } },
               expected_record_counts: {
                 type: :object,
                 additionalProperties: { type: :integer }
@@ -1115,7 +1118,7 @@ RSpec.configure do |config|
           },
           ImportVerification: {
             type: :object,
-            description: 'SureImport only. Captured at upload and completed after import publish.',
+            description: 'RelayImport/SureImport backups only. Captured at upload and completed after import publish.',
             required: %w[expected_record_counts readback],
             properties: {
               expected_record_counts: {
@@ -1123,6 +1126,15 @@ RSpec.configure do |config|
                 additionalProperties: { type: :integer }
               },
               readback: { '$ref' => '#/components/schemas/ImportVerificationReadback' }
+            }
+          },
+          BackupRestoreWarning: {
+            type: :object,
+            required: %w[code message],
+            properties: {
+              code: { type: :string },
+              message: { type: :string },
+              details: { type: :object, additionalProperties: true }
             }
           },
           ImportPreflightContent: {
@@ -1154,12 +1166,12 @@ RSpec.configure do |config|
               valid_rows_count: {
                 type: :integer,
                 minimum: 0,
-                description: 'SureImport only. Valid NDJSON records.'
+                description: 'RelayImport/SureImport backups only. Valid NDJSON records.'
               },
               invalid_rows_count: {
                 type: :integer,
                 minimum: 0,
-                description: 'SureImport only. Invalid NDJSON records. CSV malformed content returns a 422 instead.'
+                description: 'RelayImport/SureImport backups only. Invalid NDJSON records. CSV malformed content returns a 422 instead.'
               },
               entity_counts: {
                 type: :object,
@@ -1327,7 +1339,7 @@ RSpec.configure do |config|
             required: %w[id type status chunks_count summary chunks created_at updated_at],
             properties: {
               id: { type: :string, format: :uuid },
-              type: { type: :string, enum: %w[SureImport] },
+              type: { type: :string, enum: Import::BACKUP_TYPES },
               status: { type: :string, enum: %w[pending importing complete failed] },
               client_session_id: { type: :string, nullable: true },
               expected_chunks: { type: :integer, nullable: true, minimum: 1 },

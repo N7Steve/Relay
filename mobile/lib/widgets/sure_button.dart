@@ -19,7 +19,7 @@ enum SureButtonSize { sm, md, lg }
 /// [loading]) renders a disabled button.
 ///
 /// Colors resolve from the active [SureColors] palette, so the button is
-/// brightness-aware and stays in lockstep with `sure.tokens.json`.
+/// brightness-aware and stays in lockstep with `relay.tokens.json`.
 class SureButton extends StatefulWidget {
   final String label;
 

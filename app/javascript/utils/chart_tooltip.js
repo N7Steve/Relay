@@ -12,7 +12,7 @@
 // (bg-inverse, aria-describedby, anchored to a static trigger). This is a
 // data-card surface created and updated inside D3 handler code.
 // The surface itself lives in the design system as `.chart-tooltip`
-// (sure-design-system/components.css): container bg, 10px radius, 12x14
+// (relay-design-system/components.css): container bg, 10px radius, 12x14
 // padding, hairline ring composed with a soft 8/24 drop shadow, 80ms
 // left/top glide. It's a component class because Tailwind shadow utilities
 // can't compose a ring with a custom drop shadow. This constant adds the

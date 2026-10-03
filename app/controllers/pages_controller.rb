@@ -94,8 +94,8 @@ class PagesController < ApplicationController
     # Fallback if no release notes are available
     if @release_notes.nil?
       @release_notes = {
-        avatar: "https://github.com/we-promise.png",
-        username: "we-promise",
+        avatar: nil,
+        username: "N7Steve",
         name: t("pages.release_notes_unavailable.name"),
         published_at: Date.current,
         body: t("pages.release_notes_unavailable.body_html")

@@ -5,19 +5,19 @@
 # Usage examples:
 #   # Preview (no writes) a 45-day backfill for a single item
 #   # NOTE: Use your real item id
-#   bin/rails 'sure:simplefin:backfill_extra[item_id=ec255931-62ff-4a68-abda-16067fad0429,days=45,dry_run=true]'
+#   bin/rails 'relay:simplefin:backfill_extra[item_id=ec255931-62ff-4a68-abda-16067fad0429,days=45,dry_run=true]'
 #
 #   # Execute the backfill (writes enabled)
-#   bin/rails 'sure:simplefin:backfill_extra[item_id=ec255931-62ff-4a68-abda-16067fad0429,days=45,dry_run=false]'
+#   bin/rails 'relay:simplefin:backfill_extra[item_id=ec255931-62ff-4a68-abda-16067fad0429,days=45,dry_run=false]'
 #
 #   # Limit to a single linked account by Account ID (UUID from your UI/db)
-#   bin/rails 'sure:simplefin:backfill_extra[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,days=30,dry_run=false]'
+#   bin/rails 'relay:simplefin:backfill_extra[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,days=30,dry_run=false]'
 #
 #   # Clean up known demo entries for a specific account (dry-run first)
-#   bin/rails 'sure:simplefin:cleanup_demo_entries[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,dry_run=true]'
-#   bin/rails 'sure:simplefin:cleanup_demo_entries[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,dry_run=false]'
+#   bin/rails 'relay:simplefin:cleanup_demo_entries[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,dry_run=true]'
+#   bin/rails 'relay:simplefin:cleanup_demo_entries[account_id=8b46387c-5aa4-4a92-963a-4392c10999c9,dry_run=false]'
 
-namespace :sure do
+namespace :relay do
   namespace :simplefin do
     desc "Backfill transactions.extra for SimpleFin imports over a recent window. Args (named): item_id, account_id, days=30, dry_run=true, force=false"
     task :backfill_extra, [ :item_id, :account_id, :days, :dry_run, :force ] => :environment do |_, args|

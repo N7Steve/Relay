@@ -12,7 +12,7 @@ import '../theme/sure_tokens.dart';
 ///
 /// It builds a complete [InputDecoration] from the active [SureColors] palette
 /// (rather than leaning on theme defaults), so the chrome is brightness-aware,
-/// self-contained, and stays in lockstep with `sure.tokens.json`.
+/// self-contained, and stays in lockstep with `relay.tokens.json`.
 ///
 /// ```dart
 /// SureTextField(

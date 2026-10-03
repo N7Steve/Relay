@@ -17,7 +17,7 @@ class ReleaseHighlightsController < ApplicationController
   # client passes the tag it displayed; when absent we fall back to the
   # currently deployed tag.
   def dismiss
-    tag = params[:tag].presence || Sure.version.to_release_tag
+    tag = params[:tag].presence || Relay.version.to_release_tag
     Current.user.mark_release_seen!(tag)
 
     head :ok

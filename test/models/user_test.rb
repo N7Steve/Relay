@@ -425,13 +425,19 @@ class UserTest < ActiveSupport::TestCase
     assert_not user.verify_otp?("deadbeef")
   end
 
+  test "existing authenticator codes remain valid after the Relay issuer label change" do
+    user = users(:family_admin)
+    user.setup_mfa!
+    assert user.verify_otp?(ROTP::TOTP.new(user.otp_secret, issuer: "Sure Finances").now)
+  end
+
   test "provisioning_uri generates correct URI" do
     user = users(:family_member)
     user.setup_mfa!
 
     assert_match %r{otpauth://totp/}, user.provisioning_uri
     assert_match %r{secret=#{user.otp_secret}}, user.provisioning_uri
-    assert_match %r{issuer=Sure}, user.provisioning_uri
+    assert_match %r{issuer=Relay}, user.provisioning_uri
   end
 
   test "ai_available? returns true when openai access token set in settings" do
@@ -1186,7 +1192,7 @@ class UserTest < ActiveSupport::TestCase
     admin_session = admin.sessions.create!(active_impersonator_session: impersonation)
 
     # UserPurgeJob may run before the admin's next request notices the
-    # target is gone — dependent: :destroy on User#impersonated_support_sessions
+    # target is gone â€” dependent: :destroy on User#impersonated_support_sessions
     # destroys the ImpersonationSession row underneath the admin's still-live
     # Session. Without ON DELETE SET NULL on that FK, this raises
     # ActiveRecord::InvalidForeignKey instead of completing the purge.
@@ -1301,7 +1307,7 @@ class UserTest < ActiveSupport::TestCase
       scopes: "read_write",
       expires_in: 1.year
     )
-    # An unexchanged authorization code — the step before a token is minted,
+    # An unexchanged authorization code â€” the step before a token is minted,
     # which /oauth/token would otherwise still accept post-deactivation.
     grant = Doorkeeper::AccessGrant.create!(
       application: app,
