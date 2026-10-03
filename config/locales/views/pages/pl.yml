@@ -158,7 +158,7 @@ pl:
       why_required_title: Dlaczego Redis jest wymagany?
     release_notes_unavailable:
       body_html: "<p>Nie udało się teraz pobrać najnowszych informacji o wydaniu.
-        Spróbuj ponownie później albo odwiedź bezpośrednio naszą <a href='https://github.com/we-promise/sure/releases'
+        Spróbuj ponownie później albo odwiedź bezpośrednio naszą <a href='https://github.com/N7Steve/Relay/releases'
         target='_blank' rel='noopener noreferrer'>stronę wydań na GitHubie</a>.</p>"
       name: Informacje o wydaniu niedostępne
     terms:

@@ -104,6 +104,9 @@ jobs:
       - name: Lint/Format js code
         run: npm run lint
 
+      - name: Verify generated web and mobile design tokens
+        run: npm run tokens:check
+
   test_unit:
     runs-on: ubuntu-latest
     timeout-minutes: 10

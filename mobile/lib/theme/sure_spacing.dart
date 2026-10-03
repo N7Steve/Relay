@@ -2,7 +2,7 @@
 ///
 /// Mirrors the Tailwind spacing defaults the web design system relies on
 /// (`1rem = 16px`, so each step is `value * 4px`). Hand-authored rather than
-/// generated from `design/tokens/sure.tokens.json` because spacing is not part
+/// generated from `design/tokens/relay.tokens.json` because spacing is not part
 /// of the canonical token file — it comes from Tailwind's built-in scale, which
 /// is stable and shared across the web and mobile apps.
 ///

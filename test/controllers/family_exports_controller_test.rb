@@ -140,11 +140,15 @@ class FamilyExportsControllerTest < ActionDispatch::IntegrationTest
   test "admin can view export list" do
     export1 = @family.family_exports.create!(status: "completed")
     export2 = @family.family_exports.create!(status: "processing")
+    export1.export_file.attach(
+      io: StringIO.new("legacy backup"), filename: "sure_export_20240115_143000.zip", content_type: "application/zip"
+    )
 
     get family_exports_path
     assert_response :success
 
     assert_match export1.filename, response.body
+    assert_match export2.filename, response.body
     assert_match "Exporting...", response.body
     assert_select "h2", text: "Full backup"
     assert_select "h2", text: "Custom transaction export"

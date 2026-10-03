@@ -38,6 +38,9 @@ RUN bundle install \
 # Copy application code
 COPY . .
 
+# Normalize executable scripts copied from a Windows checkout.
+RUN find bin -type f -exec sed -i 's/\r$//' {} + && chmod +x bin/*
+
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile -j 0 app/ lib/
 

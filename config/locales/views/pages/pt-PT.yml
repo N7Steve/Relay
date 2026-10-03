@@ -28,7 +28,7 @@ pt-PT:
       title: Novidades
     release_notes_unavailable:
       name: Notas de versão indisponíveis
-      body_html: "<p>Não foi possível obter as notas de versão mais recentes neste momento. Volte mais tarde ou visite a nossa <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>página de versões do GitHub</a> diretamente.</p>"
+      body_html: "<p>Não foi possível obter as notas de versão mais recentes neste momento. Volte mais tarde ou visite a nossa <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>página de versões do GitHub</a> diretamente.</p>"
     privacy:
       title: Política de Privacidade
       heading: Política de Privacidade

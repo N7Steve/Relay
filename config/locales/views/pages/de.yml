@@ -121,5 +121,5 @@ de:
       why_required_body: 'Relay nutzt Redis für die Sidekiq-Hintergrundjobs: Kontodaten abgleichen, Importe verarbeiten und alles andere, was deine Finanzdaten aktuell hält.'
       why_required_title: Wofür braucht Relay Redis?
     release_notes_unavailable:
-      body_html: "<p>Die aktuellen Release Notes lassen sich gerade nicht abrufen. Versuch es später noch einmal oder öffne direkt unsere <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>GitHub-Release-Seite</a>.</p>"
+      body_html: "<p>Die aktuellen Release Notes lassen sich gerade nicht abrufen. Versuch es später noch einmal oder öffne direkt unsere <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>GitHub-Release-Seite</a>.</p>"
       name: Release Notes nicht verfügbar

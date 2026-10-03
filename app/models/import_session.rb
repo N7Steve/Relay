@@ -4,7 +4,7 @@ class ImportSession < ApplicationRecord
   ConflictError = Class.new(StandardError)
   EnqueueError = Class.new(StandardError)
 
-  IMPORT_TYPES = %w[SureImport].freeze
+  IMPORT_TYPES = Import::BACKUP_TYPES
   STATUSES = %w[pending importing complete failed].freeze
 
   belongs_to :family
@@ -101,27 +101,22 @@ class ImportSession < ApplicationRecord
   end
 
   def self.create_or_find_for!(family:, import_type:, client_session_id:, expected_chunks:)
-    import_type = import_type.presence || "SureImport"
+    import_type = import_type.presence || "RelayImport"
     expected_chunks = normalize_positive_integer(expected_chunks)
     unless IMPORT_TYPES.include?(import_type)
       session = new(import_type: import_type)
-      session.errors.add(:import_type, "must be SureImport")
+      session.errors.add(:import_type, "must be RelayImport or SureImport")
       raise ActiveRecord::RecordInvalid.new(session)
     end
 
     if client_session_id.present?
       session = family.import_sessions.find_or_initialize_by(client_session_id: client_session_id)
-      if session.persisted? &&
-         expected_chunks.present? &&
-         session.expected_chunks.present? &&
-         session.expected_chunks != expected_chunks
-        raise ConflictError, "client_session_id already exists with a different expected_chunks value"
-      end
+      return reconcile_existing_session!(session, expected_chunks) if session.persisted?
     else
       session = family.import_sessions.build
     end
 
-    session.import_type = import_type
+    session.import_type = "RelayImport"
     session.expected_chunks ||= expected_chunks
     session.save!
     session
@@ -131,17 +126,19 @@ class ImportSession < ApplicationRecord
     existing = family.import_sessions.find_by(client_session_id: client_session_id)
     raise unless existing
 
-    if expected_chunks.present? &&
-       existing.expected_chunks.present? &&
-       existing.expected_chunks != expected_chunks
-      raise ConflictError, "client_session_id already exists with a different expected_chunks value"
-    end
-    if expected_chunks.present? && existing.expected_chunks.nil?
-      existing.update!(expected_chunks: expected_chunks)
-    end
-
-    existing
+    reconcile_existing_session!(existing, expected_chunks)
   end
+
+  def self.reconcile_existing_session!(session, expected_chunks)
+    session.with_lock do
+      if expected_chunks.present? && session.expected_chunks.present? && session.expected_chunks != expected_chunks
+        raise ConflictError, "client_session_id already exists with a different expected_chunks value"
+      end
+      session.update!(expected_chunks: expected_chunks) if expected_chunks.present? && session.expected_chunks.nil?
+    end
+    session
+  end
+  private_class_method :reconcile_existing_session!
 
   def self.normalize_positive_integer(value)
     return if value.blank?
@@ -213,7 +210,7 @@ class ImportSession < ApplicationRecord
   def create_chunk!(sequence:, client_chunk_id:, checksum:, content:, filename:, content_type:)
     imports.create!(
       family: family,
-      type: "SureImport",
+      type: import_type,
       sequence: sequence,
       client_chunk_id: client_chunk_id,
       checksum: checksum
@@ -301,6 +298,8 @@ class ImportSession < ApplicationRecord
     end
 
     def enqueue_family_sync
+      return if imports.any?(&:full_backup?)
+
       family.sync_later
     rescue => error
       update!(error_details: sync_enqueue_error_details)
@@ -404,6 +403,9 @@ class ImportSession < ApplicationRecord
 
     def validate_publishable_chunks!
       raise ConflictError, "import session has no chunks" unless imports.exists?
+      if imports.any?(&:full_backup?) && imports.count > 1
+        raise ConflictError, "A full backup must be restored as a single self-contained chunk"
+      end
       raise Import::MaxRowCountExceededError if row_count_exceeded?
       validate_expected_chunk_sequences!
     end
@@ -466,6 +468,7 @@ class ImportSession < ApplicationRecord
 
     def merge_summary!(totals, summary)
       summary.each do |entity_type, counts|
+        next if entity_type == "backup_restore"
         next unless counts.respond_to?(:each)
 
         totals[entity_type] ||= {}

@@ -10,7 +10,7 @@ class Provider::Wise
   # stay safely within the limit while covering the full requested range.
   MAX_STATEMENT_DAYS = 468
 
-  headers "User-Agent" => "Sure Finance Wise Client"
+  headers "User-Agent" => "Relay Finance Wise Client"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   # Wise header carrying the one-time-token challenge on a 403 that requires
