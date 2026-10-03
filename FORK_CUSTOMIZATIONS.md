@@ -128,6 +128,8 @@ explícitas, usan `relay_production`/`relay_user` y permiten build desde Git con
 `compose.source.yml`. La instalación Sure de TrueNAS 25.10.4 no se modifica.
 Los clientes web/PWA, Flutter, Tauri y Apple conservan sus funciones, reciben
 marca Relay y mantienen paquetes, callbacks e identificadores externos actuales.
+El CI de Helm heredado está archivado en `docs/archive/sure/workflows/chart-ci.yml`;
+no reactivar checks que acoplen versiones Relay al chart Sure en el alcance Docker.
 La tarea de webhooks Plaid EU
 requiere destino HTTPS de la instalación, sin dominio alojado de Sure por defecto.
 Lectores históricos STI/GlobalID, identificadores Sophtron/asistente externos y

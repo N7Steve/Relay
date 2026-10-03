@@ -957,6 +957,13 @@ sus volúmenes. Para revertir este bloque de código puede usarse Git revert;
 tras admitir escrituras reales, el rollback de datos requiere el procedimiento
 del runbook y no consiste solamente en sustituir la imagen.
 
+La entrega se publica en `f9e46896d9fafcb502e62dea857fc8566ff60987`.
+El primer CI activa el workflow heredado de Helm por el cambio de versión y
+rechaza la diferencia respecto al chart Sure. Como Docker es el alcance elegido,
+se archiva `chart-ci.yml` en `docs/archive/sure/workflows/`: no se adapta ni
+publica el chart histórico para aparentar soporte Helm de Relay. Los workflows
+Rails y móvil permanecen activos; sus resultados remotos se verifican aparte.
+
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia
 activa a Sure esté sustituida o tenga una razón documentada para permanecer:
