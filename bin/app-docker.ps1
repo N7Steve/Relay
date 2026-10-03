@@ -31,7 +31,7 @@ if ($LASTEXITCODE -ne 0 -or "$osType".Trim() -ne 'linux') {
     throw 'Arranca Docker Desktop con contenedores Linux y vuelve a intentarlo.'
 }
 $composeArguments = @(
-    '--context', $activeContext, 'compose', '--project-name', 'sure-local',
+    '--context', $activeContext, 'compose', '--project-name', 'relay-local',
     '--project-directory', $repoRoot,
     '--env-file', (Join-Path $repoRoot 'docker/local.env'),
     '--file', (Join-Path $repoRoot 'compose.local.yml')
@@ -48,7 +48,7 @@ switch ($Task) {
     'start' {
         Invoke-LocalCompose -Arguments @('build', 'app')
         Invoke-LocalCompose -Arguments @('up', '--detach', '--wait', '--wait-timeout', '300')
-        Write-Host 'Sure listo en http://localhost:3000. Los datos locales se conservan al detenerlo.'
+        Write-Host 'Relay listo en http://localhost:3002. Los datos locales se conservan al detenerlo.'
         if (-not $NoBrowser) {
             $chromeCommand = Get-Command chrome -ErrorAction SilentlyContinue
             $chromePath = if ($chromeCommand) { $chromeCommand.Source } else { $null }
@@ -60,8 +60,8 @@ switch ($Task) {
                 )
                 $chromePath = $chromeCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
             }
-            if ($chromePath) { Start-Process -FilePath $chromePath -ArgumentList 'http://localhost:3000' }
-            else { Start-Process 'http://localhost:3000' }
+            if ($chromePath) { Start-Process -FilePath $chromePath -ArgumentList 'http://localhost:3002' }
+            else { Start-Process 'http://localhost:3002' }
         }
     }
 }

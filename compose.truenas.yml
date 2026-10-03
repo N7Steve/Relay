@@ -1,0 +1,145 @@
+# TrueNAS 25.10: Apps > Discover Apps > Install via YAML. App name: relay.
+# Fresh installation only. UI: http://<TRUENAS-IP>:3002
+# Updates: change BOTH the Git SHA below and BUILD_COMMIT_SHA to the same revision.
+# Preserve the app name, volume names and generated configuration when updating.
+x-relay-image: &relay_image
+  image: relay-local:0.1.0-caba5bf58
+  pull_policy: build
+  build:
+    context: https://github.com/N7Steve/Relay.git#caba5bf58823f8d2571bc8b1bd617a09c0775359
+    args:
+      BUILD_COMMIT_SHA: caba5bf58823f8d2571bc8b1bd617a09c0775359
+
+x-relay-env: &relay_env
+  RAILS_ENV: production
+  SELF_HOSTED: "true"
+  RAILS_FORCE_SSL: "false"
+  RAILS_ASSUME_SSL: "false"
+  RAILS_SERVE_STATIC_FILES: "true"
+  BINDING: 0.0.0.0
+  PORT: "3000"
+  POSTGRES_DB: relay_production
+  POSTGRES_USER: relay_user
+  DB_HOST: db
+  DB_PORT: "5432"
+  REDIS_URL: redis://redis:6379/1
+  ACTIVE_STORAGE_SERVICE: local
+
+services:
+  init:
+    <<: *relay_image
+    user: "0:0"
+    restart: "no"
+    entrypoint: [ruby, -e]
+    command:
+      - |
+        require "securerandom"
+        require "fileutils"
+        path = "/config/relay.env"
+        names = %w[POSTGRES_PASSWORD SECRET_KEY_BASE ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT]
+        if File.exist?(path)
+          values = File.read(path).lines.to_h { |line| line.strip.split("=", 2) }
+          abort "Incomplete persistent Relay configuration; restore its backup" unless names.all? { |name| values.fetch(name, "").match?(/\A[0-9a-f]{64,128}\z/) }
+        else
+          abort "Database already exists but Relay keys are missing; restore relay-config" if File.exist?("/database/PG_VERSION")
+          values = names.to_h { |name| [name, SecureRandom.hex(name == "SECRET_KEY_BASE" ? 64 : 32)] }
+          File.write("#{path}.new", values.map { |name, value| "#{name}=#{value}\n" }.join, mode: "w", perm: 0600)
+          File.rename("#{path}.new", path)
+        end
+        password_path = "/config/postgres-password"
+        File.write(password_path, values.fetch("POSTGRES_PASSWORD"), mode: "w", perm: 0600)
+        ["/config", path, password_path, "/rails/storage"].each { |item| File.chown(1000, 1000, item) }
+        File.chmod(0755, "/config")
+        File.chmod(0444, password_path)
+        puts "Relay persistent configuration ready (secrets not printed)"
+    volumes:
+      - relay-config:/config
+      - relay-storage:/rails/storage
+      - relay-postgres:/database:ro
+
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: relay_production
+      POSTGRES_USER: relay_user
+      POSTGRES_PASSWORD_FILE: /config/postgres-password
+    volumes:
+      - relay-postgres:/var/lib/postgresql/data
+      - relay-config:/config:ro
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7.4-bookworm
+    restart: unless-stopped
+    command: [redis-server, --appendonly, "yes"]
+    volumes:
+      - relay-redis:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web:
+    <<: *relay_image
+    restart: unless-stopped
+    environment: *relay_env
+    entrypoint: [/bin/bash, -ec]
+    command:
+      - |
+        set -a
+        . /config/relay.env
+        set +a
+        exec /rails/bin/docker-entrypoint ./bin/rails server
+    ports:
+      - "3002:3000"
+    volumes:
+      - relay-config:/config:ro
+      - relay-storage:/rails/storage
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --output, /dev/null, "http://127.0.0.1:3000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  worker:
+    <<: *relay_image
+    restart: unless-stopped
+    environment: *relay_env
+    entrypoint: [/bin/bash, -ec]
+    command:
+      - |
+        set -a
+        . /config/relay.env
+        set +a
+        exec /rails/bin/docker-entrypoint bundle exec sidekiq
+    volumes:
+      - relay-config:/config:ro
+      - relay-storage:/rails/storage
+    depends_on:
+      web:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  relay-config:
+  relay-postgres:
+  relay-storage:
+  relay-redis:

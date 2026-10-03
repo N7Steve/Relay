@@ -108,8 +108,8 @@ int _resolveColor(
 }) {
   final node = _nodeAt(tokens, path);
   final extensions = node[r'$extensions'] as Map<String, dynamic>?;
-  final value = dark && extensions != null && extensions['sure.dark'] != null
-      ? extensions['sure.dark'] as String
+  final value = dark && extensions != null && extensions['relay.dark'] != null
+      ? extensions['relay.dark'] as String
       : node[r'$value'] as String;
 
   return _resolveColorValue(tokens, value, dark: dark);
@@ -163,11 +163,11 @@ File _tokensFile() {
   var directory = Directory.current;
 
   for (var depth = 0; depth < 4; depth += 1) {
-    final file = File('${directory.path}/design/tokens/sure.tokens.json');
+    final file = File('${directory.path}/design/tokens/relay.tokens.json');
     if (file.existsSync()) return file;
 
     directory = directory.parent;
   }
 
-  throw StateError('Could not locate design/tokens/sure.tokens.json');
+  throw StateError('Could not locate design/tokens/relay.tokens.json');
 }

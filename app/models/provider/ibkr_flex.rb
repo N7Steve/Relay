@@ -17,7 +17,7 @@ class Provider::IbkrFlex
   end
 
   base_uri "https://ndcdyn.interactivebrokers.com/AccountManagement/FlexWebService"
-  headers "User-Agent" => "Sure Finance IBKR Flex Client"
+  headers "User-Agent" => "Relay Finance IBKR Flex Client"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   MAX_RETRIES = 3

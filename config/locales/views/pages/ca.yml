@@ -162,4 +162,4 @@ ca:
       title: Condicions del servei
     release_notes_unavailable:
       name: Notes de la versió no disponibles
-      body_html: <p>Ara mateix no es poden obtenir les notes de la versió més recents. Torna-ho a comprovar més tard o visita directament la nostra <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>pàgina de versions a GitHub</a>.</p>
+      body_html: <p>Ara mateix no es poden obtenir les notes de la versió més recents. Torna-ho a comprovar més tard o visita directament la nostra <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>pàgina de versions a GitHub</a>.</p>

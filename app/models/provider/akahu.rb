@@ -3,7 +3,7 @@ class Provider::Akahu
   extend SslConfigurable
 
   DEFAULT_BASE_URL = "https://api.akahu.io/v1".freeze
-  headers "User-Agent" => "Sure Finance Akahu Client"
+  headers "User-Agent" => "Relay Finance Akahu Client"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   attr_reader :app_token, :user_token

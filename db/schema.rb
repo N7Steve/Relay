@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -1410,7 +1410,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_190000) do
     t.jsonb "error_details", default: {}, null: false
     t.integer "expected_chunks"
     t.uuid "family_id", null: false
-    t.string "import_type", default: "SureImport", null: false
+    t.string "import_type", default: "RelayImport", null: false
     t.string "status", default: "pending", null: false
     t.jsonb "summary", default: {}, null: false
     t.datetime "updated_at", null: false
@@ -1420,7 +1420,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_190000) do
     t.index ["id", "family_id"], name: "idx_import_sessions_on_id_family", unique: true
     t.check_constraint "client_session_id IS NULL OR btrim(client_session_id::text) <> ''::text", name: "chk_import_sessions_client_session_id_present"
     t.check_constraint "expected_chunks IS NULL OR expected_chunks > 0", name: "chk_import_sessions_expected_chunks_positive"
-    t.check_constraint "import_type::text = 'SureImport'::text", name: "chk_import_sessions_import_type"
+    t.check_constraint "import_type::text = ANY (ARRAY['SureImport'::character varying::text, 'RelayImport'::character varying::text])", name: "chk_import_sessions_import_type"
     t.check_constraint "jsonb_typeof(error_details) = 'object'::text", name: "chk_import_sessions_error_details_object"
     t.check_constraint "jsonb_typeof(summary) = 'object'::text", name: "chk_import_sessions_summary_object"
     t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'importing'::character varying::text, 'complete'::character varying::text, 'failed'::character varying::text])", name: "chk_import_sessions_status"

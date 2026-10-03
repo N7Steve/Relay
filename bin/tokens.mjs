@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-// Sure design tokens build.
-// Reads design/tokens/sure.tokens.json (W3C DTCG-flavored), emits one Tailwind v4 CSS file.
+// Relay design tokens build.
+// Reads design/tokens/relay.tokens.json (W3C DTCG-flavored), emits one Tailwind v4 CSS file.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const TOKENS = resolve(ROOT, "design/tokens/sure.tokens.json");
-const OUT = resolve(ROOT, "app/assets/tailwind/sure-design-system/_generated.css");
+const TOKENS = resolve(ROOT, "design/tokens/relay.tokens.json");
+const OUT = resolve(ROOT, "app/assets/tailwind/relay-design-system/_generated.css");
 
 const HEADER = `/*
  * GENERATED — do not edit by hand.
- * Source: design/tokens/sure.tokens.json
+ * Source: design/tokens/relay.tokens.json
  * Build:  npm run tokens:build
  */
 `;
@@ -52,7 +52,7 @@ function assertKnownRef(ref, source) {
   if (VALID_PATHS && !VALID_PATHS.has(ref)) {
     throw new Error(
       `[tokens] Unknown token reference \`${source}\` (resolved path: \`${ref}\`). ` +
-      `Add it to design/tokens/sure.tokens.json or fix the typo.`
+      `Add it to design/tokens/relay.tokens.json or fix the typo.`
     );
   }
 }
@@ -106,14 +106,14 @@ function build() {
       const name = path.slice(1).join("-");
       const ext = node.$extensions || {};
 
-      if (ext["sure.compose"]) {
-        utilityBlocks.push(`@utility ${name} {\n  @apply ${ext["sure.compose"].join(" ")};\n}`);
+      if (ext["relay.compose"]) {
+        utilityBlocks.push(`@utility ${name} {\n  @apply ${ext["relay.compose"].join(" ")};\n}`);
         continue;
       }
 
-      const prefix = ext["sure.utility"]?.prefix;
-      const raw = ext["sure.utility"]?.raw;
-      const dark = ext["sure.dark"];
+      const prefix = ext["relay.utility"]?.prefix;
+      const raw = ext["relay.utility"]?.raw;
+      const dark = ext["relay.dark"];
 
       const lightLine = raw
         ? `${raw}: ${resolveTemplate(node.$value)};`
@@ -148,7 +148,7 @@ function build() {
     const name = varName(path);
     themeLines.push(`  ${name}: ${resolveTemplate(node.$value)};`);
 
-    const dark = node.$extensions?.["sure.dark"];
+    const dark = node.$extensions?.["relay.dark"];
     if (dark !== undefined) {
       darkLines.push(`    ${name}: ${resolveTemplate(dark)};`);
     }
@@ -169,6 +169,20 @@ ${darkLines.join("\n")}
 
 ${utilityBlocks.join("\n\n")}
 `;
+
+  if (process.argv.includes("--check")) {
+    let existing;
+    try {
+      existing = readFileSync(OUT, "utf8").replace(/\r\n/g, "\n");
+    } catch (err) {
+      if (err.code !== "ENOENT") throw err;
+    }
+    if (existing !== css) {
+      throw new Error("[tokens] Generated CSS is missing or stale. Run npm run tokens:build.");
+    }
+    console.log("[tokens] generated CSS is current");
+    return;
+  }
 
   writeFileSync(OUT, css);
   console.log(`tokens → ${OUT.replace(ROOT + "/", "")} (${themeLines.length} variables, ${darkLines.length} dark overrides, ${utilityBlocks.length} utilities)`);

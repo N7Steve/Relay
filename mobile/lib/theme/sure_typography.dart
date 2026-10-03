@@ -2,7 +2,7 @@
 ///
 /// Mirrors the Tailwind font-size defaults the web design system uses. Like
 /// [SureSpacing], this is hand-authored rather than generated from
-/// `design/tokens/sure.tokens.json` because the type scale comes from Tailwind's
+/// `design/tokens/relay.tokens.json` because the type scale comes from Tailwind's
 /// built-in `text-*` ramp, not the canonical token file.
 ///
 /// Values are font sizes in logical pixels; the comment on each records the

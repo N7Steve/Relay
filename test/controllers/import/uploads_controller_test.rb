@@ -11,6 +11,22 @@ class Import::UploadsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "Relay STI records upload NDJSON through the backup workflow" do
+    import = @user.family.imports.create!(type: "RelayImport")
+    get import_upload_url(import)
+    assert_response :success
+    assert_select "input[name='import[ndjson_file]']", count: 1
+
+    content = '{"type":"Account","data":{"id":"upload","name":"Checking"}}'
+    file = Rack::Test::UploadedFile.new(StringIO.new(content), "application/x-ndjson", original_filename: "all.ndjson")
+    patch import_upload_url(import), params: { import: { ndjson_file: file } }
+
+    assert_redirected_to import_url(import)
+    assert_equal content, import.reload.ndjson_file.download
+    assert_equal 1, import.rows_count
+    assert_equal "RelayImport", import.type
+  end
+
   test "uploads valid csv by copy and pasting" do
     patch import_upload_url(@import), params: {
       import: {
