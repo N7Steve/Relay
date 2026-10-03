@@ -38,6 +38,8 @@ class SureImportTest < ActiveSupport::TestCase
 
   test "max_row_count is higher than standard imports" do
     with_env_overrides(
+      "RELAY_IMPORT_MAX_ROWS" => nil,
+      "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => nil,
       "SURE_IMPORT_MAX_ROWS" => nil,
       "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => nil
     ) do
@@ -48,11 +50,41 @@ class SureImportTest < ActiveSupport::TestCase
 
   test "max row count and ndjson size can be configured by environment" do
     with_env_overrides(
-      "SURE_IMPORT_MAX_ROWS" => "150000",
-      "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "64"
+      "RELAY_IMPORT_MAX_ROWS" => "150000",
+      "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => "64"
     ) do
       assert_equal 150_000, SureImport.max_row_count
       assert_equal 64.megabytes, SureImport.max_ndjson_size
+    end
+  end
+
+  test "obsolete import limits are ignored" do
+    with_env_overrides("RELAY_IMPORT_MAX_ROWS" => nil, "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => nil,
+      "SURE_IMPORT_MAX_ROWS" => "1", "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "1") do
+      assert_equal 100_000, SureImport.max_row_count
+      assert_equal 500.megabytes, SureImport.max_ndjson_size
+    end
+  end
+
+  test "Relay import limits take precedence over legacy Sure limits" do
+    with_env_overrides(
+      "RELAY_IMPORT_MAX_ROWS" => "120000", "SURE_IMPORT_MAX_ROWS" => "150000",
+      "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => "32", "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "64"
+    ) do
+      assert_equal 120_000, SureImport.max_row_count
+      assert_equal 32.megabytes, SureImport.max_ndjson_size
+    end
+  end
+
+  test "invalid or blank Relay import limits use defaults instead of legacy values" do
+    [ "", "0", "-1", "invalid" ].each do |value|
+      with_env_overrides(
+        "RELAY_IMPORT_MAX_ROWS" => value, "SURE_IMPORT_MAX_ROWS" => "150000",
+        "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => value, "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "64"
+      ) do
+        assert_equal 100_000, SureImport.max_row_count
+        assert_equal 500.megabytes, SureImport.max_ndjson_size
+      end
     end
   end
 

@@ -2,8 +2,8 @@ class Provider::Github
   attr_reader :name, :owner, :branch, :client
 
   def initialize
-    @name = "sure"
-    @owner = "we-promise"
+    @name = "Relay"
+    @owner = "N7Steve"
     @branch = "main"
     @client = Octokit::Client.new(
       connection_options: {
@@ -16,7 +16,7 @@ class Provider::Github
   end
 
   def fetch_latest_release_notes
-    fetch_cached_release_notes("latest_github_release_notes") do
+    fetch_cached_release_notes("github_release_notes/#{repo}/latest") do
       client.releases(repo).first
     end
   end
@@ -25,7 +25,7 @@ class Provider::Github
   # "What's new" highlight always reflects the deployed build rather than
   # whatever happens to be the newest release on GitHub.
   def fetch_release_notes(tag)
-    fetch_cached_release_notes("github_release_notes_#{tag}") do
+    fetch_cached_release_notes("github_release_notes/#{repo}/#{tag}") do
       client.release_for_tag(repo, tag)
     end
   end

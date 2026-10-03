@@ -82,7 +82,7 @@ class Provider::Trading212
       {
         "Authorization" => "Basic #{encoded}",
         "Content-Type" => "application/json",
-        "User-Agent" => "Sure Finance Trading 212 Client"
+        "User-Agent" => "Relay Finance Trading 212 Client"
       }
     end
 

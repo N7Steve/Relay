@@ -15,6 +15,96 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
     Redis.new.del("api_rate_limit:#{@read_only_api_key.id}")
   end
 
+  test "Relay sessions remain idempotent across both names and publish Relay chunks" do
+    params = { type: "RelayImport", client_session_id: "relay-compatible-session", expected_chunks: 2 }
+    post api_v1_import_sessions_url, params: params, headers: api_headers(@api_key)
+    assert_response :created
+    data = JSON.parse(response.body)["data"]
+    assert_equal "RelayImport", data["type"]
+    session = @family.import_sessions.find(data["id"])
+
+    [ entity_records, transaction_records ].each_with_index do |records, index|
+      post chunks_api_v1_import_session_url(session), params: { sequence: index + 1, raw_file_content: build_ndjson(records) }, headers: api_headers(@api_key)
+      assert_response :created
+    end
+
+    assert_no_difference("ImportSession.count") do
+      post api_v1_import_sessions_url, params: params.merge(type: "SureImport"), headers: api_headers(@api_key)
+    end
+    assert_response :created
+    assert_equal session.id, JSON.parse(response.body).dig("data", "id")
+    assert_equal [ "RelayImport", "RelayImport" ], session.imports.pluck(:type)
+
+    post api_v1_import_sessions_url, params: params.merge(expected_chunks: 3), headers: api_headers(@api_key)
+    assert_response :conflict
+    assert_equal 2, session.reload.expected_chunks
+
+    perform_enqueued_jobs(only: ImportSessionJob) do
+      post publish_api_v1_import_session_url(session), headers: api_headers(@api_key)
+    end
+    assert_response :accepted
+    assert session.reload.complete?, session.error_details.inspect
+    assert_equal 1, session.summary.dig("transactions", "created")
+    assert_equal "API Groceries", @family.entries.find_by!(name: "API Grocery Run").entryable.category.name
+  end
+
+  test "Relay session alias preserves authentication and write scope requirements" do
+    assert_no_difference("ImportSession.count") do
+      post api_v1_import_sessions_url, params: { type: "RelayImport" }
+      assert_response :unauthorized
+
+      post api_v1_import_sessions_url, params: { type: "RelayImport" }, headers: api_headers(@read_only_api_key)
+      assert_response :forbidden
+    end
+  end
+
+  test "omitted type creates a Relay session and returns its stored type" do
+    post api_v1_import_sessions_url, params: { expected_chunks: 1 }, headers: api_headers(@api_key)
+
+    assert_response :created
+    data = JSON.parse(response.body)["data"]
+    assert_equal "RelayImport", data["type"]
+    assert_equal "RelayImport", @family.import_sessions.find(data["id"]).import_type
+  end
+
+  test "legacy session retries and responses retain the stored type" do
+    session = @family.import_sessions.create!(import_type: "SureImport", client_session_id: "old-session", expected_chunks: 1)
+
+    assert_no_difference "ImportSession.count" do
+      post api_v1_import_sessions_url,
+           params: { type: "RelayImport", client_session_id: "old-session", expected_chunks: 1 },
+           headers: api_headers(@api_key)
+    end
+
+    assert_response :created
+    assert_equal session.id, JSON.parse(response.body).dig("data", "id")
+    assert_equal "SureImport", JSON.parse(response.body).dig("data", "type")
+    post chunks_api_v1_import_session_url(session), params: { sequence: 1, raw_file_content: build_ndjson(entity_records) }, headers: api_headers(@api_key)
+    assert_response :created
+    assert_equal "SureImport", session.reload.import_type
+    assert_equal [ "SureImport" ], session.imports.pluck(:type)
+
+    get api_v1_import_session_url(session), headers: api_headers(@read_only_api_key)
+    assert_response :success
+    assert_equal "SureImport", JSON.parse(response.body).dig("data", "type")
+  end
+
+  test "members cannot attach or publish complete snapshots" do
+    session = @family.import_sessions.create!(import_type: "SureImport")
+    content = Family::Backup.new(Family.create!(name: "Backup source")).generate_ndjson
+    @user.update!(role: "member")
+    assert_no_difference("Import.count") do
+      post chunks_api_v1_import_session_url(session), params: { sequence: 1, raw_file_content: content }, headers: api_headers(@api_key)
+    end
+    assert_response :forbidden
+
+    session.attach_chunk!(sequence: 1, content: content, filename: "all.ndjson", content_type: "application/x-ndjson")
+    assert_no_enqueued_jobs do
+      post publish_api_v1_import_session_url(session), headers: api_headers(@api_key)
+    end
+    assert_response :forbidden
+  end
+
   test "creates an idempotent Sure import session" do
     assert_difference("ImportSession.count", 1) do
       post api_v1_import_sessions_url,
@@ -41,6 +131,23 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal first_id, JSON.parse(response.body).dig("data", "id")
+  end
+
+  test "ZIP chunks are normalized and idempotent with extracted NDJSON" do
+    session = @family.import_sessions.create!(expected_chunks: 1)
+    source = Family.create!(name: "ZIP chunk source")
+    bytes = Family::DataExporter.new(source).generate_export.string
+    file = Rack::Test::UploadedFile.new(StringIO.new(bytes), "application/zip", original_filename: "relay_export.zip")
+    post chunks_api_v1_import_session_url(session), params: { sequence: 1, file: file }, headers: api_headers(@api_key)
+    assert_response :created
+    import = session.imports.sole
+    assert_instance_of RelayImport, import
+    assert import.full_backup?
+    content = import.ndjson_file.download
+    assert_no_difference "Import.count" do
+      post chunks_api_v1_import_session_url(session), params: { sequence: 1, raw_file_content: content }, headers: api_headers(@api_key)
+    end
+    assert_response :created
   end
 
   test "rejects unsupported import session types" do
@@ -161,7 +268,7 @@ class Api::V1::ImportSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     data = JSON.parse(response.body)["data"]
     assert_equal session.id, data["id"]
-    assert_equal "SureImport", data["type"]
+    assert_equal "RelayImport", data["type"]
   end
 
   test "shows chunks in sequence order" do

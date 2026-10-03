@@ -55,7 +55,7 @@ class Import::Preflight
     type = preflight_import_type
     return invalid_import_type_response unless type
 
-    type == "SureImport" ? sure_import_response : csv_import_response(type)
+    type == "RelayImport" ? sure_import_response : csv_import_response(type)
   rescue PreflightError => e
     Response.new(status: e.status, payload: e.payload)
   end
@@ -66,6 +66,8 @@ class Import::Preflight
     def preflight_import_type
       type = params[:type].to_s
       return "TransactionImport" if type.blank?
+
+      return "RelayImport" if type.in?(Import::BACKUP_TYPES)
 
       type if IMPORT_TYPES.include?(type)
     end
@@ -211,24 +213,15 @@ class Import::Preflight
     end
 
     def sure_import_file_upload_attributes(file)
-      raise_response sure_file_too_large_response if file.size > SureImport.max_ndjson_size
-
-      extension = File.extname(file.original_filename.to_s).downcase
-      unless SureImport::ALLOWED_NDJSON_CONTENT_TYPES.include?(file.content_type) || extension.in?(%w[.ndjson .json])
-        raise_response invalid_sure_file_type_response
-      end
-
-      [
-        file.read,
-        file.original_filename.presence || "sure-import.ndjson",
-        file.content_type.presence || "application/x-ndjson"
-      ]
+      SureImport::Upload.read(file)
+    rescue SureImport::Upload::Error => error
+      raise_response Response.new(status: :unprocessable_entity, payload: { error: error.code, message: error.message })
     end
 
     def sure_import_raw_content_attributes(content)
       raise_response sure_content_too_large_response if content.bytesize > SureImport.max_ndjson_size
 
-      [ content, "sure-import.ndjson", "application/x-ndjson" ]
+      [ content, "relay-import.ndjson", "application/x-ndjson" ]
     end
 
     def sure_import_preflight_payload(content, filename, content_type)
@@ -246,7 +239,7 @@ class Import::Preflight
       warnings << "Row count exceeds this import type's publish limit." if stats[:rows_count] > SureImport.max_row_count
 
       {
-        type: "SureImport",
+        type: "RelayImport",
         valid: result.valid?,
         content: content_payload(filename, content_type, content),
         stats: stats,
@@ -330,7 +323,7 @@ class Import::Preflight
         status: :unprocessable_entity,
         payload: {
           error: "missing_content",
-          message: "Provide a Sure NDJSON file or raw_file_content."
+          message: "Provide a backup NDJSON file or raw_file_content."
         }
       )
     end
@@ -390,7 +383,7 @@ class Import::Preflight
         status: :unprocessable_entity,
         payload: {
           error: "invalid_file_type",
-          message: "Invalid file type. Please upload a Sure NDJSON file."
+          message: "Invalid file type. Please upload a backup NDJSON file."
         }
       )
     end
@@ -404,7 +397,7 @@ class Import::Preflight
         status: :unprocessable_entity,
         payload: {
           error: "unsupported_import_type",
-          message: "Preflight supports CSV import types and SureImport."
+          message: "Preflight supports CSV import types, RelayImport and SureImport."
         }
       )
     end

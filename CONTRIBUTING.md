@@ -32,7 +32,24 @@ To get setup for local development, you have two options:
    - [Linux Setup Guide](https://github.com/we-promise/sure/wiki/Linux-Dev-Setup-Guide)
    - [Windows Setup Guide](https://github.com/we-promise/sure/wiki/Windows-Dev-Setup-Guide)
 
-### Making a Pull Request
+### Relay maintenance workflow
+
+Work directly on `main` and keep changes small and cohesive. Prepare and validate
+the changes before presenting them to the owner. Commit and push to `origin/main`
+only after the owner confirms the changes; an explicit request to commit or push
+already supplies that confirmation. Do not create branches, worktrees or pull
+requests unless the owner explicitly requests an exception. Preserve existing
+work and use fast-forward synchronization; do not reset or force-push.
+
+See [repository guidance](AGENTS.md) and the
+[development guide](docs/llm-guides/development.md) for required verification.
+Dependabot PRs are update proposals that require review and validation before
+integration; their existence does not authorize automatic merges or closure.
+
+### Making a Pull Request when explicitly requested
+
+The following inherited contribution workflow applies to an explicitly requested
+PR or a contribution to upstream Sure, rather than routine Relay maintenance.
 
 1. Fork the repo
 2. Create your feature branch (`git checkout -b my-new-feature`)

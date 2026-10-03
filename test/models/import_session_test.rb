@@ -5,6 +5,63 @@ class ImportSessionTest < ActiveSupport::TestCase
     @family = families(:empty)
   end
 
+  test "new sessions and chunks use Relay for either backup name or an omitted type" do
+    [ "RelayImport", "SureImport", nil ].each do |type|
+      session = ImportSession.create_or_find_for!(family: @family, import_type: type, client_session_id: nil, expected_chunks: 1)
+      chunk = session.attach_chunk!(sequence: 1, content: build_ndjson(entity_records), filename: "all.ndjson", content_type: "application/x-ndjson")
+
+      assert_equal "RelayImport", session.reload.import_type
+      assert_instance_of RelayImport, chunk
+    end
+  end
+
+  test "retrying a legacy session preserves its type and existing chunks" do
+    session = @family.import_sessions.create!(import_type: "SureImport", client_session_id: "legacy-session")
+    chunk = session.attach_chunk!(sequence: 1, content: build_ndjson(entity_records), filename: "all.ndjson", content_type: "application/x-ndjson")
+
+    retry_session = ImportSession.create_or_find_for!(family: @family, import_type: "RelayImport", client_session_id: "legacy-session", expected_chunks: 2)
+
+    assert_equal session.id, retry_session.id
+    assert_equal "SureImport", retry_session.import_type
+    assert_equal 2, retry_session.expected_chunks
+    assert_equal [ chunk.id ], retry_session.imports.pluck(:id)
+    new_chunk = retry_session.attach_chunk!(sequence: 2, content: build_ndjson(transaction_records), filename: "transactions.ndjson", content_type: "application/x-ndjson")
+    assert_instance_of SureImport, new_chunk
+  end
+
+  test "duplicate insert race preserves the stored legacy session type" do
+    existing = @family.import_sessions.create!(import_type: "SureImport", client_session_id: "race-legacy")
+    racing_session = @family.import_sessions.build(client_session_id: "race-legacy")
+    racing_session.stubs(:save!).raises(ActiveRecord::RecordNotUnique)
+
+    @family.import_sessions.stub(:find_or_initialize_by, racing_session) do
+      session = ImportSession.create_or_find_for!(family: @family, import_type: "RelayImport", client_session_id: "race-legacy", expected_chunks: 2)
+      assert_equal existing, session
+    end
+
+    assert_equal "SureImport", existing.reload.import_type
+    assert_equal 2, existing.expected_chunks
+  end
+
+  test "mixed stored chunks publish without duplicate rows when a session is retried" do
+    session = @family.import_sessions.create!(client_session_id: "mixed-session", expected_chunks: 2)
+    first = session.attach_chunk!(sequence: 1, content: build_ndjson(entity_records), filename: "entities.ndjson", content_type: "application/x-ndjson")
+    first.update!(type: "SureImport")
+    second = session.attach_chunk!(sequence: 2, content: build_ndjson(transaction_records), filename: "transactions.ndjson", content_type: "application/x-ndjson")
+
+    session.publish
+    assert session.reload.complete?, session.error_details.inspect
+    assert_equal [ "SureImport", "RelayImport" ], session.imports.ordered_by_sequence.pluck(:type)
+    assert_equal "RelayImport", session.import_type
+    assert_equal "sure_import_session:#{session.id}", @family.entries.find_by!(name: "Grocery Run").source
+    assert_no_difference [ "Account.count", "Entry.count", "ImportSourceMapping.count" ] do
+      retried = ImportSession.create_or_find_for!(family: @family, import_type: "SureImport", client_session_id: "mixed-session", expected_chunks: 2)
+      assert_equal session.id, retried.id
+      retried.publish
+    end
+    assert second.reload.complete?
+  end
+
   test "job requires import session" do
     error = assert_raises(ArgumentError) do
       ImportSessionJob.perform_now(nil)

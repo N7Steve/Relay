@@ -17,7 +17,7 @@ class Provider::EnableBanking
   CONSENT_FALLBACK_DAYS = [ 180, 90, 45, 30 ].freeze
   CONSENT_SAFETY_MARGIN_SECONDS = 60 # shaved off every attempt to guard against clock/network drift
 
-  headers "User-Agent" => "Sure Finance Enable Banking Client"
+  headers "User-Agent" => "Relay Finance Enable Banking Client"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   attr_reader :application_id, :private_key

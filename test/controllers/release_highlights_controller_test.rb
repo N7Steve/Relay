@@ -10,23 +10,23 @@ class ReleaseHighlightsControllerTest < ActionDispatch::IntegrationTest
     release_notes = {
       avatar: nil,
       username: "we-promise",
-      name: Sure.version.to_release_tag,
+      name: Relay.version.to_release_tag,
       published_at: Date.current,
       body: "<p>Shiny new things</p>"
     }
     github_provider = mock
-    github_provider.expects(:fetch_release_notes).with(Sure.version.to_release_tag).returns(release_notes)
+    github_provider.expects(:fetch_release_notes).with(Relay.version.to_release_tag).returns(release_notes)
     Provider::Registry.stubs(:get_provider).with(:github).returns(github_provider)
 
     get release_highlight_path
 
     assert_response :ok
-    assert_select "h2", text: Sure.version.to_release_tag
+    assert_select "h2", text: Relay.version.to_release_tag
     assert_select "p", text: "Shiny new things"
   end
 
   test "show returns no content once the deployed release was seen" do
-    @user.mark_release_seen!(Sure.version.to_release_tag)
+    @user.mark_release_seen!(Relay.version.to_release_tag)
 
     github_provider = mock
     github_provider.expects(:fetch_release_notes).never
@@ -65,6 +65,6 @@ class ReleaseHighlightsControllerTest < ActionDispatch::IntegrationTest
     patch release_highlight_dismiss_path, as: :json
 
     assert_response :ok
-    assert_equal Sure.version.to_release_tag, @user.reload.last_seen_release_tag
+    assert_equal Relay.version.to_release_tag, @user.reload.last_seen_release_tag
   end
 end
