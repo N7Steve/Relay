@@ -5,6 +5,21 @@ selection and `Provided` concerns. For a new securities price provider, follow
 [the complete workflow](adding-a-securities-provider.md), including response
 types, MIC mapping, currency handling, settings encryption, UI, locales and tests.
 
+## External capability boundaries
+
+Financial provider requests require explicit installation-wide activation through
+`ExternalAccess`. Check at the transport boundary so direct requests, existing
+client instances and previously queued jobs also respect suspension. Faraday
+connections use `ExternalAccess::RequestMiddleware` with `:bank_sync`,
+`:market_data`, `:property_valuations` or `:ai` as appropriate. HTTParty bank
+clients prepend `Provider::ExternalRequestGuard` to their singleton class.
+Other transports must check `ExternalAccess.require!` before opening a connection.
+
+Keep account materialization and matching local. Do not reinstate provider calls
+in `Account::Syncer` or convert linked accounts to manual when disabling access.
+Keep cached financial data and explicit missing-data failures. The configuration
+and deployment transition is documented in [phase 2](../migration/pruning-phase-2.md).
+
 ## Provider logos
 
 A provider's logo comes from [`ProviderLogo`](../../app/components/provider_logo.rb): the

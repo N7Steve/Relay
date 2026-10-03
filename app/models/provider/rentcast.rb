@@ -76,6 +76,7 @@ class Provider::Rentcast < Provider
 
     def client
       @client ||= Faraday.new(url: base_url, ssl: self.class.faraday_ssl_options) do |faraday|
+        faraday.use ExternalAccess::RequestMiddleware, :property_valuations
         # Retry transient connection failures so a network blip doesn't burn
         # one of the tight monthly budget's requests
         faraday.request(:retry, {

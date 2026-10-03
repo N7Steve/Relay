@@ -1,5 +1,10 @@
 class Provider::Plaid
-  attr_reader :client, :region
+  def client
+    ExternalAccess.require!(:bank_sync)
+    @client
+  end
+
+  attr_reader :region
 
   SUPPORTED_PLAID_PRODUCTS = %w[transactions investments liabilities].freeze
   MAX_HISTORY_DAYS = Rails.env.development? ? 90 : 730

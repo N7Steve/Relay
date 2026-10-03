@@ -1,0 +1,3 @@
+en:
+  external_access:
+    insufficient_data: "Insufficient financial data. Add the missing exchange rate or price manually. %{details}"

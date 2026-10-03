@@ -3,7 +3,7 @@ class AutoSyncScheduler
 
   def self.sync!
     Rails.logger.info("[AutoSyncScheduler] auto_sync_enabled=#{Setting.auto_sync_enabled}, time=#{Setting.auto_sync_time}")
-    if Setting.auto_sync_enabled?
+    if ExternalAccess.enabled?(:bank_sync) && Setting.auto_sync_enabled?
       upsert_job
     else
       remove_job

@@ -1,5 +1,6 @@
 class Provider::Mercury
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   headers "User-Agent" => "Relay Finance Mercury Client"

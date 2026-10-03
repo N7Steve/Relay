@@ -9,6 +9,7 @@
 class Provider::Etherscan
   include Provider::EvmExplorer
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   include Provider::HttpTransport
   extend SslConfigurable
 

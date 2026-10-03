@@ -8,6 +8,7 @@
 # with SOLANA_RPC_URL.
 class Provider::SolanaRpc
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   include Provider::HttpTransport
   extend SslConfigurable
 

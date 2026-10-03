@@ -32,6 +32,9 @@ class Holding::PortfolioCache
       security[:prices_by_date][date]
     end
 
+    if price_with_priority.nil? && ExternalAccess.local_recalculation?
+      raise Security::Provided::SecurityInfoMissingError, "Missing price for security #{security_id} on #{date}; enter a manual price"
+    end
     return nil unless price_with_priority
 
     price = price_with_priority.price
@@ -42,6 +45,7 @@ class Holding::PortfolioCache
     begin
       converted_amount = price_money.exchange_to(account.currency, date: date).amount
     rescue Money::ConversionError
+      raise if ExternalAccess.local_recalculation?
       converted_amount = price.price
     end
 

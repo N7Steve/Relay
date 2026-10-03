@@ -1,5 +1,6 @@
 class Provider::Lunchflow
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   headers "User-Agent" => "Relay Finance Lunch Flow Client"

@@ -1,5 +1,6 @@
 class Provider::Akahu
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   DEFAULT_BASE_URL = "https://api.akahu.io/v1".freeze

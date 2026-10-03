@@ -15,6 +15,7 @@
 # into an exception message, a log line or debug metadata.
 class Provider::Fio < Provider
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   # Subclass so errors caught in this provider are raised as Provider::Fio::Error

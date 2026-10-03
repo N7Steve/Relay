@@ -1,5 +1,6 @@
 class Provider::Trading212
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   class Error < StandardError; end

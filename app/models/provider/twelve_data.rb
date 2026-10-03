@@ -266,6 +266,7 @@ class Provider::TwelveData < Provider
 
     def client
       @client ||= Faraday.new(url: base_url, ssl: self.class.faraday_ssl_options) do |faraday|
+        faraday.use ExternalAccess::RequestMiddleware, :market_data
         faraday.request(:retry, {
           max: 3,
           interval: 1.0,

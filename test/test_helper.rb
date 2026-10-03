@@ -86,6 +86,14 @@ module ActiveSupport
     # test so each starts from the rolled-back DB state.
     setup { Setting.clear_cache }
 
+    # Legacy provider tests explicitly exercise enabled extensions. New boundary
+    # tests override these stubs; production defaults remain false.
+    setup do
+      ExternalAccess::CAPABILITIES.each do |capability|
+        Setting.stubs("external_#{capability}_enabled").returns(true)
+      end
+    end
+
     include SqlQueryCapture
 
     # Add more helper methods to be used by all tests here...

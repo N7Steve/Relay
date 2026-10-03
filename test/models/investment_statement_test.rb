@@ -34,12 +34,11 @@ class InvestmentStatementTest < ActiveSupport::TestCase
     assert_in_delta 2083.92, @statement.holdings_value, 0.001
   end
 
-  test "portfolio_value falls back to 1:1 when FX rate is missing" do
+  test "portfolio_value reports missing FX instead of using 1:1" do
     create_investment_account(balance: 1921.92, currency: "USD")
     create_investment_account(balance: 1000, currency: "EUR")
 
-    # No ExchangeRate row → rates_for defaults to 1
-    assert_in_delta 2921.92, @statement.portfolio_value, 0.001
+    assert_raises(Money::ConversionError) { @statement.portfolio_value }
   end
 
   test "current_holdings includes holdings from every investment account regardless of currency" do

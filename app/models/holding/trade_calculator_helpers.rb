@@ -7,6 +7,7 @@ module Holding::TradeCalculatorHelpers
     def converted_trade_price(trade)
       Money.new(trade.price, trade.currency).exchange_to(account.currency).amount
     rescue Money::ConversionError
+      raise if ExternalAccess.local_recalculation?
       trade.price
     end
 end

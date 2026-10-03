@@ -153,6 +153,7 @@ class Security < ApplicationRecord
   #   instruments) is authoritative and beats the ticker-only Brandfetch
   #   lettermark placeholder.
   def display_logo_url
+    return nil unless ExternalAccess.enabled?(:logos)
     if crypto?
       self.class.brandfetch_crypto_url(crypto_base_asset).presence || logo_url.presence
     elsif website_url.present?

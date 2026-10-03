@@ -16,4 +16,13 @@ class ApplicationJob < ActiveJob::Base
   retry_on ActiveRecord::Deadlocked
   discard_on ActiveJob::DeserializationError
   queue_as :low_priority # default queue
+
+  around_perform do |job, perform|
+    capability = ExternalAccess::JobPolicy.capability(job.class.name)
+    if capability && !ExternalAccess.enabled?(capability)
+      Rails.logger.info("Cancelled #{job.class.name}: external capability #{capability} is disabled")
+    else
+      perform.call
+    end
+  end
 end

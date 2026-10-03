@@ -1,5 +1,6 @@
 class Provider::Coinbase
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   class Error < StandardError; end

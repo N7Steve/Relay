@@ -48,6 +48,7 @@ class Balance::SyncCache
           begin
             converted = Money.new(h.amount, h.currency).exchange_to(account.currency, date: h.date).amount
           rescue Money::ConversionError => error
+            raise if ExternalAccess.local_recalculation?
             # Fall back to a 1:1 rate, which misstates the holding by the FX gap. Excluding it
             # instead would be worse here: `BaseCalculator#derive_cash_balance_on_date_from_total`
             # derives cash as `total_balance - holdings_value`, so a dropped holding reappears
@@ -91,6 +92,7 @@ class Balance::SyncCache
               custom_rate: custom_rate
             ).amount
           rescue Money::ConversionError => error
+            raise if ExternalAccess.local_recalculation?
             # Drop the entry instead of converting it at a made-up rate. A 1:1 fallback here
             # would silently misstate the balance by the size of the FX gap (see #1143), and
             # raising would abandon the whole account's balances over a single entry.

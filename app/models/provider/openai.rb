@@ -431,7 +431,10 @@ class Provider::Openai < Provider
   end
 
   private
-    attr_reader :client
+    def client
+      raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
+      @client
+    end
 
     # Substitutes {session_id} into session-valued extra headers for this chat
     # request. Static headers were already set at construction; a session

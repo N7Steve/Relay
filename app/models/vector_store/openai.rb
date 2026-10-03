@@ -88,5 +88,8 @@ class VectorStore::Openai < VectorStore::Base
 
   private
 
-    attr_reader :client
+    def client
+      raise VectorStore::ConfigurationError, "AI features are disabled for this instance" unless Setting.ai_features_enabled?
+      @client
+    end
 end

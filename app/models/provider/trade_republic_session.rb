@@ -62,6 +62,7 @@ class Provider::TradeRepublicSession
   private
 
     def request(klass, path, body:, headers:)
+      ExternalAccess.require!(:bank_sync)
       refresh_session_if_needed unless path == "/api/v1/auth/web/session"
 
       uri = URI.join(API_ORIGIN, path)

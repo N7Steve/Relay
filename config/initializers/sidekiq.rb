@@ -76,7 +76,7 @@ Sidekiq.configure_server do |config|
       if File.exist?(schedule_path)
         schedule = YAML.load_file(schedule_path)
         if schedule.is_a?(Hash)
-          Sidekiq::Cron::Job.load_from_hash(schedule)
+          ExternalSchedule.reconcile!(schedule)
           Rails.logger.info("[Sidekiq::Cron] Loaded #{schedule.size} job(s) from config/schedule.yml")
         else
           Rails.logger.warn("[Sidekiq::Cron] config/schedule.yml is not a Hash, skipping load")

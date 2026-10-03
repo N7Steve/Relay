@@ -26,6 +26,7 @@ class GoogleDrive::Client
 
   class << self
     def configured?(configuration: nil)
+      return false unless ExternalAccess.enabled?(:google_drive)
       client_id(configuration: configuration).present? && client_secret(configuration: configuration).present?
     end
 
@@ -125,6 +126,7 @@ class GoogleDrive::Client
       end
 
       def request(request)
+        ExternalAccess.require!(:google_drive)
         uri = request.uri
         Net::HTTP.start(
           uri.host,

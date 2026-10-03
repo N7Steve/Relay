@@ -220,6 +220,7 @@ class Provider::MoexPublic < Provider
 
     def client
       @client ||= Faraday.new(url: base_url, ssl: self.class.faraday_ssl_options) do |faraday|
+        faraday.use ExternalAccess::RequestMiddleware, :market_data
         # Generous enough for a full history page but bounded so a hung ISS
         # endpoint can't stall a worker indefinitely.
         faraday.options.open_timeout = 5

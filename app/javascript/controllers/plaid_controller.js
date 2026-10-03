@@ -10,6 +10,7 @@ export default class extends Controller {
   };
 
   connect() {
+    if (document.body.dataset.bankSyncEnabled !== "true") return;
     this._connectionToken = (this._connectionToken ?? 0) + 1;
     const connectionToken = this._connectionToken;
     this.open(connectionToken).catch((error) => {
@@ -24,6 +25,9 @@ export default class extends Controller {
   }
 
   waitForPlaid() {
+    if (document.body.dataset.bankSyncEnabled !== "true") {
+      return Promise.reject(new Error("Bank synchronization is disabled"));
+    }
     if (typeof Plaid !== "undefined") {
       return Promise.resolve();
     }

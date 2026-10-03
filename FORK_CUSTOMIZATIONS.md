@@ -29,6 +29,20 @@ de entradas inválidas. Disposiciones y límites en
 [contratos de backup](docs/migration/pruning-backup-contracts.md) y
 [registro de fase 1](docs/migration/pruning-phase-1.md).
 
+## Recálculo local y acceso externo durante la poda
+
+La fase 2 separa el recálculo transaccional de cuentas de la importación de
+mercado. Suspender bancos conserva las cuentas enlazadas, su estrategia reverse
+y los payloads históricos. Precios/FX ausentes dejan el estado anterior intacto
+y producen un error explícito; nunca activar acceso por tener credenciales.
+
+Los controles independientes de bancos, mercado, AVM, logos y Drive quedan
+apagados por defecto. IA conserva su interruptor previo. **Antes de actualizar
+la instalación de Steve, activar explícitamente logos y Google Drive**, que están
+en uso. Conservar sus credenciales y programaciones. No se ha cambiado TrueNAS.
+Los cron locales, Agenda y la limpieza de trabajos permanecen; no purgar la cola
+compartida. Ver [registro y transición de fase 2](docs/migration/pruning-phase-2.md).
+
 ## Restricción operativa del entorno local
 
 En Windows **no se deben intentar ejecutar Rails ni herramientas que dependan del bundle Ruby nativo**. Esto incluye `bin/rails`, pruebas Minitest o RSpec, tareas Rake, RuboCop, Brakeman, migraciones, consola, servidor y comandos equivalentes. El bundle nativo no es ejecutable de forma fiable y esos intentos sólo producen fallos de dependencias conocidos.

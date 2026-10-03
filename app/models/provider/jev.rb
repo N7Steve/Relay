@@ -386,6 +386,7 @@ class Provider::Jev < Provider
 
     def client
       @client ||= Faraday.new(ssl: self.class.faraday_ssl_options) do |faraday|
+        faraday.use ExternalAccess::RequestMiddleware, :ai
         # Two defaults have to be overridden for this backoff to run at all.
         # faraday-retry only retries IDEMPOTENT_METHODS, which excludes POST;
         # opting POST in is safe here because a decision request has no side

@@ -126,6 +126,7 @@ module VectorStore::Embeddable
 
     def embedding_client
       @embedding_client ||= Faraday.new(url: embedding_uri_base) do |f|
+        f.use ExternalAccess::RequestMiddleware, :ai
         f.request :json
         f.response :json
         f.headers["Authorization"] = "Bearer #{embedding_access_token}" if embedding_access_token.present?

@@ -78,7 +78,7 @@ class AccountsController < ApplicationController
   end
 
   def sync_all
-    family.request_plaid_transactions_refreshes_later(source: "AccountsController#sync_all")
+    family.request_plaid_transactions_refreshes_later(source: "AccountsController#sync_all") if ExternalAccess.enabled?(:bank_sync)
     family.sync_later
     redirect_to accounts_path, notice: t("accounts.sync_all.syncing")
   end
@@ -186,7 +186,7 @@ class AccountsController < ApplicationController
 
   def sync
     unless @account.syncing?
-      if @account.linked?
+      if @account.linked? && ExternalAccess.enabled?(:bank_sync)
         # Sync all provider items for this account
         # Each provider item will trigger an account sync when complete
         @account.account_providers.each do |account_provider|

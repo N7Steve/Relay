@@ -2,6 +2,7 @@ require "cgi"
 
 class Provider::EnableBanking
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   BASE_URL = "https://api.enablebanking.com".freeze

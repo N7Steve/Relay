@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
           PreviewGateable
   include Pundit::Authorization
   include CodespacesForgeryProtection
+  include ExternalAccessGuardable
 
   include Pagy::Backend
 

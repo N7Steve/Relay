@@ -2,6 +2,7 @@
 
 class Provider::Brex
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   DEFAULT_BASE_URL = "https://api.brex.com"

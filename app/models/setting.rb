@@ -4,6 +4,11 @@ class Setting < RailsSettings::Base
 
   cache_prefix { "v1" }
 
+  # Credentials and historical provider preferences never enable network access.
+  ExternalAccess::CAPABILITIES.each do |capability|
+    field "external_#{capability}_enabled", type: :boolean, default: false
+  end
+
   # Fork-wide kill switch for every AI surface and outbound AI call. It is
   # deliberately instance-scoped and independent from provider credentials so
   # upstream AI code can remain installed without becoming active by accident.
@@ -68,6 +73,7 @@ class Setting < RailsSettings::Base
 
   # Transforms a stored Brandfetch URL to use the current logo size setting
   def self.transform_brand_fetch_url(url)
+    return nil if url.present? && !ExternalAccess.enabled?(:logos)
     return url unless url.present? && url.match?(BRAND_FETCH_URL_PATTERN)
 
     size = brand_fetch_logo_size
@@ -75,6 +81,7 @@ class Setting < RailsSettings::Base
   end
 
   def self.brand_fetch_icon_url(identifier, fallback: "lettermark", namespace: nil, width: nil, height: nil)
+    return nil unless ExternalAccess.enabled?(:logos)
     return nil if identifier.blank? || brand_fetch_client_id.blank?
 
     w = width || brand_fetch_logo_size

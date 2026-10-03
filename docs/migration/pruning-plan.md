@@ -355,9 +355,10 @@ actualización y recuperación de datos soportadas y probadas.
 ## Registro de ejecución
 
 La fase 0 está publicada en `eb538dae3`; la fase 1 está completada, validada
-y publicada. Su [punto de continuación](pruning-phase-1.md#punto-de-continuación-para-otro-chat)
-permite retomar en fase 2. Las fases 2–11 siguen pendientes. No se ha desplegado
-la poda en TrueNAS en estas entregas.
+y publicada. La fase 2 está **implementada y validada, sin commit/push todavía**;
+su [punto de continuación](pruning-phase-2.md#punto-de-continuación-para-otro-chat)
+registra pruebas y transición de configuración. Las fases 3–11 siguen pendientes.
+No se ha desplegado la poda en TrueNAS en estas entregas.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |
@@ -371,7 +372,8 @@ Para cada fase/subfase registrar:
 | Reversión | Código/configuración, recuperación de datos y límites |
 | Cierre | Confirmación de que se puede detener aquí con Relay utilizable |
 
-La siguiente ejecución recomendada es **fase 2**. Las fases 1 y 2 construyen
-la base segura; **fase 3** es la primera retirada de dependencias.
+El siguiente paso es confirmar la publicación de la fase 2 preparada y después
+continuar por **fase 3**, la primera retirada de dependencias. Las fases 1 y 2
+construyen la base segura.
 El avance a cualquier fase requiere cerrar la anterior aplicable, sin trasladar
 fallos, contratos rotos ni decisiones pendientes que bloqueen su funcionamiento.

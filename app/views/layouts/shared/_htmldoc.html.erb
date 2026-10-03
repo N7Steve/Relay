@@ -14,7 +14,7 @@
     <%= yield :head %>
   </head>
 
-  <body class="h-[var(--app-height)] overflow-hidden antialiased"<% if sidebar_aware %> data-controller="notification-tray"<% end %>>
+  <body data-bank-sync-enabled="<%= ExternalAccess.enabled?(:bank_sync) %>" class="h-[var(--app-height)] overflow-hidden antialiased"<% if sidebar_aware %> data-controller="notification-tray"<% end %>>
     <% if Rails.env.development? %>
       <button hidden data-controller="hotkey" data-hotkey="t t /" data-action="theme#toggle"></button>
     <% end %>

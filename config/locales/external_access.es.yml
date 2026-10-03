@@ -1,0 +1,3 @@
+es:
+  external_access:
+    insufficient_data: "Información financiera insuficiente. Añade manualmente el tipo de cambio o precio que falta. %{details}"

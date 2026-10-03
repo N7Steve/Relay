@@ -2,6 +2,7 @@
 # Handles authentication and requests to the CoinStats OpenAPI.
 class Provider::Coinstats < Provider
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   include Provider::RateLimitable
   extend SslConfigurable
 

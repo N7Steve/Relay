@@ -66,6 +66,7 @@ class Assistant::External::Client
   private
 
     def stream_response(http, request, &block)
+      raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
       model = nil
       buffer = +""
       done = false

@@ -1,5 +1,6 @@
 class Provider::Up
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   DEFAULT_BASE_URL = "https://api.up.com.au/api/v1".freeze

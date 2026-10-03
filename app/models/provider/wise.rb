@@ -2,6 +2,7 @@
 
 class Provider::Wise
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   LIVE_BASE_URL = "https://api.wise.com"

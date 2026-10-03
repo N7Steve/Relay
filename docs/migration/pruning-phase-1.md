@@ -78,9 +78,9 @@ La validación no sustituye una comprobación operativa tras un futuro despliegu
 ## Punto de continuación para otro chat
 
 - Las fases 0 y 1 están cerradas. No repetir su implementación.
-- El siguiente trabajo es **fase 2 — Separar recálculo local y operaciones
-  externas**, con el alcance y criterios de cierre del
-  [plan de poda](pruning-plan.md#fase-2--separar-recálculo-local-y-operaciones-externas).
+- La fase 2 ya está implementada y validada, pendiente de publicación. Consultar
+  su [registro y punto de continuación](pruning-phase-2.md#punto-de-continuación-para-otro-chat)
+  y el [plan de poda](pruning-plan.md) para el estado actual.
 - Leer este registro y los [contratos de recuperación](pruning-backup-contracts.md)
   antes de adaptar modelos, scopes, referencias o jobs. Las disposiciones de
   módulos aún no retirados se completan en sus fases respectivas.

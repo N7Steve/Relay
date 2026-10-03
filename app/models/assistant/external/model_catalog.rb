@@ -20,6 +20,7 @@ class Assistant::External::ModelCatalog
   end
 
   def models
+    raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
     uri = models_uri
     request = Net::HTTP::Get.new(uri.request_uri)
     request["Authorization"] = "Bearer #{@token}"

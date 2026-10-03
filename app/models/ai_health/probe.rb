@@ -286,12 +286,14 @@ class AiHealth
       end
 
       def openai_client(access_token:, endpoint:)
+        raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
         options = { access_token: access_token, request_timeout: timeout }
         options[:uri_base] = endpoint if endpoint.present?
         ::OpenAI::Client.new(**options)
       end
 
       def anthropic_client(access_token:, endpoint:)
+        raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
         options = { api_key: access_token, max_retries: 0, timeout: timeout }
         options[:base_url] = endpoint if endpoint.present?
         ::Anthropic::Client.new(**options)
@@ -299,6 +301,7 @@ class AiHealth
 
       def embedding_client(endpoint:, access_token:)
         Faraday.new(url: endpoint) do |faraday|
+          faraday.use ExternalAccess::RequestMiddleware, :ai
           faraday.request :json
           faraday.response :json
           faraday.response :raise_error

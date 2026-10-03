@@ -30,6 +30,7 @@ class Provider
     UsageData = Data.define(:used, :limit, :utilization, :plan)
 
     def with_provider_response(error_transformer: nil, &block)
+      require_external_access!
       data = yield
 
       Response.new(
@@ -49,6 +50,18 @@ class Provider
         data: nil,
         error: transformed_error
       )
+    end
+
+    def require_external_access!
+      if self.class.name.in?(%w[Provider::Openai Provider::Anthropic Provider::Jev])
+        raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
+      elsif self.class.name.in?(%w[Provider::Rentcast Provider::Realie])
+        ExternalAccess.require!(:property_valuations)
+      elsif self.class.included_modules.include?(Provider::SecurityConcept) || self.class.included_modules.include?(Provider::ExchangeRateConcept)
+        ExternalAccess.require!(:market_data)
+      elsif self.class.name != "Provider::Github" && self.class.name != "Provider::Stripe"
+        ExternalAccess.require!(:bank_sync)
+      end
     end
 
     # Fallback transformation applied by `with_provider_response` when no

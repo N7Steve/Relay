@@ -7,6 +7,7 @@
 # this at their own instance with MEMPOOL_SPACE_URL.
 class Provider::MempoolSpace
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   include Provider::HttpTransport
   extend SslConfigurable
 

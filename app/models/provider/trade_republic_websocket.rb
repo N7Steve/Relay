@@ -18,6 +18,7 @@ class Provider::TradeRepublicWebsocket
   end
 
   def connect
+    ExternalAccess.require!(:bank_sync)
     tcp = Socket.tcp(HOST, 443, connect_timeout: @timeout)
     context = OpenSSL::SSL::SSLContext.new
     context.set_params

@@ -343,6 +343,7 @@ class Provider::BinancePublic < Provider
 
     def client
       @client ||= Faraday.new(url: base_url, ssl: self.class.faraday_ssl_options) do |faraday|
+        faraday.use ExternalAccess::RequestMiddleware, :market_data
         # Explicit timeouts so a hanging Binance endpoint can't stall a Sidekiq
         # worker or Puma thread indefinitely. Values are deliberately generous
         # enough for a full 1000-row klines response but capped to bound the

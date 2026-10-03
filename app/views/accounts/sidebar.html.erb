@@ -10,8 +10,8 @@
           active_account_id: @sidebar_active_account_id
         )
       } do %>
-  <%= render "accounts/account_sidebar_tabs",
+  <%= render_account_sidebar(
         family: Current.family,
         active_tab: @account_group_tab,
-        mobile: @mobile_sidebar %>
+        mobile: @mobile_sidebar) %>
 <% end %>

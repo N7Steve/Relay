@@ -11,6 +11,7 @@
 # a site-wide integration.
 class Provider::Monobank < Provider
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   include Provider::RateLimitable
   extend SslConfigurable
 

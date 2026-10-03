@@ -12,6 +12,7 @@
 # thousands. An unverified or unknown mint keeps its placeholder instead.
 class Provider::JupiterTokens
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   include Provider::HttpTransport
   extend SslConfigurable
 

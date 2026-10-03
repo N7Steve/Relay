@@ -5,6 +5,16 @@ class Family::SyncerTest < ActiveSupport::TestCase
     @family = families(:dylan_family)
   end
 
+  test "suspended connectors recalculate all accounts without scheduling providers" do
+    Setting.stubs(:external_bank_sync_enabled).returns(false)
+    family_sync = syncs(:family)
+    syncable_item_associations.each { |association| association.klass.any_instance.expects(:sync_later).never }
+    Account.any_instance.expects(:sync_later).with(
+      parent_sync: family_sync, window_start_date: nil, window_end_date: nil
+    ).times(@family.accounts.count)
+    Family::Syncer.new(@family).perform_sync(family_sync)
+  end
+
   test "syncs provider items and manual accounts" do
     family_sync = syncs(:family)
     @family.akahu_items.create!(

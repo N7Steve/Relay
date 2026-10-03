@@ -6,6 +6,7 @@ class Provider::Simplefin
   # SIMPLEFIN_DEBUG_RAW=1 enables raw payload logging (default-off); environment
   # configuration lives in config/initializers/simplefin.rb.
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
   extend SslConfigurable
 
   headers "User-Agent" => "Relay Finance SimpleFin Client"

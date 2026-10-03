@@ -202,6 +202,11 @@ class Sync < ApplicationRecord
         return
       end
 
+      if syncable_type != "Account" && syncable_type != "Family" && !ExternalAccess.enabled?(:bank_sync)
+        request_cancel!
+        return
+      end
+
       start!
 
       begin

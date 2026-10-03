@@ -298,6 +298,7 @@ class Provider::Snaptrade
 
       def oauth_connection
         Faraday.new do |faraday|
+          faraday.use ExternalAccess::RequestMiddleware, :bank_sync
           faraday.options.timeout = 30
           faraday.options.open_timeout = 10
         end
@@ -558,6 +559,7 @@ class Provider::Snaptrade
 
     def api_connection
       @api_connection ||= Faraday.new do |faraday|
+        faraday.use ExternalAccess::RequestMiddleware, :bank_sync
         faraday.options.timeout = 30
         faraday.options.open_timeout = 10
       end

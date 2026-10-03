@@ -54,6 +54,16 @@ RSpec.describe 'API V1 Balance Sheet', type: :request do
 
         run_test!
       end
+
+      response '422', 'insufficient exchange-rate data' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        before do
+          family.accounts.create!(name: 'Foreign account', balance: 1000, currency: 'JPY', accountable: Depository.new)
+        end
+
+        run_test!
+      end
     end
   end
 end

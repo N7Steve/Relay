@@ -20,7 +20,7 @@ class Family::Syncer
   end
 
   def perform_post_sync
-    family.auto_match_transfers!
+    ExternalAccess.locally { family.auto_match_transfers! }
 
     Rails.logger.info("Applying rules for family #{family.id}")
     family.rules.where(active: true).each do |rule|
@@ -34,11 +34,12 @@ class Family::Syncer
     # integrations participate in nightly family sync as soon as they include
     # Syncable and expose a `syncable` scope.
     def child_syncables
-      provider_items = syncable_item_associations.flat_map do |association|
+      provider_items = (ExternalAccess.enabled?(:bank_sync) ? syncable_item_associations : []).flat_map do |association|
         family.public_send(association).syncable
       end
 
-      provider_items + family.accounts.manual
+      accounts = ExternalAccess.enabled?(:bank_sync) ? family.accounts.manual : family.accounts
+      provider_items + accounts
     end
 
     def syncable_item_associations

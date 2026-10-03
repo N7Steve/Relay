@@ -2,6 +2,7 @@
 
 class Provider::IndexaCapital
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
 
   headers "User-Agent" => "Relay Finance IndexaCapital Client"
   default_options.merge!(verify: true, ssl_verify_mode: OpenSSL::SSL::VERIFY_PEER, timeout: 120)

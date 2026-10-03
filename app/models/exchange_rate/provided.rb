@@ -3,6 +3,7 @@ module ExchangeRate::Provided
 
   class_methods do
     def provider
+      return nil unless ExternalAccess.enabled?(:market_data)
       provider = ENV["EXCHANGE_RATE_PROVIDER"].presence || Setting.exchange_rate_provider
       registry = Provider::Registry.for_concept(:exchange_rates)
       registry.get_provider(provider.to_sym)
@@ -56,7 +57,8 @@ module ExchangeRate::Provided
     end
 
     # Batch-fetches exchange rates for multiple source currencies.
-    # Returns a hash mapping each currency to its numeric rate, defaulting to 1 when unavailable.
+    # Missing rates raise when consumed, so unrelated currencies do not block a
+    # report and a foreign amount can never silently be valued at parity.
     def rates_for(currencies, to:, date: Date.current)
       unique_currencies = currencies.uniq
       return {} if unique_currencies.empty?
@@ -88,14 +90,17 @@ module ExchangeRate::Provided
         map[currency] = rate if rate
       end
 
-      unique_currencies.each_with_object({}) do |currency, result|
+      result = Hash.new do |_, currency|
+        next 1 if currency == to
+
+        raise Money::ConversionError.new(from_currency: currency, to_currency: to, date: date)
+      end
+      unique_currencies.each_with_object(result) do |currency, rates|
         rate = exact_rates[currency] || nearest_rates[currency] || fetched_rates[currency]
-        if rate.nil?
-          Rails.logger.warn("No exchange rate found for #{currency}/#{to} on #{date}, using 1")
-        elsif rate.date != date
+        if rate && rate.date != date
           Rails.logger.debug("FX rate #{currency}/#{to}: using #{rate.date} for #{date} (gap=#{(date - rate.date).to_i}d)")
         end
-        result[currency] = rate&.rate || 1
+        rates[currency] = rate.rate if rate
       end
     end
 

@@ -101,12 +101,16 @@ provider integrations.
 
 [Syncable](../../app/models/concerns/syncable.rb) schedules background syncs and
 [Sync](../../app/models/sync.rb) records their state, hierarchy and errors.
-[Account::Syncer](../../app/models/account/syncer.rb) imports market data,
-materializes history (reverse for linked accounts, forward for manual accounts),
-applies provider balance overrides and matches transfers after sync.
+[Account::Syncer](../../app/models/account/syncer.rb) delegates to the local
+[Account::Recalculator](../../app/models/account/recalculator.rb): materialization
+is transactional, uses reverse history for linked accounts and forward history
+for manual accounts, and applies cached provider balance overrides. It does not
+fetch market data. Missing prices/FX preserve previous balances and fail explicitly.
+Transfer matching after sync also runs without outbound market lookups.
 [Family::Syncer](../../app/models/family/syncer.rb) schedules all eligible Syncable
 `*_items` associations plus manual accounts, then matches transfers and applies
-active rules. Entry-changing workflows call `Entry#sync_account_later`; inspect
+active rules. With bank access disabled, it recalculates all accounts without
+scheduling connector items. Entry-changing workflows call `Entry#sync_account_later`; inspect
 the calling workflow rather than assuming every save schedules a full sync.
 
 [AutoSync](../../app/controllers/concerns/auto_sync.rb) can request a family sync
@@ -115,6 +119,13 @@ on login once per date when the family enables it and has active accounts.
 [Sidekiq schedule](../../config/schedule.yml) handle scheduled work. Sidekiq also
 runs [SyncJob](../../app/jobs/sync_job.rb), [ImportJob](../../app/jobs/import_job.rb)
 and [AssistantResponseJob](../../app/jobs/assistant_response_job.rb).
+
+[ExternalAccess](../../app/models/external_access.rb) controls bank sync, market
+data, property valuations, external logos and Google Drive independently. New
+settings default off; credentials do not activate access. AI uses its existing
+`Setting.ai_features_enabled?` switch. Market import jobs remain separate from
+local accounting. See the [phase 2 transition](../migration/pruning-phase-2.md)
+before deploying existing installations, especially those using Drive/Brandfetch.
 
 ## Provider interfaces and APIs
 

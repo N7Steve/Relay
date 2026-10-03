@@ -5,6 +5,7 @@
 # - V1 RPC-style endpoints for institution connection, jobs, MFA, accounts, and transactions.
 class Provider::Sophtron < Provider
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
 
   DEFAULT_BASE_URL = "https://api.sophtron.com/api"
   USER_AGENT = "Relay Finance Sophtron Client"

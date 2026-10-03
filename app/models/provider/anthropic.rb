@@ -311,7 +311,10 @@ class Provider::Anthropic < Provider
   end
 
   private
-    attr_reader :client
+    def client
+      raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
+      @client
+    end
 
     def default_max_tokens
       ENV.fetch("ANTHROPIC_MAX_TOKENS", 4096).to_i

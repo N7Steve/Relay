@@ -6,6 +6,7 @@ module Security::Provided
   class_methods do
     # Returns all enabled and configured securities providers
     def providers
+      return [] unless ExternalAccess.enabled?(:market_data)
       Setting.enabled_securities_providers.filter_map do |name|
         Provider::Registry.for_concept(:securities).get_provider(name.to_sym)
       rescue Provider::Registry::Error
@@ -21,6 +22,7 @@ module Security::Provided
     # Get a specific provider by key name (e.g., "finnhub", "twelve_data")
     # Returns nil if the provider is disabled in settings or not configured.
     def provider_for(name)
+      return nil unless ExternalAccess.enabled?(:market_data)
       return nil if name.blank?
       return nil unless Setting.enabled_securities_providers.include?(name.to_s)
       Provider::Registry.for_concept(:securities).get_provider(name.to_sym)

@@ -15,6 +15,7 @@
 # them inside its own row lock / transaction.
 class Provider::Questrade
   include HTTParty
+  singleton_class.prepend(Provider::ExternalRequestGuard)
 
   headers "User-Agent" => "Relay Finance Questrade Client"
   default_options.merge!(verify: true, ssl_verify_mode: OpenSSL::SSL::VERIFY_PEER, timeout: 120)

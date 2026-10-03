@@ -30,7 +30,7 @@ class Account::SyncerTest < ActiveSupport::TestCase
     )
     ibkr_account.ensure_account_provider!(account)
 
-    Account::MarketDataImporter.any_instance.expects(:import_all).once
+    Account::MarketDataImporter.any_instance.expects(:import_all).never
     Balance::Materializer.any_instance.expects(:materialize_balances).once
     IbkrAccount::HistoricalBalancesSync.any_instance.expects(:sync!).once
 

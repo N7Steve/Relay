@@ -1,4 +1,14 @@
 module AccountsHelper
+  def render_account_sidebar(**locals)
+    render "accounts/account_sidebar_tabs", **locals
+  rescue Money::ConversionError => error
+    render DS::Alert.new(message: t("external_access.insufficient_data", details: error.message), variant: :warning)
+  rescue ActionView::Template::Error => error
+    raise unless error.cause.is_a?(Money::ConversionError)
+
+    render DS::Alert.new(message: t("external_access.insufficient_data", details: error.cause.message), variant: :warning)
+  end
+
   def summary_card(title:, &block)
     content = capture(&block)
     render "accounts/summary_card", title: title, content: content
@@ -38,7 +48,9 @@ module AccountsHelper
       end
 
     [
-      family.build_cache_key("account_sidebar_tabs_v6", invalidate_on_data_updates: true),
+      family.build_cache_key("account_sidebar_tabs_v7", invalidate_on_data_updates: true),
+      ExternalAccess.enabled?(:logos),
+      ExternalAccess.enabled?(:market_data),
       Current.user&.id,
       shares_version,
       active_tab,

@@ -624,6 +624,10 @@ class Account < ApplicationRecord
   end
 
   def automatic_logo_url
+    unless ExternalAccess.enabled?(:logos)
+      return Rails.application.routes.url_helpers.rails_blob_path(logo, only_path: true) if logo.attached?
+      return nil
+    end
     if institution_domain.present? && Setting.brand_fetch_client_id.present?
       logo_size = Setting.brand_fetch_logo_size
 
