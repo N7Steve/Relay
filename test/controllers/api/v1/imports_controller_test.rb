@@ -3,6 +3,39 @@
 require "test_helper"
 
 class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
+  test "ZIP preflight is read only and ZIP creation stores a Relay snapshot" do
+    source = Family.create!(name: "API ZIP source")
+    bytes = Family::DataExporter.new(source).generate_export.string
+    file = Rack::Test::UploadedFile.new(StringIO.new(bytes), "application/zip", original_filename: "sure_export.zip")
+    assert_no_difference [ "Import.count", "ActiveStorage::Blob.count" ] do
+      post preflight_api_v1_imports_url, params: { type: "RelayImport", file: file }, headers: api_headers(@read_only_api_key)
+    end
+    assert_response :success
+    assert_equal true, JSON.parse(response.body).dig("data", "valid")
+
+    file.rewind
+    post api_v1_imports_url, params: { type: "SureImport", file: file }, headers: api_headers(@api_key)
+    assert_response :created
+    import = @family.imports.find(JSON.parse(response.body).dig("data", "id"))
+    assert_instance_of RelayImport, import
+    assert import.full_backup?
+
+    @user.update!(role: "member")
+    file.rewind
+    assert_no_difference "Import.count" do
+      post api_v1_imports_url, params: { type: "RelayImport", file: file }, headers: api_headers(@api_key)
+    end
+    assert_response :forbidden
+  end
+
+  test "invalid ZIPs return a validation error without imports" do
+    file = Rack::Test::UploadedFile.new(StringIO.new("damaged"), "application/zip", original_filename: "backup.zip")
+    assert_no_difference "Import.count" do
+      post api_v1_imports_url, params: { type: "RelayImport", file: file }, headers: api_headers(@api_key)
+    end
+    assert_response :unprocessable_entity
+    assert_equal "invalid_backup", JSON.parse(response.body)["error"]
+  end
   include ActiveJob::TestHelper
 
   setup do
@@ -537,6 +570,15 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_instance_of RelayImport, import
     assert import.ndjson_file.attached?
     assert_equal 1, import.rows_count
+  end
+
+  test "members cannot upload complete snapshots" do
+    @user.update!(role: "member")
+    content = Family::Backup.new(Family.create!(name: "Backup source")).generate_ndjson
+    assert_no_difference("Import.count") do
+      post api_v1_imports_url, params: { type: "SureImport", raw_file_content: content }, headers: api_headers(@api_key)
+    end
+    assert_response :forbidden
   end
 
   test "should reject Sure import with no file or raw content" do

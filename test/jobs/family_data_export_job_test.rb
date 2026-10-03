@@ -18,7 +18,7 @@ class FamilyDataExportJobTest < ActiveJob::TestCase
     assert @export.export_file.attached?
     assert_match(/\Arelay_export_.*\.zip\z/, @export.export_file.filename.to_s)
     Zip::File.open_buffer(@export.export_file.download) do |zip|
-      assert_equal "export_version: 2\n", zip.read("version.txt")
+      assert_equal "export_version: 3\n", zip.read("version.txt")
       assert SureImport.valid_ndjson_first_line?(zip.read("all.ndjson"))
     end
   end

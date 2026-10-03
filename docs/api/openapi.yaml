@@ -2020,8 +2020,9 @@ components:
           minimum: 0
     ImportVerificationReadback:
       type: object
-      description: RelayImport/SureImport backups only. Expected NDJSON counts compared
-        to family-scoped database readback after publish.
+      description: RelayImport/SureImport backups only. Legacy imports compare NDJSON
+        counts against database readback. Full snapshots verify restored attributes
+        and original attachment bytes.
       properties:
         status:
           type: string
@@ -2035,6 +2036,20 @@ components:
           type: string
           format: date-time
           nullable: true
+        verified_records:
+          type: integer
+          minimum: 0
+          description: Full snapshots only. Restored records whose attributes were
+            verified, including the family.
+        verified_attachments:
+          type: integer
+          minimum: 0
+          description: Full snapshots only. Original files whose metadata and bytes
+            were verified.
+        warnings:
+          type: array
+          items:
+            "$ref": "#/components/schemas/BackupRestoreWarning"
         expected_record_counts:
           type: object
           additionalProperties:
@@ -2084,6 +2099,19 @@ components:
             type: integer
         readback:
           "$ref": "#/components/schemas/ImportVerificationReadback"
+    BackupRestoreWarning:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
     ImportPreflightContent:
       type: object
       required:
@@ -7216,7 +7244,9 @@ paths:
       summary: Upload import session chunk
       description: Attach an ordered backup NDJSON chunk to an import session. New
         chunks use the stored session type. Existing chunks keep their type and are
-        idempotent by sequence and client_chunk_id with content verification.
+        idempotent by sequence and client_chunk_id with content verification. Full
+        backups require a family administrator and one self-contained ZIP or NDJSON
+        chunk.
       tags:
       - Import Sessions
       security:
@@ -7244,8 +7274,7 @@ paths:
                   type: string
                   description: Raw backup NDJSON content. Each chunk is limited to
                     500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to
-                    change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a fallback
-                    when the Relay variable is unset.
+                    change the limit.
           multipart/form-data:
             schema:
               type: object
@@ -7265,10 +7294,10 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: Multipart backup NDJSON file upload. Each chunk is
-                    limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB
-                    to change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a
-                    fallback when the Relay variable is unset.
+                  description: Multipart backup ZIP or NDJSON file upload. The size
+                    limit also applies to decompressed NDJSON. Each chunk is limited
+                    to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB
+                    to change the limit.
       parameters: []
       responses:
         '201':
@@ -7318,7 +7347,8 @@ paths:
     post:
       summary: Publish import session
       description: Queue ordered backup chunk processing for an import session. Later
-        chunks can reference source IDs mapped by earlier chunks.
+        chunks can reference source IDs mapped by earlier chunks. Full snapshots require
+        a family administrator and a destination without financial data.
       tags:
       - Import Sessions
       security:
@@ -7431,9 +7461,10 @@ paths:
     post:
       summary: Create import
       description: Create an import from CSV or backup NDJSON content or a multipart
-        backup file. Backup requests use RelayImport for storage, responses and queued
-        jobs, including requests using the old SureImport name. CSV content is limited
-        to 10MB.
+        backup ZIP/NDJSON file. Version 3 full backups include original file bytes
+        and require a family administrator and a destination without financial data.
+        Backup requests use RelayImport for storage, responses and queued jobs, including
+        requests using the old SureImport name. CSV content is limited to 10MB.
       tags:
       - Imports
       security:
@@ -7446,6 +7477,12 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ImportResponse"
+        '403':
+          description: full backup restoration requires an administrator
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
         '422':
           description: validation error or publish rejection
           content:
@@ -7779,8 +7816,9 @@ paths:
   "/api/v1/imports/preflight":
     post:
       summary: Validate import content without creating an import
-      description: Validate CSV or backup NDJSON without persisting an import or enqueueing
-        jobs. Backup preflight returns type RelayImport, including requests using
+      description: Validate CSV or backup ZIP/NDJSON without persisting an import
+        or enqueueing jobs. Full backups verify the manifest, graph and original file
+        checksums. Backup preflight returns type RelayImport, including requests using
         the old SureImport name. CSV content is limited to 10MB.
       tags:
       - Imports
@@ -7825,8 +7863,9 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: CSV or backup NDJSON upload when using multipart/form-data.
-                    CSV files are limited to 10MB.
+                  description: CSV or backup ZIP/NDJSON upload when using multipart/form-data.
+                    The backup limit applies to uploaded and decompressed bytes. CSV
+                    files are limited to 10MB.
                 type:
                   type: string
                   enum:
@@ -7941,8 +7980,9 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: CSV or backup NDJSON upload when using multipart/form-data.
-                    CSV files are limited to 10MB.
+                  description: CSV or backup ZIP/NDJSON upload when using multipart/form-data.
+                    The backup limit applies to uploaded and decompressed bytes. CSV
+                    files are limited to 10MB.
                 type:
                   type: string
                   enum:

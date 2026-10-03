@@ -123,7 +123,7 @@ RSpec.describe 'API V1 Imports', type: :request do
     end
 
     post 'Create import' do
-      description 'Create an import from CSV or backup NDJSON content or a multipart backup file. Backup requests use RelayImport for storage, responses and queued jobs, including requests using the old SureImport name. CSV content is limited to 10MB.'
+      description 'Create an import from CSV or backup NDJSON content or a multipart backup ZIP/NDJSON file. Version 3 full backups include original file bytes and require a family administrator and a destination without financial data. Backup requests use RelayImport for storage, responses and queued jobs, including requests using the old SureImport name. CSV content is limited to 10MB.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -247,6 +247,14 @@ RSpec.describe 'API V1 Imports', type: :request do
           }
         end
 
+        run_test!
+      end
+
+      response '403', 'full backup restoration requires an administrator' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+        let(:body) do
+          { type: 'SureImport', raw_file_content: { type: 'BackupManifest', data: { version: 1 } }.to_json }
+        end
         run_test!
       end
 
@@ -381,7 +389,7 @@ RSpec.describe 'API V1 Imports', type: :request do
 
   path '/api/v1/imports/preflight' do
     post 'Validate import content without creating an import' do
-      description 'Validate CSV or backup NDJSON without persisting an import or enqueueing jobs. Backup preflight returns type RelayImport, including requests using the old SureImport name. CSV content is limited to 10MB.'
+      description 'Validate CSV or backup ZIP/NDJSON without persisting an import or enqueueing jobs. Full backups verify the manifest, graph and original file checksums. Backup preflight returns type RelayImport, including requests using the old SureImport name. CSV content is limited to 10MB.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -397,7 +405,7 @@ RSpec.describe 'API V1 Imports', type: :request do
           file: {
             type: :string,
             format: :binary,
-            description: 'CSV or backup NDJSON upload when using multipart/form-data. CSV files are limited to 10MB.'
+            description: 'CSV or backup ZIP/NDJSON upload when using multipart/form-data. The backup limit applies to uploaded and decompressed bytes. CSV files are limited to 10MB.'
           },
           type: {
             type: :string,

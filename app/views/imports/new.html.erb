@@ -69,8 +69,8 @@
                   <%= form.hidden_field :type, value: "RelayImport" %>
                   <label class="flex items-center justify-between p-4 group cursor-pointer w-full">
                     <div class="flex items-center gap-2">
-                      <div class="bg-cyan-500/5 rounded-md w-8 h-8 flex items-center justify-center">
-                        <span class="text-cyan-500">
+                      <div class="bg-container-inset rounded-md w-8 h-8 flex items-center justify-center">
+                        <span class="text-primary">
                           <%= icon("file-braces", color: "current") %>
                         </span>
                       </div>
@@ -84,7 +84,7 @@
                       </div>
                     </div>
                     <%= icon("chevron-right") %>
-                    <%= form.file_field :import_file, accept: ".ndjson,.json", class: "hidden", onchange: "this.form.submit()" %>
+                    <%= form.file_field :import_file, accept: ".zip,.ndjson,.json", class: "hidden", onchange: "this.form.submit()" %>
                   </label>
                 <% end %>
 
