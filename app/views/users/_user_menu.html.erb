@@ -34,7 +34,7 @@
         <div class="px-4 py-3 border-t border-tertiary">
           <p class="text-sm">
             <span class="font-medium text-primary"><%= t(".version") %>:</span>
-            <%= link_to Relay.version.to_release_tag, "https://github.com/we-promise/sure/releases/tag/#{Relay.version.to_release_tag}", target: "_blank", class: "hover:underline" %>
+            <%= Relay.version.to_release_tag %>
 
             <% if Relay.commit_sha.present? %>
               (<%= link_to Relay.commit_sha.first(7), "https://github.com/N7Steve/Relay/commit/#{Relay.commit_sha}", target: "_blank", class: "hover:underline" %>)
@@ -61,7 +61,7 @@
       <% if self_hosted? && !intro_mode %>
         <%= render DS::MenuItem.new(variant: "link", roving: false, text: t(".feedback"), icon: "megaphone", href: feedback_path) %>
       <% end %>
-      <%= render DS::MenuItem.new(variant: "link", roving: false, text: t(".contact"), icon: "message-square-more", href: "https://discord.gg/36ZGBsxYEK", target: "_blank", rel: "noopener noreferrer") %>
+      <%= render DS::MenuItem.new(variant: "link", roving: false, text: t(".contact"), icon: "message-square-more", href: "https://github.com/N7Steve/Relay/issues", target: "_blank", rel: "noopener noreferrer") %>
 
       <%= render DS::MenuItem.new(variant: "divider") %>
 

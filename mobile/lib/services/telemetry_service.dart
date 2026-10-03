@@ -73,7 +73,8 @@ class TelemetryService {
   TelemetryService({TelemetryConfig? config})
       : _config = config ?? TelemetryConfig.fromEnvironment();
 
-  bool get isConfigured => _config.isConfigured;
+  // Relay keeps telemetry disabled even when a legacy build supplies a DSN.
+  bool get isConfigured => false;
   bool get isActive => isConfigured && _initialized;
 
   List<NavigatorObserver> get navigatorObservers =>

@@ -28,12 +28,18 @@ External AI assistants that call Sure's `/mcp` endpoint should connect through P
 
 ## Docker Compose setup
 
+First prepare the Relay image and private environment configuration using the
+[Relay Docker guide](docker.md). Both app services require `RELAY_IMAGE`
+explicitly. For an existing installation, complete the isolated migration
+rehearsal before starting the stack against its data.
+
+
 The `compose.example.ai.yml` file includes Pipelock. To use it:
 
 1. Download the compose file and Pipelock config:
    ```bash
-   curl -o compose.ai.yml https://raw.githubusercontent.com/we-promise/sure/main/compose.example.ai.yml
-   curl -o pipelock.example.yaml https://raw.githubusercontent.com/we-promise/sure/main/pipelock.example.yaml
+   curl -o compose.ai.yml https://raw.githubusercontent.com/N7Steve/Relay/main/compose.example.ai.yml
+   curl -o pipelock.example.yaml https://raw.githubusercontent.com/N7Steve/Relay/main/pipelock.example.yaml
    ```
 
 2. Start the stack:

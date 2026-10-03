@@ -3,7 +3,7 @@
 class Provider::Redbark
   include HTTParty
 
-  headers "User-Agent" => "Sure Finance Redbark Client"
+  headers "User-Agent" => "Relay Finance Redbark Client"
   default_options.merge!(verify: true, ssl_verify_mode: OpenSSL::SSL::VERIFY_PEER, timeout: 120)
 
   BASE_URL = "https://api.redbark.com/v1"

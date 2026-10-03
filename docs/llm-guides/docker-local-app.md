@@ -45,12 +45,17 @@ proveedores reales, IA ni exportaciones a servicios externos automáticamente.
 ## Importaciones grandes
 
 Las importaciones de backups NDJSON admiten hasta 500 MB por defecto. Para
-archivos mayores, añadir `SURE_IMPORT_MAX_NDJSON_SIZE_MB` con el límite deseado
+archivos mayores, añadir `RELAY_IMPORT_MAX_NDJSON_SIZE_MB` con el límite deseado
 en MB al bloque `local-environment` de `compose.local.yml` y volver a ejecutar
-`iniciar-app.bat`. `SURE_IMPORT_MAX_ROWS` controla por separado el límite de
+`iniciar-app.bat`. `RELAY_IMPORT_MAX_ROWS` controla por separado el límite de
 registros, que sigue siendo 100.000 por importación. Estos ajustes se aplican
 también al worker. No es necesario modificar el archivo NDJSON ni copiarlo
 manualmente al contenedor.
+
+Los nombres `SURE_IMPORT_MAX_*` siguen funcionando cuando el equivalente
+`RELAY_IMPORT_MAX_*` no está definido. Relay tiene prioridad incluso si su valor
+es vacío o no positivo: se usa entonces el valor predeterminado, sin recuperar
+el legacy. Consultar [la transición de configuración](relay-compatibility.md).
 
 ## Verificación histórica del entorno Sure
 

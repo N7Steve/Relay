@@ -12,7 +12,8 @@ services:
       POSTGRES_DB: relay_test
       POSTGRES_USER: relay_test
       POSTGRES_PASSWORD: local-test-only
-      DATABASE_URL: postgres://relay_test:local-test-only@db:5432/relay_test
+      # Fixed credentials for the isolated test database only.
+      DATABASE_URL: postgres://relay_test:local-test-only@db:5432/relay_test # pipelock:ignore PostgreSQL Connection String
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY_BASE: docker-tests-only-not-a-production-secret-000000000000000000000000
       PLAID_CLIENT_ID: test_client_id

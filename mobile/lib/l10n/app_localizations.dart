@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// Application title shown in the OS task switcher.
   ///
   /// In en, this message translates to:
-  /// **'Sure Finances'**
+  /// **'Relay'**
   String get appTitle;
 
   /// Generic cancel action label.
@@ -800,13 +800,13 @@ abstract class AppLocalizations {
   /// **'Link Your Account'**
   String get ssoOnboardingTitle;
 
-  /// Tab label for linking an existing Sure account via SSO.
+  /// Tab label for linking an existing Relay account via SSO.
   ///
   /// In en, this message translates to:
   /// **'Link existing'**
   String get ssoOnboardingTabLink;
 
-  /// Tab label for creating a new Sure account via SSO.
+  /// Tab label for creating a new Relay account via SSO.
   ///
   /// In en, this message translates to:
   /// **'Create new'**
@@ -947,7 +947,7 @@ abstract class AppLocalizations {
   /// Subtitle below the headline on the backend configuration screen.
   ///
   /// In en, this message translates to:
-  /// **'Update your Sure server URL'**
+  /// **'Update your Relay server URL'**
   String get backendConfigSubtitle;
 
   /// Label for the example URLs info box on the config screen.
@@ -959,7 +959,7 @@ abstract class AppLocalizations {
   /// Label for the server URL field on the config screen.
   ///
   /// In en, this message translates to:
-  /// **'Sure server URL'**
+  /// **'Relay server URL'**
   String get backendConfigUrlLabel;
 
   /// Hint text for the server URL field.
@@ -1475,7 +1475,7 @@ abstract class AppLocalizations {
   /// Heading above the displayed server URL on the login screen.
   ///
   /// In en, this message translates to:
-  /// **'Sure server URL:'**
+  /// **'Relay server URL:'**
   String get loginServerUrlHeading;
 
   /// Button label to open the API key login dialog.
@@ -1655,7 +1655,7 @@ abstract class AppLocalizations {
   /// Helper text for the name field in the create form.
   ///
   /// In en, this message translates to:
-  /// **'Optional (default: SureApp)'**
+  /// **'Optional (default: RelayApp)'**
   String get transactionFormNameHelper;
 
   /// Placeholder shown while categories are loading in the create form.
@@ -1841,7 +1841,7 @@ abstract class AppLocalizations {
   /// Error shown when the server returns a non-success status during the connection test.
   ///
   /// In en, this message translates to:
-  /// **'Server responded with status {code}. Please check if this is a Sure backend server.'**
+  /// **'Server responded with status {code}. Please check if this is a Relay backend server.'**
   String backendConfigServerError(int code);
 
   /// Error shown when the connection test fails with an exception.
