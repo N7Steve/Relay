@@ -204,6 +204,62 @@ anteriores. Eso también reactiva los workflows heredados: revisar este efecto
 antes de revertir en GitHub. No hay migraciones, cambios de datos, claves,
 volúmenes o configuración externa que revertir.
 
+## Cuarta entrega: configuración, tareas y backups compatibles
+
+Ejecutada el **3 de octubre de 2026**, sobre `7565587f4`:
+
+- Los backups nuevos usan `relay_export_YYYYMMDD_HHMMSS.zip`. Un export con
+  adjunto conserva el nombre almacenado, incluidos los `sure_export_*`, tanto
+  en la lista como en su descarga. El listado precarga adjuntos/blobs para no
+  añadir consultas por fila. No se cambian los nombres CSV ni los destinos Drive.
+- Los cinco nombres `RELAY_IMPORT_MAX_ROWS`, `RELAY_IMPORT_MAX_NDJSON_SIZE_MB`,
+  `RELAY_BATCH_SIZE`, `RELAY_LIMIT` y `RELAY_DRY_RUN` sustituyen a los nombres
+  Sure como configuración recomendada. `SURE_*` sigue funcionando cuando el
+  equivalente Relay no está definido. Si Relay está definido pero es vacío o
+  inválido, se aplican los defaults del consumidor, sin rescatar el valor legacy.
+- En la tarea de cifrado se conserva la prioridad de argumentos explícitos y
+  overrides sin prefijo antes de Relay/Sure. No cambia el dry-run seguro por
+  defecto. `Relay::Environment.legacy_names_in_use` lista nombres legacy
+  definidos sin equivalente Relay, sin imprimir valores ni secretos. En tareas
+  son candidatos al fallback; los argumentos y overrides pueden tener prioridad.
+- Las 12 tareas `sure:*` pasan a `relay:*`, conservando los alias antiguos,
+  argumentos y ejecución única de Rake aunque se invoquen ambos nombres en el
+  mismo proceso. Los comandos de ejemplo se actualizan; no se ejecutan tareas
+  de mantenimiento sobre instalaciones existentes.
+- Se actualizan plantillas `.env`, la guía local y
+  [la guía de compatibilidad](docs/llm-guides/relay-compatibility.md), incluyendo
+  precedencia, diagnóstico, formato de backup y reversión.
+- OpenAPI usa el título Relay y documenta la configuración nueva y su fallback.
+  Se regenera desde rswag documental. No se modifican rutas, parámetros,
+  autenticación, scopes ni tenancy de los endpoints.
+
+Se conservan `SureImport` como clase/tipo STI y valor API, `import_sessions`,
+jobs, datos NDJSON, versión ZIP 2, cabeceras, issuer MFA, claves, callbacks e
+identificadores nativos. No se añaden ni ejecutan migraciones. La restauración
+usa el `all.ndjson` extraído de ambos nombres de ZIP; no se añade una subida
+directa de ZIP.
+
+### Estado actual y siguiente bloque
+
+Las fases 0 y la base local de la 3 siguen completadas. La fase 2 ya incluye
+las rutas de diseño y tareas propias; queda decidir versión y distribución.
+La fase 4 avanza en configuración/exportaciones compatibles, pero aún falta
+la transición de tipos persistidos y contratos de importación. Las fases 5 y 6
+siguen pendientes.
+
+Siguiente paso: diseñar la transición `SureImport`/`RelayImport` con lectura
+compatible de ambos nombres y revisar conjuntamente STI, restricciones de
+`import_sessions`, API, GlobalID y jobs. Definir después el cambio de escritura
+y sus nuevas migraciones; no renombrar la clase ni reescribir migraciones
+históricas de forma aislada. Publicación y clientes requieren primero decidir
+versiones, canales y destinos reales de Relay.
+
+Reversión: revertir esta entrega no modifica datos ni adjuntos. Antes de volver
+al código anterior, copiar la configuración `RELAY_*` a sus nombres `SURE_*`
+o mantener ambos con valores equivalentes, y volver a invocar `sure:*`: el
+código anterior desconoce los nombres nuevos. El payload de backups Relay
+sigue siendo compatible con el formato anterior.
+
 ## Inventario técnico de la separación
 
 | Área | Puntos principales | Tratamiento |
@@ -464,6 +520,32 @@ validación local no certifica el resultado remoto, una release ni un despliegue
 Los logs y copias de auditoría están en `tmp/`, fuera de Git. No se ejecutan
 migraciones ni se arranca la instalación local. Los servicios de pruebas se
 detienen conservando sus volúmenes al terminar.
+
+### Validación de la cuarta entrega
+
+Ejecutada el 3 de octubre de 2026 en los proyectos aislados `relay-contracts`
+y `relay-contracts-system`, con bases `relay_test` independientes:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Focalizadas: configuración, tareas, backups, importaciones web/API | 204 pruebas, 1.003 aserciones, sin fallos, errores ni omisiones |
+| Suite completa Rails/Minitest final | 10.791 pruebas, 45.731 aserciones, 0 fallos, 0 errores, 33 omisiones heredadas |
+| Sistema: importaciones y subida desde Transacciones | 7 pruebas, 26 aserciones, sin fallos, errores ni omisiones |
+| RuboCop completo | 2.919 archivos, sin infracciones |
+| ERB lint completo | 779 plantillas, sin errores |
+| Biome | 142 archivos, sin errores |
+| Brakeman | 0 errores, 0 avisos activos; conserva las 8 exclusiones heredadas |
+| Assets y tokens | Compilación correcta en test; CSS/Dart pasan `tokens:check` |
+| OpenAPI | Regenerado: 435 ejemplos documentales, 0 fallos, 89 pendientes documentales heredados; diff limitado a título y 2 descripciones |
+| API | Minitest usa `X-Api-Key`; rswag sigue documental; verificador de consistencia correcto |
+| Tareas | `bin/rails -T relay:` registra los 12 nombres canónicos; compatibilidad y argumentos cubiertos por Minitest |
+| Whitespace | `git diff --check` correcto |
+
+Las pruebas cargan el esquema solo en sus bases aisladas. No se ejecutan tareas
+de mantenimiento en instalaciones existentes, migraciones históricas,
+despliegues ni el servidor local. Los logs permanecen en `tmp/`, fuera de Git;
+los servicios de pruebas se detienen al terminar, sin borrar volúmenes. Los
+resultados son locales; CI remoto y distribución no quedan certificados.
 
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia

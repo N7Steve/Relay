@@ -462,6 +462,20 @@ class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "file_too_large", json_response["error"]
   end
 
+  test "Relay upload limit overrides the legacy limit through API key authentication" do
+    file = Rack::Test::UploadedFile.new(
+      StringIO.new("x" * (1.megabyte + 1)), "application/x-ndjson", original_filename: "all.ndjson"
+    )
+    with_env_overrides("RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => "1", "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "2") do
+      assert_no_difference "Import.count" do
+        post api_v1_imports_url, params: { type: "SureImport", file: file }, headers: api_headers(@api_key)
+      end
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "file_too_large", JSON.parse(response.body)["error"]
+  end
+
   test "should reject Sure import uploaded file with invalid type" do
     ndjson_content = { type: "Account", data: { id: "account_1", name: "Checking" } }.to_json
     invalid_file = Rack::Test::UploadedFile.new(

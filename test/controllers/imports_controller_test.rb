@@ -455,6 +455,20 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, import.rows_count
   end
 
+  test "Relay upload limit overrides the legacy limit on the web" do
+    file = Rack::Test::UploadedFile.new(
+      StringIO.new("x" * (1.megabyte + 1)), "application/x-ndjson", original_filename: "all.ndjson"
+    )
+    with_env_overrides("RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => "1", "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "2") do
+      assert_no_difference "Import.count" do
+        post imports_url, params: { import: { type: "SureImport", import_file: file } }
+      end
+    end
+
+    assert_redirected_to new_import_url
+    assert_equal I18n.t("imports.create.file_too_large", max_size: 1), flash[:alert]
+  end
+
   test "respects SURE_IMPORT_MAX_NDJSON_SIZE_MB when creating Sure import (#3010)" do
     configured_limit = 2.megabytes
     SureImport.stubs(:max_ndjson_size).returns(configured_limit)

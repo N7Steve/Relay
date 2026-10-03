@@ -388,7 +388,8 @@ Puntos principales: `transfer.rb`, `transfer/creator.rb`, `transaction/transfera
 Funcionalidad propia incorporada en agosto de 2026:
 
 - Dos tipos de exportación: copia completa y CSV personalizado de transacciones.
-- Las importaciones de backups NDJSON admiten 500 MB por defecto, tanto por web como por API. `SURE_IMPORT_MAX_NDJSON_SIZE_MB` permite ajustar el límite; conservar la cobertura de subidas mayores de 10 MB en `test/controllers/imports_controller_test.rb` y no recuperar el límite upstream de 10 MB.
+- Las importaciones de backups NDJSON admiten 500 MB por defecto, tanto por web como por API. `RELAY_IMPORT_MAX_NDJSON_SIZE_MB` permite ajustar el límite; `SURE_IMPORT_MAX_NDJSON_SIZE_MB` sigue como fallback cuando el nombre Relay no está definido. `RELAY_IMPORT_MAX_ROWS` tiene la misma compatibilidad y conserva el default de 100.000 registros. Conservar la cobertura de subidas mayores de 10 MB y de precedencia web/API; no recuperar el límite upstream de 10 MB.
+- Desde el 3 de octubre de 2026, los nuevos backups usan `relay_export_*`; los adjuntos existentes conservan su nombre real, incluido `sure_export_*`. Se mantiene el formato ZIP v2/`all.ndjson`, CSV y archivos remotos de Drive. El listado precarga los adjuntos para evitar consultas por fila.
 - Rango de fechas, filtros JSON, usuario solicitante, tipo y número de registros.
 - Generación asíncrona y descarga desde la UI.
 - Endpoint API adaptado a las nuevas opciones.
@@ -504,6 +505,7 @@ Rutas afectadas: `app/models/concerns/syncable.rb`, modelos/importers/syncers de
 - Workflows: se conserva `.github/workflows/pipelock.yml`. Gittensor y los workflows heredados de distribución/publicación están archivados en `docs/archive/sure/workflows/`; ya no se ejecutan en Relay (3 de octubre de 2026).
 - Documentación/operación: `docs/archive/sure/rollback-instructions.md` e `docs/archive/sure/informe_scheduled_payments.md`.
 - Scripts de diagnóstico: `script/debug_subtypes.rb` y `script/debug_currency_methods.rb`.
+- Las 12 tareas antes llamadas `sure:*` tienen nombres canónicos `relay:*` y alias legacy que conservan argumentos y ejecución única de Rake. La tarea de cifrado acepta `RELAY_BATCH_SIZE`, `RELAY_LIMIT` y `RELAY_DRY_RUN`, manteniendo los overrides sin prefijo y el fallback `SURE_*`; el dry-run predeterminado sigue activo. Ver [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
 - `conflicts.txt` se retiró el 3 de octubre de 2026: era una lista UTF-16 de diez rutas de conflictos antiguos, sin consumidores ni comportamiento. Se conserva en Git; no restaurarla en futuras integraciones.
 
 ## Migraciones propias

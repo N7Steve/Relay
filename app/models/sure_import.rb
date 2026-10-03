@@ -34,11 +34,11 @@ class SureImport < Import
 
   class << self
     def max_row_count
-      positive_integer_env("SURE_IMPORT_MAX_ROWS", DEFAULT_MAX_ROW_COUNT)
+      positive_integer_env("IMPORT_MAX_ROWS", DEFAULT_MAX_ROW_COUNT)
     end
 
     def max_ndjson_size
-      positive_integer_env("SURE_IMPORT_MAX_NDJSON_SIZE_MB", DEFAULT_MAX_NDJSON_SIZE_MB).megabytes
+      positive_integer_env("IMPORT_MAX_NDJSON_SIZE_MB", DEFAULT_MAX_NDJSON_SIZE_MB).megabytes
     end
 
     # Counts JSON lines by top-level "type" (used for dry-run summaries and row limits).
@@ -97,7 +97,7 @@ class SureImport < Import
 
     private
       def positive_integer_env(name, default)
-        value = ENV[name].to_i
+        value = Relay::Environment.fetch(name).to_i
         value.positive? ? value : default
       end
   end

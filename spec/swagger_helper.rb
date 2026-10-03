@@ -10,7 +10,7 @@ RSpec.configure do |config|
     'openapi.yaml' => {
       openapi: '3.0.3',
       info: {
-        title: 'Sure API',
+        title: 'Relay API',
         version: 'v1',
         description: 'OpenAPI documentation generated from executable request specs.'
       },
