@@ -17,7 +17,7 @@ struct SureAssistantView: View {
                   .foregroundStyle(.tint)
                 Text("Ask about your money")
                   .font(.title2.bold())
-                Text("Sure’s Assistant can analyze your live accounts, spending, budgets, investments, and insights.")
+                Text("Relay’s Assistant can analyze your live accounts, spending, budgets, investments, and insights.")
                   .multilineTextAlignment(.center)
                   .foregroundStyle(.secondary)
                 VStack(spacing: 10) {
@@ -87,7 +87,7 @@ struct SureAssistantView: View {
 
   private var composer: some View {
     HStack(alignment: .bottom, spacing: 10) {
-      TextField("Message Sure Assistant", text: $draft, axis: .vertical)
+      TextField("Message Relay Assistant", text: $draft, axis: .vertical)
         .lineLimit(1...5)
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
@@ -165,6 +165,6 @@ struct SureMessageBubble: View {
     }
     .padding(.horizontal)
     .accessibilityElement(children: .combine)
-    .accessibilityLabel(message.isUser ? "You: \(message.content)" : "Sure Assistant: \(message.content)")
+    .accessibilityLabel(message.isUser ? "You: \(message.content)" : "Relay Assistant: \(message.content)")
   }
 }

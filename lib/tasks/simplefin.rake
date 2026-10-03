@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-namespace :sure do
+namespace :relay do
   namespace :simplefin do
     desc "Print debug info for a SimpleFin item: latest sync, snapshot accounts, simplefin_accounts, and unlinked list"
     task :debug, [ :item_id ] => :environment do |_, args|
       unless args[:item_id].present?
-        puts({ error: "usage", example: "bin/rails sure:simplefin:debug[ITEM_ID]" }.to_json)
+        puts({ error: "usage", example: "bin/rails relay:simplefin:debug[ITEM_ID]" }.to_json)
         exit 1
       end
 
@@ -33,16 +33,16 @@ namespace :sure do
     end
     desc "Encrypt existing SimpleFin access_url values (idempotent). Args: batch_size, limit, dry_run"
     task :encrypt_access_urls, [ :batch_size, :limit, :dry_run ] => :environment do |_, args|
-      Rake::Task["sure:encrypt_access_urls"].invoke(args[:batch_size], args[:limit], args[:dry_run])
+      Rake::Task["relay:encrypt_access_urls"].invoke(args[:batch_size], args[:limit], args[:dry_run])
     end
   end
 
   desc "Encrypt existing SimpleFin access_url values (idempotent). Args: batch_size, limit, dry_run"
   task :encrypt_access_urls, [ :batch_size, :limit, :dry_run ] => :environment do |_, args|
     # Parse args or fall back to ENV overrides for convenience
-    raw_batch = args[:batch_size].presence || ENV["BATCH_SIZE"].presence || ENV["SURE_BATCH_SIZE"].presence
-    raw_limit = args[:limit].presence || ENV["LIMIT"].presence || ENV["SURE_LIMIT"].presence
-    raw_dry   = args[:dry_run].presence || ENV["DRY_RUN"].presence || ENV["SURE_DRY_RUN"].presence
+    raw_batch = args[:batch_size].presence || ENV["BATCH_SIZE"].presence || Relay::Environment.fetch("BATCH_SIZE")
+    raw_limit = args[:limit].presence || ENV["LIMIT"].presence || Relay::Environment.fetch("LIMIT")
+    raw_dry   = args[:dry_run].presence || ENV["DRY_RUN"].presence || Relay::Environment.fetch("DRY_RUN")
 
     batch_size = raw_batch.to_i
     batch_size = 100 if batch_size <= 0

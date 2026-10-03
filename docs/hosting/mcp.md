@@ -341,13 +341,19 @@ The `/mcp` endpoint is exposed on the same port as the web UI (default 3000). Fo
 
 ## Production Deployment
 
+First prepare the Relay image and private environment configuration using the
+[Relay Docker guide](docker.md). Both app services require `RELAY_IMAGE`
+explicitly. For an existing installation, complete the isolated migration
+rehearsal before starting the stack against its data.
+
+
 For a production-ready setup with security scanning:
 
 1. **Download the example configuration:**
 
    ```bash
-   curl -o compose.ai.yml https://raw.githubusercontent.com/we-promise/sure/main/compose.example.ai.yml
-   curl -o pipelock.example.yaml https://raw.githubusercontent.com/we-promise/sure/main/pipelock.example.yaml
+   curl -o compose.ai.yml https://raw.githubusercontent.com/N7Steve/Relay/main/compose.example.ai.yml
+   curl -o pipelock.example.yaml https://raw.githubusercontent.com/N7Steve/Relay/main/pipelock.example.yaml
    ```
 
 2. **Set your MCP credentials in `.env`:**

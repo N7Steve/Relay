@@ -2,8 +2,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.3"
 	},
-	"name": "sure",
-	"version": "1.0.0",
+	"name": "relay",
+	"version": "0.1.0",
 	"description": "The personal finance app for everyone",
 	"scripts": {
 		"style:check": "biome check",
@@ -12,8 +12,8 @@
 		"lint:fix": "biome lint --write",
 		"format:check": "biome format",
 		"format": "biome format --write",
-		"tokens:build": "node bin/tokens.mjs",
-		"tokens:check": "node bin/tokens.mjs && git diff --quiet -- app/assets/tailwind/sure-design-system/_generated.css"
+		"tokens:build": "node bin/tokens.mjs && node mobile/tool/generate_relay_tokens.mjs",
+		"tokens:check": "node bin/tokens.mjs --check && node mobile/tool/generate_relay_tokens.mjs --check"
 	},
 	"author": "",
 	"license": "ISC"

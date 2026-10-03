@@ -2,6 +2,8 @@ require "application_system_test_case"
 
 class SettingsTest < ApplicationSystemTestCase
   setup do
+    Provider::Github.any_instance.stubs(:fetch_latest_release_notes).returns(nil)
+    Provider::Github.any_instance.stubs(:fetch_release_notes).returns(nil)
     sign_in @user = users(:family_admin)
 
     # Base settings available to all users
@@ -36,16 +38,14 @@ class SettingsTest < ApplicationSystemTestCase
   end
 
   test "can access settings from sidebar" do
-    VCR.use_cassette("git_repository_provider/fetch_latest_release_notes") do
-      open_settings_from_sidebar
-      assert_selector "h1", text: "Accounts"
-      assert_current_path accounts_path, ignore_query: true
+    open_settings_from_sidebar
+    assert_selector "h1", text: "Accounts"
+    assert_current_path accounts_path, ignore_query: true
 
-      @settings_links.each do |name, path|
-        click_link name, match: :first
-        assert_selector "h1", text: name
-        assert_current_path path
-      end
+    @settings_links.each do |name, path|
+      click_link name, match: :first
+      assert_selector "h1", text: name
+      assert_current_path path
     end
   end
 
@@ -95,24 +95,22 @@ class SettingsTest < ApplicationSystemTestCase
   end
 
   test "does not show admin settings to non-admin users" do
-    VCR.use_cassette("git_repository_provider/fetch_latest_release_notes") do
-      # Visit accounts path directly as non-admin user to avoid user menu issues
-      visit new_session_path
-      within %(form[action='#{sessions_path}']) do
-        fill_in "Email", with: users(:family_member).email
-        fill_in "Password", with: user_password_test
-        click_on "Log in"
-      end
-
-      # Go directly to accounts (settings) page
-      visit accounts_path
-
-      # Assert that admin-only settings are not present in the navigation
-      assert_no_selector "li", text: "AI Prompts"
-      assert_no_selector "li", text: "API Keys"
-      assert_no_selector "li", text: "Bank sync"
-      assert_no_selector "li", text: "Statement Vault"
+    # Visit accounts path directly as non-admin user to avoid user menu issues
+    visit new_session_path
+    within %(form[action='#{sessions_path}']) do
+      fill_in "Email", with: users(:family_member).email
+      fill_in "Password", with: user_password_test
+      click_on "Log in"
     end
+
+    # Go directly to accounts (settings) page
+    visit accounts_path
+
+    # Assert that admin-only settings are not present in the navigation
+    assert_no_selector "li", text: "AI Prompts"
+    assert_no_selector "li", text: "API Keys"
+    assert_no_selector "li", text: "Bank sync"
+    assert_no_selector "li", text: "Statement Vault"
   end
 
   private

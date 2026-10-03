@@ -39,7 +39,7 @@ if ($LASTEXITCODE -ne 0 -or "$osType".Trim() -ne 'linux') {
 }
 
 $composeArguments = @(
-    '--context', $activeContext, 'compose', '--project-name', 'sure-tests',
+    '--context', $activeContext, 'compose', '--project-name', 'relay-tests',
     '--project-directory', $repoRoot,
     '--env-file', (Join-Path $repoRoot 'docker/test.env'),
     '--file', (Join-Path $repoRoot 'compose.test.yml')

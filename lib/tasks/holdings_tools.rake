@@ -5,14 +5,14 @@
 # Seed a prior snapshot for an existing holding to visualize Day Change immediately.
 # Example:
 #   # Preview (no write):
-#   # bin/rails 'sure:holdings:seed_prev_snapshot[holding_id=HOLDING_UUID,change_pct=2,days_ago=1,dry_run=true]'
+#   # bin/rails 'relay:holdings:seed_prev_snapshot[holding_id=HOLDING_UUID,change_pct=2,days_ago=1,dry_run=true]'
 #   # Apply (writes):
-#   # bin/rails 'sure:holdings:seed_prev_snapshot[holding_id=HOLDING_UUID,change_pct=2,days_ago=1,dry_run=false]'
+#   # bin/rails 'relay:holdings:seed_prev_snapshot[holding_id=HOLDING_UUID,change_pct=2,days_ago=1,dry_run=false]'
 #
 # Remove a previously seeded snapshot by id:
-#   # bin/rails 'sure:holdings:remove_snapshot[id=HOLDING_UUID]'
+#   # bin/rails 'relay:holdings:remove_snapshot[id=HOLDING_UUID]'
 
-namespace :sure do
+namespace :relay do
   namespace :holdings do
     desc "Seed a previous snapshot for Day Change demo. Args: holding_id, change_pct=2, days_ago=1, dry_run=true"
     task :seed_prev_snapshot, [ :holding_id, :change_pct, :days_ago, :dry_run ] => :environment do |_, args|

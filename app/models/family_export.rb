@@ -82,10 +82,12 @@ class FamilyExport < ApplicationRecord
   end
 
   def filename
+    return export_file.filename.to_s if export_file.attached?
+
     if transactions_csv?
       "transactions_#{start_date.strftime('%Y-%m-%d')}_to_#{end_date.strftime('%Y-%m-%d')}.csv"
     else
-      "sure_export_#{created_at.strftime('%Y%m%d_%H%M%S')}.zip"
+      "relay_export_#{created_at.strftime('%Y%m%d_%H%M%S')}.zip"
     end
   end
 

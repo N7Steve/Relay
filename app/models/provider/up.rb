@@ -8,7 +8,7 @@ class Provider::Up
   # taken from API responses (links.next) are validated against this.
   ALLOWED_HOST = URI.parse(DEFAULT_BASE_URL).host.freeze
 
-  headers "User-Agent" => "Sure Finance Up Client"
+  headers "User-Agent" => "Relay Finance Up Client"
   default_options.merge!({ timeout: 120 }.merge(httparty_ssl_options))
 
   attr_reader :access_token

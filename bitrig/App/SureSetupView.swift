@@ -17,23 +17,23 @@ struct SureSetupView: View {
               .accessibilityHidden(true)
             Text("Your finances, made clear")
               .font(.largeTitle.bold())
-            Text("Connect securely to Sure with an API key. Your key stays in this device’s Keychain.")
+            Text("Connect securely to Relay with an API key. Your key stays in this device’s Keychain.")
               .font(.title3)
               .foregroundStyle(.secondary)
           }
 
           VStack(spacing: 16) {
-            TextField("Sure server", text: $server)
+            TextField("Relay server", text: $server)
               .textContentType(.URL)
               .keyboardType(.URL)
               .textInputAutocapitalization(.never)
               .autocorrectionDisabled()
               .focused($focusedField, equals: .server)
-              .accessibilityLabel("Sure server address")
+              .accessibilityLabel("Relay server address")
             SecureField("Read/write API key", text: $apiKey)
               .textContentType(.password)
               .focused($focusedField, equals: .apiKey)
-              .accessibilityLabel("Sure read/write API key")
+              .accessibilityLabel("Relay read/write API key")
           }
           .padding(18)
           .background(.background.secondary, in: .rect(cornerRadius: 20))
@@ -41,10 +41,10 @@ struct SureSetupView: View {
           VStack(alignment: .leading, spacing: 10) {
             Label("Connect to the demo", systemImage: "person.badge.key.fill")
               .font(.headline)
-            Text("Sign in through the Sure demo, then create a read/write key in Settings → API keys. Paste that key above.")
+            Text("Sign in through the Relay demo, then create a read/write key in Settings → API keys. Paste that key above.")
               .font(.subheadline)
               .foregroundStyle(.secondary)
-            Link("Open Sure demo", destination: URL(string: "https://demo.sure.am")!)
+            Link("Open Relay demo", destination: URL(string: "https://demo.sure.am")!)
               .font(.subheadline.weight(.semibold))
           }
           .padding(16)
@@ -66,7 +66,7 @@ struct SureSetupView: View {
                 ProgressView()
                   .tint(.white)
               }
-              Text(store.isLoading ? "Connecting…" : "Connect to Sure")
+              Text(store.isLoading ? "Connecting…" : "Connect to Relay")
                 .fontWeight(.semibold)
               Spacer()
               Image(systemName: "arrow.right")
@@ -80,7 +80,7 @@ struct SureSetupView: View {
         .frame(maxWidth: 620, alignment: .leading)
         .padding(24)
       }
-      .navigationTitle("Sure")
+      .navigationTitle("Relay")
     }
   }
 }

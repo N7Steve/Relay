@@ -124,7 +124,7 @@ fr:
       why_required_body: Relay utilise Redis pour alimenter les tâches en arrière-plan de Sidekiq pour des tâches telles que la synchronisation des données de compte, le traitement des importations et d'autres opérations en arrière-plan qui maintiennent vos données financières à jour.
       why_required_title: Pourquoi Redis est-il requis ?
     release_notes_unavailable:
-      body_html: "<p>Impossible de récupérer les dernières notes de mise à jour pour le moment. Veuillez réessayer plus tard ou visiter directement notre <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>page de versions GitHub</a>.</p>"
+      body_html: "<p>Impossible de récupérer les dernières notes de mise à jour pour le moment. Veuillez réessayer plus tard ou visiter directement notre <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>page de versions GitHub</a>.</p>"
       name: Notes de mise à jour indisponibles
     terms:
       heading: Conditions d'utilisation
