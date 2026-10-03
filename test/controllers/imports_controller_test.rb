@@ -8,6 +8,23 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     ensure_tailwind_build
   end
 
+  test "members cannot upload or publish complete backups" do
+    @user.update!(role: "member")
+    content = Family::Backup.new(Family.create!(name: "Backup source")).generate_ndjson
+    file = Rack::Test::UploadedFile.new(StringIO.new(content), "application/x-ndjson", original_filename: "all.ndjson")
+    assert_no_difference("Import.count") do
+      post imports_url, params: { import: { type: "SureImport", import_file: file } }
+    end
+    assert_response :forbidden
+
+    import = @user.family.imports.create!(type: "SureImport")
+    import.ndjson_file.attach(io: StringIO.new(content), filename: "all.ndjson", content_type: "application/x-ndjson")
+    assert_no_enqueued_jobs do
+      post publish_import_url(import)
+    end
+    assert_response :forbidden
+  end
+
   test "gets index" do
     get imports_url
 
@@ -16,6 +33,28 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     @user.family.imports.ordered.each do |import|
       assert_select "#" + dom_id(import), count: 1
     end
+  end
+
+  test "administrator restores a full Sure ZIP directly into an empty family" do
+    sign_in users(:empty)
+    source = Family.create!(name: "ZIP source")
+    source.accounts.create!(name: "Portable checking", accountable: Depository.new, balance: 25, currency: "EUR")
+    bytes = Family::DataExporter.new(source).generate_export.string
+    file = Rack::Test::UploadedFile.new(StringIO.new(bytes), "application/zip", original_filename: "sure_export.zip")
+
+    post imports_url, params: { import: { type: "RelayImport", import_file: file } }
+    import = users(:empty).family.imports.ordered.first
+    assert_redirected_to import_url(import)
+    assert_instance_of RelayImport, import
+    assert import.full_backup?
+    get import_url(import)
+    assert_response :success
+    assert_includes response.body, I18n.t("imports.ready.full_backup_title")
+
+    perform_enqueued_jobs(only: ImportJob) { post publish_import_url(import) }
+    assert import.reload.complete?, import.error
+    assert_equal "matched", import.verification_status
+    assert_equal "Portable checking", users(:empty).family.accounts.sole.name
   end
 
   test "gets new" do

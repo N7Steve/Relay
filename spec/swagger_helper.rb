@@ -1075,10 +1075,13 @@ RSpec.configure do |config|
           },
           ImportVerificationReadback: {
             type: :object,
-            description: 'RelayImport/SureImport backups only. Expected NDJSON counts compared to family-scoped database readback after publish.',
+            description: 'RelayImport/SureImport backups only. Legacy imports compare NDJSON counts against database readback. Full snapshots verify restored attributes and original attachment bytes.',
             properties: {
               status: { type: :string, enum: %w[not_verified matched mismatch failed reverted] },
               checked_at: { type: :string, format: :'date-time', nullable: true },
+              verified_records: { type: :integer, minimum: 0, description: 'Full snapshots only. Restored records whose attributes were verified, including the family.' },
+              verified_attachments: { type: :integer, minimum: 0, description: 'Full snapshots only. Original files whose metadata and bytes were verified.' },
+              warnings: { type: :array, items: { '$ref' => '#/components/schemas/BackupRestoreWarning' } },
               expected_record_counts: {
                 type: :object,
                 additionalProperties: { type: :integer }
@@ -1123,6 +1126,15 @@ RSpec.configure do |config|
                 additionalProperties: { type: :integer }
               },
               readback: { '$ref' => '#/components/schemas/ImportVerificationReadback' }
+            }
+          },
+          BackupRestoreWarning: {
+            type: :object,
+            required: %w[code message],
+            properties: {
+              code: { type: :string },
+              message: { type: :string },
+              details: { type: :object, additionalProperties: true }
             }
           },
           ImportPreflightContent: {

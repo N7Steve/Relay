@@ -432,8 +432,8 @@ en:
       import_rules: Import rules
       import_transactions: Import transactions
       import_qif: Import from Quicken (QIF)
-      import_sure: Import from Relay
-      import_sure_description: Full-export .ndjson file
+      import_sure: Restore a Relay or Sure backup
+      import_sure_description: ZIP or NDJSON. Full backups require an administrator and a destination without financial data.
       import_file: Import document
       import_file_description: AI-powered analysis for PDFs and searchable file upload
       requires_account: Import accounts first to unlock this option.
@@ -453,12 +453,21 @@ en:
       invalid_document_file_type: Invalid document file type for the active vector store.
       document_uploaded: Document uploaded successfully.
       document_upload_failed: We couldn't upload the document to the vector store. Please try again.
-      invalid_ndjson_file_type: Invalid file type or format. Please upload a valid .ndjson or .json export file.
+      invalid_ndjson_file_type: Invalid backup. Upload a valid ZIP containing all.ndjson, or an NDJSON or JSON export file.
       document_provider_not_configured: No vector store is configured for document uploads.
     show:
       finalize_upload: Please finalize your file upload.
       finalize_mappings: Please finalize your mappings before proceeding.
     ready:
+      full_backup_title: Full backup restoration
+      full_backup_counts:
+        one: One data record, plus original attachments.
+        other: "%{count} data records, plus original attachments."
+      historical_account_title: Some historical import accounts are unavailable
+      historical_account_description: These old imports point to accounts absent from the backup. Their history and source files will be restored without an account link. Financial records still require valid account links.
+      full_backup_description: Restore family data, preferences, connections and attachments into a destination without financial data. Your login is preserved. This cannot be undone from Imports.
+      missing_originals_title: Some document originals are unavailable
+      missing_originals_description: The source app did not retain some original files. Their metadata will be restored, but those originals are unavailable in the backup.
       description: Here's a summary of the new items that will be added to your account
         once you publish this import.
       title: Confirm your import data

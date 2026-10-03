@@ -1,6 +1,10 @@
 # Relay
 
-![Relay](docs/branding/relay-banner.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/branding/relay-banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/branding/relay-banner-light.png">
+  <img alt="Relay" src="docs/branding/relay-banner.png">
+</picture>
 
 Relay is a personal finance project based on [Sure](https://github.com/we-promise/sure),
 with roots in [Maybe](https://github.com/maybe-finance/maybe). It preserves the
