@@ -184,7 +184,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:id) { import_session.id }
 
     post 'Upload import session chunk' do
-      description 'Attach an ordered backup NDJSON chunk to an import session. New chunks use the stored session type. Existing chunks keep their type and are idempotent by sequence and client_chunk_id with content verification.'
+      description 'Attach an ordered backup NDJSON chunk to an import session. New chunks use the stored session type. Existing chunks keep their type and are idempotent by sequence and client_chunk_id with content verification. Full backups require a family administrator and one self-contained ZIP or NDJSON chunk.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -209,7 +209,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
                 },
                 raw_file_content: {
                   type: :string,
-                  description: 'Raw backup NDJSON content. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a fallback when the Relay variable is unset.'
+                  description: 'Raw backup NDJSON content. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit.'
                 }
               }
             }
@@ -232,7 +232,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
                 file: {
                   type: :string,
                   format: :binary,
-                  description: 'Multipart backup NDJSON file upload. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit. SURE_IMPORT_MAX_NDJSON_SIZE_MB remains a fallback when the Relay variable is unset.'
+                  description: 'Multipart backup ZIP or NDJSON file upload. The size limit also applies to decompressed NDJSON. Each chunk is limited to 500MB by default; configure RELAY_IMPORT_MAX_NDJSON_SIZE_MB to change the limit.'
                 }
               }
             }
@@ -324,7 +324,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:id) { import_session.id }
 
     post 'Publish import session' do
-      description 'Queue ordered backup chunk processing for an import session. Later chunks can reference source IDs mapped by earlier chunks.'
+      description 'Queue ordered backup chunk processing for an import session. Later chunks can reference source IDs mapped by earlier chunks. Full snapshots require a family administrator and a destination without financial data.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'

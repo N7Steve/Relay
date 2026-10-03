@@ -213,18 +213,9 @@ class Import::Preflight
     end
 
     def sure_import_file_upload_attributes(file)
-      raise_response sure_file_too_large_response if file.size > SureImport.max_ndjson_size
-
-      extension = File.extname(file.original_filename.to_s).downcase
-      unless SureImport::ALLOWED_NDJSON_CONTENT_TYPES.include?(file.content_type) || extension.in?(%w[.ndjson .json])
-        raise_response invalid_sure_file_type_response
-      end
-
-      [
-        file.read,
-        file.original_filename.presence || "relay-import.ndjson",
-        file.content_type.presence || "application/x-ndjson"
-      ]
+      SureImport::Upload.read(file)
+    rescue SureImport::Upload::Error => error
+      raise_response Response.new(status: :unprocessable_entity, payload: { error: error.code, message: error.message })
     end
 
     def sure_import_raw_content_attributes(content)

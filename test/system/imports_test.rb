@@ -26,6 +26,32 @@ class ImportsTest < ApplicationSystemTestCase
     assert_instance_of RelayImport, @user.family.imports.ordered.first
   end
 
+  test "complete Sure ZIP backup import" do
+    sign_in @user = users(:empty)
+    source = Family.create!(name: "Browser backup source")
+    source.accounts.create!(name: "Restored ZIP checking", accountable: Depository.new, balance: 100, currency: "EUR")
+    receipt = source.accounts.sole.entries.create!(name: "Portable receipt", amount: 10, currency: "EUR", date: Date.current, entryable: Transaction.new)
+    receipt.transaction.attachments.attach(io: StringIO.new("original receipt"), filename: "receipt.pdf", content_type: "application/pdf")
+    Tempfile.create([ "sure_export", ".zip" ]) do |file|
+      file.binmode
+      file.write(Family::DataExporter.new(source).generate_export.string)
+      file.flush
+
+      visit new_import_path(type: "RelayImport")
+      attach_file "import[import_file]", file.path, make_visible: true
+      assert_text "Full backup restoration"
+      assert_text "This cannot be undone from Imports."
+      page.save_screenshot(Rails.root.join("tmp/screenshots/complete-backup-confirmation.png"))
+      click_on "Publish import"
+      assert_text "Import in progress"
+      perform_enqueued_jobs(only: ImportJob)
+      click_on "Check status"
+      assert_text "Import successful"
+    end
+    assert_equal "Restored ZIP checking", @user.family.accounts.sole.name
+    assert_equal "original receipt", @user.family.transactions.sole.attachments.sole.download
+  end
+
   test "transaction import" do
     visit new_import_path
 

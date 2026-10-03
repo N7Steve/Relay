@@ -39,10 +39,11 @@ export keeps its stored filename, including `sure_export_*`, and remains
 downloadable. CSV export naming and Google Drive's configured filenames and
 remote file IDs are unchanged.
 
-ZIP structure, export version 2, `all.ndjson`, record types, IDs and data remain
-unchanged. Restore a legacy or Relay backup by extracting its `all.ndjson` and
-using the existing backup import workflow. The ZIP filename is not a format
-marker; importing a ZIP directly is not added by this change.
+New full exports use version 3, with a versioned relational snapshot and original
+attachment bytes in `all.ndjson`. Both Sure and Relay ZIPs can now be uploaded
+directly, or through their extracted `all.ndjson`. Version 2 exports remain
+readable through the legacy importer. See [complete backups](backups.md) for
+restoration requirements, preserved data and exclusions.
 
 ## Backup import names: Relay writers
 

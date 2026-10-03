@@ -224,6 +224,9 @@ class Api::V1::ImportsController < Api::V1::BaseController
     def create_sure_import(family)
       content, filename, content_type = sure_import_upload_attributes
       return unless content
+      if Family::Backup.snapshot?(content) && !current_resource_owner.admin?
+        return render json: { error: "forbidden", message: "Full backup restoration requires a family administrator." }, status: :forbidden
+      end
 
       begin
         @import = persist_sure_import!(family, content, filename, content_type)
@@ -331,29 +334,11 @@ class Api::V1::ImportsController < Api::V1::BaseController
     end
 
     def sure_import_file_upload_attributes(file)
-      if file.size > SureImport.max_ndjson_size
-        render json: {
-          error: "file_too_large",
-          message: "File is too large. Maximum size is #{SureImport.max_ndjson_size / 1.megabyte}MB."
-        }, status: :unprocessable_entity
-        return
-      end
-
-      extension = File.extname(file.original_filename.to_s).downcase
-      unless SureImport::ALLOWED_NDJSON_CONTENT_TYPES.include?(file.content_type) || extension.in?(%w[.ndjson .json])
-        render json: {
-          error: "invalid_file_type",
-          message: "Invalid file type. Please upload a backup NDJSON file."
-        }, status: :unprocessable_entity
-        return
-      end
-
-      content = file.read
-      sure_import_validated_attributes(
-        content: content,
-        filename: file.original_filename.presence || "relay-import.ndjson",
-        content_type: file.content_type.presence || "application/x-ndjson"
-      )
+      content, filename, content_type = SureImport::Upload.read(file)
+      sure_import_validated_attributes(content: content, filename: filename, content_type: content_type)
+    rescue SureImport::Upload::Error => error
+      render json: { error: error.code, message: error.message }, status: :unprocessable_entity
+      nil
     end
 
     def sure_import_raw_content_attributes(content)
