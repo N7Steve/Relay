@@ -28,7 +28,7 @@ zh-TW:
       title: 更新日誌
     release_notes_unavailable:
       name: 無法取得版本資訊
-      body_html: <p>目前無法取得最新的版本資訊。請稍後再回來看看，或直接前往我們的 <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>GitHub releases 頁面</a>。</p>
+      body_html: <p>目前無法取得最新的版本資訊。請稍後再回來看看，或直接前往我們的 <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>GitHub releases 頁面</a>。</p>
     privacy:
       title: 隱私權政策
       heading: 隱私權政策

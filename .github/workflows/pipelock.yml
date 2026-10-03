@@ -61,6 +61,8 @@ jobs:
             config/locales/views/reports/zh-TW.yml
 
       - name: Validate Pipelock deployment contracts
+        env:
+          RELAY_IMAGE: relay:validation-only
         shell: bash
         run: |
           set -euo pipefail

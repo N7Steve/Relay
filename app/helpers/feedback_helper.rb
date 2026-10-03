@@ -12,8 +12,10 @@ module FeedbackHelper
     return {} unless survey_id
 
     # Managed feedback uses the environment's existing SDK. Self-hosted feedback
-    # uses the shared public project, independently of operator-owned analytics.
+    # uses its explicitly configured project, independently of general analytics.
     project = destination == :self_hosted ? config.self_hosted_feedback_project : {}
+    return {} if destination == :self_hosted && project[:api_key].blank?
+
     project.merge(survey_id: survey_id)
   end
 end

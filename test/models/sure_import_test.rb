@@ -50,13 +50,19 @@ class SureImportTest < ActiveSupport::TestCase
 
   test "max row count and ndjson size can be configured by environment" do
     with_env_overrides(
-      "RELAY_IMPORT_MAX_ROWS" => nil,
-      "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => nil,
-      "SURE_IMPORT_MAX_ROWS" => "150000",
-      "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "64"
+      "RELAY_IMPORT_MAX_ROWS" => "150000",
+      "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => "64"
     ) do
       assert_equal 150_000, SureImport.max_row_count
       assert_equal 64.megabytes, SureImport.max_ndjson_size
+    end
+  end
+
+  test "obsolete import limits are ignored" do
+    with_env_overrides("RELAY_IMPORT_MAX_ROWS" => nil, "RELAY_IMPORT_MAX_NDJSON_SIZE_MB" => nil,
+      "SURE_IMPORT_MAX_ROWS" => "1", "SURE_IMPORT_MAX_NDJSON_SIZE_MB" => "1") do
+      assert_equal 100_000, SureImport.max_row_count
+      assert_equal 500.megabytes, SureImport.max_ndjson_size
     end
   end
 

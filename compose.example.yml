@@ -6,7 +6,7 @@
 # --------
 #
 # This file is an example Docker Compose configuration for self hosting
-# Sure on your local machine or on a cloud VPS.
+# Relay on your local machine or on a cloud VPS.
 #
 # The configuration below is a "standard" setup that works out of the box,
 # but if you're running this outside of a local network, it is recommended
@@ -17,14 +17,14 @@
 #
 # To run this, you should read the setup guide:
 #
-# https://github.com/we-promise/sure/blob/main/docs/hosting/docker.md
+# https://github.com/N7Steve/Relay/blob/main/docs/hosting/docker.md
 #
 # Troubleshooting:
 # ----------------
 #
-# Problems? Swing by our Discord or open a Discussion here:
+# Problems? Open an issue in the Relay repository:
 #
-# https://github.com/we-promise/sure/discussions/categories/general
+# https://github.com/N7Steve/Relay/issues
 #
 # IPv6 Note (Yahoo Finance Sync, others?):
 # ----------------------------------------
@@ -51,6 +51,12 @@ x-rails-env: &rails_env
   <<: *db_env
   SECRET_KEY_BASE: ${SECRET_KEY_BASE:-a7523c3d0ae56415046ad8abae168d71074a79534a7062258f8d1d51ac2f76d3c3bc86d86b6b0b307df30d9a6a90a2066a3fa9e67c5e6f374dbd7dd4e0778e13}
   SELF_HOSTED: "true"
+  POSTHOG_KEY: ${POSTHOG_KEY:-}
+  POSTHOG_HOST: ${POSTHOG_HOST:-https://us.i.posthog.com}
+  POSTHOG_FEEDBACK_ENABLED: ${POSTHOG_FEEDBACK_ENABLED:-false}
+  POSTHOG_FEEDBACK_KEY: ${POSTHOG_FEEDBACK_KEY:-}
+  POSTHOG_FEEDBACK_HOST: ${POSTHOG_FEEDBACK_HOST:-https://us.i.posthog.com}
+  POSTHOG_SELF_HOSTED_SANKEY_SURVEY_ID: ${POSTHOG_SELF_HOSTED_SANKEY_SURVEY_ID:-}
   RAILS_FORCE_SSL: "false"
   RAILS_ASSUME_SSL: "false"
   DB_HOST: db
@@ -82,7 +88,7 @@ x-rails-env: &rails_env
 
 services:
   web:
-    image: ghcr.io/we-promise/sure:stable
+    image: ${RELAY_IMAGE:?Set RELAY_IMAGE to your built or published Relay image}
     volumes:
       - app-storage:/rails/storage
     ports:
@@ -107,7 +113,7 @@ services:
       - sure_net
 
   worker:
-    image: ghcr.io/we-promise/sure:stable
+    image: ${RELAY_IMAGE:?Set RELAY_IMAGE to your built or published Relay image}
     command: bundle exec sidekiq
     volumes:
       - app-storage:/rails/storage

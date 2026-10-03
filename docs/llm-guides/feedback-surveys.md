@@ -10,56 +10,24 @@ question wording, response mapping, UI, and events belong to the feature.
 
 ## Configuration
 
-`Rails.configuration.x.posthog` separates two things:
+`self_hosted_feedback_project` reads the operator's public client token from
+`POSTHOG_FEEDBACK_KEY` and ingestion host from `POSTHOG_FEEDBACK_HOST`.
+`feedback_surveys` maps each feature to independent managed and self-hosted IDs.
+Sankey uses `POSTHOG_SANKEY_SURVEY_ID` for managed installations and
+`POSTHOG_SELF_HOSTED_SANKEY_SURVEY_ID` for self-hosting. No upstream destination
+is bundled. Missing tokens or survey IDs return `{}` without a fallback.
 
-- `self_hosted_feedback_project` contains the shared public project token and
-  ingestion host. All self-hosted feedback features use this destination.
-- `feedback_surveys` maps feature symbols to their `managed` and `self_hosted`
-  survey IDs. Only implemented features should be registered.
-
-For example, the existing call is:
-
-```erb
-<% feedback = feedback_config(:sankey) %>
-```
-
-On managed app/demo deployments, the result contains `survey_id` for the current
-installation. The feature uses the existing PostHog client, whose project is
-selected by `POSTHOG_KEY` and `POSTHOG_HOST`. Each deployment sets the matching
-feature survey variable; Sankey continues to use `POSTHOG_SANKEY_SURVEY_ID`.
-
-For production self-hosted installations, the result contains `api_key`, `host`,
-and `survey_id` for the shared `[app] self-hosted` project. The token is public
-client configuration; operators need no account or key setup. It must never be a
-PostHog personal or project secret key. An operator's own analytics configuration
-must not change this destination.
-
-Unknown features, blank survey IDs, or a missing ID for the selected destination
-return `{}`. There is no fallback to another feature's survey or another project.
-Self-hosted configuration also returns `{}` outside production (unless development explicitly opts in with
-`POSTHOG_DEVELOPMENT_ENABLED=true`) or when
-`POSTHOG_FEEDBACK_ENABLED=false`. This switch is specific to the shared
-self-hosted feedback connection; managed deployments retain their existing rules.
-
-## Rotating the public self-hosted project token
-
-The bundled `phc_` token is deliberately public client configuration, not a
-secret credential. It identifies the shared feedback destination and does not
-grant access to collected data or administrative APIs. Do not replace it with a personal API key.
-
-To change it, update `self_hosted_feedback_project` in the initializer, verify
-survey retrieval and ingestion against that project, and publish a release.
-Existing self-hosted versions keep their bundled token until upgraded; revoking
-the old token can therefore stop their feedback collection. Charts must remain
-usable when collection is unavailable. Operators can disable the shared
-connection immediately with `POSTHOG_FEEDBACK_ENABLED=false`.
+Use `feedback_config(:sankey)` from the view. Self-hosted feedback also requires
+production or the explicit development override and respects
+`POSTHOG_FEEDBACK_ENABLED=false`. General analytics configuration is separate.
+See the hosting guide for installation configuration and privacy boundaries.
 
 ## Adding the next feature
 
 1. Create an API survey in each intended PostHog project. App and demo have
-   distinct projects; self-hosted surveys belong in `[app] self-hosted`.
+   distinct projects; self-hosted surveys belong in the operator-configured feedback project.
 2. Add the feature to `feedback_surveys`, with a feature-specific environment
-   variable for the managed survey and the shared project's public survey ID for
+   variable for the managed survey and an explicit environment variable for
    self-hosting. Document the new environment variable in `.env.local.example`.
    Leave an unavailable destination unconfigured rather than borrowing an ID.
 3. Call `feedback_config(:feature_name)` from the feature's view and pass values

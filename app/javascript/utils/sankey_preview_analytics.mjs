@@ -92,7 +92,7 @@ export function sanitizeSelfHostedFeedback(event) {
   ].includes(event.event)) return null;
   // The browser SDK carries its public ingestion token inside properties.
   const allowed = new Set([
-    "token", "distinct_id", "sure_version", "preview_version", "surface", "state", "rating", "$survey_id",
+    "token", "distinct_id", "relay_version", "preview_version", "surface", "state", "rating", "$survey_id",
   ]);
   event.properties = Object.fromEntries(
     Object.entries(event.properties || {}).filter(([key]) =>
@@ -107,14 +107,14 @@ export function sanitizeSelfHostedFeedback(event) {
   return event;
 }
 
-export function initializeSelfHostedFeedback(posthog, key, host, loaded, sureVersion) {
+export function initializeSelfHostedFeedback(posthog, key, host, loaded, relayVersion) {
   try {
     if (!key || posthog?.sankeyFeedback || posthog?.has_opted_out_capturing?.()) return;
     posthog?.init?.(key, {
       ...selfHostedFeedbackOptions(host),
       // The SDK assigns named instances after their loaded callback returns.
       loaded: (client) => {
-        client.register({ sure_version: sureVersion });
+        client.register({ relay_version: relayVersion });
         queueMicrotask(loaded);
       },
     }, "sankeyFeedback");

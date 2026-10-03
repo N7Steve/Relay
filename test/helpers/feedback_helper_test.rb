@@ -32,6 +32,14 @@ class FeedbackHelperTest < ActionView::TestCase
     assert_not @project.key?(:survey_id)
   end
 
+  test "self-hosted surveys require an explicitly configured public project token" do
+    stubs(:self_hosted?).returns(true)
+    @config.stubs(:self_hosted_feedback_project).returns(host: "https://feedback.example.test", api_key: nil)
+    assert_empty feedback_config(:sankey)
+    @config.stubs(:self_hosted_feedback_project).returns(host: "https://feedback.example.test", api_key: " ")
+    assert_empty feedback_config(:sankey)
+  end
+
   test "unknown or unconfigured surveys never fall back to another destination" do
     @config.stubs(:feedback_surveys).returns(@surveys.merge(
       managed_only: { managed: "managed-only" },

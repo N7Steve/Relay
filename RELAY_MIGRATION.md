@@ -414,6 +414,54 @@ Relay; estrechar el constraint se rechaza mientras existan. Revertir a código
 anterior a los lectores exigiría tratar datos/jobs explícitamente. No hacer
 backfill ni borrar filas para forzar un rollback.
 
+## Octava entrega: preparación final sin decisiones operativas
+
+Preparada el **3 de octubre de 2026**, sobre `6157a7702`:
+
+- Changelog consulta `N7Steve/Relay` y separa la caché por repositorio. La versión
+  heredada se muestra sin enlazarla como release de Relay. Feedback, contacto y
+  ayuda lateral llevan a sus issues; locales y templates GitHub coherentes.
+- PostHog no incorpora token ni encuesta de Sure. Feedback self-hosted requiere
+  `POSTHOG_FEEDBACK_KEY` y `POSTHOG_SELF_HOSTED_SANKEY_SURVEY_ID`, con opt-out
+  explícito; los gráficos funcionan sin colección. Compose transmite las variables.
+- Metadatos analíticos/Stimulus pasan a `relay_version`/`relayVersion` de forma
+  coordinada, sin campos duales para versiones antiguas. La allowlist sigue limitada.
+- User-Agent de proveedores, nombre mostrado por Plaid, prompts predeterminados
+  del asistente y etiqueta de documentación API identifican Relay. No se cambian
+  protocolos de importación, asociaciones externas ni prompts guardados por familias.
+- Nuevas altas MFA usan issuer `Relay`. Los secretos existentes no cambian; la
+  prueba verifica códigos creados con el issuer anterior. No hace falta reenrolar.
+- No se reconocen dominios de Sure como demos de Relay.
+- Solo existen tareas `relay:*`; se retiran aliases `sure:*` y fallbacks `SURE_*`.
+  Remapear configuración antes del corte. Límites de importación y dry-run mantienen
+  sus defaults; permanecen argumentos/overrides sin prefijo de las tareas.
+- La tarea manual de webhooks Plaid EU exige `PLAID_EU_WEBHOOK_URL` HTTPS explícita
+  y rechaza destinos ausentes/inválidos antes de cargar proveedor o actualizar items.
+  No se ejecuta contra servicios externos en este bloque.
+- Ejemplos Docker exigen `RELAY_IMAGE` explícita para web/worker; no seleccionan
+  imagen upstream ni inventan registro de Relay. Validación del workflow Pipelock
+  proporciona una imagen ficticia únicamente para renderizar configuración.
+- Dockerfile normaliza scripts ejecutables de un checkout Windows. Guía Docker
+  propia; guías Sure Docker/Hostim/Hetzner archivadas como referencia histórica.
+  MCP/Pipelock descargan ejemplos Relay y explicitan la imagen; Plaid identifica
+  el repositorio propio.
+- [Procedimiento final](docs/migration/final-runbook.md) con inventario, backup
+  completo, ensayo separado, validación financiera/autorización y recuperación.
+- [Formulario final](docs/migration/final-decisions.md) con opciones, recomendaciones
+  y campos pendientes: ubicación/datos/destino, acceso, imagen/versión, clientes,
+  Helm, telemetría, integraciones, publicación y ventana de operación.
+
+No se despliega, migra ni inspecciona una instalación existente; no se publica
+Git, tags ni imágenes. Se conserva la base de producción por defecto y la
+identidad histórica de datos. Sophtron (`source` y `sure-family-*`), identidad
+externa del asistente, clientes nativos/FinanceKit, Helm y callbacks quedan
+registrados para concretarlos según el alcance e instalaciones elegidos.
+
+Las referencias anteriores a aliases, issuer y métricas describen entregas
+históricas y quedan sustituidas por este estado. Revertir código restaura esos
+nombres pero requiere ajustar la configuración correspondiente; para datos Relay
+rige el procedimiento de backup/restauración, no una compatibilidad entre releases.
+
 ## Inventario técnico de la separación
 
 | Área | Puntos principales | Tratamiento |
@@ -476,8 +524,8 @@ y `sure-tests`, nombres de imágenes y guards de entrypoints de forma coordinada
 Elegir un puerto distinto de 3000 si Sure y Relay convivirán. Los nombres de
 proyecto Compose deben aislar volúmenes, redes y servicios.
 
-Los ejemplos apuntan hoy a `ghcr.io/we-promise/sure:stable`. Preparar imágenes y
-chart propios antes de cambiar instrucciones de instalación. Revisar todos los
+Los ejemplos Docker exigen ahora `RELAY_IMAGE` explícita. La construcción local
+está comprobada; registro, canal y chart mantenido se eligen en el formulario. Revisar todos los
 workflows con capacidad de escribir, publicar o desplegar, incluidos workflows
 por tag o manuales. Activar cada canal después de definir sus destinos.
 
@@ -794,6 +842,48 @@ ni se opera una instalación existente. El navegador usa el servidor temporal
 de Capybara. Logs y dump quedan en `tmp/`, fuera de Git. `git diff --check`
 pasa; los servicios de ambos proyectos se detienen conservando los volúmenes.
 La validación local no certifica CI remoto, publicación ni despliegue.
+
+### Validación de la octava entrega
+
+Ejecutada el 3 de octubre de 2026 en `relay-final-prep` y
+`relay-final-browser`, con bases `relay_test` independientes:
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite completa Rails/Minitest final | 10.827 pruebas, 45.922 aserciones, 0 fallos, 0 errores, 33 omisiones existentes; 533 segundos |
+| Focalizadas de nombres, límites y tareas | 78 pruebas, 327 aserciones, sin fallos, errores ni omisiones |
+| Focalizadas de MFA, preview y webhook explícito | 121 pruebas, 480 aserciones, sin fallos, errores ni omisiones |
+| Focalizadas iniciales de GitHub/feedback/páginas | 83 pruebas, 349 aserciones, sin fallos, errores ni omisiones |
+| Sistema: ajustes y cash flow | 19 pruebas, 181 aserciones, sin fallos, errores ni omisiones |
+| Analítica JavaScript offline | 10 pruebas, sin fallos ni omisiones |
+| RuboCop completo | 2.926 archivos, sin infracciones |
+| ERB lint completo | 779 plantillas, sin errores |
+| Biome | 142 archivos sin errores de lint; check de formato/imports del controlador modificado correcto |
+| Brakeman | 0 errores, 0 avisos activos; conserva las 8 exclusiones existentes |
+| Tokens | CSS y Dart generados vigentes |
+| Docker producción | Imagen local `relay-final-prep:validation` construida y assets compilados; sin arrancarla ni publicarla |
+| Compose estándar/AI | Configuración válida con imagen explícita; falta de `RELAY_IMAGE` rechazada; perfil externo conserva Pipelock/OpenClaw sin servicios Ollama |
+| Whitespace | `git diff --check` correcto |
+
+La suite final incorpora todos los cambios de código de esta entrega. Las
+aserciones antiguas de aliases se sustituyen por cobertura de su retirada y de
+variables obsoletas ignoradas; la reducción neta de aserciones respecto a la
+séptima entrega no procede de omitir pruebas. El primer pase de navegador detectó
+un stub de Registry que también bloqueaba proveedores ajenos; se acotó al proveedor
+GitHub y la ejecución final pasa. Los stubs prueban destinos locales sin enviar
+feedback, actualizar webhooks ni consultar releases reales.
+
+Las pruebas cargan el esquema en bases propias; no se ejecuta `db:migrate` en
+una instalación. El navegador usa el servidor temporal de Capybara. La imagen de
+producción es una validación del árbol de trabajo sobre la base `6157a7702`, no
+una release ni un artefacto publicado. La restauración de datos reales, CI remoto
+y corte siguen pendientes del formulario; las pruebas de fixtures no los certifican.
+No hay cambios de endpoints, esquema ni especificación OpenAPI en esta entrega.
+
+Los servicios de estos dos proyectos se detienen conservando sus volúmenes.
+Logs de validación quedan en `tmp/`, fuera de Git. La instalación Sure existente
+no se toca. Los cambios se dejan revisables en el árbol de trabajo, sin commit,
+push, tags ni publicación de imágenes.
 
 Mantener por fase una lista de archivos afectados, resultados, riesgos,
 compatibilidad y forma de revertir. La migración termina cuando cada referencia

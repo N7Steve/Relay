@@ -3,19 +3,14 @@ require "test_helper"
 class RelayCompatibilityTest < ActiveSupport::TestCase
   setup do
     Rails.application.load_tasks unless Rake::Task.task_defined?("relay:encrypt_access_urls")
-    %w[relay:encrypt_access_urls sure:encrypt_access_urls relay:simplefin:encrypt_access_urls sure:simplefin:encrypt_access_urls].each do |name|
+    %w[relay:encrypt_access_urls relay:simplefin:encrypt_access_urls].each do |name|
       Rake::Task[name].reenable
     end
   end
 
-  test "all legacy aliases preserve named arguments" do
-    canonical_tasks = Rake::Task.tasks.select { |task| task.name.start_with?("relay:") }
-    assert canonical_tasks.any?
-    canonical_tasks.each do |canonical|
-      legacy = Rake::Task[canonical.name.sub(/\Arelay:/, "sure:")]
-      assert_equal canonical.arg_names, legacy.arg_names
-      assert_includes legacy.prerequisites, canonical.name
-    end
+  test "maintenance exposes only Relay task names" do
+    assert Rake::Task.tasks.any? { |task| task.name.start_with?("relay:") }
+    assert_not Rake::Task.tasks.any? { |task| task.name.start_with?("sure:") }
   end
 
   test "Relay flags override Sure flags and keep dry run safe" do
@@ -29,9 +24,9 @@ class RelayCompatibilityTest < ActiveSupport::TestCase
     assert_equal 0, result["updated"]
   end
 
-  test "legacy flags remain supported" do
-    result = run_encryption_task({ "SURE_BATCH_SIZE" => "8", "SURE_LIMIT" => "1", "SURE_DRY_RUN" => "true" }, batch: 8)
-    assert_equal 1, result["limit"]
+  test "obsolete flags are ignored and maintenance remains dry run" do
+    result = run_encryption_task({ "SURE_BATCH_SIZE" => "8", "SURE_LIMIT" => "1", "SURE_DRY_RUN" => "false" }, batch: 100)
+    assert_nil result["limit"]
     assert result["dry_run"]
   end
 
@@ -53,21 +48,14 @@ class RelayCompatibilityTest < ActiveSupport::TestCase
     assert_equal 4, result["batch_size"]
   end
 
-  test "legacy nested alias forwards explicit arguments ahead of environment flags" do
+  test "nested Relay task forwards explicit arguments ahead of environment flags" do
     result = run_encryption_task(
       { "BATCH_SIZE" => "4", "RELAY_BATCH_SIZE" => "7", "RELAY_DRY_RUN" => "true" },
-      batch: 3, task_name: "sure:simplefin:encrypt_access_urls", arguments: [ "3", "1", "false" ], writes: true
+      batch: 3, task_name: "relay:simplefin:encrypt_access_urls", arguments: [ "3", "1", "false" ], writes: true
     )
     assert_equal 1, result["limit"]
     assert_not result["dry_run"]
     assert_equal 1, result["updated"]
-  end
-
-  test "invoking Relay and Sure names in one process does not repeat maintenance" do
-    run_encryption_task({}, batch: 100, arguments: [ "100", "1", "false" ], writes: true)
-
-    output = capture_io { Rake::Task["sure:encrypt_access_urls"].invoke("100", "1", "false") }.first
-    assert_empty output
   end
 
   private

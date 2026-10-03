@@ -112,6 +112,25 @@ previo; el formato de los archivos JavaScript modificados sí pasa.
 | Gestión familiar y usuarios | Propia, todavía sin commit | Claridad de roles/alcance y borrado seguro de la última persona de una familia |
 | Workflows, scripts y documentos auxiliares | Revisar caso a caso | Están en el diff del fork, pero no todos son funcionalidad de producto |
 
+## Identidad y configuración Relay: cierre preparatorio
+
+Actualizado el 3 de octubre de 2026. Se conservan todas las funciones financieras
+inventariadas; se actualizan destinos de soporte/releases, etiquetas del asistente,
+proveedores y altas MFA. MFA conserva secretos y valida códigos ya enrolados.
+Feedback opcional no usa un destino Sure incorporado: requiere proyecto/encuesta
+propios y respeta opt-out; metadatos usan `relay_version` sin campos duales.
+La allowlist y el aislamiento de datos financieros del cliente permanecen intactos.
+No reintroducir token/encuesta compartidos upstream en futuras integraciones.
+
+Las plantillas Docker exigen imagen explícita. La tarea de webhooks Plaid EU
+requiere destino HTTPS de la instalación, sin dominio alojado de Sure por defecto.
+Lectores históricos STI/GlobalID, identificadores Sophtron/asistente externos y
+contratos nativos se distinguen de aliases de tareas/variables ya retirados.
+Los identificadores externos pendientes requieren inventariar primero las
+integraciones/clientes en uso. Ver [procedimiento](docs/migration/final-runbook.md),
+[formulario](docs/migration/final-decisions.md) y octava entrega de
+[RELAY_MIGRATION.md](RELAY_MIGRATION.md).
+
 ## Puerta global de integraciones de IA
 
 El fork conserva el código upstream de IA para facilitar futuras integraciones, pero no lo ofrece como funcionalidad de producto por defecto. La única autoridad es `Setting.ai_features_enabled?`, un ajuste de instancia que se administra en **Configuración de instancia → Configuración general**. No crear puertas paralelas por controlador, proveedor o variable de entorno.
@@ -388,7 +407,7 @@ Puntos principales: `transfer.rb`, `transfer/creator.rb`, `transaction/transfera
 Funcionalidad propia incorporada en agosto de 2026:
 
 - Dos tipos de exportación: copia completa y CSV personalizado de transacciones.
-- Las importaciones de backups NDJSON admiten 500 MB por defecto, tanto por web como por API. `RELAY_IMPORT_MAX_NDJSON_SIZE_MB` permite ajustar el límite; `SURE_IMPORT_MAX_NDJSON_SIZE_MB` sigue como fallback cuando el nombre Relay no está definido. `RELAY_IMPORT_MAX_ROWS` tiene la misma compatibilidad y conserva el default de 100.000 registros. Conservar la cobertura de subidas mayores de 10 MB y de precedencia web/API; no recuperar el límite upstream de 10 MB.
+- Las importaciones de backups NDJSON admiten 500 MB por defecto, tanto por web como por API. `RELAY_IMPORT_MAX_NDJSON_SIZE_MB` permite ajustar el límite; los nombres `SURE_IMPORT_MAX_*` ya no se leen (3 de octubre de 2026, instancia única). `RELAY_IMPORT_MAX_ROWS` conserva el default de 100.000 registros. Conservar la cobertura de subidas mayores de 10 MB y de precedencia web/API; no recuperar el límite upstream de 10 MB.
 - Desde el 3 de octubre de 2026, los nuevos backups usan `relay_export_*`; los adjuntos existentes conservan su nombre real, incluido `sure_export_*`. Se mantiene el formato ZIP v2/`all.ndjson`, CSV y archivos remotos de Drive. El listado precarga los adjuntos para evitar consultas por fila.
 - Web/API/preflight y sesiones admiten los dos nombres de backup, pero todas las creaciones nuevas usan `RelayImport`, también al omitir el tipo de sesión. La API devuelve el tipo real, sin negociación para clientes/versiones antiguos: Relay se prepara para una instancia única por decisión del usuario del 3 de octubre de 2026. `RelayImport < SureImport` y `backup_import_sti.rb` conservan la lectura de registros y GlobalID existentes; el filtro API por cualquiera de los nombres incluye ambos dentro de la familia. Las migraciones nuevas `20261003120000_allow_relay_import_sessions.rb` y `20261003130000_use_relay_import_session_default.rb` amplían el constraint y cambian el default a Relay, sin convertir datos. La primera se niega a revertir si hay sesiones Relay. Los reintentos conservan el tipo original bajo bloqueo de fila y los chunks nuevos usan el tipo de su sesión. Conservar adjuntos de tipo `Import`, mappings, claves de origen de sesiones e idempotencia; no retirar el lector legacy mientras existan sus datos/jobs. Ver [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
 - Rango de fechas, filtros JSON, usuario solicitante, tipo y número de registros.
@@ -506,7 +525,7 @@ Rutas afectadas: `app/models/concerns/syncable.rb`, modelos/importers/syncers de
 - Workflows: se conserva `.github/workflows/pipelock.yml`. Gittensor y los workflows heredados de distribución/publicación están archivados en `docs/archive/sure/workflows/`; ya no se ejecutan en Relay (3 de octubre de 2026).
 - Documentación/operación: `docs/archive/sure/rollback-instructions.md` e `docs/archive/sure/informe_scheduled_payments.md`.
 - Scripts de diagnóstico: `script/debug_subtypes.rb` y `script/debug_currency_methods.rb`.
-- Las 12 tareas antes llamadas `sure:*` tienen nombres canónicos `relay:*` y alias legacy que conservan argumentos y ejecución única de Rake. La tarea de cifrado acepta `RELAY_BATCH_SIZE`, `RELAY_LIMIT` y `RELAY_DRY_RUN`, manteniendo los overrides sin prefijo y el fallback `SURE_*`; el dry-run predeterminado sigue activo. Ver [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
+- Las 12 tareas antes llamadas `sure:*` usan solo `relay:*`; se retiran aliases legacy y fallbacks `SURE_*` el 3 de octubre de 2026 según la decisión de instancia única. La tarea de cifrado acepta `RELAY_BATCH_SIZE`, `RELAY_LIMIT` y `RELAY_DRY_RUN`, manteniendo argumentos y overrides sin prefijo; el dry-run predeterminado sigue activo. Ver [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
 - `conflicts.txt` se retiró el 3 de octubre de 2026: era una lista UTF-16 de diez rutas de conflictos antiguos, sin consumidores ni comportamiento. Se conserva en Git; no restaurarla en futuras integraciones.
 
 ## Migraciones propias

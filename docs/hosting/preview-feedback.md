@@ -2,7 +2,7 @@
 
 Preview features let users try changes before general release. Surveys collect
 what worked and what needs improvement; usage events show whether users saw or
-interacted with the feature. Enable previews in Settings → Preferences → Preview
+interacted with the feature. Enable previews in Settings â†’ Preferences â†’ Preview
 features. Each feature owns its access checks, feedback UI, questions, and events.
 
 The cash-flow Sankey is the first implementation. It appears below the original
@@ -12,40 +12,25 @@ current browser client and event allowlist are still specific to Sankey.
 
 ## Deployment and survey routing
 
-| Deployment | Feedback destination | Configuration |
+| Installation | Destination | Configuration |
 | --- | --- | --- |
-| Sure app | Its existing `[app] sure-app` PostHog project | Existing `POSTHOG_KEY` / `POSTHOG_HOST`, plus the feature's survey ID |
-| Demo | Its existing `[app] sure-demo` PostHog project | Existing `POSTHOG_KEY` / `POSTHOG_HOST`, plus the feature's survey ID |
-| Production self-hosted | Shared `[app] self-hosted` project | Bundled public project token and feature survey ID; no operator setup |
+| Managed app/demo | Its configured project | `POSTHOG_KEY`, `POSTHOG_HOST`, `POSTHOG_SANKEY_SURVEY_ID` |
+| Self-hosted Relay | Operator-configured feedback project | `POSTHOG_FEEDBACK_KEY`, `POSTHOG_FEEDBACK_HOST`, `POSTHOG_SELF_HOSTED_SANKEY_SURVEY_ID` |
 
-Managed deployments must use a survey belonging to their own project. Sankey's
-survey variable is `POSTHOG_SANKEY_SURVEY_ID`. Self-hosted feedback stays separate
-from any analytics project configured by the operator. Operators can disable the
-shared connection with `POSTHOG_FEEDBACK_ENABLED=false`; this does not reroute
-feedback to another project. Shared collection is disabled outside production by default.
+There is no bundled Sure project or survey. Without both the public feedback
+client token and survey ID, self-hosted feedback stays disabled and charts remain
+usable. `POSTHOG_FEEDBACK_ENABLED=false` explicitly disables it. General analytics
+is separate and does not supply missing feedback configuration.
 
-### Local testing
-
-To test without changing Rails to production mode, temporarily set
-`POSTHOG_DEVELOPMENT_ENABLED=true` in `.env.local` and restart your development
-process. Remove the override and restart when finished. This opt-in only applies
-to development; automated test environments remain disabled.
-
-With `SELF_HOSTED=true`, enable Preview features and click the Sankey thumbs-up/down
-buttons to test the bundled API survey. `POSTHOG_FEEDBACK_ENABLED=false` still
-opts out. Standard pop-up surveys require `POSTHOG_KEY` / `POSTHOG_HOST` for their
-project; managed Sankey feedback also requires `POSTHOG_SANKEY_SURVEY_ID`.
-The override uses the configured live projects, so submitted responses are real.
-
-The public project token routes requests to PostHog; it is not a private API key
-and grants no access to collected data or administration. Never distribute a
-personal or project-secret API key. Rotating bundled configuration requires a
-release and installation upgrades; older versions retain the old token. See the
-[development guide](../llm-guides/feedback-surveys.md) for configuration and rotation.
+For development testing, also set `POSTHOG_DEVELOPMENT_ENABLED=true`. Automated
+test environments remain disabled. Use a test project: real configured projects
+receive real submissions. Never use a personal or administrative API key as a
+browser client token. Change these variables in the installation configuration
+rather than editing or publishing bundled credentials.
 
 ## Survey behavior
 
-Use a PostHog **API survey** with Sure's own accessible dialog. The application
+Use a PostHog **API survey** with Relay's own accessible dialog. The application
 controls when the survey is offered and validates the configured survey and its
 question IDs. Answers use question UUIDs rather than positional indexes. Changing
 question types or accepted choices requires a corresponding client update.
@@ -71,7 +56,7 @@ compared. Add events only with their capture code, allowlist, and offline tests;
 registering a survey does not automatically instrument the feature.
 
 These are the events **currently implemented for Sankey**. All include
-`preview_version: cash_flow_v1` and `sure_version` (the deployed release string
+`preview_version: cash_flow_v1` and `relay_version` (the deployed release string
 from `.relay-version`, including any prerelease suffix):
 
 | Event | Trigger | Additional properties |
@@ -96,7 +81,7 @@ zero-valued center is equivalent to an empty preview graph. Missing or invalid
 inputs produce no event. Zoomed and expanded views do not create new comparisons.
 
 Only `new_sankey_match` or `new_sankey_mismatch`, plus `preview_version` and
-`sure_version`, is sent to PostHog. No graph, amount, category, user ID, or date range is included in the
+`relay_version`, is sent to PostHog. No graph, amount, category, user ID, or date range is included in the
 comparison payload. Existing managed SDK metadata and self-hosted privacy rules
 still apply. Intentional deficit/netting changes can produce mismatches;
 a match proves input equivalence, not visual correctness. The separate requests

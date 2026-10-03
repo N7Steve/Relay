@@ -70,7 +70,7 @@ test("dedicated initialization is optional, idempotent and announces readiness a
   assert.equal(readyClient, undefined);
   await Promise.resolve();
   assert.equal(readyClient, sdk.sankeyFeedback);
-  assert.deepEqual(properties, { sure_version: "0.7.5-alpha.10" });
+  assert.deepEqual(properties, { relay_version: "0.7.5-alpha.10" });
   assert.doesNotThrow(() => initializeSelfHostedFeedback({ init() { throw Error("blocked"); } }, "key", "host", ready));
   initializeSelfHostedFeedback({ has_opted_out_capturing: () => true, init() { assert.fail("opt-out must prevent initialization"); } }, "key", "host", ready);
 });
@@ -82,10 +82,10 @@ test("self-hosted feedback disables automatic collection and strips incidental S
   assert.equal(options.person_profiles, "never");
   assert.equal(options.persistence, "memory");
   const event = options.before_send({ event: "sankey_preview_displayed", properties: {
-    token: "public-project-token", distinct_id: "anonymous", sure_version: "0.7.5-alpha.10", preview_version: "cash_flow_v1", surface: "inline", state: "content",
+    token: "public-project-token", distinct_id: "anonymous", relay_version: "0.7.5-alpha.10", preview_version: "cash_flow_v1", surface: "inline", state: "content",
     $current_url: "https://private.example/", $referrer: "https://private.example/accounts", email: "private@example.test", $set: { name: "Private" }, $device_id: "device",
   } });
-  assert.deepEqual(event.properties, { token: "public-project-token", distinct_id: "anonymous", sure_version: "0.7.5-alpha.10", preview_version: "cash_flow_v1", surface: "inline", state: "content", $geoip_disable: false, $process_person_profile: false });
+  assert.deepEqual(event.properties, { token: "public-project-token", distinct_id: "anonymous", relay_version: "0.7.5-alpha.10", preview_version: "cash_flow_v1", surface: "inline", state: "content", $geoip_disable: false, $process_person_profile: false });
   assert.equal(sanitizeSelfHostedFeedback({ event: "$pageview" }), null);
   assert.equal(sanitizeSelfHostedFeedback({ event: "$identify" }), null);
   const responseKey = "$survey_response_01a0a162-73a2-0000-9402-ffab5bc45b4a";
@@ -115,7 +115,7 @@ test("comparison waits for analytics and preserves invalid, opted-out and failed
 });
 
 
-test("all allowed feedback events retain the registered Sure version and enable GeoIP", () => {
+test("all allowed feedback events retain the registered Relay version and enable GeoIP", () => {
   let options;
   const registered = {};
   const client = {
@@ -130,7 +130,7 @@ test("all allowed feedback events retain the registered Sure version and enable 
   for (const name of ["sankey_preview_displayed", "sankey_preview_feedback_clicked", "new_sankey_match", "new_sankey_mismatch", "survey shown", "survey sent", "survey dismissed"]) {
     const event = client.capture(name, { $geoip_disable: true, $ip: "private", amount: 123 });
     assert.deepEqual(event.properties, {
-      sure_version: "0.7.5-alpha.10",
+      relay_version: "0.7.5-alpha.10",
       $geoip_disable: false,
       $process_person_profile: false,
     });

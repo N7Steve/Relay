@@ -27,7 +27,7 @@ uk:
       title: Що нового
     release_notes_unavailable:
       name: Примітки до випуску недоступні
-      body_html: "<p>Наразі неможливо отримати останні примітки до випуску. Будь ласка, спробуйте ще раз пізніше або відвідайте нашу <a href='https://github.com/we-promise/sure/releases' target='_blank' rel='noopener noreferrer'>сторінку випусків на GitHub</a> безпосередньо.</p>"
+      body_html: "<p>Наразі неможливо отримати останні примітки до випуску. Будь ласка, спробуйте ще раз пізніше або відвідайте нашу <a href='https://github.com/N7Steve/Relay/releases' target='_blank' rel='noopener noreferrer'>сторінку випусків на GitHub</a> безпосередньо.</p>"
     privacy:
       title: Політика конфіденційності
       heading: Політика конфіденційності

@@ -4,8 +4,7 @@ require "test_helper"
 
 class SimplefinPrunePendingTest < ActiveSupport::TestCase
   setup do
-    Rails.application.load_tasks unless Rake::Task.task_defined?("sure:simplefin:prune_pending")
-    Rake::Task["sure:simplefin:prune_pending"].reenable
+    Rails.application.load_tasks unless Rake::Task.task_defined?("relay:simplefin:prune_pending")
     Rake::Task["relay:simplefin:prune_pending"].reenable
 
     @family = families(:dylan_family)
@@ -59,13 +58,13 @@ class SimplefinPrunePendingTest < ActiveSupport::TestCase
     assert_equal %w[tx_posted tx_malformed_posted], remaining_ids
   end
 
-  test "legacy Sure alias forwards arguments to the Relay task" do
+  test "explicit account scope forwards arguments to the Relay task" do
     @simplefin_account.update!(raw_transactions_payload: [
       { "id" => "pending", "pending" => true }, { "id" => "posted", "posted" => 1 }
     ])
 
     capture_io do
-      Rake::Task["sure:simplefin:prune_pending"].invoke(nil, @account.id, "false")
+      Rake::Task["relay:simplefin:prune_pending"].invoke(nil, @account.id, "false")
     end
 
     assert_equal [ "posted" ], @simplefin_account.reload.raw_transactions_payload.map { |tx| tx["id"] }
@@ -84,7 +83,7 @@ class SimplefinPrunePendingTest < ActiveSupport::TestCase
     @simplefin_account.update!(raw_transactions_payload: payload)
 
     assert_no_difference [ "Entry.count", "Transaction.count" ] do
-      capture_io { Rake::Task["sure:simplefin:prune_pending"].invoke(nil, nil, "false") }
+      capture_io { Rake::Task["relay:simplefin:prune_pending"].invoke(nil, nil, "false") }
     end
 
     assert entry.reload.persisted?
