@@ -18,8 +18,8 @@ class ExternalAccessControllerTest < ActionDispatch::IntegrationTest
 
   test "connector actions are forbidden before creating a connection" do
     Setting.stubs(:external_bank_sync_enabled).returns(false)
-    assert_no_difference "SimplefinItem.count" do
-      post simplefin_items_path, params: { simplefin_item: { name: "Disabled", access_url: "https://example.com" } }
+    assert_no_difference "EnableBankingItem.count" do
+      post enable_banking_items_path, params: { enable_banking_item: { name: "Disabled", country_code: "ES" } }
     end
     assert_response :forbidden
   end

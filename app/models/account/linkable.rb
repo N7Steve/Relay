@@ -62,10 +62,6 @@ module Account::Linkable
     # Try new system first
     return provider&.provider_name if provider.present?
 
-    # Fall back to legacy system
-    return "plaid" if plaid_account.present?
-    return "simplefin" if simplefin_account.present?
-
     nil
   end
 
@@ -78,11 +74,9 @@ module Account::Linkable
   # transactions, and therefore honors `enable_category_matcher`. Add a provider
   # here only once its entry processor checks the toggle; listing one that
   # ignores it shows the user a switch that does nothing.
-  CATEGORY_MATCHER_PROVIDER_TYPES = %w[PlaidAccount UpAccount MonobankAccount].freeze
+  CATEGORY_MATCHER_PROVIDER_TYPES = [].freeze
 
   def supports_category_matcher?
-    return true if plaid_account.present?
-
     account_providers.exists?(provider_type: CATEGORY_MATCHER_PROVIDER_TYPES)
   end
 

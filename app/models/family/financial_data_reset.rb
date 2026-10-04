@@ -63,6 +63,11 @@ class Family::FinancialDataReset
     up_items
     monobank_items
     fio_items
+    akahu_items
+    coinspot_items
+    trade_republic_items
+    trading212_items
+    wise_items
   ].freeze
 
   Result = Struct.new(:user, :family, :dry_run, :before_counts, :deleted_counts, :after_counts, keyword_init: true)
@@ -72,7 +77,7 @@ class Family::FinancialDataReset
       PROVIDER_ITEM_ASSOCIATIONS.select do |association_name|
         association = Family.reflect_on_association(association_name)
 
-        association&.klass&.included_modules&.include?(Syncable)
+        association&.klass.present?
       rescue NameError
         false
       end
@@ -199,7 +204,7 @@ class Family::FinancialDataReset
 
         item_scope = provider_item_scope(association)
         item_ids = item_scope.select(:id)
-        Sync.for_family(family).where(syncable_type: item_class.name, syncable_id: item_ids).delete_all
+        Sync.where(syncable_type: item_class.name, syncable_id: item_ids).delete_all
 
         item_class.reflect_on_all_associations(:has_many).each do |reflection|
           next if reflection.options[:through].present?
@@ -300,13 +305,20 @@ class Family::FinancialDataReset
           merchants: FamilyMerchant.where(family_id: family.id),
           merchant_customizations: MerchantCustomization.where(family_id: family.id),
           family_merchant_associations: FamilyMerchantAssociation.where(family_id: family.id),
-          syncs: Sync.for_family(family)
+          syncs: financial_sync_scope
         }
       end
     end
 
     def account_ids
       scope(:accounts).select(:id)
+    end
+
+    def financial_sync_scope
+      provider_item_associations.reduce(Sync.for_family(family)) do |syncs, association|
+        item_class = family.class.reflect_on_association(association).klass
+        syncs.or(Sync.where(syncable_type: item_class.name, syncable_id: provider_item_scope(association).select(:id)))
+      end
     end
 
     def active_storage_attachments_count

@@ -254,21 +254,7 @@ hu:
       sync_provider_in_progress: Szinkronizálás elindítva.
       recently_synced: Nemrég szinkronizálva. Próbáld újra egy pillanat múlva.
       taglines:
-        simplefin: US bankszámlák csatlakoztatása az open SimpleFIN protokollon keresztül.
-        lunchflow: 40+ ország 20 000+ bankjának csatlakoztatása (Egyesült Királyság, EU, USA stb.!)
         enable_banking: Európai bankszámlák szinkronizálása PSD2 open banking révén.
-        coinstats: Teljes kriptoportfólió nyomon követése tárcákon és tőzsdéken keresztül.
-        mercury: Mercury üzleti bankszámlák automatikus szinkronizálása.
-        brex: Brex készpénz és vállalati kártya tevékenység szinkronizálása csak olvasási hozzáféréssel.
-        coinbase: Coinbase kriptoeszközök importálása és teljesítmény nyomon követése.
-        binance: Binance spot egyenlegek szinkronizálása csak olvasási API-kulccsal.
-        kraken: Kraken egyenlegek és spot ügyletek szinkronizálása csak olvasási API-kulccsal.
-        snaptrade: Brókeri számlák csatlakoztatása a SnapTrade aggregációs hálózaton keresztül.
-        ibkr: Interactive Brokers befektetési számlák szinkronizálása Flex Query importálással.
-        indexa_capital: Indexa Capital automatizált befektetési portfólió nyomon követése.
-        sophtron: US és kanadai bankok és közüzemi szolgáltatók csatlakoztatása.
-        plaid: Ezernyi US pénzintézet csatlakoztatása Plaid-en keresztül.
-        plaid_eu: Európai pénzintézetek csatlakoztatása Plaid-en keresztül (PSD2 / Open Banking).
       search_filters:
         aria_label: Szolgáltatók keresése
         placeholder: Szolgáltatók keresése

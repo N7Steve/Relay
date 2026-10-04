@@ -12,7 +12,6 @@ hu:
       link_lunchflow: Összekapcsolás a Lunch Flow-val
       link_provider: Összekapcsolás szolgáltatóval
       unlink_provider: Leválasztás a szolgáltatóról
-      change_simplefin_account: SimpleFIN fiók módosítása
       troubleshoot: Hibakeresés
       enable: Számla engedélyezése
       disable: Számla letiltása

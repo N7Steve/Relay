@@ -87,6 +87,14 @@ class Account < ApplicationRecord
     manual.where.not(status: :pending_deletion)
   }
 
+  # Historical provider links retain reverse financial history, but no longer
+  # have a connector card. Keep those accounts visible in the ordinary groups.
+  scope :listable_without_active_connector, -> {
+    where.not(status: :pending_deletion).where.not(
+      id: AccountProvider.where(provider_type: %w[EnableBankingAccount FinancekitAccountLineage]).select(:account_id)
+    )
+  }
+
   def financial_treatment
     return @invalid_financial_treatment if defined?(@invalid_financial_treatment)
     return "outside_finances" if cashflow_boundary?
@@ -291,54 +299,6 @@ class Account < ApplicationRecord
     end
 
 
-    def create_from_simplefin_account(simplefin_account, account_type, subtype = nil)
-      # Respect user choice when provided; otherwise infer a sensible default
-      # Require an explicit account_type; do not infer on the backend
-      if account_type.blank? || account_type.to_s == "unknown"
-        raise ArgumentError, "account_type is required when creating an account from SimpleFIN"
-      end
-
-      # Get the balance from SimpleFin
-      balance = simplefin_account.current_balance || simplefin_account.available_balance || 0
-
-      # SimpleFin returns negative balances for credit cards (liabilities)
-      # But Sure expects positive balances for liabilities
-      if account_type == "CreditCard" || account_type == "Loan"
-        balance = balance.abs
-      end
-
-      # Calculate cash balance correctly for investment accounts
-      cash_balance = balance
-      if account_type == "Investment"
-        begin
-          calculator = SimplefinAccount::Investments::BalanceCalculator.new(simplefin_account)
-          calculated = calculator.cash_balance
-          cash_balance = calculated unless calculated.nil?
-        rescue => e
-          Rails.logger.warn(
-            "Investment cash_balance calculation failed for " \
-            "SimpleFin account #{simplefin_account.id}: #{e.class} - #{e.message}"
-          )
-          # Fallback to zero as suggested
-          cash_balance = 0
-        end
-      end
-
-      family = simplefin_account.simplefin_item.family
-      attributes = {
-        family: family,
-        name: simplefin_account.name,
-        balance: balance,
-        cash_balance: cash_balance,
-        currency: simplefin_account.currency,
-        accountable_type: account_type,
-        accountable_attributes: build_simplefin_accountable_attributes(simplefin_account, account_type, subtype),
-        simplefin_account_id: simplefin_account.id
-      }
-
-      # Skip initial sync - provider sync will handle balance creation with correct currency
-      create_and_sync(attributes, skip_initial_sync: true)
-    end
 
     def create_from_enable_banking_account(enable_banking_account, account_type, subtype = nil)
       # Get the balance from Enable Banking
@@ -374,95 +334,6 @@ class Account < ApplicationRecord
       )
     end
 
-    def create_from_wise_account(wise_account)
-      family = wise_account.wise_item.family
-
-      create_and_sync(
-        {
-          family: family,
-          name: wise_account.name || "Wise #{wise_account.currency}",
-          balance: wise_account.current_balance || 0,
-          cash_balance: wise_account.current_balance || 0,
-          currency: wise_account.currency,
-          accountable_type: "Depository",
-          accountable_attributes: { subtype: wise_account.account_subtype }
-        },
-        skip_initial_sync: true
-      )
-    end
-
-    def create_from_coinbase_account(coinbase_account)
-      # All Coinbase accounts are crypto exchange accounts
-      family = coinbase_account.coinbase_item.family
-
-      # Extract native balance and currency from Coinbase (e.g., USD, EUR, GBP)
-      native_balance = coinbase_account.raw_payload&.dig("native_balance", "amount").to_d
-      native_currency = coinbase_account.raw_payload&.dig("native_balance", "currency") || family.currency
-
-      attributes = {
-        family: family,
-        name: coinbase_account.name,
-        balance: native_balance,
-        cash_balance: 0, # No cash - all value is in holdings
-        currency: native_currency,
-        accountable_type: "Crypto",
-        accountable_attributes: {
-          subtype: "exchange",
-          tax_treatment: "taxable"
-        }
-      }
-
-      # Skip initial sync - provider sync will handle balance/holdings creation
-      create_and_sync(attributes, skip_initial_sync: true)
-    end
-
-    def create_from_binance_account(binance_account)
-      account = create_from_crypto_exchange_account(binance_account, family: binance_account.binance_item.family)
-      account.set_opening_anchor_balance(balance: 0)
-      account
-    end
-
-    def create_from_ibkr_account(ibkr_account)
-      family = ibkr_account.ibkr_item.family
-      default_name = if ibkr_account.ibkr_account_id.present?
-        "Interactive Brokers (#{ibkr_account.ibkr_account_id})"
-      else
-        "Interactive Brokers"
-      end
-
-      attributes = {
-        family: family,
-        name: default_name,
-        balance: 0,
-        cash_balance: 0,
-        currency: ibkr_account.currency.presence || family.currency,
-        accountable_type: "Investment",
-        accountable_attributes: {
-          subtype: "brokerage"
-        }
-      }
-
-      # Capture the created account in a variable
-      create_and_sync(attributes, skip_initial_sync: true)
-    end
-
-    def create_from_trading212_account(trading212_account)
-      family = trading212_account.trading212_item.family
-
-      attributes = {
-        family: family,
-        name: trading212_account.name.presence || "Trading 212",
-        balance: 0,
-        cash_balance: 0,
-        currency: trading212_account.currency.presence || family.currency,
-        accountable_type: "Investment",
-        accountable_attributes: {
-          subtype: "brokerage"
-        }
-      }
-
-      create_and_sync(attributes, skip_initial_sync: true)
-    end
 
     TRADE_REPUBLIC_ACCOUNT_TYPES = {
       "portfolio" => [ "Investment", "brokerage", "Trade Republic Portfolio" ],
@@ -471,57 +342,13 @@ class Account < ApplicationRecord
       "crypto" => [ "Crypto", "exchange", "Trade Republic Crypto" ]
     }.freeze
 
-    def create_from_trade_republic_account(trade_republic_account)
-      family = trade_republic_account.trade_republic_item.family
-      accountable_type, subtype, default_name = TRADE_REPUBLIC_ACCOUNT_TYPES.fetch(trade_republic_account.kind)
-
-      attributes = {
-        family: family,
-        name: trade_republic_account.name.presence || default_name,
-        balance: 0,
-        cash_balance: 0,
-        currency: trade_republic_account.currency.presence || family.currency,
-        accountable_type: accountable_type,
-        accountable_attributes: {
-          subtype: subtype
-        }
-      }
-
-      create_and_sync(attributes, skip_initial_sync: true)
-    end
-
-    def create_from_kraken_account(kraken_account)
-      create_from_crypto_exchange_account(kraken_account, family: kraken_account.kraken_item.family)
-    end
 
     # Creates a manual Crypto account for a newly-selected CoinSpot account,
     # owned by the connection's family.
-    def create_from_coinspot_account(coinspot_account)
-      create_from_crypto_exchange_account(coinspot_account, family: coinspot_account.coinspot_item.family)
-    end
 
     # Self-custody assets are wallets, not exchanges: no trade entry by hand,
     # and no cash side. The balance is written by the provider sync, which is
     # the only thing that knows what the chain says.
-    def create_from_onchain_wallet_account(onchain_wallet_account)
-      family = onchain_wallet_account.onchain_wallet_item.family
-
-      create_and_sync(
-        {
-          family: family,
-          name: onchain_wallet_account.display_name,
-          balance: 0,
-          cash_balance: 0,
-          currency: onchain_wallet_account.currency.presence || family.currency,
-          accountable_type: "Crypto",
-          accountable_attributes: {
-            subtype: "wallet",
-            tax_treatment: "taxable"
-          }
-        },
-        skip_initial_sync: true
-      )
-    end
 
     private
 
@@ -540,26 +367,6 @@ class Account < ApplicationRecord
         }
 
         create_and_sync(attributes, skip_initial_sync: true)
-      end
-
-      def build_simplefin_accountable_attributes(simplefin_account, account_type, subtype)
-        attributes = {}
-        attributes[:subtype] = subtype if subtype.present?
-
-        # Set account-type-specific attributes from SimpleFin data
-        case account_type
-        when "CreditCard"
-          # For credit cards, available_balance often represents available credit
-          if simplefin_account.available_balance.present? && simplefin_account.available_balance > 0
-            attributes[:available_credit] = simplefin_account.available_balance
-          end
-        when "Loan"
-          # For loans, we might get additional data from the raw_payload
-          # This is where loan-specific information could be extracted if available
-          # Currently we don't have specific loan fields from SimpleFin protocol
-        end
-
-        attributes
       end
   end
 

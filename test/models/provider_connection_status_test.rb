@@ -20,8 +20,8 @@ class ProviderConnectionStatusTest < ActiveSupport::TestCase
   end
 
   test "status summary is computed without calling provider item summary" do
-    provider = ProviderConnectionStatus::PROVIDERS.find { |entry| entry[:association] == :mercury_items }
-    item = mercury_items(:one)
+    provider = ProviderConnectionStatus::PROVIDERS.find { |entry| entry[:association] == :enable_banking_items }
+    item = enable_banking_items(:one)
     completed_sync = item.syncs.create!(
       status: "completed",
       created_at: 1.hour.ago,
@@ -58,11 +58,11 @@ class ProviderConnectionStatusTest < ActiveSupport::TestCase
   end
 
   test "account counts use provider account links instead of linked account fallback" do
-    provider = ProviderConnectionStatus::PROVIDERS.find { |entry| entry[:association] == :mercury_items }
-    item = mercury_items(:one)
-    linked_provider_account = item.mercury_accounts.create!(
-      account_id: "merc_acc_savings_2",
-      name: "Mercury Savings",
+    provider = ProviderConnectionStatus::PROVIDERS.find { |entry| entry[:association] == :enable_banking_items }
+    item = enable_banking_items(:one)
+    linked_provider_account = item.enable_banking_accounts.create!(
+      uid: "enable-extra", account_id: "enable-extra",
+      name: "EnableBanking Savings",
       currency: "USD"
     )
     AccountProvider.create!(
@@ -70,61 +70,14 @@ class ProviderConnectionStatusTest < ActiveSupport::TestCase
       provider: linked_provider_account
     )
 
-    item.association(:mercury_accounts).reset
+    item.enable_banking_accounts.where.not(id: linked_provider_account.id).destroy_all
+    item.enable_banking_accounts.create!(name: "Unlinked", uid: "unlinked-account", account_id: "unlinked-account", currency: "USD")
+    item.association(:enable_banking_accounts).reset
 
     status = ProviderConnectionStatus.new(provider, item, syncing: false).to_h
 
     assert_equal 2, status.dig(:accounts, :total_count)
     assert_equal 1, status.dig(:accounts, :linked_count)
     assert_equal 1, status.dig(:accounts, :unlinked_count)
-  end
-
-  test "kraken provider status is included without credential fields" do
-    statuses = ProviderConnectionStatus.for_family(families(:dylan_family))
-    kraken_status = statuses.find { |status| status[:provider] == "kraken" }
-
-    assert kraken_status
-    assert_equal "KrakenItem", kraken_status[:provider_type]
-    refute_includes kraken_status.keys, :api_key
-    refute_includes kraken_status.keys, :api_secret
-    assert_equal true, kraken_status[:credentials_configured]
-  end
-
-  test "simplefin provider status does not require setup token after partial account sync" do
-    family = families(:dylan_family)
-    item = SimplefinItem.create!(
-      family: family,
-      name: "SimpleFIN",
-      access_url: "https://example.com/access",
-      status: :requires_update,
-      pending_account_setup: true
-    )
-    completed_sync = item.syncs.create!(
-      status: "completed",
-      created_at: Time.current,
-      completed_at: Time.current,
-      sync_stats: {
-        total_accounts: 18,
-        linked_accounts: 17,
-        unlinked_accounts: 1,
-        error_buckets: { auth: 1 }
-      }
-    )
-    provider = ProviderConnectionStatus::PROVIDERS.find { |entry| entry[:association] == :simplefin_items }
-
-    item.expects(:syncs).never
-
-    status = ProviderConnectionStatus.new(
-      provider,
-      item,
-      latest_sync: completed_sync,
-      latest_completed_sync: completed_sync,
-      syncing: false
-    ).to_h
-
-    assert_equal "good", status[:status]
-    assert_equal false, status[:requires_update]
-    assert_equal true, status[:pending_account_setup]
-    assert_equal "17 synced, 1 need setup", status.dig(:sync, :status_summary)
   end
 end

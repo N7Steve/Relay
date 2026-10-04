@@ -45,7 +45,7 @@ class SyncTest < ActiveSupport::TestCase
 
   test "can run nested syncs that alert the parent when complete" do
     family = families(:dylan_family)
-    plaid_item = plaid_items(:one)
+    plaid_item = enable_banking_items(:one)
     account = accounts(:connected)
 
     family_sync = Sync.create!(syncable: family)
@@ -75,8 +75,8 @@ class SyncTest < ActiveSupport::TestCase
     # instance we configured above
     Account.any_instance.expects(:perform_post_sync).once
     Account.any_instance.expects(:broadcast_sync_complete).once
-    PlaidItem.any_instance.expects(:perform_post_sync).once
-    PlaidItem.any_instance.expects(:broadcast_sync_complete).once
+    EnableBankingItem.any_instance.expects(:perform_post_sync).once
+    EnableBankingItem.any_instance.expects(:broadcast_sync_complete).once
     Family.any_instance.expects(:perform_post_sync).once
     Family.any_instance.expects(:broadcast_sync_complete).once
 
@@ -89,7 +89,7 @@ class SyncTest < ActiveSupport::TestCase
 
   test "failures propagate up the chain" do
     family = families(:dylan_family)
-    plaid_item = plaid_items(:one)
+    plaid_item = enable_banking_items(:one)
     account = accounts(:connected)
 
     family_sync = Sync.create!(syncable: family)
@@ -113,17 +113,17 @@ class SyncTest < ActiveSupport::TestCase
     assert_equal "syncing", family_sync.reload.status
     assert_equal "syncing", plaid_item_sync.reload.status
 
-    # This error should "bubble up" to the PlaidItem and Family sync results
+    # This error should "bubble up" to the EnableBankingItem and Family sync results
     account.expects(:perform_sync).with(account_sync).raises(StandardError.new("test account sync error"))
 
     # Since these are accessed through `parent`, they won't necessarily be the same
     # instance we configured above
     Account.any_instance.expects(:perform_post_sync).once
-    PlaidItem.any_instance.expects(:perform_post_sync).once
+    EnableBankingItem.any_instance.expects(:perform_post_sync).once
     Family.any_instance.expects(:perform_post_sync).once
 
     Account.any_instance.expects(:broadcast_sync_complete).once
-    PlaidItem.any_instance.expects(:broadcast_sync_complete).once
+    EnableBankingItem.any_instance.expects(:broadcast_sync_complete).once
     Family.any_instance.expects(:broadcast_sync_complete).once
 
     account_sync.perform
@@ -135,7 +135,7 @@ class SyncTest < ActiveSupport::TestCase
 
   test "parent failure should not change status if child succeeds" do
     family = families(:dylan_family)
-    plaid_item = plaid_items(:one)
+    plaid_item = enable_banking_items(:one)
     account = accounts(:connected)
 
     family_sync = Sync.create!(syncable: family)
@@ -165,11 +165,11 @@ class SyncTest < ActiveSupport::TestCase
     # Since these are accessed through `parent`, they won't necessarily be the same
     # instance we configured above
     Account.any_instance.expects(:perform_post_sync).once
-    PlaidItem.any_instance.expects(:perform_post_sync).once
+    EnableBankingItem.any_instance.expects(:perform_post_sync).once
     Family.any_instance.expects(:perform_post_sync).once
 
     Account.any_instance.expects(:broadcast_sync_complete).once
-    PlaidItem.any_instance.expects(:broadcast_sync_complete).once
+    EnableBankingItem.any_instance.expects(:broadcast_sync_complete).once
     Family.any_instance.expects(:broadcast_sync_complete).once
 
     account_sync.perform
@@ -241,21 +241,13 @@ class SyncTest < ActiveSupport::TestCase
     assert_equal "completed", parent.reload.status
   end
 
-  test "a late provider complete! cannot resurrect a cancelled sync" do
-    item = SimplefinItem.create!(family: families(:dylan_family), name: "SF Conn", access_url: "https://example.com/access")
-    sync = Sync.create!(syncable: item, status: :syncing)
-
-    # Simulates the Sidekiq job's in-memory copy, loaded before cancellation
-    in_job_copy = Sync.find(sync.id)
-
+  test "a retired connector job cannot resurrect a cancelled sync" do
+    sync = Sync.create!(syncable: plaid_items(:one), status: :syncing)
+    queued_copy = Sync.find(sync.id)
     assert sync.request_cancel!
-    assert_equal "stale", sync.reload.status
-
-    SimplefinItem::Syncer.new(item).send(:mark_completed, in_job_copy)
-
-    assert_equal "stale", sync.reload.status
+    SyncJob.perform_now(queued_copy)
+    assert sync.reload.stale?
   end
-
   test "request_cancel! returns false for terminal syncs" do
     sync = Sync.create!(syncable: accounts(:depository), status: :completed)
 
@@ -265,7 +257,7 @@ class SyncTest < ActiveSupport::TestCase
 
   test "cancelling a running tree stales pending children and resolves the root to stale without post-sync" do
     family = families(:dylan_family)
-    plaid_item = plaid_items(:one)
+    plaid_item = enable_banking_items(:one)
     account = accounts(:connected)
 
     family_sync = Sync.create!(syncable: family, status: :syncing)
@@ -283,8 +275,8 @@ class SyncTest < ActiveSupport::TestCase
 
     # The running child finishes honestly; the cancelled root resolves to
     # stale and must not re-run family transfer matching / rules / broadcasts
-    PlaidItem.any_instance.expects(:perform_post_sync).once
-    PlaidItem.any_instance.expects(:broadcast_sync_complete).once
+    EnableBankingItem.any_instance.expects(:perform_post_sync).once
+    EnableBankingItem.any_instance.expects(:broadcast_sync_complete).once
     Family.any_instance.expects(:perform_post_sync).never
     Family.any_instance.expects(:broadcast_sync_complete).never
 
@@ -379,7 +371,7 @@ class SyncTest < ActiveSupport::TestCase
     Sync.for_family(family).incomplete.find_each(&:destroy)
     assert_not Sync.any_incomplete_for?(family)
 
-    mercury_item = mercury_items(:one)
+    mercury_item = enable_banking_items(:one)
     incomplete = Sync.create!(syncable: mercury_item, status: :pending)
     assert Sync.any_incomplete_for?(family),
            "any_incomplete_for? should report true for an in-flight Mercury sync"

@@ -441,27 +441,7 @@ de:
       sync_provider_in_progress: Sync gestartet.
       sync_provider_no_items: Keine Verbindungen zum Synchronisieren vorhanden.
       taglines:
-        akahu: Synchronisiert neuseeländische Banken über Akahu.
-        binance: Synchronisiert deine Spot-Guthaben bei Binance über einen API-Key mit Lesezugriff.
-        brex: Synchronisiert Guthaben und Firmenkartenumsätze bei Brex mit reinem Lesezugriff.
-        coinbase: Importiert deine Krypto-Bestände von Coinbase und verfolgt ihre Entwicklung.
-        coinstats: Verfolgt dein gesamtes Krypto-Portfolio über Wallets und Börsen hinweg.
         enable_banking: Synchronisiert europäische Bankkonten über PSD2-Open-Banking.
-        ibkr: Synchronisiert Depots bei Interactive Brokers über Flex-Query-Importe.
-        indexa_capital: Verfolgt dein automatisiertes Portfolio bei Indexa Capital.
-        kraken: Synchronisiert Guthaben und ausgeführte Spot-Trades bei Kraken über einen API-Key mit Lesezugriff.
-        lunchflow: Verbindet über 20.000 Banken aus mehr als 40 Ländern (Großbritannien, EU, USA und weitere).
-        mercury: Synchronisiert deine Geschäftskonten bei Mercury automatisch.
-        plaid: Verbindet Tausende US-Finanzinstitute über Plaid.
-        plaid_eu: Verbindet europäische Finanzinstitute über Plaid (PSD2 / Open Banking).
-        questrade: Synchronisiert deine Questrade-Depots direkt über die Questrade-API.
-        redbark: Synchronisiert australische Bankkonten über Redbark Open Banking.
-        simplefin: Verbindet US-Bankkonten über das offene SimpleFIN-Protokoll.
-        snaptrade: Verbindet Depots über das Aggregationsnetz von SnapTrade.
-        sophtron: Verbindet Banken und Versorger in den USA & Kanada.
-        trading212: Synchronisiert dein Trading-212-Depot über einen API-Key mit Lesezugriff.
-        trade_republic: Synchronisiert dein Trade-Republic-Konto über einen sicheren Web-Login mit Lesezugriff.
-        wise: Synchronisiert deine Wise-Guthaben in mehreren Währungen und internationale Überweisungen automatisch.
       trading212_panel:
         accounts_tab: Konten
         api_key_label: API ID

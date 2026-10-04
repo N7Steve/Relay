@@ -35,15 +35,15 @@ class ExternalAccessTest < ActiveSupport::TestCase
     ENV[variable] = previous
   end
 
-  test "a previously constructed Plaid client is blocked after suspension" do
-    provider = Provider::Plaid.new(Plaid::Configuration.new)
+  test "a previously constructed Enable Banking client is blocked after suspension" do
+    provider = Provider::EnableBanking.new(application_id: "test", client_certificate: OpenSSL::PKey::RSA.new(2048).to_pem)
     Setting.stubs(:external_bank_sync_enabled).returns(false)
-    assert_raises(ExternalAccess::Disabled) { provider.get_item("token") }
+    assert_raises(ExternalAccess::Disabled) { provider.get_session(session_id: "session") }
   end
 
   test "disabling banks prevents a direct client request before transport" do
     Setting.stubs(:external_bank_sync_enabled).returns(false)
-    assert_raises(ExternalAccess::Disabled) { Provider::Up.get("/accounts") }
+    assert_raises(ExternalAccess::Disabled) { Provider::EnableBanking.get("/accounts") }
   end
 
   test "disabling market data prevents requests from an existing connection" do

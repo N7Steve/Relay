@@ -13,7 +13,7 @@ class ExternalAccessJobTest < ActiveJob::TestCase
 
   test "queued connector sync is cancelled and keeps historical data" do
     Setting.stubs(:external_bank_sync_enabled).returns(false)
-    item = plaid_items(:one)
+    item = enable_banking_items(:one)
     sync = item.syncs.create!
     item.expects(:perform_sync).never
     sync.perform

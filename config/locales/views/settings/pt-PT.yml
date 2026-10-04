@@ -374,27 +374,7 @@ pt-PT:
       sync_provider_in_progress: Sincronização iniciada.
       recently_synced: Sincronizado recentemente. Tente novamente daqui a um momento.
       taglines:
-        akahu: Sincronize instituições financeiras da Nova Zelândia via Akahu.
-        simplefin: Ligue contas bancárias dos EUA através do protocolo aberto SimpleFIN.
-        lunchflow: Ligue 20 mil+ bancos de 40+ países (RU, UE, EUA e mais!)
-        redbark: Sincronize contas bancárias australianas através do open banking Redbark.
         enable_banking: Sincronize contas bancárias europeias através do open banking PSD2.
-        coinstats: Acompanhe toda a sua carteira de criptomoedas em carteiras e exchanges.
-        wise: Sincronize automaticamente os seus saldos multi-moeda Wise e transferências internacionais.
-        mercury: Sincronize automaticamente as suas contas bancárias empresariais Mercury.
-        brex: Sincronize o numerário e a atividade do cartão empresarial Brex com acesso apenas de leitura.
-        coinbase: Importe as suas posições cripto Coinbase e acompanhe o desempenho.
-        binance: Sincronize os seus saldos à vista Binance utilizando uma chave de API apenas de leitura.
-        kraken: Sincronize os saldos Kraken e as execuções de negociação à vista utilizando uma chave de API apenas de leitura.
-        onchain_wallet: Acompanhe carteiras Bitcoin, EVM e Solana de autocustódia a partir dos seus endereços públicos.
-        snaptrade: Ligue contas de corretagem através da rede de agregação SnapTrade.
-        trading212: Sincronize a sua carteira de investimento Trading 212 utilizando uma chave de API apenas de leitura.
-        ibkr: Sincronize contas de investimento Interactive Brokers através de importações de Flex Query.
-        questrade: Sincronize as suas contas de investimento Questrade diretamente através da API Questrade.
-        indexa_capital: Acompanhe a sua carteira de investimento automatizada Indexa Capital.
-        sophtron: Ligue bancos e utilities dos EUA e do Canadá.
-        plaid: Ligue milhares de instituições financeiras dos EUA via Plaid.
-        plaid_eu: Ligue instituições financeiras europeias via Plaid (PSD2 / Open Banking).
       search_filters:
         aria_label: Pesquisar serviços
         placeholder: Pesquisar serviços

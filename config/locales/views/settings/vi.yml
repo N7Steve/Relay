@@ -296,21 +296,7 @@ vi:
       sync_provider_in_progress: Đã bắt đầu đồng bộ.
       recently_synced: Đã đồng bộ gần đây. Thử lại sau một chút.
       taglines:
-        simplefin: Kết nối tài khoản ngân hàng Mỹ qua giao thức mở SimpleFIN.
-        lunchflow: Kết nối 20.000+ ngân hàng từ 40+ quốc gia (Anh, EU, Mỹ và nhiều hơn!)
         enable_banking: Đồng bộ tài khoản ngân hàng châu Âu qua ngân hàng mở PSD2.
-        coinstats: Theo dõi toàn bộ danh mục tiền mã hóa trên ví và sàn giao dịch.
-        mercury: Tự động đồng bộ tài khoản ngân hàng doanh nghiệp Mercury.
-        brex: Đồng bộ tiền mặt và hoạt động thẻ doanh nghiệp Brex với quyền chỉ đọc.
-        coinbase: Nhập danh mục tiền mã hóa Coinbase và theo dõi hiệu suất.
-        binance: Đồng bộ số dư giao ngay Binance bằng khóa API chỉ đọc.
-        kraken: Đồng bộ số dư Kraken và giao dịch giao ngay bằng khóa API chỉ đọc.
-        snaptrade: Kết nối tài khoản môi giới qua mạng tổng hợp SnapTrade.
-        ibkr: Đồng bộ tài khoản đầu tư Interactive Brokers qua nhập Flex Query.
-        indexa_capital: Theo dõi danh mục đầu tư tự động Indexa Capital.
-        sophtron: Kết nối ngân hàng và tiện ích tại Mỹ & Canada.
-        plaid: Kết nối hàng ngàn tổ chức tài chính Mỹ qua Plaid.
-        plaid_eu: Kết nối tổ chức tài chính châu Âu qua Plaid (PSD2 / Open Banking).
       search_filters:
         aria_label: Tìm kiếm nhà cung cấp
         placeholder: Tìm kiếm nhà cung cấp

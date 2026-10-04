@@ -5,7 +5,6 @@ ca:
         success: Entrada eliminada correctament.
   accounts:
     account:
-      change_simplefin_account: Canvia el compte de SimpleFIN
       complete_setup: Completa la configuració
       default_label: Per defecte
       delete: Elimina el compte

@@ -253,6 +253,14 @@ se representa mediante un lector nuevo que deba permanecer.
 
 ## Fase 7 — Retirar conectores externos por lotes autocontenidos
 
+**Selección confirmada:** alcance completo; conservar únicamente Enable Banking
+entre los conectores externos de bancos/brokers/exchanges/wallets. Steve indica
+que no usa ninguno ni tiene cuentas sincronizadas o datos que conservar.
+Implementación completada y validada localmente en `main`; evidencia y límites en el [registro de fase 7](pruning-phase-7.md).
+Commit/push y despliegue requieren su confirmación correspondiente.
+Se mantienen los límites de FinanceKit, cotizaciones/divisas y módulos compartidos
+descritos más abajo.
+
 No ejecutar como un gran borrado. **Cada lote es una subfase desplegable y pasa
 todo el contrato de cierre antes de comenzar el siguiente.**
 

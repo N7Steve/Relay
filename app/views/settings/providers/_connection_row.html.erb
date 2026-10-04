@@ -40,12 +40,6 @@
     </div>
   </summary>
   <div class="space-y-4 mt-4 px-4 pb-4">
-    <% if entry[:configuration] %>
-      <%= render "settings/providers/provider_form",
-                 configuration: entry[:configuration],
-                 provider_setup_encryption_warning: provider_setup_encryption_warning %>
-    <% else %>
-      <%= render "settings/providers/#{entry[:partial]}" %>
-    <% end %>
+    <%= render "settings/providers/#{entry[:partial]}" %>
   </div>
 <% end %>

@@ -6,7 +6,6 @@ tr:
         success: Kayıt başarıyla silindi.
   accounts:
     account:
-      change_simplefin_account: SimpleFIN hesabını değiştir
       complete_setup: Kurulumu tamamla
       default_label: Varsayılan
       delete: Hesabı sil

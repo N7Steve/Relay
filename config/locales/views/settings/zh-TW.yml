@@ -355,26 +355,7 @@ zh-TW:
       sync_provider_in_progress: 同步已開始。
       recently_synced: 剛剛才同步過，請稍候再試。
       taglines:
-        akahu: 透過 Akahu 同步紐西蘭的金融機構。
-        simplefin: 透過開放的 SimpleFIN 協定連結美國銀行帳戶。
-        lunchflow: 連結來自 40 多個國家（英國、歐盟、美國等）的 2 萬多家銀行！
-        redbark: 透過 Redbark 開放銀行同步澳洲銀行帳戶。
         enable_banking: 透過 PSD2 開放銀行同步歐洲的銀行帳戶。
-        coinstats: 追蹤您散布在各錢包與交易所的全部加密貨幣投資組合。
-        wise: 自動同步您的 Wise 多幣別餘額與國際轉帳。
-        mercury: 自動同步您的 Mercury 商業銀行帳戶。
-        brex: 以唯讀存取同步 Brex 的現金與公司卡活動。
-        coinbase: 匯入您的 Coinbase 加密貨幣持倉並追蹤績效。
-        binance: 使用唯讀 API 金鑰同步您的 Binance 現貨餘額。
-        kraken: 使用唯讀 API 金鑰同步 Kraken 的餘額與現貨成交紀錄。
-        snaptrade: 透過 SnapTrade 整合網路連結券商帳戶。
-        trading212: 使用唯讀 API 金鑰同步您的 Trading 212 投資組合。
-        ibkr: 透過 Flex Query 匯入同步 Interactive Brokers 的投資帳戶。
-        questrade: 透過 Questrade API 直接同步您的 Questrade 投資帳戶。
-        indexa_capital: 追蹤您的 Indexa Capital 自動化投資組合。
-        sophtron: 連結美國與加拿大的銀行及公用事業帳戶。
-        plaid: 透過 Plaid 連結數千家美國金融機構。
-        plaid_eu: 透過 Plaid 連結歐洲金融機構（PSD2／開放銀行）。
       search_filters:
         aria_label: 搜尋供應商
         placeholder: 搜尋供應商

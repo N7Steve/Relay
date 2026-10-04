@@ -15,7 +15,6 @@ de:
       disabled_label: Deaktiviert
       archived_label: Archiviert
       delete: Konto löschen
-      change_simplefin_account: SimpleFIN-Konto wechseln
       complete_setup: Setup abschließen
       exclude_from_reports: Aus allen Berichten ausschließen
       include_in_reports: In Berichte aufnehmen

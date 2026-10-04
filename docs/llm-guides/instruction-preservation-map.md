@@ -182,3 +182,13 @@ The earlier preservation inventory described the pre-pruning product. Steve
 selected phase 3 on 4 October 2026: evaluation runtime, datasets and their tests
 are removed. Runtime AI prompts/providers remain. Historical schema/migrations
 remain unchanged; old workflow snapshots are archival material.
+
+## Pruning phase 7 override
+
+The provider examples and source links above record the audited pre-pruning
+implementation. [Phase 7](../migration/pruning-phase-7.md) retires the account
+connectors except Enable Banking, while preserving FinanceKit, market/FX and
+historical persistence readers. Removed importers, processors, initializers and
+the global account-provider generator are historical references, not guidance to
+restore those features. Pending/FX privacy, tenancy and diagnostic obligations
+continue in the current [provider guide](providers.md).

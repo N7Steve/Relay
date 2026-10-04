@@ -47,35 +47,4 @@ module IbkrAccount::DataHelpers
     rescue ArgumentError, TypeError
       nil
     end
-
-    def resolve_security(row)
-      data = row.with_indifferent_access
-      ticker = data[:symbol].to_s.strip.upcase
-      return nil if ticker.blank?
-
-      Security.find_by(ticker: ticker) || create_security_from_row(ticker)
-    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
-      Security.find_by(ticker: ticker)
-    end
-
-    def trade_date_for(row)
-      data = row.with_indifferent_access
-      parsed_trade_date = parse_date(data[:trade_date])
-      return parsed_trade_date if parsed_trade_date
-
-      Rails.logger.warn(
-        "IbkrAccount::DataHelpers - Missing or invalid trade_date, falling back to Date.current. " \
-        "trade_id=#{data[:trade_id].inspect}"
-      )
-      Date.current
-    end
-
-    def extract_currency(row, fallback: nil)
-      value = row.with_indifferent_access[:currency]
-      value.present? ? value.to_s.upcase : fallback
-    end
-
-    def create_security_from_row(ticker)
-      Security.create!(ticker: ticker, name: ticker)
-    end
 end

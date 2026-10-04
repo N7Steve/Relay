@@ -30,7 +30,7 @@ class Investment::RoboadvisorPerformanceTest < ActiveSupport::TestCase
         }
       }
     )
-    provider_account.ensure_account_provider!(@account)
+    AccountProvider.create!(provider: provider_account, account: @account)
     performance = Investment::RoboadvisorPerformance.new(@account)
     period = Date.new(2026, 8, 1)..Date.new(2026, 8, 31)
 

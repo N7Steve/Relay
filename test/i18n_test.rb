@@ -106,8 +106,6 @@ class I18nTest < ActiveSupport::TestCase
       assert labels.is_a?(Hash), "#{file} must define trade_republic_items.activities.labels"
       assert_empty required_labels - labels.keys,
                    "#{file} is missing Trade Republic activity labels"
-      assert translations.dig("trade_republic_items", "trade_republic_item", "data_quality", "pending_trade_details").present?,
-             "#{file} is missing trade_republic_item.data_quality.pending_trade_details"
     end
   end
 

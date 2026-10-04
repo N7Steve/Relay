@@ -79,23 +79,6 @@ class ScheduledPayment::WealthForecastV2Test < ActiveSupport::TestCase
     assert_not_predicate forecast, :investment_return_available?
   end
 
-  test "uses Indexa contribution-adjusted return index instead of balance jump" do
-    period = Date.new(2026, 8, 1)..Date.new(2026, 8, 31)
-    performance = mock("roboadvisor_performance")
-    performance.stubs(:account).returns(@investment)
-    performance.stubs(:provider_history?).returns(true)
-    performance.stubs(:rate_for).with(period).returns(0.02.to_d)
-    performance.stubs(:opening_balance).with(period.begin).returns(1_000.to_d)
-    # A deposit doubled the visible balance, but Indexa's time-weighted index
-    # correctly reports only a 2% investment return.
-    balance = balance_row(date: period.begin, start: 1_000, market: 1_000)
-    forecast = build_forecast
-    forecast.stubs(:investment_periods).returns([ period ])
-    forecast.stubs(:investment_balance_rows).returns([ balance ])
-    forecast.stubs(:managed_portfolio_performances).returns([ performance ])
-
-    assert_in_delta Math.log(1.02), forecast.send(:investment_monthly_log_returns).sole, 0.000001
-  end
 
   test "does not turn missing provider history for a month into a false zero return" do
     period = Date.new(2026, 8, 1)..Date.new(2026, 8, 31)

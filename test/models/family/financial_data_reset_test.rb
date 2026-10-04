@@ -10,7 +10,6 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
       color: "#12B76A",
       lucide_icon: "tag"
     )
-    Provider::Registry.stubs(:plaid_provider_for_region).returns(nil)
   end
 
   test "dry run reports target counts and deletes nothing" do
@@ -24,7 +23,7 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
     assert User.exists?(@user.id)
   end
 
-  test "provider item associations are limited to explicit syncable family associations" do
+  test "provider item associations include live and historical family persistence" do
     associations = Family::FinancialDataReset.provider_item_associations
 
     assert_not_empty associations
@@ -36,7 +35,7 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
 
       assert reflection
       assert_equal :has_many, reflection.macro
-      assert_includes reflection.klass.included_modules, Syncable
+      assert reflection.klass < ApplicationRecord
     end
   end
 
@@ -49,7 +48,8 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
 
     result = Family::FinancialDataReset.new(user: @user).call
 
-    assert_equal Sync.for_family(@family).count, result.before_counts[:syncs]
+    expected = Sync.for_family(@family).or(Sync.where(syncable_type: "PlaidItem", syncable_id: @family.plaid_items.select(:id))).count
+    assert_equal expected, result.before_counts[:syncs]
   end
 
   test "destructive reset requires explicit confirmation" do
@@ -139,7 +139,7 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
 
     plaid_provider = mock
     Provider::Registry.stubs(:plaid_provider_for_region).returns(plaid_provider)
-    plaid_provider.expects(:remove_item).with(plaid_item.access_token).once
+    plaid_provider.expects(:remove_item).never
 
     result = Family::FinancialDataReset.new(family: @other_family, dry_run: false, confirmed: true).call
 

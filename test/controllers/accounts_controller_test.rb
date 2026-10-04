@@ -1,8 +1,17 @@
 require "test_helper"
 
 class AccountsControllerTest < ActionDispatch::IntegrationTest
+  test "historical connector accounts remain visible without reconnecting them" do
+    sign_in users(:family_admin)
+    historical = accounts(:connected)
+    get accounts_url
+    assert_response :success
+    assert_select "a[href=?]", account_path(historical), minimum: 1
+    assert historical.reload.linked?
+    assert_nil historical.provider
+  end
+
   include ActionView::RecordIdentifier
-  include OnchainTestHelper
   include EntriesTestHelper
 
   setup do
@@ -40,122 +49,9 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     assert_equal account_path(@account), account_link["href"]
   end
 
-  test "index localizes the Plaid add accounts action" do
-    ensure_tailwind_build
-    @user.update!(locale: "de")
 
-    get accounts_url
 
-    assert_response :success
-    assert_select "a[href=?]",
-                  edit_plaid_item_path(plaid_items(:one), add_accounts: true),
-                  text: "Konten hinzufügen",
-                  count: 1
-  end
 
-  test "index renders kraken items" do
-    kraken_item = kraken_items(:one)
-    get accounts_url
-    assert_response :success
-    assert_select "##{dom_id(kraken_item)}"
-  end
-
-  test "index renders on-chain wallet items" do
-    register_fake_chain!
-    item = create_onchain_wallet_item(family: @user.family)
-    onchain_account = create_onchain_wallet_account(item: item)
-    onchain_account.ensure_account_provider!(accounts(:investment))
-
-    get accounts_url
-
-    assert_response :success
-    # Without this the wallet is invisible here: its accounts carry a provider
-    # link, so Account.manual excludes them, and no provider section claimed them.
-    assert_select "##{dom_id(item, :accounts_index)}"
-    # The card carries the same actions menu every other provider card does.
-    assert_select "form[action=?]", sync_onchain_wallet_item_path(item)
-    assert_select "form[action=?]", onchain_wallet_item_path(item)
-  ensure
-    unregister_fake_chain!
-  end
-
-  test "index does not leak wallet accounts a member was never given" do
-    register_fake_chain!
-    admin = users(:family_admin)
-    member = users(:family_member)
-    item = create_onchain_wallet_item(family: admin.family)
-
-    shared = accounts(:investment)
-    unshared = accounts(:credit_card)
-    [ shared, unshared ].each_with_index do |account, index|
-      account.update!(owner: admin)
-      account.account_shares.destroy_all
-      row = create_onchain_wallet_account(
-        item: item,
-        address: "#{OnchainTestHelper::FAKE_ADDRESS}#{index}"
-      )
-      row.ensure_account_provider!(account)
-    end
-    shared.account_shares.create!(user: member, permission: "read_only")
-
-    sign_in member
-    get accounts_url
-
-    assert_response :success
-    assert_select "##{dom_id(item, :accounts_index)}"
-    # The item is surfaced as soon as ONE of its accounts is accessible, so
-    # rendering them all would hand a partially-authorised member the names and
-    # balances of accounts nobody shared with them.
-    assert_includes response.body, shared.name
-    assert_not_includes response.body, unshared.name
-  ensure
-    unregister_fake_chain!
-  end
-
-  test "index renders trading212 items" do
-    trading212_item = trading212_items(:configured_item)
-    get accounts_url
-    assert_response :success
-    assert_select "##{dom_id(trading212_item)}"
-  end
-
-  test "index renders only accessible accounts for a visible trading212 item" do
-    accessible_account = accounts(:depository)
-    inaccessible_account = accounts(:investment)
-    trading212_item = trading212_items(:configured_item)
-    trading212_accounts(:main_account).ensure_account_provider!(accessible_account)
-    trading212_item.trading212_accounts.create!(
-      name: "Private Trading 212 Account",
-      trading212_account_id: "t212_private_123",
-      currency: "USD",
-      current_balance: 1000,
-      cash_balance: 100,
-      raw_positions_payload: [],
-      raw_orders_payload: [],
-      raw_dividends_payload: [],
-      raw_transactions_payload: []
-    ).ensure_account_provider!(inaccessible_account)
-    sign_in users(:family_member)
-
-    get accounts_url
-
-    assert_response :success
-    assert_select "##{dom_id(trading212_item)}"
-    assert_select "turbo-frame##{dom_id(accessible_account)}", count: 1
-    assert_select "turbo-frame##{dom_id(inaccessible_account)}", count: 0
-  end
-
-  test "index renders only trading212 items with accessible accounts for members" do
-    shared_account = accounts(:credit_card)
-    trading212_accounts(:main_account).ensure_account_provider!(shared_account)
-    sign_in users(:family_member)
-
-    get accounts_url
-
-    assert_response :success
-    assert_select "##{dom_id(trading212_items(:configured_item))}"
-    assert_select "##{dom_id(trading212_items(:pending_setup_item))}", count: 0
-  end
 
   test "should get show" do
     get account_url(@account)
@@ -192,27 +88,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     assert_empty response.body.scan(/translation missing: [\w.]+/).uniq
   end
 
-  test "sync all requests fresh Plaid transactions before syncing the family" do
-    sequence = sequence("manual sync all")
-    Family.any_instance
-      .expects(:request_plaid_transactions_refreshes_later)
-      .with(source: "AccountsController#sync_all")
-      .in_sequence(sequence)
-    Family.any_instance.expects(:sync_later).once.in_sequence(sequence)
 
-    post sync_all_accounts_url
-
-    assert_redirected_to accounts_url
-  end
-
-  test "sync all continues when Plaid refresh orchestration cannot be enqueued" do
-    PlaidTransactionsRefreshAllJob.stubs(:perform_later).raises(RedisClient::Error, "Redis unavailable")
-    Family.any_instance.expects(:sync_later).once
-
-    post sync_all_accounts_url
-
-    assert_redirected_to accounts_url
-  end
 
   test "show avoids N+1 transfer queries across paginated entries" do
     queries = capture_sql_queries { get account_url(@account) }
@@ -574,7 +450,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "syncing linked account triggers sync for all provider items" do
-    plaid_account = plaid_accounts(:one)
+    plaid_account = enable_banking_accounts(:one)
     AccountProvider.create!(account: @account, provider: plaid_account)
 
     # Reload to ensure the account has the provider association loaded
@@ -582,8 +458,8 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
 
     # Mock at the class level since controller loads account from DB
     Account.any_instance.expects(:syncing?).returns(false)
-    PlaidItem.any_instance.expects(:syncing?).returns(false)
-    PlaidItem.any_instance.expects(:sync_later_with_provider_refresh).once
+    EnableBankingItem.any_instance.expects(:syncing?).returns(false)
+    EnableBankingItem.any_instance.expects(:sync_later).once
 
     post sync_account_url(@account)
     assert_redirected_to account_url(@account)
@@ -732,50 +608,8 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Account is already linked to a provider", flash[:alert]
   end
 
-  test "unlink preserves SnaptradeAccount record" do
-    snaptrade_account = snaptrade_accounts(:fidelity_401k)
-    investment = accounts(:investment)
-    AccountProvider.create!(account: investment, provider: snaptrade_account)
-    investment.reload
 
-    assert investment.linked?
 
-    delete unlink_account_url(investment)
-    investment.reload
-
-    assert_not investment.linked?
-    assert_redirected_to accounts_path
-    # SnaptradeAccount should still exist (not destroyed)
-    assert SnaptradeAccount.exists?(snaptrade_account.id), "SnaptradeAccount should be preserved after unlink"
-    # But AccountProvider should be gone
-    assert_not AccountProvider.exists?(provider_type: "SnaptradeAccount", provider_id: snaptrade_account.id)
-  end
-
-  test "unlink does not enqueue SnapTrade cleanup job" do
-    snaptrade_account = snaptrade_accounts(:fidelity_401k)
-    investment = accounts(:investment)
-    AccountProvider.create!(account: investment, provider: snaptrade_account)
-    investment.reload
-
-    assert_no_enqueued_jobs(only: SnaptradeConnectionCleanupJob) do
-      delete unlink_account_url(investment)
-    end
-  end
-
-  test "unlink detaches holdings from SnapTrade provider" do
-    snaptrade_account = snaptrade_accounts(:fidelity_401k)
-    investment = accounts(:investment)
-    ap = AccountProvider.create!(account: investment, provider: snaptrade_account)
-
-    # Assign a holding to this provider
-    holding = holdings(:one)
-    holding.update!(account_provider: ap)
-
-    delete unlink_account_url(investment)
-    holding.reload
-
-    assert_nil holding.account_provider_id, "Holding should be detached from provider after unlink"
-  end
 
   # Regression for #2516: the account sidebar fragment cache renders DS::* view
   # components, which Rails' ERB dependency tracker mis-parses as a bogus "Ds/D"
@@ -829,142 +663,4 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   end
 
   # --- member-owned connections (issue #3579) ------------------------------
-
-  test "an owner is not shown a connection carrying an account they cannot see" do
-    # Ownership must not widen exposure: the card renders the item's accounts
-    # unfiltered (and is re-rendered by a viewer-less broadcast), so the whole
-    # card is withheld rather than shown with a filtered list.
-    member = users(:family_member)
-    family = families(:dylan_family)
-    item = PlaidItem.create!(
-      family: family, plaid_id: "item_card_#{SecureRandom.hex(4)}",
-      access_token: "token", name: "Owned Bank", owner: member
-    )
-    hidden = Account.create!(
-      family: family, owner: users(:family_admin), name: "Not Shared With Member",
-      balance: 100, currency: "USD", accountable: Depository.new
-    )
-    hidden.account_shares.destroy_all
-    plaid_account = PlaidAccount.create!(
-      plaid_item: item, name: "Hidden Feed", plaid_id: "acct_card_#{SecureRandom.hex(4)}",
-      plaid_type: "depository", plaid_subtype: "checking", currency: "USD",
-      current_balance: 100, available_balance: 100
-    )
-    AccountProvider.create!(account: hidden, provider: plaid_account)
-
-    sign_in member
-    get accounts_url
-
-    assert_response :success
-    assert_select "##{ActionView::RecordIdentifier.dom_id(item)}", count: 0
-    assert_no_match(/Not Shared With Member/, response.body)
-  end
-
-  test "an owner is shown their freshly connected item before it has any accounts" do
-    # The case ownership visibility exists for: just connected, nothing synced.
-    member = users(:family_member)
-    item = PlaidItem.create!(
-      family: families(:dylan_family), plaid_id: "item_fresh_#{SecureRandom.hex(4)}",
-      access_token: "token", name: "Fresh Bank", owner: member
-    )
-
-    sign_in member
-    get accounts_url
-
-    assert_response :success
-    assert_select "##{ActionView::RecordIdentifier.dom_id(item)}", count: 1
-  end
-
-
-  test "an owner sees the management controls on their own connection card" do
-    member = users(:family_member)
-    item = PlaidItem.create!(
-      family: families(:dylan_family), plaid_id: "item_ctrl_#{SecureRandom.hex(4)}",
-      access_token: "token", name: "Controls Bank", owner: member
-    )
-
-    sign_in member
-    get accounts_url
-
-    assert_response :success
-    assert_select "a[href=?]", edit_plaid_item_path(item, add_accounts: true), count: 1
-  end
-
-  test "a member demoted to guest loses the controls on a connection they own" do
-    member = users(:family_member)
-    item = PlaidItem.create!(
-      family: families(:dylan_family), plaid_id: "item_demote_#{SecureRandom.hex(4)}",
-      access_token: "token", name: "Demoted Bank", owner: member
-    )
-    member.update!(role: :guest)
-
-    sign_in member
-    get accounts_url
-
-    assert_response :success
-    assert_select "a[href=?]", edit_plaid_item_path(item, add_accounts: true), count: 0
-  end
-
-  test "a member sees no controls on a connection someone else owns" do
-    item = PlaidItem.create!(
-      family: families(:dylan_family), plaid_id: "item_noctrl_#{SecureRandom.hex(4)}",
-      access_token: "token", name: "Admin Bank", owner: users(:family_admin)
-    )
-
-    sign_in users(:family_member)
-    get accounts_url
-
-    assert_response :success
-    assert_select "a[href=?]", edit_plaid_item_path(item, add_accounts: true), count: 0
-  end
-end
-
-class AccountsControllerSimplefinCtaTest < ActionDispatch::IntegrationTest
-  fixtures :users, :families
-
-  setup do
-    sign_in users(:family_admin)
-    @family = families(:dylan_family)
-  end
-
-  test "when unlinked SFAs exist and manuals exist, shows setup button only" do
-    item = SimplefinItem.create!(family: @family, name: "Conn", access_url: "https://example.com/access")
-    # Unlinked SFA (no account and no provider link)
-    item.simplefin_accounts.create!(name: "A", account_id: "sf_a", currency: "USD", current_balance: 1, account_type: "depository")
-    # One manual account available
-    Account.create!(family: @family, name: "Manual A", currency: "USD", balance: 0, accountable_type: "Depository", accountable: Depository.create!(subtype: "checking"))
-
-    get accounts_path
-    assert_response :success
-    # Expect setup link present
-    assert_includes @response.body, setup_accounts_simplefin_item_path(item)
-    # Relink modal (SimpleFin-specific) should not be present anymore
-    refute_includes @response.body, "Link existing accounts"
-  end
-
-  test "when SFAs exist and none unlinked and manuals exist, no relink modal is shown (unified flow)" do
-    item = SimplefinItem.create!(family: @family, name: "Conn2", access_url: "https://example.com/access")
-    # Create a manual linked to SFA so unlinked count == 0
-    sfa = item.simplefin_accounts.create!(name: "B", account_id: "sf_b", currency: "USD", current_balance: 1, account_type: "depository")
-    linked = Account.create!(family: @family, name: "Linked", currency: "USD", balance: 0, accountable_type: "Depository", accountable: Depository.create!(subtype: "savings"))
-    # Legacy association sufficient to count as linked
-    sfa.update!(account: linked)
-
-    # Also create another manual account to make manuals_exist true
-    Account.create!(family: @family, name: "Manual B", currency: "USD", balance: 0, accountable_type: "Depository", accountable: Depository.create!(subtype: "checking"))
-
-    get accounts_path
-    assert_response :success
-    # The SimpleFin-specific relink modal is removed in favor of unified provider flow
-    refute_includes @response.body, "Link existing accounts"
-  end
-
-  test "when no SFAs exist, shows neither CTA" do
-    item = SimplefinItem.create!(family: @family, name: "Conn3", access_url: "https://example.com/access")
-
-    get accounts_path
-    assert_response :success
-    refute_includes @response.body, setup_accounts_simplefin_item_path(item)
-    refute_includes @response.body, "Link existing accounts"
-  end
 end

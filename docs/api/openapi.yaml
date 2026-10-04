@@ -7793,9 +7793,9 @@ paths:
   "/api/v1/provider_connections":
     get:
       summary: Lists provider connection status summaries
-      description: List safe provider connection status metadata for the authenticated
-        user's family without exposing credentials, raw provider payloads, or raw
-        sync errors.
+      description: List safe Enable Banking and FinanceKit connection status metadata
+        for the authenticated user's family without exposing credentials, raw provider
+        payloads, or raw sync errors.
       tags:
       - Provider Connections
       security:

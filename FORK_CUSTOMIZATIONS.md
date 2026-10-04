@@ -713,3 +713,20 @@ Retirados los SDK PostHog, Sentry, Skylight, Logtail y Langfuse, sus trazas y
 las evaluaciones IA. No reintroducirlos desde upstream. Preservar el diagnóstico
 local, los filtros de datos sensibles, LlmUsage y los proveedores IA retenidos.
 Flutter usa DiagnosticsService sin identidad remota ni SDK de telemetría.
+
+
+## Poda fase 7 — conectores de cuentas
+
+Enable Banking conserva su recorrido completo. FinanceKit y clientes Apple/nativos
+continúan retenidos. Los otros 24 conectores de cuentas y Plaid EU carecen de
+transportes, adapters, altas, rutas, webhooks y configuración activable. No
+reintroducirlos al integrar upstream. Ver [registro de fase 7](docs/migration/pruning-phase-7.md).
+
+Item/Account históricos conservan cifrado, relaciones, nombres GlobalID y adjuntos
+para recuperación, sin sincronización ni callbacks remotos. Los jobs serializados
+antiguos cancelan sin purgar colas. Mantener lectores financieros locales de
+IBKR/Indexa, metadata pending/FX, nombres de movimientos y etiquetas necesarias
+para migraciones históricas. Las cuentas históricas siguen visibles sin convertir
+su estrategia reverse/forward. No borrar esquema/filas ni interpretar reversión
+de código como reconexión automática. Cotizaciones/divisas, Brandfetch, Drive,
+Agenda y Bills permanecen fuera del alcance de esta fase.

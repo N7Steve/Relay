@@ -1,0 +1,8 @@
+one:
+  family: dylan_family
+  name: Test Enable Banking
+  country_code: ES
+  application_id: test-app
+  client_certificate: test-certificate
+  session_id: test-session
+  status: good

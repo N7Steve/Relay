@@ -71,30 +71,4 @@ class FamilyResetJobTest < ActiveJob::TestCase
     assert Category.exists?(other_category.id)
     assert_equal other_category, other_mapping.reload.target
   end
-
-  test "resets family data even when Plaid credentials are invalid" do
-    # Use existing plaid item from fixtures
-    plaid_item = plaid_items(:one)
-    assert_equal @family, plaid_item.family
-
-    initial_plaid_count = @family.plaid_items.count
-    assert initial_plaid_count > 0
-
-    # Simulate invalid Plaid credentials error
-    error_response = {
-      "error_code" => "INVALID_API_KEYS",
-      "error_message" => "invalid client_id or secret provided"
-    }.to_json
-
-    plaid_error = Plaid::ApiError.new(code: 400, response_body: error_response)
-    @plaid_provider.expects(:remove_item).raises(plaid_error)
-
-    # Job should complete successfully despite the Plaid error
-    assert_nothing_raised do
-      FamilyResetJob.perform_now(@family)
-    end
-
-    # PlaidItem should be deleted
-    assert_equal 0, @family.plaid_items.reload.count
-  end
 end

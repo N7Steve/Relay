@@ -307,22 +307,7 @@ it:
       sync_provider_in_progress: Sincronizzazione avviata.
       recently_synced: Sincronizzato di recente. Riprova tra un momento.
       taglines:
-        akahu: Sincronizza gli istituti finanziari neozelandesi tramite Akahu.
-        simplefin: Connetti conti bancari USA tramite il protocollo aperto SimpleFIN.
-        lunchflow: Connetti 20.000+ banche da 40+ paesi (UK, EU, USA e altro!)
         enable_banking: Sincronizza conti bancari europei tramite PSD2 open banking.
-        coinstats: Monitora l'intero portafoglio crypto su wallet e exchange.
-        mercury: Sincronizza automaticamente i tuoi conti bancari aziendali Mercury.
-        brex: Sincronizza liquidità e attività corporate card Brex con accesso in sola lettura.
-        coinbase: Importa le tue posizioni crypto Coinbase e monitora le performance.
-        binance: Sincronizza i tuoi saldi spot Binance usando una chiave API in sola lettura.
-        kraken: Sincronizza saldi e operazioni spot Kraken usando una chiave API in sola lettura.
-        snaptrade: Connetti conti di intermediazione tramite la rete di aggregazione SnapTrade.
-        ibkr: Sincronizza conti di investimento Interactive Brokers tramite importazioni Flex Query.
-        indexa_capital: Monitora il tuo portafoglio di investimento automatizzato Indexa Capital.
-        sophtron: Connetti banche e utility USA e canadesi.
-        plaid: Connetti migliaia di istituti finanziari USA tramite Plaid.
-        plaid_eu: Connetti istituti finanziari europei tramite Plaid (PSD2 / Open Banking).
       search_filters:
         aria_label: Cerca provider
         placeholder: Cerca provider

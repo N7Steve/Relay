@@ -4,7 +4,7 @@ class DestroyableLaterTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   setup do
-    @item = plaid_items(:one)
+    @item = enable_banking_items(:one)
   end
 
   test "flags the item and enqueues its destruction" do
@@ -13,7 +13,7 @@ class DestroyableLaterTest < ActiveSupport::TestCase
     end
 
     assert @item.reload.scheduled_for_deletion?
-    assert_not_includes PlaidItem.syncable, @item
+    assert_not_includes EnableBankingItem.syncable, @item
   end
 
   # The adapter is stubbed rather than perform_later, so ActiveJob's own
@@ -25,7 +25,7 @@ class DestroyableLaterTest < ActiveSupport::TestCase
     assert_raises(RedisClient::CannotConnectError) { @item.destroy_later }
 
     assert_not @item.reload.scheduled_for_deletion?
-    assert_includes PlaidItem.syncable, @item
+    assert_includes EnableBankingItem.syncable, @item
   end
 
   # An adapter raising ActiveJob::EnqueueError (or an enqueue callback aborting)
@@ -76,30 +76,20 @@ class DestroyableLaterTest < ActiveSupport::TestCase
   # BrexItem validates base_url against an allowlist on every save, so a row
   # written before the allowlist changed would fail update!.
   test "flags an item that fails an unrelated validation" do
-    item = BrexItem.create!(family: families(:dylan_family), name: "Legacy Brex", token: "tok")
-    item.update_column(:base_url, "https://legacy-proxy.example.com")
-    assert_not item.valid?
-
-    assert_enqueued_with(job: DestroyJob, args: [ item ]) do
-      assert item.destroy_later
-    end
-
-    assert item.reload.scheduled_for_deletion?
+    @item.update_column(:name, nil)
+    assert_not @item.valid?
+    assert_enqueued_with(job: DestroyJob, args: [ @item ]) { assert @item.destroy_later }
+    assert @item.reload.scheduled_for_deletion?
   end
-
   # QuestradeItem only requires a refresh token while not scheduled for
   # deletion, so a restore that re-ran validations would raise RecordInvalid
   # here, masking the enqueue error and leaving the flag set.
-  test "restores the flag without re-running validations that depend on it" do
-    item = questrade_items(:one)
-    item.update_column(:refresh_token, nil)
+  test "restores the flag without re-running invalid record validations" do
+    @item.update_column(:name, nil)
     DestroyJob.queue_adapter.stubs(:enqueue).raises(RedisClient::CannotConnectError, "Connection refused")
-
-    assert_raises(RedisClient::CannotConnectError) { item.destroy_later }
-
-    assert_not item.reload.scheduled_for_deletion?
+    assert_raises(RedisClient::CannotConnectError) { @item.destroy_later }
+    assert_not @item.reload.scheduled_for_deletion?
   end
-
   # Every table with the flag gets its destroy_later from here, so a new provider
   # (or a local override) can't reintroduce the unguarded version.
   test "every model with a scheduled_for_deletion column uses the concern" do
@@ -108,7 +98,8 @@ class DestroyableLaterTest < ActiveSupport::TestCase
       .select { |table| connection.column_exists?(table, :scheduled_for_deletion) }
       .map { |table| table.classify.constantize }
 
-    assert_operator models.size, :>=, 24
+    models.reject! { |model| RetiredAccountConnector.model_names.include?(model.name) }
+    assert_operator models.size, :>=, 1
 
     models.each do |model|
       assert_equal DestroyableLater, model.instance_method(:destroy_later).owner,

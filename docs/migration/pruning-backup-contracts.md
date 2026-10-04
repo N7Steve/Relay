@@ -94,3 +94,15 @@ OAuth/API siguen fuera del backup familiar; no se revocan ni borran por retirar
 MCP. Las filas cifradas external_assistant_* permanecen en la instancia sin un
 consumidor activo. La prueba de conversaciones recorre export → restore → export
 → restore con una familia externa y un modelo histórico OpenClaw.
+
+
+## Actualización de fase 7
+
+Los conectores retirados conservan sus 48 clases Item/Account como lectores de
+persistencia (cifrado, relaciones y originales), sin transportes, Syncable ni
+callbacks remotos. El contrato de snapshot mantiene esos nombres y payloads.
+Se mantienen también cálculos locales de historial IBKR y rentabilidad Indexa,
+metadatos de movimientos y traducciones consumidas por migraciones históricas.
+La recuperación no convierte cuentas enlazadas ni activa sus antiguos conectores.
+Los resultados de recuperación anterior → importación → exportación → importación
+se registran en [fase 7](pruning-phase-7.md).

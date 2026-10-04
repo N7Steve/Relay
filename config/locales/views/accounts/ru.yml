@@ -6,7 +6,6 @@ ru:
         success: Запись успешно удалена.
   accounts:
     account:
-      change_simplefin_account: Изменить счёт SimpleFIN
       complete_setup: Завершить настройку
       default_label: По умолчанию
       delete: Удалить счёт

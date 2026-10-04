@@ -440,8 +440,8 @@ class Provider::FamilyGenerator < Rails::Generators::NamedBase
 
     # Add to empty check - find the existing pattern and append our check
     content = content.gsub(
-      /@coinstats_items\.empty\? %>/,
-      "@coinstats_items.empty? && #{items_var}.empty? %>"
+      /@enable_banking_items\.empty\? %>/,
+      "@enable_banking_items.empty? && #{items_var}.empty? %>"
     )
 
     # Add provider section before manual_accounts
@@ -454,8 +454,8 @@ class Provider::FamilyGenerator < Rails::Generators::NamedBase
     ERB
 
     content = content.gsub(
-      /<% if @manual_accounts\.any\? %>/,
-      "#{section.strip}\n\n    <% if @manual_accounts.any? %>"
+      /<div id="manual-accounts">/,
+      "#{section.strip}\n\n    <div id=\"manual-accounts\">"
     )
 
     write_file(view_path, content)

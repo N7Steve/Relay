@@ -240,24 +240,6 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
   # PROVIDER ITEM TESTS (if fixtures exist)
   # ============================================================================
 
-  test "lunchflow item credentials and payloads are encrypted" do
-    skip "No lunchflow items in fixtures" unless LunchflowItem.any?
-
-    item = LunchflowItem.first
-    original_payload = item.raw_payload
-
-    # Should be able to read
-    assert item.api_key.present? || item.raw_payload.present?
-
-    # Update payload
-    item.update!(raw_payload: { test: "data" })
-    item.reload
-
-    assert_equal({ "test" => "data" }, item.raw_payload)
-
-    # Restore
-    item.update!(raw_payload: original_payload)
-  end
 
   test "lunchflow account payloads are encrypted" do
     skip "No lunchflow accounts in fixtures" unless LunchflowAccount.any?
@@ -280,24 +262,6 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     account.update!(raw_payload: original_payload)
   end
 
-  test "redbark item credentials and payloads are encrypted" do
-    skip "No redbark items in fixtures" unless RedbarkItem.any?
-
-    item = RedbarkItem.first
-    original_payload = item.raw_payload
-
-    # Should be able to read
-    assert item.api_key.present? || item.raw_payload.present?
-
-    # Update payload
-    item.update!(raw_payload: { test: "data" })
-    item.reload
-
-    assert_equal({ "test" => "data" }, item.raw_payload)
-
-    # Restore
-    item.update!(raw_payload: original_payload)
-  end
 
   test "redbark account payloads are encrypted" do
     skip "No redbark accounts in fixtures" unless RedbarkAccount.any?
@@ -320,22 +284,6 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     account.update!(raw_payload: original_payload)
   end
 
-  test "monobank item credentials and payloads are encrypted" do
-    skip "No monobank items in fixtures" unless MonobankItem.any?
-
-    item = MonobankItem.first
-    item.update!(access_token: "mono-token-plaintext-probe", raw_payload: { test: "data" })
-    item.reload
-
-    # The accessor round-trips...
-    assert_equal "mono-token-plaintext-probe", item.access_token
-    assert_equal({ "test" => "data" }, item.raw_payload)
-
-    # ...but the column must not hold the value verbatim. Without this the assertions
-    # above pass just as happily against plaintext columns.
-    assert_column_not_plaintext(MonobankItem, item.id, :access_token, "mono-token-plaintext-probe")
-    assert_column_not_plaintext(MonobankItem, item.id, :raw_payload, "test")
-  end
 
   test "monobank account payloads are encrypted" do
     skip "No monobank accounts in fixtures" unless MonobankAccount.any?

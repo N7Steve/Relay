@@ -70,12 +70,10 @@ gem "tzinfo-data", platforms: %i[mswin mswin64 mingw x64_mingw jruby]
 gem "csv"
 gem "rchardet" # Character encoding detection
 gem "redcarpet"
-gem "plaid"
 gem "httparty"
 gem "rotp", "~> 6.3"
 gem "rqrcode", "~> 3.0"
 gem "webauthn", "~> 3.4"
-gem "websocket-driver", "~> 0.8"
 gem "activerecord-import"
 gem "rubyzip", "~> 3.4"
 

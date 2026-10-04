@@ -80,9 +80,9 @@ class Rule::ConditionFilter::TransactionName < Rule::ConditionFilter
       ActiveRecord::Base.sanitize_sql_for_conditions([
         operator == "=" ? match : "NOT (#{match})",
         normalized_value,
-        PlaidEntry::Processor::SOURCE,
+        "plaid",
         normalized_value,
-        PlaidEntry::Processor::NAME_SEPARATOR
+        " - "
       ])
     end
 end

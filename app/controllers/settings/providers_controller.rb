@@ -16,66 +16,9 @@ class Settings::ProvidersController < ApplicationController
     @encryption_error = true
   end
 
+
   def update
-    # Build index of valid configurable fields with their metadata
-    Provider::Factory.ensure_adapters_loaded
-    valid_fields = {}
-    Provider::ConfigurationRegistry.all.each do |config|
-      config.fields.each do |field|
-        valid_fields[field.setting_key.to_s] = field
-      end
-    end
-
-    updated_fields = []
-
-    # Perform all updates within a transaction for consistency
-    Setting.transaction do
-      provider_params.each do |param_key, param_value|
-        # Only process keys that exist in the configuration registry
-        field = valid_fields[param_key.to_s]
-        next unless field
-
-        # Clean the value and convert blank/empty strings to nil
-        value = param_value.to_s.strip
-        value = nil if value.empty?
-
-        # For secret fields only, skip placeholder values to prevent accidental overwrite
-        if field.secret && value == "********"
-          next
-        end
-
-        key_str = field.setting_key.to_s
-
-        # Check if the setting is a declared field in setting.rb
-        # Use method_defined? to check if the setter actually exists on the singleton class,
-        # not just respond_to? which returns true for dynamic fields due to respond_to_missing?
-        if Setting.singleton_class.method_defined?("#{key_str}=")
-          # If it's a declared field, set it directly.
-          # This is safe and uses the proper setter.
-          Setting.public_send("#{key_str}=", value)
-        else
-          # If it's a dynamic field, set it as an individual entry
-          # Each field is stored independently, preventing race conditions
-          Setting[key_str] = value
-        end
-
-        updated_fields << param_key
-      end
-    end
-
-    if updated_fields.any?
-      # Reload provider configurations if needed
-      reload_provider_configs(updated_fields)
-
-      redirect_to settings_providers_path, notice: t(".updated_successfully")
-    else
-      redirect_to settings_providers_path, notice: t(".no_changes")
-    end
-  rescue => error
-    Rails.logger.error("Failed to update provider settings: #{error.class} - #{error.message}")
-    flash.now[:alert] = "Failed to update provider settings. Please try again."
-    prepare_show_context
-    render :show, status: :unprocessable_entity
+    redirect_to settings_providers_path, notice: t(".no_changes")
   end
 
   def sync_all
@@ -122,33 +65,12 @@ class Settings::ProvidersController < ApplicationController
       return render :connect_form
     end
 
-    Provider::Factory.ensure_adapters_loaded
-    config = Provider::ConfigurationRegistry.all.find { |c| c.provider_key.to_s == provider_key }
-    if config
-      @panel_title           = Provider::Metadata.for(provider_key)[:name] || provider_key.titleize
-      @provider_configuration = config
-      return render :connect_form
-    end
-
     redirect_to settings_providers_path, alert: t("settings.providers.not_found")
   rescue ActiveRecord::Encryption::Errors::Configuration
     redirect_to settings_providers_path, alert: t("settings.providers.encryption_error.title")
   end
 
   private
-    def provider_params
-      # Dynamically permit all provider configuration fields
-      Provider::Factory.ensure_adapters_loaded
-      permitted_fields = []
-
-      Provider::ConfigurationRegistry.all.each do |config|
-        config.fields.each do |field|
-          permitted_fields << field.setting_key
-        end
-      end
-
-      params.require(:setting).permit(*permitted_fields)
-    end
 
     def ensure_admin
       return if Current.user.admin?
@@ -160,59 +82,9 @@ class Settings::ProvidersController < ApplicationController
       @provider_setup_encryption_warning = !ActiveRecordEncryptionConfig.explicitly_configured?
     end
 
-    # Reload provider configurations after settings update
-    def reload_provider_configs(updated_fields)
-      # Build a set of provider keys that had fields updated
-      updated_provider_keys = Set.new
-
-      # Look up the provider key directly from the configuration registry
-      updated_fields.each do |field_key|
-        Provider::ConfigurationRegistry.all.each do |config|
-          field = config.fields.find { |f| f.setting_key.to_s == field_key.to_s }
-          if field
-            updated_provider_keys.add(field.provider_key)
-            break
-          end
-        end
-      end
-
-      # Reload configuration for each updated provider
-      updated_provider_keys.each do |provider_key|
-        adapter_class = Provider::ConfigurationRegistry.get_adapter_class(provider_key)
-        adapter_class&.reload_configuration
-      end
-    end
-
-    # Hardcoded family-scoped panels — provider connections are managed through
-    # their own models (SimplefinItem, LunchflowItem, etc.) rather than global
-    # settings, so they need custom UI per-provider for connection management,
-    # status display, and sync actions. The configuration registry excludes
-    # them (see prepare_show_context).
+    # Retained family-scoped connection management.
     FAMILY_PANELS = [
-      { key: "akahu",          title: "Akahu",           turbo_id: "akahu",          partial: "akahu_panel" },
-      { key: "up",             title: "Up",              turbo_id: "up",             partial: "up_panel" },
-      { key: "monobank",       title: "Monobank",        turbo_id: "monobank",       partial: "monobank_panel" },
-      { key: "fio",            title: "Fio banka",       turbo_id: "fio",            partial: "fio_panel" },
-      { key: "lunchflow",      title: "Lunch Flow",      turbo_id: "lunchflow",      partial: "lunchflow_panel" },
-      { key: "redbark",        title: "Redbark",         turbo_id: "redbark",        partial: "redbark_panel" },
-      { key: "simplefin",      title: "SimpleFIN",       turbo_id: "simplefin",      partial: "simplefin_panel" },
-      { key: "enable_banking", title: "Enable Banking",  turbo_id: "enable_banking", partial: "enable_banking_panel" },
-      { key: "coinstats",      title: "CoinStats",       turbo_id: "coinstats",      partial: "coinstats_panel" },
-      { key: "wise",           title: "Wise",            turbo_id: "wise",           partial: "wise_panel" },
-      { key: "mercury",        title: "Mercury",         turbo_id: "mercury",        partial: "mercury_panel" },
-      { key: "brex",           title: "Brex",            turbo_id: "brex",           partial: "brex_panel" },
-      { key: "coinbase",       title: "Coinbase",        turbo_id: "coinbase",       partial: "coinbase_panel" },
-      { key: "binance",        title: "Binance",         turbo_id: "binance",        partial: "binance_panel" },
-      { key: "kraken",         title: "Kraken",          turbo_id: "kraken",         partial: "kraken_panel" },
-      { key: "coinspot",       title: "CoinSpot",        turbo_id: "coinspot",       partial: "coinspot_panel" },
-      { key: "onchain_wallet", title: "On-chain wallets", turbo_id: "onchain_wallet", partial: "onchain_wallet_panel" },
-      { key: "snaptrade",      title: "SnapTrade",       turbo_id: "snaptrade",      partial: "snaptrade_panel", auto_open: "manage" },
-      { key: "ibkr",           title: "Interactive Brokers", turbo_id: "ibkr",      partial: "ibkr_panel" },
-      { key: "trading212",     title: "Trading 212",     turbo_id: "trading212", partial: "trading212_panel" },
-      { key: "trade_republic", title: "Trade Republic",  turbo_id: "trade-republic", partial: "trade_republic_panel" },
-      { key: "indexa_capital", title: "Indexa Capital",  turbo_id: "indexa_capital", partial: "indexa_capital_panel" },
-      { key: "sophtron",       title: "Sophtron",        turbo_id: "sophtron",       partial: "sophtron_panel" },
-      { key: "questrade",      title: "Questrade",       turbo_id: "questrade",      partial: "questrade_panel" }
+      { key: "enable_banking", title: "Enable Banking",  turbo_id: "enable_banking", partial: "enable_banking_panel" }
     ].freeze
 
     FAMILY_PANEL_KEYS = FAMILY_PANELS.map { |p| p[:key] }.freeze
@@ -220,119 +92,16 @@ class Settings::ProvidersController < ApplicationController
 
     # Maps panel key → ActiveRecord model name for sync health queries
     PANEL_SYNCABLE_TYPES = {
-      "akahu"          => "AkahuItem",
-      "up"             => "UpItem",
-      "monobank"       => "MonobankItem",
-      "fio"            => "FioItem",
-      "simplefin"      => "SimplefinItem",
-      "lunchflow"      => "LunchflowItem",
-      "redbark"        => "RedbarkItem",
-      "enable_banking" => "EnableBankingItem",
-      "coinstats"      => "CoinstatsItem",
-      "wise"           => "WiseItem",
-      "mercury"        => "MercuryItem",
-      "brex"           => "BrexItem",
-      "coinbase"       => "CoinbaseItem",
-      "binance"        => "BinanceItem",
-      "kraken"         => "KrakenItem",
-      "coinspot"       => "CoinspotItem",
-      "onchain_wallet" => "OnchainWalletItem",
-      "snaptrade"      => "SnaptradeItem",
-      "questrade"      => "QuestradeItem",
-      "ibkr"           => "IbkrItem",
-      "trading212"     => "Trading212Item",
-      "trade_republic" => "TradeRepublicItem",
-      "indexa_capital" => "IndexaCapitalItem",
-      "sophtron"       => "SophtronItem"
+      "enable_banking" => "EnableBankingItem"
     }.freeze
 
     def load_provider_items(provider_key)
-      case provider_key
-      when "akahu"
-        @akahu_items = Current.family.akahu_items.active.ordered
-      when "up"
-        @up_items = Current.family.up_items.active.ordered
-      when "monobank"
-        @monobank_items = Current.family.monobank_items.active.ordered
-      when "fio"
-        @fio_items = Current.family.fio_items.active.ordered
-      when "simplefin"
-        @simplefin_items = Current.family.simplefin_items.ordered
-      when "lunchflow"
-        @lunchflow_items = Current.family.lunchflow_items.ordered
-      when "redbark"
-        @redbark_items = Current.family.redbark_items.ordered
-      when "enable_banking"
-        @enable_banking_items = Current.family.enable_banking_items.ordered
-      when "coinstats"
-        @coinstats_items = Current.family.coinstats_items.ordered
-      when "wise"
-        @wise_items = Current.family.wise_items.active.ordered.includes(:syncs, :wise_accounts)
-      when "mercury"
-        @mercury_items = Current.family.mercury_items.active.ordered.includes(:syncs, :mercury_accounts)
-      when "brex"
-        @brex_items = Current.family.brex_items.active.ordered.includes(:syncs, :brex_accounts)
-      when "coinbase"
-        @coinbase_items = Current.family.coinbase_items.ordered
-      when "binance"
-        @binance_items = Current.family.binance_items.active.ordered
-      when "kraken"
-        @kraken_items = Current.family.kraken_items.active.ordered
-      when "coinspot"
-        @coinspot_items = Current.family.coinspot_items.active.ordered
-      when "onchain_wallet"
-        @onchain_wallet_items = Current.family.onchain_wallet_items.active.ordered
-      when "snaptrade"
-        @snaptrade_items = Current.family.snaptrade_items.includes(:snaptrade_accounts).ordered
-      when "ibkr"
-        @ibkr_items = Current.family.ibkr_items.ordered
-      when "trading212"
-        @trading212_items = Current.family.trading212_items.ordered
-      when "trade_republic"
-        @trade_republic_items = Current.family.trade_republic_items.active.ordered.includes(:trade_republic_accounts)
-      when "indexa_capital"
-        @indexa_capital_items = Current.family.indexa_capital_items.ordered
-      when "sophtron"
-        @sophtron_items = Current.family.sophtron_items.ordered
-      when "questrade"
-        @questrade_items = Current.family.questrade_items.active.ordered
-      end
+      @enable_banking_items = Current.family.enable_banking_items.ordered if provider_key == "enable_banking"
     end
 
     # Prepares instance vars needed by the show view and partials
     def prepare_show_context
-      # Load all provider configurations (exclude family-scoped panels, which have their own UI below)
-      Provider::Factory.ensure_adapters_loaded
-      @provider_configurations = Provider::ConfigurationRegistry.all.reject do |config|
-        FAMILY_PANEL_KEYS.any? { |key| config.provider_key.to_s.casecmp(key).zero? }
-      end
-
-      @akahu_items = Current.family.akahu_items.active.ordered
-      @up_items = Current.family.up_items.active.ordered
-      @monobank_items = Current.family.monobank_items.active.ordered
-      # Providers page only needs to know whether any SimpleFin/Lunchflow connections exist with valid credentials
-      @simplefin_items = Current.family.simplefin_items.where.not(access_url: [ nil, "" ]).ordered.select(:id)
-      @lunchflow_items = Current.family.lunchflow_items.where.not(api_key: [ nil, "" ]).ordered.select(:id)
-      @redbark_items = Current.family.redbark_items.where.not(api_key: [ nil, "" ]).ordered.select(:id)
       @enable_banking_items = Current.family.enable_banking_items.ordered # Enable Banking panel needs session info for status display
-      # Providers page only needs to know whether any Sophtron connections exist with valid credentials
-      @sophtron_items = Current.family.sophtron_items.where.not(user_id: [ nil, "" ], access_key: [ nil, "" ]).ordered.select(:id)
-      @coinstats_items = Current.family.coinstats_items.ordered # CoinStats panel needs account info for status display
-      @wise_items = Current.family.wise_items.active.ordered
-      @mercury_items = Current.family.mercury_items.active.ordered
-      @brex_items = Current.family.brex_items.active.ordered
-      @coinbase_items = Current.family.coinbase_items.ordered # Coinbase panel needs name and sync info for status display
-      @snaptrade_items = Current.family.snaptrade_items.ordered
-      @ibkr_items = Current.family.ibkr_items.ordered.select(:id)
-      @trading212_items = Current.family.trading212_items.ordered
-      @trade_republic_items = Current.family.trade_republic_items.active.ordered.includes(:trade_republic_accounts)
-      @indexa_capital_items = Current.family.indexa_capital_items.ordered.select(:id)
-      @binance_items = Current.family.binance_items.active.ordered
-      @kraken_items = Current.family.kraken_items.active.ordered
-      @coinspot_items = Current.family.coinspot_items.active.ordered
-      @onchain_wallet_items = Current.family.onchain_wallet_items.active.ordered
-      @questrade_items = Current.family.questrade_items.active.ordered.select(:id)
-      @fio_items = Current.family.fio_items.active.ordered
 
       # Wallet uploads are managed on iOS. Only expose linked accounts the
       # current admin can access, including connections that need repair.
@@ -360,30 +129,7 @@ class Settings::ProvidersController < ApplicationController
     # on instance_variable_get for control flow.
     def family_panel_items
       {
-        "akahu"          => @akahu_items,
-        "up"             => @up_items,
-        "monobank"       => @monobank_items,
-        "fio"            => @fio_items,
-        "simplefin"      => @simplefin_items,
-        "lunchflow"      => @lunchflow_items,
-        "redbark"        => @redbark_items,
-        "enable_banking" => @enable_banking_items,
-        "coinstats"      => @coinstats_items,
-        "wise"           => @wise_items,
-        "mercury"        => @mercury_items,
-        "brex"           => @brex_items,
-        "coinbase"       => @coinbase_items,
-        "binance"        => @binance_items,
-        "kraken"         => @kraken_items,
-        "coinspot"       => @coinspot_items,
-        "onchain_wallet" => @onchain_wallet_items,
-        "snaptrade"      => @snaptrade_items,
-        "questrade"      => @questrade_items,
-        "ibkr"           => @ibkr_items,
-        "trading212"     => @trading212_items,
-        "trade_republic" => @trade_republic_items,
-        "indexa_capital" => @indexa_capital_items,
-        "sophtron"       => @sophtron_items
+        "enable_banking" => @enable_banking_items
       }
     end
 
@@ -418,22 +164,8 @@ class Settings::ProvidersController < ApplicationController
       { error: has_error, last_synced_at: last_synced, stale: stale }
     end
 
-    # Builds a unified list of provider entries (registry-driven configurations
-    # and hardcoded family panels) with pre-computed status, sorted
-    # alphabetically by display title. Each entry carries enough data for the
-    # view to render either a provider_form or a family panel partial.
+    # Builds retained connection summaries for the settings page.
     def build_provider_entries
-      configuration_entries = @provider_configurations.map do |config|
-        meta = Provider::Metadata.for(config.provider_key)
-        {
-          provider_key: config.provider_key.to_s,
-          title: meta[:name] || config.provider_key.to_s.titleize,
-          configuration: config,
-          maturity: meta[:maturity],
-          summary: view_context.provider_summary(config.provider_key)
-        }
-      end
-
       family_entries = FAMILY_PANELS.map do |panel|
         {
           provider_key: panel[:key],
@@ -457,6 +189,6 @@ class Settings::ProvidersController < ApplicationController
         summary: view_context.financekit_provider_summary(@financekit_connections)
       }
 
-      (configuration_entries + family_entries + [ wallet_entry ]).sort_by { |entry| entry[:title].downcase }
+      (family_entries + [ wallet_entry ]).sort_by { |entry| entry[:title].downcase }
     end
 end

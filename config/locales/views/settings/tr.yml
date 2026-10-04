@@ -541,42 +541,8 @@ tr:
       sync_provider_in_progress: Senkronizasyon başladı.
       sync_provider_no_items: Senkronize edilecek bağlantı yok.
       taglines:
-        akahu: Akahu üzerinden Yeni Zelanda finans kurumlarını senkronize edin.
-        binance: Salt okunur bir API anahtarı kullanarak Binance spot bakiyelerinizi
-          senkronize edin.
-        brex: Salt okunur erişimle Brex nakit ve kurumsal kart hareketlerinizi senkronize
-          edin.
-        coinbase: Coinbase kripto varlıklarınızı içe aktarın ve performansı takip
-          edin.
-        coinstats: Tüm kripto portföyünüzü cüzdanlar ve borsalar genelinde takip edin.
         enable_banking: PSD2 açık bankacılığı üzerinden Avrupa banka hesaplarınızı
           senkronize edin.
-        ibkr: Flex Query içe aktarmaları yoluyla Interactive Brokers yatırım hesaplarınızı
-          senkronize edin.
-        indexa_capital: Indexa Capital otomatik yatırım portföyünüzü takip edin.
-        kraken: Salt okunur bir API anahtarı kullanarak Kraken bakiyelerinizi ve spot
-          işlem gerçekleşmelerinizi senkronize edin.
-        lunchflow: 40'tan fazla ülkeden 20 bin+ bankayı bağlayın (İngiltere, AB, ABD
-          ve daha fazlası!)
-        mercury: Mercury işletme bankacılığı hesaplarınızı otomatik olarak senkronize
-          edin.
-        plaid: Plaid üzerinden binlerce ABD finans kurumunu bağlayın.
-        plaid_eu: Plaid üzerinden (PSD2 / Açık Bankacılık) Avrupa finans kurumlarını
-          bağlayın.
-        questrade: Questrade API'si aracılığıyla Questrade yatırım hesaplarınızı doğrudan
-          senkronize edin.
-        simplefin: Açık SimpleFIN protokolü üzerinden ABD banka hesaplarını bağlayın.
-        snaptrade: SnapTrade birleştirme ağı üzerinden aracı kurum hesaplarını bağlayın.
-        sophtron: ABD ve Kanada bankalarını ve kurumlarını bağlayın.
-        wise: Wise çoklu para birimi bakiyelerinizi ve uluslararası transferlerinizi
-          otomatik olarak senkronize edin.
-        redbark: Avustralya banka hesaplarını Redbark açık bankacılık ile senkronize edin.
-        monobank: Ukrayna Monobank kartlarını ve kumbaralarını kişisel bir API token ile senkronize edin.
-        fio: Bir Fio banka hesabını salt okunur bir API token ile senkronize edin.
-        coinspot: CoinSpot bakiyelerini, AUD değerlerini, transferleri, para yatırma, para çekme ve emir geçmişini salt okunur bir API anahtarıyla senkronize edin.
-        onchain_wallet: Gözetimsiz Bitcoin, EVM ve Solana cüzdanlarını herkese açık adresleri üzerinden takip edin.
-        trading212: Trading 212 yatırım portföyünüzü salt okunur bir API anahtarıyla senkronize edin.
-        trade_republic: Trade Republic yatırım hesabınızı güvenli, salt okunur web girişiyle senkronize edin.
       up_panel:
         step_1_html: "%{link} adresine gidin ve kişisel bir erişim token'ı oluşturun."
         step_2: Kişisel erişim token'ınızı kopyalayın.

@@ -10,15 +10,11 @@ ru:
     appearance: Внешний вид
     appearances: Внешний вид
     bank_sync: Синхронизация с банком
-    binance_items: Binance
-    brex_items: Brex
     budget_categories: Категории бюджета
     budgets: Бюджеты
     categories: Категории
     categorize: Категоризация
     chats: Чаты
-    coinbase_items: Coinbase
-    coinstats_items: CoinStats
     credit_cards: Кредитные карты
     cryptos: Криптовалюта
     dashboard: Панель управления
@@ -33,21 +29,16 @@ ru:
     holdings: Активы
     home: Главная
     hostings: Самостоятельный хостинг
-    ibkr_items: Interactive Brokers
     impersonation_sessions: Сеансы имитации
     imports: Импорт
-    indexa_capital_items: Indexa Capital
     intro: Введение
     investments: Инвестиции
     invitations: Приглашения
     invite_codes: Коды приглашений
-    kraken_items: Kraken
     llm_usage: Использование LLM
     llm_usages: Использование LLM
     loans: Кредиты
-    lunchflow_items: Lunch Flow
     merchants: Продавцы
-    mercury_items: Mercury
     messages: Сообщения
     mfa: Двухфакторная аутентификация
     oidc_accounts: Учетные записи SSO
@@ -56,7 +47,6 @@ ru:
     other_liabilities: Прочие обязательства
     payments: Оплата
     pending_duplicate_merges: Обзор дубликатов
-    plaid_items: Plaid
     preferences: Предпочтения
     profile: Информация профиля
     profiles: Информация профиля
@@ -70,9 +60,6 @@ ru:
     security: Безопасность
     self_hosting: Самостоятельный хостинг
     sessions: Вход
-    simplefin_items: SimpleFIN
-    snaptrade_items: SnapTrade
-    sophtron_items: Sophtron
     splits: Разделение
     sso_identities: Подключения SSO
     sso_providers: Провайдеры SSO
@@ -87,7 +74,5 @@ ru:
     vehicles: Транспортные средства
     changelog: Что нового
     feedback: Обратная связь
-    monobank_items: Monobank
     plan: Планирование
-    redbark_items: Redbark
     system_health: Состояние системы

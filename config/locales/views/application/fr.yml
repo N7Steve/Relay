@@ -4,15 +4,6 @@ fr:
     uploads:
       handle_qif_upload:
         qif_uploaded: Aucun
-  lunchflow_items:
-    link_accounts:
-      no_api_key: Aucun
-    link_existing_account:
-      no_api_key: Aucun
-    select_accounts:
-      no_credentials_configured: Aucun
-    select_existing_account:
-      no_credentials_configured: Aucun
   number:
     currency:
       format:
@@ -239,35 +230,8 @@ fr:
       sync_provider_in_progress: La synchronisation a commencé.
       sync_provider_no_items: Aucune connexion disponible pour synchroniser.
       taglines:
-        binance: Synchronisez vos soldes spot Binance à l'aide d'une clé API en lecture
-          seule.
-        brex: Synchronisez l'activité des espèces Brex et des cartes d'entreprise
-          avec un accès en lecture seule.
-        coinbase: Importez vos holdings cryptographiques Coinbase et suivez les performances.
-        coinstats: Suivez l’intégralité de votre portefeuille de crypto-monnaies sur
-          les portefeuilles et les échanges.
         enable_banking: Synchronisez les comptes bancaires européens via l'open banking
           PSD2.
-        ibkr: Synchronisez les comptes d'investissement Interactive Brokers via les
-          importations Flex Query.
-        indexa_capital: Suivez votre portefeuille d'investissement automatisé Indexa
-          Capital.
-        kraken: Synchronisez les soldes Kraken et les transactions au comptant à l'aide
-          d'une clé API en lecture seule.
-        lunchflow: Connectez plus de 20 000 banques dans plus de 40 pays (Royaume-Uni,
-          UE, États-Unis et plus !)
-        mercury: Synchronisez automatiquement vos comptes bancaires professionnels
-          Mercury.
-        plaid: Connectez des milliers d'institutions financières américaines via Plaid.
-        plaid_eu: Connectez les institutions financières européennes via Plaid (PSD2
-          / Open Banking).
-        simplefin: Connectez les comptes bancaires américains via le protocole ouvert
-          SimpleFIN.
-        snaptrade: Connectez les comptes de courtage via le réseau d'agrégation SnapTrade.
-        sophtron: Connectez les banques et les services publics américains et canadiens.
-  simplefin_items:
-    select_existing_account:
-      check_provider_health: Aucun
   valuations:
     new:
       amount: Aucun

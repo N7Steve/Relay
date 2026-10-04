@@ -5,7 +5,6 @@ pl:
         success: Wpis został usunięty.
   accounts:
     account:
-      change_simplefin_account: Zmień konto SimpleFIN
       complete_setup: Dokończ konfigurację
       default_label: Domyślne
       delete: Usuń konto

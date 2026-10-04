@@ -88,82 +88,9 @@ module SettingsHelper
     key = provider_key.to_s.downcase
 
     case key
-    when "plaid", "plaid_eu"
-      configured = @provider_configurations&.find { |c| c.provider_key.to_s.casecmp(key).zero? }&.configured?
-      configured ? { status: :ok } : { status: :off }
-    when "akahu"
-      return { status: :off } unless @akahu_items&.any?
-      sync_based_summary(key)
-    when "up"
-      return { status: :off } unless @up_items&.any?
-      sync_based_summary(key)
-    when "monobank"
-      return { status: :off } unless @monobank_items&.any?
-      sync_based_summary(key)
-    when "fio"
-      return { status: :off } unless @fio_items&.any?
-      sync_based_summary(key)
-    when "simplefin"
-      return { status: :off } unless @simplefin_items&.any?
-      sync_based_summary(key)
-    when "lunchflow"
-      return { status: :off } unless @lunchflow_items&.any?
-      sync_based_summary(key)
     when "enable_banking"
       return { status: :off } unless @enable_banking_items&.any?
       enable_banking_summary
-    when "coinstats"
-      return { status: :off } unless @coinstats_items&.any?
-      sync_based_summary(key)
-    when "wise"
-      return { status: :off } unless @wise_items&.any?
-      sync_based_summary(key)
-    when "mercury"
-      return { status: :off } unless @mercury_items&.any?
-      sync_based_summary(key)
-    when "redbark"
-      return { status: :off } unless @redbark_items&.any?
-      sync_based_summary(key)
-    when "brex"
-      return { status: :off } unless @brex_items&.any?
-      sync_based_summary(key)
-    when "coinbase"
-      return { status: :off } unless @coinbase_items&.any?
-      sync_based_summary(key)
-    when "binance"
-      return { status: :off } unless @binance_items&.any?
-      sync_based_summary(key)
-    when "kraken"
-      return { status: :off } unless @kraken_items&.any?
-      sync_based_summary(key)
-    when "coinspot"
-      return { status: :off } unless @coinspot_items&.any?
-      sync_based_summary(key)
-    when "onchain_wallet"
-      return { status: :off } unless @onchain_wallet_items&.any?
-      sync_based_summary(key)
-    when "trading212"
-      return { status: :off } unless @trading212_items&.any?
-      sync_based_summary(key)
-    when "snaptrade"
-      configured_item = @snaptrade_items&.find(&:oauth_configured?)
-      return { status: :off } unless configured_item
-      sync_based_summary(key)
-    when "ibkr"
-      return { status: :off } unless @ibkr_items&.any?
-      sync_based_summary(key)
-    when "trade_republic"
-      return { status: :off } unless @trade_republic_items&.any?
-      sync_based_summary(key)
-    when "indexa_capital"
-      return { status: :off } unless @indexa_capital_items&.any?
-      sync_based_summary(key)
-    when "sophtron"
-      return { status: :off } unless @sophtron_items&.any?
-      sync_based_summary(key)
-    when "questrade"
-      return { status: :off } unless @questrade_items&.any?
-      sync_based_summary(key)
     else
       { status: :off }
     end

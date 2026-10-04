@@ -629,43 +629,8 @@ pl:
       sync_provider_in_progress: Synchronizacja rozpoczęta.
       sync_provider_no_items: Brak połączeń do synchronizacji.
       taglines:
-        akahu: Synchronizuj nowozelandzkie instytucje finansowe przez Akahu.
-        binance: Synchronizuj swoje salda spot z Binance za pomocą klucza API tylko
-          do odczytu.
-        brex: Synchronizuj środki i aktywność kart firmowych Brex z dostępem tylko
-          do odczytu.
-        coinbase: Zaimportuj swoje aktywa krypto z Coinbase i śledź wyniki.
-        coinstats: Śledź cały swój portfel krypto w portfelach i na giełdach.
         enable_banking: Synchronizuj europejskie konta bankowe przez otwartą bankowość
           PSD2.
-        ibkr: Synchronizuj konta inwestycyjne Interactive Brokers przez import Flex
-          Query.
-        indexa_capital: Śledź swój zautomatyzowany portfel inwestycyjny Indexa Capital.
-        kraken: Synchronizuj salda i zrealizowane transakcje spot z Kraken za pomocą
-          klucza API tylko do odczytu.
-        lunchflow: Połącz ponad 20 tys. banków z ponad 40 krajów (Wielka Brytania,
-          UE, USA i więcej!)
-        mercury: Synchronizuj automatycznie swoje firmowe konta bankowe Mercury.
-        monobank: Synchronizuj ukraińskie karty i skarbonki Monobank za pomocą osobistego
-          tokenu API.
-        onchain_wallet: Śledź portfele Bitcoin, EVM i Solana z samodzielną kontrolą
-          kluczy na podstawie ich publicznych adresów.
-        plaid: Połącz tysiące amerykańskich instytucji finansowych przez Plaid.
-        plaid_eu: Połącz europejskie instytucje finansowe przez Plaid (PSD2 / otwarta
-          bankowość).
-        questrade: Synchronizuj swoje konta inwestycyjne Questrade bezpośrednio przez
-          API Questrade.
-        redbark: Synchronizuj australijskie konta bankowe przez otwartą bankowość
-          Redbark.
-        simplefin: Połącz amerykańskie konta bankowe przez otwarty protokół SimpleFIN.
-        snaptrade: Połącz konta maklerskie przez sieć agregacji SnapTrade.
-        sophtron: Połącz amerykańskie i kanadyjskie banki oraz dostawców usług.
-        trade_republic: Synchronizuj swoje konto inwestycyjne Trade Republic przez
-          bezpieczne logowanie internetowe tylko do odczytu.
-        trading212: Synchronizuj swój portfel inwestycyjny Trading 212 za pomocą klucza
-          API tylko do odczytu.
-        wise: Synchronizuj automatycznie swoje wielowalutowe salda i przelewy międzynarodowe
-          Wise.
       trade_republic_panel:
         accounts_discovered:
           few: Wykryto %{count} konta Trade Republic.

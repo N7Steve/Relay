@@ -1,20 +1,19 @@
 class Provider::Factory
   class AdapterNotFoundError < StandardError; end
-
   class << self
     # Register a provider adapter
-    # @param provider_type [String] The provider account class name (e.g., "PlaidAccount")
-    # @param adapter_class [Class] The adapter class (e.g., Provider::PlaidAdapter)
+    # @param provider_type [String] The provider account class name (e.g., "EnableBankingAccount")
+    # @param adapter_class [Class] The adapter class (e.g., Provider::EnableBankingAdapter)
     def register(provider_type, adapter_class)
       registry[provider_type] = adapter_class
     end
 
     # Creates an adapter for a given provider account
-    # @param provider_account [PlaidAccount, SimplefinAccount] The provider-specific account
+    # @param provider_account [ApplicationRecord] The provider-specific account
     # @param account [Account] Optional account reference
     # @return [Provider::Base] An adapter instance
     def create_adapter(provider_account, account: nil)
-      return nil if provider_account.nil?
+      return nil if provider_account.nil? || RetiredAccountConnector.model_names.include?(provider_account.class.name)
 
       provider_type = provider_account.class.name
       adapter_class = find_adapter_class(provider_type)
@@ -121,7 +120,7 @@ class Provider::Factory
       end
 
       # Discover all adapter files in the provider directory
-      # Returns adapter class names (e.g., ["PlaidAdapter", "SimplefinAdapter"])
+      # Returns adapter class names (e.g., ["EnableBankingAdapter", "FinancekitAdapter"])
       def adapter_files
         return [] unless defined?(Rails)
 

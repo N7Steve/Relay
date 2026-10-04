@@ -381,12 +381,6 @@ class GoalTest < ActiveSupport::TestCase
     assert_equal :reached, @goal.display_status
   end
 
-  test "any_connected_account? reflects plaid_account presence" do
-    assert @goal.any_connected_account?
-    only_manual = goals(:emergency_fund)
-    only_manual.goal_accounts.where(account_id: @connected.id).destroy_all
-    assert_not only_manual.reload.any_connected_account?
-  end
 
   test "pledge_action_label_key flips on manual-only goals" do
     assert_equal "goals.show.pledge_just_transferred", @goal.pledge_action_label_key

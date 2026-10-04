@@ -514,43 +514,8 @@ ca:
       sync_provider_in_progress: Sincronització iniciada.
       sync_provider_no_items: No hi ha connexions disponibles per sincronitzar.
       taglines:
-        binance: Sincronitza els teus saldos spot de Binance utilitzant una clau API
-          de només lectura.
-        brex: Sincronitza l'activitat d'efectiu i targeta corporativa de Brex amb
-          accés de només lectura.
-        coinbase: Importa les teves posicions cripto de Coinbase i fes el seguiment
-          del rendiment.
-        coinstats: Fes el seguiment de tota la teva cartera cripto a través de carteres
-          i exchanges.
         enable_banking: Sincronitza comptes bancaris europeus mitjançant l'open banking
           PSD2.
-        ibkr: Sincronitza comptes d'inversió d'Interactive Brokers mitjançant importacions
-          Flex Query.
-        indexa_capital: Fes el seguiment de la teva cartera d'inversió automatitzada
-          d'Indexa Capital.
-        kraken: Sincronitza saldos i operacions spot de Kraken utilitzant una clau
-          API de només lectura.
-        lunchflow: Connecta més de 20.000 bancs de més de 40 països (Regne Unit, UE,
-          EUA i més!).
-        mercury: Sincronitza automàticament els teus comptes bancaris empresarials
-          de Mercury.
-        plaid: Connecta milers d'entitats financeres dels EUA mitjançant Plaid.
-        plaid_eu: Connecta entitats financeres europees mitjançant Plaid (PSD2
-          / Open Banking).
-        simplefin: Connecta comptes bancaris dels EUA mitjançant el protocol obert
-          SimpleFIN.
-        snaptrade: Connecta comptes d'inversió mitjançant la xarxa d'agregació SnapTrade.
-        sophtron: Connecta bancs i serveis dels EUA i Canadà.
-        akahu: Sincronitza entitats financeres de Nova Zelanda mitjançant Akahu.
-        redbark: Sincronitza comptes bancaris australians mitjançant l'open banking de Redbark.
-        monobank: Sincronitza targetes i guardioles (jars) de Monobank amb un token API personal.
-        fio: Sincronitza un compte de Fio banka amb un token API de només lectura.
-        wise: Sincronitza automàticament els teus saldos multidivisa i les transferències internacionals de Wise.
-        coinspot: Sincronitza saldos, valors en AUD, transferències, dipòsits, retirades i historial d'ordres de CoinSpot amb una clau API de només lectura.
-        onchain_wallet: Fes el seguiment de carteres Bitcoin, EVM i Solana d'autocustòdia a partir de les seves adreces públiques.
-        trading212: Sincronitza la teva cartera d'inversió de Trading 212 amb una clau API de només lectura.
-        trade_republic: Sincronitza el teu compte d'inversió de Trade Republic mitjançant un inici de sessió web segur de només lectura.
-        questrade: Sincronitza els teus comptes d'inversió de Questrade directament a través de l'API de Questrade.
       update:
         no_changes: No s'ha fet cap canvi
         updated_successfully: Configuració del proveïdor actualitzada correctament

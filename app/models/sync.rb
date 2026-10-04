@@ -184,6 +184,12 @@ class Sync < ApplicationRecord
         return
       end
 
+      if RetiredAccountConnector.syncable_type?(syncable_type)
+        update!(error: "Account connector retired")
+        request_cancel!
+        return
+      end
+
       # Guard: syncable may have been deleted while job was queued
       unless syncable.present?
         Rails.logger.warn("Sync #{id} - syncable #{syncable_type}##{syncable_id} no longer exists. Marking as failed.")
@@ -345,6 +351,8 @@ class Sync < ApplicationRecord
     end
 
     def perform_post_sync
+      return if RetiredAccountConnector.syncable_type?(syncable_type)
+
       Rails.logger.info("Performing post-sync for #{syncable_type} (#{syncable.id})")
       syncable.perform_post_sync
       syncable.broadcast_sync_complete
@@ -367,7 +375,7 @@ class Sync < ApplicationRecord
     end
 
     def handle_start_transition
-      report_warnings
+      report_warnings unless RetiredAccountConnector.syncable_type?(syncable_type)
     end
 
     def handle_transition

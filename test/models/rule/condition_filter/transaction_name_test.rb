@@ -133,7 +133,7 @@ class Rule::ConditionFilter::TransactionNameTest < ActiveSupport::TestCase
       entry = create_transaction(
         account: @account,
         name: name,
-        source: PlaidEntry::Processor::SOURCE,
+        source: "plaid",
         external_id: "ext-#{name.parameterize}"
       )
 

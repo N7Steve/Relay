@@ -28,7 +28,7 @@ class Account::SyncerTest < ActiveSupport::TestCase
       ibkr_account_id: "U1234567",
       currency: "CHF"
     )
-    ibkr_account.ensure_account_provider!(account)
+    AccountProvider.create!(account: account, provider: ibkr_account)
 
     Account::MarketDataImporter.any_instance.expects(:import_all).never
     Balance::Materializer.any_instance.expects(:materialize_balances).once

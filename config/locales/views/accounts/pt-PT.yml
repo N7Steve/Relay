@@ -12,7 +12,6 @@ pt-PT:
       link_lunchflow: Ligar com Lunch Flow
       link_provider: Ligar serviço externo
       unlink_provider: Desligar serviço externo
-      change_simplefin_account: Alterar conta SimpleFIN
       troubleshoot: Resolver problemas
       enable: Ativar conta
       disable: Desativar conta

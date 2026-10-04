@@ -35,7 +35,7 @@ class SyncsControllerTest < ActionDispatch::IntegrationTest
 
   test "non-admin member cannot cancel a provider item sync" do
     sign_in users(:family_member)
-    provider_sync = Sync.create!(syncable: plaid_items(:one), status: :syncing)
+    provider_sync = Sync.create!(syncable: enable_banking_items(:one), status: :syncing)
 
     post cancel_sync_path(provider_sync)
 
@@ -44,7 +44,7 @@ class SyncsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "admin can cancel a provider item sync" do
-    provider_sync = Sync.create!(syncable: plaid_items(:one), status: :syncing)
+    provider_sync = Sync.create!(syncable: enable_banking_items(:one), status: :syncing)
 
     post cancel_sync_path(provider_sync)
 

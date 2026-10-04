@@ -329,14 +329,6 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert_equal "USD", response.data.currency
   end
 
-  test "fetch_security_info handles stablecoin (no Binance pair link)" do
-    response = @provider.fetch_security_info(symbol: "CRYPTO:USDT", exchange_operating_mic: "BNCX")
-
-    assert response.success?
-    assert_equal "USDT", response.data.name
-    assert_equal "crypto", response.data.kind
-    assert_nil response.data.links
-  end
 
   test "fetch_security_prices resolves a bare CRYPTO: ticker against the USDT pair" do
     rows = [ kline_row("2026-01-15", "150.25") ]

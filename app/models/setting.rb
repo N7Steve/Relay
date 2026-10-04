@@ -1,7 +1,6 @@
 # Dynamic settings the user can change within the app (helpful for self-hosting)
 class Setting < RailsSettings::Base
   class ValidationError < StandardError; end
-
   cache_prefix { "v1" }
 
   # Credentials and historical provider preferences never enable network access.
@@ -64,12 +63,12 @@ class Setting < RailsSettings::Base
   # Multi-provider: comma-separated list of enabled securities providers
   field :securities_providers, type: :string, default: ENV.fetch("SECURITIES_PROVIDERS", "")
 
-  # New provider API keys (encrypted at rest — see EncryptedSettingFields below)
+  # New provider API keys (encrypted at rest â€” see EncryptedSettingFields below)
   field :tiingo_api_key, type: :string, default: ENV["TIINGO_API_KEY"]
   field :eodhd_api_key, type: :string, default: ENV["EODHD_API_KEY"]
   field :alpha_vantage_api_key, type: :string, default: ENV["ALPHA_VANTAGE_API_KEY"]
   field :tinkoff_invest_api_key, type: :string, default: ENV["TINKOFF_INVEST_API_KEY"]
-  # Mansa API (mansaapi.com) — African exchanges, including NGX (Nigeria),
+  # Mansa API (mansaapi.com) â€” African exchanges, including NGX (Nigeria),
   # which none of the providers above cover. See Provider::Mansa.
   field :mansa_api_key, type: :string, default: ENV["MANSA_API_KEY"]
 
@@ -129,7 +128,7 @@ class Setting < RailsSettings::Base
         setting_encryptor.decrypt_and_verify(value)
       rescue ActiveSupport::MessageVerifier::InvalidSignature,
              ActiveSupport::MessageEncryptor::InvalidMessage
-        # Value was stored before encryption was enabled — return as-is.
+        # Value was stored before encryption was enabled â€” return as-is.
         # It will be re-encrypted on next write.
         value
       end
@@ -149,14 +148,7 @@ class Setting < RailsSettings::Base
     end
   end
 
-  # Sync settings - check both provider env vars for default
-  # Only defaults to true if neither provider explicitly disables pending
-  SYNCS_INCLUDE_PENDING_DEFAULT = begin
-    simplefin = ENV.fetch("SIMPLEFIN_INCLUDE_PENDING", "1") == "1"
-    plaid = ENV.fetch("PLAID_INCLUDE_PENDING", "1") == "1"
-    simplefin && plaid
-  end
-  field :syncs_include_pending, type: :boolean, default: SYNCS_INCLUDE_PENDING_DEFAULT
+  field :syncs_include_pending, type: :boolean, default: true
   field :auto_sync_enabled, type: :boolean, default: ENV.fetch("AUTO_SYNC_ENABLED", "1") == "1"
   field :auto_sync_time, type: :string, default: ENV.fetch("AUTO_SYNC_TIME", "02:22")
   field :auto_sync_timezone, type: :string, default: ENV.fetch("AUTO_SYNC_TIMEZONE", "UTC")

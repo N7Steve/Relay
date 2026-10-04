@@ -12,7 +12,6 @@ uk:
       link_lunchflow: "Пов'язати з Lunch Flow"
       link_provider: "Пов'язати з постачальником"
       unlink_provider: "Від'єднати від постачальника"
-      change_simplefin_account: "Змінити рахунок SimpleFIN"
       troubleshoot: "Вирішення проблем"
       enable: "Увімкнути рахунок"
       disable: "Вимкнути рахунок"

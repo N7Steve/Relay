@@ -3,21 +3,37 @@ class Family < ApplicationRecord
   has_many :financekit_account_lineages, dependent: :destroy
   has_many :financekit_conflicts, dependent: :destroy
 
-  include FioConnectable
   # Historical instance billing data is retained until the schema cleanup phase.
   has_one :subscription, dependent: :destroy
 
   include Syncable, AutoTransferMatchable
-  include PlaidConnectable, SimplefinConnectable, LunchflowConnectable, AkahuConnectable, EnableBankingConnectable
-  include CoinbaseConnectable, BinanceConnectable, KrakenConnectable, CoinspotConnectable, CoinstatsConnectable, SnaptradeConnectable, MercuryConnectable, BrexConnectable, SophtronConnectable
-  include IndexaCapitalConnectable, IbkrConnectable, WiseConnectable
-  include UpConnectable
-  include MonobankConnectable
-  include Trading212Connectable
-  include TradeRepublicConnectable
-  include QuestradeConnectable
-  include RedbarkConnectable
-  include OnchainWalletConnectable
+
+  include EnableBankingConnectable
+
+  has_many :akahu_items, dependent: :destroy
+  has_many :binance_items, dependent: :destroy
+  has_many :brex_items, dependent: :destroy
+  has_many :coinbase_items, dependent: :destroy
+  has_many :coinspot_items, dependent: :destroy
+  has_many :coinstats_items, dependent: :destroy
+  has_many :fio_items, dependent: :destroy
+  has_many :ibkr_items, dependent: :destroy
+  has_many :indexa_capital_items, dependent: :destroy
+  has_many :kraken_items, dependent: :destroy
+  has_many :lunchflow_items, dependent: :destroy
+  has_many :mercury_items, dependent: :destroy
+  has_many :monobank_items, dependent: :destroy
+  has_many :onchain_wallet_items, dependent: :destroy
+  has_many :plaid_items, dependent: :destroy
+  has_many :questrade_items, dependent: :destroy
+  has_many :redbark_items, dependent: :destroy
+  has_many :simplefin_items, dependent: :destroy
+  has_many :snaptrade_items, dependent: :destroy
+  has_many :sophtron_items, dependent: :destroy
+  has_many :trade_republic_items, dependent: :destroy
+  has_many :trading212_items, dependent: :destroy
+  has_many :up_items, dependent: :destroy
+  has_many :wise_items, dependent: :destroy
 
   DATE_FORMATS = [
     [ "MM-DD-YYYY", "%m-%d-%Y" ],
@@ -235,21 +251,6 @@ class Family < ApplicationRecord
     nil
   end
 
-  # Callers should still enqueue the normal family sync immediately. Plaid's
-  # refresh is asynchronous, and its polling chain schedules a distinct item
-  # sync after the cursor advances (or after the bounded polling fallback), so
-  # fresh transactions are imported even if the baseline family sync runs first.
-  def request_plaid_transactions_refreshes_later(source:)
-    enqueued_job = PlaidTransactionsRefreshAllJob.perform_later(self, source: source)
-    return enqueued_job if enqueued_job
-
-    capture_plaid_refresh_enqueue_failure(source:, error_class: "ActiveJob::EnqueueError")
-    nil
-  rescue => error
-    capture_plaid_refresh_enqueue_failure(source:, error_class: error.class.name)
-    nil
-  end
-
   def custom_enabled_currencies?
     enabled_currencies.present?
   end
@@ -272,22 +273,7 @@ class Family < ApplicationRecord
     enabled_currency_objects(extra:).reject { |currency| currency.iso_code == primary_currency_code }
   end
 
-  def capture_plaid_refresh_enqueue_failure(source:, error_class:)
-    DebugLogEntry.capture(
-      category: "provider_sync",
-      level: "warn",
-      message: "Plaid transaction refresh could not be enqueued; continuing with normal sync",
-      source: source,
-      provider_key: "plaid",
-      family: self,
-      metadata: { error_class: error_class }
-    )
-  rescue => logging_error
-    Rails.logger.warn(
-      "Plaid refresh enqueue diagnostic failed: #{logging_error.class.name}"
-    )
-  end
-  private :capture_plaid_refresh_enqueue_failure
+
 
 
   def moniker_label

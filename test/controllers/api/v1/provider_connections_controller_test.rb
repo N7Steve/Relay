@@ -6,7 +6,7 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
   setup do
     @user = users(:family_admin)
     @family = @user.family
-    @mercury_item = mercury_items(:one)
+    @enable_banking_item = enable_banking_items(:one)
 
     @user.api_keys.active.destroy_all
 
@@ -31,8 +31,19 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
     redis.del("api_rate_limit:#{@read_write_key.id}")
   end
 
+  test "only retained connections are exposed for either read scope" do
+    [ @api_key, @read_write_key ].each do |key|
+      get api_v1_provider_connections_url, headers: api_headers(key)
+      assert_response :success
+      providers = JSON.parse(response.body)["data"].map { |row| row["provider"] }
+      assert_includes providers, "enable_banking"
+      assert_empty providers & RetiredAccountConnector::PREFIXES.map(&:underscore)
+      assert_empty providers - %w[enable_banking financekit]
+    end
+  end
+
   test "lists provider connection status for current family" do
-    failed_sync = @mercury_item.syncs.create!(
+    failed_sync = @enable_banking_item.syncs.create!(
       status: "failed",
       failed_at: Time.current,
       error: "secret token failed"
@@ -42,27 +53,27 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
     assert_response :success
 
     json_response = JSON.parse(response.body)
-    mercury_connection = json_response["data"].detect do |connection|
-      connection["id"] == @mercury_item.id && connection["provider"] == "mercury"
+    enable_banking_connection = json_response["data"].detect do |connection|
+      connection["id"] == @enable_banking_item.id && connection["provider"] == "enable_banking"
     end
 
-    assert_not_nil mercury_connection
-    assert_equal "mercury", mercury_connection["provider"]
-    assert_equal "MercuryItem", mercury_connection["provider_type"]
-    assert_equal @mercury_item.name, mercury_connection["name"]
-    assert_equal @mercury_item.status, mercury_connection["status"]
-    assert_includes [ true, false ], mercury_connection["requires_update"]
-    assert_equal true, mercury_connection["credentials_configured"]
-    assert_includes [ true, false ], mercury_connection["scheduled_for_deletion"]
-    assert_includes [ true, false ], mercury_connection["pending_account_setup"]
-    assert_equal @mercury_item.mercury_accounts.count, mercury_connection["accounts"]["total_count"]
-    assert_equal failed_sync.id, mercury_connection["sync"]["latest"]["id"]
-    assert_equal true, mercury_connection["sync"]["latest"]["error"]["present"]
-    assert_equal "Sync failed", mercury_connection["sync"]["latest"]["error"]["message"]
+    assert_not_nil enable_banking_connection
+    assert_equal "enable_banking", enable_banking_connection["provider"]
+    assert_equal "EnableBankingItem", enable_banking_connection["provider_type"]
+    assert_equal @enable_banking_item.name, enable_banking_connection["name"]
+    assert_equal @enable_banking_item.status, enable_banking_connection["status"]
+    assert_includes [ true, false ], enable_banking_connection["requires_update"]
+    assert_equal true, enable_banking_connection["credentials_configured"]
+    assert_includes [ true, false ], enable_banking_connection["scheduled_for_deletion"]
+    assert_includes [ true, false ], enable_banking_connection["pending_account_setup"]
+    assert_equal @enable_banking_item.enable_banking_accounts.count, enable_banking_connection["accounts"]["total_count"]
+    assert_equal failed_sync.id, enable_banking_connection["sync"]["latest"]["id"]
+    assert_equal true, enable_banking_connection["sync"]["latest"]["error"]["present"]
+    assert_equal "Sync failed", enable_banking_connection["sync"]["latest"]["error"]["message"]
   end
 
   test "reports failed sync errors as present without exposing raw messages" do
-    failed_sync = @mercury_item.syncs.create!(
+    failed_sync = @enable_banking_item.syncs.create!(
       status: "failed",
       failed_at: Time.current,
       error: nil
@@ -71,17 +82,17 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
     get api_v1_provider_connections_url, headers: api_headers(@api_key)
     assert_response :success
 
-    mercury_connection = JSON.parse(response.body)["data"].detect do |connection|
-      connection["id"] == @mercury_item.id && connection["provider"] == "mercury"
+    enable_banking_connection = JSON.parse(response.body)["data"].detect do |connection|
+      connection["id"] == @enable_banking_item.id && connection["provider"] == "enable_banking"
     end
 
-    assert_equal failed_sync.id, mercury_connection["sync"]["latest"]["id"]
-    assert_equal true, mercury_connection["sync"]["latest"]["error"]["present"]
-    assert_equal "Sync failed", mercury_connection["sync"]["latest"]["error"]["message"]
+    assert_equal failed_sync.id, enable_banking_connection["sync"]["latest"]["id"]
+    assert_equal true, enable_banking_connection["sync"]["latest"]["error"]["present"]
+    assert_equal "Sync failed", enable_banking_connection["sync"]["latest"]["error"]["message"]
   end
 
   test "reports stale sync errors as present" do
-    stale_sync = @mercury_item.syncs.create!(
+    stale_sync = @enable_banking_item.syncs.create!(
       status: "stale",
       syncing_at: 2.days.ago
     )
@@ -89,60 +100,30 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
     get api_v1_provider_connections_url, headers: api_headers(@api_key)
     assert_response :success
 
-    mercury_connection = JSON.parse(response.body)["data"].detect do |connection|
-      connection["id"] == @mercury_item.id && connection["provider"] == "mercury"
+    enable_banking_connection = JSON.parse(response.body)["data"].detect do |connection|
+      connection["id"] == @enable_banking_item.id && connection["provider"] == "enable_banking"
     end
 
-    assert_equal stale_sync.id, mercury_connection["sync"]["latest"]["id"]
-    assert_equal true, mercury_connection["sync"]["latest"]["error"]["present"]
-    assert_equal "Sync became stale before completion", mercury_connection["sync"]["latest"]["error"]["message"]
+    assert_equal stale_sync.id, enable_banking_connection["sync"]["latest"]["id"]
+    assert_equal true, enable_banking_connection["sync"]["latest"]["error"]["present"]
+    assert_equal "Sync became stale before completion", enable_banking_connection["sync"]["latest"]["error"]["message"]
   end
 
   test "does not expose provider secrets or raw sync errors" do
-    @mercury_item.syncs.create!(
-      status: "failed",
-      failed_at: Time.current,
-      error: "raw provider token secret"
-    )
-    kraken_item = kraken_items(:one)
-    kraken_item.syncs.create!(
-      status: "failed",
-      failed_at: Time.current,
-      error: "raw kraken key secret"
-    )
-
+    @enable_banking_item.syncs.create!(status: "failed", error: "private failure")
     get api_v1_provider_connections_url, headers: api_headers(@api_key)
     assert_response :success
-
-    json_response = JSON.parse(response.body)
-    kraken_connection = json_response["data"].detect do |connection|
-      connection["id"] == kraken_item.id && connection["provider"] == "kraken"
-    end
-
-    assert_not_nil kraken_connection
-    assert_equal "KrakenItem", kraken_connection["provider_type"]
-    refute_includes response.body, @mercury_item.token
-    refute_includes response.body, kraken_item.api_key
-    refute_includes response.body, kraken_item.api_secret
-    refute_includes response.body, "raw provider token secret"
-    refute_includes response.body, "raw kraken key secret"
+    refute_includes response.body, @enable_banking_item.client_certificate
+    refute_includes response.body, @enable_banking_item.session_id
+    refute_includes response.body, "private failure"
   end
-
-  test "fails closed when credential readiness is unknown" do
+  test "fails closed when credentials are not configured" do
+    EnableBankingItem.any_instance.stubs(:credentials_configured?).returns(false)
     get api_v1_provider_connections_url, headers: api_headers(@api_key)
     assert_response :success
-
-    plaid_connection = JSON.parse(response.body)["data"].detect do |connection|
-      connection["provider"] == "plaid"
-    end
-
-    assert_not_nil plaid_connection
-    assert_includes [ true, false ], plaid_connection["requires_update"]
-    assert_equal false, plaid_connection["credentials_configured"]
-    assert_includes [ true, false ], plaid_connection["scheduled_for_deletion"]
-    assert_includes [ true, false ], plaid_connection["pending_account_setup"]
+    connection = JSON.parse(response.body)["data"].find { |row| row["provider"] == "enable_banking" }
+    assert_not connection["credentials_configured"]
   end
-
   test "excludes another family's provider connections" do
     other_item = snaptrade_items(:unauthorized_item)
 
@@ -158,37 +139,6 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
     assert_response :success
   end
 
-  test "lists Brex provider connection status" do
-    brex_item = brex_items(:one)
-
-    get api_v1_provider_connections_url, headers: api_headers(@api_key)
-    assert_response :success
-
-    brex_connection = JSON.parse(response.body)["data"].detect do |connection|
-      connection["id"] == brex_item.id && connection["provider"] == "brex"
-    end
-
-    assert_not_nil brex_connection
-    assert_equal "BrexItem", brex_connection["provider_type"]
-    assert_equal brex_item.name, brex_connection["name"]
-    assert_equal brex_item.brex_accounts.count, brex_connection["accounts"]["total_count"]
-    assert_equal brex_item.linked_accounts_count, brex_connection["accounts"]["linked_count"]
-    assert_equal brex_item.unlinked_accounts_count, brex_connection["accounts"]["unlinked_count"]
-  end
-
-  test "reports credentials_configured true for an authorized SnapTrade item" do
-    snaptrade_item = snaptrade_items(:configured_item)
-
-    get api_v1_provider_connections_url, headers: api_headers(@api_key)
-    assert_response :success
-
-    snaptrade_connection = JSON.parse(response.body)["data"].detect do |connection|
-      connection["id"] == snaptrade_item.id && connection["provider"] == "snaptrade"
-    end
-
-    assert_not_nil snaptrade_connection
-    assert_equal true, snaptrade_connection["credentials_configured"]
-  end
 
   test "returns an empty list when no provider connections exist" do
     ProviderConnectionStatus.stub(:for_family, []) do

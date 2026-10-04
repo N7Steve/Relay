@@ -5,7 +5,6 @@ fr:
         success: Entrée supprimée avec succès.
   accounts:
     account:
-      change_simplefin_account: Changer le compte SimpleFIN
       complete_setup: Configuration complète
       default_label: Par défaut
       delete: Supprimer le compte

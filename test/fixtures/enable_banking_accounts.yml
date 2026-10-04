@@ -1,0 +1,14 @@
+one:
+  enable_banking_item: one
+  name: Enable Banking Checking
+  uid: enable-checking
+  account_id: enable-checking
+  currency: USD
+  current_balance: 1000
+two:
+  enable_banking_item: one
+  name: Enable Banking Savings
+  uid: enable-savings
+  account_id: enable-savings
+  currency: USD
+  current_balance: 100

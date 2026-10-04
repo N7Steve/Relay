@@ -1,7 +1,10 @@
 require "test_helper"
 
 class ExternalScheduleTest < ActiveSupport::TestCase
-  setup { Sidekiq::Cron::Job.stubs(:find).with("clean_inactive_families").returns(nil) }
+  setup do
+    Sidekiq::Cron::Job.stubs(:find).with("clean_inactive_families").returns(nil)
+    Sidekiq::Cron::Job.stubs(:find).with("sync_hourly").returns(nil)
+  end
 
   test "removes retired commercial cron without touching shared queues or other schedules" do
     schedule = {

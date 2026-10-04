@@ -76,7 +76,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     plaid_item = plaid_items(:one)
 
     provider = mock
-    provider.expects(:remove_item).with(plaid_item.access_token).once
+    provider.expects(:remove_item).never
     PlaidItem.any_instance.stubs(:plaid_provider).returns(provider)
 
     perform_enqueued_jobs(only: FamilyResetJob) do
@@ -105,7 +105,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     plaid_item = plaid_items(:one)
 
     provider = mock
-    provider.expects(:remove_item).with(plaid_item.access_token).once
+    provider.expects(:remove_item).never
     PlaidItem.any_instance.stubs(:plaid_provider).returns(provider)
     Demo::Generator.any_instance.expects(:generate_new_user_data_for!).with(@user.family, email: @user.email)
 

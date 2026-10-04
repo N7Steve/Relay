@@ -16,7 +16,6 @@ zh-CN:
       link_lunchflow: 连接 Lunch Flow
       link_provider: 连接提供商
       unlink_provider: 取消与提供商的连接
-      change_simplefin_account: 更改 SimpleFIN 账户
       troubleshoot: 排查问题
       enable: 启用账户
       disable: 停用账户

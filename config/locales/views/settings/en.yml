@@ -474,37 +474,7 @@ en:
       recently_synced: Synced recently. Try again in a moment.
       taglines:
         financekit: Sync (some) FinanceKit accounts through the Relay iOS app.
-        akahu: Sync New Zealand financial institutions via Akahu.
-        simplefin: Connect US bank accounts via the open SimpleFIN protocol.
-        lunchflow: Connect 20k+ banks from 40+ countries (UK, EU, USA and more!)
-        redbark: Sync Australian bank accounts via Redbark open banking.
-        up: Sync Australian Up bank accounts with a personal access token.
-        monobank: Sync Ukrainian Monobank cards and jars with a personal API token.
-        fio: Sync a Fio banka account with a read-only API token.
         enable_banking: Sync European bank accounts via PSD2 open banking.
-        coinstats: Track your entire crypto portfolio across wallets and exchanges.
-        wise: Sync your Wise multi-currency balances and international transfers automatically.
-        mercury: Sync your Mercury business banking accounts automatically.
-        brex: Sync Brex cash and corporate card activity with read-only access.
-        coinbase: Import your Coinbase crypto holdings and track performance.
-        binance: Sync your Binance spot balances using a read-only API key.
-        kraken: Sync Kraken balances and spot trade fills using a read-only API key.
-        coinspot: Sync CoinSpot balances, AUD values, transfers, deposits, withdrawals,
-          and order history using a read-only API key.
-        onchain_wallet: Track self-custody Bitcoin, EVM and Solana wallets from their
-          public addresses.
-        snaptrade: Connect brokerage accounts via the SnapTrade aggregation network.
-        trading212: Sync your Trading 212 investment portfolio using a read-only API
-          key.
-        trade_republic: Sync your Trade Republic investment account via secure read-only
-          web login.
-        ibkr: Sync Interactive Brokers investment accounts via Flex Query imports.
-        questrade: Sync your Questrade investment accounts directly via the Questrade
-          API.
-        indexa_capital: Track your Indexa Capital automated investment portfolio.
-        sophtron: Connect US & Canadian banks and utilities.
-        plaid: Connect thousands of US financial institutions via Plaid.
-        plaid_eu: Connect European financial institutions via Plaid (PSD2 / Open Banking).
       search_filters:
         aria_label: Search providers
         placeholder: Search providers

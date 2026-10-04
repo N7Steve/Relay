@@ -11,7 +11,6 @@ Official Helm chart for deploying the Sure Rails application on Kubernetes. It s
 - Web (Rails) Deployment + Service and optional Ingress
 - Worker (Sidekiq) Deployment
 - Optional Helm-hook Job for db:migrate, or initContainer migration strategy
-- Optional post-install/upgrade SimpleFin encryption backfill Job (idempotent; dry-run by default)
 - Optional CronJobs for custom tasks
 - Optional subcharts
   - CloudNativePG (operator) + Cluster CR for PostgreSQL with HA support
@@ -129,12 +128,6 @@ redisOperator:
 migrations:
   strategy: job
 
-simplefin:
-  encryption:
-    enabled: false         # enable + backfill later once you're happy
-    backfill:
-      enabled: true
-      dryRun: true
 ```
 
 ### HA k3s profile (example)
@@ -184,12 +177,6 @@ migrations:
   initContainer:
     enabled: true   # optional safety net on pod restarts (only migrates when pending)
 
-simplefin:
-  encryption:
-    enabled: true
-    backfill:
-      enabled: true
-      dryRun: false
 ```
 
 ## CloudNativePG notes
@@ -486,7 +473,6 @@ Execution flow:
 1. CNPG Cluster (if enabled) and other resources are created.
 2. `sure-migrate` Job (post-install/post-upgrade hook) waits for the RW service to accept connections.
 3. `db:prepare` runs; safe and idempotent across fresh installs and upgrades.
-4. Optional data backfills (like SimpleFin encryption) run in their own post hooks.
 
 To use the initContainer strategy instead (or in addition as a safety net):
 
@@ -497,30 +483,11 @@ migrations:
     enabled: true
 ```
 
-## SimpleFin encryption backfill
+## Retired account connector configuration
 
-- SimpleFin encryption is optional. If you enable it, you must provide Active Record Encryption keys.
-- The backfill Job runs a safe, idempotent Rake task to encrypt existing `access_url` values.
-
-```yaml
-simplefin:
-  encryption:
-    enabled: true
-    backfill:
-      enabled: true
-      dryRun: true  # set false to actually write changes
-
-rails:
-  # Provide encryption keys via an existing secret or below values (for testing only)
-  existingSecret: my-app-secret
-  # or
-  secret:
-    enabled: true
-    values:
-      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: "..."
-      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: "..."
-      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: "..."
-```
+SimpleFIN connector settings and its automatic backfill Job were retired in
+phase 7. Preserve existing encryption keys for historical data. No connector
+backfill runs as a deployment hook. See [the migration record](../../docs/migration/pruning-phase-7.md).
 
 ## Ingress
 
@@ -540,7 +507,7 @@ ingress:
 
 ## Boot-required secrets
 
-The Rails initializer for Active Record Encryption loads on boot. To prevent boot crashes, ensure the following environment variables are present for ALL workloads (web, worker, migrate job/initContainer, CronJobs, and the SimpleFin backfill job):
+The Rails initializer for Active Record Encryption loads on boot. To prevent boot crashes, ensure the following environment variables are present for ALL workloads (web, worker, migrate job/initContainer, CronJobs):
 
 - `SECRET_KEY_BASE`
 - `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`
@@ -578,7 +545,7 @@ rails:
         name: another-secret
 ```
 
-These are injected into web, worker, migrate job/initContainer, CronJobs, and the SimpleFin backfill job in addition to the simple maps.
+These are injected into web, worker, migrate job/initContainer, CronJobs in addition to the simple maps.
 
 ## Writable filesystem and /tmp
 
@@ -846,7 +813,6 @@ See `values.yaml` for the complete configuration surface, including:
 - `redisSimple.*`: optional single‑pod Redis (non‑HA) when `redis-ha.enabled=false`
 - `web.*`, `worker.*`: replicas, probes, resources, scheduling, **strategy** (rolling update configuration)
 - `migrations.*`: strategy job or initContainer
-- `simplefin.encryption.*`: enable + backfill options
 - `cronjobs.*`: custom CronJobs
 - `pipelock.*`: AI agent security proxy (forward proxy, DLP, injection scanning, request-body scanning, health watchdog, signed receipts, trusted domains, logging, serviceMonitor, PDB, extraVolumes, extraVolumeMounts, extraConfig)
 - `service.*`, `ingress.*`, `serviceMonitor.*`, `hpa.*`

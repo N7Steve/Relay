@@ -25,7 +25,7 @@ class IbkrAccount::HistoricalBalancesSyncTest < ActiveSupport::TestCase
         { report_date: "2026-05-08", total: "3351.00" }
       ]
     )
-    @ibkr_account.ensure_account_provider!(@account)
+    AccountProvider.create!(provider: @ibkr_account, account: @account)
   end
 
   # Seed an existing balance row as if the materializer already ran.

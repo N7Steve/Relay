@@ -40,7 +40,7 @@ class Settings::HostingsController < ApplicationController
       @yahoo_finance_health_status = @yahoo_finance_provider&.health_status || :unknown
     end
 
-    # Property valuation (AVM) providers — usage is shown against their tight
+    # Property valuation (AVM) providers â€” usage is shown against their tight
     # monthly request caps when a key is configured
     @rentcast_usage = Provider::Registry.get_provider(:rentcast)&.usage
     @realie_usage = Provider::Registry.get_provider(:realie)&.usage
@@ -124,7 +124,7 @@ class Settings::HostingsController < ApplicationController
                 .in_batches.update_all(offline: true, offline_reason: "provider_disabled")
       end
 
-      # Bring securities back online when their provider is re-enabled — but only
+      # Bring securities back online when their provider is re-enabled â€” but only
       # those that were taken offline by a provider toggle, not by health checks.
       added = new_providers - old_providers
       added.each do |added_provider|
