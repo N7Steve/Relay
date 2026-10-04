@@ -4,9 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/privacy_provider.dart';
 import '../widgets/sure_logo.dart';
-import 'chat_list_screen.dart';
 import 'dashboard_screen.dart';
-import 'intro_screen.dart';
 import 'more_screen.dart';
 import 'settings_screen.dart';
 import '../l10n/app_localizations.dart';
@@ -29,12 +27,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       screens.add(DashboardScreen(key: _dashboardKey));
     }
 
-    if (introLayout) {
-      screens.add(IntroScreen(onStartChat: onStartChat));
-    }
-
-    screens.add(const ChatListScreen());
-
     if (!introLayout) {
       screens.add(const MoreScreen());
     }
@@ -49,15 +41,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     AuthProvider authProvider,
     bool introLayout,
   ) async {
-    const chatIndex = 1;
-
-    if (index == chatIndex && !authProvider.aiEnabled) {
-      final enabled = await _showEnableAiPrompt();
-      if (!enabled) {
-        return;
-      }
-    }
-
     if (mounted) {
       setState(() {
         _currentIndex = index;
@@ -69,12 +52,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
   }
 
-  Future<void> _handleSelectSettings(AuthProvider authProvider, bool introLayout) async {
-    final settingsIndex = introLayout ? 2 : 3;
+  Future<void> _handleSelectSettings(
+    AuthProvider authProvider,
+    bool introLayout,
+  ) async {
+    const settingsIndex = 2;
     await _handleDestinationSelected(settingsIndex, authProvider, introLayout);
   }
 
-  List<NavigationDestination> _buildDestinations(bool introLayout, AppLocalizations l) {
+  List<NavigationDestination> _buildDestinations(
+    bool introLayout,
+    AppLocalizations l,
+  ) {
     final destinations = <NavigationDestination>[];
 
     if (!introLayout) {
@@ -86,24 +75,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
       );
     }
-
-    if (introLayout) {
-      destinations.add(
-        NavigationDestination(
-          icon: const Icon(Icons.auto_awesome_outlined),
-          selectedIcon: const Icon(Icons.auto_awesome),
-          label: l.navIntro,
-        ),
-      );
-    }
-
-    destinations.add(
-      NavigationDestination(
-        icon: const Icon(Icons.chat_bubble_outline),
-        selectedIcon: const Icon(Icons.chat_bubble),
-        label: l.navAssistant,
-      ),
-    );
 
     if (!introLayout) {
       destinations.add(
@@ -118,7 +89,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return destinations;
   }
 
-  PreferredSizeWidget _buildTopBar(AuthProvider authProvider, bool introLayout) {
+  PreferredSizeWidget _buildTopBar(
+    AuthProvider authProvider,
+    bool introLayout,
+  ) {
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: 60,
@@ -176,49 +150,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Future<bool> _showEnableAiPrompt() async {
-    final l = AppLocalizations.of(context);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    final shouldEnable = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        final dl = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(dl.navEnableAiChatTitle),
-          content: Text(dl.navEnableAiChatContent),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(dl.navEnableAiChatNotNow),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(dl.navEnableAiChatConfirm),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (shouldEnable != true) {
-      return false;
-    }
-
-    final enabled = await authProvider.enableAi();
-
-    if (!enabled && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.errorMessage ?? l.navEnableAiChatFailed),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-
-    return enabled;
-  }
-
   int _resolveBottomSelectedIndex(List<NavigationDestination> destinations) {
     if (destinations.isEmpty) {
       return 0;
@@ -240,12 +171,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final l = AppLocalizations.of(context);
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
-        final introLayout = authProvider.isIntroLayout;
-        const chatIndex = 1;
-        final screens = _buildScreens(
-          introLayout,
-          () => _handleDestinationSelected(chatIndex, authProvider, introLayout),
-        );
+        const introLayout = false;
+        final screens = _buildScreens(introLayout, null);
         final destinations = _buildDestinations(introLayout, l);
         final bottomNavIndex = _resolveBottomSelectedIndex(destinations);
 
@@ -255,10 +182,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
         return Scaffold(
           appBar: _buildTopBar(authProvider, introLayout),
-          body: IndexedStack(
-            index: _currentIndex,
-            children: screens,
-          ),
+          body: IndexedStack(index: _currentIndex, children: screens),
           bottomNavigationBar: NavigationBar(
             selectedIndex: bottomNavIndex,
             onDestinationSelected: (index) {

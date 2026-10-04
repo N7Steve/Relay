@@ -3,7 +3,7 @@ class Provider::Registry
 
   Error = Class.new(StandardError)
 
-  CONCEPTS = %i[exchange_rates securities llm property_valuations classification]
+  CONCEPTS = %i[exchange_rates securities property_valuations]
 
   validates :concept, inclusion: { in: CONCEPTS }
 
@@ -16,22 +16,6 @@ class Provider::Registry
       send(name)
     rescue NoMethodError
       raise Error.new("Provider '#{name}' not found in registry")
-    end
-
-    # Resolves the LLM provider for batch/PDF flows, honoring Setting.llm_provider
-    # the way chat does: prefer the configured provider, but fall back to whichever
-    # one actually has credentials so an install that swaps providers (or has only
-    # one configured) keeps working. Returns nil when neither is configured —
-    # callers guard on that.
-    def preferred_llm_provider
-      return nil unless Setting.ai_features_enabled?
-
-      order = Setting.llm_provider == "anthropic" ? %i[anthropic openai] : %i[openai anthropic]
-      order.each do |name|
-        provider = get_provider(name)
-        return provider if provider
-      end
-      nil
     end
 
     def plaid_provider_for_region(region)
@@ -67,53 +51,6 @@ class Provider::Registry
 
       def github
         Provider::Github.new
-      end
-
-      def openai
-        return nil unless Setting.ai_features_enabled?
-
-        access_token = ENV["OPENAI_ACCESS_TOKEN"].presence || Setting.openai_access_token
-
-        return nil unless access_token.present?
-
-        uri_base = ENV["OPENAI_URI_BASE"].presence || Setting.openai_uri_base
-        model = ENV["OPENAI_MODEL"].presence || Setting.openai_model
-
-        if uri_base.present? && model.blank?
-          Rails.logger.error("Custom OpenAI provider configured without a model; please set OPENAI_MODEL or Setting.openai_model")
-          return nil
-        end
-
-        Provider::Openai.new(access_token, uri_base: uri_base, model: model)
-      end
-
-      def anthropic
-        return nil unless Setting.ai_features_enabled?
-
-        access_token = ENV["ANTHROPIC_ACCESS_TOKEN"].presence ||
-                       ENV["ANTHROPIC_API_KEY"].presence ||
-                       Setting.anthropic_access_token
-
-        return nil unless access_token.present?
-
-        base_url = ENV["ANTHROPIC_BASE_URL"].presence || Setting.anthropic_base_url
-        model = ENV["ANTHROPIC_MODEL"].presence || Setting.anthropic_model
-
-        Provider::Anthropic.new(access_token, base_url: base_url, model: model)
-      end
-
-      def jev
-        return nil unless Setting.ai_features_enabled?
-
-        api_key = Provider::Jev.api_key # pipelock:ignore
-
-        return nil unless api_key.present?
-
-        Provider::Jev.new(
-          api_key,
-          endpoint: Provider::Jev.effective_endpoint,
-          model: Provider::Jev.effective_model
-        )
       end
 
       def yahoo_finance
@@ -224,14 +161,10 @@ class Provider::Registry
         %i[twelve_data yahoo_finance moex_public frankfurter]
       when :securities
         %i[twelve_data yahoo_finance tiingo eodhd alpha_vantage mfapi binance_public moex_public tinkoff_invest mansa]
-      when :llm
-        Setting.ai_features_enabled? ? %i[openai anthropic] : []
-      when :classification
-        Setting.ai_features_enabled? ? %i[jev] : []
       when :property_valuations
         %i[rentcast realie]
       else
-        %i[plaid_us plaid_eu github openai anthropic]
+        %i[plaid_us plaid_eu github]
       end
     end
 end

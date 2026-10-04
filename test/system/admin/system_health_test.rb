@@ -5,83 +5,7 @@ class Admin::SystemHealthTest < ApplicationSystemTestCase
 
   setup do
     sign_in users(:sure_support_staff)
-    Setting.stubs(:llm_provider).returns("openai")
-    Setting.stubs(:openai_access_token).returns(nil)
-    Setting.stubs(:openai_uri_base).returns(nil)
-    Setting.stubs(:openai_model).returns(nil)
     stub_healthy_sidekiq
-    AiHealth::Probe.any_instance.stubs(:llm).returns(probe_result(:passing))
-    AiHealth::Probe.any_instance.stubs(:function_calling).returns(probe_result(:passing))
-    AiHealth::Probe.any_instance.stubs(:pdf_text_extraction).returns(probe_result(:passing))
-    AiHealth::Probe.any_instance.stubs(:pdf_vision_processing).returns(probe_result(:passing))
-    AiHealth::Probe.any_instance.stubs(:openai_vector_store).returns(probe_result(:passing))
-  end
-
-  test "selecting AI status runs live probes" do
-    with_openai_access_token do
-      visit admin_system_health_path
-
-      click_button "AI status"
-
-      assert_current_path admin_system_health_path(tab: "ai")
-      assert_selector "button[role='tab'][aria-selected='true']", text: "AI status"
-      assert_text "Live check passed"
-      assert_text "Live tool call succeeded"
-      assert_text "PDF text-extraction path"
-      assert_text "PDF vision/native path"
-      assert_text "Synthetic PDF check passed", count: 2
-      assert_text "Live checks passed"
-    end
-  end
-
-  test "running the checks again stays on the AI tab and forces fresh probes" do
-    with_openai_access_token do
-      visit admin_system_health_path(tab: "ai")
-      assert_text "Live check passed"
-
-      click_on "Run checks again"
-
-      assert_current_path admin_system_health_path(tab: "ai", refresh_ai_health: "1")
-      assert_selector "turbo-frame#ai_status[src$='?refresh_ai_health=1']"
-      assert_text "Live check passed"
-    end
-  end
-
-  test "going back after switching tabs returns to system health" do
-    with_openai_access_token do
-      visit admin_system_health_path
-      click_button "AI status"
-      assert_text "Live check passed"
-
-      click_link "Preferences", match: :first
-      assert_no_selector "[data-testid='system-health-tabs']"
-      page.go_back
-
-      assert_current_path admin_system_health_path(tab: "ai")
-      assert_selector "button[role='tab'][aria-selected='true']", text: "AI status"
-    end
-  end
-
-  # The redirect comes back to this page, which the button's `replace` action
-  # turns into a morphing refresh even after a tab switch. The button has to
-  # leave the frame for the flash to show, and the frame has to keep its status
-  # through the morph instead of taking the new page's loading placeholder.
-  test "queueing a worker check keeps the AI status on screen" do
-    with_openai_access_token do
-      visit admin_system_health_path
-      click_button "AI status"
-      assert_text "Live check passed"
-      page.execute_script(<<~JS)
-        document.addEventListener("turbo:morph", () => {
-          window.aiStatusAfterMorph = document.getElementById("ai_status").textContent
-        }, { once: true })
-      JS
-
-      click_button "Verify worker configuration"
-
-      assert_text "Worker check queued"
-      assert_match "Live check passed", page.evaluate_script("window.aiStatusAfterMorph")
-    end
   end
 
   test "hosted super admin enables the test button by registering an iOS device" do
@@ -89,7 +13,7 @@ class Admin::SystemHealthTest < ApplicationSystemTestCase
     Apns::Client.stubs(:configured?).returns(true)
     Rails.stubs(:cache).returns(ActiveSupport::Cache::MemoryStore.new)
     visit admin_system_health_path
-    assert_selector "button[role='tab']", count: 2
+    assert_selector "button[role='tab']", count: 1
     assert_selector "button[role='tab'][aria-selected='true']", text: "Background jobs"
     assert_selector "h2", text: "Push notifications"
     assert_button "Send test push notification", disabled: true
@@ -121,25 +45,6 @@ class Admin::SystemHealthTest < ApplicationSystemTestCase
   end
 
   private
-    def with_openai_access_token(&block)
-      ClimateControl.modify(
-        "OPENAI_ACCESS_TOKEN" => "test-token",
-        "OPENAI_URI_BASE" => nil,
-        "OPENAI_MODEL" => nil,
-        "VECTOR_STORE_PROVIDER" => nil,
-        &block
-      )
-    end
-
-    def probe_result(status)
-      AiHealth::Probe::Result.new(
-        status: status,
-        checked_at: Time.current,
-        failure_code: nil,
-        http_status: nil
-      )
-    end
-
     def stub_healthy_sidekiq
       SidekiqHealth.any_instance.stubs(:healthy?).returns(true)
       SidekiqHealth.any_instance.stubs(:processes_count).returns(1)

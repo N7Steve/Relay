@@ -1,13 +1,12 @@
 # Proxy de salida opcional
 
-La fase 5 conserva el forward proxy Pipelock para instalaciones que lo elijan.
-`compose.example.ai.yml` y el chart heredado mantienen HTTPS_PROXY, healthchecks,
-controles de salida y configuración de recibos. Un proxy cooperativo no sustituye
-las puertas de capacidad de Relay ni impone una política de red del host.
+El chart heredado conserva el forward proxy Pipelock, sus healthchecks y recibos.
+`pipelock.example.yaml` sigue disponible como configuración genérica para un
+proxy elegido por el operador. La fase 6 retira el ejemplo Compose IA y sus
+servicios Ollama/Open WebUI; no elimina servicios ni volúmenes de instalaciones.
 
-Se retiran el listener, puerto e ingress del reverse proxy MCP y el perfil
-OpenClaw. No se reconfigura una instalación real ni se eliminan volúmenes existentes.
-Las opciones MCP antiguas del chart ya no exponen un endpoint de Relay.
+El proxy cooperativo no sustituye las puertas de capacidad de Relay ni impone
+una política de red del host. MCP y los transportes de asistente están retirados;
+sus valores históricos no exponen endpoints ni requieren activar un proxy.
 
-Ver [registro de fase 5](../migration/pruning-phase-5.md) y
-[referencia anterior archivada](../archive/sure/hosting/pipelock.md).
+Ver [fase 6](../migration/pruning-phase-6.md).

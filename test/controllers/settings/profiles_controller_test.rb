@@ -15,13 +15,13 @@ class Settings::ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("settings.profiles.show.sharing_policy_manage")
   end
 
-  test "intro user sees profile without settings navigation" do
+  test "historical intro user sees ordinary profile and settings navigation" do
     sign_in @intro_user
     get settings_profile_path
 
     assert_response :success
-    assert_select "#mobile-settings-nav", count: 0
-    assert_select "h2", text: I18n.t("settings.profiles.show.household_title"), count: 0
+    assert_select "#mobile-settings-nav", count: 1
+    assert_select "h2", text: I18n.t("settings.profiles.show.household_title"), count: 1
     assert_select "[data-action='app-layout#openMobileSidebar']", count: 0
     assert_select "[data-action='app-layout#closeMobileSidebar']", count: 0
     assert_select "[data-action='app-layout#toggleLeftSidebar']", count: 0

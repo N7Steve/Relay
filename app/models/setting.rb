@@ -9,49 +9,14 @@ class Setting < RailsSettings::Base
     field "external_#{capability}_enabled", type: :boolean, default: false
   end
 
-  # Fork-wide kill switch for every AI surface and outbound AI call. It is
-  # deliberately instance-scoped and independent from provider credentials so
-  # upstream AI code can remain installed without becoming active by accident.
-  field :ai_features_enabled, type: :boolean, default: Rails.env.test?
-
+  # Compatibility predicate for historical preferences and retained clients.
+  # Persisted settings and old environment values cannot reactivate retired AI.
   def self.ai_features_enabled?
-    ai_features_enabled == true
+    false
   end
 
   # Third-party API keys
   field :twelve_data_api_key, type: :string, default: ENV["TWELVE_DATA_API_KEY"]
-  field :openai_access_token, type: :string, default: ENV["OPENAI_ACCESS_TOKEN"]
-  field :openai_uri_base, type: :string, default: ENV["OPENAI_URI_BASE"]
-  field :openai_model, type: :string, default: ENV["OPENAI_MODEL"]
-  field :openai_json_mode, type: :string, default: ENV["LLM_JSON_MODE"]
-  field :openai_request_timeout, type: :integer, default: ENV["OPENAI_REQUEST_TIMEOUT"]&.to_i
-  field :anthropic_access_token, type: :string, default: ENV["ANTHROPIC_ACCESS_TOKEN"].presence || ENV["ANTHROPIC_API_KEY"].presence
-  field :anthropic_model, type: :string, default: ENV["ANTHROPIC_MODEL"]
-  field :anthropic_base_url, type: :string, default: ENV["ANTHROPIC_BASE_URL"]
-  field :llm_provider, type: :string, default: ENV.fetch("LLM_PROVIDER", "openai")
-
-  # Jev (TypeSafe) — a classification provider, not an LLM. Reachable either
-  # through OpenRouter's Decisions API (the default) or TypeSafe's own endpoint.
-  # Deliberately no OPENROUTER_API_KEY fallback: an operator holding that key
-  # for an unrelated purpose should not silently enable Jev.
-  field :jev_api_key, type: :string, default: ENV["JEV_API_KEY"]
-  field :jev_endpoint, type: :string, default: ENV["JEV_ENDPOINT"]
-  field :jev_model, type: :string, default: ENV["JEV_MODEL"]
-
-  # LLM token budget (applies to every outbound LLM call: chat, auto-categorize,
-  # merchant detection, enhance-merchants, PDF processing). Defaults track
-  # Ollama's historical 2048-token baseline so local small-context models work
-  # out of the box. ENV overrides Setting at read time in Provider::Openai.
-  field :llm_context_window, type: :integer, default: ENV["LLM_CONTEXT_WINDOW"]&.to_i
-  field :llm_max_response_tokens, type: :integer, default: ENV["LLM_MAX_RESPONSE_TOKENS"]&.to_i
-  field :llm_max_items_per_call, type: :integer, default: ENV["LLM_MAX_ITEMS_PER_CALL"]&.to_i
-
-  # How long the chat UI waits for an assistant response before treating it as
-  # undelivered. Self-hosted users running local models on slow hardware need
-  # this well above the 90s default — a local model that takes minutes to
-  # generate would otherwise always trip the watchdog. Read via
-  # `Chat.response_timeout`, which applies ENV > Setting > default precedence.
-  field :ai_response_timeout, type: :integer, default: ENV["AI_RESPONSE_TIMEOUT"]&.to_i
   # Historical configuration only; no transport or settings form consumes these.
   field :external_assistant_url, type: :string
   field :external_assistant_token, type: :string
@@ -129,9 +94,6 @@ class Setting < RailsSettings::Base
       mansa_api_key
       rentcast_api_key
       realie_api_key
-      openai_access_token
-      anthropic_access_token
-      jev_api_key
       external_assistant_token
     ].freeze
 
@@ -238,9 +200,6 @@ class Setting < RailsSettings::Base
   class << self
     alias_method :raw_onboarding_state, :onboarding_state
     alias_method :raw_onboarding_state=, :onboarding_state=
-    alias_method :raw_openai_model, :openai_model
-    alias_method :raw_openai_model=, :openai_model=
-
     def onboarding_state
       value = raw_onboarding_state
       return "invite_only" if value.blank? && require_invite_for_signup
@@ -252,18 +211,6 @@ class Setting < RailsSettings::Base
       validate_onboarding_state!(state)
       self.require_invite_for_signup = state == "invite_only"
       self.raw_onboarding_state = state
-    end
-
-    def openai_model=(value)
-      old_value = raw_openai_model
-      self.raw_openai_model = value
-
-      if old_value != value && old_value.present?
-        Rails.logger.info("OpenAI model changed from #{old_value} to #{value}, clearing AI cache for all families")
-        Family.find_each do |family|
-          ClearAiCacheJob.perform_later(family)
-        end
-      end
     end
 
     # Support dynamic field access via bracket notation
@@ -331,17 +278,5 @@ class Setting < RailsSettings::Base
       def dynamic_key_name(key_str)
         "dynamic:#{key_str}"
       end
-  end
-
-  # Validates OpenAI configuration requires model when custom URI base is set
-  def self.validate_openai_config!(uri_base: nil, model: nil)
-    # Use provided values or current settings
-    uri_base_value = uri_base.nil? ? openai_uri_base : uri_base
-    model_value = model.nil? ? openai_model : model
-
-    # If custom URI base is set, model must also be set
-    if uri_base_value.present? && model_value.blank?
-      raise ValidationError, "OpenAI model is required when custom URI base is configured"
-    end
   end
 end

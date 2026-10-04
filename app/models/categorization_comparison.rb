@@ -1,9 +1,4 @@
-# One transaction categorized twice, by the provider in use and by the one that
-# is not. Recorded by Family::AutoCategorizer when shadow mode samples a run;
-# only the applied provider's answer reaches the transaction.
-#
-# `shadow_confidence` is null unless the shadow provider reports one, which the
-# LLM providers never do.
+# Historical comparison ledger; no categorization provider writes new records.
 class CategorizationComparison < ApplicationRecord
   belongs_to :family
   # Not named `transaction`: ActiveRecord already defines that method, and an

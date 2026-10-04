@@ -85,7 +85,7 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 3. Click **Save changes**.
 4. Go to [https://dashboard.plaid.com/developers/keys](https://dashboard.plaid.com/developers/keys) or click **Developers > Keys** in the sidebar.
 5. Copy your `client_id` and `secret` keys. Use the "Production" secret key.
-6. In your `docker-compose` file, below the `OPENAI_ACCESS_TOKEN: ${OPENAI_ACCESS_TOKEN}` line, add these lines:
+6. In your `docker-compose` file, add these lines to the web and worker environment blocks:
 ```
 PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
 PLAID_SECRET: ${PLAID_SECRET}

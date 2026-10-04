@@ -272,10 +272,10 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
       refute Setting.singleton_class.method_defined?(:plaid_client_id=),
         "plaid_client_id= should NOT be defined on Setting's singleton class"
 
-      # openai_model IS a declared field (defined in Setting)
+      # brand_fetch_client_id IS a declared field (defined in Setting)
       # but it's not a provider field, so it won't go through this controller
-      assert Setting.singleton_class.method_defined?(:openai_model=),
-        "openai_model= should be defined on Setting's singleton class"
+      assert Setting.singleton_class.method_defined?(:brand_fetch_client_id=),
+        "brand_fetch_client_id= should be defined on Setting's singleton class"
     end
   end
 
@@ -627,7 +627,6 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
     Setting["plaid_secret"] = nil
   end
 
-
   test "GET connect_form renders Interactive Brokers panel" do
     get connect_form_settings_providers_path(provider_key: "ibkr")
 
@@ -659,7 +658,6 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("settings.providers.drawer_trust_statement")
     refute_includes response.body, I18n.t("settings.providers.drawer_trust_statement_encryption_unconfigured")
   end
-
 
   test "GET connect_form uses shared encryption warning for provider panels" do
     ActiveRecordEncryptionConfig.stubs(:explicitly_configured?).returns(false)
@@ -782,10 +780,10 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
     with_self_hosting do
       # This test verifies the difference between respond_to? and singleton_class.method_defined?
 
-      # openai_model is a declared field
-      assert Setting.singleton_class.method_defined?(:openai_model=),
-        "openai_model= should be defined on Setting's singleton class"
-      assert Setting.respond_to?(:openai_model=),
+      # brand_fetch_client_id is a declared field
+      assert Setting.singleton_class.method_defined?(:brand_fetch_client_id=),
+        "brand_fetch_client_id= should be defined on Setting's singleton class"
+      assert Setting.respond_to?(:brand_fetch_client_id=),
         "respond_to? should return true for declared field"
 
       # plaid_client_id is a dynamic field

@@ -26,7 +26,9 @@
   <% if self_hosted? && Current.user.admin? %>
     <div class="flex flex-wrap items-center gap-2 -mt-2">
     <% if missing.include?(:crypto_provider) %>
-      <%= render DS::Button.new(
+      <%# This warning also renders inside token selection forms. A Turbo link
+          keeps the POST action without nesting a second form. %>
+      <%= render DS::Link.new(
             text: t("onchain_wallet_items.price_provider_warning.enable"),
             icon: "zap",
             variant: :outline,

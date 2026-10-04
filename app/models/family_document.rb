@@ -3,7 +3,10 @@ class FamilyDocument < ApplicationRecord
 
   has_one_attached :file
 
-  SUPPORTED_EXTENSIONS = VectorStore::Base::SUPPORTED_EXTENSIONS
+  SUPPORTED_EXTENSIONS = %w[
+    .c .cpp .css .csv .docx .gif .go .html .java .jpeg .jpg .js .json
+    .md .pdf .php .png .pptx .py .rb .sh .tar .tex .ts .txt .xlsx .xml .zip
+  ].freeze
 
   validates :filename, presence: true
   validates :status, inclusion: { in: %w[pending processing ready error] }

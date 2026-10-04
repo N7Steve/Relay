@@ -126,9 +126,10 @@ La evolución upstream se integra con estas adaptaciones:
   animaciones y añaden la restauración de foco de upstream.
 - La actualización atómica de cuentas mantiene la subida/borrado de `custom_logo`;
   una validación fallida revierte también el cambio de saldo.
-- Jev, su proveedor secundario de comparación, el descubrimiento de modelos del
-  asistente externo y los nuevos diagnósticos diferidos dependen de la misma puerta
-  `Setting.ai_features_enabled?`, tanto al mostrarlos como al ejecutarlos.
+- Fase 6 retira IA integrada, Jev, embeddings y diagnósticos IA. Los históricos
+  permanecen recuperables, con reglas explícitas y narración determinista.
+  Brandfetch se controla desde Configuración de instancia, incluso con variables
+  heredadas de logos configuradas. Ver `docs/migration/pruning-phase-6.md`.
 - Bills conserva su evolución interna. Sus proyecciones cachean sólo IDs bajo
   `transactions_projected_recurring/v7`, sin exponerse en el producto del fork.
 - Se conserva la migración ya existente

@@ -13,16 +13,11 @@ final class SureStore {
   var accounts: [SureAccount] = []
   var budgets: [SureBudget] = []
   var insights: [SureInsight] = []
-  var chats: [SureChat] = []
-  var selectedChat: SureChat?
-  var messages: [SureMessage] = []
-  var isAssistantThinking = false
   var selectedTab = SureTab.overview
 
   private(set) var baseURLString = "https://demo.sure.am"
   private var client = SureAPIClient(baseURL: URL(string: "https://demo.sure.am")!, apiKey: "")
   private var sessionGeneration = 0
-  private var chatGeneration = 0
 
   func restoreSession() async {
     let generation = sessionGeneration
@@ -49,7 +44,6 @@ final class SureStore {
       return false
     }
     sessionGeneration &+= 1
-    chatGeneration &+= 1
     let generation = sessionGeneration
     isLoading = true
     errorMessage = nil
@@ -76,22 +70,17 @@ final class SureStore {
 
   func disconnect() async {
     sessionGeneration &+= 1
-    chatGeneration &+= 1
     await unregisterPushToken()
     KeychainStore.deleteAPIKey()
     UserDefaults.standard.removeObject(forKey: "sure.pushSubscriptionID")
     UserDefaults.standard.set(false, forKey: "sure.insightNotifications")
     isConfigured = false
     isLoading = false
-    isAssistantThinking = false
     errorMessage = nil
     balanceSheet = nil
     accounts = []
     budgets = []
     insights = []
-    chats = []
-    selectedChat = nil
-    messages = []
   }
 
   func refreshAll() async {
@@ -126,26 +115,6 @@ final class SureStore {
       return
     }
 
-    do {
-      let loadedChats = try await loadAllPages(
-        path: "api/v1/chats",
-        collection: ChatCollection.self,
-        items: \.chats
-      )
-      guard sessionGeneration == generation else { return }
-      chats = loadedChats
-    } catch let error as SureAPIError {
-      guard sessionGeneration == generation else { return }
-      if case .server(status: 403, message: _) = error {
-        chats = []
-      } else {
-        errorMessage = error.localizedDescription
-      }
-    } catch {
-      guard sessionGeneration == generation else { return }
-      errorMessage = error.localizedDescription
-    }
-
     await loadInsights()
     guard sessionGeneration == generation else { return }
     if UserDefaults.standard.bool(forKey: "sure.insightNotifications") {
@@ -178,80 +147,6 @@ final class SureStore {
       guard sessionGeneration == generation else { return }
       errorMessage = error.localizedDescription
     }
-  }
-
-  func loadChat(_ chat: SureChat) async {
-    chatGeneration &+= 1
-    let generation = sessionGeneration
-    let conversationGeneration = chatGeneration
-    selectedChat = chat
-    isAssistantThinking = false
-    do {
-      let detail = try await loadLatestChatDetail(chatID: chat.id)
-      guard sessionGeneration == generation,
-            chatGeneration == conversationGeneration,
-            selectedChat?.id == chat.id else { return }
-      messages = detail.messages.sorted { $0.createdAt < $1.createdAt }
-    } catch {
-      guard sessionGeneration == generation, chatGeneration == conversationGeneration else { return }
-      errorMessage = error.localizedDescription
-    }
-  }
-
-  func newChat() {
-    chatGeneration &+= 1
-    selectedChat = nil
-    messages = []
-    isAssistantThinking = false
-  }
-
-  func sendMessage(_ content: String) async {
-    let text = content.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !text.isEmpty, !isAssistantThinking else { return }
-    let generation = sessionGeneration
-    let conversationGeneration = chatGeneration
-    isAssistantThinking = true
-    errorMessage = nil
-    do {
-      if let selectedChat {
-        let request = MessageRequest(content: text)
-        let _: MessageReceipt = try await client.post(
-          "api/v1/chats/\(selectedChat.id)/messages",
-          body: request
-        )
-        guard sessionGeneration == generation, chatGeneration == conversationGeneration else { return }
-        messages.append(SureMessage(
-          id: UUID().uuidString,
-          type: "user_message",
-          role: "user",
-          content: text,
-          createdAt: ISO8601DateFormatter().string(from: Date())
-        ))
-      } else {
-        let request = NewChatRequest(title: makeTitle(from: text), message: text)
-        let detail: ChatDetail = try await client.post("api/v1/chats", body: request)
-        guard sessionGeneration == generation, chatGeneration == conversationGeneration else { return }
-        selectedChat = detail.chat
-        messages = detail.messages.sorted { $0.createdAt < $1.createdAt }
-      }
-      try await pollForAssistantResponse(
-        sessionGeneration: generation,
-        chatGeneration: conversationGeneration
-      )
-      guard sessionGeneration == generation, chatGeneration == conversationGeneration else { return }
-      let loadedChats = try await loadAllPages(
-        path: "api/v1/chats",
-        collection: ChatCollection.self,
-        items: \.chats
-      )
-      guard sessionGeneration == generation, chatGeneration == conversationGeneration else { return }
-      chats = loadedChats
-    } catch {
-      guard sessionGeneration == generation, chatGeneration == conversationGeneration else { return }
-      errorMessage = error.localizedDescription
-    }
-    guard sessionGeneration == generation, chatGeneration == conversationGeneration else { return }
-    isAssistantThinking = false
   }
 
   func registerPushToken(_ token: String) async {
@@ -304,37 +199,6 @@ final class SureStore {
     }
   }
 
-  private func pollForAssistantResponse(sessionGeneration: Int, chatGeneration: Int) async throws {
-    guard let chat = selectedChat else { return }
-    let previousAssistantIDs = Set(messages.filter { !$0.isUser }.map(\.id))
-    let retryDelays = [3, 5, 8, 13, 21, 34]
-    for delay in retryDelays {
-      try await Task.sleep(for: .seconds(delay))
-      guard self.sessionGeneration == sessionGeneration,
-            self.chatGeneration == chatGeneration,
-            !Task.isCancelled else { return }
-      let detail: ChatDetail
-      do {
-        detail = try await loadLatestChatDetail(chatID: chat.id)
-      } catch let error as SureAPIError {
-        if case .server(status: 429, message: _) = error {
-          throw error
-        }
-        continue
-      } catch {
-        continue
-      }
-      guard self.sessionGeneration == sessionGeneration,
-            self.chatGeneration == chatGeneration else { return }
-      messages = detail.messages.sorted { $0.createdAt < $1.createdAt }
-      if messages.contains(where: { !$0.isUser && !previousAssistantIDs.contains($0.id) && !$0.content.isEmpty }) {
-        return
-      }
-    }
-    guard self.sessionGeneration == sessionGeneration, self.chatGeneration == chatGeneration else { return }
-    errorMessage = "The assistant is still working. Pull to refresh this conversation in a moment."
-  }
-
   private func loadAllPages<Collection: Decodable & Sendable, Item: Sendable>(
     path: String,
     collection: Collection.Type,
@@ -350,14 +214,6 @@ final class SureStore {
       allItems.append(contentsOf: nextPage[keyPath: items])
     }
     return allItems
-  }
-
-  private func loadLatestChatDetail(chatID: String) async throws -> ChatDetail {
-    let firstPage: ChatDetail = try await client.get("api/v1/chats/\(chatID)")
-    guard let pagination = firstPage.pagination,
-          pagination.totalPages > pagination.page else { return firstPage }
-
-    return try await client.get("api/v1/chats/\(chatID)?page=\(pagination.totalPages)")
   }
 
   private func makeLocalInsights() -> [SureInsight] {
@@ -382,7 +238,7 @@ final class SureStore {
         id: "live-largest-account",
         type: "idle_cash",
         title: "Review your largest account",
-        body: "\(largest.name) holds \(largest.balance). Ask the Assistant whether that concentration fits your goals.",
+        body: "\(largest.name) holds \(largest.balance). Review whether that concentration fits your goals.",
         priority: "medium",
         status: "active"
       ))
@@ -400,10 +256,6 @@ final class SureStore {
     return Array(generated.prefix(3))
   }
 
-  private func makeTitle(from content: String) -> String {
-    String(content.prefix(48))
-  }
-
   private func normalizedURL(_ input: String) -> URL? {
     guard var components = URLComponents(string: input.trimmingCharacters(in: .whitespacesAndNewlines)),
           components.scheme == "https", components.host != nil else { return nil }
@@ -416,7 +268,6 @@ enum SureTab: Hashable {
   case overview
   case accounts
   case budgets
-  case assistant
 }
 
 protocol PaginatedCollection {
@@ -425,26 +276,6 @@ protocol PaginatedCollection {
 
 extension AccountCollection: PaginatedCollection {}
 extension BudgetCollection: PaginatedCollection {}
-extension ChatCollection: PaginatedCollection {}
-
-struct NewChatRequest: Codable, Sendable {
-  var title: String
-  var message: String
-}
-
-struct MessageRequest: Codable, Sendable {
-  var content: String
-}
-
-struct MessageReceipt: Codable, Sendable {
-  var id: String
-  var chatId: String
-
-  enum CodingKeys: String, CodingKey {
-    case id
-    case chatId = "chat_id"
-  }
-}
 
 struct PushSubscriptionRequest: Codable, Sendable {
   var token: String

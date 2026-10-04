@@ -26,18 +26,10 @@ class UsersController < ApplicationController
         redirect_to settings_profile_path, alert: error_message
       end
     else
-      was_ai_enabled = @user.ai_enabled
       if @user.update(user_params.except(:redirect_to, :delete_profile_image))
         @user.profile_image.purge if should_purge_profile_image?
 
-        # Add a special notice if AI was just enabled or disabled
-        notice = if !was_ai_enabled && @user.ai_enabled
-          "AI Assistant has been enabled successfully."
-        elsif was_ai_enabled && !@user.ai_enabled
-          "AI Assistant has been disabled."
-        else
-          t(".success")
-        end
+        notice = t(".success")
 
         respond_to do |format|
           format.html { handle_redirect(notice) }
@@ -89,12 +81,6 @@ class UsersController < ApplicationController
         redirect_to goals_onboarding_path
       when "appearance"
         redirect_to settings_appearance_path, notice: notice
-      when "ai_prompts"
-        if ai_features_enabled?
-          redirect_to settings_ai_prompts_path, notice: notice
-        else
-          redirect_to settings_profile_path, notice: notice
-        end
       else
         redirect_to settings_profile_path, notice: notice
       end
@@ -121,12 +107,10 @@ class UsersController < ApplicationController
         family_attrs << { enabled_currencies: [] }
       end
 
-      ai_preferences = ai_features_enabled? ? %i[show_ai_sidebar ai_enabled] : []
 
       params.require(:user).permit(
         :first_name, :last_name, :email, :profile_image, :redirect_to, :delete_profile_image, :onboarded_at,
         :show_sidebar, :default_period, :default_account_order, :theme, :set_onboarding_preferences_at, :set_onboarding_goals_at, :locale,
-        *ai_preferences,
         family_attributes: family_attrs,
         goals: []
       )

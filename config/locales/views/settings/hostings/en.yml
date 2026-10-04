@@ -70,6 +70,8 @@ en:
           frankfurter: Frankfurter
           mansa: Mansa
       brand_fetch_settings:
+        enabled_label: Use Brandfetch
+        enabled_description: Allow external logos. Your choice takes precedence over the legacy environment setting; a Client ID is still required.
         description: Enter the Client ID provided by Brandfetch
         env_configured_message: You have successfully configured your Brandfetch Client ID through the BRAND_FETCH_CLIENT_ID environment variable.
         show_details: "(show details)"

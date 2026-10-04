@@ -297,21 +297,6 @@ Rails.application.routes.draw do
     end
   end
 
-  # AI chats
-  resources :chats do
-    resources :messages, only: :create do
-      member do
-        # Client-side watchdog reports a "Thinking…" bubble that never received
-        # a response (e.g. the background worker is down) so it can be failed.
-        post :report_timeout
-      end
-    end
-
-    member do
-      post :retry
-    end
-  end
-
   resources :family_exports, only: %i[new create index destroy] do
     member do
       get :download
@@ -407,8 +392,6 @@ Rails.application.routes.draw do
     end
     resources :sso_identities, only: :destroy
     resources :api_keys, only: [ :index, :show, :new, :create, :destroy ]
-    resource :ai_prompts, only: %i[show update]
-    resource :llm_usage, only: :show
     resource :guides, only: :show
     get "bank_sync", to: redirect("/settings/providers", status: 301)
     resource :providers, only: %i[show update] do
@@ -489,7 +472,6 @@ Rails.application.routes.draw do
     collection do
       get :merge
       post :perform_merge
-      post :enhance
     end
   end
 
@@ -580,11 +562,9 @@ Rails.application.routes.draw do
     # CSRF protection rather than a plain URL.
     collection do
       post :detect
-      post :ai_review, to: "bills/ai_reviews#create"
       post :reset_feed_token
     end
     member do
-      get :smart_configuration, to: "bills/smart_configurations#show"
     end
   end
   get "bills_feed/:token", to: "bills_feeds#show", as: :bills_feed, defaults: { format: :ics }
@@ -615,7 +595,6 @@ Rails.application.routes.draw do
       # URL and outside CSRF protection. Every call site passes method: :post.
       post :identify
       post :cleanup
-      post :smart_fill, to: "recurring_transactions/smart_fills#create"
       patch :update_settings
     end
 
@@ -673,7 +652,6 @@ Rails.application.routes.draw do
       delete :destroy_all
       get :confirm_all
       post :apply_all
-      post :clear_ai_cache
     end
   end
 
@@ -760,7 +738,6 @@ Rails.application.routes.draw do
       post "auth/sso_exchange", to: "auth#sso_exchange"
       post "auth/sso_link", to: "auth#sso_link"
       post "auth/sso_create_account", to: "auth#sso_create_account"
-      patch "auth/enable_ai", to: "auth#enable_ai"
 
       # Production API endpoints
       resources :accounts, only: [ :index, :show ]
@@ -804,12 +781,6 @@ Rails.application.routes.draw do
         get :latest, on: :collection
       end
       resources :provider_connections, only: [ :index ]
-
-      resources :chats, only: [ :index, :show, :create, :update, :destroy ] do
-        resources :messages, only: [ :create ] do
-          post :retry, on: :collection
-        end
-      end
 
       get "users/reset/status", to: "users#reset_status"
       delete "users/reset", to: "users#reset"
@@ -1002,7 +973,6 @@ Rails.application.routes.draw do
   terms_url = ENV["LEGAL_TERMS_URL"].presence
   get "privacy", to: privacy_url ? redirect(privacy_url) : "pages#privacy"
   get "terms", to: terms_url ? redirect(terms_url) : "pages#terms"
-  get "intro", to: "pages#intro"
 
   # Admin namespace for super admin functionality
   namespace :admin do
@@ -1028,8 +998,6 @@ Rails.application.routes.draw do
     # that happen to round-trip cleanly). The controller file is singular,
     # so name it explicitly.
     resource :system_health, only: :show, controller: "system_health" do
-      get :ai_status
-      post :verify_worker_ai
       post :send_test_push
     end
   end

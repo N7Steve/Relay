@@ -1,5 +1,4 @@
 class FamilyMerchantsController < ApplicationController
-  guard_feature unless: -> { ai_features_enabled? }, only: :enhance
   before_action :set_merchant, only: %i[edit update destroy]
 
   def index
@@ -28,8 +27,6 @@ class FamilyMerchantsController < ApplicationController
     assigned_ids = @all_provider_merchants.pluck(:id)
     @unlinked_merchants = ProviderMerchant.where(id: recently_unlinked_ids - assigned_ids).alphabetically
 
-    @enhanceable_count = @all_provider_merchants.where(website_url: [ nil, "" ]).count
-    @llm_available = Provider::Registry.get_provider(:openai).present?
 
     @pagy_family_merchants, @family_merchants = pagy(family_scope, page_param: :family_page, limit: safe_per_page)
     @pagy_provider_merchants, @provider_merchants = pagy(provider_scope, page_param: :provider_page, limit: safe_per_page)
@@ -96,18 +93,6 @@ class FamilyMerchantsController < ApplicationController
     end
   end
 
-  def enhance
-    cache_key = "enhance_provider_merchants:#{Current.family.id}"
-
-    already_running = !Rails.cache.write(cache_key, true, expires_in: 10.minutes, unless_exist: true)
-
-    if already_running
-      return redirect_to family_merchants_path, alert: t(".already_running")
-    end
-
-    EnhanceProviderMerchantsJob.perform_later(Current.family)
-    redirect_to family_merchants_path, notice: t(".success")
-  end
 
   def merge
     @merchants = all_family_merchants

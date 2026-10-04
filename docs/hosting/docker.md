@@ -5,7 +5,7 @@ For a complete pasteable TrueNAS Custom App, use
 [TrueNAS installation and update guide](truenas.md).
 
 Relay is built from this repository. There is no selected public release channel
-or default upstream application image. The standard and AI Compose examples
+or default upstream application image. The standard Compose examples
 require `RELAY_IMAGE` explicitly and use the same image for web and worker.
 
 ## Prepare an image
@@ -23,7 +23,7 @@ which it was built; building on a workstation does not install it on a server.
 
 ## Prepare configuration
 
-Copy `compose.example.yml` (or the optional AI example) and `.env.example` to the
+Copy `compose.example.yml` and `.env.example` to the
 chosen installation directory. Keep real credentials out of Git. Configure
 `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` and `SECRET_KEY_BASE`
 explicitly. The new installation defaults are `relay_production` and `relay_user`; password

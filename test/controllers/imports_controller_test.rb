@@ -120,20 +120,6 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[name='import[type]'][value='DocumentImport']", count: 0
   end
 
-  test "global AI gate blocks direct PDF uploads" do
-    Setting.stubs(:ai_features_enabled?).returns(false)
-
-    assert_no_difference [ "AccountStatement.count", "Import.where(type: 'PdfImport').count" ] do
-      post imports_url, params: {
-        import: {
-          import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-        }
-      }
-    end
-
-    assert_response :forbidden
-  end
-
   test "cancel marks a lost import as failed" do
     import = imports(:transaction)
     import.update_columns(status: "importing", updated_at: 2.hours.ago)
@@ -196,31 +182,6 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to import_upload_url(Import.all.ordered.first)
   end
 
-  test "uploads supported non-pdf document for vector store without creating import" do
-    adapter = mock("vector_store_adapter")
-    adapter.stubs(:supported_extensions).returns(%w[.csv .pdf])
-    VectorStore::Registry.stubs(:adapter).returns(adapter)
-
-    family_document = family_documents(:tax_return)
-    Family.any_instance.expects(:upload_document).with do |file_content:, filename:, **|
-      assert_not_empty file_content
-      assert_equal "valid.csv", filename
-      true
-    end.returns(family_document)
-
-    assert_no_difference "Import.count" do
-      post imports_url, params: {
-        import: {
-          type: "DocumentImport",
-          import_file: file_fixture_upload("imports/valid.csv", "text/csv")
-        }
-      }
-    end
-
-    assert_redirected_to new_import_url
-    assert_equal I18n.t("imports.create.document_uploaded"), flash[:notice]
-  end
-
   test "summary renders the import outcome for a pdf import" do
     get summary_import_url(imports(:pdf_with_rows))
 
@@ -232,170 +193,6 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     get summary_import_url(imports(:transaction))
 
     assert_response :not_found
-  end
-
-  test "uploads pdf document as PdfImport when using DocumentImport option" do
-    adapter = mock("vector_store_adapter")
-    adapter.stubs(:supported_extensions).returns(%w[.pdf .txt])
-    VectorStore::Registry.stubs(:adapter).returns(adapter)
-
-    @user.family.expects(:upload_document).never
-
-    assert_difference "Import.count", 1 do
-      assert_difference "AccountStatement.count", 1 do
-        post imports_url, params: {
-          import: {
-            type: "DocumentImport",
-            import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-          }
-        }
-      end
-    end
-
-    created_import = Import.order(:created_at).last
-    assert_equal "PdfImport", created_import.type
-    assert_equal AccountStatement.order(:created_at).last, created_import.account_statement
-    assert_not created_import.pdf_file.attached?
-    assert_redirected_to import_url(created_import)
-    assert_equal I18n.t("imports.create.pdf_processing"), flash[:notice]
-  end
-
-  test "uploads pdf import through account statement" do
-    assert_difference "AccountStatement.count", 1 do
-      assert_difference "Import.where(type: 'PdfImport').count", 1 do
-        post imports_url, params: {
-          import: {
-            import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-          }
-        }
-      end
-    end
-
-    statement = AccountStatement.order(:created_at).last
-    created_import = PdfImport.order(:created_at).last
-    assert_equal statement, created_import.account_statement
-    assert_not created_import.pdf_file.attached?
-    assert_redirected_to import_url(created_import)
-    assert_equal I18n.t("imports.create.pdf_processing"), flash[:notice]
-  end
-
-  test "guest cannot create statement backed pdf import" do
-    sign_in users(:intro_user)
-
-    assert_no_difference [ "AccountStatement.count", "Import.where(type: 'PdfImport').count" ] do
-      assert_no_enqueued_jobs only: ProcessPdfJob do
-        post imports_url, params: {
-          import: {
-            import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-          }
-        }
-      end
-    end
-
-    assert_redirected_to new_import_url
-    assert_equal I18n.t("accounts.not_authorized"), flash[:alert]
-  end
-
-  test "duplicate pdf import reuses account statement" do
-    statement = AccountStatement.create_from_upload!(
-      family: @user.family,
-      account: nil,
-      file: uploaded_file(
-        filename: "existing_statement.pdf",
-        content_type: "application/pdf",
-        content: file_fixture("imports/sample_bank_statement.pdf").binread
-      )
-    )
-
-    assert_no_difference "AccountStatement.count" do
-      assert_difference "Import.where(type: 'PdfImport').count", 1 do
-        post imports_url, params: {
-          import: {
-            import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-          }
-        }
-      end
-    end
-
-    created_import = PdfImport.order(:created_at).last
-    assert_equal statement, created_import.account_statement
-    assert_redirected_to import_url(created_import)
-  end
-
-  test "duplicate pdf import does not enqueue processing twice for reused import" do
-    assert_difference "AccountStatement.count", 1 do
-      assert_difference "Import.where(type: 'PdfImport').count", 1 do
-        assert_enqueued_jobs 1, only: ProcessPdfJob do
-          post imports_url, params: {
-            import: {
-              import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-            }
-          }
-
-          post imports_url, params: {
-            import: {
-              import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-            }
-          }
-        end
-      end
-    end
-
-    created_import = PdfImport.order(:created_at).last
-    assert_equal "importing", created_import.status
-    assert_redirected_to import_url(created_import)
-  end
-
-  test "duplicate pdf import for inaccessible statement does not create import" do
-    AccountStatement.create_from_upload!(
-      family: @user.family,
-      account: accounts(:investment),
-      file: uploaded_file(
-        filename: "existing_statement.pdf",
-        content_type: "application/pdf",
-        content: file_fixture("imports/sample_bank_statement.pdf").binread
-      )
-    )
-
-    sign_in users(:family_member)
-
-    assert_no_difference [ "AccountStatement.count", "Import.where(type: 'PdfImport').count" ] do
-      post imports_url, params: {
-        import: {
-          import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-        }
-      }
-    end
-
-    assert_redirected_to new_import_url
-    assert_equal I18n.t("imports.create.duplicate_pdf_unavailable"), flash[:alert]
-  end
-
-  test "read only shared user cannot reuse duplicate statement backed pdf import" do
-    AccountStatement.create_from_upload!(
-      family: @user.family,
-      account: accounts(:credit_card),
-      file: uploaded_file(
-        filename: "existing_statement.pdf",
-        content_type: "application/pdf",
-        content: file_fixture("imports/sample_bank_statement.pdf").binread
-      )
-    )
-
-    sign_in users(:family_member)
-
-    assert_no_difference [ "AccountStatement.count", "Import.where(type: 'PdfImport').count" ] do
-      assert_no_enqueued_jobs only: ProcessPdfJob do
-        post imports_url, params: {
-          import: {
-            import_file: file_fixture_upload("imports/sample_bank_statement.pdf", "application/pdf")
-          }
-        }
-      end
-    end
-
-    assert_redirected_to new_import_url
-    assert_equal I18n.t("imports.create.duplicate_pdf_unavailable"), flash[:alert]
   end
 
   test "setting statement backed pdf import account links source statement" do
@@ -478,24 +275,6 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to account_url(account)
     assert_equal I18n.t("accounts.not_authorized"), flash[:alert]
-  end
-
-  test "rejects unsupported document type for DocumentImport option" do
-    adapter = mock("vector_store_adapter")
-    adapter.stubs(:supported_extensions).returns(%w[.pdf .txt])
-    VectorStore::Registry.stubs(:adapter).returns(adapter)
-
-    assert_no_difference "Import.count" do
-      post imports_url, params: {
-        import: {
-          type: "DocumentImport",
-          import_file: file_fixture_upload("profile_image.png", "image/png")
-        }
-      }
-    end
-
-    assert_redirected_to new_import_url
-    assert_equal I18n.t("imports.create.invalid_document_file_type"), flash[:alert]
   end
 
   test "publishes import" do

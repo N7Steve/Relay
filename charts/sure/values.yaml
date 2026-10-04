@@ -40,7 +40,6 @@ rails:
       ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ""
       ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ""
       # Third party optional keys
-      OPENAI_ACCESS_TOKEN: ""
       OIDC_CLIENT_ID: ""
       OIDC_CLIENT_SECRET: ""
       OIDC_ISSUER: ""
@@ -49,7 +48,6 @@ rails:
   settings:
     SELF_HOSTED: "true"
     ONBOARDING_STATE: "open"
-    AI_DEBUG_MODE: "false"
 
 # Database: CloudNativePG (operator chart dependency) and a Cluster CR (optional)
 cloudnative-pg:

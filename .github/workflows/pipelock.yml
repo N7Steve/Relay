@@ -39,7 +39,6 @@ jobs:
           exclude-paths: |
             .env.example
             compose.example.yml
-            compose.example.ai.yml
             docs/hosting/ai.md
             app/models/provider/binance.rb
             config/locales/views/reports/ca.yml
@@ -80,14 +79,7 @@ jobs:
           assert_no_blocklist pipelock.example.yaml
           vector_categories="dlp,entropy,scheme,response_injection,mcp_response,mcp_input,mcp_tools,clean"
           pipelock test --fail-on-gap --category "${vector_categories}" --config pipelock.example.yaml
-          docker compose -f compose.example.ai.yml config --quiet
-
-          external_services="$(docker compose -f compose.example.ai.yml --profile external-assistant config --services)"
-          grep -qx 'openclaw' <<<"${external_services}"
-          if grep -Eqx 'ollama|ollama-webui' <<<"${external_services}"; then
-            echo "::error::External assistant profile exposes local AI services"
-            exit 1
-          fi
+          docker compose -f compose.example.yml config --quiet
 
           rendered_config="${RUNNER_TEMP}/sure-pipelock.yaml"
           helm template sure charts/sure \
@@ -101,30 +93,9 @@ jobs:
           assert_no_blocklist "${rendered_config}"
           pipelock test --fail-on-gap --category "${vector_categories}" --config "${rendered_config}"
 
-          helm template sure charts/sure \
-            --set rails.externalAssistant.enabled=true \
-            --set rails.externalAssistant.url=https://agent.vendor.example/v1/chat \
-            --set pipelock.enabled=true \
-            >/dev/null
-
-          if rejection_output="$(helm template sure charts/sure \
-            --set rails.externalAssistant.enabled=true \
-            --set rails.externalAssistant.url=https://agent.vendor.example/v1/chat \
-            --set pipelock.enabled=false \
-            2>&1)"; then
-            echo "::error::External assistant rendered without Pipelock"
-            exit 1
-          fi
-          expected_rejection="pipelock.requireForExternalAssistant is true but pipelock.enabled is false"
-          if ! grep -Fq "${expected_rejection}" <<<"${rejection_output}"; then
-            echo "::error::External assistant failed for an unexpected reason"
-            printf '%s\n' "${rejection_output}"
-            exit 1
-          fi
-
+          # Retired assistant overrides cannot require or expose a transport.
           helm template sure charts/sure \
             --set rails.externalAssistant.enabled=true \
             --set rails.externalAssistant.url=https://agent.vendor.example/v1/chat \
             --set pipelock.enabled=false \
-            --set pipelock.requireForExternalAssistant=false \
             >/dev/null

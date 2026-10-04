@@ -24,6 +24,23 @@
     <% end %>
   </div>
 
+  <%= form_with url: settings_hosting_path, method: :patch,
+        data: { controller: "auto-submit-form" } do %>
+    <div class="flex items-center justify-between gap-4">
+      <div class="text-sm space-y-1">
+        <label class="text-primary font-medium" for="setting_external_logos_enabled"><%= t(".enabled_label") %></label>
+        <p class="text-secondary"><%= t(".enabled_description") %></p>
+      </div>
+      <%= render DS::Toggle.new(
+            id: "setting_external_logos_enabled",
+            name: "setting[external_logos_enabled]",
+            checked: ExternalAccess.enabled?(:logos),
+            disabled: !Current.user.admin?,
+            data: { auto_submit_form_target: "auto" }
+      ) %>
+    </div>
+  <% end %>
+
   <%= styled_form_with model: Setting.new,
                        url: settings_hosting_path,
                        method: :patch,

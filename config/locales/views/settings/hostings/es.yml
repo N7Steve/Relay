@@ -63,6 +63,8 @@ es:
         description: Elige qué servicio usar para obtener tipos de cambio y precios de acciones. Yahoo Finance es gratuito y no requiere clave API. Twelve Data requiere una clave API (gratuita disponible) pero ofrece mayor cobertura de datos.
         securities_provider_label: Proveedor de valores (Precios de acciones)
       brand_fetch_settings:
+        enabled_label: Usar Brandfetch
+        enabled_description: Permite cargar logos externos. Esta elección tiene prioridad sobre la variable de entorno anterior; sigue siendo necesario un Client ID.
         description: Introduce el ID de Cliente proporcionado por Brandfetch
         env_configured_message: Has configurado correctamente tu Client ID de Brandfetch mediante la variable de entorno BRAND_FETCH_CLIENT_ID.
         show_details: (ver detalles)

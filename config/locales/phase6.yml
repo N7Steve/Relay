@@ -1,0 +1,12 @@
+en:
+  rules:
+    retired_ai_action: "Retired AI action (inactive)"
+  imports:
+    pdf_import:
+      ai_retired: "AI extraction has been retired. The original document is preserved."
+es:
+  rules:
+    retired_ai_action: "Acción de IA retirada (inactiva)"
+  imports:
+    pdf_import:
+      ai_retired: "La extracción con IA se ha retirado. Se conserva el documento original."

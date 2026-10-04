@@ -113,7 +113,6 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "creating account from guest invitation assigns guest role and intro layout" do
-    User.any_instance.stubs(:openai_configured?).returns(true)
     invitation = invitations(:one)
     invitation.update!(role: "guest", email: "guest-signup@example.com")
 
@@ -130,7 +129,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert created_user.ui_layout_intro?
     assert_not created_user.show_sidebar?
     assert_not created_user.show_ai_sidebar?
-    assert created_user.ai_enabled?
+    assert_not created_user.ai_enabled?
   end
 
   test "creating account from invitation shares existing family accounts when family shares by default" do

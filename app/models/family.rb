@@ -7,7 +7,7 @@ class Family < ApplicationRecord
   # Historical instance billing data is retained until the schema cleanup phase.
   has_one :subscription, dependent: :destroy
 
-  include Syncable, AutoTransferMatchable, VectorSearchable
+  include Syncable, AutoTransferMatchable
   include PlaidConnectable, SimplefinConnectable, LunchflowConnectable, AkahuConnectable, EnableBankingConnectable
   include CoinbaseConnectable, BinanceConnectable, KrakenConnectable, CoinspotConnectable, CoinstatsConnectable, SnaptradeConnectable, MercuryConnectable, BrexConnectable, SophtronConnectable
   include IndexaCapitalConnectable, IbkrConnectable, WiseConnectable
@@ -18,7 +18,6 @@ class Family < ApplicationRecord
   include QuestradeConnectable
   include RedbarkConnectable
   include OnchainWalletConnectable
-  include AiPromptable
 
   DATE_FORMATS = [
     [ "MM-DD-YYYY", "%m-%d-%Y" ],
@@ -37,7 +36,7 @@ class Family < ApplicationRecord
 
 
   MONIKERS = [ "Family", "Group" ].freeze
-  # Accept legacy values on restore; routing always uses the builtin assistant.
+  # Accept legacy values on restore; no assistant transport remains.
   ASSISTANT_TYPES = %w[builtin external].freeze
 
   # Which provider categorizes this family's transactions. Family-level rather
@@ -50,6 +49,7 @@ class Family < ApplicationRecord
   has_many :accounts, dependent: :destroy
   has_many :invitations, dependent: :destroy
 
+  has_many :family_documents, dependent: :destroy
   has_many :imports, dependent: :destroy
   has_many :import_sessions, dependent: :destroy
   has_many :import_source_mappings, dependent: :destroy
@@ -202,82 +202,6 @@ class Family < ApplicationRecord
             numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
   validates :categorization_shadow_rate,
             numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
-
-  # Single definition of the ENV-over-column precedence, so the resolver and the
-  # settings UI can never disagree about which provider is actually in force.
-  def effective_categorization_provider
-    ENV["CATEGORIZATION_PROVIDER"].presence || categorization_provider
-  end
-
-  # The provider that will actually categorize this family's transactions,
-  # falling back to the LLM path when Jev is unselected or unconfigured.
-  # Credentials alone never select Jev; the family has to choose it, because
-  # this decides whose transaction descriptions reach a third party.
-  #
-  # Anything naming the provider calls this, including the rule confirmation
-  # screen's cost estimate, or it quotes a provider that will not run. Views
-  # call it while rendering, so it writes nothing itself; a caller that runs
-  # categorization passes a block to hear why Jev could not be built.
-  def resolved_categorization_provider(&on_jev_error)
-    return nil unless Setting.ai_features_enabled?
-
-    jev = configured_jev_provider(&on_jev_error) if effective_categorization_provider == "jev"
-
-    # Honors Setting.llm_provider (#2113); Provider::Anthropic gained
-    # auto_categorize in #1984, so either LLM provider can serve this.
-    jev || Provider::Registry.preferred_llm_provider
-  end
-
-  def categorization_model_name
-    provider = resolved_categorization_provider
-    return unless provider
-
-    case provider
-    when Provider::Jev then Provider::Jev.effective_model
-    when Provider::Anthropic then Provider::Anthropic.effective_model
-    else Provider::Openai.effective_model
-    end
-  end
-
-  # Answers below this confidence are not applied. Zero applies everything and
-  # is the default. Only providers reporting calibrated confidence can be gated;
-  # the LLM providers return a bare category name. Clamped because the ENV
-  # override bypasses both the column validation and the DB check constraint.
-  def effective_categorization_confidence_threshold
-    (ENV["CATEGORIZATION_CONFIDENCE_THRESHOLD"].presence || categorization_confidence_threshold).to_f.clamp(0.0, 1.0)
-  end
-
-  # Fraction of categorization runs that also ask the provider not in use, for
-  # comparison only. Zero disables it. Doubles spend on the runs it samples, so
-  # it is sampled rather than all-or-nothing. Clamped because `rand < rate` on
-  # an unbounded override samples every run.
-  def effective_categorization_shadow_rate
-    (ENV["CATEGORIZATION_SHADOW_RATE"].presence || categorization_shadow_rate).to_f.clamp(0.0, 1.0)
-  end
-
-  # The provider to run alongside the one in use, for comparison. Symmetric —
-  # returns whichever of the two is not selected, so either can be trialled
-  # against the other without a second mechanism.
-  def shadow_categorization_provider(&on_jev_error)
-    return nil unless Setting.ai_features_enabled?
-
-    if effective_categorization_provider == "jev"
-      Provider::Registry.preferred_llm_provider
-    else
-      configured_jev_provider(&on_jev_error)
-    end
-  end
-
-  # Returns Jev, or nil when it cannot be built. The registry constructs a fresh
-  # Provider::Jev per lookup and its constructor rejects a cleartext endpoint,
-  # which JEV_ENDPOINT can set without passing the settings form's check.
-  def configured_jev_provider
-    Provider::Registry.get_provider(:jev)
-  rescue Provider::Error => error
-    yield error if block_given?
-    nil
-  end
-  private :configured_jev_provider
 
   validates :default_account_sharing, inclusion: { in: SHARING_DEFAULTS }
   validates :personal_budgets, inclusion: { in: [ true, false ] }
@@ -489,44 +413,6 @@ class Family < ApplicationRecord
       .pluck(:merchant_id)
     family_merchant_ids = merchants.pluck(:id)
     Merchant.where(id: (assigned_ids + recently_unlinked_ids + family_merchant_ids).uniq)
-  end
-
-  def auto_categorize_transactions_later(transactions, rule_run_id: nil)
-    AutoCategorizeJob.perform_later(self, transaction_ids: transactions.pluck(:id), rule_run_id: rule_run_id)
-  end
-
-  def auto_categorize_transactions(transaction_ids)
-    bayes_result = Family::BayesCategorizer.new(self).classify_and_apply(transaction_ids)
-    remaining_ids = Array(transaction_ids) - bayes_result.categorized_ids
-
-    # Bayes handled everything with sufficient confidence — skip the LLM
-    # categorizer entirely (including its no-provider error contract).
-    if bayes_result.categorized_ids.any? && remaining_ids.empty?
-      DebugLogEntry.capture(
-        category: "auto_categorization",
-        level: "info",
-        message: "Bayesian categorization handled all transactions; skipped LLM categorization",
-        source: self.class.name,
-        family: self,
-        metadata: {
-          requested_transaction_ids: Array(transaction_ids),
-          categorized_transaction_ids: bayes_result.categorized_ids,
-          modified_count: bayes_result.modified_count
-        }
-      )
-      return bayes_result.modified_count
-    end
-
-    llm_modified_count = AutoCategorizer.new(self, transaction_ids: remaining_ids).auto_categorize
-    bayes_result.modified_count + llm_modified_count
-  end
-
-  def auto_detect_transaction_merchants_later(transactions, rule_run_id: nil)
-    AutoDetectMerchantsJob.perform_later(self, transaction_ids: transactions.pluck(:id), rule_run_id: rule_run_id)
-  end
-
-  def auto_detect_transaction_merchants(transaction_ids)
-    AutoMerchantDetector.new(self, transaction_ids: transaction_ids).auto_detect
   end
 
   # Memoized per user: the layout renders the account sidebar on every page

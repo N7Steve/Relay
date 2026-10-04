@@ -440,48 +440,6 @@ class UserTest < ActiveSupport::TestCase
     assert_match %r{issuer=Relay}, user.provisioning_uri
   end
 
-  test "ai_available? returns true when openai access token set in settings" do
-    previous = Setting.openai_access_token
-    with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
-      Setting.openai_access_token = nil
-      assert_not @user.ai_available?
-
-      Setting.openai_access_token = "token"
-      assert @user.ai_available?
-    end
-  ensure
-    Setting.openai_access_token = previous
-  end
-
-  test "legacy external credentials do not make AI available" do
-    @user.family.update!(assistant_type: "external")
-    @user.stubs(:openai_configured?).returns(false)
-    @user.stubs(:anthropic_configured?).returns(false)
-    with_env_overrides("ASSISTANT_TYPE" => "external", "EXTERNAL_ASSISTANT_URL" => "https://retired.example.com/chat", "EXTERNAL_ASSISTANT_TOKEN" => "legacy") do
-      assert_not @user.ai_available?
-      @user.stubs(:openai_configured?).returns(true)
-      assert @user.ai_available?
-    end
-  end
-
-  test "intro layout collapses sidebars and enables ai" do
-    User.any_instance.stubs(:openai_configured?).returns(true)
-    user = User.new(
-      family: families(:empty),
-      email: "intro-new@example.com",
-      password: "Password1!",
-      password_confirmation: "Password1!",
-      role: :guest,
-      ui_layout: :intro
-    )
-
-    assert user.save, user.errors.full_messages.to_sentence
-    assert user.ui_layout_intro?
-    assert_not user.show_sidebar?
-    assert_not user.show_ai_sidebar?
-    assert user.ai_enabled?
-  end
-
   test "non-guest role cannot persist intro layout" do
     user = User.new(
       family: families(:empty),
@@ -503,88 +461,6 @@ class UserTest < ActiveSupport::TestCase
 
     assert user.ui_layout_dashboard?
     assert user.show_sidebar?
-    assert user.show_ai_sidebar?
-  end
-
-  test "new member defaults show_ai_sidebar to false when AI is not available" do
-    previous = Setting.openai_access_token
-    with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
-      Setting.openai_access_token = nil
-      user = User.new(
-        family: families(:empty),
-        email: "member-no-ai@example.com",
-        password: "Password1!",
-        password_confirmation: "Password1!",
-        role: :member
-      )
-      assert user.save, user.errors.full_messages.to_sentence
-      assert_not user.show_ai_sidebar?
-    end
-  ensure
-    Setting.openai_access_token = previous
-  end
-
-  test "new admin defaults show_ai_sidebar to true even when AI is not available" do
-    previous = Setting.openai_access_token
-    with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
-      Setting.openai_access_token = nil
-      user = User.new(
-        family: families(:empty),
-        email: "admin-no-ai@example.com",
-        password: "Password1!",
-        password_confirmation: "Password1!",
-        role: :admin
-      )
-      assert user.save, user.errors.full_messages.to_sentence
-      assert user.show_ai_sidebar?
-    end
-  ensure
-    Setting.openai_access_token = previous
-  end
-
-  test "new member defaults show_ai_sidebar to true when AI is available" do
-    User.any_instance.stubs(:openai_configured?).returns(true)
-
-    user = User.new(
-      family: families(:empty),
-      email: "member-with-ai@example.com",
-      password: "Password1!",
-      password_confirmation: "Password1!",
-      role: :member
-    )
-    assert user.save, user.errors.full_messages.to_sentence
-    assert user.show_ai_sidebar?
-  end
-
-  test "new guest defaults show_ai_sidebar to false when AI is not available" do
-    previous = Setting.openai_access_token
-    with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
-      Setting.openai_access_token = nil
-      user = User.new(
-        family: families(:empty),
-        email: "guest-no-ai@example.com",
-        password: "Password1!",
-        password_confirmation: "Password1!",
-        role: :guest
-      )
-      assert user.save, user.errors.full_messages.to_sentence
-      assert_not user.show_ai_sidebar?
-    end
-  ensure
-    Setting.openai_access_token = previous
-  end
-
-  test "new guest defaults show_ai_sidebar to false when AI is available" do
-    User.any_instance.stubs(:openai_configured?).returns(true)
-
-    user = User.new(
-      family: families(:empty),
-      email: "guest-with-ai@example.com",
-      password: "Password1!",
-      password_confirmation: "Password1!",
-      role: :guest
-    )
-    assert user.save, user.errors.full_messages.to_sentence
     assert_not user.show_ai_sidebar?
   end
 

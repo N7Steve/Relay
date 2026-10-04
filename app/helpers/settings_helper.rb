@@ -32,9 +32,7 @@ module SettingsHelper
       {
         header: t("settings.settings_nav.integrations_section_title"),
         items: [
-          settings_nav_item(:api_keys_label, :settings_api_keys_path, "key", visible: admin_user?),
-          settings_nav_item(:ai_prompts_label, :settings_ai_prompts_path, "bot", visible: ai_admin_user?),
-          settings_nav_item(:llm_usage_label, :settings_llm_usage_path, "activity", visible: ai_admin_user?)
+          settings_nav_item(:api_keys_label, :settings_api_keys_path, "key", visible: admin_user?)
         ]
       },
       {
@@ -332,9 +330,6 @@ module SettingsHelper
       Current.user&.super_admin?
     end
 
-    def ai_admin_user?
-      ai_features_enabled? && admin_user?
-    end
 
     def self_hosted_and_admin?
       self_hosted? && admin_user?

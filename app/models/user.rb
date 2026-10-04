@@ -195,26 +195,17 @@ class User < ApplicationRecord
     end
   end
 
+  # Historical preferences cannot enable the retired assistant.
   def show_ai_sidebar?
-    Setting.ai_features_enabled? && show_ai_sidebar
+    false
   end
 
   def ai_available?
-    return false unless Setting.ai_features_enabled?
-
-    openai_configured? || anthropic_configured?
-  end
-
-  def openai_configured?
-    Provider::Openai.configured?
-  end
-
-  def anthropic_configured?
-    Provider::Anthropic.configured?
+    false
   end
 
   def ai_enabled?
-    ai_enabled && ai_available?
+    false
   end
 
   def self.default_ui_layout

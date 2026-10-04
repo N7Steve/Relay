@@ -8,7 +8,6 @@ import 'providers/categories_provider.dart';
 import 'providers/merchants_provider.dart';
 import 'providers/tags_provider.dart';
 import 'providers/transactions_provider.dart';
-import 'providers/chat_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/privacy_provider.dart';
 import 'screens/backend_config_screen.dart';
@@ -65,13 +64,13 @@ class SureApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LogService.instance),
         ChangeNotifierProvider(create: (_) => ConnectivityService()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => CategoriesProvider()),
         ChangeNotifierProvider(create: (_) => MerchantsProvider()),
         ChangeNotifierProvider(create: (_) => TagsProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
-            create: (_) => PrivacyProvider(initialHidden: moneyHidden)),
+          create: (_) => PrivacyProvider(initialHidden: moneyHidden),
+        ),
         ChangeNotifierProxyProvider<ConnectivityService, AccountsProvider>(
           create: (_) => AccountsProvider(),
           update: (_, connectivityService, accountsProvider) {
@@ -188,26 +187,31 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
     _appLinks = AppLinks();
 
     // Handle deep link that launched the app (cold start)
-    _appLinks.getInitialLink().then((uri) {
-      if (uri != null) {
-        DiagnosticsService.instance.addBreadcrumb(
-          'deep_links',
-          'initial_link_received',
-          data: {'recognized': _isSsoCallback(uri)},
-        );
-        _handleDeepLink(uri);
-      }
-    }).catchError((e, stackTrace) {
-      LogService.instance.error(
-        'DeepLinks',
-        'Initial link failed with ${e.runtimeType}',
-      );
-      unawaited(DiagnosticsService.instance.captureHandledException(
-        e,
-        stackTrace,
-        operation: 'deep_links.initial_link',
-      ));
-    });
+    _appLinks
+        .getInitialLink()
+        .then((uri) {
+          if (uri != null) {
+            DiagnosticsService.instance.addBreadcrumb(
+              'deep_links',
+              'initial_link_received',
+              data: {'recognized': _isSsoCallback(uri)},
+            );
+            _handleDeepLink(uri);
+          }
+        })
+        .catchError((e, stackTrace) {
+          LogService.instance.error(
+            'DeepLinks',
+            'Initial link failed with ${e.runtimeType}',
+          );
+          unawaited(
+            DiagnosticsService.instance.captureHandledException(
+              e,
+              stackTrace,
+              operation: 'deep_links.initial_link',
+            ),
+          );
+        });
 
     // Listen for deep links while app is running
     _linkSubscription = _appLinks.uriLinkStream.listen(
@@ -217,11 +221,13 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
           'DeepLinks',
           'Link stream failed with ${e.runtimeType}',
         );
-        unawaited(DiagnosticsService.instance.captureHandledException(
-          e,
-          stackTrace,
-          operation: 'deep_links.stream',
-        ));
+        unawaited(
+          DiagnosticsService.instance.captureHandledException(
+            e,
+            stackTrace,
+            operation: 'deep_links.stream',
+          ),
+        );
       },
     );
   }
@@ -271,17 +277,11 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_isCheckingConfig) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (!_hasBackendUrl) {
-      return BackendConfigScreen(
-        onConfigSaved: _onBackendConfigSaved,
-      );
+      return BackendConfigScreen(onConfigSaved: _onBackendConfigSaved);
     }
 
     return Consumer<AuthProvider>(
@@ -289,9 +289,7 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
         // Only show loading spinner during initial auth check
         if (authProvider.isInitializing) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 

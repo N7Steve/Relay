@@ -567,50 +567,6 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Refresh token is required", response_data["error"]
   end
 
-  test "should enable ai for authenticated user" do
-    Provider::Openai.stubs(:configured?).returns(true)
-    user = users(:family_admin)
-    user.update!(ai_enabled: false)
-    device = user.mobile_devices.create!(@device_info)
-    token = Doorkeeper::AccessToken.create!(application: @shared_app, resource_owner_id: user.id, mobile_device_id: device.id, scopes: "read_write")
-
-    patch "/api/v1/auth/enable_ai", headers: {
-      "Authorization" => "Bearer #{token.token}",
-      "Content-Type" => "application/json"
-    }
-
-    assert_response :success
-    response_data = JSON.parse(response.body)
-    assert_equal true, response_data.dig("user", "ai_enabled")
-    assert_equal user.ui_layout, response_data.dig("user", "ui_layout")
-    assert_equal true, user.reload.ai_enabled
-  end
-
-  test "should require read_write scope to enable ai" do
-    Provider::Openai.stubs(:configured?).returns(true)
-    user = users(:family_admin)
-    user.update!(ai_enabled: false)
-    device = user.mobile_devices.create!(@device_info)
-    token = Doorkeeper::AccessToken.create!(application: @shared_app, resource_owner_id: user.id, mobile_device_id: device.id, scopes: "read")
-
-    patch "/api/v1/auth/enable_ai", headers: {
-      "Authorization" => "Bearer #{token.token}",
-      "Content-Type" => "application/json"
-    }
-
-    assert_response :forbidden
-    response_data = JSON.parse(response.body)
-    assert_equal "insufficient_scope", response_data["error"]
-    assert_equal "This action requires the 'write' scope", response_data["message"]
-    assert_not user.reload.ai_enabled
-  end
-
-  test "should require authentication when enabling ai" do
-    patch "/api/v1/auth/enable_ai", headers: { "Content-Type" => "application/json" }
-
-    assert_response :unauthorized
-  end
-
   # SSO Link tests
   test "should link existing account via SSO and return tokens" do
     user = users(:family_admin)
@@ -1129,24 +1085,6 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
     assert_equal "Linking code is invalid or expired", JSON.parse(response.body)["error"]
     assert_nil Rails.cache.read("mobile_sso_link:#{linking_code}")
-  end
-
-  test "should return forbidden when ai is not available" do
-    user = users(:family_admin)
-    user.update!(ai_enabled: false)
-    device = user.mobile_devices.create!(@device_info)
-    token = Doorkeeper::AccessToken.create!(application: @shared_app, resource_owner_id: user.id, mobile_device_id: device.id, scopes: "read_write")
-    User.any_instance.stubs(:ai_available?).returns(false)
-
-    patch "/api/v1/auth/enable_ai", headers: {
-      "Authorization" => "Bearer #{token.token}",
-      "Content-Type" => "application/json"
-    }
-
-    assert_response :forbidden
-    response_data = JSON.parse(response.body)
-    assert_equal "AI is not available for your account", response_data["error"]
-    assert_not user.reload.ai_enabled
   end
 
   test "mobile SSO onboarding via invitation shares existing family accounts when family shares by default" do

@@ -50,7 +50,7 @@ class Settings::ProvidersController < ApplicationController
         # Use method_defined? to check if the setter actually exists on the singleton class,
         # not just respond_to? which returns true for dynamic fields due to respond_to_missing?
         if Setting.singleton_class.method_defined?("#{key_str}=")
-          # If it's a declared field (e.g., openai_model), set it directly.
+          # If it's a declared field, set it directly.
           # This is safe and uses the proper setter.
           Setting.public_send("#{key_str}=", value)
         else

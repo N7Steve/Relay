@@ -37,14 +37,8 @@ class PagesController < ApplicationController
   DASHBOARD_PERIOD_WIDGETS = %w[cashflow_sankey outflows_donut investment_summary net_worth_chart].freeze
 
   skip_authentication only: %i[redis_configuration_error privacy terms]
-  guard_feature unless: -> { ai_features_enabled? }, only: :intro
-  before_action :ensure_intro_guest!, only: :intro
 
   def dashboard
-    if ai_features_enabled? && Current.user&.ui_layout_intro?
-      redirect_to chats_path and return
-    end
-
     @balance_sheet = Current.family.balance_sheet
     @investment_statement = Current.family.investment_statement
     @accounts = Current.user.accessible_accounts.navigation_visible.with_attached_logo
@@ -61,9 +55,6 @@ class PagesController < ApplicationController
     @breadcrumbs = [ [ t("breadcrumbs.home"), root_path ], [ t("breadcrumbs.dashboard"), nil ] ]
   end
 
-  def intro
-    @breadcrumbs = [ [ t("breadcrumbs.home"), chats_path ], [ t("breadcrumbs.intro"), nil ] ]
-  end
 
   def update_preferences
     if Current.user.update_dashboard_preferences(preferences_params, laid_out_order: ordered_dashboard_section_keys)

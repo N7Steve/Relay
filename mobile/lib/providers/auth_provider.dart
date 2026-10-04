@@ -89,12 +89,14 @@ class AuthProvider with ChangeNotifier {
         // If tokens exist but are expired, try to refresh only when online
         if (_tokens != null && _tokens!.isExpired) {
           final results = await Connectivity().checkConnectivity();
-          final isOnline = results.any((r) =>
-              r == ConnectivityResult.mobile ||
-              r == ConnectivityResult.wifi ||
-              r == ConnectivityResult.ethernet ||
-              r == ConnectivityResult.vpn ||
-              r == ConnectivityResult.bluetooth);
+          final isOnline = results.any(
+            (r) =>
+                r == ConnectivityResult.mobile ||
+                r == ConnectivityResult.wifi ||
+                r == ConnectivityResult.ethernet ||
+                r == ConnectivityResult.vpn ||
+                r == ConnectivityResult.bluetooth,
+          );
           if (isOnline) {
             await _refreshToken();
           } else {
@@ -105,10 +107,7 @@ class AuthProvider with ChangeNotifier {
       _addDiagnosticsBreadcrumb(
         'auth',
         'stored_auth_loaded',
-        data: {
-          'authenticated': isAuthenticated,
-          'api_key_mode': _isApiKeyAuth,
-        },
+        data: {'authenticated': isAuthenticated, 'api_key_mode': _isApiKeyAuth},
       );
     } catch (e, stackTrace) {
       _captureDiagnosticsException(
@@ -169,7 +168,9 @@ class AuthProvider with ChangeNotifier {
           _mfaRequired = true;
           _showMfaInput = true; // Show MFA input field
           LogService.instance.debug(
-              'AuthProvider', 'MFA required! Setting _showMfaInput to true');
+            'AuthProvider',
+            'MFA required! Setting _showMfaInput to true',
+          );
 
           // If user already submitted an OTP code, this is likely an invalid OTP error
           // Show the error message so user knows the code was wrong
@@ -202,11 +203,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('Login', e);
-      _captureDiagnosticsException(
-        e,
-        stackTrace,
-        operation: 'auth.login',
-      );
+      _captureDiagnosticsException(e, stackTrace, operation: 'auth.login');
       _errorMessage =
           'Unable to connect. Please check your network and try again.';
       _isLoading = false;
@@ -215,9 +212,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> loginWithApiKey({
-    required String apiKey,
-  }) async {
+  Future<bool> loginWithApiKey({required String apiKey}) async {
     _errorMessage = null;
     _isLoading = true;
     notifyListeners();
@@ -234,18 +229,12 @@ class AuthProvider with ChangeNotifier {
         _apiKey = apiKey;
         _isApiKeyAuth = true;
         ApiConfig.setApiKeyAuth(apiKey);
-        _addDiagnosticsBreadcrumb(
-          'auth',
-          'api_key_login_success',
-        );
+        _addDiagnosticsBreadcrumb('auth', 'api_key_login_success');
         _isLoading = false;
         notifyListeners();
         return true;
       } else {
-        _addDiagnosticsBreadcrumb(
-          'auth',
-          'api_key_login_failed',
-        );
+        _addDiagnosticsBreadcrumb('auth', 'api_key_login_failed');
         _errorMessage = result['error'] as String?;
         _isLoading = false;
         notifyListeners();
@@ -304,11 +293,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('Signup', e);
-      _captureDiagnosticsException(
-        e,
-        stackTrace,
-        operation: 'auth.signup',
-      );
+      _captureDiagnosticsException(e, stackTrace, operation: 'auth.signup');
       _errorMessage =
           'Unable to connect. Please check your network and try again.';
       _isLoading = false;
@@ -329,8 +314,10 @@ class AuthProvider with ChangeNotifier {
         deviceInfo: deviceInfo,
       );
 
-      final launched = await launchUrl(Uri.parse(ssoUrl),
-          mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        Uri.parse(ssoUrl),
+        mode: LaunchMode.externalApplication,
+      );
       _addDiagnosticsBreadcrumb(
         'auth',
         'sso_launch_result',
@@ -341,11 +328,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('SSO launch', e);
-      _captureDiagnosticsException(
-        e,
-        stackTrace,
-        operation: 'auth.sso_launch',
-      );
+      _captureDiagnosticsException(e, stackTrace, operation: 'auth.sso_launch');
       _errorMessage = 'Unable to start sign-in. Please try again.';
     } finally {
       _isLoading = false;
@@ -365,10 +348,7 @@ class AuthProvider with ChangeNotifier {
         _tokens = result['tokens'] as AuthTokens?;
         _user = result['user'] as User?;
         _ssoOnboardingPending = false;
-        _addDiagnosticsBreadcrumb(
-          'auth',
-          'sso_callback_success',
-        );
+        _addDiagnosticsBreadcrumb('auth', 'sso_callback_success');
         _isLoading = false;
         notifyListeners();
         return true;
@@ -393,10 +373,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return false;
       } else {
-        _addDiagnosticsBreadcrumb(
-          'auth',
-          'sso_callback_failed',
-        );
+        _addDiagnosticsBreadcrumb('auth', 'sso_callback_failed');
         _errorMessage = result['error'] as String?;
         _isLoading = false;
         notifyListeners();
@@ -441,10 +418,7 @@ class AuthProvider with ChangeNotifier {
         _tokens = result['tokens'] as AuthTokens?;
         _user = result['user'] as User?;
         _clearSsoOnboardingState();
-        _addDiagnosticsBreadcrumb(
-          'auth',
-          'sso_link_success',
-        );
+        _addDiagnosticsBreadcrumb('auth', 'sso_link_success');
         _isLoading = false;
         notifyListeners();
         return true;
@@ -457,11 +431,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('SSO link', e);
-      _captureDiagnosticsException(
-        e,
-        stackTrace,
-        operation: 'auth.sso_link',
-      );
+      _captureDiagnosticsException(e, stackTrace, operation: 'auth.sso_link');
       _errorMessage = 'Failed to link account. Please try again.';
       _isLoading = false;
       notifyListeners();
@@ -469,10 +439,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> ssoCreateAccount({
-    String? firstName,
-    String? lastName,
-  }) async {
+  Future<bool> ssoCreateAccount({String? firstName, String? lastName}) async {
     if (_ssoLinkingCode == null) {
       _errorMessage = 'No pending SSO session. Please try signing in again.';
       notifyListeners();
@@ -494,18 +461,12 @@ class AuthProvider with ChangeNotifier {
         _tokens = result['tokens'] as AuthTokens?;
         _user = result['user'] as User?;
         _clearSsoOnboardingState();
-        _addDiagnosticsBreadcrumb(
-          'auth',
-          'sso_create_account_success',
-        );
+        _addDiagnosticsBreadcrumb('auth', 'sso_create_account_success');
         _isLoading = false;
         notifyListeners();
         return true;
       } else {
-        _addDiagnosticsBreadcrumb(
-          'auth',
-          'sso_create_account_failed',
-        );
+        _addDiagnosticsBreadcrumb('auth', 'sso_create_account_failed');
         _errorMessage = result['error'] as String?;
         _isLoading = false;
         notifyListeners();
@@ -608,16 +569,18 @@ class AuthProvider with ChangeNotifier {
   }
 
   void _safeDiagnostics(FutureOr<void> Function() action) {
-    unawaited(Future<void>(() async {
-      try {
-        await action();
-      } catch (error) {
-        LogService.instance.warning(
-          'AuthProvider',
-          'Diagnostics operation failed: ${error.runtimeType}',
-        );
-      }
-    }));
+    unawaited(
+      Future<void>(() async {
+        try {
+          await action();
+        } catch (error) {
+          LogService.instance.warning(
+            'AuthProvider',
+            'Diagnostics operation failed: ${error.runtimeType}',
+          );
+        }
+      }),
+    );
   }
 
   Future<String?> getValidAccessToken() async {
@@ -633,27 +596,6 @@ class AuthProvider with ChangeNotifier {
     }
 
     return _tokens?.accessToken;
-  }
-
-  Future<bool> enableAi() async {
-    final accessToken = await getValidAccessToken();
-    if (accessToken == null) {
-      _errorMessage = 'Session expired. Please login again.';
-      notifyListeners();
-      return false;
-    }
-
-    final result = await _authService.enableAi(accessToken: accessToken);
-    if (result['success'] == true) {
-      _user = result['user'] as User?;
-      _errorMessage = null;
-      notifyListeners();
-      return true;
-    }
-
-    _errorMessage = result['error'] as String?;
-    notifyListeners();
-    return false;
   }
 
   void clearError() {

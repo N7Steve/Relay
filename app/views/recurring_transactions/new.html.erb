@@ -39,17 +39,7 @@
             it only exists on this variant: with no anchor it would guess.
             DS::Link translates method: into data-turbo-method, so this is a
             real POST; the anchor rides the query string. %>
-        <% if bills_one_shot_ai_available? %>
-          <%= render DS::Link.new(
-                text: t(".smart_fill"),
-                icon: "sparkles",
-                variant: :default,
-                href: smart_fill_recurring_transactions_path(entry_id: params[:entry_id], income: params[:income].presence),
-                method: :post,
-                frame: :modal
-              ) %>
-        <% end %>
-      <% else %>
+              <% else %>
         <span class="text-secondary"><%= t(".search_all_prompt") %></span>
         <%= render DS::Link.new(
               text: t(".search_all_cta"),
@@ -58,19 +48,6 @@
             ) %>
       <% end %>
     </div>
-
-    <% if @smart_fill %>
-      <div class="mb-5 rounded-lg bg-container-inset px-3 py-2 text-sm">
-        <p class="text-primary"><%= t(".smart_fill_applied") %></p>
-        <% if @smart_fill.rationale.present? %>
-          <p class="text-xs text-secondary"><%= @smart_fill.rationale %></p>
-        <% end %>
-      </div>
-    <% elsif @smart_fill_error %>
-      <div class="mb-5 rounded-lg bg-container-inset px-3 py-2 text-sm text-secondary">
-        <%= @smart_fill_error %>
-      </div>
-    <% end %>
 
     <%= render "form", recurring_transaction: @recurring_transaction, sibling_count: 0 %>
   <% end %>

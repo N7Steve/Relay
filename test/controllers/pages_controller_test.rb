@@ -339,21 +339,6 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
-  test "intro page requires guest role" do
-    get intro_path
-
-    assert_redirected_to root_path
-    assert_equal "Intro is only available to guest users.", flash[:alert]
-  end
-
-  test "intro page is accessible for guest users" do
-    sign_in @intro_user
-
-    get intro_path
-
-    assert_response :ok
-  end
-
   test "dashboard renders sankey chart with subcategories" do
     # Create parent category with subcategory
     parent_category = @family.categories.create!(name: "Shopping", color: "#FF5733")

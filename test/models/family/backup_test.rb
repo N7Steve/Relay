@@ -61,12 +61,8 @@ class Family::BackupTest < ActiveSupport::TestCase
   end
 
   test "document upload stores original bytes for subsequent backups" do
-    adapter = mock("vector store")
-    VectorStore.stubs(:adapter).returns(adapter)
-    adapter.expects(:create_store).returns(OpenStruct.new(success?: true, data: { id: "store-portable" }))
-    adapter.expects(:upload_file).with(store_id: "store-portable", file_content: "original document", filename: "notes.txt")
-      .returns(OpenStruct.new(success?: true, data: { file_id: "file-portable" }))
-    document = @source.upload_document(file_content: "original document", filename: "notes.txt")
+    document = @source.family_documents.create!(filename: "notes.txt", status: "ready", file_size: 17)
+    document.file.attach(io: StringIO.new("original document"), filename: "notes.txt", content_type: "text/plain")
     assert_equal "original document", document.file.download
 
     restore!

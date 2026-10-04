@@ -111,12 +111,4 @@ class FamilyMerchantsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "text/html", response.media_type
     assert_includes response.body, @merchant.name
   end
-
-  test "enhance enqueues job and redirects" do
-    assert_enqueued_with(job: EnhanceProviderMerchantsJob) do
-      post enhance_family_merchants_path
-    end
-
-    assert_redirected_to family_merchants_path
-  end
 end

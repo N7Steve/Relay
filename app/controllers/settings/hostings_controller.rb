@@ -1,25 +1,6 @@
 class Settings::HostingsController < ApplicationController
   layout "settings"
 
-  # Minimum accepted value for each configurable numeric LLM field. Mirrors the
-  # `min:` attribute on the form inputs in `_openai_settings.html.erb` so the
-  # controller rejects what the browser-side validator would reject.
-  LLM_NUMERIC_MINIMUMS = {
-    llm_context_window: 256,
-    llm_max_response_tokens: 64,
-    llm_max_items_per_call: 1,
-    openai_request_timeout: Provider::Openai::MIN_REQUEST_TIMEOUT,
-    ai_response_timeout: Chat::MIN_RESPONSE_TIMEOUT.to_i
-  }.freeze
-
-  AI_CONFIG_KEYS = %i[
-    openai_access_token openai_uri_base openai_model openai_json_mode
-    anthropic_access_token anthropic_base_url anthropic_model llm_provider
-    llm_context_window llm_max_response_tokens llm_max_items_per_call
-    openai_request_timeout ai_response_timeout
-    jev_api_key jev_endpoint jev_model
-  ].freeze
-
   guard_feature unless: -> { self_hosted? }
 
   before_action :ensure_admin, only: [ :update, :clear_cache ]
@@ -66,10 +47,6 @@ class Settings::HostingsController < ApplicationController
   end
 
   def update
-    if hosting_params.key?(:ai_features_enabled)
-      Setting.ai_features_enabled = hosting_params[:ai_features_enabled] == "1"
-    end
-
     if hosting_params.key?(:onboarding_state)
       onboarding_state = hosting_params[:onboarding_state].to_s
       Setting.onboarding_state = onboarding_state
@@ -105,6 +82,10 @@ class Settings::HostingsController < ApplicationController
     if hosting_params.key?(:invite_only_default_family_id)
       value = hosting_params[:invite_only_default_family_id].presence
       Setting.invite_only_default_family_id = value
+    end
+
+    if hosting_params.key?(:external_logos_enabled)
+      Setting.external_logos_enabled = hosting_params[:external_logos_enabled] == "1"
     end
 
     if hosting_params.key?(:brand_fetch_client_id)
@@ -187,117 +168,8 @@ class Settings::HostingsController < ApplicationController
       sync_auto_sync_scheduler!
     end
 
-    update_encrypted_setting(:openai_access_token)
-
-    # Validate OpenAI configuration before updating
-    if hosting_params.key?(:openai_uri_base) || hosting_params.key?(:openai_model)
-      Setting.validate_openai_config!(
-        uri_base: hosting_params[:openai_uri_base],
-        model: hosting_params[:openai_model]
-      )
-    end
-
-    if hosting_params.key?(:openai_uri_base)
-      Setting.openai_uri_base = hosting_params[:openai_uri_base]
-    end
-
-    if hosting_params.key?(:openai_model)
-      Setting.openai_model = hosting_params[:openai_model]
-    end
-
-    if hosting_params.key?(:openai_json_mode)
-      Setting.openai_json_mode = hosting_params[:openai_json_mode].presence
-    end
-
-    update_encrypted_setting(:anthropic_access_token)
-
-    if hosting_params.key?(:anthropic_base_url)
-      raw_base_url = hosting_params[:anthropic_base_url].to_s.strip
-      if raw_base_url.blank?
-        Setting.anthropic_base_url = nil
-      else
-        parsed = URI.parse(raw_base_url) rescue nil
-        unless parsed.is_a?(URI::HTTP)
-          raise Setting::ValidationError, t(".invalid_anthropic_base_url")
-        end
-        # A custom Anthropic-compatible endpoint requires a model — Provider::Anthropic
-        # raises without one. Validate the pair together (mirrors the OpenAI branch), using
-        # the submitted model when present so a blanked model field is caught too.
-        effective_model =
-          if hosting_params.key?(:anthropic_model)
-            hosting_params[:anthropic_model].to_s.strip
-          else
-            Setting.anthropic_model.to_s.strip
-          end
-        if effective_model.blank?
-          raise Setting::ValidationError, t(".anthropic_model_required_for_base_url")
-        end
-        Setting.anthropic_base_url = raw_base_url
-      end
-    end
-
-    if hosting_params.key?(:anthropic_model)
-      Setting.anthropic_model = hosting_params[:anthropic_model].presence
-    end
-
-    if hosting_params.key?(:llm_provider)
-      provider = hosting_params[:llm_provider].to_s
-      if %w[openai anthropic].include?(provider)
-        Setting.llm_provider = provider
-      end
-    end
-
-    update_encrypted_setting(:jev_api_key)
-
-    if hosting_params.key?(:jev_endpoint)
-      raw_endpoint = hosting_params[:jev_endpoint].to_s.strip
-      if raw_endpoint.blank?
-        Setting.jev_endpoint = nil
-      else
-        # Provider::Jev owns the rule so settings, JEV_ENDPOINT and eval-time
-        # construction cannot drift apart; the controller's job is only to turn
-        # a rejection into a message instead of a 500.
-        unless Provider::Jev.endpoint_allowed?(raw_endpoint)
-          raise Setting::ValidationError, t(".invalid_jev_endpoint")
-        end
-        Setting.jev_endpoint = raw_endpoint
-      end
-    end
-
-    if hosting_params.key?(:jev_model)
-      Setting.jev_model = hosting_params[:jev_model].presence
-    end
-
-    LLM_NUMERIC_MINIMUMS.each do |key, minimum|
-      next unless hosting_params.key?(key)
-      raw = hosting_params[key].to_s.strip
-      if raw.blank?
-        Setting.public_send("#{key}=", nil)
-        next
-      end
-      parsed = Integer(raw, 10) rescue nil
-      if parsed.nil? || parsed < minimum
-        label = t("settings.hostings.openai_settings.#{key}_label")
-        raise Setting::ValidationError, t(".invalid_llm_budget", field: label, minimum: minimum)
-      end
-      Setting.public_send("#{key}=", parsed)
-    end
-
-    update_categorization_provider
-    update_categorization_tuning
-
     redirect_to settings_hosting_path, notice: t(".success")
   rescue Setting::ValidationError => error
-    # Preserve user-submitted OpenAI config so the form re-renders with their
-    # input intact (issue #1824). The form auto-submits on blur, so a partial
-    # entry (e.g. URI base before model) hits validation and would otherwise
-    # be wiped because the view reads from the unchanged Setting.* values.
-    @openai_uri_base_input = hosting_params[:openai_uri_base] if hosting_params.key?(:openai_uri_base)
-    @openai_model_input = hosting_params[:openai_model] if hosting_params.key?(:openai_model)
-    @anthropic_base_url_input = hosting_params[:anthropic_base_url] if hosting_params.key?(:anthropic_base_url)
-    @anthropic_model_input = hosting_params[:anthropic_model] if hosting_params.key?(:anthropic_model)
-    @jev_endpoint_input = hosting_params[:jev_endpoint] if hosting_params.key?(:jev_endpoint)
-    @jev_model_input = hosting_params[:jev_model] if hosting_params.key?(:jev_model)
     flash.now[:alert] = error.message
     render :show, status: :unprocessable_entity
   end
@@ -312,66 +184,9 @@ class Settings::HostingsController < ApplicationController
     # Strong parameters for the self-hosting settings form.
     def hosting_params
       return ActionController::Parameters.new unless params.key?(:setting)
-      permitted = params.require(:setting).permit(:ai_features_enabled, :onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :demo_family_refresh_enabled, :demo_family_refresh_family_id, :brand_fetch_client_id, :brand_fetch_high_res_logos, :twelve_data_api_key, :tiingo_api_key, :eodhd_api_key, :alpha_vantage_api_key, :tinkoff_invest_api_key, :mansa_api_key, :rentcast_api_key, :realie_api_key, :openai_access_token, :openai_uri_base, :openai_model, :openai_json_mode, :anthropic_access_token, :anthropic_base_url, :anthropic_model, :jev_api_key, :jev_endpoint, :jev_model, :llm_provider, :llm_context_window, :llm_max_response_tokens, :llm_max_items_per_call, :openai_request_timeout, :ai_response_timeout, :exchange_rate_provider, :securities_provider, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time, securities_providers: [])
-      AI_CONFIG_KEYS.each { |key| permitted.delete(key) } unless Setting.ai_features_enabled?
+      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :demo_family_refresh_enabled, :demo_family_refresh_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :twelve_data_api_key, :tiingo_api_key, :eodhd_api_key, :alpha_vantage_api_key, :tinkoff_invest_api_key, :mansa_api_key, :rentcast_api_key, :realie_api_key, :exchange_rate_provider, :securities_provider, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time, securities_providers: [])
       permitted
     end
-
-    # Family-scoped: it decides whose transaction data is
-    # sent to Jev. Guarded by the preview gate because the selector that submits
-    # it is only rendered for opted-in users.
-    def update_categorization_provider
-      return unless Setting.ai_features_enabled?
-
-      return unless params[:family].present? && params[:family][:categorization_provider].present?
-      return if ENV["CATEGORIZATION_PROVIDER"].present?
-      return unless preview_features_enabled?
-
-      provider = params[:family][:categorization_provider]
-      return unless Family::CATEGORIZATION_PROVIDERS.include?(provider)
-
-      Current.family.update!(categorization_provider: provider)
-    end
-
-    # Family-scoped like categorization_provider. Validated here rather than
-    # leaning on the DB check constraint, which would surface as a 500 instead
-    # of the inline error the rest of this form gives.
-    def update_categorization_tuning
-      return unless Setting.ai_features_enabled?
-
-      return unless params[:family].present?
-      return unless preview_features_enabled?
-
-      updates = {}
-
-      if params[:family][:categorization_confidence_threshold].present? && ENV["CATEGORIZATION_CONFIDENCE_THRESHOLD"].blank?
-        updates[:categorization_confidence_threshold] = unit_interval!(
-          params[:family][:categorization_confidence_threshold],
-          t("settings.hostings.categorization_provider_selector.confidence_threshold_label")
-        )
-      end
-
-      if params[:family][:categorization_shadow_rate].present? && ENV["CATEGORIZATION_SHADOW_RATE"].blank?
-        updates[:categorization_shadow_rate] = unit_interval!(
-          params[:family][:categorization_shadow_rate],
-          t("settings.hostings.categorization_provider_selector.shadow_rate_label")
-        )
-      end
-
-      Current.family.update!(updates) if updates.any?
-    end
-
-    def unit_interval!(raw, field_label)
-      value = Float(raw.to_s.strip) rescue nil
-
-      if value.nil? || value.negative? || value > 1
-        raise Setting::ValidationError,
-              t("settings.hostings.update.invalid_categorization_rate", field: field_label)
-      end
-
-      value
-    end
-
 
     def ensure_admin
       redirect_to settings_hosting_path, alert: t(".not_authorized") unless Current.user.admin?

@@ -25,10 +25,6 @@ class BillsMobileTest < ApplicationSystemTestCase
   end
 
   test "no Bills view scrolls sideways on a phone" do
-    # The AI chips render only with consent plus a provider, so without this
-    # the overview would be measured without a whole strip it can carry.
-    Provider::Registry.stubs(:preferred_llm_provider).returns(OpenStruct.new)
-
     # A long name, a five-figure amount and a note: the row at its widest.
     bill = @family.recurring_transactions.create!(
       name: "Watson Property Management Company LLC",
@@ -66,7 +62,7 @@ class BillsMobileTest < ApplicationSystemTestCase
       # The widest optional strips have to actually be on the page for the
       # measurement to mean anything.
       if view == "overview"
-        assert_text I18n.t("bills.ai_prompts.due_before_paycheck")
+        assert_no_text I18n.t("bills.ai_prompts.due_before_paycheck")
         assert_text "Neighborhood Fitness and Racquet Club Membership"
       end
 

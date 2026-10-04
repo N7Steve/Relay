@@ -15,7 +15,6 @@ class ApplicationController < ActionController::Base
   end
 
   before_action :detect_os
-  before_action :set_default_chat
   before_action :set_active_storage_url_options
 
   helper_method :demo_config, :demo_host_match?, :show_demo_warning?, :current_sidekiq_health, :ai_features_enabled?
@@ -94,14 +93,6 @@ class ApplicationController < ActionController::Base
       when /iPhone|iPad/i then "ios"
       else ""
       end
-    end
-
-    # By default, we show the user the last chat they interacted with
-    def set_default_chat
-      return unless ai_features_enabled?
-
-      @last_viewed_chat = Current.user&.last_viewed_chat
-      @chat = @last_viewed_chat
     end
 
     def ai_features_enabled?

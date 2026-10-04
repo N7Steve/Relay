@@ -108,7 +108,6 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "inviting an existing user as guest applies intro defaults" do
-    User.any_instance.stubs(:openai_configured?).returns(true)
     existing_user = users(:empty)
     existing_user.update!(
       role: :member,
@@ -132,7 +131,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert existing_user.ui_layout_intro?
     assert_not existing_user.show_sidebar?
     assert_not existing_user.show_ai_sidebar?
-    assert existing_user.ai_enabled?
+    assert_not existing_user.ai_enabled?
   end
 
   test "re-inviting an email whose prior invitation expired succeeds instead of 500ing" do

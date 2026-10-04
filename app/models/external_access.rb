@@ -6,6 +6,10 @@ class ExternalAccess
     raise ArgumentError, "Unknown external capability: #{capability}" unless CAPABILITIES.include?(capability)
     return false if capability == :market_data && local_recalculation?
 
+    if capability == :logos
+      return Setting.external_logos_enabled == true
+    end
+
     override = ENV["RELAY_EXTERNAL_#{capability.to_s.upcase}_ENABLED"]
     return %w[true 1].include?(override.downcase) unless override.nil?
 

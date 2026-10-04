@@ -23,7 +23,7 @@ struct SureSettingsView: View {
           .background(.background.secondary, in: .rect(cornerRadius: 18))
 
           VStack(alignment: .leading, spacing: 12) {
-            Toggle("AI insight notifications", systemImage: "bell.badge.fill", isOn: $insightNotifications)
+            Toggle("Insight notifications", systemImage: "bell.badge.fill", isOn: $insightNotifications)
               .onChange(of: insightNotifications) {
                 Task { await updateNotificationPreference() }
               }

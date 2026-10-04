@@ -53,9 +53,7 @@ class Provider
     end
 
     def require_external_access!
-      if self.class.name.in?(%w[Provider::Openai Provider::Anthropic Provider::Jev])
-        raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
-      elsif self.class.name.in?(%w[Provider::Rentcast Provider::Realie])
+      if self.class.name.in?(%w[Provider::Rentcast Provider::Realie])
         ExternalAccess.require!(:property_valuations)
       elsif self.class.included_modules.include?(Provider::SecurityConcept) || self.class.included_modules.include?(Provider::ExchangeRateConcept)
         ExternalAccess.require!(:market_data)

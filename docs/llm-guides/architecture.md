@@ -124,20 +124,21 @@ and [AssistantResponseJob](../../app/jobs/assistant_response_job.rb).
 
 [ExternalAccess](../../app/models/external_access.rb) controls bank sync, market
 data, property valuations, external logos and Google Drive independently. New
-settings default off; credentials do not activate access. AI uses its existing
-`Setting.ai_features_enabled?` switch. Market import jobs remain separate from
+settings default off; credentials do not activate access. AI is retired in phase 6; historical preferences cannot enable it. Market import jobs remain separate from
 local accounting. See the [phase 2 transition](../migration/pruning-phase-2.md)
 before deploying existing installations, especially those using Drive/Brandfetch.
 
-MCP, dynamic registration/discovery and external assistant transport were removed
-in pruning phase 5. Builtin chat/tools, OAuth, API keys and native client auth
-remain. Historical external settings and family values are inert; old unmarked
-jobs stop without redirecting their contents to another provider. No tokens are
-revoked or shared queues purged. See [phase 5](../migration/pruning-phase-5.md).
+MCP, external assistant transport and integrated AI were removed in phases 5–6.
+OAuth, API keys and native authentication remain. Conversations, original files,
+historical PDF imports and usage ledgers remain local persistence readers.
+Serialized AI jobs finish without contacting providers. Insights use deterministic
+localized templates. Brandfetch logos are controlled by the instance preference;
+`RELAY_EXTERNAL_LOGOS_ENABLED` no longer overrides it. Other external capability
+environment overrides retain their existing behavior.
+See [phase 6](../migration/pruning-phase-6.md).
 
 Remote monitoring and LLM evaluation runtime were removed in pruning phase 3.
 `LocalDiagnostics` records failures through Rails logs and `DebugLogEntry.capture`.
-Providers still record `LlmUsage` locally and retain their AI capability guards.
 Legacy telemetry variables do not activate SDKs. Historical evaluation tables
 remain in the schema; the application no longer executes evaluation tasks.
 

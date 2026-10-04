@@ -31,7 +31,6 @@ class SettingsTest < ApplicationSystemTestCase
       merchants_index = @settings_links.index([ "Merchants", family_merchants_path ])
       @settings_links.insert(merchants_index + 1, [ "Statement Vault", account_statements_path ])
       @settings_links += [
-        [ "AI Prompts", settings_ai_prompts_path ],
         [ "API Keys", settings_api_keys_path ]
       ]
     end
@@ -52,8 +51,6 @@ class SettingsTest < ApplicationSystemTestCase
   test "can update self hosting settings" do
     sign_in users(:sure_support_staff)
 
-    Provider::Registry.stubs(:get_provider).with(:openai).returns(nil)
-    Provider::Registry.stubs(:get_provider).with(:anthropic).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:twelve_data).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:yahoo_finance).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:rentcast).returns(nil)

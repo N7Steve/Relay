@@ -111,29 +111,6 @@ struct InsightCollection: Codable, Sendable {
   var insights: [SureInsight]
 }
 
-struct SureChat: Codable, Identifiable, Sendable, Hashable {
-  var id: String
-  var title: String
-  var error: String?
-  var createdAt: String
-  var updatedAt: String
-  var lastMessageAt: String?
-  var messageCount: Int?
-
-  enum CodingKeys: String, CodingKey {
-    case id, title, error
-    case createdAt = "created_at"
-    case updatedAt = "updated_at"
-    case lastMessageAt = "last_message_at"
-    case messageCount = "message_count"
-  }
-}
-
-struct ChatCollection: Codable, Sendable {
-  var chats: [SureChat]
-  var pagination: SurePagination?
-}
-
 struct SurePagination: Codable, Sendable {
   var page: Int
   var perPage: Int
@@ -145,40 +122,5 @@ struct SurePagination: Codable, Sendable {
     case perPage = "per_page"
     case totalCount = "total_count"
     case totalPages = "total_pages"
-  }
-}
-
-struct SureMessage: Codable, Identifiable, Sendable, Equatable {
-  var id: String
-  var type: String
-  var role: String
-  var content: String
-  var createdAt: String
-
-  enum CodingKeys: String, CodingKey {
-    case id, type, role, content
-    case createdAt = "created_at"
-  }
-
-  var isUser: Bool { role == "user" || type == "user_message" }
-}
-
-struct ChatDetail: Codable, Sendable {
-  var id: String
-  var title: String
-  var error: String?
-  var createdAt: String
-  var updatedAt: String
-  var messages: [SureMessage]
-  var pagination: SurePagination?
-
-  enum CodingKeys: String, CodingKey {
-    case id, title, error, messages, pagination
-    case createdAt = "created_at"
-    case updatedAt = "updated_at"
-  }
-
-  var chat: SureChat {
-    SureChat(id: id, title: title, error: error, createdAt: createdAt, updatedAt: updatedAt)
   }
 }

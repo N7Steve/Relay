@@ -6,7 +6,7 @@ class ExternalAccess::RequestMiddleware < Faraday::Middleware
 
   def call(env)
     if @capability == :ai
-      raise ExternalAccess::Disabled, "AI features are disabled" unless Setting.ai_features_enabled?
+      raise ExternalAccess::Disabled, "AI features have been retired"
     else
       ExternalAccess.require!(@capability)
     end

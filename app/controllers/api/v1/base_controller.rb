@@ -32,7 +32,6 @@ class Api::V1::BaseController < ApplicationController
   before_action :log_api_access
 
 
-
   # Override Doorkeeper's default behavior to return JSON instead of redirecting
   def doorkeeper_unauthorized_render_options(error: nil)
     { json: { error: "unauthorized", message: "Access token is invalid, expired, or missing" } }
@@ -323,12 +322,5 @@ class Api::V1::BaseController < ApplicationController
         ip_address: request.ip
       )
       Current.session.active_impersonator_session = nil
-    end
-
-    # Check if AI features are enabled for the current user
-    def require_ai_enabled
-      unless Setting.ai_features_enabled? && current_resource_owner&.ai_enabled?
-        render_json({ error: "feature_disabled", message: "AI features are not enabled for this user" }, status: :forbidden)
-      end
     end
 end

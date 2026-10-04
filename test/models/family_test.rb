@@ -265,35 +265,6 @@ class FamilyTest < ActiveSupport::TestCase
     assert_equal Money::Currency.as_options.map(&:iso_code), family.reload.enabled_currency_codes
   end
 
-  test "upload_document stores provided metadata on family document" do
-    family = families(:dylan_family)
-    family.update!(vector_store_id: nil)
-
-    adapter = mock("vector_store_adapter")
-    adapter.expects(:create_store).with(name: "Family #{family.id} Documents").returns(
-      VectorStore::Response.new(success?: true, data: { id: "vs_test123" }, error: nil)
-    )
-    adapter.expects(:upload_file).with(
-      store_id: "vs_test123",
-      file_content: "hello",
-      filename: "notes.txt"
-    ).returns(
-      VectorStore::Response.new(success?: true, data: { file_id: "file-xyz" }, error: nil)
-    )
-
-    VectorStore::Registry.stubs(:adapter).returns(adapter)
-
-    document = family.upload_document(
-      file_content: "hello",
-      filename: "notes.txt",
-      metadata: { "type" => "financial_document" }
-    )
-
-    assert_not_nil document
-    assert_equal({ "type" => "financial_document" }, document.metadata)
-    assert_equal "vs_test123", family.reload.vector_store_id
-  end
-
   # auto_share_existing_accounts_with -----------------------------------------
 
   test "auto_share_existing_accounts_with shares existing family accounts read_write when sharing is default" do
@@ -520,97 +491,8 @@ class FamilyTest < ActiveSupport::TestCase
     "JEV_ENDPOINT" => "http://internal-gateway.example.com/v1/systemone"
   }.freeze
 
-  test "resolved_categorization_provider builds Jev when the endpoint is allowed" do
-    family = families(:dylan_family)
-    family.update!(categorization_provider: "jev")
-
-    with_env_overrides("JEV_API_KEY" => "test_api_key", "JEV_ENDPOINT" => "https://api.typesafe.ai/v1/systemone") do
-      assert_instance_of Provider::Jev, family.resolved_categorization_provider
-    end
-  end
-
-  test "categorization_model_name names the Jev model when Jev will categorize" do
-    family = families(:dylan_family)
-    family.stubs(:resolved_categorization_provider).returns(Provider::Jev.allocate)
-    Provider::Jev.stubs(:effective_model).returns("~typesafe/jev-latest")
-
-    assert_equal "~typesafe/jev-latest", family.categorization_model_name
-  end
-
-  test "categorization_model_name names the Anthropic model when Anthropic will categorize" do
-    family = families(:dylan_family)
-    family.stubs(:resolved_categorization_provider).returns(Provider::Anthropic.allocate)
-    Provider::Anthropic.stubs(:effective_model).returns("claude-sonnet-test")
-
-    assert_equal "claude-sonnet-test", family.categorization_model_name
-  end
-
-  test "resolved_categorization_provider falls back to the LLM provider when the endpoint is rejected" do
-    family = families(:dylan_family)
-    family.update!(categorization_provider: "jev")
-    llm = Provider::Openai.allocate
-    Provider::Registry.stubs(:preferred_llm_provider).returns(llm)
-
-    with_env_overrides(REJECTED_JEV_ENV) do
-      assert_same llm, family.resolved_categorization_provider
-    end
-  end
-
-  test "resolved_categorization_provider does not write diagnostics from view-time callers" do
-    family = families(:dylan_family)
-    family.update!(categorization_provider: "jev")
-    Provider::Registry.stubs(:preferred_llm_provider).returns(nil)
-
-    assert_no_difference "DebugLogEntry.count" do
-      with_env_overrides(REJECTED_JEV_ENV) do
-        assert_nil family.resolved_categorization_provider
-      end
-    end
-  end
-
-  test "categorization_model_name does not write diagnostics from view-time callers" do
-    family = families(:dylan_family)
-    family.update!(categorization_provider: "jev")
-    Provider::Registry.stubs(:preferred_llm_provider).returns(nil)
-
-    assert_no_difference "DebugLogEntry.count" do
-      with_env_overrides(REJECTED_JEV_ENV) do
-        assert_nil family.categorization_model_name
-      end
-    end
-  end
-
-  test "shadow_categorization_provider returns nil when the Jev endpoint is rejected" do
-    family = families(:dylan_family)
-    family.update!(categorization_provider: "llm")
-
-    with_env_overrides(REJECTED_JEV_ENV) do
-      assert_nil family.shadow_categorization_provider
-    end
-  end
-
-  test "resolved_categorization_provider hands the construction error to a caller that asks" do
-    family = families(:dylan_family)
-    family.update!(categorization_provider: "jev")
-    Provider::Registry.stubs(:preferred_llm_provider).returns(nil)
-    errors = []
-
-    with_env_overrides(REJECTED_JEV_ENV) do
-      assert_nil family.resolved_categorization_provider { |error| errors << error }
-    end
-
-    assert_equal [ Provider::Jev::Error ], errors.map(&:class)
-  end
-
   # The rescue is deliberately narrow, so a registry bug still surfaces rather
   # than being reported to the operator as a Jev misconfiguration.
-  test "resolved_categorization_provider does not swallow non-provider errors" do
-    family = families(:dylan_family)
-    family.update!(categorization_provider: "jev")
-    Provider::Registry.stubs(:get_provider).with(:jev).raises(ArgumentError, "boom")
-
-    assert_raises(ArgumentError) { family.resolved_categorization_provider }
-  end
 
   private
     def set_preview_features(user, enabled)

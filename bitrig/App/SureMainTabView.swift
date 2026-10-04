@@ -18,9 +18,6 @@ struct SureMainTabView: View {
         .tabItem { Label("Budgets", systemImage: "chart.pie.fill") }
         .tag(SureTab.budgets)
 
-      SureAssistantView()
-        .tabItem { Label("Assistant", systemImage: "sparkles") }
-        .tag(SureTab.assistant)
     }
     .onReceive(NotificationCenter.default.publisher(for: .sureOpenInsights)) { _ in
       store.selectedTab = .overview

@@ -77,28 +77,13 @@ class ImportsController < ApplicationController
   def create
     file = import_params[:import_file]
 
-    if file.present? && !ai_features_enabled? && (document_upload_request? || Import::ALLOWED_PDF_MIME_TYPES.include?(file.content_type))
+    if document_upload_request? || params.dig(:import, :type) == "PdfImport" || (file.present? && Import::ALLOWED_PDF_MIME_TYPES.include?(file.content_type))
       head :forbidden
-      return
-    end
-
-    if file.present? && document_upload_request?
-      create_document_import(file)
       return
     end
 
     if file.present? && sure_import_request?
       create_sure_import(file)
-      return
-    end
-
-    # Handle PDF file uploads - process with AI
-    if file.present? && Import::ALLOWED_PDF_MIME_TYPES.include?(file.content_type)
-      unless valid_pdf_file?(file)
-        redirect_to new_import_path, alert: t("imports.create.invalid_pdf")
-        return
-      end
-      create_pdf_import(file)
       return
     end
 
@@ -187,67 +172,8 @@ class ImportsController < ApplicationController
       redirect_back_or_to redirect_target, alert: t("accounts.not_authorized")
     end
 
-    def create_pdf_import(file)
-      return redirect_to new_import_path, alert: t("accounts.not_authorized") unless AccountStatement.statement_manager?(Current.user)
-      return redirect_to new_import_path, alert: t("imports.create.pdf_too_large", max_size: Import::MAX_PDF_SIZE / 1.megabyte) if file.size > Import::MAX_PDF_SIZE
-
-      pdf_import = PdfImport.create_from_upload!(family: Current.family, file: file, user: Current.user)
-      pdf_import.process_with_ai_later
-      redirect_to import_path(pdf_import), notice: t("imports.create.pdf_processing")
-    rescue AccountStatement::DuplicateUploadError
-      redirect_to new_import_path, alert: t("imports.create.duplicate_pdf_unavailable")
-    rescue AccountStatement::InvalidUploadError
-      redirect_to new_import_path, alert: t("imports.create.invalid_pdf")
-    end
-
-    def create_document_import(file)
-      adapter = VectorStore.adapter
-      unless adapter
-        redirect_to new_import_path, alert: t("imports.create.document_provider_not_configured")
-        return
-      end
-
-      if file.size > Import::MAX_PDF_SIZE
-        redirect_to new_import_path, alert: t("imports.create.document_too_large", max_size: Import::MAX_PDF_SIZE / 1.megabyte)
-        return
-      end
-
-      filename = file.original_filename.to_s
-      ext = File.extname(filename).downcase
-      supported_extensions = adapter.supported_extensions.map(&:downcase)
-
-      unless supported_extensions.include?(ext)
-        redirect_to new_import_path, alert: t("imports.create.invalid_document_file_type")
-        return
-      end
-
-      if ext == ".pdf"
-        unless valid_pdf_file?(file)
-          redirect_to new_import_path, alert: t("imports.create.invalid_pdf")
-          return
-        end
-
-        create_pdf_import(file)
-        return
-      end
-
-      family_document = Current.family.upload_document(
-        file_content: file.read,
-        filename: filename
-      )
-
-      if family_document
-        redirect_to new_import_path, notice: t("imports.create.document_uploaded")
-      else
-        redirect_to new_import_path, alert: t("imports.create.document_upload_failed")
-      end
-    end
-
     def document_upload_supported_extensions
-      adapter = VectorStore.adapter
-      return [] unless adapter
-
-      adapter.supported_extensions.map(&:downcase).uniq.sort
+      []
     end
 
     def document_upload_request?

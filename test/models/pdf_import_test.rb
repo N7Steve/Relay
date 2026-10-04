@@ -86,43 +86,6 @@ class PdfImportTest < ActiveSupport::TestCase
     assert @import.valid?
   end
 
-  test "process_with_ai_later enqueues ProcessPdfJob" do
-    import = PdfImport.create_from_statement!(statement: create_pdf_statement)
-
-    assert_enqueued_with job: ProcessPdfJob, args: [ import ] do
-      assert import.process_with_ai_later
-    end
-
-    assert_equal "importing", import.reload.status
-  end
-
-  test "process_with_ai_later does not enqueue duplicate jobs while importing" do
-    import = PdfImport.create_from_statement!(statement: create_pdf_statement)
-
-    assert_enqueued_jobs 1, only: ProcessPdfJob do
-      assert import.process_with_ai_later
-      assert_not import.reload.process_with_ai_later
-    end
-
-    assert_equal "importing", import.reload.status
-  end
-
-  test "process_with_ai_later does not claim import without pdf content" do
-    assert_no_enqueued_jobs only: ProcessPdfJob do
-      assert_not @import.process_with_ai_later
-    end
-
-    assert_equal "pending", @import.reload.status
-  end
-
-  test "process_with_ai_later resets pending when enqueue fails" do
-    import = PdfImport.create_from_statement!(statement: create_pdf_statement)
-    ProcessPdfJob.stubs(:perform_later).raises(StandardError, "queue offline")
-
-    assert_not import.process_with_ai_later
-    assert_equal "pending", import.reload.status
-  end
-
   test "generate_rows_from_extracted_data creates import rows" do
     import = imports(:pdf_with_rows)
     import.rows.destroy_all

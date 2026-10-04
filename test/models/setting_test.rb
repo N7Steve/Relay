@@ -1,78 +1,9 @@
 require "test_helper"
 
 class SettingTest < ActiveSupport::TestCase
-  setup do
-    # Clear settings before each test
-    Setting.openai_uri_base = nil
-    Setting.openai_model = nil
-  end
-
   teardown do
     # Clean up dynamic fields after each test
     Setting.where("var LIKE ?", "dynamic:%").destroy_all
-  end
-
-  test "validate_openai_config! passes when both uri base and model are set" do
-    assert_nothing_raised do
-      Setting.validate_openai_config!(uri_base: "https://api.example.com", model: "gpt-4")
-    end
-  end
-
-  test "ai_features_enabled? only accepts a boolean true" do
-    Setting.stubs(:ai_features_enabled).returns(true)
-    assert Setting.ai_features_enabled?
-
-    Setting.stubs(:ai_features_enabled).returns("true")
-    assert_not Setting.ai_features_enabled?
-  end
-
-  test "validate_openai_config! passes when neither uri base nor model are set" do
-    assert_nothing_raised do
-      Setting.validate_openai_config!(uri_base: "", model: "")
-    end
-  end
-
-  test "validate_openai_config! passes when uri base is blank and model is set" do
-    assert_nothing_raised do
-      Setting.validate_openai_config!(uri_base: "", model: "gpt-4")
-    end
-  end
-
-  test "validate_openai_config! raises error when uri base is set but model is blank" do
-    error = assert_raises(Setting::ValidationError) do
-      Setting.validate_openai_config!(uri_base: "https://api.example.com", model: "")
-    end
-
-    assert_match(/OpenAI model is required/, error.message)
-  end
-
-  test "validate_openai_config! uses current settings when parameters are nil" do
-    Setting.openai_uri_base = "https://api.example.com"
-    Setting.openai_model = "gpt-4"
-
-    assert_nothing_raised do
-      Setting.validate_openai_config!(uri_base: nil, model: nil)
-    end
-  end
-
-  test "validate_openai_config! raises error when current uri base is set but new model is blank" do
-    Setting.openai_uri_base = "https://api.example.com"
-    Setting.openai_model = "gpt-4"
-
-    error = assert_raises(Setting::ValidationError) do
-      Setting.validate_openai_config!(uri_base: nil, model: "")
-    end
-
-    assert_match(/OpenAI model is required/, error.message)
-  end
-
-  test "validate_openai_config! passes when new uri base is blank and current model exists" do
-    Setting.openai_uri_base = "https://api.example.com"
-    Setting.openai_model = "gpt-4"
-
-    assert_nothing_raised do
-      Setting.validate_openai_config!(uri_base: "", model: nil)
-    end
   end
 
   # Dynamic field tests
@@ -124,20 +55,6 @@ class SettingTest < ActiveSupport::TestCase
     keys = Setting.dynamic_keys
     assert_includes keys, "dynamic1"
     assert_includes keys, "dynamic2"
-  end
-
-  test "declared fields take precedence over dynamic fields" do
-    # Try to set a declared field using bracket notation
-    Setting["openai_model"] = "custom-model"
-    assert_equal "custom-model", Setting["openai_model"]
-    assert_equal "custom-model", Setting.openai_model
-  end
-
-  test "cannot delete declared fields" do
-    Setting.openai_model = "test-model"
-    result = Setting.delete("openai_model")
-    assert_nil result
-    assert_equal "test-model", Setting.openai_model
   end
 
   test "brand_fetch_icon_url builds a logo URL with the requested fallback" do

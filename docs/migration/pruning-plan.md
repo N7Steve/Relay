@@ -3,11 +3,12 @@
 Preparado el 4 de octubre de 2026 sobre
 `1e279bd8f6fe05d295c074180efccbcd59195ad5`.
 Base: [análisis de migración y poda](pruning-analysis.md).
-Estado: fases 0–4 completadas, validadas y publicadas en `origin/main`
+Estado: fases 0–5 completadas, validadas y publicadas en `origin/main`
 el 4 de octubre de 2026. Evidencia y límites en los
 [registros de fase 0](pruning-phase-0.md) y [fase 1](pruning-phase-1.md).
-Fase 4 publicada en `92ee241a1`, base al iniciar fase 5. Fase 5 implementada,
-validada y sin publicar; fases 6–11 pendientes.
+Fase 4 publicada en `92ee241a1`; fase 5 en `ecc901083`. Fase 6 seleccionada e implementada
+el 4 de octubre de 2026; validada localmente en Rails/web/Flutter y sin publicar.
+Compilación Swift pendiente en entorno nativo. Fases 7–11 pendientes.
 Ver los registros de [fase 4](pruning-phase-4.md) y [fase 5](pruning-phase-5.md).
 
 La petición autoriza preparar este plan. La selección de una fase autorizará
@@ -356,11 +357,11 @@ actualización y recuperación de datos soportadas y probadas.
 
 ## Registro de ejecución
 
-La fase 0 está publicada en `eb538dae3`, la fase 1 en `a5299f36c` y la fase 2
-en `ee3341fd3`. La fase 3 está implementada y validada, sin publicar;
-su [registro](pruning-phase-3.md) recoge alcance, pruebas y pendientes.
+La fase 0 está publicada en `eb538dae3`, la fase 1 en `a5299f36c`, la fase 2
+en `ee3341fd3`, la fase 3 en `feccab08c`, la fase 4 en `92ee241a1` y la fase 5
+en `ecc901083`. Los registros de cada fase recogen alcance, pruebas y límites.
 El [punto de continuación de fase 2](pruning-phase-2.md#punto-de-continuación-para-otro-chat)
-registra la transición de configuración. Las fases 4–11 siguen pendientes.
+registra la transición de configuración. Las fases 7–11 siguen pendientes.
 No se ha desplegado la poda en TrueNAS en estas entregas.
 Para cada fase/subfase registrar:
 
@@ -375,8 +376,8 @@ Para cada fase/subfase registrar:
 | Reversión | Código/configuración, recuperación de datos y límites |
 | Cierre | Confirmación de que se puede detener aquí con Relay utilizable |
 
-La fase 5 está implementada y validada, sin commit/push. El resultado queda
-preparado para publicación autorizada. La siguiente
-selección será **fase 6**, retirada opcional de IA integrada. Las fases 1 y 2 construyeron la base segura.
+La fase 6 está seleccionada e implementada, validada localmente en Rails/web/Flutter
+y sin commit/push. Build Swift pendiente en entorno nativo.
+Ver [fase 6](pruning-phase-6.md). Las fases 1 y 2 construyeron la base segura.
 El avance a cualquier fase requiere cerrar la anterior aplicable, sin trasladar
 fallos, contratos rotos ni decisiones pendientes que bloqueen su funcionamiento.

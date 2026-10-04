@@ -130,21 +130,6 @@ class PdfImportReconciliationTest < ActiveSupport::TestCase
     assert_equal 1, @import.reload.rows_count, "nothing on the new account matches, so it is offered"
   end
 
-  test "extract_transactions stores string keys so rows can actually be generated" do
-    provider = mock("llm_provider")
-    Provider::Registry.stubs(:preferred_llm_provider).returns(provider)
-    provider.stubs(:extract_bank_statement).returns(
-      OpenStruct.new(success?: true, data: { transactions: [ { date: @date.to_s, amount: "-5.0", name: "Coffee" } ] })
-    )
-    @import.stubs(:pdf_file_content).returns("fake-pdf")
-
-    @import.extract_transactions
-
-    # Without deep_stringify_keys this reads back empty and no rows are built.
-    assert_equal 1, @import.extracted_transactions.size
-    assert_equal "Coffee", @import.extracted_transactions.first["name"]
-  end
-
   test "publishing does not re-match a row against an entry row generation already consumed" do
     create_transaction(account: @account, date: @date, amount: 50, name: "Coffee")
 

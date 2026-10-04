@@ -81,7 +81,7 @@ class OnchainWalletItemsControllerTest < ActionDispatch::IntegrationTest
   test "the warning offers a one-click fix on a self-hosted instance" do
     get new_wallet_onchain_wallet_items_url
 
-    assert_select "form[action=?]", enable_crypto_prices_onchain_wallet_items_path
+    assert_select "a[href=?][data-turbo-method='post'][data-turbo-frame='_top']", enable_crypto_prices_onchain_wallet_items_path
   end
 
   test "enable_crypto_prices adds the crypto provider without disabling the others" do

@@ -24,15 +24,38 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     ))
   end
 
-  teardown do
-    # These tests persist global Setting.* values; reset them so state can't
-    # leak into later (order-dependent) tests.
-    %i[anthropic_access_token anthropic_base_url anthropic_model jev_api_key jev_endpoint jev_model llm_provider twelve_data_api_key openai_access_token openai_request_timeout ai_response_timeout external_assistant_url external_assistant_token external_assistant_model external_assistant_agent_id rentcast_api_key realie_api_key demo_family_refresh_enabled demo_family_refresh_family_id].each do |key|
-      Setting.public_send("#{key}=", nil)
+  test "Brandfetch can be enabled and disabled even with a legacy environment override" do
+    Setting.unstub(:external_logos_enabled)
+    ClimateControl.modify("RELAY_EXTERNAL_LOGOS_ENABLED" => "false") do
+      patch settings_hosting_url, params: { setting: { external_logos_enabled: "1", brand_fetch_client_id: "test-client" } }
+      assert_redirected_to settings_hosting_url
+      assert ExternalAccess.enabled?(:logos)
+      assert_includes Setting.brand_fetch_icon_url("example.com"), "cdn.brandfetch.io"
+      get settings_hosting_url
+      assert_select "input[name='setting[external_logos_enabled]'][type='checkbox'][checked]"
+
+      patch settings_hosting_url, params: { setting: { external_logos_enabled: "0" } }
+      assert_not ExternalAccess.enabled?(:logos)
+      assert_nil Setting.brand_fetch_icon_url("example.com")
+      assert_nil Setting.transform_brand_fetch_url("https://cdn.brandfetch.io/example.com/icon.png")
     end
-    Setting.ai_features_enabled = true
   end
 
+  test "Brandfetch instance choice also overrides an enabled legacy environment" do
+    Setting.unstub(:external_logos_enabled)
+    ClimateControl.modify("RELAY_EXTERNAL_LOGOS_ENABLED" => "true") do
+      patch settings_hosting_url, params: { setting: { external_logos_enabled: "0" } }
+      assert_not ExternalAccess.enabled?(:logos)
+    end
+  end
+
+  test "members cannot change the Brandfetch instance preference" do
+    sign_in users(:family_member)
+    assert_no_difference -> { Setting.where(var: "external_logos_enabled").count } do
+      patch settings_hosting_url, params: { setting: { external_logos_enabled: "1" } }
+    end
+    assert_redirected_to settings_hosting_url
+  end
 
   test "should get edit when self hosting is enabled" do
     @provider.expects(:usage).returns(@usage_response)
@@ -40,59 +63,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     with_self_hosting do
       get settings_hosting_url
       assert_response :success
-    end
-  end
-
-  test "AI gate can be disabled and hides all AI configuration" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { ai_features_enabled: "0" } }
-
-      assert_not Setting.ai_features_enabled?
-      follow_redirect!
-      assert_response :success
-      assert_select "input[type=checkbox][name='setting[ai_features_enabled]']:not([checked])"
-      assert_select "input[name='setting[openai_access_token]']", count: 0
-      assert_select "input[name='setting[anthropic_access_token]']", count: 0
-      assert_select "select[name='family[assistant_type]']", count: 0
-    end
-  end
-
-  test "disabled AI ignores classification settings and skips external model discovery" do
-    family = users(:family_admin).family
-    family.update!(assistant_type: "external", categorization_provider: "llm")
-    users(:family_admin).update!(preferences: { "preview_features_enabled" => true })
-    Setting.stubs(:ai_features_enabled?).returns(false)
-
-    with_self_hosting do
-      patch settings_hosting_url, params: {
-        setting: { jev_api_key: "new-key", jev_model: "new-model", external_assistant_model: "openclaw/new" },
-        family: { categorization_provider: "jev", categorization_shadow_rate: "1" }
-      }
-
-      assert_redirected_to settings_hosting_url
-      assert_equal "llm", family.reload.categorization_provider
-      assert_equal 0, family.categorization_shadow_rate
-      assert_nil Setting.jev_api_key
-      assert_nil Setting.external_assistant_model
-
-      get settings_hosting_url
-      assert_response :success
-      assert_select "select[name='family[categorization_provider]']", count: 0
-      assert_select "input[name='setting[jev_api_key]']", count: 0
-    end
-  end
-
-  test "AI gate can be enabled from the disabled state" do
-    Setting.ai_features_enabled = false
-
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { ai_features_enabled: "1" } }
-
-      assert_redirected_to settings_hosting_url
-      assert Setting.ai_features_enabled?
-      follow_redirect!
-      assert_select "input[type=checkbox][name='setting[ai_features_enabled]'][checked]"
-      assert_select "input[name='setting[openai_access_token]']"
     end
   end
 
@@ -107,38 +77,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
       assert_select "details > summary h2", text: I18n.t("settings.hostings.show.property_valuation_providers", locale: :es)
       assert_select "details > summary h2", text: I18n.t("settings.hostings.show.sync_settings", locale: :es)
       assert_select "details:not([open]) > summary h2", text: I18n.t("settings.hostings.show.danger_zone", locale: :es)
-    end
-  end
-
-  test "renders OpenAI model and timeout guidance in German" do
-    sign_in users(:sure_support_staff)
-
-    with_self_hosting do
-      get settings_hosting_url(locale: :de)
-
-      assert_response :success
-      assert_includes response.body, "Konfiguriertes Modell prüfen"
-      assert_includes response.body, "Tools beziehungsweise Function Calling unterstützt"
-      assert_includes response.body, "Zeitlimits"
-      assert_includes response.body, "Anfragezeitlimit in Sekunden (optional)"
-      assert_includes response.body, "OPENAI_REQUEST_TIMEOUT"
-      assert_includes response.body, "Antwortzeitlimit in Sekunden (optional)"
-      assert_includes response.body, "(1 + ASSISTANT_MAX_TOOL_CALL_ITERATIONS) × Anfragezeitlimit"
-      assert_includes response.body, "AI_RESPONSE_TIMEOUT"
-      refute_includes response.body, "Request Timeout in Seconds"
-    end
-
-    %w[
-      model_function_calling_help
-      model_function_calling_link
-      timeout_heading
-      timeout_description
-      openai_request_timeout_label
-      openai_request_timeout_help
-      ai_response_timeout_label
-      ai_response_timeout_help
-    ].each do |key|
-      assert I18n.exists?("settings.hostings.openai_settings.#{key}", :de, fallback: false)
     end
   end
 
@@ -349,360 +287,21 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "can update openai access token when self hosting is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { openai_access_token: "token" } }
-
-      assert_equal "token", Setting.openai_access_token
-    end
-  end
-
   # Regression: issue #2465 symptom for the OpenAI token. Blanking the field
   # (the form auto-submits on blur) must clear the stored value, not silently
   # keep the old one.
-  test "can clear openai access token by submitting a blank value" do
-    with_self_hosting do
-      Setting.openai_access_token = "previous-token"
-
-      patch settings_hosting_url, params: { setting: { openai_access_token: "" } }
-
-      assert_nil Setting.openai_access_token
-    end
-  end
-
-  test "ignores redacted openai token placeholder" do
-    with_self_hosting do
-      Setting.openai_access_token = "previous-token"
-
-      patch settings_hosting_url, params: { setting: { openai_access_token: "********" } }
-
-      assert_equal "previous-token", Setting.openai_access_token
-    end
-  end
-
-  test "can update anthropic access token when self hosting is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { anthropic_access_token: "fake-anthropic-key-for-tests" } }
-
-      assert_equal "fake-anthropic-key-for-tests", Setting.anthropic_access_token
-    end
-  end
 
   # Regression: issue #2465 symptom for the Anthropic token.
-  test "can clear anthropic access token by submitting a blank value" do
-    with_self_hosting do
-      Setting.anthropic_access_token = "previous-token"
-
-      patch settings_hosting_url, params: { setting: { anthropic_access_token: "" } }
-
-      assert_nil Setting.anthropic_access_token
-    end
-  end
-
-  test "ignores redacted anthropic token placeholder" do
-    with_self_hosting do
-      Setting.anthropic_access_token = "previous-token"
-
-      patch settings_hosting_url, params: { setting: { anthropic_access_token: "********" } }
-
-      assert_equal "previous-token", Setting.anthropic_access_token
-    end
-  end
-
-  test "can update anthropic base_url and model" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { anthropic_base_url: "https://bedrock.example.com", anthropic_model: "claude-opus-4-7" } }
-
-      assert_equal "https://bedrock.example.com", Setting.anthropic_base_url
-      assert_equal "claude-opus-4-7", Setting.anthropic_model
-    end
-  end
-
-  test "rejects non-URL anthropic base_url" do
-    with_self_hosting do
-      Setting.anthropic_base_url = nil
-
-      patch settings_hosting_url, params: { setting: { anthropic_base_url: "not-a-url" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/Anthropic Base URL must be an http/, flash[:alert])
-      assert_nil Setting.anthropic_base_url
-    end
-  end
-
-  test "clears anthropic base_url when blank value submitted" do
-    with_self_hosting do
-      Setting.anthropic_base_url = "https://bedrock.example.com"
-
-      patch settings_hosting_url, params: { setting: { anthropic_base_url: "" } }
-
-      assert_nil Setting.anthropic_base_url
-    end
-  end
-
-  test "requires anthropic model when a custom base_url is set" do
-    with_self_hosting do
-      Setting.anthropic_base_url = nil
-      Setting.anthropic_model = nil
-
-      patch settings_hosting_url, params: { setting: { anthropic_base_url: "https://bedrock.example.com" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/Anthropic Model is required/, flash[:alert])
-      assert_nil Setting.anthropic_base_url
-    end
-  end
-
-  test "can update categorization tuning when opted into preview features" do
-    with_self_hosting do
-      enable_preview_features!
-
-      patch settings_hosting_url, params: {
-        family: { categorization_confidence_threshold: "0.7", categorization_shadow_rate: "0.25" }
-      }
-
-      @user.family.reload
-      assert_in_delta 0.7, @user.family.categorization_confidence_threshold, 0.001
-      assert_in_delta 0.25, @user.family.categorization_shadow_rate, 0.001
-    end
-  end
-
-  test "rejects a categorization threshold outside 0 and 1" do
-    with_self_hosting do
-      enable_preview_features!
-      # Compare against what was actually stored rather than a literal, so this
-      # keeps testing "rejection leaves the value alone" if the default moves.
-      before = @user.family.categorization_confidence_threshold
-
-      patch settings_hosting_url, params: {
-        family: { categorization_confidence_threshold: "1.5" }
-      }
-
-      assert_response :unprocessable_entity
-      assert_match(/between 0 and 1/, flash[:alert])
-      assert_in_delta before, @user.family.reload.categorization_confidence_threshold, 0.001
-    end
-  end
-
-  test "rejects a non-numeric categorization shadow rate" do
-    with_self_hosting do
-      enable_preview_features!
-
-      patch settings_hosting_url, params: { family: { categorization_shadow_rate: "lots" } }
-
-      assert_response :unprocessable_entity
-      assert_in_delta 0.0, @user.family.reload.categorization_shadow_rate, 0.001
-    end
-  end
-
-  test "ignores categorization tuning from a user without preview features" do
-    with_self_hosting do
-      family = users(:family_admin).family
-      assert_not family.preview_features_enabled?
-
-      patch settings_hosting_url, params: { family: { categorization_shadow_rate: "0.5" } }
-
-      assert_in_delta 0.0, family.reload.categorization_shadow_rate, 0.001
-    end
-  end
-
-  test "can update jev api key when self hosting is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { jev_api_key: "fake-jev-key-for-tests" } }
-
-      assert_equal "fake-jev-key-for-tests", Setting.jev_api_key
-    end
-  end
-
-  test "ignores redacted jev api key placeholder" do
-    with_self_hosting do
-      Setting.jev_api_key = "previous-key"
-
-      patch settings_hosting_url, params: { setting: { jev_api_key: "********" } }
-
-      assert_equal "previous-key", Setting.jev_api_key
-    end
-  end
-
-  test "can clear jev api key by submitting a blank value" do
-    with_self_hosting do
-      Setting.jev_api_key = "previous-key"
-
-      patch settings_hosting_url, params: { setting: { jev_api_key: "" } }
-
-      assert_nil Setting.jev_api_key
-    end
-  end
-
-  test "can update jev endpoint and model" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { jev_endpoint: "https://api.typesafe.ai/v1/systemone", jev_model: "jev-latest" } }
-
-      assert_equal "https://api.typesafe.ai/v1/systemone", Setting.jev_endpoint
-      assert_equal "jev-latest", Setting.jev_model
-    end
-  end
-
-  test "rejects non-URL jev endpoint" do
-    with_self_hosting do
-      Setting.jev_endpoint = nil
-
-      patch settings_hosting_url, params: { setting: { jev_endpoint: "not-a-url" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/Jev Endpoint must be an http/, flash[:alert])
-      assert_nil Setting.jev_endpoint
-    end
-  end
-
-  test "rejects a plaintext jev endpoint but allows loopback" do
-    with_self_hosting do
-      Setting.jev_endpoint = nil
-
-      patch settings_hosting_url, params: { setting: { jev_endpoint: "http://api.typesafe.ai/v1/systemone" } }
-
-      assert_response :unprocessable_entity
-      assert_nil Setting.jev_endpoint
-
-      patch settings_hosting_url, params: { setting: { jev_endpoint: "http://localhost:4000/v1/systemone" } }
-
-      assert_equal "http://localhost:4000/v1/systemone", Setting.jev_endpoint
-    end
-  end
-
-  test "clears jev endpoint when blank value submitted" do
-    with_self_hosting do
-      Setting.jev_endpoint = "https://api.typesafe.ai/v1/systemone"
-
-      patch settings_hosting_url, params: { setting: { jev_endpoint: "" } }
-
-      assert_nil Setting.jev_endpoint
-    end
-  end
-
-  test "can update llm_provider to anthropic" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { llm_provider: "anthropic" } }
-
-      assert_equal "anthropic", Setting.llm_provider
-    end
-  end
-
-  test "falls back to openai when stored llm_provider is invalid" do
-    with_self_hosting do
-      Setting.llm_provider = "bogus"
-      Provider::Openai.stubs(:configured?).returns(false)
-
-      get settings_hosting_url
-
-      assert_response :success
-      assert_select "select[name=?] option[selected][value=?]", "setting[llm_provider]", "openai"
-      assert_no_match(/translation missing/i, @response.body)
-    end
-  ensure
-    Setting.llm_provider = nil
-  end
-
-  test "rejects unknown llm_provider values" do
-    with_self_hosting do
-      Setting.llm_provider = "openai"
-
-      patch settings_hosting_url, params: { setting: { llm_provider: "bogus" } }
-
-      assert_equal "openai", Setting.llm_provider
-    end
-  end
-
-  test "can update openai uri base and model together when self hosting is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { openai_uri_base: "https://api.example.com/v1", openai_model: "gpt-4" } }
-
-      assert_equal "https://api.example.com/v1", Setting.openai_uri_base
-      assert_equal "gpt-4", Setting.openai_model
-    end
-  end
-
-  test "cannot update openai uri base without model when self hosting is enabled" do
-    with_self_hosting do
-      Setting.openai_model = ""
-
-      patch settings_hosting_url, params: { setting: { openai_uri_base: "https://api.example.com/v1" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/OpenAI model is required/, flash[:alert])
-      assert Setting.openai_uri_base.blank?, "Expected openai_uri_base to remain blank after failed validation"
-    end
-  end
 
   # Regression: issue #1824. The OpenAI form auto-submits on blur, so entering
   # the URI base before the model fires a partial submit that fails validation.
   # The re-rendered form must show the user's submitted URI base — not the
   # still-blank saved value — so they can finish typing the model.
-  test "preserves submitted openai uri base in form when validation fails" do
-    with_self_hosting do
-      Setting.openai_uri_base = nil
-      Setting.openai_model = ""
-
-      patch settings_hosting_url, params: { setting: { openai_uri_base: "https://api.example.com/v1" } }
-
-      assert_response :unprocessable_entity
-      assert_select "input[name=?]", "setting[openai_uri_base]" do |inputs|
-        assert_equal "https://api.example.com/v1", inputs.first["value"]
-      end
-    end
-  ensure
-    Setting.openai_uri_base = nil
-    Setting.openai_model = nil
-  end
 
   # PR #1862 review (jjmata): symmetric coverage for the model field. When the
   # user changes the URI base and clears the model in the same auto-submit, the
   # cross-field validation fails — the re-rendered model input must reflect the
   # user's submitted (cleared) value, not silently revert to the saved model.
-  test "preserves submitted openai model in form when validation fails" do
-    with_self_hosting do
-      Setting.openai_uri_base = "https://saved.example.com/v1"
-      Setting.openai_model = "saved-model"
-
-      patch settings_hosting_url, params: { setting: {
-        openai_uri_base: "https://new.example.com/v1",
-        openai_model: ""
-      } }
-
-      assert_response :unprocessable_entity
-      assert_select "input[name=?]", "setting[openai_uri_base]" do |inputs|
-        assert_equal "https://new.example.com/v1", inputs.first["value"]
-      end
-      assert_select "input[name=?]", "setting[openai_model]" do |inputs|
-        assert_not_equal "saved-model", inputs.first["value"].to_s,
-          "model field must reflect the submitted (cleared) value, not the saved model"
-      end
-    end
-  ensure
-    Setting.openai_uri_base = nil
-    Setting.openai_model = nil
-  end
-
-  test "can update openai model alone when self hosting is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { openai_model: "gpt-4" } }
-
-      assert_equal "gpt-4", Setting.openai_model
-    end
-  end
-
-  test "cannot clear openai model when custom uri base is set" do
-    with_self_hosting do
-      Setting.openai_uri_base = "https://api.example.com/v1"
-      Setting.openai_model = "gpt-4"
-
-      patch settings_hosting_url, params: { setting: { openai_model: "" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/OpenAI model is required/, flash[:alert])
-      assert_equal "gpt-4", Setting.openai_model
-    end
-  end
 
   test "can clear data cache when self hosting is enabled" do
     account = accounts(:investment)
@@ -739,92 +338,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   # Regression: issue #2465 symptom for the external assistant token.
-  test "accepts valid llm budget overrides and blanks clear them" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: {
-        llm_context_window: "4096",
-        llm_max_response_tokens: "1024",
-        llm_max_items_per_call: "40",
-        openai_request_timeout: "180",
-        ai_response_timeout: "240"
-      } }
-
-      assert_redirected_to settings_hosting_url
-      assert_equal 4096, Setting.llm_context_window
-      assert_equal 1024, Setting.llm_max_response_tokens
-      assert_equal 40, Setting.llm_max_items_per_call
-      assert_equal 180, Setting.openai_request_timeout
-      assert_equal 240, Setting.ai_response_timeout
-
-      patch settings_hosting_url, params: { setting: {
-        llm_context_window: "",
-        llm_max_response_tokens: "",
-        llm_max_items_per_call: "",
-        openai_request_timeout: "",
-        ai_response_timeout: ""
-      } }
-
-      assert_nil Setting.llm_context_window
-      assert_nil Setting.llm_max_response_tokens
-      assert_nil Setting.llm_max_items_per_call
-      assert_nil Setting.openai_request_timeout
-      assert_nil Setting.ai_response_timeout
-    end
-  ensure
-    Setting.llm_context_window = nil
-    Setting.llm_max_response_tokens = nil
-    Setting.llm_max_items_per_call = nil
-    Setting.openai_request_timeout = nil
-    Setting.ai_response_timeout = nil
-  end
-
-  test "rejects llm budget below field minimum" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { llm_context_window: "0" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/must be a whole number/, flash[:alert])
-      assert_nil Setting.llm_context_window
-
-      patch settings_hosting_url, params: { setting: { llm_max_response_tokens: "-5" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/must be a whole number/, flash[:alert])
-      assert_nil Setting.llm_max_response_tokens
-
-      patch settings_hosting_url, params: { setting: { llm_max_items_per_call: "not-a-number" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/must be a whole number/, flash[:alert])
-      assert_nil Setting.llm_max_items_per_call
-
-      patch settings_hosting_url, params: { setting: { openai_request_timeout: "0" } }
-
-      assert_response :unprocessable_entity
-      assert_match(/must be a whole number/, flash[:alert])
-      assert_nil Setting.openai_request_timeout
-    end
-  ensure
-    Setting.llm_context_window = nil
-    Setting.llm_max_response_tokens = nil
-    Setting.llm_max_items_per_call = nil
-    Setting.openai_request_timeout = nil
-  end
-
-  test "shows environment backed OpenAI request timeout when field is disabled" do
-    with_self_hosting do
-      Setting.openai_request_timeout = 180
-
-      with_env_overrides("OPENAI_REQUEST_TIMEOUT" => "300") do
-        get settings_hosting_url
-
-        assert_response :success
-        assert_select "input[name='setting[openai_request_timeout]'][value='300'][disabled='disabled']"
-      end
-    end
-  ensure
-    Setting.openai_request_timeout = nil
-  end
 
   test "can clear data only when admin" do
     with_self_hosting do

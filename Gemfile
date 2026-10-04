@@ -78,7 +78,6 @@ gem "webauthn", "~> 3.4"
 gem "websocket-driver", "~> 0.8"
 gem "activerecord-import"
 gem "rubyzip", "~> 3.4"
-gem "pdf-reader", "~> 2.12"
 
 # OpenID Connect, OAuth & SAML authentication
 gem "omniauth", "~> 2.1"
@@ -92,9 +91,6 @@ gem "omniauth-saml", "~> 2.1"
 gem "aasm"
 gem "after_commit_everywhere", "~> 1.0"
 
-# AI
-gem "ruby-openai"
-gem "anthropic", "~> 1.0"
 
 group :development, :test do
   gem "debug", platforms: %i[mri mswin mswin64 mingw x64_mingw]

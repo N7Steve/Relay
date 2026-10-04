@@ -6,7 +6,7 @@ FROM ruby:3.4.9-slim-bookworm
 RUN apt-get update -qq \
     && apt-get install --no-install-recommends -y \
       build-essential git libpq-dev libyaml-dev libvips42 \
-      postgresql-client poppler-utils \
+      postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=node /usr/local/bin/node /usr/local/bin/node

@@ -3,14 +3,13 @@
 module Admin
   class SystemHealthController < Admin::BaseController
     before_action :require_hosted_push, only: :send_test_push
-    before_action :require_ai_features, only: %i[ai_status verify_worker_ai]
 
     # Bypass the per-request memo / cross-request cache that the layout
     # banner uses. An operator landing on this page (often right after
     # restarting the worker) wants to confirm the current state, not a
     # snapshot up to `SidekiqHealth::CACHE_TTL` old.
     def show
-      tabs = Setting.ai_features_enabled? ? %w[background_jobs ai] : %w[background_jobs]
+      tabs = %w[background_jobs]
       @active_tab = params[:tab].presence_in(tabs) || "background_jobs"
       if Apns::Client.hosted?
         @push_notification_test = PushNotificationTest.new(Current.user)
@@ -22,24 +21,6 @@ module Admin
       @health = SidekiqHealth.new
     end
 
-    # Each live probe can take up to AiHealth::Probe.timeout, so the page
-    # loads this into its AI tab through a lazy frame instead of waiting on
-    # the probes before it renders.
-    def ai_status
-      @ai_health = AiHealth.new(force_probes: params[:refresh_ai_health] == "1")
-      @worker_ai_health_results = WorkerAiHealth.recent
-      render layout: false
-    end
-
-    # Queues an asynchronous worker-side verification (see
-    # WorkerAiHealthCheckJob) and returns immediately -- the result appears
-    # in the AI status tab once whichever worker process dequeues it
-    # finishes, typically within a few seconds.
-    def verify_worker_ai
-      WorkerAiHealth.request_check!
-      redirect_to admin_system_health_path(tab: "ai", locale: locale_from_param), notice: t(".queued")
-    end
-
     def send_test_push
       result = PushNotificationTest.new(Current.user).request!
       flash[result == :queued ? :notice : :alert] = t("admin.system_health.push_notifications.messages.#{result}")
@@ -47,10 +28,6 @@ module Admin
     end
 
     private
-      def require_ai_features
-        head :forbidden unless Setting.ai_features_enabled?
-      end
-
       def require_hosted_push
         head :not_found unless Apns::Client.hosted?
       end

@@ -6,7 +6,6 @@ class BillsControllerTest < ActionDispatch::IntegrationTest
   end
 
   setup do
-    Provider::Openai.stubs(:configured?).returns(true)
     sign_in @user = users(:family_admin)
     @user.update!(preferences: (@user.preferences || {}).merge("preview_features_enabled" => true))
     @family = @user.family
@@ -39,7 +38,6 @@ class BillsControllerTest < ActionDispatch::IntegrationTest
 
   test "bills page shell is localized in German" do
     @user.update!(locale: "de")
-    Provider::Registry.stubs(:preferred_llm_provider).returns(Object.new)
 
     get bills_url
 
@@ -75,7 +73,7 @@ class BillsControllerTest < ActionDispatch::IntegrationTest
     assert_select "header" do
       assert_select "a:not([role=menuitem])", text: translations.fetch("bills.index.add_bill")
       assert_select "a[role=menuitem]", text: translations.fetch("bills.index.add_income")
-      assert_select "button", text: translations.fetch("bills.index.review_with_ai")
+      assert_select "button", text: translations.fetch("bills.index.review_with_ai"), count: 0
     end
 
     get bills_url(view: "paycheck")
@@ -84,7 +82,7 @@ class BillsControllerTest < ActionDispatch::IntegrationTest
     assert_select "header" do
       assert_select "a:not([role=menuitem])", text: translations.fetch("bills.index.add_income")
       assert_select "a[role=menuitem]", text: translations.fetch("bills.index.add_bill")
-      assert_select "button", text: translations.fetch("bills.index.review_with_ai")
+      assert_select "button", text: translations.fetch("bills.index.review_with_ai"), count: 0
     end
   end
 
@@ -1446,48 +1444,6 @@ class BillsControllerTest < ActionDispatch::IntegrationTest
     assert_no_match I18n.t("bills.index.empty.title"), response.body
   end
 
-  test "AI chips and the review button need both consent and a provider" do
-    Provider::Registry.stubs(:preferred_llm_provider).returns(Object.new)
-    get bills_url
-    assert_response :success
-    # Apostrophe-free fragment: response bodies HTML-escape apostrophes.
-    assert_match "due before my next paycheck", response.body
-    assert_match I18n.t("bills.index.review_with_ai"), response.body
-    # A menu item, not a third header button: it still has to POST into the
-    # sidebar chat frame and open the sidebar, or it seeds a chat nobody sees.
-    assert_select "header div[role=menu] form[action=?]", ai_review_bills_path do
-      assert_select "button[data-turbo-frame=?][data-action=?]", "sidebar_chat", "app-layout#openRightSidebar"
-    end
-
-    @user.update!(ai_enabled: false)
-    get bills_url
-    assert_response :success
-    assert_no_match "due before my next paycheck", response.body
-    assert_no_match I18n.t("bills.index.review_with_ai"), response.body
-
-    # Consent without a configured provider is a button to a dead chat.
-    @user.update!(ai_enabled: true)
-    Provider::Registry.stubs(:preferred_llm_provider).returns(nil)
-    get bills_url
-    assert_response :success
-    assert_no_match "due before my next paycheck", response.body
-    assert_no_match I18n.t("bills.index.review_with_ai"), response.body
-  end
-
-  test "the bill page offers smart configure only when AI is available" do
-    bill = create_bill(name: "Power Co", amount: 80)
-
-    Provider::Registry.stubs(:preferred_llm_provider).returns(Object.new)
-    get bill_url(bill)
-    assert_response :success
-    assert_match smart_configuration_bill_path(bill), response.body
-
-    Provider::Registry.stubs(:preferred_llm_provider).returns(nil)
-    get bill_url(bill)
-    assert_response :success
-    assert_no_match smart_configuration_bill_path(bill), response.body
-  end
-
   test "price changes on accounts the member cannot reach stay out of notices and the rollup" do
     hidden = create_bill(name: "Hidden brokerage sub", amount: 24.99, account: accounts(:investment))
     hidden.update!(bill_type: "subscription")
@@ -1556,7 +1512,6 @@ class BillsControllerTest < ActionDispatch::IntegrationTest
       response.body
   end
 
-
   # The overview groups by calendar month, which is the wrong unit for anyone
   # paid weekly: four paychecks and four rent payments land in one list. The
   # markers only earn their place when income actually subdivides the month.
@@ -1596,7 +1551,6 @@ class BillsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_no_match(/due before [A-Z][a-z]{2} \d+/, response.body)
   end
-
 
   # The bridge is filtered out of the timeline, and only a shortfall earned a
   # banner, so a bill due before payday that the cash comfortably covered

@@ -11,7 +11,7 @@ struct SureOverviewView: View {
           if !store.insights.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
               HStack {
-                Label("AI insights", systemImage: "sparkles")
+                Label("Insights", systemImage: "sparkles")
                   .font(.title2.bold())
                 Spacer()
                 Text("LIVE")
