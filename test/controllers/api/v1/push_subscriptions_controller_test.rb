@@ -2,7 +2,7 @@ require "test_helper"
 
 class Api::V1::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     @user = users(:family_admin)
     key = ApiKey.generate_secure_key
     @api_key = ApiKey.create!(
@@ -212,7 +212,7 @@ class Api::V1::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "self hosted mode rejects registration even when APNs is configured" do
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
+    Apns::Client.stubs(:hosted?).returns(false)
     Apns::Client.stubs(:configured?).returns(true)
     assert_no_difference "PushSubscription.count" do
       post api_v1_push_subscriptions_url,
@@ -226,7 +226,7 @@ class Api::V1::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     subscription = @user.push_subscriptions.create!(
       token: @token, environment: "sandbox", platform: "ios", last_registered_at: Time.current
     )
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
+    Apns::Client.stubs(:hosted?).returns(false)
     assert_no_difference "PushSubscription.count" do
       delete api_v1_push_subscription_url(subscription), headers: @headers
     end

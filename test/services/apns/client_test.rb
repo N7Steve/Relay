@@ -2,7 +2,7 @@ require "test_helper"
 
 class Apns::ClientTest < ActiveSupport::TestCase
   setup do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     @environment = {
       "APNS_ENABLED" => nil,
       "APNS_KEY_ID" => "key-id",
@@ -60,7 +60,7 @@ class Apns::ClientTest < ActiveSupport::TestCase
   end
 
   test "configured credentials never permit direct sends from self hosted mode" do
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
+    Apns::Client.stubs(:hosted?).returns(false)
     Apnotic::Connection.expects(:development).never
     Apnotic::Connection.expects(:new).never
     ClimateControl.modify(@environment) do

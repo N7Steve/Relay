@@ -2,7 +2,7 @@
 
 Native macOS shell (Tauri 2 + WKWebView) that renders the full Sure web app and
 wraps it in real Mac chrome. It always talks to a Sure server you already run
-(self-hosted or managed) — same trust model as a browser.
+(self-hosted) — same trust model as a browser.
 
 ## Requirements
 - Rust (stable), Node 18+, Xcode command line tools, macOS 12+.

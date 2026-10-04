@@ -24,7 +24,6 @@ class InvitationsController < ApplicationController
       elsif existing_user
         flash[:alert] = t(".failure")
       else
-        InvitationMailer.invite_email(@invitation).deliver_later unless self_hosted?
         flash[:notice] = t(".success")
       end
     else

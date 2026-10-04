@@ -90,7 +90,9 @@ Revertir código y lockfiles conserva el esquema y todos los datos. Antes de
 volver a una versión anterior, retirar las variables Langfuse heredadas para
 evitar reactivar sus envíos. Los SDK retirados permanecen recuperables en Git.
 
-Estado: **implementada y validada, sin commit/push**. Se puede detener aquí con
+Estado original de entrega: **implementada y validada, sin commit/push**.
+Publicación posterior: incluida en `feccab08c`, observado en `origin/main`
+al iniciar la [fase 4](pruning-phase-4.md) el 4 de octubre de 2026. Se puede detener aquí con
 Relay utilizable: misma contabilidad, proveedores retenidos y recuperación
 comprobada, sin los SDK retirados. Tras publicación autorizada,
 continuar con **fase 4 — Retirar la plataforma comercial SaaS**. Preservar permisos,

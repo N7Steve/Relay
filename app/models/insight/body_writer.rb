@@ -72,8 +72,8 @@ class Insight::BodyWriter
 
     # This job runs unprompted for every family, so unlike chat (where the user
     # initiates each call) LLM narration is gated on someone in the family
-    # having AI enabled — consent to share financial data with the provider,
-    # and a cost cap in managed mode. Everyone else gets the template body.
+    # having AI enabled — consent to share financial data with the provider.
+    # Everyone else gets the template body.
     def provider
       return @provider if defined?(@provider)
       return @provider = nil unless Setting.ai_features_enabled?

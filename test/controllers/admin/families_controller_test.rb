@@ -25,15 +25,17 @@ class Admin::FamiliesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_users_url
   end
 
-  test "destroy does not delete a family with an active subscription" do
+  test "explicit destruction removes a family with historical billing without contacting Stripe" do
     family = Family.create!(name: "Subscribed Empty Family")
-    family.start_subscription!("sub_admin_cleanup")
+    family.create_subscription!(status: :active, stripe_id: "sub_admin_cleanup")
+    Provider::Registry.expects(:get_provider).with(:stripe).never
 
-    assert_no_difference("Family.count") do
-      delete admin_family_url(family)
+    assert_difference("Family.count", -1) do
+      assert_difference("Subscription.count", -1) do
+        delete admin_family_url(family)
+      end
     end
 
     assert_redirected_to admin_users_url
-    assert_equal "Could not cancel active Stripe subscription. Please cancel it manually before deleting the family.", flash[:alert]
   end
 end

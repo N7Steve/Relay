@@ -2,6 +2,7 @@ require "test_helper"
 
 class Bills::AiReviewsControllerTest < ActionDispatch::IntegrationTest
   setup do
+    Provider::Openai.stubs(:configured?).returns(true)
     sign_in @user = users(:family_admin)
     @user.update!(preferences: (@user.preferences || {}).merge("preview_features_enabled" => true))
   end

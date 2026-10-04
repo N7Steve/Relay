@@ -51,7 +51,7 @@ class SettingsTest < ApplicationSystemTestCase
 
   test "can update self hosting settings" do
     sign_in users(:sure_support_staff)
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
+
     Provider::Registry.stubs(:get_provider).with(:openai).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:anthropic).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:twelve_data).returns(nil)
@@ -77,9 +77,8 @@ class SettingsTest < ApplicationSystemTestCase
   end
 
   test "does not show payment link if self hosting" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     open_settings_from_sidebar
-    assert_no_selector "li", text: I18n.t("settings.settings_nav.payment_label")
+    assert_no_selector "a[href='/settings/payment']"
   end
 
   # Escape is also the settings nav's hotkey back to the page before settings.

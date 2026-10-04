@@ -1,9 +1,6 @@
 de:
   views:
     settings:
-      payments:
-        renewal: Dein Beitrag wird am %{date} fortgesetzt.
-        cancellation: Dein Beitrag endet am %{date}.
   settings:
     ai_prompts:
       show:
@@ -20,22 +17,6 @@ de:
         merchant_detector:
           title: Händlererkennung
           subtitle: Die KI identifiziert und ergänzt Transaktionsdaten mit Händlerinformationen
-    payments:
-      show:
-        page_title: Zahlung
-        subscription_subtitle: Aktualisiere deine Kreditkartendaten
-        subscription_title: Abonnement verwalten
-        choose_level: Stufe wählen
-        contributions_note: Beiträge zu %{product_name} erscheinen hier.
-        currently_on_plan: 'Aktueller Tarif:'
-        manage: Verwalten
-        not_contributing_emphasis: kein Unterstützer
-        not_contributing_prefix: Du bist derzeit
-        payment_via_stripe: Zahlung über Stripe
-        trial_days_left:
-          one: Die Daten werden in %{count} Tag gelöscht
-          other: Die Daten werden in %{count} Tagen gelöscht
-        trialing: Du nutzt gerade die offene Demo von %{product_name}
     preferences:
       show:
         country: Land
@@ -187,7 +168,6 @@ de:
       advanced_section_title: Erweitert
       ai_prompts_label: KI-Eingabeaufforderungen
       api_key_label: API-Schlüssel
-      payment_label: Zahlung
       categories_label: Kategorien
       feedback_label: Feedback
       general_section_title: Allgemein

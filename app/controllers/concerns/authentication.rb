@@ -66,7 +66,7 @@ module Authentication
     end
 
     def self_hosted_first_login?
-      Rails.application.config.app_mode.self_hosted? && User.count.zero?
+      User.count.zero?
     end
 
     def set_request_details

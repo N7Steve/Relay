@@ -31,7 +31,7 @@ module ExternalAccessGuardable
       provider_controller = Family.reflect_on_all_associations(:has_many).any? do |association|
         association.name.to_s == controller_name && controller_name.end_with?("_items")
       end
-      bank_webhook = controller_name == "webhooks" && action_name != "stripe"
+      bank_webhook = controller_name == "webhooks"
       head :forbidden if (provider_controller || bank_webhook) && !ExternalAccess.enabled?(:bank_sync)
     end
 end

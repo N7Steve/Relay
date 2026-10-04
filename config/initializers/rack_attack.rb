@@ -174,11 +174,8 @@ class Rack::Attack
     request.ip if request.post? && request.path == "/settings/background_jobs/cancel"
   end
 
-  # Determine limits based on self-hosted mode
-  self_hosted = Rails.application.config.app_mode.self_hosted?
-
   # Throttle API requests per access token
-  throttle("api/requests", limit: self_hosted ? 10_000 : 100, period: 1.hour) do |request|
+  throttle("api/requests", limit: 10_000, period: 1.hour) do |request|
     if request.path.start_with?("/api/")
       # Extract access token from Authorization header
       auth_header = request.get_header("HTTP_AUTHORIZATION")
@@ -193,7 +190,7 @@ class Rack::Attack
   end
 
   # More permissive throttling for API requests by IP (for development/testing)
-  throttle("api/ip", limit: self_hosted ? 20_000 : 200, period: 1.hour) do |request|
+  throttle("api/ip", limit: 20_000, period: 1.hour) do |request|
     request.ip if request.path.start_with?("/api/")
   end
 

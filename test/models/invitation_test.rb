@@ -208,6 +208,7 @@ class InvitationTest < ActiveSupport::TestCase
   end
 
   test "accept_for applies guest role defaults" do
+    Provider::Openai.stubs(:configured?).returns(true)
     user = users(:family_member)
     user.update!(
       family_id: @family.id,

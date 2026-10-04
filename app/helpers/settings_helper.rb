@@ -7,8 +7,7 @@ module SettingsHelper
           settings_nav_item(:profile_label, :settings_profile_path, "circle-user"),
           settings_nav_item(:preferences_label, :settings_preferences_path, "bolt"),
           settings_nav_item(:appearance_label, :settings_appearance_path, "palette"),
-          settings_nav_item(:security_label, :settings_security_path, "shield-check"),
-          settings_nav_item(:payment_label, :settings_payment_path, "circle-dollar-sign", visible: !self_hosted? && Current.family&.can_manage_subscription?)
+          settings_nav_item(:security_label, :settings_security_path, "shield-check")
         ]
       },
       {

@@ -2,6 +2,7 @@ require "test_helper"
 
 class MessagesControllerTest < ActionDispatch::IntegrationTest
   setup do
+    Provider::Openai.stubs(:configured?).returns(true)
     sign_in @user = users(:family_admin)
     @chat = @user.chats.first
   end

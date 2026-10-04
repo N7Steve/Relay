@@ -10,7 +10,7 @@ class McpController < ApplicationController
   # Skip session-based auth and CSRF — this is a token-authenticated API
   skip_authentication
   skip_before_action :verify_authenticity_token
-  skip_before_action :require_onboarding_and_upgrade
+  skip_before_action :require_onboarding
   skip_before_action :set_default_chat
   skip_before_action :detect_os
 

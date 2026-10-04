@@ -16,10 +16,8 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create invitation for member" do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
-
     assert_difference("Invitation.count") do
-      assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      assert_no_enqueued_jobs only: ActionMailer::MailDeliveryJob do
         post invitations_url, params: {
           invitation: {
             email: "new@example.com",
@@ -110,6 +108,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "inviting an existing user as guest applies intro defaults" do
+    User.any_instance.stubs(:openai_configured?).returns(true)
     existing_user = users(:empty)
     existing_user.update!(
       role: :member,

@@ -4,7 +4,10 @@ class Family < ApplicationRecord
   has_many :financekit_conflicts, dependent: :destroy
 
   include FioConnectable
-  include Syncable, AutoTransferMatchable, Subscribeable, VectorSearchable
+  # Historical instance billing data is retained until the schema cleanup phase.
+  has_one :subscription, dependent: :destroy
+
+  include Syncable, AutoTransferMatchable, VectorSearchable
   include PlaidConnectable, SimplefinConnectable, LunchflowConnectable, AkahuConnectable, EnableBankingConnectable
   include CoinbaseConnectable, BinanceConnectable, KrakenConnectable, CoinspotConnectable, CoinstatsConnectable, SnaptradeConnectable, MercuryConnectable, BrexConnectable, SophtronConnectable
   include IndexaCapitalConnectable, IbkrConnectable, WiseConnectable
@@ -721,10 +724,6 @@ class Family < ApplicationRecord
 
     scope = Merchant.where(id: merchant_ids)
     "#{scope.count}-#{scope.maximum(:updated_at)&.to_f}"
-  end
-
-  def self_hoster?
-    Rails.application.config.app_mode.self_hosted?
   end
 
   # Lazy so existing families get a token on first render, and resetting is

@@ -53,27 +53,7 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Demo data"
   end
 
-  test "index shows subscription status for families" do
-    family = users(:family_admin).family
-    family.subscription&.destroy
-    Subscription.create!(
-      family_id: family.id,
-      status: :active,
-      stripe_id: "cus_test_#{family.id}"
-    )
 
-    get admin_users_url
-    assert_response :success
-    assert_match(/Active/, response.body, "Page should show subscription status for families with active subscriptions")
-  end
-
-  test "index shows no subscription label for families without subscription" do
-    users(:family_admin).family.subscription&.destroy
-
-    get admin_users_url
-    assert_response :success
-    assert_match(/No subscription/, response.body, "Page should show 'No subscription' for families without one")
-  end
 
   test "index renders auth type pills for local and sso users" do
     solo_family = Family.create!(name: "SSO Test Family")

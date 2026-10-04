@@ -16,7 +16,7 @@ class UsersController < ApplicationController
 
     if email_changed?
       if @user.initiate_email_change(user_params[:email])
-        if Rails.application.config.app_mode.self_hosted? && !Setting.require_email_confirmation
+        if !Setting.require_email_confirmation
           handle_redirect(t(".success"))
         else
           redirect_to settings_profile_path, notice: t(".email_change_initiated")
@@ -87,8 +87,6 @@ class UsersController < ApplicationController
         redirect_to settings_preferences_path, notice: notice
       when "goals"
         redirect_to goals_onboarding_path
-      when "trial"
-        redirect_to trial_onboarding_path
       when "appearance"
         redirect_to settings_appearance_path, notice: notice
       when "ai_prompts"

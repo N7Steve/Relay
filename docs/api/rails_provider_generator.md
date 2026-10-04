@@ -45,7 +45,7 @@ rails g provider:global plaid \
 ### Use `provider:global` When:
 - ✅ One set of credentials serves the entire application
 - ✅ Provider charges per-application (not per-customer)
-- ✅ You control the API account (self-hosted or managed mode)
+- ✅ You control the API account (self-hosted installation)
 - ✅ All families can safely share access
 - ✅ Examples: Plaid, OpenAI, exchange rate services
 

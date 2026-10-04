@@ -181,11 +181,6 @@ class OnboardingsTest < ApplicationSystemTestCase
     assert_button I18n.t("onboardings.goals.submit")
   end
 
-  test "trial page renders correctly" do
-    visit trial_onboarding_path
-
-    assert_text "Relay"
-  end
 
   test "navigation between onboarding steps" do
     # Start at main onboarding

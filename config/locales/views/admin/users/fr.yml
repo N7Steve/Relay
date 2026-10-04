@@ -3,7 +3,6 @@ fr:
   admin:
     families:
       destroy:
-        family_has_active_subscription: Cette famille / ce groupe a un abonnement actif et ne peut pas être supprimé tant que l'abonnement n'est pas résilié.
         family_has_users: Cette famille / ce groupe compte encore des utilisateurs et ne peut pas être supprimé.
         success: Famille / groupe supprimé avec succès.
     users:
@@ -47,16 +46,11 @@ fr:
           role: Rôle
           role_all: Tous les rôles
           submit: Filtrer
-          trial_all: Tous
-          trial_expiring_soon: Expire dans 7 jours
-          trial_status: Statut de l'essai
-          trial_trialing: En essai
         invitations:
           delete: Supprimer
           delete_all: Tout supprimer
           expires: Expire le %{date}
           pending_label: Invité (en attente)
-        no_subscription: Aucun abonnement
         no_users: Aucun utilisateur trouvé.
         not_available: n/a
         remove: Supprimer l'utilisateur
@@ -83,7 +77,6 @@ fr:
           super_admin: Super Administrateur
         section_title: Familles / Groupes
         summary:
-          trials_expiring_7_days: Essais expirant dans les 7 prochains jours
         table:
           actions: Actions
           create_new_family_option: "+ Créer une famille / un groupe"
@@ -100,10 +93,8 @@ fr:
           role: Rôle
           session_count: Nombre de sessions
           set_password: Définir un nouveau mot de passe
-          trial_ends_at: Fin de l'essai
           user: Utilisateur
         title: Gestion des utilisateurs
-        trial_ends_at: Fin de l'essai
         unnamed_family: Famille/Groupe sans nom
         unused_families:
           delete: Supprimer la famille inutilisée

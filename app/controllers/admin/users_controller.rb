@@ -7,22 +7,12 @@ module Admin
     def index
       authorize User
       scope = policy_scope(User)
-        .left_joins(family: :subscription)
-        .includes(:oidc_identities, family: :subscription)
+        .includes(:oidc_identities, :family)
         .with_attached_profile_image
 
       scope = scope.where(role: params[:role]) if params[:role].present?
-      scope = apply_trial_filter(scope) if params[:trial_status].present?
 
-      users = scope.order(
-        Arel.sql(
-          "CASE " \
-          "WHEN subscriptions.status = 'trialing' THEN 0 " \
-          "WHEN subscriptions.id IS NULL THEN 1 " \
-          "ELSE 2 END, " \
-          "subscriptions.trial_ends_at ASC NULLS LAST, users.email ASC"
-        )
-      )
+      users = scope.order(:email)
 
       family_ids = users.map(&:family_id).uniq
       @accounts_count_by_family = Account.where(family_id: family_ids).group(:family_id).count
@@ -48,10 +38,6 @@ module Admin
         .distinct
         .pluck("users.family_id")
 
-      @trials_expiring_in_7_days = Subscription
-        .where(status: :trialing)
-        .where(trial_ends_at: Time.current..7.days.from_now)
-        .count
       @sso_identity_blocks = SsoIdentityBlock.order(created_at: :desc)
 
       # Used by the view to hide the "remove" action for the sole remaining
@@ -277,18 +263,6 @@ module Admin
           @user.super_admin? &&
           user_params[:role] != "super_admin" &&
           User.where(role: :super_admin).where.not(id: @user.id).none?
-      end
-
-      def apply_trial_filter(scope)
-        case params[:trial_status]
-        when "expiring_soon"
-          scope.where(subscriptions: { status: :trialing })
-            .where(subscriptions: { trial_ends_at: Time.current..7.days.from_now })
-        when "trialing"
-          scope.where(subscriptions: { status: :trialing })
-        else
-          scope
-        end
       end
   end
 end

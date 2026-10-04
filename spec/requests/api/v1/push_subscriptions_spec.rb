@@ -3,8 +3,6 @@
 require "swagger_helper"
 
 RSpec.describe "API V1 Push Subscriptions", type: :request do
-  before { allow(Rails.application.config).to receive(:app_mode).and_return("managed".inquiry) }
-
   let(:family) { Family.create!(name: "API Family") }
   let(:user) do
     family.users.create!(email: "push-api@example.com", password: "password123", ai_enabled: true)
@@ -17,7 +15,7 @@ RSpec.describe "API V1 Push Subscriptions", type: :request do
 
   path "/api/v1/push_subscriptions" do
     post "Register an APNs device token" do
-      description "Available only in hosted (managed) mode. Requires write scope."
+      description "Unavailable in Relay's self-hosted installation. Legacy Apple credentials do not enable push registration."
       tags "Push Subscriptions"
       security [ { apiKeyAuth: [] } ]
       consumes "application/json"
@@ -25,27 +23,12 @@ RSpec.describe "API V1 Push Subscriptions", type: :request do
       parameter name: :subscription, in: :body, required: true, schema: { "$ref" => "#/components/schemas/PushSubscriptionRegistration" }
       let(:subscription) { { token: "ab" * 32, environment: "sandbox", platform: "ios" } }
 
-      response "403", "push unavailable in self-hosted mode or insufficient write scope" do
-        before { allow(Rails.application.config).to receive(:app_mode).and_return("self_hosted".inquiry) }
+      response "403", "push unavailable in Relay" do
         schema "$ref" => "#/components/schemas/ErrorResponse"
-        run_test!
-      end
-
-      response "201", "token registered" do
-        schema "$ref" => "#/components/schemas/PushSubscription"
-        run_test!
-      end
-
-
-      response "422", "invalid or conflicting subscription" do
-        schema "$ref" => "#/components/schemas/ErrorResponse"
-        let(:subscription) { { token: "ab" * 32, environment: "staging", platform: "ios" } }
-
         run_test!
       end
     end
   end
-
 
   path "/api/v1/push_subscriptions/{id}" do
     parameter name: :id, in: :path, type: :string, required: true
@@ -60,18 +43,13 @@ RSpec.describe "API V1 Push Subscriptions", type: :request do
     let(:id) { subscription.id }
 
     delete "Unregister an APNs device token" do
-      description "Available only in hosted (managed) mode. Requires write scope."
+      description "Unavailable in Relay's self-hosted installation. Historical device tokens remain stored."
       tags "Push Subscriptions"
       security [ { apiKeyAuth: [] } ]
 
-      response "403", "push unavailable in self-hosted mode or insufficient write scope" do
-        before { allow(Rails.application.config).to receive(:app_mode).and_return("self_hosted".inquiry) }
+      response "403", "push unavailable in Relay" do
         produces "application/json"
         schema "$ref" => "#/components/schemas/ErrorResponse"
-        run_test!
-      end
-
-      response "204", "token unregistered" do
         run_test!
       end
     end

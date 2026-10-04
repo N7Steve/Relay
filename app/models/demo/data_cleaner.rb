@@ -64,11 +64,6 @@ class Demo::DataCleaner
       # key being revoked from the UI.
       ApiKey.where(display_key: ApiKey::DEMO_MONITORING_KEY).delete_all
 
-      # A family cancels its Stripe subscription before it goes, and aborts
-      # when Stripe refuses. The demo family's is fake ("sub_demo_123"), so the
-      # cancel always fails, and a dev reset must not cancel a real one either.
-      Subscription.where.not(status: %w[canceled incomplete_expired]).update_all(status: "canceled")
-
       # The last active super admin cannot be deleted, and a reset deletes
       # every user.
       User.where(role: "super_admin").update_all(role: "admin")

@@ -11,16 +11,11 @@ ru:
           role: Роль
           role_all: Все роли
           submit: Фильтр
-          trial_all: Все
-          trial_expiring_soon: Истекает через 7 дней
-          trial_status: Статус пробного периода
-          trial_trialing: На пробном периоде
         invitations:
           delete: Удалить
           delete_all: Удалить все
           expires: Истекает %{date}
           pending_label: Приглашён (в ожидании)
-        no_subscription: Без подписки
         no_users: Пользователи не найдены.
         not_available: н/д
         role_descriptions:
@@ -40,7 +35,6 @@ ru:
           super_admin: Суперадминистратор
         section_title: Семьи / Группы
         summary:
-          trials_expiring_7_days: Пробные периоды истекают в течение 7 дней
         table:
           family_accounts: Семейные счета
           family_transactions: Семейные операции
@@ -48,7 +42,6 @@ ru:
           never: Никогда
           role: Роль
           session_count: Количество сессий
-          trial_ends_at: Пробный период заканчивается
           user: Пользователь
           family: Семья / группа
           keep_current_family: Оставить текущую семью/группу
@@ -60,7 +53,6 @@ ru:
           password_placeholder: Оставьте пустым, чтобы сохранить текущий
           actions: Действия
         title: Управление пользователями
-        trial_ends_at: Пробный период заканчивается
         unnamed_family: Безымянная семья/группа
         you: "(Вы)"
         family_monikers:
@@ -121,6 +113,5 @@ ru:
         submit: Удалить пользователя навсегда
     families:
       destroy:
-        family_has_active_subscription: У семьи/группы есть активная подписка; её нельзя удалить, пока подписка не отменена.
         family_has_users: В семье/группе ещё есть пользователи, поэтому её нельзя удалить.
         success: Семья/группа успешно удалена.

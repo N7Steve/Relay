@@ -59,7 +59,7 @@ class Provider
         ExternalAccess.require!(:property_valuations)
       elsif self.class.included_modules.include?(Provider::SecurityConcept) || self.class.included_modules.include?(Provider::ExchangeRateConcept)
         ExternalAccess.require!(:market_data)
-      elsif self.class.name != "Provider::Github" && self.class.name != "Provider::Stripe"
+      elsif self.class.name != "Provider::Github"
         ExternalAccess.require!(:bank_sync)
       end
     end

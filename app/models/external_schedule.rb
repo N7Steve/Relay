@@ -9,6 +9,9 @@ class ExternalSchedule
   }.freeze
 
   def self.reconcile!(schedule)
+    # Remove only this retired commercial cron, including persisted schedules.
+    Sidekiq::Cron::Job.find("clean_inactive_families")&.destroy
+    schedule = schedule.except("clean_inactive_families")
     enabled = schedule.reject do |name, _|
       capability = JOB_CAPABILITIES[name]
       disabled = capability && !ExternalAccess.enabled?(capability)

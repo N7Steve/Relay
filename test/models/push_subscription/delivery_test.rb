@@ -2,7 +2,7 @@ require "test_helper"
 
 class PushSubscription::DeliveryTest < ActiveSupport::TestCase
   setup do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     Apns::Client.stubs(:configured?).returns(true)
     @subscription = users(:sure_support_staff).push_subscriptions.create!(
       token: "ab" * 32, environment: "sandbox", platform: "ios", last_registered_at: 1.minute.ago
@@ -51,7 +51,7 @@ class PushSubscription::DeliveryTest < ActiveSupport::TestCase
   end
 
   test "self hosted mode never constructs a transport even when configured" do
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
+    Apns::Client.stubs(:hosted?).returns(false)
     Apns::Client.expects(:new).never
     assert_equal :skipped, deliver("200")
   end

@@ -6,7 +6,6 @@ class SidekiqHealthBannerTest < ApplicationSystemTestCase
     @health.stubs(:healthy?).returns(false)
     @health.stubs(:reason).returns(:queue_backed_up)
 
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
     Redis.any_instance.stubs(:ping).returns("PONG")
     SidekiqHealth.stubs(:current).returns(@health)
   end

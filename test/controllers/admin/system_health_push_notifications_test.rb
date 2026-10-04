@@ -2,7 +2,7 @@ require "test_helper"
 
 class Admin::SystemHealthPushNotificationsTest < ActionDispatch::IntegrationTest
   setup do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     Apns::Client.stubs(:configured?).returns(true)
     Rails.stubs(:cache).returns(ActiveSupport::Cache::MemoryStore.new)
     @user = users(:sure_support_staff)
@@ -50,7 +50,7 @@ class Admin::SystemHealthPushNotificationsTest < ActionDispatch::IntegrationTest
 
   test "self hosted mode hides the section and rejects the post even with credentials and a device" do
     register_device
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
+    Apns::Client.stubs(:hosted?).returns(false)
     get admin_system_health_url(tab: "background_jobs")
     assert_response :success
     assert_select "button[role='tab']", text: "Push notifications", count: 0

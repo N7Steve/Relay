@@ -7,25 +7,17 @@ zh-CN:
         description: 管理您实例中的用户角色。超级管理员可以访问 SSO 提供商设置和用户管理。
         section_title: 家庭 / 组
         you: （您）
-        trial_ends_at: 试用结束于
         not_available: 不适用
         no_users: 未找到用户。
         unnamed_family: 未命名家庭/组
-        no_subscription: 无订阅
         family_summary: "%{members} 名成员 · %{accounts} 个账户 · %{transactions} 笔交易"
         filters:
           role: 角色
           role_all: 所有角色
-          trial_status: 试用状态
-          trial_all: 全部
-          trial_expiring_soon: 7 天内到期
-          trial_trialing: 试用中
           submit: 筛选
         summary:
-          trials_expiring_7_days: 未来 7 天内到期的试用
         table:
           user: 用户
-          trial_ends_at: 试用结束
           family_accounts: 家庭账户
           family_transactions: 家庭交易
           last_login: 上次登录

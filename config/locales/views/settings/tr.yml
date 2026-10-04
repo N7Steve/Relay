@@ -159,22 +159,6 @@ tr:
         step_4: Yetkilendirildikten sonra Claude, hesaplarınızı, işlemlerinizi ve
           bakiye verilerinizi okuyabilir.
         unknown_client: Bilinmeyen istemci
-    payments:
-      show:
-        choose_level: Seviye seçin
-        contributions_note: "%{product_name}'e yapılan katkılar burada gösterilecek."
-        currently_on_plan: 'Şu anda kullanılan plan:'
-        manage: Yönet
-        not_contributing_emphasis: katkıda bulunmuyor
-        not_contributing_prefix: Şu anda
-        page_title: Ödeme
-        payment_via_stripe: Stripe ile ödeme
-        subscription_subtitle: Abonelik ve ödeme bilgilerinizi güncelleyin
-        subscription_title: Aboneliği yönet
-        trial_days_left:
-          one: Veriler %{count} gün içinde silinecek
-          other: Veriler %{count} gün içinde silinecek
-        trialing: Şu anda %{product_name}'in açık demosu kullanılıyor
     preferences:
       show:
         additional_currencies_label: Ek para birimleri
@@ -817,7 +801,6 @@ tr:
       mcp_label: MCP
       merchants_label: Satıcılar
       other_section_title: Diğer
-      payment_label: Ödeme
       preferences_label: Tercihler
       profile_label: Hesap
       providers_label: Sağlayıcılar
@@ -889,6 +872,3 @@ tr:
         success: Bütçe paylaşım ayarları güncellendi
   views:
     settings:
-      payments:
-        cancellation: Katkınız %{date} tarihinde sona erecek.
-        renewal: Katkınız %{date} tarihinde devam edecek.

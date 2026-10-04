@@ -7,11 +7,9 @@ es:
         description: Gestiona los usuarios y roles de toda esta instalación. Los miembros y las invitaciones se gestionan desde el perfil del grupo actual.
         section_title: Familias y grupos
         you: (Tú)
-        trial_ends_at: La prueba finaliza
         not_available: n/a
         no_users: No se han encontrado usuarios.
         unnamed_family: Familia/grupo sin nombre
-        no_subscription: Sin suscripción
         family_summary: '%{members} miembros · %{accounts} cuentas · %{transactions} transacciones'
         manage_current_family: Gestionar grupo actual
         instance_context:
@@ -28,16 +26,10 @@ es:
         filters:
           role: Rol
           role_all: Todos los roles
-          trial_status: Estado de la prueba
-          trial_all: Todos
-          trial_expiring_soon: Caduca en 7 días
-          trial_trialing: En periodo de prueba
           submit: Filtrar
         summary:
-          trials_expiring_7_days: Pruebas que caducan en los próximos 7 días
         table:
           user: Usuario
-          trial_ends_at: La prueba finaliza
           family_accounts: Cuentas familiares
           family_transactions: Transacciones familiares
           last_login: Último inicio de sesión

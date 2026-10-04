@@ -217,24 +217,6 @@ pl:
         step_4: Po autoryzacji Claude będzie mógł odczytywać Twoje konta, transakcje
           i dane o saldach.
         unknown_client: Nieznany klient
-    payments:
-      show:
-        choose_level: Wybierz poziom
-        contributions_note: Tutaj pojawią się wpłaty na rzecz %{product_name}.
-        currently_on_plan: Obecnie na planie
-        manage: Zarządzaj
-        not_contributing_emphasis: nie wpłaca
-        not_contributing_prefix: Obecnie
-        page_title: Płatności
-        payment_via_stripe: Płatność przez Stripe
-        subscription_subtitle: Zaktualizuj dane swojej karty kredytowej
-        subscription_title: Zarządzaj wpłatami
-        trial_days_left:
-          few: Dane zostaną usunięte za %{count} dni
-          many: Dane zostaną usunięte za %{count} dni
-          one: Dane zostaną usunięte za %{count} dzień
-          other: Dane zostaną usunięte za %{count} dni
-        trialing: Obecnie korzystasz z otwartego demo %{product_name}
     preferences:
       show:
         additional_currencies_label: Dodatkowe waluty
@@ -862,7 +844,6 @@ pl:
       mcp_label: MCP
       merchants_label: Sprzedawcy
       other_section_title: Więcej
-      payment_label: Płatności
       preferences_label: Preferencje
       profile_label: Informacje profilowe
       providers_label: Dostawcy
@@ -887,6 +868,3 @@ pl:
       choose_label: "(opcjonalne)"
   views:
     settings:
-      payments:
-        cancellation: Twoje wsparcie kończy się %{date}.
-        renewal: Twoje wsparcie będzie kontynuowane %{date}.

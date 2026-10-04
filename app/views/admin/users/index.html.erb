@@ -27,29 +27,8 @@
             {},
             class: "rounded-lg border border-primary px-3 py-2 text-sm bg-container-inset text-primary w-full" %>
       </div>
-      <div class="w-full md:w-auto">
-        <%= f.label :trial_status, t(".filters.trial_status"), class: "block text-sm font-medium text-primary mb-1" %>
-        <%= f.select :trial_status,
-            options_for_select(
-              [[t(".filters.trial_all"), ""], [t(".filters.trial_expiring_soon"), "expiring_soon"], [t(".filters.trial_trialing"), "trialing"]],
-              params[:trial_status]
-            ),
-            {},
-            class: "rounded-lg border border-primary px-3 py-2 text-sm bg-container-inset text-primary w-full" %>
-      </div>
       <%= render DS::Button.new(variant: :primary, size: :md, type: "submit", text: t(".filters.submit"), class: "md:w-auto w-full justify-center") %>
     <% end %>
-  </div>
-
-  <!-- Summary: trials expiring in next 7 days -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="bg-container-inset rounded-lg p-4">
-      <div class="flex items-center gap-2 mb-2">
-        <%= icon "calendar-clock", class: "w-5 h-5 text-secondary" %>
-        <p class="text-xs font-medium text-secondary uppercase"><%= t(".summary.trials_expiring_7_days") %></p>
-      </div>
-      <p class="text-2xl font-semibold text-primary"><%= @trials_expiring_in_7_days %></p>
-    </div>
   </div>
 
   <!-- Families/Groups & Users -->
@@ -92,16 +71,6 @@
                 </div>
               </div>
               <div class="flex items-center gap-4 shrink-0">
-                <% sub = family.subscription %>
-                <% if sub&.trialing? %>
-                  <span class="text-xs text-secondary">
-                    <%= t(".table.trial_ends_at") %>: <%= sub.trial_ends_at&.to_fs(:long) || t(".not_available") %>
-                  </span>
-                <% elsif sub %>
-                  <%= render DS::Pill.new(label: sub.status.humanize, tone: sub.active? ? :success : :neutral) %>
-                <% else %>
-                  <span class="text-xs text-secondary"><%= t(".no_subscription") %></span>
-                <% end %>
                 <%= icon "chevron-down", class: "w-4 h-4 text-secondary transition-transform group-open:rotate-180" %>
               </div>
             <% end %>

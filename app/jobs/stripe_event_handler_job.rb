@@ -1,9 +1,6 @@
 class StripeEventHandlerJob < ApplicationJob
-  queue_as :default
-
+  # Compatibility for jobs queued before SaaS retirement. No side effects.
   def perform(event_id)
-    stripe_provider = Provider::Registry.get_provider(:stripe)
-    Rails.logger.info "Processing Stripe event: #{event_id}"
-    stripe_provider.process_event(event_id)
+    Rails.logger.info("Ignored retired commercial job: StripeEventHandlerJob")
   end
 end

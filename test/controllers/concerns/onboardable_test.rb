@@ -3,7 +3,6 @@ require "test_helper"
 class OnboardableTest < ActionDispatch::IntegrationTest
   setup do
     sign_in @user = users(:empty)
-    @user.family.subscription.destroy
   end
 
   test "must complete onboarding before any other action" do
@@ -13,18 +12,22 @@ class OnboardableTest < ActionDispatch::IntegrationTest
     assert_redirected_to onboarding_path
   end
 
-  test "must have subscription to visit dashboard" do
+  test "onboarded users can visit dashboard without a subscription" do
     @user.update!(onboarded_at: 1.day.ago)
-
-    get root_path
-    assert_redirected_to trial_onboarding_path
-  end
-
-  test "onboarded subscribed user can visit dashboard" do
-    @user.update!(onboarded_at: 1.day.ago)
-    @user.family.start_trial_subscription!
+    @user.family.subscription&.destroy!
 
     get root_path
     assert_response :success
+  end
+
+  test "expired historical trial does not block dashboard access or mutate billing" do
+    @user.update!(onboarded_at: 1.day.ago)
+    @user.family.subscription&.destroy!
+    subscription = @user.family.create_subscription!(status: :trialing, trial_ends_at: 90.days.ago)
+
+    get root_path
+    assert_response :success
+    assert_equal "trialing", subscription.reload.status
+    assert_select "a[href='/subscription/upgrade']", count: 0
   end
 end

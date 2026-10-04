@@ -105,7 +105,7 @@ class GenerateInsightsJobTest < ActiveJob::TestCase
   end
 
   test "enqueues notifications for newly created high priority insights" do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     opted_in_user, opted_out_user = @family.users.to_a
     set_preview_features(opted_out_user, false)
     subscription = opted_in_user.push_subscriptions.create!(

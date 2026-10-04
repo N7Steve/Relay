@@ -6,9 +6,6 @@ class Family::Syncer
   end
 
   def perform_sync(sync)
-    # We don't rely on this value to guard the app, but keep it eventually consistent
-    family.sync_trial_status!
-
     # Schedule child syncs
     child_syncables.each do |syncable|
       # Cooperative cancellation: stop fanning out child syncs once a cancel

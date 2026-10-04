@@ -7,25 +7,17 @@ pt-PT:
         description: "Gestão das funções dos utilizadores, da associação a famílias/grupos e da remoção de contas na sua instância. Os superadministradores podem aceder às definições dos serviços SSO e à gestão de utilizadores."
         section_title: "Famílias / Grupos"
         you: "(Você)"
-        trial_ends_at: "Fim do período experimental"
         not_available: "n/d"
         no_users: "Não foram encontrados utilizadores."
         unnamed_family: "Família/Grupo sem designação"
-        no_subscription: "Sem subscrição"
         family_summary: "%{members} membros · %{accounts} contas · %{transactions} transações"
         filters:
           role: "Função"
           role_all: "Todas as funções"
-          trial_status: "Estado do período experimental"
-          trial_all: "Todos"
-          trial_expiring_soon: "Expira em 7 dias"
-          trial_trialing: "Em período experimental"
           submit: "Filtrar"
         summary:
-          trials_expiring_7_days: "Períodos experimentais que expiram nos próximos 7 dias"
         table:
           user: "Utilizador"
-          trial_ends_at: "Fim do período experimental"
           family_accounts: "Contas da família"
           family_transactions: "Transações da família"
           last_login: "Último início de sessão"
@@ -114,6 +106,5 @@ pt-PT:
         submit: "Eliminar utilizador permanentemente"
     families:
       destroy:
-        family_has_active_subscription: "A família/grupo tem uma subscrição ativa e não pode ser eliminada até a subscrição ser cancelada."
         family_has_users: "A família/grupo ainda tem utilizadores e não pode ser eliminada."
         success: "Família/grupo eliminada com sucesso."

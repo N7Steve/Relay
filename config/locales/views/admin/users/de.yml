@@ -7,22 +7,15 @@ de:
         description: Benutzerrollen für deine Instanz verwalten. Super-Admins haben Zugriff auf SSO-Provider und Benutzerverwaltung.
         section_title: "Benutzer"
         you: "(Sie)"
-        trial_ends_at: "Testversion endet"
         not_available: "k. A."
         no_users: "Keine Benutzer gefunden."
         filters:
           role: "Rolle"
           role_all: "Alle Rollen"
-          trial_status: "Teststatus"
-          trial_all: "Alle"
-          trial_expiring_soon: "Läuft in 7 Tagen ab"
-          trial_trialing: "In Testphase"
           submit: "Filtern"
         summary:
-          trials_expiring_7_days: "Testversionen laufen in den nächsten 7 Tagen ab"
         table:
           user: "Benutzer"
-          trial_ends_at: "Testversion endet"
           family_accounts: "Familienkonten"
           family_transactions: "Familienbuchungen"
           last_login: "Letzte Anmeldung"
@@ -51,7 +44,6 @@ de:
           delete_all: Alle löschen
           expires: Läuft ab am %{date}
           pending_label: Eingeladen (offen)
-        no_subscription: Kein Abo
         unnamed_family: Familie/Gruppe ohne Namen
       update:
         success: "Benutzerrolle wurde erfolgreich aktualisiert."

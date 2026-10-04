@@ -4,9 +4,7 @@ class Settings::CategorizationProviderTest < ApplicationSystemTestCase
   setup do
     sign_in @user = users(:family_admin)
     @family = @user.family
-    # The settings page is guarded by self_hosted?, and the panel itself is
-    # behind the preview gate.
-    Rails.configuration.stubs(:app_mode).returns("self_hosted".inquiry)
+    # The panel is behind the preview gate.
   end
 
   teardown do

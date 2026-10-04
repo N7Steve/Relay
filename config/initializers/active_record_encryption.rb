@@ -2,8 +2,8 @@ require Rails.root.join("lib/active_record_encryption_config").to_s
 
 # Configure Active Record encryption keys
 # Priority order:
-# 1. Environment variables (works for both managed and self-hosted modes)
-# 2. Auto-generation from SECRET_KEY_BASE (self-hosted only, if credentials not present)
+# 1. Environment variables
+# 2. Derivation from SECRET_KEY_BASE (if credentials are not present)
 # 3. Rails credentials (fallback, handled in application.rb)
 
 # Check if keys are provided via environment variables
@@ -15,12 +15,12 @@ if ActiveRecordEncryptionConfig.partial_env?
   raise ActiveRecordEncryptionConfig.partial_env_message
 end
 
-# If all environment variables are present, use them (works for both managed and self-hosted)
+# If all environment variables are present, use them
 if ActiveRecordEncryptionConfig.complete_env?
   Rails.application.config.active_record.encryption.primary_key = primary_key
   Rails.application.config.active_record.encryption.deterministic_key = deterministic_key
   Rails.application.config.active_record.encryption.key_derivation_salt = key_derivation_salt
-elsif Rails.application.config.app_mode.self_hosted? && !Rails.application.credentials.active_record_encryption.present?
+elsif !Rails.application.credentials.active_record_encryption.present?
   # For self-hosted instances without credentials or env vars, auto-generate keys
   # Use SECRET_KEY_BASE as the seed for deterministic key generation
   # This ensures keys are consistent across container restarts

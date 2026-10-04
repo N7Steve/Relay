@@ -43,6 +43,19 @@ en uso. Conservar sus credenciales y programaciones. No se ha cambiado TrueNAS.
 Los cron locales, Agenda y la limpieza de trabajos permanecen; no purgar la cola
 compartida. Ver [registro y transición de fase 2](docs/migration/pruning-phase-2.md).
 
+## Producto exclusivamente self-hosted — poda fase 4
+
+La fase 4 retira modo managed, Stripe, suscripciones/trials comerciales, upgrade
+y el borrado por caducidad. Preservar familias, roles, invitaciones, permisos,
+recuperación de acceso, contabilidad, Agenda, inversiones, Drive y Brandfetch.
+Los datos históricos de facturación siguen en la instancia, excluidos del backup
+familiar como antes; no hay migraciones. Jobs comerciales anteriores son inertes
+y solo se retira su cron propio, sin purgar la cola compartida.
+
+IA y clientes siguen conservados: proveedor IA explícitamente configurado y sus
+controles de consentimiento; API/OAuth intactos y APNs sin activación en Relay.
+Ver alcance, pruebas y transición en [fase 4](docs/migration/pruning-phase-4.md).
+
 ## Restricción operativa del entorno local
 
 En Windows **no se deben intentar ejecutar Rails ni herramientas que dependan del bundle Ruby nativo**. Esto incluye `bin/rails`, pruebas Minitest o RSpec, tareas Rake, RuboCop, Brakeman, migraciones, consola, servidor y comandos equivalentes. El bundle nativo no es ejecutable de forma fiable y esos intentos sólo producen fallos de dependencias conocidos.

@@ -18,7 +18,7 @@ class Api::V1::BaseController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   # Skip onboarding requirements for API endpoints
-  skip_before_action :require_onboarding_and_upgrade
+  skip_before_action :require_onboarding
 
   # Force JSON format for all API requests
   before_action :force_json_format

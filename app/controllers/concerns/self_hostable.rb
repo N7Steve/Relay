@@ -9,7 +9,8 @@ module SelfHostable
 
   private
     def self_hosted?
-      Rails.configuration.app_mode.self_hosted?
+      # Compatibility helper for the retained installation UI. No mode switch.
+      true
     end
 
     def self_hosted_first_login?
@@ -17,8 +18,6 @@ module SelfHostable
     end
 
     def verify_self_host_config
-      return unless self_hosted?
-
       # Special handling for Redis configuration error page
       if controller_name == "pages" && action_name == "redis_configuration_error"
         # If Redis is now working, redirect to home

@@ -33,16 +33,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     Setting.ai_features_enabled = true
   end
 
-  test "cannot edit when self hosting is disabled" do
-    @provider.stubs(:usage).returns(@usage_response)
-
-    Rails.configuration.stubs(:app_mode).returns("managed".inquiry)
-    get settings_hosting_url
-    assert_response :forbidden
-
-    patch settings_hosting_url, params: { setting: { onboarding_state: "invite_only" } }
-    assert_response :forbidden
-  end
 
   test "should get edit when self hosting is enabled" do
     @provider.expects(:usage).returns(@usage_response)

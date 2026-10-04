@@ -9,7 +9,7 @@ class OauthRegistrationController < ApplicationController
 
   skip_authentication
   skip_before_action :verify_authenticity_token
-  skip_before_action :require_onboarding_and_upgrade, raise: false
+  skip_before_action :require_onboarding, raise: false
   skip_before_action :set_default_chat, raise: false
   skip_before_action :detect_os, raise: false
 

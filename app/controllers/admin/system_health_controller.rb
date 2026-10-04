@@ -8,8 +8,7 @@ module Admin
     # Bypass the per-request memo / cross-request cache that the layout
     # banner uses. An operator landing on this page (often right after
     # restarting the worker) wants to confirm the current state, not a
-    # snapshot up to `SidekiqHealth::CACHE_TTL` old. Also makes the page
-    # work in managed mode, where `current_sidekiq_health` is nil.
+    # snapshot up to `SidekiqHealth::CACHE_TTL` old.
     def show
       tabs = Setting.ai_features_enabled? ? %w[background_jobs ai] : %w[background_jobs]
       @active_tab = params[:tab].presence_in(tabs) || "background_jobs"

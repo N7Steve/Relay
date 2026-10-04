@@ -7,13 +7,9 @@ class Demo::DataCleanerTest < ActiveSupport::TestCase
     Provider::Registry.stubs(:plaid_provider_for_region).returns(nil)
   end
 
-  # The generator gives its demo family a fake Stripe subscription, and a
-  # family cancels its subscription at Stripe before it goes. The cancel always
-  # failed, so `rake demo_data:default SKIP_CLEAR=0` could never remove the
-  # demo family it had created itself.
   test "clears a family with a Stripe subscription without calling Stripe" do
     family = Family.create!(name: "Demo Family")
-    family.start_subscription!("sub_demo_123")
+    family.create_subscription!(status: :active, stripe_id: "sub_demo_123")
     Provider::Registry.expects(:get_provider).with(:stripe).never
 
     clear!

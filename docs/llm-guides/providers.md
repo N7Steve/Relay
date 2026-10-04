@@ -207,7 +207,7 @@ Raw debugging is default-off. `SIMPLEFIN_DEBUG_RAW=1` and
 `UP_DEBUG_RAW=1` enables [Up's debug configuration](../../config/initializers/up.rb),
 but its [importer](../../app/models/up_item/importer.rb) logs raw transactions only
 when `Rails.env.local?` is also true. The dump contains PII: preserve this local-only
-guard and do not enable raw Up dumps in managed/production. This guard is specific
+guard and do not enable raw Up dumps in production. This guard is specific
 to Up; the SimpleFIN and Lunchflow flags do not provide the same environment gate.
 
 `MONOBANK_DEBUG_RAW=1` behaves like the Up flag: its

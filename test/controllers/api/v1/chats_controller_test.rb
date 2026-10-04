@@ -4,6 +4,7 @@ require "test_helper"
 
 class Api::V1::ChatsControllerTest < ActionDispatch::IntegrationTest
   setup do
+    Provider::Openai.stubs(:configured?).returns(true)
     @user = users(:family_admin)
     @user.update!(ai_enabled: true)
 

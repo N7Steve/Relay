@@ -45,8 +45,7 @@ itself with **Enable crypto prices** — that adds `binance_public` to the
 enabled providers and leaves the others alone. Otherwise, enable it under
 **Settings → Self hosting → Market data providers**, or set
 `SECURITIES_PROVIDERS` to a comma-separated list including `binance_public`.
-On a managed instance this is the operator's setting, so the button is not
-offered.
+The button is available to installation administrators.
 
 ### And an exchange rate, if your currency is not USD
 

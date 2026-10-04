@@ -2,8 +2,6 @@
 nl:
   views:
     settings:
-      payments:
-        renewal: "Uw bijdrage wordt voortgezet op %{date}."
   settings:
     ai_prompts:
       show:
@@ -20,11 +18,6 @@ nl:
         merchant_detector:
           title: Handelaar Detectie
           subtitle: AI identificeert en verrijkt transactiegegevens met handelaarsinformatie
-    payments:
-      show:
-        page_title: Betaling
-        subscription_subtitle: Werk uw abonnement en betalingsgegevens bij
-        subscription_title: Abonnement beheren
     preferences:
       show:
         country: Land
@@ -122,7 +115,6 @@ nl:
       advanced_section_title: Geavanceerd
       ai_prompts_label: AI Prompts
       api_key_label: API Key
-      payment_label: Betaling
       categories_label: Categorieën
       feedback_label: Feedback
       general_section_title: Algemeen

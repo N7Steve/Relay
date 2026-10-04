@@ -33,7 +33,19 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
     )
   end
 
+  teardown do
+    Setting.demo_family_refresh_enabled = false
+    Setting.demo_family_refresh_family_id = nil
+  end
+
+  def create_replacement_demo!
+    family = Family.create!(name: "Fresh Demo")
+    family.users.create!(first_name: "New", last_name: "Demo", email: @demo_email, password: "password123", role: :admin)
+  end
+
   test "anonymizes old demo user email, enqueues deletion, regenerates data, and notifies super admins" do
+    Setting.demo_family_refresh_enabled = true
+    Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     travel_to Time.utc(2026, 1, 1, 5, 0, 0) do
       Session.create!(user: @demo_user)
       Family.create!(name: "New Family Today", created_at: 6.hours.ago)
@@ -48,6 +60,7 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
       generator = mock
       generator.expects(:generate_default_data!).with(skip_clear: true, email: @demo_email) do
         assert ApiKey.find_by(display_key: ApiKey::DEMO_MONITORING_KEY)
+        create_replacement_demo!
       end
       Demo::Generator.expects(:new).returns(generator)
 
@@ -63,17 +76,18 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   end
 
   test "reads demo email when config_for returns symbol keys" do
+    Setting.demo_family_refresh_enabled = true
+    Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     Rails.application.stubs(:config_for).with(:demo).returns({ email: @demo_email })
 
     generator = mock
-    generator.expects(:generate_default_data!).with(skip_clear: true, email: @demo_email)
+    generator.expects(:generate_default_data!).with(skip_clear: true, email: @demo_email) { create_replacement_demo! }
     Demo::Generator.expects(:new).returns(generator)
 
     DemoFamilyRefreshJob.perform_now
   end
 
   test "self-hosted refresh is disabled by default" do
-    Rails.configuration.stubs(:app_mode).returns("self_hosted".inquiry)
     Setting.demo_family_refresh_enabled = false
     Demo::Generator.expects(:new).never
 
@@ -82,7 +96,6 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   end
 
   test "self-hosted refresh replaces only the explicitly selected demo family" do
-    Rails.configuration.stubs(:app_mode).returns("self_hosted".inquiry)
     visitor = Family.create!(name: "Visitor")
     visitor_user = visitor.users.create!(first_name: "Visitor", last_name: "Owner", email: "visitor@example.com", password: "password123", role: :admin)
     Setting.demo_family_refresh_family_id = @demo_family.id.to_s
@@ -106,11 +119,10 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
     Setting.demo_family_refresh_family_id = nil
   end
 
-  test "self-hosted refresh revokes old credentials and disarms the synthetic subscription" do
-    Rails.configuration.stubs(:app_mode).returns("self_hosted".inquiry)
+  test "refresh revokes old credentials and leaves historical billing unchanged until explicit deletion" do
     Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     Setting.demo_family_refresh_enabled = true
-    @demo_family.start_subscription!("sub_demo_123")
+    @demo_family.create_subscription!(status: :active, stripe_id: "sub_demo_123")
     session = Session.create!(user: @demo_user)
     app = Doorkeeper::Application.create!(name: "Demo Retirement Test", redirect_uri: "https://example.com/callback", confidential: false)
     token = Doorkeeper::AccessToken.create!( # pipelock:ignore Credential in URL
@@ -134,7 +146,7 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
     assert key.reload.revoked?
     assert token.reload.revoked_at
     assert grant.reload.revoked_at
-    assert @demo_family.reload.subscription.canceled?
+    assert @demo_family.reload.subscription.active?
     assert @demo_family.destroy
   ensure
     Setting.demo_family_refresh_enabled = false
@@ -142,7 +154,6 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   end
 
   test "self-hosted refresh refuses a family mismatch or a monitoring key owned by another family" do
-    Rails.configuration.stubs(:app_mode).returns("self_hosted".inquiry)
     Setting.demo_family_refresh_enabled = true
     Setting.demo_family_refresh_family_id = families(:dylan_family).id.to_s
     Demo::Generator.expects(:new).never
@@ -159,7 +170,6 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   end
 
   test "self-hosted refresh refuses a selected family whose demo user lost admin access" do
-    Rails.configuration.stubs(:app_mode).returns("self_hosted".inquiry)
     Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     Setting.demo_family_refresh_enabled = true
     @demo_user.update!(role: :member)
@@ -175,7 +185,6 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   end
 
   test "self-hosted refresh refuses a selected family containing a super admin" do
-    Rails.configuration.stubs(:app_mode).returns("self_hosted".inquiry)
     Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     Setting.demo_family_refresh_enabled = true
     @demo_family.users.create!(first_name: "Instance", last_name: "Admin", email: "instance-admin@example.com", password: "password123", role: :super_admin)
@@ -193,6 +202,8 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   end
 
   test "rolls back generated demo data when refresh fails" do
+    Setting.demo_family_refresh_enabled = true
+    Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     failing_generator = Class.new do
       def generate_default_data!(skip_clear:, email:)
         Family.create!(name: "Partial Demo Family")
@@ -214,6 +225,8 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   end
 
   test "skips refresh when another worker holds the advisory lock" do
+    Setting.demo_family_refresh_enabled = true
+    Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     connection = ActiveRecord::Base.connection
     connection.expects(:select_value).with(regexp_matches(/pg_try_advisory_lock/)).returns(false)
     Rails.logger.expects(:warn).with("Skipped demo family refresh: advisory lock unavailable")

@@ -12,15 +12,8 @@ class Api::V1::UsageControllerTest < ActionDispatch::IntegrationTest
       scopes: [ "read" ],
       display_key: "usage_test_#{SecureRandom.hex(8)}"
     )
-
-    # Clear any existing rate limit data
-    Redis.new.del("api_rate_limit:#{@api_key.id}")
   end
 
-  teardown do
-    # Clean up Redis data after each test
-    Redis.new.del("api_rate_limit:#{@api_key.id}")
-  end
 
   test "should return usage information for API key authentication" do
     # Make a few requests to generate some usage
@@ -42,11 +35,11 @@ class Api::V1::UsageControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil response_body["api_key"]["created_at"]
 
     # Check rate limit information
-    assert_equal "standard", response_body["rate_limit"]["tier"]
-    assert_equal 100, response_body["rate_limit"]["limit"]
-    assert_equal 4, response_body["rate_limit"]["current_count"] # 3 test requests + 1 usage request
-    assert_equal 96, response_body["rate_limit"]["remaining"]
-    assert response_body["rate_limit"]["reset_in_seconds"] > 0
+    assert_equal "noop", response_body["rate_limit"]["tier"]
+    assert_nil response_body["rate_limit"]["limit"]
+    assert_equal 0, response_body["rate_limit"]["current_count"]
+    assert_nil response_body["rate_limit"]["remaining"]
+    assert_equal 0, response_body["rate_limit"]["reset_in_seconds"]
     assert_not_nil response_body["rate_limit"]["reset_at"]
   end
 
@@ -68,7 +61,6 @@ class Api::V1::UsageControllerTest < ActionDispatch::IntegrationTest
       response_body = JSON.parse(response.body)
       assert_equal "insufficient_scope", response_body["error"]
     ensure
-      Redis.new.del("api_rate_limit:#{api_key_no_read.id}")
       api_key_no_read.destroy
     end
   end
@@ -80,7 +72,7 @@ class Api::V1::UsageControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
-  test "should update usage count when accessing usage endpoint" do
+  test "usage requests do not accumulate a commercial counter" do
     # Check initial state
     get "/api/v1/usage", headers: { "X-Api-Key" => @api_key.display_key }
     assert_response :success
@@ -95,7 +87,8 @@ class Api::V1::UsageControllerTest < ActionDispatch::IntegrationTest
     response_body = JSON.parse(response.body)
     second_count = response_body["rate_limit"]["current_count"]
 
-    assert_equal first_count + 1, second_count
+    assert_equal 0, first_count
+    assert_equal 0, second_count
   end
 
   test "should include rate limit headers in usage response" do
@@ -106,33 +99,19 @@ class Api::V1::UsageControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil response.headers["X-RateLimit-Remaining"]
     assert_not_nil response.headers["X-RateLimit-Reset"]
 
-    assert_equal "100", response.headers["X-RateLimit-Limit"]
-    assert_equal "99", response.headers["X-RateLimit-Remaining"]
+    assert_equal "Infinity", response.headers["X-RateLimit-Limit"]
+    assert_equal "Infinity", response.headers["X-RateLimit-Remaining"]
   end
 
-  test "should work correctly when approaching rate limit" do
-    travel_to Time.zone.local(2026, 1, 1, 12, 15, 0) do
-      # Make 98 requests to get close to the limit
-      98.times do
-        get "/api/v1/test", headers: { "X-Api-Key" => @api_key.display_key }
-        assert_response :success
-      end
-
-      # Check usage - this should be request 99
-      get "/api/v1/usage", headers: { "X-Api-Key" => @api_key.display_key }
-      assert_response :success
-
-      response_body = JSON.parse(response.body)
-      assert_equal 99, response_body["rate_limit"]["current_count"]
-      assert_equal 1, response_body["rate_limit"]["remaining"]
-
-      # One more request should hit the limit
+  test "usage remains available beyond the former commercial quota" do
+    101.times do
       get "/api/v1/test", headers: { "X-Api-Key" => @api_key.display_key }
       assert_response :success
-
-      # Now we should be rate limited
-      get "/api/v1/usage", headers: { "X-Api-Key" => @api_key.display_key }
-      assert_response :too_many_requests
     end
+
+    get "/api/v1/usage", headers: { "X-Api-Key" => @api_key.display_key }
+    assert_response :success
+    assert_equal 0, response.parsed_body["rate_limit"]["current_count"]
+    assert_nil response.parsed_body["rate_limit"]["remaining"]
   end
 end

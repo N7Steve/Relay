@@ -85,7 +85,7 @@ class Admin::SystemHealthTest < ApplicationSystemTestCase
   end
 
   test "hosted super admin enables the test button by registering an iOS device" do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     Apns::Client.stubs(:configured?).returns(true)
     Rails.stubs(:cache).returns(ActiveSupport::Cache::MemoryStore.new)
     visit admin_system_health_path

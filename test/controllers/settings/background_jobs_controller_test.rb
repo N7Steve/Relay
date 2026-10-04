@@ -3,6 +3,7 @@ require "test_helper"
 class Settings::BackgroundJobsControllerTest < ActionDispatch::IntegrationTest
   setup do
     stub_sidekiq
+    SidekiqHealth.stubs(:current).returns(stub(healthy?: true))
   end
 
   test "super admin can view the console" do

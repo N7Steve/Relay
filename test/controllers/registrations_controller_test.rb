@@ -56,8 +56,8 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_not new_user.super_admin?, "Subsequent user should not be super_admin"
   end
 
-  test "create when hosted requires an invite code" do
-    with_env_overrides REQUIRE_INVITE_CODE: "true" do
+  test "invite-only signup requires and consumes a valid invite code" do
+    with_invite_only_signup do
       assert_no_difference "User.count" do
         post registration_url, params: { user: {
           email: "john@example.com",
@@ -84,7 +84,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "invite code is not consumed when signup fails validation" do
-    with_env_overrides REQUIRE_INVITE_CODE: "true" do
+    with_invite_only_signup do
       invite_code = InviteCode.generate!
 
       assert_no_difference "User.count" do
@@ -100,7 +100,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "invalid invite code does not create a user" do
-    with_env_overrides REQUIRE_INVITE_CODE: "true" do
+    with_invite_only_signup do
       assert_no_difference "User.count" do
         post registration_url, params: { user: {
           email: "valid@example.com",
@@ -113,6 +113,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "creating account from guest invitation assigns guest role and intro layout" do
+    User.any_instance.stubs(:openai_configured?).returns(true)
     invitation = invitations(:one)
     invitation.update!(role: "guest", email: "guest-signup@example.com")
 
@@ -185,4 +186,10 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil created_user
     assert_equal 0, AccountShare.where(user: created_user).count
   end
+  private
+    def with_invite_only_signup
+      Setting.stubs(:onboarding_state).returns("invite_only")
+      Setting.stubs(:invite_only_default_family_id).returns(nil)
+      yield
+    end
 end

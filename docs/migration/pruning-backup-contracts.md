@@ -33,6 +33,15 @@ Kraken, Lunchflow, Mercury, Monobank, OnchainWallet, Plaid, Questrade, Redbark,
 Simplefin, Snaptrade, Sophtron, TradeRepublic, Trading212, Up y Wise.
 No se modifica esa allowlist ni se afirma ausencia de filas en producción.
 
+## Facturación histórica tras fase 4
+
+Stripe y la plataforma SaaS están retirados. `Subscription` y los campos de
+facturación de instancia permanecen como historia, sin callbacks comerciales.
+Sus exclusiones de backup y la eliminación de `Family.stripe_customer_id` del
+snapshot portable no cambian. Restaurar no activa pagos, trials ni webhooks;
+los vínculos financieros y originales mantienen su verificación.
+Ver [registro de fase 4](pruning-phase-4.md).
+
 ## Implementación mínima de historial de conversaciones
 
 `Family::Backup::ConversationRecords::{Chat,Message,ToolCall}` lee las tablas

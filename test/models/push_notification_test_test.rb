@@ -2,7 +2,7 @@ require "test_helper"
 
 class PushNotificationTestTest < ActiveJob::TestCase
   setup do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     Apns::Client.stubs(:configured?).returns(true)
     @cache = ActiveSupport::Cache::MemoryStore.new
     Rails.stubs(:cache).returns(@cache)
@@ -96,7 +96,7 @@ class PushNotificationTestTest < ActiveJob::TestCase
 
   test "host mode is rechecked by the worker and at request time" do
     @test.request!
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
+    Apns::Client.stubs(:hosted?).returns(false)
     assert_equal :hosted_only, @test.request!
     Apns::Client.expects(:new).never
     deliver

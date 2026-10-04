@@ -13,7 +13,8 @@ module Apns
     TransientError = Class.new(StandardError)
 
     def self.hosted?
-      Rails.application.config.app_mode.managed?
+      # APNs delivery was exclusive to the retired SaaS installation.
+      false
     end
 
     def self.available?

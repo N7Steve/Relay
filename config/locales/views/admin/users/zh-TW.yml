@@ -7,25 +7,17 @@ zh-TW:
         description: 管理這個執行個體的使用者角色。超級管理員可以存取 SSO 供應商設定與使用者管理。
         section_title: 家庭／群組
         you: （您）
-        trial_ends_at: 試用結束
         not_available: 不適用
         no_users: 找不到使用者。
         unnamed_family: 未命名的家庭／群組
-        no_subscription: 沒有訂閱
         family_summary: '%{members} 位成員 · %{accounts} 個帳戶 · %{transactions} 筆交易'
         filters:
           role: 角色
           role_all: 所有角色
-          trial_status: 試用狀態
-          trial_all: 全部
-          trial_expiring_soon: 7 天內到期
-          trial_trialing: 試用中
           submit: 篩選
         summary:
-          trials_expiring_7_days: 未來 7 天內到期的試用
         table:
           user: 使用者
-          trial_ends_at: 試用結束
           family_accounts: 家庭帳戶數
           family_transactions: 家庭交易數
           last_login: 上次登入

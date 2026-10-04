@@ -568,6 +568,7 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should enable ai for authenticated user" do
+    Provider::Openai.stubs(:configured?).returns(true)
     user = users(:family_admin)
     user.update!(ai_enabled: false)
     device = user.mobile_devices.create!(@device_info)
@@ -586,6 +587,7 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should require read_write scope to enable ai" do
+    Provider::Openai.stubs(:configured?).returns(true)
     user = users(:family_admin)
     user.update!(ai_enabled: false)
     device = user.mobile_devices.create!(@device_info)

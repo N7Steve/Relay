@@ -3,6 +3,7 @@ require "ostruct"
 
 class Insight::BodyWriterTest < ActiveSupport::TestCase
   setup do
+    Provider::Openai.stubs(:configured?).returns(true)
     @family = families(:dylan_family)
   end
 

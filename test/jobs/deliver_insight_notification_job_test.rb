@@ -2,7 +2,7 @@ require "test_helper"
 
 class DeliverInsightNotificationJobTest < ActiveJob::TestCase
   setup do
-    Rails.application.config.stubs(:app_mode).returns("managed".inquiry)
+    Apns::Client.stubs(:hosted?).returns(true)
     Apns::Client.stubs(:configured?).returns(true)
     @insight = insights(:cash_flow_warning)
     user = @insight.family.users.first
@@ -90,7 +90,7 @@ class DeliverInsightNotificationJobTest < ActiveJob::TestCase
   end
 
   test "self hosted mode prevents enqueueing and execution of old jobs" do
-    Rails.application.config.stubs(:app_mode).returns("self_hosted".inquiry)
+    Apns::Client.stubs(:hosted?).returns(false)
     Apns::Client.expects(:new).never
     assert_no_enqueued_jobs do
       DeliverInsightNotificationJob.enqueue_for(@insight)

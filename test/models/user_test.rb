@@ -441,7 +441,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "ai_available? returns true when openai access token set in settings" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     previous = Setting.openai_access_token
     with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
       Setting.openai_access_token = nil
@@ -455,7 +454,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "ai_available? returns true when external assistant is configured and family type is external" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     previous = Setting.openai_access_token
     @user.family.update!(assistant_type: "external")
     with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: "http://localhost:18789/v1/chat", EXTERNAL_ASSISTANT_TOKEN: "test-token", EXTERNAL_ASSISTANT_MODEL: "openclaw/main" do
@@ -468,7 +466,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "ai_available? returns false when external assistant is configured but family type is builtin" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     previous = Setting.openai_access_token
     with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: "http://localhost:18789/v1/chat", EXTERNAL_ASSISTANT_TOKEN: "test-token", EXTERNAL_ASSISTANT_MODEL: "openclaw/main" do
       Setting.openai_access_token = nil
@@ -479,7 +476,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "ai_available? returns false when external assistant is configured but user is not in allowlist" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     previous = Setting.openai_access_token
     @user.family.update!(assistant_type: "external")
     with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: "http://localhost:18789/v1/chat", EXTERNAL_ASSISTANT_TOKEN: "test-token", EXTERNAL_ASSISTANT_MODEL: "openclaw/main", EXTERNAL_ASSISTANT_ALLOWED_EMAILS: "other@example.com" do
@@ -492,6 +488,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "intro layout collapses sidebars and enables ai" do
+    User.any_instance.stubs(:openai_configured?).returns(true)
     user = User.new(
       family: families(:empty),
       email: "intro-new@example.com",
@@ -533,7 +530,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "new member defaults show_ai_sidebar to false when AI is not available" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     previous = Setting.openai_access_token
     with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
       Setting.openai_access_token = nil
@@ -552,7 +548,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "new admin defaults show_ai_sidebar to true even when AI is not available" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     previous = Setting.openai_access_token
     with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
       Setting.openai_access_token = nil
@@ -571,7 +566,8 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "new member defaults show_ai_sidebar to true when AI is available" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(false)
+    User.any_instance.stubs(:openai_configured?).returns(true)
+
     user = User.new(
       family: families(:empty),
       email: "member-with-ai@example.com",
@@ -584,7 +580,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "new guest defaults show_ai_sidebar to false when AI is not available" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(true)
     previous = Setting.openai_access_token
     with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: nil, EXTERNAL_ASSISTANT_TOKEN: nil, EXTERNAL_ASSISTANT_MODEL: nil do
       Setting.openai_access_token = nil
@@ -603,7 +598,8 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "new guest defaults show_ai_sidebar to false when AI is available" do
-    Rails.application.config.app_mode.stubs(:self_hosted?).returns(false)
+    User.any_instance.stubs(:openai_configured?).returns(true)
+
     user = User.new(
       family: families(:empty),
       email: "guest-with-ai@example.com",

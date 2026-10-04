@@ -79,15 +79,12 @@ class OnchainWalletItemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the warning offers a one-click fix on a self-hosted instance" do
-    Rails.configuration.stubs(:app_mode).returns(ActiveSupport::StringInquirer.new("self_hosted"))
-
     get new_wallet_onchain_wallet_items_url
 
     assert_select "form[action=?]", enable_crypto_prices_onchain_wallet_items_path
   end
 
   test "enable_crypto_prices adds the crypto provider without disabling the others" do
-    Rails.configuration.stubs(:app_mode).returns(ActiveSupport::StringInquirer.new("self_hosted"))
     Setting.securities_providers = "twelve_data"
 
     post enable_crypto_prices_onchain_wallet_items_url
@@ -97,18 +94,8 @@ class OnchainWalletItemsControllerTest < ActionDispatch::IntegrationTest
     assert_includes Setting.enabled_securities_providers, "twelve_data"
   end
 
-  test "enable_crypto_prices is refused on a managed instance where the operator decides" do
-    Setting.securities_providers = "twelve_data"
-
-    post enable_crypto_prices_onchain_wallet_items_url
-
-    assert_response :redirect
-    assert_not Onchain::SecurityResolver.price_provider_enabled?
-    assert_equal I18n.t("onchain_wallet_items.enable_crypto_prices.not_self_hosted"), flash[:alert]
-  end
 
   test "a member without admin rights is not offered the one-click fix" do
-    Rails.configuration.stubs(:app_mode).returns(ActiveSupport::StringInquirer.new("self_hosted"))
     sign_in users(:family_member)
 
     get manage_onchain_wallet_item_url(create_onchain_wallet_item(family: @family))
@@ -320,18 +307,11 @@ class OnchainWalletItemsControllerTest < ActionDispatch::IntegrationTest
     assert_match "USDC", flash[:alert]
   end
 
-  test "the settings link is not offered to anyone who cannot open that page" do
-    # Managed instance: market data is the operator's setting and the page is
-    # gated, so a link there is a dead end. Asserted on the link's own text —
-    # the settings layout mentions that path for its own reasons.
+  test "admin sees market settings while members cannot manage wallets" do
     link = I18n.t("onchain_wallet_items.price_provider_warning.link")
 
     get new_wallet_onchain_wallet_items_url
     assert_match I18n.t("onchain_wallet_items.price_provider_warning.title"), response.body
-    assert_no_match link, response.body
-
-    Rails.configuration.stubs(:app_mode).returns(ActiveSupport::StringInquirer.new("self_hosted"))
-    get new_wallet_onchain_wallet_items_url
     assert_match link, response.body
 
     sign_in users(:family_member)

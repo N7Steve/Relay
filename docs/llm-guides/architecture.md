@@ -1,8 +1,10 @@
 # Architecture and development conventions
 
 Read the relevant models and [schema](../../db/schema.rb) before changing domain
-behavior. The application supports `managed` and `self_hosted` modes through
-`Rails.application.config.app_mode`; see [application configuration](../../config/application.rb).
+behavior. Relay runs exclusively as a self-hosted installation; legacy
+`SELF_HOSTED`/`SELF_HOSTING_ENABLED` values cannot select a commercial mode.
+See [phase 4](../migration/pruning-phase-4.md) and
+[application configuration](../../config/application.rb).
 Provider availability can differ between installations.
 
 ## Design conventions
@@ -25,8 +27,8 @@ Provider availability can differ between installations.
 
 ## Families, users and currencies
 
-[Family](../../app/models/family.rb) owns financial accounts, users, subscriptions
-and many preferences. [User](../../app/models/user.rb) belongs to a family;
+[Family](../../app/models/family.rb) owns financial accounts, users and many preferences.
+Historical instance billing rows remain in the schema without commercial behavior. [User](../../app/models/user.rb) belongs to a family;
 [Session](../../app/models/session.rb) belongs to a user. Roles include guest,
 member, admin and super admin. Accounts also have an optional user owner and
 sharing rules, so family membership alone does not describe every user's access.

@@ -67,7 +67,6 @@ That's it! Sure will use OpenAI's with a default model (currently `gpt-4.1`) for
 - You want the best performance without setup
 - You don't have powerful hardware (GPU with large VRAM)
 - You're okay with cloud-based processing
-- You're running a managed instance
 
 ### Local Inference (Self-Hosted)
 

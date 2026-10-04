@@ -50,17 +50,3 @@ es:
       optimization: Analizar y optimizar cuentas
       reduce_stress: Reducir el estrés financiero o la ansiedad
       submit: Siguiente
-    trial:
-      title: Prueba Relay durante 45 días
-      data_deletion: Los datos se eliminarán después
-      description_html: A partir de hoy puedes probar el producto a fondo.<br/>Si te gusta, alójalo tú mismo o contribuye para seguir usándolo aquí.
-      try_button: Probar Relay durante 45 días
-      continue_trial: Continuar prueba
-      upgrade: Actualizar
-      how_it_works: Cómo funciona
-      today: Hoy
-      today_description: Tendrás acceso gratuito a Relay durante 45 días en nuestro AWS.
-      in_40_days: En 40 días (%{date})
-      in_40_days_description: Te notificaremos para recordarte exportar tus datos.
-      in_45_days: En 45 días (%{date})
-      in_45_days_description: Eliminamos tus datos — ¡contribuye para seguir usando Relay aquí!

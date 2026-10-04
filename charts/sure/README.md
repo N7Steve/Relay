@@ -553,7 +553,7 @@ rails:
     enabled: true  # set to false to skip injecting the three AR encryption env vars
 ```
 
-Note: In self-hosted mode, if these env vars are not provided, they will be automatically generated from `SECRET_KEY_BASE`. In managed mode, these env vars must be explicitly provided via environment variables or Rails credentials.
+Relay always runs self-hosted. If these env vars are not provided, keys are derived from `SECRET_KEY_BASE`. Preserve the existing keys and secret when updating to retain access to encrypted data.
 
 ## Advanced environment variable injection
 

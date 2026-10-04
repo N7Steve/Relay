@@ -1,6 +1,20 @@
 require "test_helper"
 
 class ExternalScheduleTest < ActiveSupport::TestCase
+  setup { Sidekiq::Cron::Job.stubs(:find).with("clean_inactive_families").returns(nil) }
+
+  test "removes retired commercial cron without touching shared queues or other schedules" do
+    schedule = {
+      "clean_inactive_families" => { "class" => "InactiveFamilyCleanerJob" },
+      "clean_syncs" => { "class" => "SyncCleanerJob" }
+    }
+    stale_job = mock("persisted commercial cron")
+    stale_job.expects(:destroy).once
+    Sidekiq::Cron::Job.expects(:find).with("clean_inactive_families").returns(stale_job)
+    Sidekiq::Cron::Job.expects(:load_from_hash).with(schedule.except("clean_inactive_families"))
+
+    ExternalSchedule.reconcile!(schedule)
+  end
   test "reconciliation deletes only disabled owned jobs and retains local maintenance" do
     schedule = {
       "import_market_data" => { "class" => "ImportMarketDataJob" },

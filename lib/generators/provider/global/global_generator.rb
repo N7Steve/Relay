@@ -230,8 +230,7 @@ class Provider::GlobalGenerator < Rails::Generators::NamedBase
           2. Enter your credentials below
           3. These credentials will be used by all families (global configuration)
 
-          **Note:** This is a global configuration for self-hosted mode only.
-          In managed mode, credentials are configured by the platform operator.
+          **Note:** These settings belong to the self-hosted installation.
         DESC
 
     #{fields_code}

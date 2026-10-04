@@ -2,9 +2,6 @@
 pt-BR:
   views:
     settings:
-      payments:
-        renewal: "Sua contribuição continua em %{date}."
-        cancellation: "Sua contribuição termina em %{date}."
   settings:
     ai_prompts:
       show:
@@ -21,11 +18,6 @@ pt-BR:
         merchant_detector:
           title: Detector de Estabelecimentos
           subtitle: A IA identifica e enriquece dados de transações com informações do estabelecimento
-    payments:
-      show:
-        page_title: Pagamento
-        subscription_subtitle: Atualize sua assinatura e detalhes de pagamento
-        subscription_title: Gerenciar assinatura
     appearances:
       show:
         page_title: Aparência
@@ -142,7 +134,6 @@ pt-BR:
       advanced_section_title: Avançado
       ai_prompts_label: Sugestões de IA
       api_key_label: Chave da API
-      payment_label: Pagamento
       categories_label: Categorias
       feedback_label: Feedback
       general_section_title: Geral

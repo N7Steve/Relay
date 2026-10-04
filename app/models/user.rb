@@ -135,7 +135,7 @@ class User < ApplicationRecord
   def initiate_email_change(new_email)
     return false if new_email == email
 
-    if Rails.application.config.app_mode.self_hosted? && !Setting.require_email_confirmation
+    if !Setting.require_email_confirmation
       update(email: new_email)
     else
       if update(unconfirmed_email: new_email)
@@ -201,7 +201,6 @@ class User < ApplicationRecord
 
   def ai_available?
     return false unless Setting.ai_features_enabled?
-    return true unless Rails.application.config.app_mode.self_hosted?
 
     effective_type = ENV["ASSISTANT_TYPE"].presence || family&.assistant_type.presence || "builtin"
 

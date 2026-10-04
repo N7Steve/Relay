@@ -49,12 +49,6 @@ clean_debug_log_entries:
   queue: "scheduled"
   description: "Deletes debug log entries older than 90 days"
 
-clean_inactive_families:
-  cron: "0 4 * * *" # daily at 4:00 AM
-  class: "InactiveFamilyCleanerJob"
-  queue: "scheduled"
-  description: "Archives and destroys families that expired their trial without subscribing (managed mode only)"
-
 refresh_demo_family:
   cron: "0 5 * * *" # daily at 5:00 AM UTC
   class: "DemoFamilyRefreshJob"

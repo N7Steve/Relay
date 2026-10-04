@@ -37,9 +37,7 @@
     <%= render "impersonation_sessions/approval_bar" if approval_bar_visible %>
 
     <%# Only surface the Sidekiq nudge to operators who can act on it. The
-        Redis round-trip and banner render are both skipped for non-super-admins
-        and for managed-mode deployments — `current_sidekiq_health` returns
-        nil in those cases. %>
+        Redis round-trip and banner render are both skipped for non-super-admins. %>
     <% if Current.user&.super_admin? && current_sidekiq_health && !current_sidekiq_health.healthy? %>
       <% if sidebar_aware %>
         <% content_for :system_alerts do %>

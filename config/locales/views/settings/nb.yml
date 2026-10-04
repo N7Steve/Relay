@@ -2,14 +2,7 @@
 nb:
   views:
     settings:
-      payments:
-        renewal: "Bidraget ditt fortsetter den %{date}."
   settings:
-    payments:
-      show:
-        page_title: Betaling
-        subscription_subtitle: Oppdater abonnementet og betalingsdetaljene dine
-        subscription_title: Administrer abonnement
     preferences:
       show:
         country: Land
@@ -87,7 +80,6 @@ nb:
       accounts_label: Kontoer
       api_key_label: API-nøkkel
       advanced_section_title: Avansert
-      payment_label: Betaling
       categories_label: Kategorier
       feedback_label: Tilbakemelding
       general_section_title: Generelt

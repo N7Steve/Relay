@@ -752,9 +752,6 @@ GEM
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     stringio (3.2.0)
-    stripe (19.6.2)
-      bigdecimal
-      logger
     swd (2.0.3)
       activesupport (>= 3)
       attr_required (>= 0.0.5)
@@ -932,7 +929,6 @@ DEPENDENCIES
   simplecov
   stackprof
   stimulus-rails
-  stripe
   tailwindcss-rails
   turbo-rails
   tzinfo-data
