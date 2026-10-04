@@ -14,15 +14,14 @@ class Provider::Openai::AutoMerchantDetector
   # Threshold for auto mode: if more than this percentage returns null, retry with none mode
   AUTO_MODE_NULL_THRESHOLD = 0.5
 
-  attr_reader :client, :model, :transactions, :user_merchants, :custom_provider, :langfuse_trace, :family, :json_mode
+  attr_reader :client, :model, :transactions, :user_merchants, :custom_provider, :family, :json_mode
 
-  def initialize(client, model: "", transactions:, user_merchants:, custom_provider: false, langfuse_trace: nil, family: nil, json_mode: nil)
+  def initialize(client, model: "", transactions:, user_merchants:, custom_provider: false, family: nil, json_mode: nil)
     @client = client
     @model = model
     @transactions = transactions
     @user_merchants = user_merchants
     @custom_provider = custom_provider
-    @langfuse_trace = langfuse_trace
     @family = family
     @json_mode = json_mode || default_json_mode
   end
@@ -130,12 +129,6 @@ class Provider::Openai::AutoMerchantDetector
   private
 
     def auto_detect_merchants_openai_native
-      span = langfuse_trace&.span(name: "auto_detect_merchants_api_call", input: {
-        model: model.presence || Provider::Openai::DEFAULT_MODEL,
-        transactions: transactions,
-        user_merchants: user_merchants
-      })
-
       response = client.responses.create(parameters: {
         model: model.presence || Provider::Openai::DEFAULT_MODEL,
         input: [ { role: "developer", content: developer_message } ],
@@ -165,11 +158,7 @@ class Provider::Openai::AutoMerchantDetector
         }
       )
 
-      span&.end(output: result.map(&:to_h), usage: response.dig("usage"))
       result
-    rescue => e
-      span&.end(output: { error: e.message }, level: "ERROR")
-      raise
     end
 
     def auto_detect_merchants_openai_generic
@@ -211,13 +200,6 @@ class Provider::Openai::AutoMerchantDetector
     end
 
     def auto_detect_merchants_with_mode(mode)
-      span = langfuse_trace&.span(name: "auto_detect_merchants_api_call", input: {
-        model: model.presence || Provider::Openai::DEFAULT_MODEL,
-        transactions: transactions,
-        user_merchants: user_merchants,
-        json_mode: mode
-      })
-
       # Build parameters with configurable JSON response format
       params = {
         model: model.presence || Provider::Openai::DEFAULT_MODEL,
@@ -261,11 +243,7 @@ class Provider::Openai::AutoMerchantDetector
         }
       )
 
-      span&.end(output: result.map(&:to_h), usage: response.dig("usage"))
       result
-    rescue => e
-      span&.end(output: { error: e.message }, level: "ERROR")
-      raise
     end
 
     AutoDetectedMerchant = Provider::LlmConcept::AutoDetectedMerchant

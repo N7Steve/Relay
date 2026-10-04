@@ -62,25 +62,13 @@ class MonobankAccount::Processor
       { success: false, failed: 1, errors: [ { error: I18n.t("monobank_item.errors.account_processing_failed") } ] }
     end
 
-    # Report a processing error to Sentry with a sanitized message and tags.
+    # Report a processing error to local diagnostics with a sanitized message and tags.
     def report_exception(error, context)
       safe_error = SanitizedProcessingError.new("Monobank account processing failed")
 
-      Sentry.capture_exception(safe_error) do |scope|
-        scope.set_tags(
-          monobank_account_id: monobank_account.id,
+      LocalDiagnostics.report(safe_error, metadata: { monobank_account_id: monobank_account.id,
           context: context,
-          error_class: error.class.name
-        )
-        scope.set_context(
-          "monobank_account_processor",
-          {
-            monobank_account_id: monobank_account.id,
-            context: context,
-            error_class: error.class.name
-          }
-        )
-      end
+          error_class: error.class.name }, source: "models/monobank_account/processor")
     end
 
     # CurrencyNormalizable hook: warn when a Monobank currency code is unrecognized.

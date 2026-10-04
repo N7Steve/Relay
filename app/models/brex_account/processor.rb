@@ -37,13 +37,7 @@ class BrexAccount::Processor
 
       if currency.nil?
         Rails.logger.warn "BrexAccount::Processor - currency parse failed for brex_account #{brex_account.id}: #{brex_account.currency.inspect}, defaulting to USD"
-        Sentry.capture_message("BrexAccount currency parse failed", level: :warning) do |scope|
-          scope.set_tags(brex_account_id: brex_account.id)
-          scope.set_context("brex_account", {
-            id: brex_account.id,
-            currency: brex_account.currency
-          })
-        end
+        LocalDiagnostics.report("BrexAccount currency parse failed", level: :warn, metadata: { brex_account_id: brex_account.id }, source: "models/brex_account/processor")
         currency = "USD"
       end
 
@@ -68,11 +62,7 @@ class BrexAccount::Processor
     end
 
     def report_exception(error, context)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(
-          brex_account_id: brex_account.id,
-          context: context
-        )
-      end
+      LocalDiagnostics.report(error, metadata: { brex_account_id: brex_account.id,
+          context: context }, source: "models/brex_account/processor")
     end
 end

@@ -14,13 +14,12 @@ class Provider::Anthropic::PdfProcessor
   REQUEST_ENVELOPE_BYTES = 1 * 1024 * 1024
   MAX_PDF_BYTES = (MAX_REQUEST_BYTES - REQUEST_ENVELOPE_BYTES) * 3 / 4
 
-  attr_reader :client, :model, :pdf_content, :langfuse_trace, :family
+  attr_reader :client, :model, :pdf_content, :family
 
-  def initialize(client, model:, pdf_content:, langfuse_trace: nil, family: nil)
+  def initialize(client, model:, pdf_content:, family: nil)
     @client = client
     @model = model
     @pdf_content = pdf_content
-    @langfuse_trace = langfuse_trace
     @family = family
   end
 
@@ -30,11 +29,6 @@ class Provider::Anthropic::PdfProcessor
       raise Provider::Anthropic::Error,
             "PDF is too large (#{pdf_content.bytesize} bytes); base64-encoded it would exceed Anthropic's 32 MB request limit"
     end
-
-    span = langfuse_trace&.span(name: "process_pdf_api_call", input: {
-      model: model,
-      pdf_size: pdf_content&.bytesize
-    })
 
     response = client.messages.create(
       model: model,
@@ -50,10 +44,11 @@ class Provider::Anthropic::PdfProcessor
 
     record_usage(model, response.usage, operation: "process_pdf", metadata: { pdf_size: pdf_content.bytesize })
 
-    span&.end(output: result.to_h, usage: usage_hash(response.usage))
     result
   rescue => e
-    span&.end(output: { error: e.message, error_detail: safe_error_detail(e) }, level: "ERROR")
+    LocalDiagnostics.report(StandardError.new("PDF processing failed"),
+      source: "provider/anthropic/pdf_processor",
+      metadata: { error_detail: safe_error_detail(e), provider_error_class: e.class.name })
     record_usage_error(model, operation: "process_pdf", error: e, metadata: { pdf_size: pdf_content&.bytesize })
     raise
   end
@@ -174,14 +169,5 @@ class Provider::Anthropic::PdfProcessor
 
     def block_input(block)
       block.respond_to?(:input) ? block.input : (block[:input] || block["input"])
-    end
-
-    def usage_hash(raw_usage)
-      return {} unless raw_usage
-      {
-        "input_tokens" => raw_usage.input_tokens.to_i,
-        "output_tokens" => raw_usage.output_tokens.to_i,
-        "total_tokens" => raw_usage.input_tokens.to_i + raw_usage.output_tokens.to_i
-      }
     end
 end

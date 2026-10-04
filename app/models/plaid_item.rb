@@ -62,7 +62,7 @@ class PlaidItem < ApplicationRecord
       # Mark the connection as invalid but don't auto-delete. The caller
       # gets nil so the calling controller can decide what to render.
       update!(status: :requires_update)
-      Sentry.capture_exception(e) if defined?(Sentry)
+      LocalDiagnostics.report(e, source: "models/plaid_item")
       nil
     else
       # Re-raise so the controller can surface a friendly alert to the user
@@ -195,7 +195,7 @@ class PlaidItem < ApplicationRecord
         # Log the error but don't prevent deletion - we're removing the item from our database
         # If we can't tell Plaid, we'll at least stop using it on our end
         Rails.logger.warn("Failed to remove Plaid item: #{error_code} - #{json_response['error_message']}")
-        Sentry.capture_exception(e) if defined?(Sentry)
+        LocalDiagnostics.report(e, source: "models/plaid_item")
       end
     end
 

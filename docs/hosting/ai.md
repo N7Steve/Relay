@@ -919,76 +919,11 @@ Before resetting the cache, consider:
 - Reset cache only when necessary
 - Consider using local LLMs for bulk re-processing
 
-## Observability with Langfuse
+## Local diagnostics
 
-Sure includes built-in support for [Langfuse](https://langfuse.com/), an open-source LLM observability platform.
-
-### What is Langfuse?
-
-Langfuse helps you:
-- Track all LLM requests and responses
-- Monitor costs per request
-- Measure response latency
-- Debug failed requests
-- Analyze usage patterns
-- Optimize prompts based on real data
-
-### Setup
-
-1. Create a free account at [Langfuse Cloud](https://cloud.langfuse.com/) or [self-host Langfuse](https://langfuse.com/docs/deployment/self-host)
-
-2. Get your API keys from the Langfuse dashboard
-
-3. Configure Sure:
-   ```bash
-   LANGFUSE_PUBLIC_KEY=pk-lf-...
-   LANGFUSE_SECRET_KEY=sk-lf-...
-   LANGFUSE_HOST=https://cloud.langfuse.com  # or your self-hosted URL
-   ```
-
-4. Restart Sure
-
-All LLM operations will now be logged to Langfuse, including:
-- Chat messages and responses
-- Auto-categorization requests
-- Merchant detection
-- Token usage and costs
-- Response times
-
-### Langfuse Features in Sure
-
-- **Automatic tracing:** Every LLM call is automatically traced
-- **Session tracking:** Chat sessions are tracked with a unique session ID
-- **User anonymization:** User IDs are hashed before sending to Langfuse
-- **Cost tracking:** Token usage is logged for cost analysis
-- **Error tracking:** Failed requests are logged with error details
-
-### Viewing Traces
-
-1. Go to your Langfuse dashboard
-2. Navigate to **Traces**
-3. You'll see traces for:
-   - `openai.chat_response` - Chat assistant interactions
-   - `openai.auto_categorize` - Transaction categorization
-   - `openai.auto_detect_merchants` - Merchant detection
-
-### Privacy Considerations
-
-**What's sent to Langfuse:**
-- Prompts and responses
-- Model names
-- Token counts
-- Timestamps
-- Session IDs
-- Hashed user IDs (not actual user data)
-
-**What's NOT sent:**
-- User email addresses
-- User names
-- Unhashed user IDs
-- Account credentials
-
-**For maximum privacy:** Self-host Langfuse on your own infrastructure.
+Relay records operational errors and LLM usage locally. Remote telemetry and
+evaluation tasks were removed in pruning phase 3. Legacy monitoring variables
+have no effect.
 
 ## Testing and Evaluation
 
@@ -1009,12 +944,8 @@ Test your AI configuration:
 
 ### Automated Evaluation
 
-Sure doesn't currently include automated evals, but you can build them using Langfuse:
-
-1. **Collect baseline responses:** Run test prompts and save responses
-2. **Create evaluation dataset:** Use Langfuse datasets feature
-3. **Run evaluations:** Test new models/prompts against the dataset
-4. **Compare results:** Use Langfuse's comparison tools
+Remote evaluation tasks have been removed. Provider behavior is covered by
+Minitest with synthetic responses.
 
 ### Benchmarking Models
 
@@ -1112,7 +1043,7 @@ and GPT-4o mini is $0.15 / $0.60.
 
 **Optimization tips:**
 1. Use `gpt-4o-mini` for categorization
-2. Use Langfuse to identify expensive prompts
+2. Use local LLM usage records to identify expensive prompts
 3. Cache results when possible
 4. Consider local LLMs for high-volume operations
 
@@ -1334,7 +1265,7 @@ Restart `web` and `worker` after changing the environment variables, and make su
 **Symptom:** Unexpected bills from cloud provider
 
 **Analysis:**
-1. Check Langfuse for usage patterns
+1. Check local LLM usage records for usage patterns
 2. Look for unusually long conversations
 3. Check if you're using an expensive model
 
@@ -1388,9 +1319,7 @@ gets its own prefix, which no longer shares a cache entry with other families on
 the same API key. The first request after each edit also pays full price. The
 result is a small, temporary increase in cost.
 
-Evals always score the default. `Eval::Runners::ChatRunner` reads
-`STATIC_INSTRUCTIONS` directly, which keeps eval scores reproducible. Editing a
-family's prompt does not change them.
+Remote evaluation runners have been removed. Use provider tests for prompt regressions.
 
 Custom OpenAI-compatible endpoints need a little more care. The categorizer and
 merchant parsers look for a `{"categorizations": [...]}` or `{"merchants": [...]}`
@@ -1777,7 +1706,6 @@ Upgrading: deployments that set only the URL and token keep working. When no age
 - [OpenAI Documentation](https://platform.openai.com/docs)
 - [Ollama Documentation](https://github.com/ollama/ollama)
 - [OpenRouter Documentation](https://openrouter.ai/docs)
-- [Langfuse Documentation](https://langfuse.com/docs)
 - [Relay GitHub Repository](https://github.com/N7Steve/Relay)
 
 ## Support

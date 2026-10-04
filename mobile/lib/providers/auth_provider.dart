@@ -9,7 +9,7 @@ import '../services/auth_service.dart';
 import '../services/device_service.dart';
 import '../services/api_config.dart';
 import '../services/log_service.dart';
-import '../services/telemetry_service.dart';
+import '../services/diagnostics_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -102,8 +102,7 @@ class AuthProvider with ChangeNotifier {
           }
         }
       }
-      _updateTelemetryUser(_user);
-      _addTelemetryBreadcrumb(
+      _addDiagnosticsBreadcrumb(
         'auth',
         'stored_auth_loaded',
         data: {
@@ -112,7 +111,7 @@ class AuthProvider with ChangeNotifier {
         },
       );
     } catch (e, stackTrace) {
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.load_stored',
@@ -121,7 +120,6 @@ class AuthProvider with ChangeNotifier {
       _user = null;
       _apiKey = null;
       _isApiKeyAuth = false;
-      _clearTelemetryUser();
     }
 
     _isLoading = false;
@@ -162,8 +160,7 @@ class AuthProvider with ChangeNotifier {
         _user = result['user'] as User?;
         _mfaRequired = false;
         _showMfaInput = false; // Reset on successful login
-        _updateTelemetryUser(_user);
-        _addTelemetryBreadcrumb('auth', 'login_success');
+        _addDiagnosticsBreadcrumb('auth', 'login_success');
         _isLoading = false;
         notifyListeners();
         return true;
@@ -191,7 +188,7 @@ class AuthProvider with ChangeNotifier {
             _showMfaInput = true;
           }
         }
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'login_failed',
           data: {
@@ -205,7 +202,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('Login', e);
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.login',
@@ -237,8 +234,7 @@ class AuthProvider with ChangeNotifier {
         _apiKey = apiKey;
         _isApiKeyAuth = true;
         ApiConfig.setApiKeyAuth(apiKey);
-        _clearTelemetryUser();
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'api_key_login_success',
         );
@@ -246,7 +242,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'api_key_login_failed',
         );
@@ -257,7 +253,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('API key login', e);
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.api_key_login',
@@ -295,13 +291,12 @@ class AuthProvider with ChangeNotifier {
       if (result['success'] == true) {
         _tokens = result['tokens'] as AuthTokens?;
         _user = result['user'] as User?;
-        _updateTelemetryUser(_user);
-        _addTelemetryBreadcrumb('auth', 'signup_success');
+        _addDiagnosticsBreadcrumb('auth', 'signup_success');
         _isLoading = false;
         notifyListeners();
         return true;
       } else {
-        _addTelemetryBreadcrumb('auth', 'signup_failed');
+        _addDiagnosticsBreadcrumb('auth', 'signup_failed');
         _errorMessage = result['error'] as String?;
         _isLoading = false;
         notifyListeners();
@@ -309,7 +304,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('Signup', e);
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.signup',
@@ -336,7 +331,7 @@ class AuthProvider with ChangeNotifier {
 
       final launched = await launchUrl(Uri.parse(ssoUrl),
           mode: LaunchMode.externalApplication);
-      _addTelemetryBreadcrumb(
+      _addDiagnosticsBreadcrumb(
         'auth',
         'sso_launch_result',
         data: {'launched': launched},
@@ -346,7 +341,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('SSO launch', e);
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.sso_launch',
@@ -370,8 +365,7 @@ class AuthProvider with ChangeNotifier {
         _tokens = result['tokens'] as AuthTokens?;
         _user = result['user'] as User?;
         _ssoOnboardingPending = false;
-        _updateTelemetryUser(_user);
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'sso_callback_success',
         );
@@ -387,7 +381,7 @@ class AuthProvider with ChangeNotifier {
         _ssoLastName = result['last_name'] as String?;
         _ssoAllowAccountCreation = result['allow_account_creation'] == true;
         _ssoHasPendingInvitation = result['has_pending_invitation'] == true;
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'sso_onboarding_required',
           data: {
@@ -399,7 +393,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return false;
       } else {
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'sso_callback_failed',
         );
@@ -410,7 +404,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('SSO callback', e);
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.sso_callback',
@@ -447,8 +441,7 @@ class AuthProvider with ChangeNotifier {
         _tokens = result['tokens'] as AuthTokens?;
         _user = result['user'] as User?;
         _clearSsoOnboardingState();
-        _updateTelemetryUser(_user);
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'sso_link_success',
         );
@@ -456,7 +449,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _addTelemetryBreadcrumb('auth', 'sso_link_failed');
+        _addDiagnosticsBreadcrumb('auth', 'sso_link_failed');
         _errorMessage = result['error'] as String?;
         _isLoading = false;
         notifyListeners();
@@ -464,7 +457,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('SSO link', e);
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.sso_link',
@@ -501,8 +494,7 @@ class AuthProvider with ChangeNotifier {
         _tokens = result['tokens'] as AuthTokens?;
         _user = result['user'] as User?;
         _clearSsoOnboardingState();
-        _updateTelemetryUser(_user);
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'sso_create_account_success',
         );
@@ -510,7 +502,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _addTelemetryBreadcrumb(
+        _addDiagnosticsBreadcrumb(
           'auth',
           'sso_create_account_failed',
         );
@@ -521,7 +513,7 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e, stackTrace) {
       _logAuthException('SSO create account', e);
-      _captureTelemetryException(
+      _captureDiagnosticsException(
         e,
         stackTrace,
         operation: 'auth.sso_create_account',
@@ -557,9 +549,8 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
     _mfaRequired = false;
     ApiConfig.clearApiKeyAuth();
-    _safeTelemetry(() async {
-      TelemetryService.instance.addBreadcrumb('auth', 'logout');
-      await TelemetryService.instance.clearUser();
+    _safeDiagnostics(() async {
+      DiagnosticsService.instance.addBreadcrumb('auth', 'logout');
     });
     notifyListeners();
   }
@@ -588,30 +579,13 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _setTelemetryUser(User? user) async {
-    if (user == null) {
-      await TelemetryService.instance.clearUser();
-      return;
-    }
-
-    await TelemetryService.instance.setUserId(user.id);
-  }
-
-  void _updateTelemetryUser(User? user) {
-    _safeTelemetry(() => _setTelemetryUser(user));
-  }
-
-  void _clearTelemetryUser() {
-    _safeTelemetry(() => TelemetryService.instance.clearUser());
-  }
-
-  void _addTelemetryBreadcrumb(
+  void _addDiagnosticsBreadcrumb(
     String category,
     String message, {
     Map<String, dynamic>? data,
   }) {
-    _safeTelemetry(
-      () => TelemetryService.instance.addBreadcrumb(
+    _safeDiagnostics(
+      () => DiagnosticsService.instance.addBreadcrumb(
         category,
         message,
         data: data,
@@ -619,13 +593,13 @@ class AuthProvider with ChangeNotifier {
     );
   }
 
-  void _captureTelemetryException(
+  void _captureDiagnosticsException(
     Object error,
     StackTrace stackTrace, {
     required String operation,
   }) {
-    _safeTelemetry(
-      () => TelemetryService.instance.captureHandledException(
+    _safeDiagnostics(
+      () => DiagnosticsService.instance.captureHandledException(
         error,
         stackTrace,
         operation: operation,
@@ -633,14 +607,14 @@ class AuthProvider with ChangeNotifier {
     );
   }
 
-  void _safeTelemetry(FutureOr<void> Function() action) {
+  void _safeDiagnostics(FutureOr<void> Function() action) {
     unawaited(Future<void>(() async {
       try {
         await action();
       } catch (error) {
         LogService.instance.warning(
           'AuthProvider',
-          'Telemetry operation failed: ${error.runtimeType}',
+          'Diagnostics operation failed: ${error.runtimeType}',
         );
       }
     }));

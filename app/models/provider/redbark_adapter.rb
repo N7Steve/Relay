@@ -58,7 +58,6 @@ class Provider::RedbarkAdapter < Provider::Base
     provider_account.redbark_item
   end
 
-
   def institution_domain
     metadata = provider_account.institution_metadata
     return nil unless metadata.present?

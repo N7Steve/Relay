@@ -23,7 +23,7 @@ class PlaidAccount::Investments::SecurityResolverTest < ActiveSupport::TestCase
     })
 
     Security::Resolver.expects(:new).never
-    Sentry.stubs(:capture_exception)
+    LocalDiagnostics.stubs(:report)
 
     response = @resolver.resolve(plaid_security_id: missing_id)
 

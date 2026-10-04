@@ -360,15 +360,11 @@ class CoinbaseAccount::Processor
       end
     end
 
-    # Reports errors to Sentry with context tags.
+    # Reports errors to local diagnostics with context tags.
     # @param error [Exception] The error to report
     # @param context [String] Processing context (e.g., "account", "trades")
     def report_exception(error, context)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(
-          coinbase_account_id: coinbase_account.id,
-          context: context
-        )
-      end
+      LocalDiagnostics.report(error, metadata: { coinbase_account_id: coinbase_account.id,
+          context: context }, source: "models/coinbase_account/processor")
     end
 end

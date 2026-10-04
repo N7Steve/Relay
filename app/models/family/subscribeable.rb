@@ -124,7 +124,7 @@ module Family::Subscribeable
       begin
         Provider::Registry.get_provider(:stripe).cancel_subscription(subscription.stripe_id)
       rescue => e
-        Sentry.capture_exception(e) if defined?(Sentry)
+        LocalDiagnostics.report(e, source: "models/family/subscribeable")
         Rails.logger.error "Failed to cancel Stripe subscription before family deletion: #{e.message}"
         errors.add(:base, :cannot_delete_with_active_subscription, message: "Could not cancel active Stripe subscription. Please cancel it manually before deleting the family.")
         throw(:abort)

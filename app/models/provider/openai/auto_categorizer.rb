@@ -14,15 +14,14 @@ class Provider::Openai::AutoCategorizer
   # This is a heuristic to detect when strict JSON mode is breaking the model's ability to reason
   AUTO_MODE_NULL_THRESHOLD = 0.5
 
-  attr_reader :client, :model, :transactions, :user_categories, :custom_provider, :langfuse_trace, :family, :json_mode
+  attr_reader :client, :model, :transactions, :user_categories, :custom_provider, :family, :json_mode
 
-  def initialize(client, model: "", transactions: [], user_categories: [], custom_provider: false, langfuse_trace: nil, family: nil, json_mode: nil)
+  def initialize(client, model: "", transactions: [], user_categories: [], custom_provider: false, family: nil, json_mode: nil)
     @client = client
     @model = model
     @transactions = transactions
     @user_categories = user_categories
     @custom_provider = custom_provider
-    @langfuse_trace = langfuse_trace
     @family = family
     @json_mode = json_mode || default_json_mode
   end
@@ -118,12 +117,6 @@ class Provider::Openai::AutoCategorizer
   private
 
     def auto_categorize_openai_native
-      span = langfuse_trace&.span(name: "auto_categorize_api_call", input: {
-        model: model.presence || Provider::Openai::DEFAULT_MODEL,
-        transactions: transactions,
-        user_categories: user_categories
-      })
-
       response = client.responses.create(parameters: {
         model: model.presence || Provider::Openai::DEFAULT_MODEL,
         input: [ { role: "developer", content: developer_message } ],
@@ -152,11 +145,7 @@ class Provider::Openai::AutoCategorizer
         }
       )
 
-      span&.end(output: result.map(&:to_h), usage: response.dig("usage"))
       result
-    rescue => e
-      span&.end(output: { error: e.message }, level: "ERROR")
-      raise
     end
 
     def auto_categorize_openai_generic
@@ -202,13 +191,6 @@ class Provider::Openai::AutoCategorizer
     end
 
     def auto_categorize_with_mode(mode)
-      span = langfuse_trace&.span(name: "auto_categorize_api_call", input: {
-        model: model.presence || Provider::Openai::DEFAULT_MODEL,
-        transactions: transactions,
-        user_categories: user_categories,
-        json_mode: mode
-      })
-
       # Build parameters with configurable JSON response format
       params = {
         model: model.presence || Provider::Openai::DEFAULT_MODEL,
@@ -252,11 +234,7 @@ class Provider::Openai::AutoCategorizer
         }
       )
 
-      span&.end(output: result.map(&:to_h), usage: response.dig("usage"))
       result
-    rescue => e
-      span&.end(output: { error: e.message }, level: "ERROR")
-      raise
     end
 
     AutoCategorization = Provider::LlmConcept::AutoCategorization

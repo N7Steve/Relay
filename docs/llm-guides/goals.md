@@ -265,7 +265,7 @@ calls it. Things to watch:
 
 - The outer `rescue StandardError` is protective: an unexpected raise
   here would break the importer for every account. Keep the rescue, but
-  forward to Sentry so the underlying bug stays visible.
+  record local diagnostics so the underlying bug stays visible.
 - The inner rescue catches `NotOpenError`, `RecordInvalid`, and
   `RecordNotUnique`. These cover the known race conditions (another
   worker claimed the pledge first; another pledge claimed the
@@ -299,10 +299,10 @@ Light-mode contrast on pale palette entries is weak against
 feature. The distribution bar segments and the goal-card ring are the
 visible surfaces.
 
-`Goal#balance_series_values` rescues `StandardError` and logs to Sentry
+`Goal#balance_series_values` rescues `StandardError` and records local diagnostics
 when `Balance::ChartSeriesBuilder` raises. The chart degrades to
 target-line-only rather than 500ing. If you're debugging "why is the
-projection saved-line empty," check Sentry first.
+projection saved-line empty," check local debug logs first.
 
 ## Demo data
 

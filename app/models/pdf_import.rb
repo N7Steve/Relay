@@ -24,7 +24,7 @@ class PdfImport < Import
         rescue => e
           # One bad record must not abort the sweep for the rest.
           Rails.logger.error("PdfImport.clean failed for #{pdf_import.id}: #{e.class}: #{e.message}")
-          Sentry.capture_exception(e) { |scope| scope.set_tags(record_type: name, record_id: pdf_import.id) } if defined?(Sentry)
+          LocalDiagnostics.report(e, metadata: { record_type: name, record_id: pdf_import.id }, source: "models/pdf_import")
         end
     end
 

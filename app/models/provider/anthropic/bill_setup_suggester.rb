@@ -3,25 +3,18 @@ class Provider::Anthropic::BillSetupSuggester
 
   TOOL_NAME = "report_bill_setup".freeze
 
-  attr_reader :client, :model, :charges, :categories, :current_config, :langfuse_trace, :family
+  attr_reader :client, :model, :charges, :categories, :current_config, :family
 
-  def initialize(client, model:, charges: [], categories: [], current_config: nil, langfuse_trace: nil, family: nil)
+  def initialize(client, model:, charges: [], categories: [], current_config: nil, family: nil)
     @client = client
     @model = model
     @charges = charges
     @categories = categories
     @current_config = current_config
-    @langfuse_trace = langfuse_trace
     @family = family
   end
 
   def suggest
-    span = langfuse_trace&.span(name: "suggest_bill_setup_api_call", input: {
-      model: model,
-      charges: charges,
-      configure_mode: current_config.present?
-    })
-
     response = client.messages.create(
       model: model,
       max_tokens: max_tokens,
@@ -38,10 +31,8 @@ class Provider::Anthropic::BillSetupSuggester
       configure_mode: current_config.present?
     })
 
-    span&.end(output: result.to_h, usage: usage_hash(response.usage))
     result
   rescue => e
-    span&.end(output: { error: e.message }, level: "ERROR")
     record_usage_error(model, operation: "suggest_bill_setup", error: e, metadata: {
       charge_count: charges.size
     })
@@ -165,14 +156,5 @@ class Provider::Anthropic::BillSetupSuggester
 
     def block_input(block)
       block.respond_to?(:input) ? block.input : (block[:input] || block["input"])
-    end
-
-    def usage_hash(raw_usage)
-      return {} unless raw_usage
-      {
-        "input_tokens" => raw_usage.input_tokens.to_i,
-        "output_tokens" => raw_usage.output_tokens.to_i,
-        "total_tokens" => raw_usage.input_tokens.to_i + raw_usage.output_tokens.to_i
-      }
     end
 end

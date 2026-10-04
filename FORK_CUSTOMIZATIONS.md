@@ -681,3 +681,10 @@ git diff --name-only "$oldBase..HEAD"
 ## Criterio de mantenimiento
 
 Una modificación se considera “nuestra” si añade comportamiento requerido por N7Home/N7Steve, adapta datos existentes a dicho comportamiento o es necesaria para operarlo/probarlo. Correcciones que ya estén resueltas de forma equivalente en upstream pueden eliminarse, pero la decisión debe quedar registrada actualizando este inventario.
+
+### Poda fase 3 — diagnóstico local
+
+Retirados los SDK PostHog, Sentry, Skylight, Logtail y Langfuse, sus trazas y
+las evaluaciones IA. No reintroducirlos desde upstream. Preservar el diagnóstico
+local, los filtros de datos sensibles, LlmUsage y los proveedores IA retenidos.
+Flutter usa DiagnosticsService sin identidad remota ni SDK de telemetría.

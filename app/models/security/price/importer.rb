@@ -64,13 +64,7 @@ class Security::Price::Importer
     unless prev_price_value.present?
       Rails.logger.error("Could not find a start price for #{security.ticker} on or before #{fill_start_date}")
 
-      Sentry.capture_exception(MissingStartPriceError.new("Could not determine start price for ticker")) do |scope|
-        scope.set_tags(security_id: security.id)
-        scope.set_context("security", {
-          id: security.id,
-          start_date: fill_start_date
-        })
-      end
+      LocalDiagnostics.report(MissingStartPriceError.new("Could not determine start price for ticker"), metadata: { security_id: security.id }, source: "models/security/price/importer")
 
       return 0
     end

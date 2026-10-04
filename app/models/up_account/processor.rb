@@ -63,25 +63,13 @@ class UpAccount::Processor
       { success: false, failed: 1, errors: [ { error: I18n.t("up_item.errors.account_processing_failed") } ] }
     end
 
-    # Report a processing error to Sentry with a sanitized message and tags.
+    # Report a processing error to local diagnostics with a sanitized message and tags.
     def report_exception(error, context)
       safe_error = SanitizedProcessingError.new("Up account processing failed")
 
-      Sentry.capture_exception(safe_error) do |scope|
-        scope.set_tags(
-          up_account_id: up_account.id,
+      LocalDiagnostics.report(safe_error, metadata: { up_account_id: up_account.id,
           context: context,
-          error_class: error.class.name
-        )
-        scope.set_context(
-          "up_account_processor",
-          {
-            up_account_id: up_account.id,
-            context: context,
-            error_class: error.class.name
-          }
-        )
-      end
+          error_class: error.class.name }, source: "models/up_account/processor")
     end
 
     # CurrencyNormalizable hook: warn when an Up currency code is unrecognized.

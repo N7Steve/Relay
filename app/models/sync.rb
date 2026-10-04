@@ -354,19 +354,15 @@ class Sync < ApplicationRecord
     end
 
     def report_error(error)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(sync_id: id)
-      end
+      LocalDiagnostics.report(error, metadata: { sync_id: id }, source: "models/sync")
     end
 
     def report_warnings
       todays_sync_count = syncable.syncs.where(created_at: Date.current.all_day).count
 
       if todays_sync_count > 10
-        Sentry.capture_exception(
-          Error.new("#{syncable_type} (#{syncable.id}) has exceeded 10 syncs today (count: #{todays_sync_count})"),
-          level: :warning
-        )
+        LocalDiagnostics.report(Error.new("#{syncable_type} (#{syncable.id}) has exceeded 10 syncs today (count: #{todays_sync_count})"),
+          level: :warn, source: "models/sync")
       end
     end
 

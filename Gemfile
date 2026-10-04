@@ -39,12 +39,6 @@ gem "sidekiq-unique-jobs"
 # Monitoring
 gem "vernier"
 gem "rack-mini-profiler"
-gem "sentry-ruby"
-gem "sentry-rails"
-gem "sentry-sidekiq"
-gem "posthog-ruby"
-gem "logtail-rails", require: false
-gem "skylight", group: :production, require: false
 
 # Active Storage
 gem "aws-sdk-s3", "~> 1.208.0", require: false
@@ -102,7 +96,6 @@ gem "after_commit_everywhere", "~> 1.0"
 # AI
 gem "ruby-openai"
 gem "anthropic", "~> 1.0"
-gem "langfuse-ruby", "~> 0.1.4", require: "langfuse"
 
 group :development, :test do
   gem "debug", platforms: %i[mri mswin mswin64 mingw x64_mingw]

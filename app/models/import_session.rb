@@ -71,7 +71,7 @@ class ImportSession < ApplicationRecord
       rescue => e
         # One bad record must not abort the sweep for the rest.
         Rails.logger.error("ImportSession.clean failed for #{session.id}: #{e.class}: #{e.message}")
-        Sentry.capture_exception(e) { |scope| scope.set_tags(record_type: name, record_id: session.id) } if defined?(Sentry)
+        LocalDiagnostics.report(e, metadata: { record_type: name, record_id: session.id }, source: "models/import_session")
       end
   end
 

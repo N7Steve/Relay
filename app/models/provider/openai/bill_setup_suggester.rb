@@ -1,15 +1,14 @@
 class Provider::Openai::BillSetupSuggester
   include Provider::Openai::Concerns::UsageRecorder
 
-  attr_reader :client, :model, :charges, :categories, :current_config, :langfuse_trace, :family
+  attr_reader :client, :model, :charges, :categories, :current_config, :family
 
-  def initialize(client, model: "", charges: [], categories: [], current_config: nil, langfuse_trace: nil, family: nil)
+  def initialize(client, model: "", charges: [], categories: [], current_config: nil, family: nil)
     @client = client
     @model = model
     @charges = charges
     @categories = categories
     @current_config = current_config
-    @langfuse_trace = langfuse_trace
     @family = family
   end
 
@@ -27,12 +26,6 @@ class Provider::Openai::BillSetupSuggester
     Suggestion = Provider::LlmConcept::BillSetupSuggestion
 
     def suggest_with_format(response_format)
-      span = langfuse_trace&.span(name: "suggest_bill_setup_api_call", input: {
-        model: model,
-        charges: charges,
-        configure_mode: current_config.present?
-      })
-
       params = {
         model: model,
         messages: [
@@ -51,11 +44,7 @@ class Provider::Openai::BillSetupSuggester
         configure_mode: current_config.present?
       })
 
-      span&.end(output: result.to_h, usage: response.dig("usage"))
       result
-    rescue => e
-      span&.end(output: { error: e.message }, level: "ERROR")
-      raise
     end
 
     def instructions

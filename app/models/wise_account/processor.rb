@@ -17,7 +17,7 @@ class WiseAccount::Processor
     process_transactions
   rescue StandardError => e
     Rails.logger.error "WiseAccount::Processor - Failed to process account #{wise_account.id}: #{e.message}"
-    Sentry.capture_exception(e) { |s| s.set_tags(wise_account_id: wise_account.id) }
+    LocalDiagnostics.report(e, metadata: { wise_account_id: wise_account.id }, source: "models/wise_account/processor")
     raise
   end
 
@@ -39,6 +39,6 @@ class WiseAccount::Processor
     rescue StandardError => e
       Rails.logger.error "WiseAccount::Processor - Failed to process transactions for wise_account #{wise_account.id}: #{e.message}"
       Rails.logger.error Array(e.backtrace).first(10).join("\n")
-      Sentry.capture_exception(e) { |s| s.set_tags(wise_account_id: wise_account.id) }
+      LocalDiagnostics.report(e, metadata: { wise_account_id: wise_account.id }, source: "models/wise_account/processor")
     end
 end

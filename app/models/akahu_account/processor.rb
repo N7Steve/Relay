@@ -51,21 +51,9 @@ class AkahuAccount::Processor
     def report_exception(error, context)
       safe_error = SanitizedProcessingError.new("Akahu account processing failed")
 
-      Sentry.capture_exception(safe_error) do |scope|
-        scope.set_tags(
-          akahu_account_id: akahu_account.id,
+      LocalDiagnostics.report(safe_error, metadata: { akahu_account_id: akahu_account.id,
           context: context,
-          error_class: error.class.name
-        )
-        scope.set_context(
-          "akahu_account_processor",
-          {
-            akahu_account_id: akahu_account.id,
-            context: context,
-            error_class: error.class.name
-          }
-        )
-      end
+          error_class: error.class.name }, source: "models/akahu_account/processor")
     end
 
     def log_invalid_currency(currency_value)

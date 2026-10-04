@@ -365,7 +365,6 @@ class Provider::BinancePublic < Provider
       end
     end
 
-
     # Cached for 24h — exchangeInfo returns the full symbol universe (thousands
     # of rows, weight 10) and rarely changes.
     def exchange_info_symbols

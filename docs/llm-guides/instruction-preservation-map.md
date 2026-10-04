@@ -175,3 +175,10 @@ as main policy; the wealth-named guides entered main directly in [efb7cc393](htt
 
 No application code or runtime configuration changes are needed to correct these
 descriptions. The shared guides link to the implementation for future verification.
+
+## Pruning phase 3 override
+
+The earlier preservation inventory described the pre-pruning product. Steve
+selected phase 3 on 4 October 2026: evaluation runtime, datasets and their tests
+are removed. Runtime AI prompts/providers remain. Historical schema/migrations
+remain unchanged; old workflow snapshots are archival material.

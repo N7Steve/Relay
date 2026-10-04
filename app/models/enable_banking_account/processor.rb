@@ -170,11 +170,7 @@ class EnableBankingAccount::Processor
     end
 
     def report_exception(error, context)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(
-          enable_banking_account_id: enable_banking_account.id,
-          context: context
-        )
-      end
+      LocalDiagnostics.report(error, metadata: { enable_banking_account_id: enable_banking_account.id,
+          context: context }, source: "models/enable_banking_account/processor")
     end
 end

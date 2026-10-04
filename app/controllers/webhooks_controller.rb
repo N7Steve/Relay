@@ -14,7 +14,7 @@ class WebhooksController < ApplicationController
 
     render json: { received: true }, status: :ok
   rescue => error
-    Sentry.capture_exception(error)
+    LocalDiagnostics.report(error, source: "controllers/webhooks_controller")
     Rails.logger.error("Webhook error: #{error.class} - #{error.message}")
     render json: { error: "Invalid webhook" }, status: :bad_request
   end
@@ -31,7 +31,7 @@ class WebhooksController < ApplicationController
 
     render json: { received: true }, status: :ok
   rescue => error
-    Sentry.capture_exception(error)
+    LocalDiagnostics.report(error, source: "controllers/webhooks_controller")
     Rails.logger.error("Webhook error: #{error.class} - #{error.message}")
     render json: { error: "Invalid webhook" }, status: :bad_request
   end
@@ -47,11 +47,11 @@ class WebhooksController < ApplicationController
 
       head :ok
     rescue JSON::ParserError => error
-      Sentry.capture_exception(error)
+      LocalDiagnostics.report(error, source: "controllers/webhooks_controller")
       Rails.logger.error "JSON parser error: #{error.message}"
       head :bad_request
     rescue Stripe::SignatureVerificationError => error
-      Sentry.capture_exception(error)
+      LocalDiagnostics.report(error, source: "controllers/webhooks_controller")
       Rails.logger.error "Stripe signature verification error: #{error.message}"
       head :bad_request
     end

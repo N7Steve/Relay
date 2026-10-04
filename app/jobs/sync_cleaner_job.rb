@@ -25,9 +25,7 @@ class SyncCleanerJob < ApplicationJob
       yield
     rescue => e
       Rails.logger.error("SyncCleanerJob sweep #{label} failed: #{e.class}: #{e.message}")
-      Sentry.capture_exception(e) do |scope|
-        scope.set_tags(sweep: label)
-      end
+      LocalDiagnostics.report(e, metadata: { sweep: label }, source: "jobs/sync_cleaner_job")
     end
 
     def clear_stuck_activity_fetch_flags
@@ -60,7 +58,7 @@ class SyncCleanerJob < ApplicationJob
           # One bad record must not abort the sweep for the rest of this
           # model or the models still to come.
           Rails.logger.error("SyncCleanerJob activity-flag sweep failed for #{model_name} #{record.id}: #{e.class}: #{e.message}")
-          Sentry.capture_exception(e) { |scope| scope.set_tags(record_type: model_name, record_id: record.id) } if defined?(Sentry)
+          LocalDiagnostics.report(e, metadata: { record_type: model_name, record_id: record.id }, source: "jobs/sync_cleaner_job")
         end
       end
     end

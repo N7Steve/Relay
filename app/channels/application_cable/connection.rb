@@ -4,7 +4,7 @@ module ApplicationCable
 
     private
       def report_error(e)
-        Sentry.capture_exception(e)
+        LocalDiagnostics.report(e, source: "channels/application_cable/connection")
       end
   end
 end

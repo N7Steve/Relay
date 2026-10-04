@@ -2,6 +2,7 @@ require "test_helper"
 
 class AkahuItem::SyncerTest < ActiveSupport::TestCase
   setup do
+    Rails.logger.stubs(:error)
     @akahu_item = AkahuItem.create!(
       family: families(:dylan_family),
       name: "Main Akahu",
@@ -41,14 +42,15 @@ class AkahuItem::SyncerTest < ActiveSupport::TestCase
     end.once
 
     sync = @akahu_item.syncs.create!
-    scope = RecordingSentryScope.new
-    Sentry.expects(:capture_exception).with do |captured_error|
+    captured_metadata = nil
+    LocalDiagnostics.expects(:report).with do |captured_error, **options|
+      captured_metadata = options[:metadata]
       captured_error.is_a?(AkahuItem::Syncer::SafeSyncError) &&
         !captured_error.equal?(error) &&
         captured_error.cause.nil? &&
         captured_error.message == I18n.t("akahu_item.errors.sync_failed") &&
         !captured_error.message.include?(sensitive_message)
-    end.yields(scope).once
+    end.once
 
     sync.perform
 
@@ -57,24 +59,6 @@ class AkahuItem::SyncerTest < ActiveSupport::TestCase
     assert_equal I18n.t("akahu_item.errors.sync_failed"), sync.error
     assert_equal I18n.t("akahu_item.errors.sync_failed"), sync.sync_stats.dig("errors", 0, "message")
     assert_not_includes sync.sync_stats.dig("errors", 0, "message"), sensitive_message
-    assert_equal({ sync_id: sync.id }, scope.tags)
-    assert_empty scope.contexts
-  end
-
-  class RecordingSentryScope
-    attr_reader :tags, :contexts
-
-    def initialize
-      @tags = {}
-      @contexts = {}
-    end
-
-    def set_tags(tags)
-      @tags.merge!(tags)
-    end
-
-    def set_context(name, context)
-      @contexts[name] = context
-    end
+    assert_equal({ sync_id: sync.id }, captured_metadata)
   end
 end

@@ -67,7 +67,7 @@ class WiseItem::Syncer
     safe_message = user_safe_error_message(e)
     Rails.logger.error "WiseItem::Syncer - sync failed for item #{wise_item.id}: #{e.class} - #{e.message}"
     Rails.logger.error Array(e.backtrace).first(10).join("\n")
-    Sentry.capture_exception(e) { |s| s.set_tags(wise_item_id: wise_item.id) }
+    LocalDiagnostics.report(e, metadata: { wise_item_id: wise_item.id }, source: "models/wise_item/syncer")
     collect_health_stats(sync, errors: [ { message: safe_message, category: "sync_error" } ])
     raise SafeSyncError, safe_message
   end

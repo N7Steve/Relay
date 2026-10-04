@@ -99,7 +99,7 @@ class Provider::Anthropic::PdfProcessorTest < ActiveSupport::TestCase
     assert_match(/32 MB request limit/i, err.message)
   end
 
-  test "extracts only allowlisted error fields into span output when the API call fails" do
+  test "extracts only allowlisted error fields into local diagnostics when the API call fails" do
     error = StandardError.new("boom")
     def error.body
       {
@@ -111,33 +111,37 @@ class Provider::Anthropic::PdfProcessorTest < ActiveSupport::TestCase
 
     client = stub_failing_client(error)
     captured_output = nil
-    trace = stub_trace { |output| captured_output = output }
+    LocalDiagnostics.expects(:report).with do |_error, **options|
+      captured_output = options[:metadata]
+      true
+    end
 
     assert_raises(StandardError) do
       Provider::Anthropic::PdfProcessor.new(
         client,
         model: "claude-sonnet-4-6",
-        pdf_content: @pdf_content,
-        langfuse_trace: trace
+        pdf_content: @pdf_content
       ).process
     end
 
     assert_equal({ type: "invalid_request_error", message: "invalid request" }, captured_output[:error_detail])
   end
 
-  test "error_detail is nil in span output when the error exposes no body" do
+  test "error_detail is nil in local diagnostics when the error exposes no body" do
     error = StandardError.new("boom")
 
     client = stub_failing_client(error)
     captured_output = nil
-    trace = stub_trace { |output| captured_output = output }
+    LocalDiagnostics.expects(:report).with do |_error, **options|
+      captured_output = options[:metadata]
+      true
+    end
 
     assert_raises(StandardError) do
       Provider::Anthropic::PdfProcessor.new(
         client,
         model: "claude-sonnet-4-6",
-        pdf_content: @pdf_content,
-        langfuse_trace: trace
+        pdf_content: @pdf_content
       ).process
     end
 
@@ -152,14 +156,16 @@ class Provider::Anthropic::PdfProcessorTest < ActiveSupport::TestCase
 
     client = stub_failing_client(error)
     captured_output = nil
-    trace = stub_trace { |output| captured_output = output }
+    LocalDiagnostics.expects(:report).with do |_error, **options|
+      captured_output = options[:metadata]
+      true
+    end
 
     assert_raises(StandardError) do
       Provider::Anthropic::PdfProcessor.new(
         client,
         model: "claude-sonnet-4-6",
-        pdf_content: @pdf_content,
-        langfuse_trace: trace
+        pdf_content: @pdf_content
       ).process
     end
 
@@ -173,14 +179,6 @@ class Provider::Anthropic::PdfProcessorTest < ActiveSupport::TestCase
       client = mock
       client.stubs(:messages).returns(messages)
       client
-    end
-
-    def stub_trace
-      span = mock
-      span.expects(:end).with { |args| yield(args[:output]); true }
-      trace = mock
-      trace.stubs(:span).returns(span)
-      trace
     end
 
     def stub_client(response)

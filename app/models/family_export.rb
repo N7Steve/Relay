@@ -77,7 +77,7 @@ class FamilyExport < ApplicationRecord
       rescue => e
         # One bad record must not abort the sweep for the rest.
         Rails.logger.error("FamilyExport.clean failed for #{export.id}: #{e.class}: #{e.message}")
-        Sentry.capture_exception(e) { |scope| scope.set_tags(record_type: name, record_id: export.id) } if defined?(Sentry)
+        LocalDiagnostics.report(e, metadata: { record_type: name, record_id: export.id }, source: "models/family_export")
       end
   end
 

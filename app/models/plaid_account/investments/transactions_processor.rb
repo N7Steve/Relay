@@ -53,9 +53,7 @@ class PlaidAccount::Investments::TransactionsProcessor
       resolved_security_result = security_resolver.resolve(plaid_security_id: transaction["security_id"])
 
       unless resolved_security_result.security.present?
-        Sentry.capture_exception(SecurityNotFoundError.new("Could not find security for plaid trade")) do |scope|
-          scope.set_tags(plaid_account_id: plaid_account.id)
-        end
+        LocalDiagnostics.report(SecurityNotFoundError.new("Could not find security for plaid trade"), metadata: { plaid_account_id: plaid_account.id }, source: "models/plaid_account/investments/transactions_processor")
 
         return # We can't process a non-cash transaction without a security
       end

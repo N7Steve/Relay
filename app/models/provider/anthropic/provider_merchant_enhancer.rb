@@ -3,22 +3,16 @@ class Provider::Anthropic::ProviderMerchantEnhancer
 
   TOOL_NAME = "report_enhancements".freeze
 
-  attr_reader :client, :model, :merchants, :langfuse_trace, :family
+  attr_reader :client, :model, :merchants, :family
 
-  def initialize(client, model:, merchants: [], langfuse_trace: nil, family: nil)
+  def initialize(client, model:, merchants: [], family: nil)
     @client = client
     @model = model
     @merchants = merchants
-    @langfuse_trace = langfuse_trace
     @family = family
   end
 
   def enhance_merchants
-    span = langfuse_trace&.span(name: "enhance_provider_merchants_api_call", input: {
-      model: model,
-      merchants: merchants
-    })
-
     response = client.messages.create(
       model: model,
       max_tokens: max_tokens,
@@ -33,10 +27,8 @@ class Provider::Anthropic::ProviderMerchantEnhancer
 
     record_usage(model, response.usage, operation: "enhance_provider_merchants", metadata: { merchant_count: merchants.size })
 
-    span&.end(output: result.map(&:to_h), usage: usage_hash(response.usage))
     result
   rescue => e
-    span&.end(output: { error: e.message }, level: "ERROR")
     record_usage_error(model, operation: "enhance_provider_merchants", error: e, metadata: { merchant_count: merchants.size })
     raise
   end
@@ -141,14 +133,5 @@ class Provider::Anthropic::ProviderMerchantEnhancer
 
     def block_input(block)
       block.respond_to?(:input) ? block.input : (block[:input] || block["input"])
-    end
-
-    def usage_hash(raw_usage)
-      return {} unless raw_usage
-      {
-        "input_tokens" => raw_usage.input_tokens.to_i,
-        "output_tokens" => raw_usage.output_tokens.to_i,
-        "total_tokens" => raw_usage.input_tokens.to_i + raw_usage.output_tokens.to_i
-      }
     end
 end

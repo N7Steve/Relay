@@ -199,11 +199,6 @@ class Provider::Openai < Provider
 
       effective_model = model.presence || @default_model
 
-      trace = create_langfuse_trace(
-        name: "openai.auto_categorize",
-        input: { transactions: transactions, user_categories: user_categories }
-      )
-
       batches = slice_for_context(transactions, fixed: user_categories)
 
       result = batches.flat_map do |batch|
@@ -213,13 +208,10 @@ class Provider::Openai < Provider
           transactions: batch,
           user_categories: user_categories,
           custom_provider: custom_provider?,
-          langfuse_trace: trace,
           family: family,
           json_mode: json_mode
         ).auto_categorize
       end
-
-      upsert_langfuse_trace(trace: trace, output: result.map(&:to_h))
 
       result
     end
@@ -229,22 +221,14 @@ class Provider::Openai < Provider
     with_provider_response do
       effective_model = model.presence || @default_model
 
-      trace = create_langfuse_trace(
-        name: "openai.suggest_bill_setup",
-        input: { charges: charges, configure_mode: current_config.present? }
-      )
-
       result = BillSetupSuggester.new(
         client,
         model: effective_model,
         charges: charges,
         categories: categories,
         current_config: current_config,
-        langfuse_trace: trace,
         family: family
       ).suggest
-
-      upsert_langfuse_trace(trace: trace, output: result.to_h)
 
       result
     end
@@ -253,11 +237,6 @@ class Provider::Openai < Provider
   def auto_detect_merchants(transactions: [], user_merchants: [], model: "", family: nil, json_mode: nil)
     with_provider_response do
       effective_model = model.presence || @default_model
-
-      trace = create_langfuse_trace(
-        name: "openai.auto_detect_merchants",
-        input: { transactions: transactions, user_merchants: user_merchants }
-      )
 
       batches = slice_for_context(transactions, fixed: user_merchants)
 
@@ -268,13 +247,10 @@ class Provider::Openai < Provider
           transactions: batch,
           user_merchants: user_merchants,
           custom_provider: custom_provider?,
-          langfuse_trace: trace,
           family: family,
           json_mode: json_mode
         ).auto_detect_merchants
       end
-
-      upsert_langfuse_trace(trace: trace, output: result.map(&:to_h))
 
       result
     end
@@ -284,11 +260,6 @@ class Provider::Openai < Provider
     with_provider_response do
       effective_model = model.presence || @default_model
 
-      trace = create_langfuse_trace(
-        name: "openai.enhance_provider_merchants",
-        input: { merchants: merchants }
-      )
-
       batches = slice_for_context(merchants)
 
       result = batches.flat_map do |batch|
@@ -297,13 +268,10 @@ class Provider::Openai < Provider
           model: effective_model,
           merchants: batch,
           custom_provider: custom_provider?,
-          langfuse_trace: trace,
           family: family,
           json_mode: json_mode
         ).enhance_merchants
       end
-
-      upsert_langfuse_trace(trace: trace, output: result.map(&:to_h))
 
       result
     end
@@ -331,11 +299,6 @@ class Provider::Openai < Provider
       effective_model = model.presence || @default_model
       raise Error, "Model does not support PDF/vision processing: #{effective_model}" unless supports_pdf_processing?(model: effective_model)
 
-      trace = create_langfuse_trace(
-        name: "openai.process_pdf",
-        input: { pdf_size: pdf_content&.bytesize }
-      )
-
       # Reasoning-model completion limits include reasoning; the fallback is a budget reserve.
       response_limit =
         if self.class.native_pdf_completion_limit?(model: effective_model, custom_provider: custom_provider?)
@@ -349,12 +312,9 @@ class Provider::Openai < Provider
         model: effective_model,
         pdf_content: pdf_content,
         custom_provider: custom_provider?,
-        langfuse_trace: trace,
         family: family,
         max_response_tokens: response_limit
       ).process
-
-      upsert_langfuse_trace(trace: trace, output: result.to_h)
 
       result
     end
@@ -364,18 +324,11 @@ class Provider::Openai < Provider
     with_provider_response do
       effective_model = model.presence || @default_model
 
-      trace = create_langfuse_trace(
-        name: "openai.extract_bank_statement",
-        input: { pdf_size: pdf_content&.bytesize }
-      )
-
       result = BankStatementExtractor.new(
         client: client,
         pdf_content: pdf_content,
         model: effective_model
       ).extract
-
-      upsert_langfuse_trace(trace: trace, output: { transaction_count: result[:transactions].size })
 
       result
     end
@@ -548,41 +501,15 @@ class Provider::Openai < Provider
             response = response_chunk.data
             usage = response_chunk.usage
             Rails.logger.debug("Stream response usage: #{usage.inspect}")
-            log_langfuse_generation(
-              name: "chat_response",
-              model: model,
-              input: input_payload,
-              output: response.messages.map(&:output_text).join("\n"),
-              usage: usage,
-              session_id: session_id,
-              user_identifier: user_identifier
-            )
             record_llm_usage(family: family, model: model, operation: "chat", usage: usage)
             response
           else
             parsed = ChatParser.new(raw_response).parsed
             Rails.logger.debug("Non-stream raw_response['usage']: #{raw_response['usage'].inspect}")
-            log_langfuse_generation(
-              name: "chat_response",
-              model: model,
-              input: input_payload,
-              output: parsed.messages.map(&:output_text).join("\n"),
-              usage: raw_response["usage"],
-              session_id: session_id,
-              user_identifier: user_identifier
-            )
             record_llm_usage(family: family, model: model, operation: "chat", usage: raw_response["usage"])
             parsed
           end
         rescue => e
-          log_langfuse_generation(
-            name: "chat_response",
-            model: model,
-            input: input_payload,
-            error: e,
-            session_id: session_id,
-            user_identifier: user_identifier
-          )
           record_llm_usage(family: family, model: model, operation: "chat", error: e)
           raise
         end
@@ -628,16 +555,6 @@ class Provider::Openai < Provider
 
           parsed = GenericChatParser.new(raw_response).parsed
 
-          log_langfuse_generation(
-            name: "chat_response",
-            model: model,
-            input: messages,
-            output: parsed.messages.map(&:output_text).join("\n"),
-            usage: raw_response["usage"],
-            session_id: session_id,
-            user_identifier: user_identifier
-          )
-
           record_llm_usage(family: family, model: model, operation: "chat", usage: raw_response["usage"])
 
           # If a streamer was provided, manually call it with the parsed response
@@ -656,14 +573,6 @@ class Provider::Openai < Provider
 
           parsed
         rescue => e
-          log_langfuse_generation(
-            name: "chat_response",
-            model: model,
-            input: messages,
-            error: e,
-            session_id: session_id,
-            user_identifier: user_identifier
-          )
           record_llm_usage(family: family, model: model, operation: "chat", error: e)
           raise
         end
@@ -753,76 +662,6 @@ class Provider::Openai < Provider
           }
         }
       end
-    end
-
-    def langfuse_client
-      return unless ENV["LANGFUSE_PUBLIC_KEY"].present? && ENV["LANGFUSE_SECRET_KEY"].present?
-
-      @langfuse_client = Langfuse.new
-    end
-
-    def create_langfuse_trace(name:, input:, session_id: nil, user_identifier: nil)
-      return unless langfuse_client
-
-      langfuse_client.trace(
-        name: name,
-        input: input,
-        session_id: session_id,
-        user_id: user_identifier,
-        environment: Rails.env
-      )
-    rescue => e
-      Rails.logger.warn("Langfuse trace creation failed: #{e.message}\n#{e.full_message}")
-      nil
-    end
-
-    def log_langfuse_generation(name:, model:, input:, output: nil, usage: nil, error: nil, session_id: nil, user_identifier: nil)
-      return unless langfuse_client
-
-      trace = create_langfuse_trace(
-        name: "openai.#{name}",
-        input: input,
-        session_id: session_id,
-        user_identifier: user_identifier
-      )
-
-      generation = trace&.generation(
-        name: name,
-        model: model,
-        input: input
-      )
-
-      if error
-        generation&.end(
-          output: { error: error.message, details: error.respond_to?(:details) ? error.details : nil },
-          level: "ERROR"
-        )
-        upsert_langfuse_trace(
-          trace: trace,
-          output: { error: error.message },
-          level: "ERROR"
-        )
-      else
-        generation&.end(output: output, usage: usage)
-        upsert_langfuse_trace(trace: trace, output: output)
-      end
-    rescue => e
-      Rails.logger.warn("Langfuse logging failed: #{e.message}\n#{e.full_message}")
-    end
-
-    def upsert_langfuse_trace(trace:, output:, level: nil)
-      return unless langfuse_client && trace&.id
-
-      payload = {
-        id: trace.id,
-        output: output
-      }
-      payload[:level] = level if level.present?
-
-      langfuse_client.trace(**payload)
-    rescue => e
-      Rails.logger.warn("Langfuse trace upsert failed for trace_id=#{trace&.id}: #{e.message}\n#{e.full_message}")
-      nil
     end
 
     def record_llm_usage(family:, model:, operation:, usage: nil, error: nil)

@@ -229,22 +229,11 @@ excludes POST, and `retry_statuses` is never consulted because `raise_error`
 converts the status to an exception first. Both have to be overridden or the
 backoff silently never runs.
 
-## Evals
+## Verification
 
-`Eval::ProviderFactory` builds the provider for a run, taking per-run overrides
-the registry deliberately does not accept. Add a branch there — both
-`Eval::Runners::Base` and `Eval::Langfuse::ExperimentRunner` go through it.
-
-A classification provider spending one request per sample can attribute cost per
-sample, which is what makes `cost_per_sample` meaningful. Carry `usage` on the
-returned struct so the runner can record it.
-
-```bash
-JEV_API_KEY=... PROVIDER=jev bin/rails "evals:run[categorization_golden_v2,jev-latest]"
-```
-
-Check `error_rate` before believing an accuracy figure — a stale model slug
-records every sample as incorrect and otherwise reads as a credible 0%.
+Use Minitest with synthetic HTTP responses to verify classification behavior,
+error handling and local usage recording. Evaluation runners were removed in
+pruning phase 3.
 
 ## Checklist
 
@@ -255,6 +244,5 @@ records every sample as incorrect and otherwise reads as a credible 0%.
 - [ ] Provider resolution rescues construction failures and falls back, never raises
 - [ ] Every Choice question has an opt-out sentinel, translated to `nil`
 - [ ] Return types structurally compatible with the `LlmConcept` equivalents
-- [ ] Per-request `usage` carried through for eval cost attribution
-- [ ] Branch added to `Eval::ProviderFactory`
+- [ ] Per-request `usage` carried through for local cost attribution
 - [ ] Tests stub HTTP with WebMock — the suite blocks real connections

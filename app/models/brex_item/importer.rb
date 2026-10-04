@@ -59,13 +59,7 @@ class BrexItem::Importer
       brex_item.upsert_brex_snapshot!(accounts_data)
     rescue => e
       Rails.logger.error "BrexItem::Importer - Failed to store accounts snapshot: #{e.message}"
-      Sentry.capture_exception(e) do |scope|
-        scope.set_tags(brex_item_id: brex_item.id)
-        scope.set_context("brex_item_snapshot", {
-          brex_item_id: brex_item.id,
-          accounts_data: BrexAccount.sanitize_payload(accounts_data)
-        })
-      end
+      LocalDiagnostics.report(e, metadata: { brex_item_id: brex_item.id }, source: "models/brex_item/importer")
       raise
     end
 

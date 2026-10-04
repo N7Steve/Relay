@@ -55,9 +55,7 @@ class Security::HealthChecker
       handle_failure
     end
   rescue => e
-    Sentry.capture_exception(e) do |scope|
-      scope.set_tags(security_id: @security.id)
-    end
+    LocalDiagnostics.report(e, metadata: { security_id: @security.id }, source: "models/security/health_checker")
   ensure
     security.update!(last_health_check_at: Time.current)
   end

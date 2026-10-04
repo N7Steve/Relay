@@ -1,27 +1,21 @@
 class Provider::Openai::PdfProcessor
   include Provider::Openai::Concerns::UsageRecorder
 
-  attr_reader :client, :model, :pdf_content, :custom_provider, :langfuse_trace, :family, :max_response_tokens,
+  attr_reader :client, :model, :pdf_content, :custom_provider, :family, :max_response_tokens,
               :processing_mode
 
-  def initialize(client, model: "", pdf_content: nil, custom_provider: false, langfuse_trace: nil, family: nil,
+  def initialize(client, model: "", pdf_content: nil, custom_provider: false, family: nil,
                  max_response_tokens:, processing_mode: :auto)
     @client = client
     @model = model
     @pdf_content = pdf_content
     @custom_provider = custom_provider
-    @langfuse_trace = langfuse_trace
     @family = family
     @max_response_tokens = max_response_tokens
     @processing_mode = processing_mode
   end
 
   def process
-    span = langfuse_trace&.span(name: "process_pdf_api_call", input: {
-      model: model.presence || Provider::Openai::DEFAULT_MODEL,
-      pdf_size: pdf_content&.bytesize
-    })
-
     # Try text extraction first (works with all models)
     # Fall back to vision API with images if text extraction fails (for scanned PDFs)
     response = case processing_mode
@@ -40,10 +34,11 @@ class Provider::Openai::PdfProcessor
       raise ArgumentError, "Unknown PDF processing mode: #{processing_mode.inspect}"
     end
 
-    span&.end(output: response.to_h)
     response
   rescue => e
-    span&.end(output: { error: e.message, error_detail: safe_error_detail(e) }, level: "ERROR")
+    LocalDiagnostics.report(StandardError.new("PDF processing failed"),
+      source: "provider/openai/pdf_processor",
+      metadata: { error_detail: safe_error_detail(e), provider_error_class: e.class.name })
     raise
   end
 

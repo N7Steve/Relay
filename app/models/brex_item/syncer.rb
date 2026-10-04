@@ -75,9 +75,7 @@ class BrexItem::Syncer
     safe_message = user_safe_error_message(e)
     Rails.logger.error "BrexItem::Syncer - sync failed for Brex item #{brex_item.id}: #{e.class} - #{e.message}"
     Rails.logger.error Array(e.backtrace).first(10).join("\n")
-    Sentry.capture_exception(e) do |scope|
-      scope.set_tags(brex_item_id: brex_item.id)
-    end
+    LocalDiagnostics.report(e, metadata: { brex_item_id: brex_item.id }, source: "models/brex_item/syncer")
     collect_health_stats(sync, errors: [ { message: safe_message, category: "sync_error" } ])
     raise SafeSyncError, safe_message
   end

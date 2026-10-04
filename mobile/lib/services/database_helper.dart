@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'log_service.dart';
-import 'telemetry_service.dart';
+import 'diagnostics_service.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -48,7 +48,7 @@ class DatabaseHelper {
     } catch (e, stackTrace) {
       _log.error('DatabaseHelper',
           'Error initializing local database sure_offline.db: ${e.runtimeType}');
-      unawaited(TelemetryService.instance.captureHandledException(
+      unawaited(DiagnosticsService.instance.captureHandledException(
         e,
         stackTrace,
         operation: 'database.open',
@@ -81,7 +81,7 @@ class DatabaseHelper {
         'DatabaseHelper',
         'Error opening database file "$filePath": ${e.runtimeType}',
       );
-      unawaited(TelemetryService.instance.captureHandledException(
+      unawaited(DiagnosticsService.instance.captureHandledException(
         e,
         stackTrace,
         operation: 'database.initialize',
@@ -163,7 +163,7 @@ class DatabaseHelper {
         'DatabaseHelper',
         'Error creating local database schema: ${e.runtimeType}',
       );
-      unawaited(TelemetryService.instance.captureHandledException(
+      unawaited(DiagnosticsService.instance.captureHandledException(
         e,
         stackTrace,
         operation: 'database.create_schema',

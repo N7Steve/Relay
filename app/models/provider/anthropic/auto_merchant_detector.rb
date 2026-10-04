@@ -3,24 +3,17 @@ class Provider::Anthropic::AutoMerchantDetector
 
   TOOL_NAME = "report_merchants".freeze
 
-  attr_reader :client, :model, :transactions, :user_merchants, :langfuse_trace, :family
+  attr_reader :client, :model, :transactions, :user_merchants, :family
 
-  def initialize(client, model:, transactions: [], user_merchants: [], langfuse_trace: nil, family: nil)
+  def initialize(client, model:, transactions: [], user_merchants: [], family: nil)
     @client = client
     @model = model
     @transactions = transactions
     @user_merchants = user_merchants
-    @langfuse_trace = langfuse_trace
     @family = family
   end
 
   def auto_detect_merchants
-    span = langfuse_trace&.span(name: "auto_detect_merchants_api_call", input: {
-      model: model,
-      transactions: transactions,
-      user_merchants: user_merchants
-    })
-
     response = client.messages.create(
       model: model,
       max_tokens: max_tokens,
@@ -38,10 +31,8 @@ class Provider::Anthropic::AutoMerchantDetector
       merchant_count: user_merchants.size
     })
 
-    span&.end(output: result.map(&:to_h), usage: usage_hash(response.usage))
     result
   rescue => e
-    span&.end(output: { error: e.message }, level: "ERROR")
     record_usage_error(model, operation: "auto_detect_merchants", error: e, metadata: {
       transaction_count: transactions.size,
       merchant_count: user_merchants.size
@@ -181,14 +172,5 @@ class Provider::Anthropic::AutoMerchantDetector
 
     def block_input(block)
       block.respond_to?(:input) ? block.input : (block[:input] || block["input"])
-    end
-
-    def usage_hash(raw_usage)
-      return {} unless raw_usage
-      {
-        "input_tokens" => raw_usage.input_tokens.to_i,
-        "output_tokens" => raw_usage.output_tokens.to_i,
-        "total_tokens" => raw_usage.input_tokens.to_i + raw_usage.output_tokens.to_i
-      }
     end
 end

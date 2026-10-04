@@ -91,7 +91,7 @@ class Goals::FundingAccountsBreakdownComponent < ApplicationComponent
       end
     rescue StandardError => e
       Rails.logger.error("Inflow totals map for goal #{goal.id} failed: #{e.class}: #{e.message}")
-      Sentry.capture_exception(e) if defined?(Sentry)
+      LocalDiagnostics.report(e, source: "components/goals/funding_accounts_breakdown_component")
       {}
     end
 end

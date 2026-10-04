@@ -48,7 +48,7 @@ class ExchangeRate::Importer
     unless prev_rate_value.present?
       error = MissingStartRateError.new("Could not find a start rate for #{from} to #{to} between #{start_date} and #{end_date}")
       Rails.logger.error(error.message)
-      Sentry.capture_exception(error)
+      LocalDiagnostics.report(error, source: "models/exchange_rate/importer")
       return
     end
 
@@ -221,7 +221,7 @@ class ExchangeRate::Importer
         else
           message = "#{exchange_rate_provider.class.name} could not fetch exchange rate pair from: #{from} to: #{to} between: #{effective_start_date} and: #{Date.current}.  Provider error: #{provider_response.error.message}"
           Rails.logger.warn(message)
-          Sentry.capture_exception(MissingExchangeRateError.new(message), level: :warning)
+          LocalDiagnostics.report(MissingExchangeRateError.new(message), level: :warn, source: "models/exchange_rate/importer")
           {}
         end
       end

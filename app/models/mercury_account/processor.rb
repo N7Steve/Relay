@@ -68,11 +68,7 @@ class MercuryAccount::Processor
     end
 
     def report_exception(error, context)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(
-          mercury_account_id: mercury_account.id,
-          context: context
-        )
-      end
+      LocalDiagnostics.report(error, metadata: { mercury_account_id: mercury_account.id,
+          context: context }, source: "models/mercury_account/processor")
     end
 end

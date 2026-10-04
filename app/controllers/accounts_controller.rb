@@ -367,7 +367,7 @@ class AccountsController < ApplicationController
       Loan::PayoffChart.new(account.loan, as_of: as_of, period: period, projection: projection).payload
     rescue StandardError => e
       Rails.logger.error("Loan payoff chart failed for account #{account.id}: #{e.class} - #{e.message}")
-      Sentry.capture_exception(e) { |scope| scope.set_tags(record_type: "Account", record_id: account.id) } if defined?(Sentry)
+      LocalDiagnostics.report(e, metadata: { record_type: "Account", record_id: account.id }, source: "controllers/accounts_controller")
       nil
     end
 

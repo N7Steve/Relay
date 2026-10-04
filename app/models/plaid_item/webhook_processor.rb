@@ -31,7 +31,7 @@ class PlaidItem::WebhookProcessor
     end
   rescue => e
     # To always ensure we return a 200 to Plaid (to keep endpoint healthy), silently capture and report all errors
-    Sentry.capture_exception(e)
+    LocalDiagnostics.report(e, source: "models/plaid_item/webhook_processor")
   end
 
   private
@@ -48,9 +48,7 @@ class PlaidItem::WebhookProcessor
       # the Plaid Item (upstream) still exists (and is being billed), but doesn't exist internally.
       #
       # Since we don't have the item which has the access token, there is nothing we can do programmatically
-      # here, so we just need to report it to Sentry and manually handle it.
-      Sentry.capture_exception(MissingItemError.new("Received Plaid webhook for item no longer in our DB.  Manual action required to resolve.")) do |scope|
-        scope.set_tags(plaid_item_id: item_id)
-      end
+      # here, so we just need to report it to local diagnostics and manually handle it.
+      LocalDiagnostics.report(MissingItemError.new("Received Plaid webhook for item no longer in our DB.  Manual action required to resolve."), metadata: { plaid_item_id: item_id }, source: "models/plaid_item/webhook_processor")
     end
 end

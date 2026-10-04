@@ -150,8 +150,6 @@ class PlaidAccount::Processor
     end
 
     def report_exception(error)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(plaid_account_id: plaid_account.id)
-      end
+      LocalDiagnostics.report(error, metadata: { plaid_account_id: plaid_account.id }, source: "models/plaid_account/processor")
     end
 end

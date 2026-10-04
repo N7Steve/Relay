@@ -26,7 +26,7 @@ class SophtronAccount::Processor
   # - Processes all stored transactions to create Transaction records
   #
   # @return [Hash, nil] Transaction processing result hash or nil if no linked account
-  # @raise [StandardError] if processing fails (errors are logged and reported to Sentry)
+  # @raise [StandardError] if processing fails (errors are logged and reported to local diagnostics)
   def process
     unless sophtron_account.current_account.present?
       Rails.logger.info "SophtronAccount::Processor - No linked account for sophtron_account #{sophtron_account.id}, skipping processing"
@@ -103,17 +103,13 @@ class SophtronAccount::Processor
       raise
     end
 
-    # Reports an exception to Sentry with Sophtron account context.
+    # Reports an exception to local diagnostics with Sophtron account context.
     #
     # @param error [Exception] The error to report
     # @param context [String] Additional context (e.g., 'account', 'transactions')
     # @return [void]
     def report_exception(error, context)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(
-          sophtron_account_id: sophtron_account.id,
-          context: context
-        )
-      end
+      LocalDiagnostics.report(error, metadata: { sophtron_account_id: sophtron_account.id,
+          context: context }, source: "models/sophtron_account/processor")
     end
 end

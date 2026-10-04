@@ -97,11 +97,6 @@ class SimplefinAccount::Processor
             "SimpleFIN liability sign (loan) amounts: sfa=#{simplefin_account.id} " \
             "observed=#{observed.to_s('F')} stored=#{balance.to_s('F')}"
           )
-          Sentry.add_breadcrumb(Sentry::Breadcrumb.new(
-            category: "simplefin",
-            message: "liability_sign=loan",
-            data: { sfa_id: simplefin_account.id }
-          )) rescue nil
         else
           # A user override is authoritative because some SimpleFIN feeds use
           # the same sign for both debt and genuine credit balances.
@@ -130,11 +125,6 @@ class SimplefinAccount::Processor
                   "SimpleFIN overpayment heuristic (credit) amounts: sfa=#{simplefin_account.id} " \
                   "observed=#{observed.to_s('F')} metrics=#{result.metrics.slice(:charges_total, :payments_total, :tx_count).inspect}"
                 )
-                Sentry.add_breadcrumb(Sentry::Breadcrumb.new(
-                  category: "simplefin",
-                  message: "liability_sign=credit",
-                  data: { sfa_id: simplefin_account.id }
-                )) rescue nil
               when :debt
                 balance = observed.abs
                 Rails.logger.info(
@@ -145,11 +135,6 @@ class SimplefinAccount::Processor
                   "SimpleFIN overpayment heuristic (debt) amounts: sfa=#{simplefin_account.id} " \
                   "observed=#{observed.to_s('F')} metrics=#{result.metrics.slice(:charges_total, :payments_total, :tx_count).inspect}"
                 )
-                Sentry.add_breadcrumb(Sentry::Breadcrumb.new(
-                  category: "simplefin",
-                  message: "liability_sign=debt",
-                  data: { sfa_id: simplefin_account.id }
-                )) rescue nil
               else
                 # Fall back to existing sign-only logic (log unknown for observability)
                 begin
@@ -221,12 +206,8 @@ class SimplefinAccount::Processor
     end
 
     def report_exception(error, context)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(
-          simplefin_account_id: simplefin_account.id,
-          context: context
-        )
-      end
+      LocalDiagnostics.report(error, metadata: { simplefin_account_id: simplefin_account.id,
+          context: context }, source: "models/simplefin_account/processor")
     end
 
     # Helpers

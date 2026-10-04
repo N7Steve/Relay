@@ -90,11 +90,7 @@ class LunchflowAccount::Processor
     end
 
     def report_exception(error, context)
-      Sentry.capture_exception(error) do |scope|
-        scope.set_tags(
-          lunchflow_account_id: lunchflow_account.id,
-          context: context
-        )
-      end
+      LocalDiagnostics.report(error, metadata: { lunchflow_account_id: lunchflow_account.id,
+          context: context }, source: "models/lunchflow_account/processor")
     end
 end

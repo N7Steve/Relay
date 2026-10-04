@@ -6,13 +6,12 @@ class Provider::Anthropic::BankStatementExtractor
   # Mirrors Provider::Anthropic::PdfProcessor::MAX_PDF_BYTES.
   MAX_PDF_BYTES = 32 * 1024 * 1024
 
-  attr_reader :client, :model, :pdf_content, :langfuse_trace, :family
+  attr_reader :client, :model, :pdf_content, :family
 
-  def initialize(client:, model:, pdf_content:, langfuse_trace: nil, family: nil)
+  def initialize(client:, model:, pdf_content:, family: nil)
     @client = client
     @model = model
     @pdf_content = pdf_content
-    @langfuse_trace = langfuse_trace
     @family = family
   end
 
@@ -22,11 +21,6 @@ class Provider::Anthropic::BankStatementExtractor
       raise Provider::Anthropic::Error,
             "PDF exceeds Anthropic's 32 MB limit (#{pdf_content.bytesize} bytes)"
     end
-
-    span = langfuse_trace&.span(name: "extract_bank_statement_api_call", input: {
-      model: model,
-      pdf_size: pdf_content.bytesize
-    })
 
     response = client.messages.create(
       model: model,
@@ -55,10 +49,8 @@ class Provider::Anthropic::BankStatementExtractor
       truncated: truncated
     })
 
-    span&.end(output: { transaction_count: result[:transactions].size }, usage: usage_hash(response.usage))
     result
   rescue => e
-    span&.end(output: { error: e.message }, level: "ERROR")
     record_usage_error(model, operation: "extract_bank_statement", error: e, metadata: { pdf_size: pdf_content&.bytesize })
     raise
   end
@@ -216,14 +208,5 @@ class Provider::Anthropic::BankStatementExtractor
 
     def block_input(block)
       block.respond_to?(:input) ? block.input : (block[:input] || block["input"])
-    end
-
-    def usage_hash(raw_usage)
-      return {} unless raw_usage
-      {
-        "input_tokens" => raw_usage.input_tokens.to_i,
-        "output_tokens" => raw_usage.output_tokens.to_i,
-        "total_tokens" => raw_usage.input_tokens.to_i + raw_usage.output_tokens.to_i
-      }
     end
 end

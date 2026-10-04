@@ -12,15 +12,6 @@ tr:
         title: Yeni Sankey grafiği
         preview: Önizleme
         preview_tooltip: Bu grafik, mobil Swift istemcisiyle ortak kullanılan yeni bir API'ye dayandığı için yukarıdaki görselleştirmenin yerini alacak.
-        feedback_prompt: Bu grafiği yukarıdaki orijinaliyle karşılaştırın ve sıralama dışında farklı görünüyorsa bize bildirin.
-        positive: Doğru görünüyor
-        negative: Bir şeyler yanlış görünüyor
-        feedback_title: Nakit akışı grafiği geri bildirimi
-        feedback_loading: Geri bildirim formu yükleniyor…
-        feedback_unavailable: Geri bildirim şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.
-        feedback_thanks: Grafiği geliştirmemize yardımcı olduğunuz için teşekkürler!
-        feedback_privacy: Yanıtınız PostHog'a gönderilir. Sorunu hesap numaraları, bakiyeler veya diğer özel finansal bilgiler olmadan açıklayın.
-        feedback_submit: Geri bildirim gönder
       balance_sheet:
         add_accounts: Tam bir döküm görmek için %{name} hesaplarınızı ekleyin
         add_asset_accounts: Tam bir döküm görmek için varlık hesaplarınızı ekleyin

@@ -89,7 +89,7 @@ class BrexItem::SyncerTest < ActiveSupport::TestCase
     sync = mock_sync(window_start_date: Date.new(2026, 2, 1))
     @brex_item.expects(:import_latest_brex_data)
               .raises(Provider::Brex::BrexError.new("raw upstream auth body", :unauthorized, http_status: 401))
-    Sentry.expects(:capture_exception)
+    LocalDiagnostics.expects(:report)
 
     error = assert_raises(BrexItem::Syncer::SafeSyncError) do
       @syncer.perform_sync(sync)

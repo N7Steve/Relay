@@ -51,7 +51,7 @@ class Provider::Stripe
 
     CheckoutSessionResult.new(success?: true, subscription_id: session.subscription)
   rescue StandardError => e
-    Sentry.capture_exception(e)
+    LocalDiagnostics.report(e, source: "models/provider/stripe")
     Rails.logger.error "Error fetching checkout result for session #{session_id}: #{e.message}"
     CheckoutSessionResult.new(success?: false, subscription_id: nil)
   end

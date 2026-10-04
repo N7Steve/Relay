@@ -121,11 +121,11 @@ Settings pueden quedar guardados sin consumidores al volver al código anterior.
 
 ## Punto de continuación para otro chat
 
-- Fases 0 y 1 publicadas. **Fase 2 lista y validada, todavía sin commit/push**.
-- No repetir su implementación. Revisar el working tree y este registro antes
-  de publicar; seguir la confirmación de Git exigida por `AGENTS.md`.
-- Tras publicar esta entrega, continuar por **fase 3 — Retirar telemetría y
-  evaluaciones remotas**, según el [plan de poda](pruning-plan.md).
+- Fases 0, 1 y 2 publicadas. **Fase 2 publicada en `ee3341fd3`**.
+- No repetir su implementación. La fase 3 está implementada y validada, sin
+  publicar; consultar su [registro](pruning-phase-3.md) y el working tree.
+- Tras cerrar y publicar fase 3, continuar por **fase 4 — Retirar la plataforma
+  comercial SaaS**, según el [plan de poda](pruning-plan.md).
 - Antes de un despliegue, activar Drive/logos en la configuración de Steve y
   revisar los valores guardados de IA. No se ha inspeccionado ni cambiado su NAS.
 - Preservar recálculo local, estrategia de cuentas enlazadas, históricos,

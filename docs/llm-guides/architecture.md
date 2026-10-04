@@ -127,6 +127,12 @@ settings default off; credentials do not activate access. AI uses its existing
 local accounting. See the [phase 2 transition](../migration/pruning-phase-2.md)
 before deploying existing installations, especially those using Drive/Brandfetch.
 
+Remote monitoring and LLM evaluation runtime were removed in pruning phase 3.
+`LocalDiagnostics` records failures through Rails logs and `DebugLogEntry.capture`.
+Providers still record `LlmUsage` locally and retain their AI capability guards.
+Legacy telemetry variables do not activate SDKs. Historical evaluation tables
+remain in the schema; the application no longer executes evaluation tasks.
+
 ## Provider interfaces and APIs
 
 Interchangeable provider concepts are registered at runtime through

@@ -137,7 +137,7 @@ class PlaidItemsController < ApplicationController
       Rails.logger.warn(
         "Plaid link_token request failed: #{error_code} - #{error_body['error_message']}"
       )
-      Sentry.capture_exception(error) if defined?(Sentry)
+      LocalDiagnostics.report(error, source: "controllers/plaid_items_controller")
 
       alert = friendly_link_token_alert(error_code, error_body["error_message"])
 
@@ -158,7 +158,7 @@ class PlaidItemsController < ApplicationController
     # [...]. To request access, visit dashboard.plaid.com..."). Those messages
     # are safe to show verbatim — they describe a Plaid-side config issue,
     # not user data. For everything else we fall back to a generic message
-    # and rely on the log + Sentry trail.
+    # and rely on the log + local diagnostics trail.
     SHOWABLE_PLAID_ERROR_CODES = %w[
       INVALID_PRODUCT
       PRODUCTS_NOT_SUPPORTED

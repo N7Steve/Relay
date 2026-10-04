@@ -56,11 +56,7 @@ class PlaidAccount::Investments::SecurityResolver
     end
 
     def report_unresolvable_security(plaid_security_id)
-      Sentry.capture_exception(UnresolvablePlaidSecurityError.new("Could not resolve Plaid security from provided data")) do |scope|
-        scope.set_context("plaid_security", {
-          plaid_security_id: plaid_security_id
-        })
-      end
+      LocalDiagnostics.report(UnresolvablePlaidSecurityError.new("Could not resolve Plaid security from provided data"), source: "models/plaid_account/investments/security_resolver")
     end
 
     # Plaid treats "brokerage cash" differently than us.  Internally, Sure treats "brokerage cash"

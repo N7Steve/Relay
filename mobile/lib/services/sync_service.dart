@@ -7,7 +7,7 @@ import 'transactions_service.dart';
 import 'accounts_service.dart';
 import 'connectivity_service.dart';
 import 'log_service.dart';
-import 'telemetry_service.dart';
+import 'diagnostics_service.dart';
 
 class SyncService with ChangeNotifier {
   final OfflineStorageService _offlineStorage = OfflineStorageService();
@@ -33,14 +33,14 @@ class SyncService with ChangeNotifier {
       final pendingDeletes = await _offlineStorage.getPendingDeletes();
       _log.info('SyncService',
           'Found ${pendingDeletes.length} pending deletes to process');
-      TelemetryService.instance.addBreadcrumb(
+      DiagnosticsService.instance.addBreadcrumb(
         'sync',
         'pending_delete_replay_started',
         data: {'count': pendingDeletes.length},
       );
 
       if (pendingDeletes.isEmpty) {
-        TelemetryService.instance.addBreadcrumb(
+        DiagnosticsService.instance.addBreadcrumb(
           'sync',
           'pending_delete_replay_finished',
           data: {
@@ -104,7 +104,7 @@ class SyncService with ChangeNotifier {
 
       _log.info('SyncService',
           'Delete complete: $successCount success, $failureCount failed');
-      TelemetryService.instance.addBreadcrumb(
+      DiagnosticsService.instance.addBreadcrumb(
         'sync',
         'pending_delete_replay_finished',
         data: {
@@ -145,14 +145,14 @@ class SyncService with ChangeNotifier {
           await _offlineStorage.getPendingTransactions();
       _log.info('SyncService',
           'Found ${pendingTransactions.length} pending transactions to upload');
-      TelemetryService.instance.addBreadcrumb(
+      DiagnosticsService.instance.addBreadcrumb(
         'sync',
         'pending_upload_replay_started',
         data: {'count': pendingTransactions.length},
       );
 
       if (pendingTransactions.isEmpty) {
-        TelemetryService.instance.addBreadcrumb(
+        DiagnosticsService.instance.addBreadcrumb(
           'sync',
           'pending_upload_replay_finished',
           data: {
@@ -221,7 +221,7 @@ class SyncService with ChangeNotifier {
 
       _log.info('SyncService',
           'Upload complete: $successCount success, $failureCount failed');
-      TelemetryService.instance.addBreadcrumb(
+      DiagnosticsService.instance.addBreadcrumb(
         'sync',
         'pending_upload_replay_finished',
         data: {
@@ -291,24 +291,24 @@ class SyncService with ChangeNotifier {
     required String accessToken,
     String? accountId,
   }) async {
-    final telemetrySpan = TelemetryService.instance.startSpan(
+    final diagnosticsSpan = DiagnosticsService.instance.startSpan(
       'sync.transactions_fetch',
       'Mobile transaction fetch',
       data: {'scoped_account': accountId != null},
     );
-    var telemetrySpanFinished = false;
-    var telemetrySucceeded = false;
-    Object? telemetryThrowable;
+    var diagnosticsSpanFinished = false;
+    var diagnosticsSucceeded = false;
+    Object? diagnosticsThrowable;
 
-    Future<void> finishTelemetrySpan({
+    Future<void> finishDiagnosticsSpan({
       required bool success,
       Object? throwable,
     }) async {
-      if (telemetrySpanFinished) return;
+      if (diagnosticsSpanFinished) return;
 
-      telemetrySpanFinished = true;
-      await TelemetryService.instance.finishSpan(
-        telemetrySpan,
+      diagnosticsSpanFinished = true;
+      await DiagnosticsService.instance.finishSpan(
+        diagnosticsSpan,
         success: success,
         throwable: throwable,
       );
@@ -322,7 +322,7 @@ class SyncService with ChangeNotifier {
             ? 'Fetching transactions for all accounts'
             : 'Fetching transactions for scoped account',
       );
-      TelemetryService.instance.addBreadcrumb(
+      DiagnosticsService.instance.addBreadcrumb(
         'sync',
         'transactions_fetch_started',
         data: {'scoped_account': accountId != null},
@@ -337,7 +337,7 @@ class SyncService with ChangeNotifier {
       while (currentPage <= totalPages) {
         _log.info('SyncService',
             '>>> Fetching page $currentPage of $totalPages (perPage: $perPage)');
-        TelemetryService.instance.addBreadcrumb(
+        DiagnosticsService.instance.addBreadcrumb(
           'sync',
           'transactions_fetch_page',
           data: {
@@ -403,7 +403,7 @@ class SyncService with ChangeNotifier {
         } else {
           _log.error('SyncService',
               'Server returned error on page $currentPage: ${result['error']}');
-          TelemetryService.instance.addBreadcrumb(
+          DiagnosticsService.instance.addBreadcrumb(
             'sync',
             'transactions_fetch_failed',
             data: {'page': currentPage},
@@ -451,7 +451,7 @@ class SyncService with ChangeNotifier {
 
       _log.info(
           'SyncService', '========== SYNC FROM SERVER COMPLETE ==========');
-      TelemetryService.instance.addBreadcrumb(
+      DiagnosticsService.instance.addBreadcrumb(
         'sync',
         'transactions_fetch_finished',
         data: {
@@ -459,7 +459,7 @@ class SyncService with ChangeNotifier {
           'transaction_count': allTransactions.length,
         },
       );
-      telemetrySucceeded = true;
+      diagnosticsSucceeded = true;
       _lastSyncTime = DateTime.now();
       notifyListeners();
 
@@ -472,8 +472,8 @@ class SyncService with ChangeNotifier {
         'SyncService',
         'syncFromServer failed with ${e.runtimeType}',
       );
-      telemetryThrowable = e;
-      await TelemetryService.instance.captureHandledException(
+      diagnosticsThrowable = e;
+      await DiagnosticsService.instance.captureHandledException(
         e,
         stackTrace,
         operation: 'sync.transactions_fetch',
@@ -483,9 +483,9 @@ class SyncService with ChangeNotifier {
         error: e.toString(),
       );
     } finally {
-      await finishTelemetrySpan(
-        success: telemetrySucceeded,
-        throwable: telemetryThrowable,
+      await finishDiagnosticsSpan(
+        success: diagnosticsSucceeded,
+        throwable: diagnosticsThrowable,
       );
     }
   }
@@ -534,7 +534,7 @@ class SyncService with ChangeNotifier {
     }
 
     _log.info('SyncService', '==== Full Sync Started ====');
-    TelemetryService.instance.addBreadcrumb('sync', 'full_sync_started');
+    DiagnosticsService.instance.addBreadcrumb('sync', 'full_sync_started');
     _isSyncing = true;
     _syncError = null;
     notifyListeners();
@@ -579,7 +579,7 @@ class SyncService with ChangeNotifier {
 
       _log.info('SyncService',
           '==== Full Sync Complete: ${allSuccess ? "SUCCESS" : "PARTIAL/FAILED"} ====');
-      TelemetryService.instance.addBreadcrumb(
+      DiagnosticsService.instance.addBreadcrumb(
         'sync',
         'full_sync_finished',
         data: {
@@ -603,7 +603,7 @@ class SyncService with ChangeNotifier {
       );
     } catch (e, stackTrace) {
       _log.error('SyncService', 'Full sync failed with ${e.runtimeType}');
-      await TelemetryService.instance.captureHandledException(
+      await DiagnosticsService.instance.captureHandledException(
         e,
         stackTrace,
         operation: 'sync.full',

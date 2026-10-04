@@ -20,7 +20,7 @@ import 'services/api_config.dart';
 import 'services/connectivity_service.dart';
 import 'services/log_service.dart';
 import 'services/preferences_service.dart';
-import 'services/telemetry_service.dart';
+import 'services/diagnostics_service.dart';
 import 'theme/sure_theme.dart';
 import 'l10n/app_localizations.dart';
 import 'package:upgrader/upgrader.dart';
@@ -45,7 +45,7 @@ void main() async {
     );
   }
 
-  await TelemetryService.instance.initialize(
+  await DiagnosticsService.instance.initialize(
     appRunner: () => runApp(SureApp(moneyHidden: moneyHidden)),
   );
 }
@@ -105,7 +105,7 @@ class SureApp extends StatelessWidget {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           debugShowCheckedModeBanner: false,
-          navigatorObservers: TelemetryService.instance.navigatorObservers,
+          navigatorObservers: DiagnosticsService.instance.navigatorObservers,
           theme: SureTheme.light,
           darkTheme: SureTheme.dark,
           themeMode: themeProvider.themeMode,
@@ -190,7 +190,7 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
     // Handle deep link that launched the app (cold start)
     _appLinks.getInitialLink().then((uri) {
       if (uri != null) {
-        TelemetryService.instance.addBreadcrumb(
+        DiagnosticsService.instance.addBreadcrumb(
           'deep_links',
           'initial_link_received',
           data: {'recognized': _isSsoCallback(uri)},
@@ -202,7 +202,7 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
         'DeepLinks',
         'Initial link failed with ${e.runtimeType}',
       );
-      unawaited(TelemetryService.instance.captureHandledException(
+      unawaited(DiagnosticsService.instance.captureHandledException(
         e,
         stackTrace,
         operation: 'deep_links.initial_link',
@@ -217,7 +217,7 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
           'DeepLinks',
           'Link stream failed with ${e.runtimeType}',
         );
-        unawaited(TelemetryService.instance.captureHandledException(
+        unawaited(DiagnosticsService.instance.captureHandledException(
           e,
           stackTrace,
           operation: 'deep_links.stream',
@@ -228,7 +228,7 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
 
   void _handleDeepLink(Uri uri) {
     final isSsoCallback = _isSsoCallback(uri);
-    TelemetryService.instance.addBreadcrumb(
+    DiagnosticsService.instance.addBreadcrumb(
       'deep_links',
       'link_received',
       data: {'recognized': isSsoCallback},
@@ -244,12 +244,12 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
       uri.scheme == 'sureapp' && uri.host == 'oauth';
 
   Future<void> _checkBackendConfig() async {
-    final hasUrl = await TelemetryService.instance.traceAsync(
+    final hasUrl = await DiagnosticsService.instance.traceAsync(
       'app.backend_config_check',
       'Backend configuration check',
       ApiConfig.initialize,
     );
-    TelemetryService.instance.addBreadcrumb(
+    DiagnosticsService.instance.addBreadcrumb(
       'app',
       'backend_config_checked',
       data: {'configured': hasUrl},

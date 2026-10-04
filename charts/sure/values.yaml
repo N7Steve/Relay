@@ -44,9 +44,6 @@ rails:
       OIDC_CLIENT_ID: ""
       OIDC_CLIENT_SECRET: ""
       OIDC_ISSUER: ""
-      LANGFUSE_PUBLIC_KEY: ""
-      LANGFUSE_SECRET_KEY: ""
-      LANGFUSE_HOST: "https://cloud.langfuse.com"
 
   # Non-secret env defaults mirrored from .env.local.example
   settings:

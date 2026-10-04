@@ -65,25 +65,13 @@ class FioAccount::Processor
       { success: false, failed: 1, errors: [ { error: I18n.t("fio_item.errors.account_processing_failed") } ] }
     end
 
-    # Report a processing error to Sentry with a sanitized message and tags.
+    # Report a processing error to local diagnostics with a sanitized message and tags.
     def report_exception(error, context)
       safe_error = SanitizedProcessingError.new("Fio account processing failed")
 
-      Sentry.capture_exception(safe_error) do |scope|
-        scope.set_tags(
-          fio_account_id: fio_account.id,
+      LocalDiagnostics.report(safe_error, metadata: { fio_account_id: fio_account.id,
           context: context,
-          error_class: error.class.name
-        )
-        scope.set_context(
-          "fio_account_processor",
-          {
-            fio_account_id: fio_account.id,
-            context: context,
-            error_class: error.class.name
-          }
-        )
-      end
+          error_class: error.class.name }, source: "models/fio_account/processor")
     end
 
     def log_invalid_currency(currency_value)

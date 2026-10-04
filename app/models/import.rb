@@ -143,7 +143,7 @@ class Import < ApplicationRecord
           # One bad record must not abort the sweep for every other stuck
           # import this hour.
           Rails.logger.error("Import.clean failed for #{import.type} #{import.id}: #{e.class}: #{e.message}")
-          Sentry.capture_exception(e) { |scope| scope.set_tags(record_type: import.type, record_id: import.id) } if defined?(Sentry)
+          LocalDiagnostics.report(e, metadata: { record_type: import.type, record_id: import.id }, source: "models/import")
         end
     end
 

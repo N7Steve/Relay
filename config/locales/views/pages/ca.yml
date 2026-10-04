@@ -30,15 +30,6 @@ ca:
         title: Nou diagrama de Sankey
         preview: Experimental
         preview_tooltip: Aquest diagrama substituirà la visualització de dalt, ja que utilitza una nova API compartida amb el client mòbil en Swift.
-        feedback_prompt: Compara aquest diagrama amb l'original de dalt i digues-nos si es veu diferent, a part de l'ordenació.
-        positive: Sembla correcte
-        negative: Hi ha alguna cosa malament
-        feedback_title: Comentaris sobre el diagrama de flux de caixa
-        feedback_loading: Carregant el formulari de comentaris…
-        feedback_unavailable: Ara mateix no es poden enviar comentaris. Torna-ho a provar més tard.
-        feedback_thanks: Gràcies per ajudar-nos a millorar el diagrama!
-        feedback_privacy: La teva resposta s'envia a PostHog. Descriu el problema sense números de compte, saldos ni altres dades financeres privades.
-        feedback_submit: Envia els comentaris
       cashflow_sankey:
         add_transaction: Afegeix una transacció
         no_data_description: Afegeix transaccions per mostrar dades de flux de caixa

@@ -31,7 +31,6 @@ dependencies:
   package_info_plus: ^8.0.0
   local_auth: ^2.3.0
   flutter_markdown: ^0.7.2
-  sentry_flutter: ^8.14.2
   upgrader: ^13.5.0
 
 dev_dependencies:

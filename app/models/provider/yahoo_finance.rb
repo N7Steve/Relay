@@ -726,7 +726,6 @@ class Provider::YahooFinance < Provider
     #           Validation
     # ================================
 
-
     def validate_date_range!(start_date, end_date)
       raise Error, "Start date cannot be after end date" if start_date > end_date
       raise Error, "Date range too large (max 5 years)" if end_date > start_date + 5.years
@@ -792,8 +791,6 @@ class Provider::YahooFinance < Provider
       full_key = "#{@cache_prefix}_#{key}"
       Rails.cache.write(full_key, data, expires_in: CACHE_DURATION)
     end
-
-
 
     # ================================
     #         Helper Methods

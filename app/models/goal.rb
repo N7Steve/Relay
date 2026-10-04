@@ -396,7 +396,7 @@ class Goal < ApplicationRecord
       matching = linked_accounts.select { |a| a.currency == currency }
       if matching.size != linked_accounts.size
         Rails.logger.warn("Goal##{id} linked-account currency drift: #{linked_accounts.size - matching.size} of #{linked_accounts.size} mismatched (expected #{currency})")
-        Sentry.capture_message("Goal linked-account currency drift", level: :warning, extra: { goal_id: id, expected_currency: currency }) if defined?(Sentry)
+        LocalDiagnostics.report("Goal linked-account currency drift", level: :warn, metadata: { goal_id: id, expected_currency: currency }, source: "models/goal")
       end
       matching.sum { |account| account_amount_for(account) }
     end
@@ -1277,7 +1277,7 @@ class Goal < ApplicationRecord
       # Degrade gracefully (chart drops to target-line-only) but surface
       # the failure; silent fallbacks here masked real Builder bugs.
       Rails.logger.error("Goal##{id} balance series failed: #{e.class}: #{e.message}")
-      Sentry.capture_exception(e) if defined?(Sentry)
+      LocalDiagnostics.report(e, source: "models/goal")
       []
     end
 
