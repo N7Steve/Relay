@@ -8,10 +8,11 @@ class ExternalSchedule
   }.freeze
 
   def self.reconcile!(schedule)
-    # Remove only this retired commercial cron, including persisted schedules.
+    # Remove retired owned schedules, including definitions already in Redis.
     Sidekiq::Cron::Job.find("clean_inactive_families")&.destroy
     Sidekiq::Cron::Job.find("sync_hourly")&.destroy
-    schedule = schedule.except("clean_inactive_families", "sync_hourly")
+    Sidekiq::Cron::Job.find("generate_recurring_occurrences")&.destroy
+    schedule = schedule.except("clean_inactive_families", "sync_hourly", "generate_recurring_occurrences")
     enabled = schedule.reject do |name, _|
       capability = JOB_CAPABILITIES[name]
       disabled = capability && !ExternalAccess.enabled?(capability)

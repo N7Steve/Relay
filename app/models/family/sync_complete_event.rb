@@ -35,12 +35,5 @@ class Family::SyncCompleteEvent
       partial: "accounts/sync_controls",
       locals: { family: family }
     )
-
-    # Schedule recurring transaction pattern identification (debounced to run after all syncs complete)
-    begin
-      RecurringTransaction.identify_patterns_for(family)
-    rescue => e
-      Rails.logger.error("Family::SyncCompleteEvent recurring transaction identification failed: #{e.message}\n#{e.backtrace&.join("\n")}")
-    end
   end
 end

@@ -26,9 +26,6 @@ vi:
       delete_subtitle: Thao tác này sẽ xóa chuyển khoản. Các giao dịch liên quan sẽ không bị xóa.
       delete_title: Xóa chuyển khoản?
       details: Chi tiết
-      mark_recurring: Đánh dấu là định kỳ
-      mark_recurring_subtitle: Theo dõi chuyển khoản này như một mẫu định kỳ trong nguồn cấp sắp tới và trang định kỳ.
-      mark_recurring_title: Đánh dấu chuyển khoản là định kỳ
       note_label: Ghi chú
       note_placeholder: Thêm ghi chú cho chuyển khoản này
       overview: Tổng quan

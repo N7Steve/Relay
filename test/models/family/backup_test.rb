@@ -39,6 +39,62 @@ class Family::BackupTest < ActiveSupport::TestCase
     assert_equal "Already paid", restored.scheduled_payment_entries.find_by!(status: "rejected").rejection_reason
   end
 
+  test "round trips historical Bills relationships without producing Agenda or extra occurrences" do
+    @target = Family.create!(name: "First historical recovery", currency: "EUR")
+    @target.users.create!(email: "first-bills-restore@example.com", password: "password123", role: "admin")
+    entry = transaction(@account, "Historical payment", 20)
+    series = @source.recurring_transactions.create!(
+      account: @account, destination_account: @destination, merchant: @merchant, category: @category,
+      name: "Historical Bills", amount: 20, currency: "EUR", expected_day_of_month: 15,
+      last_occurrence_date: Date.new(2026, 8, 15), next_expected_date: Date.new(2026, 9, 15),
+      status: "active", bill_type: "transfer", payment_url: "https://example.com/pay",
+      matcher_hints: { "name_aliases" => [ "Original payment" ] }
+    )
+    replacement = series.dup
+    replacement.update!(name: "Replacement", amount: 25)
+    series.update!(replaced_by: replacement)
+    series.recurrence_rules.create!(frequency: "monthly", interval: 1, day_of_month: 15, position: 0)
+    occurrence = series.recurring_occurrences.create!(family: @source, original_due_on: entry.date,
+      due_on: entry.date, currency: "EUR", expected_amount: 20, status: "paid", closed_at: Time.current)
+    occurrence.allocations.create!(entry: entry, allocated_amount: 20, currency: "EUR", paid_on: entry.date,
+      state: "confirmed", source: "user_confirmed", source_amount: 20, source_currency: "EUR")
+    series.recurring_price_changes.create!(entry: entry, previous_amount: 15, new_amount: 20,
+      currency: "EUR", effective_on: entry.date, source: "detected")
+    series.recurring_match_rejections.create!(entry: entry)
+
+    assert_no_difference [ "ScheduledPayment.count", "ScheduledPaymentEntry.count" ] do
+      restore!
+    end
+
+    restored = @target.recurring_transactions.find_by!(name: series.name)
+    assert_equal "Checking", restored.account.name
+    assert_equal "Savings", restored.destination_account.name
+    assert_equal "Utilities", restored.category.name
+    assert_equal "Utilities", restored.merchant.name
+    assert_equal replacement.name, restored.replaced_by.name
+    assert_equal series.matcher_hints, restored.matcher_hints
+    assert_equal series.payment_url, restored.payment_url
+    assert_equal 15, restored.recurrence_rules.sole.day_of_month
+    assert_equal 1, @target.recurring_occurrences.count
+    restored_occurrence = restored.recurring_occurrences.sole
+    assert_equal occurrence.attributes.except("id", "family_id", "recurring_transaction_id"),
+      restored_occurrence.attributes.except("id", "family_id", "recurring_transaction_id")
+    assert_equal "Historical payment", restored_occurrence.allocations.sole.entry.name
+    assert_equal restored_occurrence.allocations.sole.entry, restored.recurring_price_changes.sole.entry
+    assert_equal restored_occurrence.allocations.sole.entry, restored.recurring_match_rejections.sole.entry
+
+    second_target = Family.create!(name: "Second historical recovery", currency: "EUR")
+    second_target.users.create!(email: "second-bills-restore@example.com", password: "password123", role: "admin")
+    content = nil
+    Zip::File.open_buffer(Family::DataExporter.new(@target).generate_export) { |zip| content = zip.read("all.ndjson") }
+    assert_no_difference [ "ScheduledPayment.count", "ScheduledPaymentEntry.count" ] do
+      Family::DataImporter.new(second_target, content).import!
+    end
+    assert_equal 1, second_target.recurring_occurrences.count
+    assert_equal "Replacement", second_target.recurring_transactions.find_by!(name: series.name).replaced_by.name
+    assert_equal "Historical payment", second_target.recurring_occurrences.sole.allocations.sole.entry.name
+  end
+
   test "round trips custom account and provider merchant icons, receipts and documents as bytes" do
     entry = transaction(@account, "Receipt", 20)
     provider = ProviderMerchant.create!(name: "Portable provider", source: "plaid")

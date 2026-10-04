@@ -61,9 +61,6 @@ pt-PT:
     show:
       keep_both: Não, manter ambos
       loan_payment: Pagamento de Empréstimo
-      mark_recurring: Marcar como Recorrente
-      mark_recurring_subtitle: Acompanhe isto como uma transação recorrente. A variação de montante é calculada automaticamente com base nos últimos 6 meses de transações semelhantes.
-      mark_recurring_title: Transação Recorrente
       merge_duplicate: Sim, fundir
       potential_duplicate_description: Esta transação pendente pode ser a mesma que a transação efetuada abaixo. Nesse caso, funda-as para evitar dupla contagem.
       potential_duplicate_title: Possível duplicado detetado
@@ -101,7 +98,6 @@ pt-PT:
       settings: Definições
       tags_label: Tags
       tab_transactions: Transações
-      tab_upcoming: Próximo
       uncategorized: "(sem categoria)"
       additional_details: "Detalhes adicionais"
       payee: "Beneficiário"
@@ -125,9 +121,6 @@ pt-PT:
       withdrawal: Levantamento
       exchange: Troca
       other: Outro
-    mark_recurring: Marcar como Recorrente
-    mark_recurring_subtitle: Acompanhe isto como uma transação recorrente. A variação de montante é calculada automaticamente com base nos últimos 6 meses de transações semelhantes.
-    mark_recurring_title: Transação Recorrente
     potential_duplicate_title: Possível duplicado detetado
     potential_duplicate_description: Esta transação pendente pode ser a mesma que a transação efetuada abaixo. Nesse caso, funda-as para evitar dupla contagem.
     keep_both: Não, manter ambos

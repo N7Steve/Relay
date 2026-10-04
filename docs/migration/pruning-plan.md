@@ -3,13 +3,11 @@
 Preparado el 4 de octubre de 2026 sobre
 `1e279bd8f6fe05d295c074180efccbcd59195ad5`.
 Base: [análisis de migración y poda](pruning-analysis.md).
-Estado: fases 0–5 completadas, validadas y publicadas en `origin/main`
-el 4 de octubre de 2026. Evidencia y límites en los
-[registros de fase 0](pruning-phase-0.md) y [fase 1](pruning-phase-1.md).
-Fase 4 publicada en `92ee241a1`; fase 5 en `ecc901083`. Fase 6 seleccionada e implementada
-el 4 de octubre de 2026; validada localmente en Rails/web/Flutter y sin publicar.
-Compilación Swift pendiente en entorno nativo. Fases 7–11 pendientes.
-Ver los registros de [fase 4](pruning-phase-4.md) y [fase 5](pruning-phase-5.md).
+Estado actualizado el 5 de octubre de 2026: fases 0–7 implementadas y
+publicadas en `origin/main`. Steve informa de que fase 7 está desplegada y
+aparentemente funciona correctamente; este trabajo no inspecciona la instalación.
+Fase 8 implementada y validada localmente, sin commit/push. Fases 9–11 pendientes.
+Ver los registros de [fase 7](pruning-phase-7.md) y [fase 8](pruning-phase-8.md).
 
 La petición autoriza preparar este plan. La selección de una fase autorizará
 su implementación dentro del alcance descrito. Commit/push y operaciones sobre
@@ -256,8 +254,9 @@ se representa mediante un lector nuevo que deba permanecer.
 **Selección confirmada:** alcance completo; conservar únicamente Enable Banking
 entre los conectores externos de bancos/brokers/exchanges/wallets. Steve indica
 que no usa ninguno ni tiene cuentas sincronizadas o datos que conservar.
-Implementación completada y validada localmente en `main`; evidencia y límites en el [registro de fase 7](pruning-phase-7.md).
-Commit/push y despliegue requieren su confirmación correspondiente.
+Implementación publicada. Steve informa el 5 de octubre de 2026 de su despliegue
+y funcionamiento aparentemente correcto; evidencia local y límites en el
+[registro de fase 7](pruning-phase-7.md).
 Se mantienen los límites de FinanceKit, cotizaciones/divisas y módulos compartidos
 descritos más abajo.
 
@@ -288,6 +287,9 @@ con funcionamiento manual cuando se ha aprobado su conversión.
 procedimiento inverso ensayado. Volver al código anterior no revincula una cuenta.
 
 ## Fase 8 — Retirar Bills y recurrencias detectadas
+
+**Selección confirmada:** alcance completo implementado y validado localmente.
+Evidencia en [registro de fase 8](pruning-phase-8.md); publicación pendiente de confirmación.
 
 - Suspender detección/materialización Bills y retirar sus cron, feeds, endpoints,
   asignaciones, detección de series y consumidores en movimientos/transferencias.
@@ -368,9 +370,9 @@ actualización y recuperación de datos soportadas y probadas.
 La fase 0 está publicada en `eb538dae3`, la fase 1 en `a5299f36c`, la fase 2
 en `ee3341fd3`, la fase 3 en `feccab08c`, la fase 4 en `92ee241a1` y la fase 5
 en `ecc901083`. Los registros de cada fase recogen alcance, pruebas y límites.
-El [punto de continuación de fase 2](pruning-phase-2.md#punto-de-continuación-para-otro-chat)
-registra la transición de configuración. Las fases 7–11 siguen pendientes.
-No se ha desplegado la poda en TrueNAS en estas entregas.
+Las fases 6–7 están publicadas; el reporte de Steve sobre el despliegue de fase 7
+se recoge arriba. Fase 8 implementada y validada localmente; fases
+9–11 pendientes. Este trabajo no verifica directamente TrueNAS.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |
@@ -384,8 +386,6 @@ Para cada fase/subfase registrar:
 | Reversión | Código/configuración, recuperación de datos y límites |
 | Cierre | Confirmación de que se puede detener aquí con Relay utilizable |
 
-La fase 6 está seleccionada e implementada, validada localmente en Rails/web/Flutter
-y sin commit/push. Build Swift pendiente en entorno nativo.
-Ver [fase 6](pruning-phase-6.md). Las fases 1 y 2 construyeron la base segura.
-El avance a cualquier fase requiere cerrar la anterior aplicable, sin trasladar
-fallos, contratos rotos ni decisiones pendientes que bloqueen su funcionamiento.
+Las fases 1 y 2 construyeron la base segura. El avance a cualquier fase requiere
+cerrar la anterior aplicable, sin trasladar fallos, contratos rotos ni decisiones
+pendientes que bloqueen su funcionamiento.

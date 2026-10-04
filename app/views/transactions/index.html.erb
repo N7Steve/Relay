@@ -51,46 +51,9 @@
   <%= render "summary", totals: @search.totals %>
   <% include_hidden_accounts = @q && @q[:default_accounts_only] == "false" %>
 
-  <%
-    show_upcoming_tab = bills_frontend_enabled? && !Current.family.recurring_transactions_disabled?
-    show_tabs = show_upcoming_tab
-  %>
-
-  <% if show_tabs %>
-    <%= render DS::Tabs.new(active_tab: params[:tab].presence || "transactions", variant: :unstyled) do |tabs| %>
-      <div class="flex flex-wrap items-center justify-between gap-y-4 mb-4">
-        <%= tabs.with_nav(classes: "flex bg-surface-inset p-1 rounded-lg max-w-fit") do |nav| %>
-          <% nav.with_btn(id: "transactions", label: t("transactions.show.tab_transactions"), classes: "px-6") %>
-          <% if show_upcoming_tab %>
-            <% nav.with_btn(id: "upcoming", label: t("transactions.show.tab_upcoming"), classes: "px-6") %>
-          <% end %>
-        <% end %>
-
-        <div class="flex items-center gap-6">
-          <%= render "transactions/compact_view_toggle" %>
-          <%= render "transactions/include_hidden_accounts_toggle", include_hidden_accounts: include_hidden_accounts %>
-        </div>
-      </div>
-
-      <%= tabs.with_panel(tab_id: "transactions") do %>
-        <div class="bg-container rounded-xl shadow-border-xs">
-          <%= render "transactions/list", transactions: @transactions, projected_recurring: @projected_recurring, q: params[:q], pagy: @pagy %>
-        </div>
-      <% end %>
-
-      <% if show_upcoming_tab %>
-        <%= tabs.with_panel(tab_id: "upcoming") do %>
-          <div class="bg-container rounded-xl shadow-border-xs">
-            <%= render "transactions/upcoming" %>
-          </div>
-        <% end %>
-      <% end %>
-    <% end %>
-  <% else %>
-    <div class="flex items-center justify-end gap-6 mb-4">
-      <%= render "transactions/compact_view_toggle" %>
-      <%= render "transactions/include_hidden_accounts_toggle", include_hidden_accounts: include_hidden_accounts %>
-    </div>
-    <%= render "transactions/list", transactions: @transactions, projected_recurring: @projected_recurring, q: params[:q], pagy: @pagy %>
-  <% end %>
+  <div class="flex items-center justify-end gap-6 mb-4">
+    <%= render "transactions/compact_view_toggle" %>
+    <%= render "transactions/include_hidden_accounts_toggle", include_hidden_accounts: include_hidden_accounts %>
+  </div>
+  <%= render "transactions/list", transactions: @transactions, q: params[:q], pagy: @pagy %>
 <% end %>

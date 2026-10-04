@@ -19,9 +19,6 @@ class Entry < ApplicationRecord
   validates :reconciled_at, presence: true, if: -> { reconciled_by_statement_id.present? }
 
   has_many :child_entries, class_name: "Entry", foreign_key: :parent_entry_id, dependent: :destroy
-  # Read side only, so a transaction can say which bills it paid. The foreign key
-  # already nullifies on delete, so this adds no lifecycle behaviour.
-  has_many :recurring_allocations, dependent: nil, inverse_of: :entry
 
   has_one :scheduled_payment_entry, foreign_key: :entry_id, class_name: "ScheduledPaymentEntry"
   has_one :transfer_scheduled_payment_entry, foreign_key: :transfer_entry_id, class_name: "ScheduledPaymentEntry"

@@ -1,6 +1,4 @@
-# Bills subsystem: adds the `accent` and `outline_muted` variants, with their
-# colours declared in design/tokens/relay.tokens.json alongside every other
-# button colour.
+# Shared button variants use colours from design/tokens/relay.tokens.json.
 class DS::Buttonish < DesignSystemComponent
   VARIANTS = {
     primary: {

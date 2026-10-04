@@ -46,10 +46,9 @@ class Insight < ApplicationRecord
 
   # Everything the user hasn't acknowledged; what the feed renders.
   scope :visible, -> { where(status: [ :active, :read ]) }
-  # These generators remain part of the upstream Bills subsystem, but their
-  # output must not leak into the Agenda-first fork shell.
+  # Retain historical Bills insights in backups, outside the active product.
   scope :for_product_frontend, -> {
-    Rails.configuration.x.bills_frontend_enabled ? all : where.not(insight_type: BILLS_BACKED_TYPES)
+    where.not(insight_type: BILLS_BACKED_TYPES)
   }
   scope :ordered, -> {
     order(Arel.sql("CASE insights.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END"))
@@ -63,7 +62,7 @@ class Insight < ApplicationRecord
   end
 
   def product_frontend_visible?
-    Rails.configuration.x.bills_frontend_enabled || !BILLS_BACKED_TYPES.include?(insight_type)
+    !BILLS_BACKED_TYPES.include?(insight_type)
   end
 
   def acknowledge!

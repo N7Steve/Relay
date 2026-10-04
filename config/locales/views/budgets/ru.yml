@@ -38,12 +38,6 @@ ru:
       status: Статус
       view_all_transactions: Просмотреть все операции по категории
       rolled_over: Перенесено
-    bills_reserved: '%{amount} зарезервировано под платежи'
-    bills_reserved_unconvertible:
-      one: '%{count} платёж не зарезервирован: нет обменного курса'
-      few: '%{count} платежа не зарезервированы: нет обменного курса'
-      many: '%{count} платежей не зарезервированы: нет обменного курса'
-      other: '%{count} платежа не зарезервированы: нет обменного курса'
     budget_category:
       rolled_over: +%{amount} перенесено
     move:

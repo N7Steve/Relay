@@ -119,7 +119,8 @@ class InsightsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "acknowledge refreshes the unread badge in both lightbulb copies" do
-    unread = @user.family.insights.active.count
+    create_retained_unread_insight
+    unread = @user.family.insights.for_product_frontend.active.count
     assert_operator unread, :>, 1, "fixtures need more than one unread insight"
 
     patch acknowledge_insight_url(@insight), as: :turbo_stream
@@ -155,9 +156,10 @@ class InsightsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "unacknowledge refreshes the unread badge" do
+    create_retained_unread_insight
     @insight.acknowledge!
 
-    unread = @user.family.insights.active.count
+    unread = @user.family.insights.for_product_frontend.active.count
 
     patch unacknowledge_insight_url(@insight), as: :turbo_stream
 
@@ -293,6 +295,11 @@ class InsightsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def create_retained_unread_insight
+      @user.family.insights.create!(insight_type: "idle_cash", priority: "low", status: "active",
+        title: "Cash available", body: "Local cash insight", dedup_key: "idle_cash:badge-test", generated_at: Time.current)
+    end
+
     def enable_preview_features
       @user.update!(preferences: (@user.preferences || {}).merge("preview_features_enabled" => true))
     end

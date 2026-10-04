@@ -55,9 +55,6 @@ it:
     show:
       keep_both: No, tienile entrambe
       loan_payment: Pagamento prestito
-      mark_recurring: Segna come ricorrente
-      mark_recurring_subtitle: Monitora questa come transazione ricorrente. La varianza dell'importo viene calcolata automaticamente dagli ultimi 6 mesi di transazioni simili.
-      mark_recurring_title: Transazione ricorrente
       merge_duplicate: Sì, uniscile
       potential_duplicate_description: Questa transazione in attesa potrebbe essere la stessa di quella registrata qui sotto. In caso affermativo, uniscile per evitare il doppio conteggio.
       potential_duplicate_title: Possibile duplicato rilevato
@@ -94,7 +91,6 @@ it:
       settings: Impostazioni
       tags_label: Etichette
       tab_transactions: Transazioni
-      tab_upcoming: In arrivo
       uncategorized: "(non categorizzata)"
       additional_details: "Dettagli aggiuntivi"
       payee: "Beneficiario"
@@ -118,9 +114,6 @@ it:
       withdrawal: Prelievo
       exchange: Cambio
       other: Altro
-    mark_recurring: Segna come ricorrente
-    mark_recurring_subtitle: Monitora questa come transazione ricorrente. La varianza dell'importo viene calcolata automaticamente dagli ultimi 6 mesi di transazioni simili.
-    mark_recurring_title: Transazione ricorrente
     potential_duplicate_title: Possibile duplicato rilevato
     potential_duplicate_description: Questa transazione in attesa potrebbe essere la stessa di quella registrata qui sotto. In caso affermativo, uniscile per evitare il doppio conteggio.
     keep_both: No, tienile entrambe

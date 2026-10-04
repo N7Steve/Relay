@@ -98,7 +98,7 @@ class GenerateInsightsJobTest < ActiveJob::TestCase
       @family,
       targets: "[data-insights-badge]",
       partial: "layouts/shared/insights_badge",
-      locals: { count: @family.insights.active.count + 1 }
+      locals: { count: @family.insights.for_product_frontend.active.count + 1 }
     )
 
     GenerateInsightsJob.perform_now(family_id: @family.id)

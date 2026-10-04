@@ -53,9 +53,6 @@ vi:
     show:
       keep_both: Không, giữ cả hai
       loan_payment: Thanh toán khoản vay
-      mark_recurring: Đánh dấu là định kỳ
-      mark_recurring_subtitle: Theo dõi giao dịch định kỳ này. Mức biến động được tự động tính từ 6 tháng giao dịch tương tự.
-      mark_recurring_title: Giao dịch định kỳ
       merge_duplicate: Có, gộp lại
       potential_duplicate_description: Giao dịch đang chờ này có thể giống với giao dịch đã đăng bên dưới. Nếu vậy, hãy gộp lại để tránh tính hai lần.
       potential_duplicate_title: Phát hiện trùng lặp có thể
@@ -92,7 +89,6 @@ vi:
       settings: Cài đặt
       tags_label: Nhãn
       tab_transactions: Giao dịch
-      tab_upcoming: Sắp tới
       uncategorized: "(chưa phân loại)"
       additional_details: "Thông tin bổ sung"
       payee: "Người nhận"
@@ -116,9 +112,6 @@ vi:
       withdrawal: Rút tiền
       exchange: Trao đổi
       other: Khác
-    mark_recurring: Đánh dấu là định kỳ
-    mark_recurring_subtitle: Theo dõi giao dịch định kỳ này. Mức biến động được tự động tính từ 6 tháng giao dịch tương tự.
-    mark_recurring_title: Giao dịch định kỳ
     potential_duplicate_title: Phát hiện trùng lặp có thể
     potential_duplicate_description: Giao dịch đang chờ này có thể giống với giao dịch đã đăng bên dưới. Nếu vậy, hãy gộp lại để tránh tính hai lần.
     merge_duplicate_button: Có, gộp lại

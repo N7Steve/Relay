@@ -50,7 +50,6 @@ class Family < ApplicationRecord
     [ "DD MMM YYYY", "%d %b %Y" ]
   ].freeze
 
-
   MONIKERS = [ "Family", "Group" ].freeze
   # Accept legacy values on restore; no assistant transport remains.
   ASSISTANT_TYPES = %w[builtin external].freeze
@@ -272,9 +271,6 @@ class Family < ApplicationRecord
   def secondary_enabled_currency_objects(extra: [])
     enabled_currency_objects(extra:).reject { |currency| currency.iso_code == primary_currency_code }
   end
-
-
-
 
   def moniker_label
     case moniker.presence
@@ -566,77 +562,12 @@ class Family < ApplicationRecord
     "#{entries.count}-#{entries.maximum(:updated_at)&.to_f}"
   end
 
-  # Used for invalidating caches keyed on recurring transactions (e.g. the
-  # transactions index's projected recurring list). See #entries_version for
-  # why .count is included alongside the timestamp.
-  def recurring_transactions_version
-    "#{recurring_transactions.count}-#{recurring_transactions.maximum(:updated_at)&.to_f}"
-  end
-
   # Used for invalidating caches whose results depend on which accounts are
   # active/draft vs. disabled (e.g. AccountsController#toggle_active changes
   # nothing on entries, but changes which entries `uncategorized_transactions`
   # considers accessible).
   def accounts_status_version
     "#{accounts.count}-#{accounts.maximum(:updated_at)&.to_f}"
-  end
-
-  # Used for invalidating caches that render merchant name/logo for recurring
-  # transactions (e.g. the transactions index's projected recurring list).
-  # Recurring detection copies `transaction.merchant_id` (see
-  # RecurringTransaction::Identifier), which can point at either a
-  # family-owned FamilyMerchant or a shared ProviderMerchant -- editing either
-  # (e.g. a manual rename, or ProviderMerchant::Enhancer updating a shared
-  # provider merchant's name/logo) doesn't touch `recurring_transactions`.
-  # Scoped to only the merchants actually referenced by this family's
-  # recurring transactions, rather than all family merchants, so unrelated
-  # merchant edits don't bust the cache unnecessarily.
-  def recurring_transaction_merchants_version
-    merchant_ids = recurring_transactions.where.not(merchant_id: nil).distinct.pluck(:merchant_id)
-    return "0-" if merchant_ids.empty?
-
-    scope = Merchant.where(id: merchant_ids)
-    "#{scope.count}-#{scope.maximum(:updated_at)&.to_f}"
-  end
-
-  # Lazy so existing families get a token on first render, and resetting is
-  # revocation.
-  def bills_feed_token!
-    return bills_feed_token if bills_feed_token.present?
-
-    update!(bills_feed_token: SecureRandom.urlsafe_base64(24))
-    bills_feed_token
-  end
-
-  def reset_bills_feed_token!
-    update!(bills_feed_token: SecureRandom.urlsafe_base64(24))
-    bills_feed_token
-  end
-
-  # The URL a member subscribes to carries the MEMBER's identity, because the
-  # feed must honor per-account sharing: a member who can reach a subset of
-  # accounts must not receive the whole family's obligations. The family
-  # secret never appears in the URL; only a digest of it does, so rotating
-  # `bills_feed_token` still revokes every previously shared URL at once.
-  def bills_feed_token_for(user)
-    self.class.bills_feed_verifier.generate([ user.id, bills_feed_stamp! ])
-  end
-
-  def bills_feed_stamp!
-    Digest::SHA256.hexdigest(bills_feed_token!).first(16)
-  end
-
-  # Non-minting read for the verification side: a family that never rendered
-  # a feed link has no token, and a signed URL from some earlier life must
-  # not conjure one into existence to match against.
-  def bills_feed_stamp
-    return nil if bills_feed_token.blank?
-
-    Digest::SHA256.hexdigest(bills_feed_token).first(16)
-  end
-
-  def self.bills_feed_verifier
-    Rails.application.message_verifier("bills-user-feed")
   end
 
   private

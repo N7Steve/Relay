@@ -10,6 +10,7 @@
 class RecurringAllocation < ApplicationRecord
   include Monetizable
 
+  # Persistence only: no allocation engine or default payment date.
   belongs_to :recurring_occurrence
   belongs_to :entry, optional: true
 
@@ -26,16 +27,10 @@ class RecurringAllocation < ApplicationRecord
   scope :confirmed, -> { where(state: :confirmed) }
   scope :suggested, -> { where(state: :suggested) }
 
-  before_validation :default_paid_on
-
   private
     def currency_matches_occurrence
       return if recurring_occurrence.nil? || currency == recurring_occurrence.currency
 
       errors.add(:currency, :must_match_occurrence)
-    end
-
-    def default_paid_on
-      self.paid_on ||= entry&.date || Date.current
     end
 end

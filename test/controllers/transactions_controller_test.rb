@@ -9,6 +9,26 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     @entry = entries(:transaction)
   end
 
+  test "index caches uncategorized_count across requests" do
+    # Test environment uses null_store; swap in a memory store so the cache
+    # actually persists between the two requests below.
+    original_cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+
+    get transactions_url
+    assert_response :success
+
+    queries = capture_sql_queries { get transactions_url }
+    assert_response :success
+
+    # uncategorized_transactions is a scope (joins/wheres), so its name never
+    # appears in the generated SQL -- match the COUNT query it produces instead.
+    assert_empty queries.select { |q| q =~ /SELECT COUNT/i && q =~ /category_id.*IS NULL/i },
+      "second request with unchanged data should reuse the cached uncategorized count"
+  ensure
+    Rails.cache = original_cache
+  end
+
   test "toggle compact view persists the preference without replacing other preferences" do
     @user.update!(preferences: @user.preferences.merge("unrelated_preference" => true))
 
@@ -23,69 +43,6 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to transactions_url
     assert_not @user.reload.transactions_compact_view?
     assert_equal true, @user.preferences["unrelated_preference"]
-  end
-
-  # Bills has always linked out to transactions. Until now nothing linked back,
-  # so a transaction that settled a bill was a dead end. The link-back is part
-  # of the preview-gated bills surface, so the viewer needs the flag.
-  test "a German transaction shows the bill it paid with localized copy" do
-    @user.update!(locale: "de")
-    @user.update!(preferences: (@user.preferences || {}).merge("preview_features_enabled" => true))
-    series = @user.family.recurring_transactions.create!(
-      account: accounts(:depository), name: "Watson Property", amount: 2000,
-      currency: "USD", expected_day_of_month: 9, status: "active", manual: true,
-      bill_type: "bill", last_occurrence_date: Date.current,
-      next_expected_date: Date.current
-    )
-    series.recurring_occurrences.destroy_all
-    due = Date.current.beginning_of_month + 8
-    occurrence = series.recurring_occurrences.create!(
-      family: @user.family, original_due_on: due, due_on: due,
-      currency: "USD", expected_amount: 2000, status: "scheduled"
-    )
-    RecurringTransaction::Allocator.new(occurrence).allocate!(entry: @entry)
-
-    get transaction_url(@entry), headers: { "Turbo-Frame" => "drawer" }
-
-    assert_response :success
-    assert_match "Watson Property", response.body
-    assert_match bill_path(series), response.body, "the bill must be reachable from the transaction"
-
-    translations = {
-      "transactions.show.create_bill" => "Rechnung hinzufügen",
-      "transactions.show.applied_to_title" => "Damit bezahlte Rechnungen",
-      "transactions.show.applied_to_detail" => "%{amount} für die am %{date} fällige Rechnung",
-      "transactions.show.applied_to_unreviewed" => "Prüfung erforderlich"
-    }
-    translations.each do |key, text|
-      assert_equal text, I18n.t(key, locale: :de, fallback: false)
-    end
-
-    assert_match translations.fetch("transactions.show.create_bill"), response.body
-    assert_match translations.fetch("transactions.show.applied_to_title"), response.body
-    assert_match(/für die am .* fällige Rechnung/, response.body)
-  end
-
-  test "the bill link-back stays hidden without preview access" do
-    series = @user.family.recurring_transactions.create!(
-      account: accounts(:depository), name: "Watson Property", amount: 2000,
-      currency: "USD", expected_day_of_month: 9, status: "active", manual: true,
-      bill_type: "bill", last_occurrence_date: Date.current,
-      next_expected_date: Date.current
-    )
-    series.recurring_occurrences.destroy_all
-    due = Date.current.beginning_of_month + 8
-    occurrence = series.recurring_occurrences.create!(
-      family: @user.family, original_due_on: due, due_on: due,
-      currency: "USD", expected_amount: 2000, status: "scheduled"
-    )
-    RecurringTransaction::Allocator.new(occurrence).allocate!(entry: @entry)
-
-    get transaction_url(@entry), headers: { "Turbo-Frame" => "drawer" }
-
-    assert_response :success
-    assert_no_match bill_path(series), response.body,
-      "the preview-gated bill link must not render for a user without the flag"
   end
 
   test "index groups subcategories immediately after their parent in the category filter" do
@@ -426,78 +383,6 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Transaction updated", flash[:notice]
     assert_redirected_to account_url(@entry.account)
     assert_enqueued_with(job: SyncJob)
-  end
-
-  test "re-renders show with mark-recurring state when update fails validation" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 100, merchant: merchant)
-
-    family.recurring_transactions.create!(
-      account: account,
-      merchant: merchant,
-      amount: entry.amount,
-      currency: entry.currency,
-      expected_day_of_month: entry.date.day,
-      last_occurrence_date: entry.date,
-      next_expected_date: 1.month.from_now,
-      status: "active",
-      manual: true,
-      occurrence_count: 1
-    )
-
-    patch transaction_url(entry), params: {
-      entry: {
-        name: "",
-        date: entry.date,
-        currency: entry.currency,
-        amount: entry.amount.abs,
-        nature: "outflow",
-        entryable_type: entry.entryable_type,
-        entryable_attributes: { id: entry.entryable_id }
-      }
-    }
-
-    assert_response :unprocessable_entity
-    assert_includes response.body, "A manual recurring transaction already exists for this pattern"
-    assert_select "button[disabled]", text: /Mark as Recurring/
-  end
-
-  test "turbo_stream update refreshes mark-recurring state when it newly matches" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 100, name: "Other Name")
-
-    family.recurring_transactions.create!(
-      account: account,
-      merchant: merchant,
-      amount: entry.amount,
-      currency: entry.currency,
-      expected_day_of_month: entry.date.day,
-      last_occurrence_date: entry.date,
-      next_expected_date: 1.month.from_now,
-      status: "active",
-      manual: true,
-      occurrence_count: 1
-    )
-
-    patch transaction_url(entry), params: {
-      entry: {
-        date: entry.date,
-        currency: entry.currency,
-        amount: entry.amount.abs,
-        nature: "outflow",
-        entryable_type: entry.entryable_type,
-        entryable_attributes: { id: entry.entryable_id, merchant_id: merchant.id }
-      }
-    }, as: :turbo_stream
-
-    assert_response :success
-    assert_select "turbo-stream[target='#{dom_id(entry, :mark_recurring)}'] button[disabled]", text: /Mark as Recurring/
   end
 
   test "transaction count represents filtered total" do
@@ -897,209 +782,6 @@ end
     assert_select "#total-expense", text: totals.transfer_outflow_money.format
   end
 
-  test "mark_as_recurring creates a manual recurring transaction" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 100, merchant: merchant)
-    transaction = entry.entryable
-
-    assert_difference "family.recurring_transactions.count", 1 do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "Transaction marked as recurring", flash[:notice]
-
-    recurring = family.recurring_transactions.last
-    assert_equal true, recurring.manual, "Expected recurring transaction to be manual"
-    assert_equal merchant.id, recurring.merchant_id
-    assert_equal entry.currency, recurring.currency
-    assert_equal entry.date.day, recurring.expected_day_of_month
-  end
-
-  test "mark_as_recurring shows alert if recurring transaction already exists" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 100, merchant: merchant)
-    transaction = entry.entryable
-
-    # Create existing recurring transaction
-    family.recurring_transactions.create!(
-      account: account,
-      merchant: merchant,
-      amount: entry.amount,
-      currency: entry.currency,
-      expected_day_of_month: entry.date.day,
-      last_occurrence_date: entry.date,
-      next_expected_date: 1.month.from_now,
-      status: "active",
-      manual: true,
-      occurrence_count: 1
-    )
-
-    assert_no_difference "RecurringTransaction.count" do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "A manual recurring transaction already exists for this pattern", flash[:alert]
-  end
-
-  test "mark_as_recurring allows a second manual recurring transaction with same merchant but different amount" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 34, merchant: merchant)
-    transaction = entry.entryable
-
-    # Existing manual recurring row for the same merchant, but a different amount
-    family.recurring_transactions.create!(
-      account: account,
-      merchant: merchant,
-      amount: 12,
-      currency: entry.currency,
-      expected_day_of_month: entry.date.day,
-      last_occurrence_date: entry.date,
-      next_expected_date: 1.month.from_now,
-      status: "active",
-      manual: true,
-      occurrence_count: 1
-    )
-
-    assert_difference "family.recurring_transactions.count", 1 do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "Transaction marked as recurring", flash[:notice]
-  end
-
-  test "mark_as_recurring allows a second manual recurring transaction with same name but different amount" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    entry = create_transaction(account: account, name: "Example Payee", amount: 34)
-    transaction = entry.entryable
-
-    # Existing manual recurring row for the same payee name, but a different amount
-    family.recurring_transactions.create!(
-      account: account,
-      name: "Example Payee",
-      amount: 12,
-      currency: entry.currency,
-      expected_day_of_month: entry.date.day,
-      last_occurrence_date: entry.date,
-      next_expected_date: 1.month.from_now,
-      status: "active",
-      manual: true,
-      occurrence_count: 1
-    )
-
-    assert_difference "family.recurring_transactions.count", 1 do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "Transaction marked as recurring", flash[:notice]
-  end
-
-  test "mark_as_recurring shows alert if recurring transaction with same name and amount already exists" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    entry = create_transaction(account: account, name: "Example Payee", amount: 100)
-    transaction = entry.entryable
-
-    family.recurring_transactions.create!(
-      account: account,
-      name: "Example Payee",
-      amount: entry.amount,
-      currency: entry.currency,
-      expected_day_of_month: entry.date.day,
-      last_occurrence_date: entry.date,
-      next_expected_date: 1.month.from_now,
-      status: "active",
-      manual: true,
-      occurrence_count: 1
-    )
-
-    assert_no_difference "RecurringTransaction.count" do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "A manual recurring transaction already exists for this pattern", flash[:alert]
-  end
-
-  test "mark_as_recurring shows already-exists alert when a concurrent request wins the race" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 100, merchant: merchant)
-    transaction = entry.entryable
-
-    # Simulate another request creating the identical pattern between our
-    # pre-check and our create call.
-    RecurringTransaction.expects(:create_from_transaction).raises(
-      ActiveRecord::RecordNotUnique.new("duplicate key value violates unique constraint")
-    )
-
-    assert_no_difference "RecurringTransaction.count" do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "A manual recurring transaction already exists for this pattern", flash[:alert]
-  end
-
-  test "mark_as_recurring handles validation errors gracefully" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 100, merchant: merchant)
-    transaction = entry.entryable
-
-    # Stub create_from_transaction to raise a validation error
-    RecurringTransaction.expects(:create_from_transaction).raises(
-      ActiveRecord::RecordInvalid.new(
-        RecurringTransaction.new.tap { |rt| rt.errors.add(:base, "Test validation error") }
-      )
-    )
-
-    assert_no_difference "RecurringTransaction.count" do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "Failed to create recurring transaction. Please check the transaction details and try again.", flash[:alert]
-  end
-
-  test "mark_as_recurring handles unexpected errors gracefully" do
-    family = families(:empty)
-    sign_in users(:empty)
-    account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
-    merchant = family.merchants.create! name: "Test Merchant"
-    entry = create_transaction(account: account, amount: 100, merchant: merchant)
-    transaction = entry.entryable
-
-    # Stub create_from_transaction to raise an unexpected error
-    RecurringTransaction.expects(:create_from_transaction).raises(StandardError.new("Unexpected error"))
-
-    assert_no_difference "RecurringTransaction.count" do
-      post mark_as_recurring_transaction_path(transaction)
-    end
-
-    assert_redirected_to transactions_path
-    assert_equal "An unexpected error occurred while creating the recurring transaction", flash[:alert]
-  end
-
   test "unlock clears protection flags on user-modified entry" do
     family = families(:empty)
     sign_in users(:empty)
@@ -1481,70 +1163,6 @@ end
                  "Expected transfer counterparty accounts to be preloaded"
   end
 
-  test "index caches uncategorized_count and projected_recurring across requests" do
-    # Test environment uses null_store; swap in a memory store so the cache
-    # actually persists between the two requests below.
-    original_cache = Rails.cache
-    Rails.cache = ActiveSupport::Cache::MemoryStore.new
-
-    get transactions_url
-    assert_response :success
-
-    queries = capture_sql_queries { get transactions_url }
-    assert_response :success
-
-    # uncategorized_transactions is a scope (joins/wheres), so its name never
-    # appears in the generated SQL -- match the COUNT query it produces instead.
-    assert_empty queries.select { |q| q =~ /SELECT COUNT/i && q =~ /category_id.*IS NULL/i },
-      "second request with unchanged data should reuse the cached uncategorized count"
-    # Building the cache key itself still runs small COUNT/MAX queries against
-    # recurring_transactions (Family#recurring_transactions_version and
-    # #recurring_transaction_merchants_version), so match the projection query
-    # the cached block itself would run instead of the whole table name.
-    assert_empty queries.grep(/next_expected_date/i),
-      "second request with unchanged data should reuse the cached projected recurring lookup"
-  ensure
-    Rails.cache = original_cache
-  end
-
-  test "index renders when the projected_recurring cache holds records from an older schema" do
-    # Regression: the cache used to hold whole RecurringTransaction objects. After
-    # an upgrade that added columns (e.g. payment_url in 0.7.5), the entry written
-    # by the previous version was still served and rendering raised
-    # ActiveModel::MissingAttributeError until the key rolled over the next day.
-    original_cache = Rails.cache
-    written_keys = []
-    Rails.cache = Class.new(ActiveSupport::Cache::MemoryStore) {
-      define_method(:write_entry) do |key, entry, **options|
-        written_keys << key
-        super(key, entry, **options)
-      end
-    }.new
-
-    recurring = recurring_transactions(:netflix_subscription)
-
-    get transactions_url
-    assert_response :success
-
-    cache_keys = written_keys.grep(/transactions_projected_recurring/).uniq
-    assert_not_empty cache_keys, "the first request should populate the projected-recurring cache"
-
-    # Write the Marshal payload the previous version produced: the record's
-    # attributes without the columns that version did not have yet.
-    stale_payload = [ recurring.attributes_for_database.except("payment_url", "autopay", "notes"), false, [ [ :merchant, recurring.merchant ] ] ]
-    stale_record = RecurringTransaction.allocate
-    stale_record.define_singleton_method(:marshal_dump) { stale_payload }
-    cache_keys.each { |key| Rails.cache.write(key, [ stale_record ]) }
-    assert_raises(ActiveModel::MissingAttributeError) { Rails.cache.read(cache_keys.first).first.payment_url }
-
-    get transactions_url
-    assert_response :success
-    assert_match(/#{Regexp.escape(recurring.merchant.name)}/, response.body,
-      "the projected recurring transaction should still render from fresh records")
-  ensure
-    Rails.cache = original_cache
-  end
-
   test "index uncategorized_count cache reflects new transactions immediately" do
     original_cache = Rails.cache
     Rails.cache = ActiveSupport::Cache::MemoryStore.new
@@ -1623,76 +1241,6 @@ end
 
     assert_operator count_after_revocation, :<, count_with_access,
       "revoking account-share access must not leave a stale cached count that still includes the now-inaccessible account"
-  ensure
-    Rails.cache = original_cache
-  end
-
-  test "index projected_recurring cache is invalidated when account-share access is revoked" do
-    original_cache = Rails.cache
-    Rails.cache = ActiveSupport::Cache::MemoryStore.new
-
-    member = users(:family_member)
-    share = account_shares(:depository_shared_with_member)
-    recurring = recurring_transactions(:netflix_subscription)
-    assert_equal share.account_id, recurring.account_id,
-      "fixture assumption: the shared depository account has the netflix recurring charge"
-
-    merchant_name_pattern = /#{Regexp.escape(recurring.merchant.name)}/
-
-    sign_in member
-    get transactions_url
-    assert_match merchant_name_pattern, response.body,
-      "the member should see the shared account's recurring transaction before revocation"
-
-    share.destroy!
-
-    get transactions_url
-    assert_no_match merchant_name_pattern, response.body,
-      "revoking account-share access must not leave a stale cached projected-recurring list"
-  ensure
-    Rails.cache = original_cache
-  end
-
-  test "index projected_recurring cache reflects a merchant rename immediately" do
-    original_cache = Rails.cache
-    Rails.cache = ActiveSupport::Cache::MemoryStore.new
-
-    recurring = recurring_transactions(:netflix_subscription)
-    merchant = recurring.merchant
-
-    get transactions_url
-    assert_match(/#{Regexp.escape(merchant.name)}/, response.body,
-      "the recurring transaction should render with the merchant's original name")
-
-    merchant.update!(name: "Netflix Renamed")
-
-    get transactions_url
-    assert_match(/Netflix Renamed/, response.body,
-      "renaming the merchant must not leave a stale cached projected-recurring list")
-  ensure
-    Rails.cache = original_cache
-  end
-
-  test "index projected_recurring cache reflects a provider merchant update immediately" do
-    original_cache = Rails.cache
-    Rails.cache = ActiveSupport::Cache::MemoryStore.new
-
-    # Recurring detection copies transaction.merchant_id, which can point at a
-    # shared ProviderMerchant (not just a family-owned FamilyMerchant) -- e.g.
-    # ProviderMerchant::Enhancer updates these after the recurring row exists.
-    provider_merchant = ProviderMerchant.create!(name: "Provider Merchant Original", source: "enable_banking")
-    recurring = recurring_transactions(:netflix_subscription)
-    recurring.update!(merchant: provider_merchant, name: nil)
-
-    get transactions_url
-    assert_match(/Provider Merchant Original/, response.body,
-      "the recurring transaction should render with the provider merchant's original name")
-
-    provider_merchant.update!(name: "Provider Merchant Renamed")
-
-    get transactions_url
-    assert_match(/Provider Merchant Renamed/, response.body,
-      "updating the provider merchant must not leave a stale cached projected-recurring list")
   ensure
     Rails.cache = original_cache
   end

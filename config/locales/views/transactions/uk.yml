@@ -60,9 +60,6 @@ uk:
     show:
       keep_both: Ні, залишити обидві
       loan_payment: Платіж за позикою
-      mark_recurring: Позначити як повторювану
-      mark_recurring_subtitle: Відстежуйте це як повторювану транзакцію. Розбіжність суми автоматично розраховується на основі минулих 6 місяців подібних транзакцій.
-      mark_recurring_title: Повторювана транзакція
       merge_duplicate: Так, об'єднати їх
       potential_duplicate_description: Ця очікувана транзакція може бути такою ж, як і проведена транзакція нижче. Якщо так, об'єднайте їх, щоб уникнути подвійного підрахунку.
       potential_duplicate_title: Виявлено можливий дублікат
@@ -99,7 +96,6 @@ uk:
       settings: Налаштування
       tags_label: Теги
       tab_transactions: Транзакції
-      tab_upcoming: Майбутні
       uncategorized: "(без категорії)"
       additional_details: "Додаткові відомості"
       payee: "Одержувач"
@@ -109,10 +105,6 @@ uk:
       transfer_or_debt_payment: "Переказ або сплата боргу?"
       open_matcher: "Відкрити зіставлення"
       convert: "Перетворити"
-      create_bill: Створити платіж
-      applied_to_title: Платежі, оплачені цією транзакцією
-      applied_to_detail: '%{amount} в оплату платежу з терміном %{date}'
-      applied_to_unreviewed: Потребує перевірки
     activity_labels:
       buy: Купівля
       sell: Продаж
@@ -127,9 +119,6 @@ uk:
       withdrawal: Зняття
       exchange: Обмін
       other: Інше
-    mark_recurring: Позначити як повторювану
-    mark_recurring_subtitle: Відстежуйте це як повторювану транзакцію. Розбіжність суми автоматично розраховується на основі минулих 6 місяців подібних транзакцій.
-    mark_recurring_title: Повторювана транзакція
     potential_duplicate_title: Виявлено можливий дублікат
     potential_duplicate_description: Ця очікувана транзакція може бути такою ж, як і проведена транзакція нижче. Якщо так, об'єднайте їх, щоб уникнути подвійного підрахунку.
     keep_both: Ні, залишити обидві

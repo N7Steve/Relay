@@ -32,10 +32,6 @@ pt-PT:
         subjacentes.
       delete_title: Eliminar transferência?
       details: Detalhes
-      mark_recurring: Marcar como recorrente
-      mark_recurring_subtitle: Acompanhe esta transferência como um padrão recorrente no feed
-        de próximos eventos e na página de recorrentes.
-      mark_recurring_title: Marcar transferência como recorrente
       note_label: Notas
       note_placeholder: Adicionar uma nota a esta transferência
       overview: Visão geral

@@ -2728,40 +2728,26 @@ class Family::DataImporterTest < ActiveSupport::TestCase
     assert_equal 1, result.dig(:summary, "recurring_price_changes", "skipped")
   end
 
-  # A bill created with a full payment history must not also carry the
-  # occurrences its own creation callback generates.
-  test "imported occurrences do not duplicate the ones a new series generates" do
+  test "imported historical occurrences are preserved exactly once" do
     Family::DataImporter.new(@family, build_ndjson(bills_ndjson_records)).import!
 
     series = @family.recurring_transactions.sole
     duplicates = series.recurring_occurrences.group(:original_due_on).count.select { |_, n| n > 1 }
 
-    assert_empty duplicates, "generation and import collided on the same due date"
+    assert_empty duplicates
+    assert_equal 1, series.recurring_occurrences.count
   end
 
-
-  # Occurrence generation fires after_commit on the instance the importer
-  # created. If validation cached its rules while they were still empty, a
-  # biweekly restore would materialize monthly phantom occurrences beside the
-  # real schedule.
-  test "a restored biweekly series keeps its cadence, with no monthly phantoms" do
+  # Historical cadence and occurrences survive without running the retired engine.
+  test "a restored biweekly series keeps its rule without materializing new occurrences" do
     Family::DataImporter.new(@family, build_ndjson(bills_ndjson_records)).import!
 
     series = @family.recurring_transactions.find_by!(name: "Rent")
 
-    # The imported historical row is weekend-adjusted off its weekday, so the
-    # cadence check runs on what generation produced: every scheduled cycle
-    # lands on the rule's weekday, fourteen days from its neighbour. A monthly
-    # phantom would land on the 9th, whatever weekday that is.
-    generated = series.recurring_occurrences.open_status.order(:due_on).pluck(:due_on)
-    assert generated.any?, "generation must have materialized future cycles"
-
-    generated.each do |due_on|
-      assert_equal 1, due_on.cwday, "#{due_on} is not the rule's Monday"
-    end
-    generated.each_cons(2) do |a, b|
-      assert_equal 14, (b - a).to_i, "#{a} to #{b} is not one biweekly step"
-    end
+    assert_equal "weekly", series.recurrence_rules.sole.frequency
+    assert_equal 2, series.recurrence_rules.sole.interval
+    assert_equal 1, series.recurring_occurrences.count
+    assert_equal "paid", series.recurring_occurrences.sole.status
   end
 
   # Session imports arrive in chunks, each processed by a fresh importer. The

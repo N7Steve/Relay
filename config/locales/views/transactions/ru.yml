@@ -212,9 +212,6 @@ ru:
       drag_drop_title: Перетащите CSV для импорта
       transaction: операция
       transactions: операции
-    mark_recurring: Отметить как регулярную
-    mark_recurring_subtitle: Отслеживайте это как регулярную операцию. Разница в сумме автоматически рассчитывается на основе последних 6 месяцев аналогичных операций.
-    mark_recurring_title: Регулярная операция
     merge_duplicate:
       failure: Не удалось объединить операции
       success: Операции успешно объединены
@@ -322,9 +319,6 @@ ru:
         и отчётах.
       keep_both: Нет, оставить обе
       loan_payment: Платеж по кредиту
-      mark_recurring: Отметить как регулярную
-      mark_recurring_subtitle: Отслеживайте это как регулярную операцию. Разница в сумме автоматически рассчитывается на основе последних 6 месяцев аналогичных операций.
-      mark_recurring_title: Регулярная операция
       memo: Заметка
       merchant_label: Продавец
       merge_duplicate: Да, объединить их
@@ -350,16 +344,11 @@ ru:
       provider_extras: Дополнения провайдера
       settings: Настройки
       tab_transactions: Операции
-      tab_upcoming: Предстоящие
       tags_label: Теги
       transfer: Перевод
       transfer_matcher_description: Свяжите эту операцию с ее аналогом на другом счете.
       transfer_or_debt_payment: Перевод или платеж по долгу?
       uncategorized: "(без категории)"
-      create_bill: Создать регулярный платёж
-      applied_to_title: Платежи, оплаченные этой операцией
-      applied_to_detail: '%{amount} в счёт платежа со сроком %{date}'
-      applied_to_unreviewed: Требует проверки
     split_parent_row:
       split_label: Разделена
     summary:

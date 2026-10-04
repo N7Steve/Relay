@@ -6,9 +6,7 @@
 class Insight::GeneratorRegistry
   GENERATORS = [
     Insight::Generators::SpendingAnomalyGenerator,
-    Insight::Generators::CashFlowWarningGenerator,
     Insight::Generators::NetWorthMilestoneGenerator,
-    Insight::Generators::SubscriptionAuditGenerator,
     Insight::Generators::SavingsRateChangeGenerator,
     Insight::Generators::IdleCashGenerator,
     Insight::Generators::BudgetInsightGenerator,

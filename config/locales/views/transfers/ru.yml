@@ -36,10 +36,6 @@ ru:
       delete_title: Удалить перевод?
       details: Подробности
       from: Откуда
-      mark_recurring: Отметить как регулярный
-      mark_recurring_subtitle: Отслеживайте этот перевод как регулярный в ленте и
-        на странице регулярных операций.
-      mark_recurring_title: Отметить перевод как регулярный
       note_label: Заметки
       note_placeholder: Добавьте заметку к этому переводу
       overview: Обзор

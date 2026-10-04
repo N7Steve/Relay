@@ -202,10 +202,6 @@ tr:
       drag_drop_title: İçe aktarmak için CSV dosyasını bırakın
       transaction: işlem
       transactions: işlemler
-    mark_recurring: Yinelenen olarak işaretle
-    mark_recurring_subtitle: Bunu yinelenen bir işlem olarak takip edin. Tutar farkı,
-      geçmiş 6 aydaki benzer işlemlerden otomatik olarak hesaplanır.
-    mark_recurring_title: Yinelenen İşlem
     merge_duplicate:
       failure: İşlemler birleştirilemedi
       success: İşlemler başarıyla birleştirildi
@@ -314,10 +310,6 @@ tr:
         çıkarılacaktır.
       keep_both: Hayır, ikisini de tut
       loan_payment: Kredi Ödemesi
-      mark_recurring: Yinelenen olarak işaretle
-      mark_recurring_subtitle: Bunu yinelenen bir işlem olarak takip edin. Tutar farkı,
-        geçmiş 6 aydaki benzer işlemlerden otomatik olarak hesaplanır.
-      mark_recurring_title: Yinelenen İşlem
       memo: Not
       merchant_label: Satıcı
       merge_duplicate: Evet, birleştir
@@ -342,16 +334,11 @@ tr:
       provider_extras: Sağlayıcı ek bilgileri
       settings: Ayarlar
       tab_transactions: İşlemler
-      tab_upcoming: Yaklaşan
       tags_label: Etiketler
       transfer: Transfer
       transfer_matcher_description: Bu işlemi başka bir hesaptaki karşılığına bağlayın.
       transfer_or_debt_payment: Transfer mi yoksa Borç Ödemesi mi?
       uncategorized: "(kategorilendirilmemiş)"
-      create_bill: Fatura oluştur
-      applied_to_title: Bu ödemeyle kapatılan faturalar
-      applied_to_detail: Son ödeme tarihi %{date} olan faturaya %{amount}
-      applied_to_unreviewed: İnceleme gerekiyor
     split_parent_row:
       split_label: Bölünmüş
     summary:

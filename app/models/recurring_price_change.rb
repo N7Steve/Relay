@@ -1,7 +1,5 @@
-# One observed price change on a series: previous amount, new amount, when it
-# took effect, and the charge that revealed it. The rows are the series' price
-# history, feeding subscription intelligence (price sparklines, "raised twice
-# this year", annualized deltas).
+# Historical Bills price changes, including their original transaction links.
+# Kept for backup recovery; no price detection or subscription intelligence runs.
 class RecurringPriceChange < ApplicationRecord
   include Monetizable
 

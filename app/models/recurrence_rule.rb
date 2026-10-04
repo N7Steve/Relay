@@ -1,13 +1,4 @@
-# One repetition pattern of a recurring transaction. A series usually has one
-# rule ("monthly on the 15th"); patterns that fire more than once per period are
-# several rows ("semimonthly" is two monthly rules, "1st and 3rd Friday" is two
-# nth-weekday rules). A series with zero rules is legal and means "legacy
-# monthly on expected_day_of_month"; RecurringTransaction::Schedule synthesizes
-# the implicit rule.
-#
-# Day anchoring is exactly one of:
-#   * day_of_month (1..31, or -1 for the last day of the month)
-#   * a (weekday, weekday_ordinal) pair ("3rd Friday"; ordinal -1 = last)
+# Historical Bills rules retained for validated legacy import and backup recovery.
 class RecurrenceRule < ApplicationRecord
   LAST = -1
 

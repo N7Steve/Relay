@@ -130,8 +130,8 @@ La evolución upstream se integra con estas adaptaciones:
   permanecen recuperables, con reglas explícitas y narración determinista.
   Brandfetch se controla desde Configuración de instancia, incluso con variables
   heredadas de logos configuradas. Ver `docs/migration/pruning-phase-6.md`.
-- Bills conserva su evolución interna. Sus proyecciones cachean sólo IDs bajo
-  `transactions_projected_recurring/v7`, sin exponerse en el producto del fork.
+- Bills se retira en fase 8. Agenda queda como único motor de pagos previstos;
+  se conservan sólo persistencia histórica, recuperación y consumidores de jobs antiguos.
 - Se conserva la migración ya existente
   `20260910130001_nullify_sessions_active_impersonator_session_on_delete.rb`.
   La copia upstream `20260910130000_nullify_sessions_active_impersonator_session_on_delete.rb`
@@ -159,7 +159,7 @@ previo; el formato de los archivos JavaScript modificados sí pasa.
 | Área | Propiedad | Debe preservarse al actualizar upstream |
 | --- | --- | --- |
 | Pagos recurrentes / programados | Propia | Modelos, generación, confirmación/rechazo, transferencias recurrentes e integración en transacciones |
-| Bills / recurrencias detectadas | Upstream, oculto | Conservar la implementación como referencia reutilizable, pero sin superficies de acceso visibles; Pagos programados es el único producto recurrente expuesto |
+| Bills / recurrencias detectadas | Retirado en fase 8 | Agenda es el único motor; conservar lectores históricos y backups, sin detección ni conversión automática |
 | Informes personalizados | Propia | Resumen, desglose, gastos compartidos, exportación y secciones reordenables |
 | Tratamiento financiero y archivo de cuentas | Propia | Preservar “incluida”, “solo seguimiento” y “fuera de mis finanzas”; el archivo sólo afecta a la presentación |
 | Roboadvisor e inversiones | Propia | Rendimiento, flujos, liquidez neta estimada y tratamiento fiscal |
@@ -312,31 +312,25 @@ Cobertura añadida en `test/models/scheduled_payment_robustness_test.rb` y ampli
 - Las acciones y formularios conservan mes/vista mediante parámetros permitidos. Los marcadores antiguos `transactions?tab=scheduled&scheduled_month=...` redirigen al mes correspondiente de Agenda.
 - Cobertura específica en `test/models/scheduled_payment/agenda_test.rb`, `test/models/scheduled_payment/wealth_forecast_test.rb`, en las pruebas del controlador y en `test/controllers/agenda_primary_frontend_test.rb`. El diff, la sintaxis Ruby aislada y los locales se han validado localmente; la ejecución de Rails queda pendiente porque el bundle no es ejecutable de forma fiable en este entorno.
 
-### Convivencia con Bills incorporado desde upstream
+### Retirada de Bills en fase 8
 
-La integración de septiembre de 2026 añadió el subsistema upstream **Bills**, basado principalmente en `RecurringTransaction` y `RecurringOccurrence`. El código de ambos sistemas puede convivir, pero en este fork sólo Pagos programados se presenta como funcionalidad de producto:
+La integración de septiembre de 2026 incorporó Bills; su motor se retira el
+5 de octubre de 2026. Agenda conserva generación, confirmación, rechazo, enlaces
+y previsiones de `ScheduledPayment*`, sin detección automática de series Bills.
 
-- **Pagos programados** es la función primaria del fork: el usuario define pagos futuros explícitos, se generan ocurrencias pendientes y puede confirmarlas, rechazarlas, omitirlas o ejecutarlas automáticamente.
-- **Bills** es una implementación upstream que se conserva oculta: detecta patrones recurrentes en movimientos existentes, permite confirmar series, proyectar vencimientos, registrar pagos y presentar planificación por nóminas.
-- Bills no debe tener ninguna superficie de acceso visible en el fork, incluso para usuarios con `Preview Features`: sin entrada en la navegación global, sin pestaña **Upcoming** en Transacciones, sin entrada de **Transacciones recurrentes** en Ajustes y sin enlaces, asignaciones o acciones heredadas de Bills desde transacciones, transferencias, presupuestos o insights.
-- Sus modelos, controladores, rutas, jobs, detectores, API, feed de calendario y pruebas se mantienen internamente para facilitar futuras actualizaciones upstream y servir como fuente de funcionalidades. No forman parte del frontend soportado del fork.
-- Las rutas HTML directas de Bills y Transacciones recurrentes se conservan para reducir el diff con upstream, pero redirigen a Agenda cuando el frontend de Bills está desactivado. Las acciones directas `mark_as_recurring` de transacciones y transferencias están protegidas de la misma forma; ocultar solamente sus botones no es suficiente.
-- Los insights que dependen de Bills (`cash_flow_warning` y `subscription_audit`) pueden seguir generándose y almacenándose como parte del subsistema, pero se excluyen del dashboard, listado, contador, actualizaciones Turbo y notificaciones del producto mientras Bills permanezca oculto.
-- No migrar, fusionar ni eliminar modelos de `ScheduledPayment*` en favor de `RecurringTransaction*` sin una decisión funcional y una migración de datos explícitas.
-- No sincronizar automáticamente una misma regla entre `ScheduledPayment*` y `RecurringTransaction*`: son dominios independientes y una doble escritura produciría proyecciones y estados contradictorios.
-- Las funciones útiles de Bills podrán trasladarse selectivamente a Pagos programados en el futuro. Cada traslado debe adaptarse al dominio `ScheduledPayment*`, conservar su flujo de ocurrencias/confirmación y añadir pruebas propias; no se debe hacer visible Bills como atajo para ofrecer esa función.
-- Cuando upstream cambie Bills, revisar especialmente `transactions_controller`, `transaction.rb`, presupuestos, categorías y las vistas de transacciones, porque son los puntos donde ambos subsistemas se solapan.
+- No reintroducir rutas, cron, feeds, API, detectores, asignaciones, callbacks,
+  proyecciones ni la puerta `bills_frontend_enabled` al integrar upstream.
+- Conservar las seis clases históricas y sus relaciones para backups, legacy
+  imports y GlobalID. No borrar datos/esquema ni convertirlos automáticamente.
+- Los jobs Bills serializados terminan sin efectos; conservarlos hasta comprobar
+  su ausencia en queued/retry/scheduled jobs. No purgar la cola compartida.
+- Los generadores `cash_flow_warning` y `subscription_audit` desaparecen; sus
+  históricos siguen fuera del frontend. Presupuestos, Goals y señales locales
+  mantenidas conservan sus cálculos.
+- Funciones futuras tomadas de Bills deben adaptarse a Agenda con pruebas propias;
+  el código retirado sigue disponible en Git.
 
-#### Contrato técnico de la frontera Agenda/Bills
-
-- `config/initializers/fork_features.rb` define `Rails.configuration.x.bills_frontend_enabled`. Vale `false` en desarrollo y producción, y `true` en test para conservar ejecutable la cobertura upstream de Bills sin reescribirla ni borrarla.
-- `app/controllers/concerns/bills_frontend_guardable.rb` concentra la protección de rutas. `RecurringFeatureGuardable` la aplica a las pantallas HTML upstream y los controladores de transacciones y transferencias la aplican a sus acciones Bills aisladas.
-- `bills_frontend_enabled?`, en `ApplicationHelper`, es la única condición que deben usar las vistas para mostrar una superficie Bills. No repartir comprobaciones de entorno o del fork por las plantillas.
-- `Insight.for_product_frontend` es la frontera de lectura para cualquier feed, badge o emisión de insights dirigida al usuario. Añadir un nuevo insight respaldado por Bills exige incluirlo en `Insight::BILLS_BACKED_TYPES`.
-- `test/controllers/agenda_primary_frontend_test.rb` fuerza el valor de producción (`false`) y cubre redirecciones, ausencia de accesos y bloqueo de mutaciones. El resto de la suite conserva el valor `true` para verificar el código upstream en aislamiento.
-- Esta configuración es una decisión de distribución del fork, no una preferencia de usuario ni una preview feature. No exponerla en Ajustes sin revisar antes esta política de producto.
-
-Archivos upstream que forman esta frontera: `app/controllers/bills_controller.rb`, `app/views/bills/`, `app/models/recurring_transaction.rb`, `app/models/recurring_occurrence.rb`, `app/views/recurring_transactions/`, rutas de Bills y sus pruebas. La capa de ocultación del fork incluye además `config/initializers/fork_features.rb`, `app/controllers/concerns/bills_frontend_guardable.rb`, `app/controllers/concerns/recurring_feature_guardable.rb`, los puntos de integración en transacciones, transferencias, presupuestos, ajustes e insights, y `test/controllers/agenda_primary_frontend_test.rb`. No reintroducir `bills_nav_item` ni accesos equivalentes automáticamente durante un merge.
+Ver [registro de fase 8](docs/migration/pruning-phase-8.md).
 
 ## 3. Tratamiento financiero, navegación y archivo de cuentas
 
@@ -554,7 +548,7 @@ Esta funcionalidad permite que cada familia sustituya las imágenes automáticas
 
 - Las cuentas tienen un adjunto Active Storage independiente, `Account#custom_logo`. La resolución visual sigue esta precedencia: **logo personalizado → Brandfetch → logo del proveedor → adjunto heredado `logo` → inicial generada por la vista**.
 - Los comercios usan `MerchantCustomization`, con una fila única por `(family_id, merchant_id)` y un adjunto `custom_logo`. El comercio puede ser global (`ProviderMerchant`), por lo que el archivo **no debe adjuntarse al propio comercio**: mantenerlo en la personalización evita compartir la imagen con otras familias. La precedencia es **logo personalizado de la familia → logo externo/Brandfetch del comercio → inicial generada**.
-- `Merchant#display_logo_url(family:)` centraliza esa resolución y debe usarse en todas las superficies que muestran comercios: transacciones, selectores y filtros, informes, Agenda, Bills y recurrencias. Se pasa la familia explícitamente para conservar el aislamiento multi-tenant.
+- `Merchant#display_logo_url(family:)` centraliza esa resolución y debe usarse en todas las superficies que muestran comercios: transacciones, selectores y filtros, informes y Agenda. Se pasa la familia explícitamente para conservar el aislamiento multi-tenant.
 - `Merchant::Customizer` coordina de forma transaccional la edición del comercio y su personalización. Renombrar un `ProviderMerchant` conserva el comportamiento anterior y lo convierte en `FamilyMerchant`; cambiar únicamente su imagen no provoca esa conversión.
 - El concern `CustomLogoAttachable` comparte las restricciones: JPEG, PNG o WebP, máximo 5 MB, con variante cuadrada de 128×128 en WebP. El formulario permite previsualizar el archivo local, cambiarlo y marcar la restauración del logo automático.
 - La autorización de Active Storage cubre ambos tipos de adjunto: una cuenta debe ser accesible por `Current.user` y una personalización de comercio debe pertenecer a `Current.family`. No se deben exponer URLs de blobs de otras familias.
@@ -575,7 +569,7 @@ Los períodos independientes de las cards se coordinan en `app/controllers/pages
 
 Estas áreas proceden principalmente del repositorio oficial y se aceptaron en el fork. No son personalizaciones que deban divergir sin motivo, pero deben revisarse en futuros merges por sus puntos de contacto con las funciones propias:
 
-- Bills, recurrencias detectadas y planificación por nóminas, conservadas internamente pero ocultas según la decisión descrita anteriormente.
+- Bills, recurrencias detectadas y planificación por nóminas retirados en fase 8; sólo persistencia histórica recuperable.
 - Integraciones de Trade Republic y Wise con SCA, además de mejoras de refresco de Plaid.
 - Ciclo de vida ampliado de Goals y cambios de presupuestos como rollover y movimientos entre categorías.
 - Idempotencia al crear transacciones, divisiones durante importación QIF y mejoras de jerarquía de categorías.
@@ -676,7 +670,7 @@ git diff
 4. En conflictos de transacciones/transferencias, comprobar también pagos programados, informes y exportaciones; comparten modelos y controladores.
 5. No aceptar automáticamente el `db/schema.rb`: validar primero las dieciséis migraciones propias.
 6. Si upstream incorpora una función equivalente, decidir expresamente si migrar a ella y añadir pruebas de regresión antes de retirar la implementación del fork.
-7. Mantener Bills oculto en toda la interfaz, también con Preview Features. Conservar su implementación únicamente como referencia interna y portar funciones útiles hacia Pagos programados de forma selectiva y probada. Al resolver conflictos, integrar primero la evolución upstream del subsistema y reaplicar después la frontera pequeña formada por `bills_frontend_enabled?`, los guards de controlador y `Insight.for_product_frontend`; no resolverlos eliminando código Bills ni conectando ambos modelos.
+7. Mantener Bills retirado tras fase 8. No reintroducir motores, rutas, cron, API, feed, callbacks ni guards de frontend desde upstream. Conservar persistencia histórica y recuperación; portar funciones útiles a Agenda sólo con alcance seleccionado y pruebas propias, sin conectar ambos dominios.
 8. En cambios de `IncomeStatement::Totals`, verificar los dos indicadores internos de transferencias que cruzan la frontera (`transfer_to_excluded`/`transfer_from_excluded`) y versionar la clave de caché si cambia cualquier `Data.define` cacheado.
 9. Probar Money In / Out y Spending Trend con `month_start_day = 25`, incluyendo selector, etiquetas, fechas inicial/final y corte del período activo en hoy.
 10. En Inicio, mantener independientes los períodos de Flujo de caja, Salidas, Inversiones y Patrimonio neto. Verificar que cada selector persiste por usuario, actualiza sólo el cálculo de su card y conserva el estado de los demás widgets; no reintroducir el selector global.
@@ -730,3 +724,11 @@ para migraciones históricas. Las cuentas históricas siguen visibles sin conver
 su estrategia reverse/forward. No borrar esquema/filas ni interpretar reversión
 de código como reconexión automática. Cotizaciones/divisas, Brandfetch, Drive,
 Agenda y Bills permanecen fuera del alcance de esta fase.
+
+## Poda fase 8 — Agenda como único motor
+
+Retirados Bills, recurrencias detectadas y sus consumidores completos. Preservar
+Agenda, forecast local, transferencias, splits, presupuestos/Goals e insights
+retenidos. Las seis tablas Bills y su persistencia histórica permanecen, con
+relaciones y originales recuperables sin generación ni conversión automática.
+Ver [fase 8](docs/migration/pruning-phase-8.md).

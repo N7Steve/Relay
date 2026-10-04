@@ -86,6 +86,11 @@ per-module dispositions, dependencies and the required recovery rehearsal before
 removing models. Historical readers still require their tables; they are not
 permission to drop data or to silently skip unsupported rows.
 
+Since pruning phase 8, recurring Bills models are historical persistence only.
+Restoring their rules, occurrences and allocations never generates new cycles
+or Agenda payments. Their existing wire names, relations and tables are retained;
+Agenda remains a separate domain. See [phase 8](../migration/pruning-phase-8.md).
+
 Run the backup round-trip tests plus the exporter, importer, SureImport,
 ImportSession and web/API import controller suites. Tests cover actual bytes,
 relationships, histories, settings, import retries and rollback after late errors.

@@ -233,7 +233,6 @@ Rails.application.routes.draw do
 
   resources :transfers, only: %i[new create destroy show update] do
     member do
-      post :mark_as_recurring
       patch :tags, action: :update_tags
     end
   end
@@ -301,61 +300,11 @@ Rails.application.routes.draw do
     member do
       get :convert_to_trade
       post :create_trade_from_transaction
-      post :mark_as_recurring
       delete :retract_scheduled
       post :merge_duplicate
       post :dismiss_duplicate
       post :unlock
       patch :tags, action: :update_tags
-    end
-  end
-
-  resources :bills, only: %i[index show] do
-    # POST for the same reason recurring_transactions#identify is: detection
-    # mutates (creates suggested series and occurrences), so it stays behind
-    # CSRF protection rather than a plain URL.
-    collection do
-      post :detect
-      post :reset_feed_token
-    end
-    member do
-    end
-  end
-  get "bills_feed/:token", to: "bills_feeds#show", as: :bills_feed, defaults: { format: :ics }
-
-  resources :recurring_occurrences, only: %i[show] do
-    member do
-      post :mark_paid
-      post :skip
-      post :reopen
-      patch :snooze
-      patch :override_amount
-    end
-
-    resources :allocations, controller: :recurring_allocations, only: %i[create]
-  end
-
-  resources :recurring_allocations, only: %i[destroy] do
-    member do
-      post :confirm
-      post :reject
-    end
-  end
-
-  resources :recurring_transactions, only: %i[index new create edit update destroy] do
-    collection do
-      # POST only: all three mutate. They accepted GET while DS::Link's method
-      # option was inert, which left destructive work sitting behind a plain
-      # URL and outside CSRF protection. Every call site passes method: :post.
-      post :identify
-      post :cleanup
-      patch :update_settings
-    end
-
-    member do
-      post :toggle_status
-      post :confirm
-      post :dismiss
     end
   end
 
@@ -512,7 +461,6 @@ Rails.application.routes.draw do
       resources :transfers, only: [ :index, :show ]
       resources :rejected_transfers, only: [ :index, :show ]
       resources :valuations, only: [ :index, :create, :update, :show ]
-      resources :recurring_transactions, only: [ :index, :show, :create, :update, :destroy ]
       resources :family_exports, only: [ :index, :show, :create ] do
         get :download, on: :member
       end
@@ -551,8 +499,6 @@ Rails.application.routes.draw do
     end
   end
 
-
-
   resources :currencies, only: %i[show]
 
   resources :impersonation_sessions, only: [ :create ] do
@@ -565,16 +511,6 @@ Rails.application.routes.draw do
       put :complete
     end
   end
-
-
-
-
-
-
-
-
-
-
 
   get "redis-configuration-error", to: "pages#redis_configuration_error"
 

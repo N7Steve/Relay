@@ -42,9 +42,6 @@ de:
       date: Datum
       destination_fee: Gebühr Empfänger
       from: Von
-      mark_recurring: Als wiederkehrend markieren
-      mark_recurring_subtitle: Erfasse diese Überweisung als wiederkehrend, damit sie in der Vorschau und auf der Seite für wiederkehrende Buchungen auftaucht.
-      mark_recurring_title: Überweisung als wiederkehrend markieren
       source_fee: Gebühr Absender
       to: Nach
       total: Gesamt

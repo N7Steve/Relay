@@ -39,10 +39,6 @@ tr:
       status: Durum
       view_all_transactions: Tüm kategori işlemlerini görüntüle
       rolled_over: Devredildi
-    bills_reserved: '%{amount} faturalar için ayrıldı'
-    bills_reserved_unconvertible:
-      one: '%{count} fatura için tutar ayrılamadı, döviz kuru mevcut değil'
-      other: '%{count} fatura için tutar ayrılamadı, döviz kuru mevcut değil'
     budget_category:
       rolled_over: +%{amount} devredildi
     move:

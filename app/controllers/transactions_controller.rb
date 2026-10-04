@@ -1,6 +1,5 @@
 class TransactionsController < ApplicationController
   include EntryableResource
-  include BillsFrontendGuardable
 
   DEFAULT_PER_PAGE = 20
 
@@ -8,14 +7,8 @@ class TransactionsController < ApplicationController
   before_action :set_entry, only: %i[show update destroy retract_scheduled]
   before_action :set_entry_for_tags, only: :update_tags
   before_action :store_per_page!, only: :index
-  before_action :ensure_bills_frontend_enabled, only: :mark_as_recurring
 
   helper_method :new_transaction_idempotency_key
-
-  def show
-    super
-    assign_mark_recurring_state
-  end
 
   def new
     prefill_params_from_duplicate!
@@ -92,28 +85,6 @@ class TransactionsController < ApplicationController
 
     @uncategorized_count = Rails.cache.fetch(uncategorized_count_cache_key) do
       Current.accessible_entries.uncategorized_transactions.count
-    end
-
-    # Agenda owns upcoming movements in the fork UI. Cache IDs only so schema
-    # changes cannot leave stale recurring-transaction objects in shared cache.
-    projected_recurring_ids = if helpers.bills_frontend_enabled?
-      Rails.cache.fetch(projected_recurring_cache_key, expires_in: 1.day) do
-        Current.family.recurring_transactions
-                      .accessible_by(Current.user)
-                      .active
-                      .where("next_expected_date <= ? AND next_expected_date >= ?",
-                             10.days.from_now.to_date,
-                             Date.current)
-                      .pluck(:id)
-      end
-    else
-      []
-    end
-    @projected_recurring = if projected_recurring_ids.empty?
-      []
-    else
-      Current.family.recurring_transactions.accessible_by(Current.user)
-                    .where(id: projected_recurring_ids).includes(:merchant).to_a
     end
   end
 
@@ -215,8 +186,6 @@ class TransactionsController < ApplicationController
       # Reload to ensure fresh state for turbo stream rendering
       @entry.reload
 
-      assign_mark_recurring_state
-
       respond_to do |format|
         format.html { redirect_back_or_to account_path(@entry.account), notice: t(".updated") }
         format.turbo_stream do
@@ -237,11 +206,6 @@ class TransactionsController < ApplicationController
               partial: "transactions/notes",
               locals: { entry: @entry, can_annotate: can_annotate_entry? }
             ) if params[:entry]&.key?(:notes) && notes_changed),
-            (turbo_stream.replace(
-              dom_id(@entry, :mark_recurring),
-              partial: "transactions/mark_recurring",
-              locals: { entry: @entry }
-            ) if helpers.bills_frontend_enabled? && can_edit_entry? && !@entry.split_child?),
             turbo_stream.replace(
               dom_id(@entry),
               partial: "entries/entry",
@@ -252,7 +216,7 @@ class TransactionsController < ApplicationController
         end
       end
     else
-      assign_mark_recurring_state
+
       render :show, status: :unprocessable_entity
     end
   end
@@ -443,58 +407,6 @@ class TransactionsController < ApplicationController
     redirect_back_or_to transactions_path
   end
 
-  def mark_as_recurring
-    transaction = accessible_transactions.includes(entry: :account).find(params[:id])
-
-    return unless require_account_permission!(transaction.entry.account)
-
-    # Check if a recurring transaction already exists for this pattern.
-    # The UI disables the button ahead of time using the same lookup, but this
-    # guard remains as the authoritative check (e.g. stale page, direct POST).
-    existing = transaction.existing_manual_recurring_transaction
-
-    if existing
-      flash[:alert] = t("recurring_transactions.already_exists")
-      redirect_back_or_to transactions_path
-      return
-    end
-
-    begin
-      recurring_transaction = RecurringTransaction.create_from_transaction(transaction)
-
-      respond_to do |format|
-        format.html do
-          flash[:notice] = t("recurring_transactions.marked_as_recurring")
-          redirect_back_or_to transactions_path
-        end
-      end
-    rescue ActiveRecord::RecordInvalid => e
-      respond_to do |format|
-        format.html do
-          flash[:alert] = t("recurring_transactions.creation_failed")
-          redirect_back_or_to transactions_path
-        end
-      end
-    rescue ActiveRecord::RecordNotUnique
-      # Another request created the same (account, name/merchant, amount,
-      # currency) pattern between the check above and this create — the DB
-      # unique index is the authoritative backstop for that race.
-      respond_to do |format|
-        format.html do
-          flash[:alert] = t("recurring_transactions.already_exists")
-          redirect_back_or_to transactions_path
-        end
-      end
-    rescue StandardError => e
-      respond_to do |format|
-        format.html do
-          flash[:alert] = t("recurring_transactions.unexpected_error")
-          redirect_back_or_to transactions_path
-        end
-      end
-    end
-  end
-
   def update_preferences
     Current.user.update_transactions_preferences(preferences_params)
     head :ok
@@ -560,38 +472,6 @@ class TransactionsController < ApplicationController
     def uncategorized_count_cache_key
       "transactions_uncategorized_count/v4/#{Current.family.id}/#{Current.user.id}/" \
         "#{Current.family.entries_version}/#{Current.family.accounts_status_version}/#{Current.account_share_version}"
-    end
-
-    # Scoped additionally by Date.current since the "next 10 days" window is
-    # date-dependent and would otherwise return a stale window on a cache hit
-    # from an earlier day.
-    #
-    # Includes Family#recurring_transaction_merchants_version because the
-    # cached records are preloaded with :merchant and rendered with its
-    # name/logo, but editing a FamilyMerchant or a shared ProviderMerchant
-    # doesn't touch `recurring_transactions`.
-    def projected_recurring_cache_key
-      "transactions_projected_recurring/v7/#{Current.family.id}/#{Current.user.id}/#{Date.current}/" \
-        "#{Current.family.recurring_transactions_version}/#{Current.family.accounts_status_version}/" \
-        "#{Current.family.recurring_transaction_merchants_version}/#{Current.account_share_version}"
-    end
-
-    # The "Mark as Recurring" block is only ever rendered under these same
-    # conditions (see transactions/show.html.erb), so skip the extra query
-    # entirely when it won't be used — this runs on every show/failed-update
-    # render, including read-only viewers and split-child transactions.
-    def assign_mark_recurring_state
-      return unless helpers.bills_frontend_enabled?
-      return unless can_edit_entry? && !@entry.split_child?
-
-      existing = @entry.transaction.existing_manual_recurring_transaction
-
-      @mark_recurring_href = mark_as_recurring_transaction_path(@entry.transaction)
-      @mark_recurring_subtitle_class = existing ? "text-subdued" : "text-secondary"
-      @mark_recurring_subtitle = existing ? t("recurring_transactions.already_exists") : t("transactions.show.mark_recurring_subtitle")
-      @mark_recurring_disabled = existing.present?
-      @mark_recurring_title = existing ? t("recurring_transactions.already_exists") : nil
-      @mark_recurring_button_class = existing ? "disabled:opacity-50" : nil
     end
 
     def accessible_transactions

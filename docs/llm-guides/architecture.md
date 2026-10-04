@@ -138,6 +138,14 @@ localized templates. Brandfetch logos are controlled by the instance preference;
 environment overrides retain their existing behavior.
 See [phase 6](../migration/pruning-phase-6.md).
 
+Bills detection and scheduling are retired in phase 8. Agenda's
+`ScheduledPayment`/`ScheduledPaymentEntry` own planned payments. Recurring Bills
+models retain historical persistence and validated import/backup relationships,
+without generation, matching or sync callbacks. Serialized Bills jobs finish
+without effects; worker startup removes their persisted cron. Historical Bills
+insights remain exportable but are excluded from the active frontend and
+generator registry. See [phase 8](../migration/pruning-phase-8.md).
+
 Remote monitoring and LLM evaluation runtime were removed in pruning phase 3.
 `LocalDiagnostics` records failures through Rails logs and `DebugLogEntry.capture`.
 Legacy telemetry variables do not activate SDKs. Historical evaluation tables

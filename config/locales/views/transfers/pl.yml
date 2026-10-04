@@ -38,10 +38,6 @@ pl:
       destination_fee: Opłata docelowa
       details: Szczegóły
       from: Z
-      mark_recurring: Oznacz jako cykliczny
-      mark_recurring_subtitle: Śledź ten przelew jako powtarzający się wzorzec w nadchodzących
-        wydarzeniach i na stronie cykliczności.
-      mark_recurring_title: Oznacz przelew jako cykliczny
       note_label: Notatki
       note_placeholder: Dodaj notatkę do tego przelewu
       overview: Przegląd

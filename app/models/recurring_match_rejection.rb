@@ -1,5 +1,4 @@
-# A (series, entry) pair the user rejected: the matcher must never suggest it
-# again. Corrections are permanently sticky.
+# Historical Bills match rejections retained with their series and entry links.
 class RecurringMatchRejection < ApplicationRecord
   belongs_to :recurring_transaction
   belongs_to :entry

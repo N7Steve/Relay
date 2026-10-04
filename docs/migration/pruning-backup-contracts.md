@@ -106,3 +106,13 @@ metadatos de movimientos y traducciones consumidas por migraciones históricas.
 La recuperación no convierte cuentas enlazadas ni activa sus antiguos conectores.
 Los resultados de recuperación anterior → importación → exportación → importación
 se registran en [fase 7](pruning-phase-7.md).
+
+## Actualización de fase 8
+
+Los seis modelos Bills conservan persistencia, nombres del snapshot y relaciones
+para importaciones históricas y GlobalID. No conservan callbacks generadores,
+matching ni motores de recurrencia. Restaurar Bills nunca crea pagos Agenda ni
+materializa nuevas ocurrencias. Se preservan reemplazos entre series, reglas,
+asignaciones a entries, cambios de precio y rechazos; columnas y tablas no cambian.
+Los insights históricos Bills siguen exportándose, sin generación ni frontend.
+Los ensayos y límites se registran en [fase 8](pruning-phase-8.md).

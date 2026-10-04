@@ -38,10 +38,6 @@ ca:
       status: Estat
       view_all_transactions: Veure totes les transaccions de la categoria
       rolled_over: Traspassat
-    bills_reserved: '%{amount} reservats per a factures'
-    bills_reserved_unconvertible:
-      one: '%{count} factura no està reservada, no hi ha tipus de canvi disponible'
-      other: '%{count} factures no estan reservades, no hi ha tipus de canvi disponible'
     budget_category:
       rolled_over: +%{amount} traspassat
     move:

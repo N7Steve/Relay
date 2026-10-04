@@ -186,9 +186,6 @@ fr:
       drag_drop_title: Déposez un CSV à importer
       transaction: transaction
       transactions: transactions
-    mark_recurring: Marquer comme récurrente
-    mark_recurring_subtitle: Suivez cette transaction comme récurrente. La variance du montant est calculée automatiquement à partir des 6 derniers mois de transactions similaires.
-    mark_recurring_title: Transaction récurrente
     merge_duplicate:
       failure: Impossible de fusionner les transactions
       success: Transactions fusionnées avec succès
@@ -276,16 +273,12 @@ fr:
       activity_type_description: Type d'activité d'investissement (Achat, Vente, Dividende, etc.). Détecté automatiquement ou défini manuellement.
       additional_details: Détails supplémentaires
       amount: Montant
-      applied_to_detail: "%{amount} affectés à la facture à échéance le %{date}"
-      applied_to_title: Factures réglées par cette transaction
-      applied_to_unreviewed: À vérifier
       attachments: Pièces jointes
       category_label: Catégorie
       convert: Convertir
       convert_to_trade_button: Convertir en transaction boursière
       convert_to_trade_description: Convertissez cette transaction en une transaction boursière d'achat ou de vente avec les détails du titre pour le suivi du portefeuille.
       convert_to_trade_title: Convertir en transaction boursière
-      create_bill: Créer une facture
       date_label: Date
       delete: Supprimer
       delete_subtitle: Cette action supprime définitivement la transaction, affecte vos soldes historiques et ne peut pas être annulée.
@@ -296,9 +289,6 @@ fr:
       exclude_description: Les transactions exclues seront retirées des calculs budgétaires et des rapports.
       keep_both: Non, gardez les deux
       loan_payment: Paiement du prêt
-      mark_recurring: Marquer comme récurrente
-      mark_recurring_subtitle: Suivez cela comme une transaction récurrente. L'écart de montant est automatiquement calculé à partir des 6 derniers mois de transactions similaires.
-      mark_recurring_title: Transaction récurrente
       memo: Mémo
       merchant_label: Marchand
       merge_duplicate: Oui, fusionnez-les
@@ -320,7 +310,6 @@ fr:
       provider_extras: Suppléments du fournisseur
       settings: Paramètres
       tab_transactions: Transactions
-      tab_upcoming: À venir
       tags_label: Étiquettes
       transfer: Transfert
       transfer_matcher_description: Connectez cette transaction à sa contrepartie dans un autre compte.

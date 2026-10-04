@@ -55,9 +55,6 @@ hu:
     show:
       keep_both: Nem, mindkettőt tartsd meg
       loan_payment: Hiteltörlesztés
-      mark_recurring: Ismétlődőként jelölés
-      mark_recurring_subtitle: Kövesd ezt ismétlődő tranzakcióként. Az összegeltérés automatikusan kiszámításra kerül az elmúlt 6 hónap hasonló tranzakcióiból.
-      mark_recurring_title: Ismétlődő tranzakció
       merge_duplicate: Igen, egyesítsd őket
       potential_duplicate_description: Ez a függőben lévő tranzakció megegyezhet az alábbi közzétett tranzakcióval. Ha igen, egyesítsd őket a kettős könyvelés elkerülése érdekében.
       potential_duplicate_title: Lehetséges duplikátum észlelve
@@ -94,7 +91,6 @@ hu:
       settings: Beállítások
       tags_label: Címkék
       tab_transactions: Tranzakciók
-      tab_upcoming: Közelgő
       uncategorized: "(kategorizálatlan)"
       additional_details: "További részletek"
       payee: "Kedvezményezett"
@@ -118,9 +114,6 @@ hu:
       withdrawal: Kifizetés
       exchange: Csere
       other: Egyéb
-    mark_recurring: Ismétlődőként jelölés
-    mark_recurring_subtitle: Kövesd ezt ismétlődő tranzakcióként. Az összegeltérés automatikusan kiszámításra kerül az elmúlt 6 hónap hasonló tranzakcióiból.
-    mark_recurring_title: Ismétlődő tranzakció
     potential_duplicate_title: Lehetséges duplikátum észlelve
     potential_duplicate_description: Ez a függőben lévő tranzakció megegyezhet az alábbi közzétett tranzakcióval. Ha igen, egyesítsd őket a kettős könyvelés elkerülése érdekében.
     keep_both: Nem, mindkettőt tartsd meg

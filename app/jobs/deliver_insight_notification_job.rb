@@ -7,6 +7,7 @@ class DeliverInsightNotificationJob < ApplicationJob
   discard_on ActiveRecord::RecordNotFound
 
   def self.enqueue_for(insight)
+    return unless insight.product_frontend_visible?
     return unless Apns::Client.available? && insight.priority_high? && insight.active?
 
     insight.family.users.includes(:push_subscriptions).find_each do |user|
@@ -22,6 +23,7 @@ class DeliverInsightNotificationJob < ApplicationJob
     return unless Apns::Client.available?
 
     insight = Insight.find(insight_id)
+    return unless insight.product_frontend_visible?
     subscription = PushSubscription.find(push_subscription_id)
     return unless subscription.user.family_id == insight.family_id
     return unless subscription.eligible? && subscription.user.preview_features_enabled?

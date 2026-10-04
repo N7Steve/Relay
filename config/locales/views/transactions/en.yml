@@ -63,13 +63,6 @@ en:
     show:
       keep_both: No, keep both
       loan_payment: Loan Payment
-      mark_recurring: Mark as Recurring
-      create_bill: Create a bill
-      mark_recurring_subtitle: Track this as a recurring transaction. Amount variance is automatically calculated from past 6 months of similar transactions.
-      mark_recurring_title: Recurring Transaction
-      applied_to_title: Bills this paid
-      applied_to_detail: "%{amount} toward the bill due %{date}"
-      applied_to_unreviewed: Needs review
       merge_duplicate: Yes, merge them
       potential_duplicate_description: This pending transaction may be the same as the posted transaction below. If so, merge them to avoid double-counting.
       potential_duplicate_title: Possible duplicate detected
@@ -122,7 +115,6 @@ en:
       create_recurring_button: "Create"
       tags_label: Tags
       tab_transactions: Transactions
-      tab_upcoming: Upcoming
       tab_scheduled: Scheduled
       uncategorized: "(uncategorized)"
       additional_details: "Additional details"
@@ -168,9 +160,6 @@ en:
       withdrawal: Withdrawal
       exchange: Exchange
       other: Other
-    mark_recurring: Mark as Recurring
-    mark_recurring_subtitle: Track this as a recurring transaction. Amount variance is automatically calculated from past 6 months of similar transactions.
-    mark_recurring_title: Recurring Transaction
     potential_duplicate_title: Possible duplicate detected
     potential_duplicate_description: This pending transaction may be the same as the posted transaction below. If so, merge them to avoid double-counting.
     keep_both: No, keep both

@@ -29,9 +29,6 @@ it:
       delete_subtitle: Questo rimuove il bonifico. Non eliminerà le transazioni sottostanti.
       delete_title: Rimuovere il bonifico?
       details: Dettagli
-      mark_recurring: Segna come ricorrente
-      mark_recurring_subtitle: Traccia questo bonifico come schema ricorrente nel feed delle prossime uscite e nella pagina dei ricorrenti.
-      mark_recurring_title: Segna il bonifico come ricorrente
       note_label: Note
       note_placeholder: Aggiungi una nota a questo bonifico
       overview: Panoramica

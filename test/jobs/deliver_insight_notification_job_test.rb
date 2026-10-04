@@ -4,7 +4,8 @@ class DeliverInsightNotificationJobTest < ActiveJob::TestCase
   setup do
     Apns::Client.stubs(:hosted?).returns(true)
     Apns::Client.stubs(:configured?).returns(true)
-    @insight = insights(:cash_flow_warning)
+    @insight = insights(:spending_anomaly_dining)
+    @insight.update!(priority: "high")
     user = @insight.family.users.first
     user.update!(preferences: user.preferences.merge("preview_features_enabled" => true))
     @subscription = user.push_subscriptions.create!(
@@ -13,6 +14,20 @@ class DeliverInsightNotificationJobTest < ActiveJob::TestCase
       platform: "ios",
       last_registered_at: Time.current
     )
+  end
+
+  test "historical Bills insights cannot enqueue notifications or execute old delivery jobs" do
+    historical = insights(:cash_flow_warning)
+    Apns::Client.expects(:new).never
+
+    %w[cash_flow_warning subscription_audit].each do |type|
+      historical.update!(insight_type: type)
+      job = DeliverInsightNotificationJob.new(insight_id: historical.id, push_subscription_id: @subscription.id)
+      assert_no_enqueued_jobs only: DeliverInsightNotificationJob do
+        DeliverInsightNotificationJob.enqueue_for(historical)
+        ActiveJob::Base.execute(job.serialize)
+      end
+    end
   end
 
   test "a job queued before a device changed users cannot reach its replacement" do

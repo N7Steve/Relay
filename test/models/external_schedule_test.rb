@@ -4,6 +4,7 @@ class ExternalScheduleTest < ActiveSupport::TestCase
   setup do
     Sidekiq::Cron::Job.stubs(:find).with("clean_inactive_families").returns(nil)
     Sidekiq::Cron::Job.stubs(:find).with("sync_hourly").returns(nil)
+    Sidekiq::Cron::Job.stubs(:find).with("generate_recurring_occurrences").returns(nil)
   end
 
   test "removes retired commercial cron without touching shared queues or other schedules" do
@@ -18,6 +19,20 @@ class ExternalScheduleTest < ActiveSupport::TestCase
 
     ExternalSchedule.reconcile!(schedule)
   end
+  test "removes persisted Bills cron and keeps Agenda on repeated reconciliation" do
+    schedule = {
+      "generate_recurring_occurrences" => { "class" => "GenerateRecurringOccurrencesJob" },
+      "generate_scheduled_payments" => { "class" => "GenerateScheduledPaymentsJob" }
+    }
+    stale_job = mock("persisted Bills cron")
+    stale_job.expects(:destroy).once
+    Sidekiq::Cron::Job.expects(:find).with("generate_recurring_occurrences").returns(stale_job)
+    Sidekiq::Cron::Job.expects(:load_from_hash).with(schedule.except("generate_recurring_occurrences")).twice
+
+    ExternalSchedule.reconcile!(schedule)
+    ExternalSchedule.reconcile!(schedule)
+  end
+
   test "reconciliation deletes only disabled owned jobs and retains local maintenance" do
     schedule = {
       "import_market_data" => { "class" => "ImportMarketDataJob" },

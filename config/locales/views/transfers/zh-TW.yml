@@ -31,9 +31,6 @@ zh-TW:
       delete_subtitle: 這將會移除轉帳連結，但不會刪除其對應的原始交易紀錄。
       delete_title: 確定要移除轉帳嗎？
       details: 詳情
-      mark_recurring: 標記為定期
-      mark_recurring_subtitle: 在「即將發生」動態與定期交易頁面中，以定期模式追蹤這筆轉帳。
-      mark_recurring_title: 把轉帳標記為定期
       note_label: 備註
       note_placeholder: 為此筆轉帳新增備註
       overview: 概覽

@@ -55,9 +55,6 @@ zh-TW:
     show:
       keep_both: 不要，兩筆都保留
       loan_payment: 貸款還款
-      mark_recurring: 標記為定期交易
-      mark_recurring_subtitle: 將此筆交易追蹤為定期交易。系統會根據過去 6 個月的類似交易自動計算金額變動範圍。
-      mark_recurring_title: 定期交易
       merge_duplicate: 好，合併
       potential_duplicate_description: 這筆待處理交易可能和下面那筆已入帳的交易是同一筆。若是如此，請合併這兩筆，以免重複計算。
       potential_duplicate_title: 偵測到可能重複的交易
@@ -94,7 +91,6 @@ zh-TW:
       settings: 設定
       tags_label: 標籤
       tab_transactions: 交易紀錄
-      tab_upcoming: 即將發生
       uncategorized: （未分類）
       additional_details: 額外詳細資訊
       payee: 收款人
@@ -118,9 +114,6 @@ zh-TW:
       withdrawal: 提領
       exchange: 兌換
       other: 其他
-    mark_recurring: 標記為定期交易
-    mark_recurring_subtitle: 將此筆交易追蹤為定期交易。系統會根據過去 6 個月的類似交易自動計算金額變動範圍。
-    mark_recurring_title: 定期交易
     potential_duplicate_title: 偵測到可能重複的交易
     potential_duplicate_description: 這筆待處理交易可能和下面那筆已入帳的交易是同一筆。若是如此，請合併這兩筆，以免重複計算。
     merge_duplicate:

@@ -6,12 +6,6 @@ pl:
       left_to_allocate: do przydzielenia
       over_set: "> 100% przydzielone"
       percent_set: "%{percent} przydzielone"
-    bills_reserved: "%{amount} zarezerwowane na rachunki"
-    bills_reserved_unconvertible:
-      few: "%{count} rachunki nie są zarezerwowane, brak dostępnego kursu wymiany"
-      many: "%{count} rachunków nie jest zarezerwowanych, brak dostępnego kursu wymiany"
-      one: 1 rachunek nie jest zarezerwowany, brak dostępnego kursu wymiany
-      other: "%{count} rachunków nie jest zarezerwowanych, brak dostępnego kursu wymiany"
     budget_category:
       rolled_over: "+%{amount} przeniesione"
     budget_category_form:
