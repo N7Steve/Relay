@@ -46,7 +46,6 @@ it:
     llm_usages: Utilizzo LLM
     loans: Prestiti
     lunchflow_items: Lunch Flow
-    mcp: Server MCP
     merchants: Esercenti
     mercury_items: Mercury
     messages: Messaggi

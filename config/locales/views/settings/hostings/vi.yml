@@ -18,7 +18,6 @@ vi:
           invite_only: Chỉ theo lời mời
       show:
         general: Cài đặt chung
-        ai_assistant: Trợ lý AI
         financial_data_providers: Nhà cung cấp dữ liệu tài chính
         sync_settings: Cài đặt đồng bộ
         invites: Mã mời
@@ -53,32 +52,6 @@ vi:
           mfapi: MFAPI.in
           binance_public: Binance
           moex_public: MOEX
-      assistant_settings:
-        title: Trợ lý AI
-        description: Chọn cách trợ lý trò chuyện phản hồi. Tích hợp sẵn sử dụng nhà cung cấp LLM đã cấu hình trực tiếp. Bên ngoài ủy thác cho tác nhân AI từ xa có thể gọi lại các công cụ tài chính của Relay qua MCP.
-        type_label: Loại trợ lý
-        type_builtin: Tích hợp sẵn (LLM trực tiếp)
-        type_external: Bên ngoài (tác nhân từ xa)
-        external_status: Endpoint trợ lý bên ngoài
-        external_configured: Đã cấu hình
-        external_not_configured: Chưa được cấu hình. Nhập URL và token bên dưới, hoặc đặt biến môi trường EXTERNAL_ASSISTANT_URL và EXTERNAL_ASSISTANT_TOKEN.
-        env_notice: "Loại trợ lý bị khóa ở '%{type}' qua biến môi trường ASSISTANT_TYPE."
-        env_configured_external: Đã cấu hình thành công qua biến môi trường.
-        url_label: URL endpoint
-        url_placeholder: "https://your-agent-host/v1/chat"
-        url_help: URL đầy đủ đến endpoint API của tác nhân. Nhà cung cấp tác nhân sẽ cung cấp cho bạn thông tin này.
-        token_label: Mã thông báo API
-        token_placeholder: Nhập mã thông báo từ nhà cung cấp tác nhân
-        token_help: Mã thông báo xác thực do tác nhân bên ngoài cung cấp. Được gửi dưới dạng Bearer token với mỗi yêu cầu.
-        agent_id_label: ID tác nhân (Tùy chọn)
-        agent_id_placeholder: "main (mặc định)"
-        agent_id_help: Định tuyến đến tác nhân cụ thể khi nhà cung cấp lưu trữ nhiều tác nhân. Để trống cho tác nhân mặc định.
-        disconnect_title: Kết nối bên ngoài
-        disconnect_description: Xóa kết nối trợ lý bên ngoài và chuyển về trợ lý tích hợp sẵn.
-        disconnect_button: Ngắt kết nối
-        confirm_disconnect:
-          title: Ngắt kết nối trợ lý bên ngoài?
-          body: Thao tác này sẽ xóa URL, token và ID tác nhân đã lưu, và chuyển về trợ lý tích hợp sẵn. Bạn có thể kết nối lại sau bằng cách nhập thông tin xác thực mới.
       brand_fetch_settings:
         description: Nhập Client ID do Brandfetch cung cấp
         env_configured_message: Bạn đã cấu hình thành công Client ID Brandfetch qua biến môi trường BRAND_FETCH_CLIENT_ID.
@@ -177,8 +150,6 @@ vi:
         invalid_sync_time: "Định dạng thời gian đồng bộ không hợp lệ. Vui lòng sử dụng định dạng HH:MM (ví dụ: 02:30)."
         invalid_llm_budget: "%{field} phải là số nguyên ≥ %{minimum}."
         scheduler_sync_failed: Đã lưu cài đặt, nhưng cập nhật lịch đồng bộ thất bại. Vui lòng thử lại hoặc kiểm tra nhật ký máy chủ.
-      disconnect_external_assistant:
-        external_assistant_disconnected: Trợ lý bên ngoài đã bị ngắt kết nối
       clear_cache:
         cache_cleared: Bộ nhớ đệm dữ liệu đã được xóa. Quá trình này có thể mất vài giây để hoàn tất.
       not_authorized: Bạn không có quyền thực hiện hành động này

@@ -4,6 +4,10 @@ Seleccionada por Steve el 4 de octubre de 2026. Base: `feccab08c`, presente en
 `main` y `origin/main` al empezar. Árbol inicialmente limpio, fetch y fast-forward
 sin cambios entrantes. Sin ramas, worktrees, PR, commit/push ni operaciones TrueNAS.
 
+Publicación comprobada al iniciar fase 5: estos cambios están incluidos en
+`92ee241a1`, presente en `origin/main`. Las notas de preparación sin commit/push
+de este registro describen su estado al cerrar aquella implementación.
+
 ## Resultado
 
 Relay funciona exclusivamente como instalación self-hosted. No existe selector

@@ -24,14 +24,16 @@ Google Drive y Brandfetch son funciones utilizadas y deben preservarse.
 
 ### Continuación de la poda
 
-**Fases 0–3 publicadas. Fase 4 implementada y validada, sin commit/push.**
+**Fases 0–4 publicadas. Fase 5 implementada y validada, sin commit/push.**
 El recálculo local está separado de las capacidades externas y la telemetría
 remota está retirada. La fase 0 se publicó en `eb538dae3`, fase 1 en `a5299f36c`
 y fase 2 en `ee3341fd3`. La fase 3 está incluida en la base `feccab08c`, presente
 en `origin/main` al iniciar fase 4. Consultar los registros de
 [fase 3](docs/migration/pruning-phase-3.md), [fase 4](docs/migration/pruning-phase-4.md)
 y el [plan por fases](docs/migration/pruning-plan.md). La fase 4 retira la
-plataforma comercial; la siguiente selección será fase 5, MCP/asistente externo.
+plataforma comercial y se publicó en `92ee241a1`, base de fase 5.
+La fase 5 retira MCP/asistente externo; ver su [registro](docs/migration/pruning-phase-5.md).
+La siguiente selección será fase 6, retirada opcional de IA integrada.
 Antes de desplegar, activar explícitamente Drive y logos conforme al registro.
 No repetir las fases cerradas ni confundir publicación Git con despliegue TrueNAS.
 

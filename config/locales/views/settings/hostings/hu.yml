@@ -19,7 +19,6 @@ hu:
           invite_only: Csak meghívóval
       show:
         general: Általános beállítások
-        ai_assistant: AI-asszisztens
         financial_data_providers: Pénzügyi adatszolgáltatók
         sync_settings: Szinkronizálási beállítások
         invites: Meghívókódok
@@ -54,32 +53,6 @@ hu:
           mfapi: MFAPI.in
           binance_public: Binance
           moex_public: MOEX
-      assistant_settings:
-        title: AI-asszisztens
-        description: Válaszd ki, hogyan válaszoljon a csevegési asszisztens. A beépített mód közvetlenül a beállított LLM-szolgáltatót használja. A külső mód egy távoli AI-ügynökhöz továbbítja a kérést, amely MCP-n keresztül hozzáférhet a Relay pénzügyi eszközeihez.
-        type_label: Asszisztens típusa
-        type_builtin: Beépített (Built-in LLM)
-        type_external: Külső (távoli ügynök)
-        external_status: Külső asszisztens végpontja
-        external_configured: Konfigurálva
-        external_not_configured: Nincs konfigurálva. Add meg az URL-t és a tokent alább, vagy állítsd be az EXTERNAL_ASSISTANT_URL és EXTERNAL_ASSISTANT_TOKEN környezeti változókat.
-        env_notice: "Az asszisztens típusa '%{type}'-ra van rögzítve az ASSISTANT_TYPE környezeti változó által."
-        env_configured_external: Sikeresen konfigurálva környezeti változókon keresztül.
-        url_label: Végpont URL
-        url_placeholder: "https://a-te-agentszolgaltato-hosztod/v1/chat"
-        url_help: Az ügynök API-végpontjának teljes URL-je. Az ügynökszolgáltatód adja meg ezt.
-        token_label: API-token
-        token_placeholder: Add meg az ügynökszolgáltatódtól kapott tokent
-        token_help: A külső ügynök által biztosított hitelesítési token. Ez minden kéréssel együtt Bearer tokenként kerül elküldésre.
-        agent_id_label: Ügynökazonosító (nem kötelező)
-        agent_id_placeholder: "main (alapértelmezett)"
-        agent_id_help: Egy adott ügynökre irányít, ha a szolgáltató több ügynököt üzemeltet. Hagyd üresen az alapértelmezetthez.
-        disconnect_title: Külső kapcsolat
-        disconnect_description: Távolítsd el a külső asszisztens kapcsolatát, és térj vissza a beépített asszisztenshez.
-        disconnect_button: Kapcsolat bontása
-        confirm_disconnect:
-          title: Bontod a külső asszisztens kapcsolatát?
-          body: Ez eltávolítja a mentett URL-t, tokent és ügynökazonosítót, és visszavált a beépített asszisztensre. Később újra csatlakozhatsz új hitelesítő adatok megadásával.
       brand_fetch_settings:
         description: Add meg a Brandfetch által biztosított kliens-azonosítót
         env_configured_message: Sikeresen konfiguráltad a Brandfetch kliens-azonosítódat a BRAND_FETCH_CLIENT_ID környezeti változón keresztül.
@@ -178,8 +151,6 @@ hu:
         invalid_sync_time: "Érvénytelen szinkronizálási időformátum. Kérjük, használd a ÓÓ:PP formátumot (pl.: 02:30)."
         invalid_llm_budget: "%{field} értékének legalább %{minimum} egész számnak kell lennie."
         scheduler_sync_failed: A beállítások mentve, de a szinkronizálási ütemezés frissítése nem sikerült. Kérjük, próbáld újra, vagy ellenőrizd a szerver naplóit.
-      disconnect_external_assistant:
-        external_assistant_disconnected: A külső asszisztens kapcsolata bontva
       clear_cache:
         cache_cleared: Az adatcache törölve. Ez néhány percet vehet igénybe.
       not_authorized: Nincs jogosultságod ehhez a művelethez

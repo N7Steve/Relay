@@ -28,6 +28,16 @@ class ChatTest < ActiveSupport::TestCase
     assert_not_equal first_chat.error_target, second_chat.error_target
   end
 
+  test "failed responses keep their original question eligible for retry" do
+    chat = @user.chats.start!("Original question", model: "gpt-4.1")
+    response = chat.messages.where(type: "AssistantMessage", status: :pending).sole
+    response.update_columns(status: "failed")
+
+    assert chat.needs_assistant_response?
+    assert response.reload.failed?
+    assert_equal 2, chat.messages.count
+  end
+
   test "creates with initial message" do
     prompt = "Test prompt"
 

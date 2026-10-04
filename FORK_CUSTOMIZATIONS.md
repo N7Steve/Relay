@@ -20,6 +20,17 @@ funciones propias financieras, Agenda, inversiones y permisos siguen protegidas.
 Ver [fase 0](docs/migration/pruning-phase-0.md) y
 [plan de poda](docs/migration/pruning-plan.md).
 
+## Retirada aprobada de MCP y asistente externo — fase 5
+
+La fase 5 sustituye las disposiciones históricas de conservación de esos dos
+transportes. Se retiran endpoint, metadata/registro dinámico, UI, cliente remoto,
+catálogo y proxy MCP. IA integrada y sus herramientas compartidas, OAuth/API keys,
+clientes y acceso documental se conservan. No se revocan tokens, no se purgan
+colas compartidas ni se borran historiales o originales. Los trabajos anteriores sin marca de transporte
+se detienen, sin redirigirse a otro proveedor; pueden reintentarse explícitamente. Valores de familia y
+configuración cifrada permanecen inertes para recuperación y reversión.
+Ver [registro de fase 5](docs/migration/pruning-phase-5.md).
+
 ## Contratos de recuperación durante la poda
 
 La fase 1 de poda prepara lectores de persistencia independientes para el

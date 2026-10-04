@@ -32,42 +32,6 @@ pl:
         model_label: Domyślny model (opcjonalnie)
         model_placeholder: claude-sonnet-4-6 (domyślnie)
         title: Anthropic (Claude)
-      assistant_settings:
-        agent_id_help: Kieruje do konkretnego agenta, gdy dostawca hostuje ich wiele.
-          Pozostaw puste, aby użyć domyślnego.
-        agent_id_label: ID agenta (opcjonalne)
-        agent_id_placeholder: main (domyślnie)
-        confirm_disconnect:
-          body: To usunie zapisany URL, token i ID agenta oraz przełączy na asystenta
-            wbudowanego. Możesz połączyć ponownie później, podając nowe dane.
-          title: Rozłączyć zewnętrznego asystenta?
-        description: Wybierz, jak odpowiada asystent czatu. Wbudowany asystent korzysta
-          bezpośrednio ze skonfigurowanego dostawcy LLM. Zewnętrzny deleguje zapytania
-          do zdalnego agenta AI, który może korzystać z narzędzi finansowych Relay
-          przez MCP.
-        disconnect_button: Rozłącz
-        disconnect_description: Usuń połączenie z zewnętrznym asystentem i przełącz
-          z powrotem na asystenta wbudowanego.
-        disconnect_title: Połączenie zewnętrzne
-        env_configured_external: Pomyślnie skonfigurowano przez zmienne środowiskowe.
-        env_notice: Typ asystenta jest zablokowany na '%{type}' przez zmienną środowiskową
-          ASSISTANT_TYPE.
-        external_configured: Skonfigurowany
-        external_not_configured: Nieskonfigurowany. Wprowadź poniżej URL i token albo
-          ustaw zmienne środowiskowe EXTERNAL_ASSISTANT_URL i EXTERNAL_ASSISTANT_TOKEN.
-        external_status: Endpoint zewnętrznego asystenta
-        title: Asystent AI
-        token_help: Token uwierzytelniający dostarczony przez zewnętrznego agenta.
-          Jest wysyłany jako token Bearer z każdym żądaniem.
-        token_label: Token API
-        token_placeholder: Wprowadź token od dostawcy agenta
-        type_builtin: Wbudowany (bezpośredni LLM)
-        type_external: Zewnętrzny (zdalny agent)
-        type_label: Typ asystenta
-        url_help: Pełny URL endpointu API Twojego agenta. Otrzymasz go od dostawcy
-          agenta.
-        url_label: URL endpointu
-        url_placeholder: https://your-agent-host/v1/chat
       brand_fetch_settings:
         description: Wprowadź Client ID otrzymany od Brandfetch
         env_configured_message: Skonfigurowano identyfikator klienta Brandfetch przez
@@ -90,8 +54,6 @@ pl:
       clear_cache:
         cache_cleared: Pamięć podręczna danych została wyczyszczona. Zakończenie operacji
           może zająć chwilę.
-      disconnect_external_assistant:
-        external_assistant_disconnected: Zewnętrzny asystent został rozłączony
       ensure_admin:
         not_authorized: Nie masz uprawnień do wykonania tej akcji
       ensure_super_admin_for_onboarding:
@@ -298,7 +260,6 @@ pl:
         title: RentCast
         usage: Wykorzystano %{used} z %{limit} miesięcznych zapytań
       show:
-        ai_assistant: Asystent AI
         clear_cache: Wyczyść pamięć podręczną danych
         clear_cache_warning: Wyczyszczenie pamięci podręcznej danych usunie wszystkie
           kursy walut, ceny papierów wartościowych, salda kont i inne dane. Nie usunie

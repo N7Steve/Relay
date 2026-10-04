@@ -4,7 +4,7 @@ es:
     hostings:
       ai_features_settings:
         title: Funciones de IA
-        description: Muestra y habilita el chat, los prompts, las importaciones asistidas, el consumo, las comprobaciones de salud y el acceso MCP en toda la instancia.
+        description: Muestra y habilita el chat, los prompts, las importaciones asistidas, el consumo, las comprobaciones de salud en toda la instancia.
       invite_code_settings:
         description: Controla cómo se registran nuevas personas en tu instancia de %{product}.
         email_confirmation_description: Cuando está habilitado, los usuarios deben confirmar su dirección de correo electrónico al cambiarla o registrarse.
@@ -21,7 +21,6 @@ es:
           invite_only: Solo con invitación
       show:
         general: Configuración General
-        ai_assistant: Asistente de IA
         financial_data_providers: Proveedores de Datos Financieros
         property_valuation_providers: Proveedores de valoración de propiedades
         sync_settings: Ajustes de Sincronización
@@ -63,32 +62,6 @@ es:
         title: Selección de Proveedores
         description: Elige qué servicio usar para obtener tipos de cambio y precios de acciones. Yahoo Finance es gratuito y no requiere clave API. Twelve Data requiere una clave API (gratuita disponible) pero ofrece mayor cobertura de datos.
         securities_provider_label: Proveedor de valores (Precios de acciones)
-      assistant_settings:
-        title: Asistente de IA
-        description: Elige cómo responde el asistente del chat. "Integrado" utiliza directamente tu proveedor de LLM configurado. "Externo" delega en un agente remoto que puede interactuar con las herramientas financieras de Relay mediante MCP.
-        type_label: Tipo de asistente
-        type_builtin: Integrado (LLM directo)
-        type_external: Externo (agente remoto)
-        external_status: Punto de conexión del asistente externo
-        external_configured: Configurado
-        external_not_configured: No configurado. Introduce la URL y el token a continuación, o define las variables de entorno EXTERNAL_ASSISTANT_URL y EXTERNAL_ASSISTANT_TOKEN.
-        env_notice: El tipo de asistente está fijado en '%{type}' mediante la variable de entorno ASSISTANT_TYPE.
-        env_configured_external: Configurado correctamente mediante variables de entorno.
-        url_label: URL del punto de conexión (Endpoint)
-        url_placeholder: https://tu-agente-host/v1/chat
-        url_help: La URL completa del punto de conexión de la API de tu agente. Tu proveedor de agentes te facilitará esta dirección.
-        token_label: Token de API
-        token_placeholder: Introduce el token de tu proveedor de agentes
-        token_help: El token de autenticación proporcionado por tu agente externo. Se envía como un token Bearer en cada solicitud.
-        agent_id_label: ID del Agente (Opcional)
-        agent_id_placeholder: main (por defecto)
-        agent_id_help: Dirige las peticiones a un agente específico si el proveedor aloja varios. Déjalo en blanco para el predeterminado.
-        disconnect_title: Conexión externa
-        disconnect_description: Elimina la conexión del asistente externo y vuelve al asistente integrado.
-        disconnect_button: Desconectar
-        confirm_disconnect:
-          title: ¿Desconectar asistente externo?
-          body: Esto eliminará la URL guardada, el token y el ID del agente, y cambiará al asistente integrado. Podrás volver a conectarlo más tarde introduciendo nuevas credenciales.
       brand_fetch_settings:
         description: Introduce el ID de Cliente proporcionado por Brandfetch
         env_configured_message: Has configurado correctamente tu Client ID de Brandfetch mediante la variable de entorno BRAND_FETCH_CLIENT_ID.
@@ -245,8 +218,6 @@ es:
         invalid_anthropic_base_url: La URL base de Anthropic debe ser una URL http(s).
         anthropic_model_required_for_base_url: El modelo de Anthropic es obligatorio cuando se define una URL base personalizada.
         scheduler_sync_failed: Ajustes guardados, pero no se pudo actualizar la programación de sincronización. Inténtalo de nuevo o revisa los registros del servidor.
-      disconnect_external_assistant:
-        external_assistant_disconnected: Asistente externo desconectado
       clear_cache:
         cache_cleared: La caché de datos ha sido limpiada. Esto puede tardar unos momentos en completarse.
       not_authorized: No estás autorizado para realizar esta acción

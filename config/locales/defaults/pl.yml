@@ -196,10 +196,6 @@ pl:
       create: Utwórz %{model}
       submit: Wyślij %{model}
       update: Aktualizuj %{model}
-  mcp:
-    errors:
-      invalid_session_id: Nieprawidłowy identyfikator sesji MCP
-      unsupported_protocol_version: 'Nieobsługiwana wersja protokołu MCP: %{version}'
   number:
     currency:
       format:

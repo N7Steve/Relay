@@ -227,10 +227,6 @@ tr:
       long: "%e %B %Y, %A, %H:%M"
       short: "%e %B, %H:%M"
     pm: öğleden sonra
-  mcp:
-    errors:
-      invalid_session_id: Geçersiz MCP oturum kimliği
-      unsupported_protocol_version: 'Desteklenmeyen MCP protokol sürümü: %{version}'
   oauth:
     registration:
       invalid_redirect_uris: redirect_uris yalnızca https, loopback http veya yerel uygulama URI şeması kullanabilir

@@ -133,30 +133,6 @@ ru:
         total_cost: Общая стоимость
         total_requests: Всего запросов
         total_tokens: Всего токенов
-    mcp:
-      revoke:
-        revoked: Подключение отозвано.
-      show:
-        connect_subtitle: Вставьте этот URL в Claude.ai (или любой клиент с поддержкой 
-          MCP), чтобы подключить его к вашему аккаунту Relay.
-        connect_title: Подключить ИИ-ассистента
-        connected_ago: Подключено %{time} назад
-        connected_subtitle: Эти приложения сейчас имеют доступ к вашим данным Relay.
-          Отзовите доступ для тех, которыми больше не пользуетесь.
-        connected_title: Подключённые клиенты
-        copied: Скопировано!
-        copy_url: Копировать
-        how_to_connect_title: Как подключить Claude
-        page_title: MCP-сервер
-        revoke: Отозвать
-        revoke_confirm: Отозвать доступ для этого клиента?
-        step_1: Откройте Claude.ai и перейдите в Settings → Customize → Connectors.
-        step_2: Нажмите «Add connector» и вставьте URL MCP-сервера выше.
-        step_3: Нажмите Connect — вы будете перенаправлены в Relay для входа и
-          подтверждения доступа.
-        step_4: После авторизации Claude сможет читать ваши счета, операции и данные 
-          о балансе.
-        unknown_client: Неизвестный клиент
     preferences:
       show:
         additional_currencies_label: Дополнительные валюты
@@ -778,7 +754,6 @@ ru:
       imports_label: Импорт
       llm_usage_label: Использование LLM
       logout: Выйти
-      mcp_label: MCP
       merchants_label: Продавцы
       other_section_title: Ещё
       preferences_label: Предпочтения

@@ -52,6 +52,7 @@ class Setting < RailsSettings::Base
   # generate would otherwise always trip the watchdog. Read via
   # `Chat.response_timeout`, which applies ENV > Setting > default precedence.
   field :ai_response_timeout, type: :integer, default: ENV["AI_RESPONSE_TIMEOUT"]&.to_i
+  # Historical configuration only; no transport or settings form consumes these.
   field :external_assistant_url, type: :string
   field :external_assistant_token, type: :string
   field :external_assistant_model, type: :string

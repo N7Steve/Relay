@@ -5876,7 +5876,7 @@ paths:
       schema:
         type: string
     post:
-      summary: Retry the last assistant response
+      summary: Retry the last assistant response using its original question
       tags:
       - Chat Messages
       security:

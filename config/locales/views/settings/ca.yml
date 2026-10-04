@@ -727,26 +727,6 @@ ca:
           - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
           - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
           generate: 'Genera''n un joc amb: bin/rails db:encryption:init'
-    mcp:
-      show:
-        page_title: Servidor MCP
-        connect_title: Connecta un assistent d'IA
-        connect_subtitle: Enganxa aquest URL a Claude.ai (o a qualsevol client compatible amb MCP) per connectar-lo al teu compte de Relay.
-        copy_url: Copia
-        copied: Copiat!
-        how_to_connect_title: Com connectar Claude
-        step_1: Obre Claude.ai i ves a Settings → Customize → Connectors.
-        step_2: Fes clic a "Add connector" i enganxa l'URL del servidor MCP de dalt.
-        step_3: 'Fes clic a Connect: se''t redirigirà a Relay per iniciar sessió i autoritzar l''accés.'
-        step_4: Un cop autoritzat, Claude podrà llegir els teus comptes, transaccions i saldos.
-        connected_title: Clients connectats
-        connected_subtitle: Aquestes aplicacions tenen accés a les teves dades de Relay. Revoca les que ja no facis servir.
-        unknown_client: Client desconegut
-        connected_ago: Connectat fa %{time}
-        revoke: Revoca
-        revoke_confirm: Vols revocar l'accés d'aquest client?
-      revoke:
-        revoked: Connexió revocada.
     background_jobs:
       show:
         page_title: Tasques en segon pla
@@ -811,7 +791,6 @@ ca:
       imports_label: Importacions
       llm_usage_label: Ús d'LLM
       logout: Tanca la sessió
-      mcp_label: MCP
       merchants_label: Comerços
       other_section_title: Més
       preferences_label: Preferències

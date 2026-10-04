@@ -33,42 +33,6 @@ ru:
         model_label: Модель по умолчанию (необязательно)
         model_placeholder: claude-sonnet-4-6 (по умолчанию)
         title: Anthropic (Claude)
-      assistant_settings:
-        agent_id_help: Направляет к конкретному агенту, когда поставщик размещает
-          несколько. Оставьте пустым для использования по умолчанию.
-        agent_id_label: ID агента (необязательно)
-        agent_id_placeholder: main (по умолчанию)
-        confirm_disconnect:
-          body: Это удалит сохраненные URL, токен и ID агента и переключит на встроенного
-            ассистента. Вы можете подключиться снова, введя новые учетные данные.
-          title: Отключить внешнего ассистента?
-        description: Выберите, как чат-ассистент будет отвечать. Встроенный использует
-          вашего настроенного LLM-поставщика напрямую. Внешний делегирует удаленному
-          AI-агенту, который может обращаться к финансовым инструментам Relay через
-          MCP.
-        disconnect_button: Отключить
-        disconnect_description: Удалите подключение внешнего ассистента и переключитесь
-          обратно на встроенного ассистента.
-        disconnect_title: Внешнее подключение
-        env_configured_external: Успешно настроено через переменные окружения.
-        env_notice: Тип ассистента заблокирован на '%{type}' через переменную окружения
-          ASSISTANT_TYPE.
-        external_configured: Настроен
-        external_not_configured: Не настроен. Введите URL и токен ниже или установите
-          переменные окружения EXTERNAL_ASSISTANT_URL и EXTERNAL_ASSISTANT_TOKEN.
-        external_status: Статус внешнего ассистента
-        title: AI Ассистент
-        token_help: Токен аутентификации, предоставленный вашим внешним агентом. Отправляется
-          как Bearer токен с каждым запросом.
-        token_label: API токен
-        token_placeholder: Введите токен от вашего поставщика агента
-        type_builtin: Встроенный (прямой LLM)
-        type_external: Внешний (удаленный агент)
-        type_label: Тип ассистента
-        url_help: Полный URL API конечной точки вашего агента. Ваш поставщик агента
-          предоставит вам это.
-        url_label: URL конечной точки
-        url_placeholder: https://your-agent-host/v1/chat
       brand_fetch_settings:
         description: Введите Client ID, предоставленный Brandfetch
         env_configured_message: Вы успешно настроили ваш Brandfetch Client ID через
@@ -90,8 +54,6 @@ ru:
         title: Настройки Brandfetch
       clear_cache:
         cache_cleared: Кэш данных очищен. Это может занять несколько минут.
-      disconnect_external_assistant:
-        external_assistant_disconnected: Внешний ассистент отключен
       ensure_super_admin_for_onboarding:
         not_authorized: У вас нет прав для выполнения этого действия
       eodhd_settings:
@@ -221,7 +183,6 @@ ru:
         yahoo_finance_hint: бесплатно, API-ключ не требуется
         requires_api_key_mansa: требуется API-ключ, бесплатно 100 запросов/день — только NGX (Нигерийская биржа)
       show:
-        ai_assistant: AI Ассистент
         clear_cache: Очистить кэш данных
         clear_cache_warning: Очистка кэша данных удалит все курсы валют, цены на ценные
           бумаги, балансы счетов и другие данные. Это не удалит счета, операции, категории

@@ -453,38 +453,15 @@ class UserTest < ActiveSupport::TestCase
     Setting.openai_access_token = previous
   end
 
-  test "ai_available? returns true when external assistant is configured and family type is external" do
-    previous = Setting.openai_access_token
+  test "legacy external credentials do not make AI available" do
     @user.family.update!(assistant_type: "external")
-    with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: "http://localhost:18789/v1/chat", EXTERNAL_ASSISTANT_TOKEN: "test-token", EXTERNAL_ASSISTANT_MODEL: "openclaw/main" do
-      Setting.openai_access_token = nil
+    @user.stubs(:openai_configured?).returns(false)
+    @user.stubs(:anthropic_configured?).returns(false)
+    with_env_overrides("ASSISTANT_TYPE" => "external", "EXTERNAL_ASSISTANT_URL" => "https://retired.example.com/chat", "EXTERNAL_ASSISTANT_TOKEN" => "legacy") do
+      assert_not @user.ai_available?
+      @user.stubs(:openai_configured?).returns(true)
       assert @user.ai_available?
     end
-  ensure
-    Setting.openai_access_token = previous
-    @user.family.update!(assistant_type: "builtin")
-  end
-
-  test "ai_available? returns false when external assistant is configured but family type is builtin" do
-    previous = Setting.openai_access_token
-    with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: "http://localhost:18789/v1/chat", EXTERNAL_ASSISTANT_TOKEN: "test-token", EXTERNAL_ASSISTANT_MODEL: "openclaw/main" do
-      Setting.openai_access_token = nil
-      assert_not @user.ai_available?
-    end
-  ensure
-    Setting.openai_access_token = previous
-  end
-
-  test "ai_available? returns false when external assistant is configured but user is not in allowlist" do
-    previous = Setting.openai_access_token
-    @user.family.update!(assistant_type: "external")
-    with_env_overrides OPENAI_ACCESS_TOKEN: nil, EXTERNAL_ASSISTANT_URL: "http://localhost:18789/v1/chat", EXTERNAL_ASSISTANT_TOKEN: "test-token", EXTERNAL_ASSISTANT_MODEL: "openclaw/main", EXTERNAL_ASSISTANT_ALLOWED_EMAILS: "other@example.com" do
-      Setting.openai_access_token = nil
-      assert_not @user.ai_available?
-    end
-  ensure
-    Setting.openai_access_token = previous
-    @user.family.update!(assistant_type: "builtin")
   end
 
   test "intro layout collapses sidebars and enables ai" do

@@ -202,14 +202,7 @@ class User < ApplicationRecord
   def ai_available?
     return false unless Setting.ai_features_enabled?
 
-    effective_type = ENV["ASSISTANT_TYPE"].presence || family&.assistant_type.presence || "builtin"
-
-    case effective_type
-    when "external"
-      Assistant::External.available_for?(self)
-    else
-      openai_configured? || anthropic_configured?
-    end
+    openai_configured? || anthropic_configured?
   end
 
   def openai_configured?
@@ -457,7 +450,7 @@ class User < ApplicationRecord
   # Revokes mobile/third-party API access alongside the web-session
   # invalidation above. Without this, a deactivated user's existing
   # Doorkeeper tokens and API keys stay valid on the wire — currently
-  # harmless only because Api::V1::BaseController/McpController re-check
+  # harmless only because Api::V1::BaseController re-check
   # active? on every request, but that's a second, independent safeguard,
   # not a substitute for actually revoking the credentials. Also revokes
   # unexchanged OAuth authorization grants — /oauth/token doesn't go
@@ -467,7 +460,7 @@ class User < ApplicationRecord
   # Revokes mobile/third-party API access alongside the web-session
   # invalidation above. Without this, a deactivated user's existing
   # Doorkeeper tokens and API keys stay valid on the wire — currently
-  # harmless only because Api::V1::BaseController/McpController re-check
+  # harmless only because Api::V1::BaseController re-check
   # active? on every request, but that's a second, independent safeguard,
   # not a substitute for actually revoking the credentials. Also revokes
   # unexchanged OAuth authorization grants — /oauth/token doesn't go

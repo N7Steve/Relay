@@ -18,7 +18,6 @@ it:
           invite_only: Solo su invito
       show:
         general: Impostazioni generali
-        ai_assistant: Assistente IA
         financial_data_providers: Provider dati finanziari
         sync_settings: Impostazioni sincronizzazione
         invites: Codici invito
@@ -55,32 +54,6 @@ it:
           binance_public: Binance
           moex_public: MOEX
           tinkoff_invest: T-Invest (T-Bank)
-      assistant_settings:
-        title: Assistente IA
-        description: Scegli come risponde l'assistente chat. Integrato usa il tuo provider LLM configurato direttamente. Esterno delega a un agente IA remoto che può richiamare gli strumenti finanziari di Relay tramite MCP.
-        type_label: Tipo di assistente
-        type_builtin: Integrato (LLM diretto)
-        type_external: Esterno (agente remoto)
-        external_status: Endpoint assistente esterno
-        external_configured: Configurato
-        external_not_configured: Non configurato. Inserisci l'URL e il token qui sotto, o imposta le variabili d'ambiente EXTERNAL_ASSISTANT_URL e EXTERNAL_ASSISTANT_TOKEN.
-        env_notice: "Il tipo di assistente è bloccato su '%{type}' tramite la variabile d'ambiente ASSISTANT_TYPE."
-        env_configured_external: Configurato con successo tramite variabili d'ambiente.
-        url_label: URL endpoint
-        url_placeholder: "https://your-agent-host/v1/chat"
-        url_help: L'URL completo all'endpoint API del tuo agente. Il tuo provider agente te lo fornirà.
-        token_label: Token API
-        token_placeholder: Inserisci il token dal tuo provider agente
-        token_help: Il token di autenticazione fornito dal tuo agente esterno. Viene inviato come token Bearer con ogni richiesta.
-        agent_id_label: ID agente (facoltativo)
-        agent_id_placeholder: "main (predefinito)"
-        agent_id_help: Instrada a un agente specifico quando il provider ospita più agenti. Lascia vuoto per il predefinito.
-        disconnect_title: Connessione esterna
-        disconnect_description: Rimuovi la connessione all'assistente esterno e torna all'assistente integrato.
-        disconnect_button: Disconnetti
-        confirm_disconnect:
-          title: Disconnettere l'assistente esterno?
-          body: Questo rimuoverà l'URL, il token e l'ID agente salvati, e passerà all'assistente integrato. Puoi riconnetterti in seguito inserendo nuove credenziali.
       brand_fetch_settings:
         description: Inserisci il Client ID fornito da Brandfetch
         env_configured_message: Hai configurato con successo il tuo Client ID di Brandfetch tramite la variabile d'ambiente BRAND_FETCH_CLIENT_ID.
@@ -213,8 +186,6 @@ it:
         invalid_anthropic_base_url: L'URL base di Anthropic deve essere un URL http(s).
         anthropic_model_required_for_base_url: Il modello Anthropic è obbligatorio quando si imposta un URL base personalizzato.
         scheduler_sync_failed: Impostazioni salvate, ma aggiornamento pianificazione sincronizzazione fallito. Riprova o controlla i log del server.
-      disconnect_external_assistant:
-        external_assistant_disconnected: Assistente esterno disconnesso
       clear_cache:
         cache_cleared: Cache dati svuotata. Potrebbero volerci alcuni istanti per completare.
       not_authorized: Non sei autorizzato a eseguire questa azione

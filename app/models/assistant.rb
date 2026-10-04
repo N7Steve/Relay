@@ -2,8 +2,7 @@ module Assistant
   Error = Class.new(StandardError)
 
   REGISTRY = {
-    "builtin" => Assistant::Builtin,
-    "external" => Assistant::External
+    "builtin" => Assistant::Builtin
   }.freeze
 
   # Tools for users who opted into preview features in Settings -> Preferences.
@@ -49,10 +48,7 @@ module Assistant
       REGISTRY.keys
     end
 
-    # The single registry behind both the builtin chat and the /mcp endpoint's
-    # tools/list — a function class added here is immediately callable by an
-    # external agent, so pass the user to keep preview tools out of the default
-    # surface.
+    # Builtin chat tools retain per-user preview and account-access boundaries.
     def function_classes(user = nil)
       classes = [
         Function::GetTransactions,
@@ -86,8 +82,7 @@ module Assistant
 
       def implementation_for(chat)
         raise Error, "chat is required" if chat.blank?
-        type = ENV["ASSISTANT_TYPE"].presence || chat.user&.family&.assistant_type.presence || "builtin"
-        REGISTRY.fetch(type) { REGISTRY["builtin"] }
+        Assistant::Builtin
       end
   end
 end

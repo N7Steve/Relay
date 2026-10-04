@@ -17,7 +17,6 @@ uk:
           invite_only: Лише за запрошеннями
       show:
         general: Загальні налаштування
-        ai_assistant: ШІ-помічник
         financial_data_providers: Постачальники фінансових даних
         sync_settings: Налаштування синхронізації
         invites: Коди запрошень
@@ -58,32 +57,6 @@ uk:
           frankfurter: Frankfurter
           mansa: Mansa
         requires_api_key_mansa: потрібен ключ API, безкоштовний тариф — 100 запитів на день; лише NGX (Нігерійська біржа)
-      assistant_settings:
-        title: ШІ-помічник
-        description: Виберіть, як відповідатиме чат-помічник. Вбудований використовує безпосередньо налаштованого постачальника LLM. Зовнішній делегує віддаленому ШІ-агенту, який може звертатися до фінансових інструментів Relay через MCP.
-        type_label: Тип помічника
-        type_builtin: Вбудований (прямий LLM)
-        type_external: Зовнішній (віддалений агент)
-        external_status: Кінцева точка зовнішнього помічника
-        external_configured: Налаштовано
-        external_not_configured: Не налаштовано. Введіть URL-адресу та токен нижче або встановіть змінні середовища EXTERNAL_ASSISTANT_URL та EXTERNAL_ASSISTANT_TOKEN.
-        env_notice: "Тип помічника заблоковано на '%{type}' через змінну середовища ASSISTANT_TYPE."
-        env_configured_external: Успішно налаштовано через змінні середовища.
-        url_label: URL-адреса кінцевої точки
-        url_placeholder: "https://your-agent-host/v1/chat"
-        url_help: Повна URL-адреса кінцевої точки API вашого агента. Ваш постачальник агента надасть вам це.
-        token_label: Токен API
-        token_placeholder: Введіть токен від вашого постачальника агента
-        token_help: Токен автентифікації, наданий вашим зовнішнім агентом. Він надсилається як токен Bearer з кожним запитом.
-        agent_id_label: ID агента (необов'язково)
-        agent_id_placeholder: "main (за замовчуванням)"
-        agent_id_help: Маршрутизує до певного агента, коли постачальник розміщує кілька. Залиште порожнім для значення за замовчуванням.
-        disconnect_title: Зовнішнє з'єднання
-        disconnect_description: Видаліть з'єднання із зовнішнім помічником і поверніться до вбудованого помічника.
-        disconnect_button: Відключити
-        confirm_disconnect:
-          title: Відключити зовнішнього помічника?
-          body: Це видалить збережену URL-адресу, токен та ID агента та переключиться на вбудованого помічника. Ви можете перепідключитися пізніше, ввівши нові облікові дані.
       brand_fetch_settings:
         description: Введіть ідентифікатор клієнта, наданий Brandfetch
         env_configured_message: Ви успішно налаштували свій ідентифікатор клієнта Brandfetch за допомогою змінної середовища BRAND_FETCH_CLIENT_ID.
@@ -229,8 +202,6 @@ uk:
         invalid_anthropic_base_url: Базова URL-адреса Anthropic має бути URL-адресою http(s).
         anthropic_model_required_for_base_url: Модель Anthropic є обов'язковою, коли встановлено власну базову URL-адресу.
         scheduler_sync_failed: Налаштування збережено, але не вдалося оновити розклад синхронізації. Будь ласка, спробуйте ще раз або перевірте журнали сервера.
-      disconnect_external_assistant:
-        external_assistant_disconnected: Зовнішнього помічника відключено
       clear_cache:
         cache_cleared: Кеш даних очищено. Це може зайняти кілька хвилин.
       not_authorized: Ви не авторизовані для виконання цієї дії

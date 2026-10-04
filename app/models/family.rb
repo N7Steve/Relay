@@ -37,6 +37,7 @@ class Family < ApplicationRecord
 
 
   MONIKERS = [ "Family", "Group" ].freeze
+  # Accept legacy values on restore; routing always uses the builtin assistant.
   ASSISTANT_TYPES = %w[builtin external].freeze
 
   # Which provider categorizes this family's transactions. Family-level rather

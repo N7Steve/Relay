@@ -94,7 +94,6 @@ zh-CN:
         general: 通用设置
         invites: 邀请码设置
         title: 自托管配置
-        ai_assistant: AI 助手
         sync_settings: 同步设置
       twelve_data_settings:
         api_calls_used: 已使用 %{used} / %{limit} 次每日 API 调用（%{percentage}）
@@ -128,32 +127,6 @@ zh-CN:
         status_inactive: Yahoo Finance 连接失败
         title: Yahoo Finance 设置
         troubleshooting: 请检查您的互联网连接和防火墙设置。Yahoo Finance 可能暂时不可用。
-      assistant_settings:
-        title: AI 助手
-        description: 配置 Relay 使用的 AI 助手模式。
-        type_label: 助手类型
-        type_builtin: 内置（直接调用 LLM）
-        type_external: 外部（远程代理）
-        external_status: 外部助手端点
-        external_configured: 已配置
-        external_not_configured: 外部助手尚未配置。
-        env_notice: 已通过环境变量配置 %{type}。
-        env_configured_external: 外部助手已通过环境变量配置。
-        url_label: 端点 URL
-        url_placeholder: 输入外部助手端点 URL
-        url_help: 外部助手服务的完整访问地址。
-        token_label: API 令牌
-        token_placeholder: 输入 API 令牌
-        token_help: 用于验证外部助手请求的令牌。
-        agent_id_label: Agent ID（可选）
-        agent_id_placeholder: main（默认）
-        agent_id_help: 留空时使用默认代理。
-        disconnect_title: 外部连接
-        disconnect_description: 断开当前外部助手连接。
-        disconnect_button: 断开连接
-        confirm_disconnect:
-          title: 断开外部助手？
-          body: 断开后将无法继续使用此远程助手。
       llm_provider_selector:
         title: AI 提供商
         description: 选择 Relay 调用的 LLM 提供商。
@@ -208,8 +181,6 @@ zh-CN:
         step_2: 前往 API Key 页面并复制密钥。
         rate_limit_warning: 免费计划可能有调用频率限制。
         no_health_check_note: 此提供商暂无健康检查。
-      disconnect_external_assistant:
-        external_assistant_disconnected: 外部助手已断开连接。
       ensure_admin:
         not_authorized: 您没有执行此操作的权限。
       ensure_super_admin_for_onboarding:

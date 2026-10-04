@@ -265,9 +265,6 @@ Rails.application.routes.draw do
       post :new_connection
     end
   end
-  get ".well-known/oauth-protected-resource", to: "oauth_metadata#protected_resource"
-  get ".well-known/oauth-authorization-server", to: "oauth_metadata#authorization_server"
-  post "register", to: "oauth_registration#create"
   use_doorkeeper do |mapping|
     mapping.controllers authorizations: "oauth/authorizations"
   end
@@ -403,7 +400,6 @@ Rails.application.routes.draw do
     end
     resource :hosting, only: %i[show update] do
       delete :clear_cache, on: :collection
-      delete :disconnect_external_assistant, on: :collection
     end
     resource :security, only: :show
     resources :webauthn_credentials, only: %i[create destroy] do
@@ -411,9 +407,6 @@ Rails.application.routes.draw do
     end
     resources :sso_identities, only: :destroy
     resources :api_keys, only: [ :index, :show, :new, :create, :destroy ]
-    resource :mcp, controller: "mcp", only: :show do
-      delete "tokens/:token_id", to: "mcp#revoke", as: :revoke_token
-    end
     resource :ai_prompts, only: %i[show update]
     resource :llm_usage, only: :show
     resource :guides, only: :show
@@ -994,9 +987,6 @@ Rails.application.routes.draw do
   end
 
   get "redis-configuration-error", to: "pages#redis_configuration_error"
-
-  # MCP server endpoint for external AI assistants (JSON-RPC 2.0)
-  post "mcp", to: "mcp#handle"
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

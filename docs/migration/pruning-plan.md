@@ -3,11 +3,12 @@
 Preparado el 4 de octubre de 2026 sobre
 `1e279bd8f6fe05d295c074180efccbcd59195ad5`.
 Base: [análisis de migración y poda](pruning-analysis.md).
-Estado: fases 0–3 completadas, validadas y publicadas en `origin/main`
+Estado: fases 0–4 completadas, validadas y publicadas en `origin/main`
 el 4 de octubre de 2026. Evidencia y límites en los
 [registros de fase 0](pruning-phase-0.md) y [fase 1](pruning-phase-1.md).
-Fase 4 implementada y validada, sin publicar; fases 5–11 pendientes.
-Ver el [registro de fase 4](pruning-phase-4.md).
+Fase 4 publicada en `92ee241a1`, base al iniciar fase 5. Fase 5 implementada,
+validada y sin publicar; fases 6–11 pendientes.
+Ver los registros de [fase 4](pruning-phase-4.md) y [fase 5](pruning-phase-5.md).
 
 La petición autoriza preparar este plan. La selección de una fase autorizará
 su implementación dentro del alcance descrito. Commit/push y operaciones sobre
@@ -374,8 +375,8 @@ Para cada fase/subfase registrar:
 | Reversión | Código/configuración, recuperación de datos y límites |
 | Cierre | Confirmación de que se puede detener aquí con Relay utilizable |
 
-La fase 4 está implementada y validada. Los cambios están preparados para
-publicación autorizada, sin commit/push todavía. La siguiente selección será **fase 5**,
-retirada de MCP y asistente externo. Las fases 1 y 2 construyeron la base segura.
+La fase 5 está implementada y validada, sin commit/push. El resultado queda
+preparado para publicación autorizada. La siguiente
+selección será **fase 6**, retirada opcional de IA integrada. Las fases 1 y 2 construyeron la base segura.
 El avance a cualquier fase requiere cerrar la anterior aplicable, sin trasladar
 fallos, contratos rotos ni decisiones pendientes que bloqueen su funcionamiento.

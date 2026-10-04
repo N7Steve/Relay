@@ -84,3 +84,13 @@ no resolvería su contrato.
 
 La reversión de esta fase es de código: las tablas, filas y archivos no cambian
 de formato ni se migran. No se borran ni recodifican tipos históricos.
+
+## Historia del asistente externo tras fase 5
+
+Se conservan Family.assistant_type histórico, Chat/Message/ToolCall, instrucciones,
+modelos, contenido, estados y originales locales. La importación no encola
+respuestas ni reconstruye índices externos. Los ajustes de instancia y tokens
+OAuth/API siguen fuera del backup familiar; no se revocan ni borran por retirar
+MCP. Las filas cifradas external_assistant_* permanecen en la instancia sin un
+consumidor activo. La prueba de conversaciones recorre export → restore → export
+→ restore con una familia externa y un modelo histórico OpenClaw.

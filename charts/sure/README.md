@@ -1,3 +1,7 @@
+> Relay fase 5: MCP y el asistente externo están retirados. El chart conserva
+> el proxy de salida; las opciones antiguas no exponen puertos MCP.
+> La guía anterior está [archivada](../../docs/archive/sure/charts/README.md).
+
 # Sure Helm Chart
 
 Official Helm chart for deploying the Sure Rails application on Kubernetes. It supports web (Rails) and worker (Sidekiq) workloads, optional in-cluster PostgreSQL (CloudNativePG) and Redis subcharts for turnkey self-hosting, and production-grade features like pre-upgrade migrations, pod security contexts, HPAs, and optional ServiceMonitor.
@@ -12,7 +16,7 @@ Official Helm chart for deploying the Sure Rails application on Kubernetes. It s
 - Optional subcharts
   - CloudNativePG (operator) + Cluster CR for PostgreSQL with HA support
   - OT-CONTAINER-KIT redis-operator for Redis HA (replication by default, optional Sentinel)
-- Optional Pipelock AI agent security proxy (forward proxy + MCP reverse proxy with DLP, prompt injection, and tool poisoning detection)
+- Optional Pipelock AI agent security proxy (forward proxy for outbound HTTPS controls)
 - Security best practices: runAsNonRoot, readOnlyRootFilesystem, optional existingSecret, no hardcoded secrets
 - Scalability
   - Replicas (web/worker), resources, topology spread constraints
@@ -643,7 +647,6 @@ hpa:
 [Pipelock](https://github.com/luckyPipewrench/pipelock) is an optional security proxy that scans AI agent traffic for secret exfiltration, prompt injection, tool poisoning, and SSRF. It runs as a separate Deployment with two listeners:
 
 - **Forward proxy** (port 8888): Applies destination, SSRF, rate, budget, CONNECT-header DLP, and receipt controls to HTTPS tunnels from clients that honor the proxy variables. The chart doesn't configure TLS interception, so encrypted bodies stay opaque.
-- **MCP reverse proxy** (port 8889): Scans inbound MCP traffic from external AI assistants.
 
 The chart pins Pipelock 3.4.0 by tag and multi-architecture image digest. Read the [Pipelock release notes](https://github.com/luckyPipewrench/pipelock/releases/tag/v3.4.0) before overriding that pin.
 
@@ -668,26 +671,6 @@ pipelock:
     - "*.corp.example.com"
 ```
 
-### MCP tool redirect profiles
-
-Redirect profiles route matched MCP tool calls to an audited handler program instead of blocking. The handler returns a synthetic MCP response, keeping the agent's flow intact while enforcing policy:
-
-```yaml
-pipelock:
-  mcpToolPolicy:
-    enabled: true
-    action: redirect      # or use per-rule action overrides
-    rules:
-      - name: redirect-fetch
-        toolPattern: "^(fetch|web_fetch)$"
-        action: redirect
-        redirectProfile: safe-fetch
-    redirectProfiles:
-      safe-fetch:
-        exec: ["/pipelock", "internal-redirect", "fetch-proxy"]
-        reason: "Route fetch calls through audited proxy"
-```
-
 ### Request body scanning
 
 Request body scanning covers cleartext HTTP, reverse-proxy, and WebSocket bodies. It can't inspect encrypted HTTPS tunnel bodies unless you configure TLS interception and install Pipelock's CA in the client container.
@@ -706,7 +689,7 @@ Enabled by default with `action: warn`, matching Pipelock's balanced preset. Rev
 
 ### Health watchdog
 
-The wedge-detection watchdog returns 503 on `/health` when a subsystem heartbeat (proxy hot path, MCP listener, rules-engine reload watcher) goes stale. Enabled by default in pipelock; the chart exposes the controls so operators can opt into per-subsystem detail in the health payload:
+The wedge-detection watchdog returns 503 on `/health` when a subsystem heartbeat (proxy hot path, rules-engine reload watcher) goes stale. Enabled by default in pipelock; the chart exposes the controls so operators can opt into per-subsystem detail in the health payload:
 
 ```yaml
 pipelock:
@@ -784,30 +767,6 @@ pipelock doctor
 pipelock explain --config pipelock.yaml "https://example.com/path"
 ```
 
-### Exposing MCP to external AI assistants
-
-When running in Kubernetes, external AI agents need network access to the MCP reverse proxy port. Enable the Pipelock Ingress:
-
-```yaml
-pipelock:
-  enabled: true
-  ingress:
-    enabled: true
-    className: nginx
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt
-    hosts:
-      - host: pipelock.example.com
-        paths:
-          - path: /
-            pathType: Prefix
-    tls:
-      - hosts: [pipelock.example.com]
-        secretName: pipelock-tls
-```
-
-Security: The Ingress routes to port `mcp` (8889). Ensure `MCP_API_TOKEN` is set so the MCP endpoint requires authentication. The Ingress itself does not add auth.
-
 ### Metrics (Prometheus)
 
 Pipelock exposes `/metrics` on the forward proxy port. Enable scraping with a ServiceMonitor:
@@ -866,17 +825,6 @@ pipelock:
 
 These are appended verbatim to `pipelock.yaml`. Do not duplicate keys already rendered by the chart.
 
-### Pipelock requirement for external assistants
-
-The chart rejects an external AI assistant deployment without Pipelock by default:
-
-```yaml
-pipelock:
-  requireForExternalAssistant: true
-```
-
-`helm template` and `helm install` fail when `rails.externalAssistant.enabled=true` and `pipelock.enabled=false`. Set `requireForExternalAssistant: false` only when you accept direct external-assistant traffic. This guard can't detect direct MCP access configured through `MCP_API_TOKEN`.
-
 ## Security Notes
 
 - Never commit secrets in `values.yaml`. Use `rails.existingSecret` or a tool like Sealed Secrets.
@@ -900,7 +848,7 @@ See `values.yaml` for the complete configuration surface, including:
 - `migrations.*`: strategy job or initContainer
 - `simplefin.encryption.*`: enable + backfill options
 - `cronjobs.*`: custom CronJobs
-- `pipelock.*`: AI agent security proxy (forward proxy, MCP reverse proxy, DLP, injection scanning, request-body scanning, health watchdog, signed receipts, trusted domains, tool redirect profiles, logging, serviceMonitor, ingress, PDB, extraVolumes, extraVolumeMounts, extraConfig)
+- `pipelock.*`: AI agent security proxy (forward proxy, DLP, injection scanning, request-body scanning, health watchdog, signed receipts, trusted domains, logging, serviceMonitor, PDB, extraVolumes, extraVolumeMounts, extraConfig)
 - `service.*`, `ingress.*`, `serviceMonitor.*`, `hpa.*`
 
 ## Helm tests

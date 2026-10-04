@@ -1,6 +1,5 @@
 # ===========================================================================
-# Example Docker Compose file with Ollama (local LLM), OpenClaw (external AI
-# assistant), and Pipelock (agent security proxy)
+# Example Docker Compose file with Ollama (local LLM) and Pipelock (forward proxy)
 # ===========================================================================
 #
 # Purpose:
@@ -15,22 +14,10 @@
 #       that honor HTTPS_PROXY. HTTPS bodies remain encrypted because this
 #       example does not configure TLS interception. HTTPS_PROXY is cooperative;
 #       Docker Compose has no egress network policy.
-#     - MCP reverse proxy (port 8889): scans inbound AI traffic (DLP,
-#       prompt injection, tool poisoning, tool call policy). External AI
-#       clients should connect to Pipelock on port 8889 rather than
-#       directly to Sure's /mcp endpoint. Note: /mcp is still reachable
-#       on web port 3000 (auth token required); Pipelock adds scanning
-#       but Docker Compose cannot enforce network-level routing.
 #
 #   Ollama + Open WebUI — local LLM inference
 #   (optional, --profile local-ai)
 #     - Only starts when you run: docker compose --profile local-ai up
-#
-#   OpenClaw — external AI assistant
-#   (optional, --profile external-assistant)
-#     - Starts an OpenClaw locally for Sure's external assistant mode.
-#     - Set EXTERNAL_ASSISTANT_URL to http://openclaw:18789/v1/chat/completions
-#       for internal routing.
 #
 # Setup:
 # ------
@@ -79,11 +66,6 @@ x-rails-env: &rails_env
   REDIS_URL: redis://redis:6379/1
   GOOGLE_DRIVE_CLIENT_ID: ${GOOGLE_DRIVE_CLIENT_ID:-}
   GOOGLE_DRIVE_CLIENT_SECRET: ${GOOGLE_DRIVE_CLIENT_SECRET:-}
-  # MCP server endpoint — enables /mcp for external AI assistants (e.g. Claude, GPT).
-  # Set both values to activate. MCP_USER_EMAIL must match an existing user's email.
-  # External AI clients should connect via Pipelock (port 8889) for scanning.
-  MCP_API_TOKEN: ${MCP_API_TOKEN:-}
-  MCP_USER_EMAIL: ${MCP_USER_EMAIL:-}
   # Route outbound HTTPS through Pipelock for clients that respect HTTPS_PROXY.
   # This applies tunnel-level controls; encrypted HTTPS bodies are not inspected
   # unless you separately configure TLS interception and trust its CA.
@@ -127,16 +109,7 @@ x-rails-env: &rails_env
   EMBEDDING_DIMENSIONS: "1024"
   # NOTE: enabling OpenAI will incur costs when you use AI-related features in the app (chat, rules).  Make sure you have set appropriate spend limits on your account before adding this.
   #  OPENAI_ACCESS_TOKEN: ${OPENAI_ACCESS_TOKEN}
-  # External AI Assistant — delegates chat to a remote AI agent (e.g., OpenClaw).
-  # The agent calls back to Sure's /mcp endpoint for financial data.
-  # Set EXTERNAL_ASSISTANT_URL + TOKEN to activate, then either set ASSISTANT_TYPE=external
   # here (forces all families) or choose "External" in Settings > Self-Hosting > AI Assistant.
-  ASSISTANT_TYPE: ${ASSISTANT_TYPE:-}
-  EXTERNAL_ASSISTANT_URL: ${EXTERNAL_ASSISTANT_URL:-http://openclaw:18789/v1/chat/completions}
-  EXTERNAL_ASSISTANT_TOKEN: ${EXTERNAL_ASSISTANT_TOKEN:-}
-  EXTERNAL_ASSISTANT_AGENT_ID: ${EXTERNAL_ASSISTANT_AGENT_ID:-main}
-  EXTERNAL_ASSISTANT_SESSION_KEY: ${EXTERNAL_ASSISTANT_SESSION_KEY:-agent:main:main}
-  EXTERNAL_ASSISTANT_ALLOWED_EMAILS: ${EXTERNAL_ASSISTANT_ALLOWED_EMAILS:-}
 
 services:
   pipelock:
@@ -173,15 +146,6 @@ services:
       - "/etc/pipelock/pipelock.yaml"
       - "--listen"
       - "0.0.0.0:8888"
-      - "--mcp-listen"
-      - "0.0.0.0:8889"
-      - "--mcp-upstream"
-      - "http://web:3000/mcp"
-    ports:
-      # MCP reverse proxy — external AI assistants connect here
-      - "${MCP_PROXY_PORT:-8889}:8889"
-      # Uncomment to expose forward proxy endpoints (/health, /metrics, /stats):
-      # - "8888:8888"
     healthcheck:
       test: ["CMD", "/pipelock", "healthcheck", "--addr", "127.0.0.1:8888"]
       interval: 10s
@@ -254,67 +218,12 @@ services:
     networks:
       - relay_net
 
-  # OpenClaw gateway for Sure's "external assistant" mode.
-  # Based on OpenClaw Docker install docs:
-  # https://docs.openclaw.ai/install/docker
-  openclaw:
-    profiles:
-      - external-assistant
-    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
-    hostname: openclaw
-    restart: unless-stopped
-    init: true
-    environment:
-      HOME: /home/node
-      TERM: xterm-256color
-      TZ: ${OPENCLAW_TZ:-UTC}
-      OPENCLAW_GATEWAY_TOKEN: ${EXTERNAL_ASSISTANT_TOKEN:-changeme}
-      OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: ${OPENCLAW_ALLOW_INSECURE_PRIVATE_WS:-}
-    command:
-      [
-        "node",
-        "dist/index.js",
-        "gateway",
-        # OpenClaw may exit with "Missing config" on first boot in example setups.
-        # `--allow-unconfigured` keeps the gateway running until you complete `openclaw setup`.
-        "pass",
-        "--allow-unconfigured",
-        "--bind",
-        "${OPENCLAW_GATEWAY_BIND:-lan}",
-        "--port",
-        "18789",
-      ]
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    ports:
-      # Expose for local onboarding/debugging. Sure uses the internal service name.
-      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
-    volumes:
-      - openclaw-config:/home/node/.openclaw
-      - openclaw-workspace:/home/node/.openclaw/workspace
-    networks:
-      - relay_net
-
   web:
     image: ${RELAY_IMAGE:?Set RELAY_IMAGE to your built or published Relay image}
     volumes:
       - app-storage:/rails/storage
     ports:
-      # Web UI for browser access. Note: /mcp is also reachable on this port,
-      # bypassing Pipelock's MCP scanning (auth token is still required).
-      # For hardened deployments, use `expose: [3000]` instead and front
-      # the web UI with a separate reverse proxy.
-      #
+      # Web UI for browser access.
       # To also publish on IPv6 (dual-stack), uncomment the line below AND
       # set BINDING=:: in the environment block. See docs/hosting/docker.md
       # "Binding to IPv6" for details.
@@ -426,8 +335,6 @@ volumes:
   redis-data:
   ollama:
   ollama-webui:
-  openclaw-config:
-  openclaw-workspace:
 
 networks:
   relay_net:

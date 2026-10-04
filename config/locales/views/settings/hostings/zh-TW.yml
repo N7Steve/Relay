@@ -18,7 +18,6 @@ zh-TW:
           invite_only: 僅限邀請
       show:
         general: 一般設定
-        ai_assistant: AI 助手
         financial_data_providers: 金融資料供應商
         property_valuation_providers: 房產估價供應商
         sync_settings: 同步設定
@@ -60,32 +59,6 @@ zh-TW:
         title: 供應商選擇
         description: 選擇用於取得匯率和證券價格的服務。Yahoo Finance 是免費的且不需要 API 金鑰。Twelve Data 需要免費的 API 金鑰，但可能提供更廣的資料涵蓋範圍。
         securities_provider_label: 證券（股價）資料供應商
-      assistant_settings:
-        title: AI 助手
-        description: 選擇聊天助手的回應方式。內建模式會直接使用您設定的 LLM 供應商；外部模式則交給遠端 AI 代理處理，該代理可以透過 MCP 回頭呼叫 Relay 的財務工具。
-        type_label: 助手類型
-        type_builtin: 內建（直接使用 LLM）
-        type_external: 外部（遠端代理）
-        external_status: 外部助手端點
-        external_configured: 已設定
-        external_not_configured: 尚未設定。請在下方輸入網址與 Token，或設定 EXTERNAL_ASSISTANT_URL 與 EXTERNAL_ASSISTANT_TOKEN 環境變數。
-        env_notice: 助手類型已透過 ASSISTANT_TYPE 環境變數鎖定為「%{type}」。
-        env_configured_external: 已透過環境變數成功設定。
-        url_label: 端點網址
-        url_placeholder: https://your-agent-host/v1/chat
-        url_help: 代理 API 端點的完整網址，請向您的代理供應商索取。
-        token_label: API 權杖 (API Token)
-        token_placeholder: 輸入您的代理供應商給的 Token
-        token_help: 由您的外部代理提供的驗證 Token，每次請求都會以 Bearer token 的形式送出。
-        agent_id_label: Agent ID（選填）
-        agent_id_placeholder: main（預設）
-        agent_id_help: 當供應商託管多個代理時，用來指定其中一個。留白即使用預設值。
-        disconnect_title: 外部連線
-        disconnect_description: 移除外部助手連線，改回使用內建助手。
-        disconnect_button: 中斷連線
-        confirm_disconnect:
-          title: 要中斷外部助手嗎？
-          body: 這會移除已儲存的網址、Token 與 Agent ID，並切換回內建助手。日後輸入新的憑證就能重新連線。
       brand_fetch_settings:
         description: 輸入 Brandfetch 提供的 Client ID
         env_configured_message: 您已透過 BRAND_FETCH_CLIENT_ID 環境變數成功設定 Brandfetch Client ID。
@@ -240,8 +213,6 @@ zh-TW:
         invalid_anthropic_base_url: Anthropic Base URL 必須是 http(s) 網址。
         anthropic_model_required_for_base_url: 設定自訂 Base URL 時，必須一併指定 Anthropic 模型。
         scheduler_sync_failed: 設定已儲存，但同步排程更新失敗。請再試一次，或查看伺服器紀錄檔。
-      disconnect_external_assistant:
-        external_assistant_disconnected: 外部助手已中斷連線
       clear_cache:
         cache_cleared: 資料快取已清除。這可能需要一點時間才會完成。
       not_authorized: 您沒有權限執行此操作

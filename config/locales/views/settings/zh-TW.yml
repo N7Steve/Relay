@@ -269,26 +269,6 @@ zh-TW:
         sso_confirm_body: 確定要中斷您的 %{provider} 帳號連結嗎？之後再用該供應商登入就能重新連結。
         sso_confirm_button: 中斷連線
         sso_warning_message: 這是您唯一的登入方式。中斷連結前，建議先在安全性設定中設定密碼，否則您可能會無法登入自己的帳號。
-    mcp:
-      show:
-        page_title: MCP Server
-        connect_title: 連接 AI 助手
-        connect_subtitle: 將這個網址貼到 Claude.ai（或任何支援 MCP 的用戶端），即可連接到您的 Relay 帳號。
-        copy_url: 複製
-        copied: 已複製！
-        how_to_connect_title: 如何連接 Claude
-        step_1: 開啟 Claude.ai，前往 Settings → Customize → Connectors。
-        step_2: 點選「Add connector」，貼上上方的 MCP 伺服器網址。
-        step_3: 點選 Connect — 您會被導向 Relay 登入並授權存取。
-        step_4: 授權完成後，Claude 就能讀取您的帳戶、交易與餘額資料。
-        connected_title: 已連接的用戶端
-        connected_subtitle: 這些應用程式目前可以存取您的 Relay 資料。不再使用的請撤銷。
-        unknown_client: 未知用戶端
-        connected_ago: 於 %{time}前連接
-        revoke: 撤銷
-        revoke_confirm: 要撤銷此用戶端的存取權嗎？
-      revoke:
-        revoked: 連線已撤銷。
     settings_nav:
       accounts_label: 帳戶管理
       advanced_section_title: 進階設定
@@ -310,7 +290,6 @@ zh-TW:
       profile_label: 個人資料
       recurring_transactions_label: 定期交易
       rules_label: 自動化規則
-      mcp_label: MCP
       security_label: 安全性
       self_hosting_label: 自行代管
       sso_providers_label: SSO 供應商

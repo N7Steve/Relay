@@ -73,13 +73,13 @@ class Chat < ApplicationRecord
   end
 
   def needs_assistant_response?
-    conversation_messages.ordered.last.role != "assistant"
+    conversation_messages.where.not(status: "failed").ordered.last&.role != "assistant"
   end
 
   def retry_last_message!
     update!(error: nil)
 
-    last_message = conversation_messages.ordered.last
+    last_message = conversation_messages.where.not(status: "failed").ordered.last
 
     if last_message.present? && last_message.role == "user"
 
@@ -125,7 +125,8 @@ class Chat < ApplicationRecord
   def ask_assistant_later(message)
     clear_error
     pending = messages.create!(type: "AssistantMessage", content: "", ai_model: message.ai_model, status: :pending)
-    AssistantResponseJob.perform_later(message, pending)
+    AssistantResponseJob.perform_later(message, pending, backend: "builtin")
+    pending
   end
 
   def ask_assistant(message, assistant_message: nil)
@@ -250,6 +251,7 @@ class Chat < ApplicationRecord
     def classify_error_message(message)
       normalized_message = message.to_s.strip
       return I18n.t("chat.errors.default") if normalized_message.blank?
+      return normalized_message if normalized_message == I18n.t("chat.errors.legacy_request_stopped")
 
       if RATE_LIMIT_PATTERNS.any? { |pattern| normalized_message.match?(pattern) }
         I18n.t("chat.errors.rate_limited")

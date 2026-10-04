@@ -1,12 +1,8 @@
 {{- if .Values.pipelock.enabled }}
 {{- $fwdPort := 8888 -}}
-{{- $mcpPort := 8889 -}}
 {{- $pullPolicy := "IfNotPresent" -}}
 {{- if .Values.pipelock.forwardProxy -}}
 {{- $fwdPort = int (.Values.pipelock.forwardProxy.port | default 8888) -}}
-{{- end -}}
-{{- if .Values.pipelock.mcpProxy -}}
-{{- $mcpPort = int (.Values.pipelock.mcpProxy.port | default 8889) -}}
 {{- end -}}
 {{- if .Values.pipelock.image -}}
 {{- $pullPolicy = .Values.pipelock.image.pullPolicy | default "IfNotPresent" -}}
@@ -58,10 +54,6 @@ spec:
             - "/etc/pipelock/pipelock.yaml"
             - "--listen"
             - "0.0.0.0:{{ $fwdPort }}"
-            - "--mcp-listen"
-            - "0.0.0.0:{{ $mcpPort }}"
-            - "--mcp-upstream"
-            - {{ include "sure.pipelockUpstream" . | quote }}
           volumeMounts:
             - name: config
               mountPath: /etc/pipelock
@@ -72,9 +64,6 @@ spec:
           ports:
             - name: proxy
               containerPort: {{ $fwdPort }}
-              protocol: TCP
-            - name: mcp
-              containerPort: {{ $mcpPort }}
               protocol: TCP
           livenessProbe:
             httpGet:

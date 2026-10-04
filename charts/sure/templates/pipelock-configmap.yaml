@@ -37,22 +37,6 @@
 {{- $wsIdleTimeout = int (.Values.pipelock.websocketProxy.idleTimeoutSeconds | default 300) -}}
 {{- $wsOriginPolicy = .Values.pipelock.websocketProxy.originPolicy | default "rewrite" -}}
 {{- end -}}
-{{- $mcpPolicyEnabled := true -}}
-{{- $mcpPolicyAction := "warn" -}}
-{{- if .Values.pipelock.mcpToolPolicy -}}
-{{- if hasKey .Values.pipelock.mcpToolPolicy "enabled" -}}
-{{- $mcpPolicyEnabled = .Values.pipelock.mcpToolPolicy.enabled -}}
-{{- end -}}
-{{- $mcpPolicyAction = .Values.pipelock.mcpToolPolicy.action | default "warn" -}}
-{{- end -}}
-{{- $mcpBindingEnabled := true -}}
-{{- $mcpBindingAction := "warn" -}}
-{{- if .Values.pipelock.mcpSessionBinding -}}
-{{- if hasKey .Values.pipelock.mcpSessionBinding "enabled" -}}
-{{- $mcpBindingEnabled = .Values.pipelock.mcpSessionBinding.enabled -}}
-{{- end -}}
-{{- $mcpBindingAction = .Values.pipelock.mcpSessionBinding.unknownToolAction | default "warn" -}}
-{{- end -}}
 {{- $chainEnabled := true -}}
 {{- $chainAction := "warn" -}}
 {{- $chainWindow := 20 -}}
@@ -163,43 +147,8 @@ data:
       enabled: true
       action: warn
       include_defaults: true
-    mcp_input_scanning:
-      enabled: true
-      action: block
-      on_parse_error: block
-    mcp_tool_scanning:
-      enabled: true
-      action: warn
-      detect_drift: true
     mcp_tool_policy:
-      enabled: {{ $mcpPolicyEnabled }}
-      action: {{ $mcpPolicyAction }}
-{{- if and .Values.pipelock.mcpToolPolicy .Values.pipelock.mcpToolPolicy.rules }}
-      rules:
-{{- range .Values.pipelock.mcpToolPolicy.rules }}
-        - name: {{ required "pipelock.mcpToolPolicy.rules[].name is required" .name | quote }}
-          tool_pattern: {{ required "pipelock.mcpToolPolicy.rules[].toolPattern is required" .toolPattern | quote }}
-{{- if .argPattern }}
-          arg_pattern: {{ .argPattern | quote }}
-{{- end }}
-{{- if .argKey }}
-          arg_key: {{ .argKey | quote }}
-{{- end }}
-{{- if .action }}
-          action: {{ .action | quote }}
-{{- end }}
-{{- if .redirectProfile }}
-          redirect_profile: {{ .redirectProfile | quote }}
-{{- end }}
-{{- end }}
-{{- end }}
-{{- if and .Values.pipelock.mcpToolPolicy .Values.pipelock.mcpToolPolicy.redirectProfiles }}
-      redirect_profiles:
-        {{- toYaml .Values.pipelock.mcpToolPolicy.redirectProfiles | nindent 8 }}
-{{- end }}
-    mcp_session_binding:
-      enabled: {{ $mcpBindingEnabled }}
-      unknown_tool_action: {{ $mcpBindingAction }}
+      enabled: false
     tool_chain_detection:
       enabled: {{ $chainEnabled }}
       action: {{ $chainAction }}

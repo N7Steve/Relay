@@ -28,7 +28,6 @@ de:
         confirm_clear_cache:
           title: Daten-Cache leeren?
           body: Bist du sicher, dass du den Daten-Cache leeren möchtest? Dadurch werden alle Wechselkurse, Wertpapierpreise, Kontostände und andere Daten entfernt. Diese Aktion kann nicht rückgängig gemacht werden.
-        ai_assistant: KI-Assistent
         property_valuation_providers: Anbieter für Immobilienbewertung
       provider_selection:
         title: Anbieterauswahl
@@ -177,34 +176,6 @@ de:
         model_label: Standardmodell (optional)
         model_placeholder: claude-sonnet-4-6 (Standard)
         title: Anthropic (Claude)
-      assistant_settings:
-        agent_id_help: Leitet an einen bestimmten Agenten weiter, wenn der Anbieter mehrere betreibt. Leer lassen für den Standard.
-        agent_id_label: Agenten-ID (optional)
-        agent_id_placeholder: main (Standard)
-        confirm_disconnect:
-          body: Damit werden die gespeicherte URL, der Token und die Agenten-ID entfernt und der integrierte Assistent aktiviert. Du kannst später mit neuen Zugangsdaten wieder verbinden.
-          title: Externen Assistenten trennen?
-        description: Leg fest, wie der Chat-Assistent antwortet. „Integriert“ nutzt deinen eingerichteten LLM-Anbieter direkt. „Extern“ gibt an einen entfernten KI-Agenten ab, der über MCP auf die Finanzfunktionen von Relay zugreifen kann.
-        disconnect_button: Trennen
-        disconnect_description: Entfernt die Verbindung zum externen Assistenten und schaltet zurück auf den integrierten.
-        disconnect_title: Externe Verbindung
-        env_configured_external: Über Umgebungsvariablen eingerichtet.
-        env_notice: Die Art des Assistenten ist über die Umgebungsvariable ASSISTANT_TYPE auf „%{type}“ festgelegt.
-        external_configured: Eingerichtet
-        external_not_configured: Nicht eingerichtet. Trag URL und Token unten ein oder setz EXTERNAL_ASSISTANT_URL und EXTERNAL_ASSISTANT_TOKEN.
-        external_status: Endpunkt des externen Assistenten
-        title: KI-Assistent
-        token_help: Der Token deines externen Agenten. Er wird bei jeder Anfrage als Bearer-Token mitgeschickt.
-        token_label: API-Token
-        token_placeholder: Token deines Agenten-Anbieters eintragen
-        type_builtin: Integriert (direktes LLM)
-        type_external: Extern (entfernter Agent)
-        type_label: Art des Assistenten
-        url_help: Die vollständige URL zum API-Endpunkt deines Agenten. Die bekommst du von deinem Anbieter.
-        url_label: Endpunkt-URL
-        url_placeholder: https://dein-agent-host/v1/chat
-      disconnect_external_assistant:
-        external_assistant_disconnected: Externer Assistent getrennt
       ensure_admin:
         not_authorized: Dazu bist du nicht berechtigt
       ensure_super_admin_for_onboarding:

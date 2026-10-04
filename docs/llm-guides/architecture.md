@@ -129,6 +129,12 @@ settings default off; credentials do not activate access. AI uses its existing
 local accounting. See the [phase 2 transition](../migration/pruning-phase-2.md)
 before deploying existing installations, especially those using Drive/Brandfetch.
 
+MCP, dynamic registration/discovery and external assistant transport were removed
+in pruning phase 5. Builtin chat/tools, OAuth, API keys and native client auth
+remain. Historical external settings and family values are inert; old unmarked
+jobs stop without redirecting their contents to another provider. No tokens are
+revoked or shared queues purged. See [phase 5](../migration/pruning-phase-5.md).
+
 Remote monitoring and LLM evaluation runtime were removed in pruning phase 3.
 `LocalDiagnostics` records failures through Rails logs and `DebugLogEntry.capture`.
 Providers still record `LlmUsage` locally and retain their AI capability guards.

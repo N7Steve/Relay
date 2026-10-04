@@ -4,7 +4,7 @@ class Family::Backup::ConversationRecordsTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   setup do
-    @source = Family.create!(name: "Historical conversations", currency: "EUR")
+    @source = Family.create!(name: "Historical conversations", currency: "EUR", assistant_type: "external")
     @source_user = @source.users.create!(email: "historical@example.com", password: "password123", role: "admin")
     @target = Family.create!(name: "Conversation destination")
     @target_user = @target.users.create!(email: "conversation-target@example.com", password: "password123", role: "admin")
@@ -13,7 +13,7 @@ class Family::Backup::ConversationRecordsTest < ActiveSupport::TestCase
     @message_id = SecureRandom.uuid
     Message.insert_all!([ {
       id: @message_id, chat_id: @chat.id, type: "AssistantMessage", content: "Historical answer",
-      ai_model: "historical-model", status: "complete", reasoning: false,
+      ai_model: "openclaw/historical", status: "complete", reasoning: false,
       created_at: Time.current, updated_at: Time.current
     } ])
     ToolCall.insert_all!([ {
@@ -56,6 +56,23 @@ class Family::Backup::ConversationRecordsTest < ActiveSupport::TestCase
     assert_equal "Historical answer", message.content
     assert_instance_of ToolCall::Function, message.tool_calls.sole
     assert_equal({ "answer" => "Stored result" }, message.tool_calls.sole.function_result)
+  end
+
+  test "stopped blank placeholders round trip without jobs or content loss" do
+    Message.insert_all!([ {
+      id: SecureRandom.uuid, chat_id: @chat.id, type: "AssistantMessage", content: "",
+      ai_model: "external-agent", status: "failed", reasoning: false,
+      created_at: Time.current, updated_at: Time.current
+    } ])
+
+    assert_no_enqueued_jobs do
+      result = Family::DataImporter.new(@target, Family::Backup.new(@source).generate_ndjson).import!
+      assert_equal "matched", result[:verification]["status"]
+    end
+    stopped = @target_user.chats.sole.messages.failed.sole
+    assert_equal "", stopped.content
+    assert_equal "external-agent", stopped.ai_model
+    assert_equal "Historical answer", @target_user.chats.sole.messages.complete.sole.content
   end
 
   test "duplicate conversation IDs are rejected using the stable backup name" do

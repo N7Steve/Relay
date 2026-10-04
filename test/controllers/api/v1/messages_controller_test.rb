@@ -59,24 +59,34 @@ class Api::V1::MessagesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "should retry last assistant message" do
-    skip "Retry functionality needs debugging"
+  test "API key retry reuses the original prompt and preserves failed history" do
+    key = ApiKey.create!(user: @user, name: "Retry key", scopes: [ "read_write" ], display_key: "retry_#{SecureRandom.hex(8)}")
+    prompt = @chat.messages.create!(type: "UserMessage", content: "Original question", ai_model: "gpt-4.1")
+    failed = @chat.messages.where(type: "AssistantMessage", status: :pending).ordered.last
+    AssistantResponseJob.perform_now(prompt, failed)
+    clear_enqueued_jobs
 
-    # Create an assistant message to retry
-    assistant_message = @chat.messages.create!(
-      type: "AssistantMessage",
-      content: "Previous response",
-      ai_model: "gpt-4"
-    )
-
-    assert_enqueued_with(job: AssistantResponseJob) do
-      post "/api/v1/chats/#{@chat.id}/messages/retry",
-        headers: bearer_auth_header(@write_token)
+    assert_difference "AssistantMessage.count", 1 do
+      assert_enqueued_jobs 1, only: AssistantResponseJob do
+        post "/api/v1/chats/#{@chat.id}/messages/retry", headers: { "X-Api-Key" => key.display_key }
+      end
     end
 
     assert_response :accepted
-    response_body = JSON.parse(response.body)
-    assert response_body["message_id"].present?
+    pending = @chat.messages.find(response.parsed_body["message_id"])
+    assert pending.pending?
+    assert_equal prompt.ai_model, pending.ai_model
+    assert failed.reload.failed?
+    assert_equal "", failed.content
+    assert_equal "Original question", prompt.reload.content
+  end
+
+  test "read-only API keys cannot retry responses" do
+    key = ApiKey.create!(user: @user, name: "Read retry key", scopes: [ "read" ], display_key: "read_retry_#{SecureRandom.hex(8)}")
+    assert_no_enqueued_jobs do
+      post "/api/v1/chats/#{@chat.id}/messages/retry", headers: { "X-Api-Key" => key.display_key }
+    end
+    assert_response :forbidden
   end
 
   test "should not retry if no assistant message exists" do

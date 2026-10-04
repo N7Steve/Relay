@@ -1,9 +1,9 @@
 class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
-  before_action :default_mcp_scope, only: [ :new, :create ]
+  before_action :default_application_scope, only: [ :new, :create ]
 
   private
 
-    def default_mcp_scope
+    def default_application_scope
       return if params[:scope].present?
 
       application = Doorkeeper::Application.find_by(uid: params[:client_id])

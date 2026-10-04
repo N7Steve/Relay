@@ -229,26 +229,6 @@ es:
         sso_confirm_body: ¿Estás seguro de que deseas desconectar tu cuenta de %{provider}? Podrás volver a conectarla más tarde iniciando sesión de nuevo con ese proveedor.
         sso_confirm_button: Desconectar
         sso_warning_message: Este es tu único método de acceso. Deberías establecer una contraseña en tus ajustes de seguridad antes de desconectarlo, de lo contrario podrías perder el acceso a tu cuenta.
-    mcp:
-      show:
-        page_title: Servidor MCP
-        connect_title: Conecta un asistente de IA
-        connect_subtitle: Pega esta URL en Claude.ai (o en cualquier cliente compatible con MCP) para conectarlo a tu cuenta de Relay.
-        copy_url: Copiar
-        copied: ¡Copiado!
-        how_to_connect_title: Cómo conectar Claude
-        step_1: Abre Claude.ai y ve a Ajustes → Integraciones.
-        step_2: Haz clic en "Añadir integración" y pega la URL del servidor MCP de arriba.
-        step_3: 'Haz clic en Conectar: se te redirigirá a Relay para iniciar sesión y autorizar el acceso.'
-        step_4: Una vez autorizado, Claude podrá leer tus cuentas, transacciones y datos de saldo.
-        connected_title: Clientes conectados
-        connected_subtitle: Estas aplicaciones tienen acceso actualmente a tus datos de Relay. Revoca las que ya no uses.
-        unknown_client: Cliente desconocido
-        connected_ago: Conectado hace %{time}
-        revoke: Revocar
-        revoke_confirm: ¿Revocar el acceso de este cliente?
-      revoke:
-        revoked: Conexión revocada.
     settings_nav:
       personal_family_section_title: Personal y familia
       accounts_data_section_title: Cuentas y datos
@@ -276,7 +256,6 @@ es:
       recurring_transactions_label: Recurrentes
       scheduled_payments_label: Pagos Programados
       rules_label: Reglas
-      mcp_label: MCP
       security_label: Seguridad
       self_hosting_label: Configuración de instancia
       sso_providers_label: Proveedores SSO
