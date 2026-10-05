@@ -29,22 +29,6 @@ nl:
         label: Client ID
         placeholder: Voer hier uw Client ID in
         title: Brandfetch instellingen
-      openai_settings:
-        description: Voer het toegangstoken in en configureer optioneel een aangepaste OpenAI-compatibele provider
-        env_configured_message: Succesvol geconfigureerd via omgevingsvariabelen.
-        access_token_label: Toegangstoken
-        access_token_placeholder: Voer hier uw toegangstoken in
-        uri_base_label: API basis-URL (optioneel)
-        uri_base_placeholder: "https://api.openai.com/v1 (standaard)"
-        model_label: Model (optioneel)
-        model_placeholder: "gpt-4.1 (standaard)"
-        json_mode_label: JSON modus
-        json_mode_auto: Auto (aanbevolen)
-        json_mode_strict: Strikt (beste voor denkende modellen)
-        json_mode_none: Geen (beste voor standaard modellen)
-        json_mode_json_object: JSON Object
-        json_mode_help: "Strikte modus werkt het beste met denkende modellen (qwen-thinking, deepseek-reasoner). Geen modus werkt het beste met standaard modellen (llama, mistral, gpt-oss)."
-        title: OpenAI
       update:
         failure: Ongeldige instellingswaarde
         success: Instellingen bijgewerkt

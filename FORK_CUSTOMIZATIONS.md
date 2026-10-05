@@ -191,8 +191,9 @@ estabilizar la instalación, sin reactivar sus SDK por variables de entorno.
 Relay empieza en 0.1.0. Las plantillas Docker exigen imagen, contraseña y clave
 explícitas, usan `relay_production`/`relay_user` y permiten build desde Git con
 `compose.source.yml`. La instalación Sure de TrueNAS 25.10.4 no se modifica.
-Los clientes web/PWA, Flutter, Tauri y Apple conservan sus funciones, reciben
-marca Relay y mantienen paquetes, callbacks e identificadores externos actuales.
+Los clientes web/PWA y Flutter Android reciben marca Relay y mantienen paquetes,
+callbacks e identificadores externos actuales; Tauri, SwiftUI y los destinos
+iOS/web de Flutter se retiraron en la fase 12.
 El chart Helm y su CI se retiraron en la fase 11 (recuperables en Git); no
 reactivar checks que acoplen versiones Relay a Kubernetes en el alcance Docker.
 `compose.truenas.folder.yml` instala desde un solo YAML con carpetas en
@@ -230,14 +231,12 @@ Este bloque se incorporó después del HEAD usado para el inventario original y 
 ### Comportamiento propio
 
 - La administración global de usuarios explica que muestra usuarios de toda la instancia, no sólo de la familia activa.
-- Cada familia muestra número de miembros, cuentas y transacciones, estado de demo/suscripción, familia actual y el rol del usuario actual.
-- Las familias demo se reconocen por la clave de monitorización demo, sin depender del nombre visible.
+- Cada familia muestra número de miembros, cuentas y transacciones, familia actual y el rol del usuario actual.
 - Se añade acceso directo a la gestión de la familia actual y contexto sobre qué acciones pertenecen a administración de instancia o de familia.
 - El formulario de invitación explica los roles, selecciona `member` por defecto y aclara que `super_admin` no se concede desde una invitación familiar.
 - El perfil explica la política de compartir y enlaza a la administración adecuada.
 - Al eliminar al último usuario se advierte que también desaparecerá la familia y se muestran las cuentas/transacciones afectadas.
 - El borrado del último usuario exige escribir el nombre exacto de la familia.
-- El borrado permanente de una familia demo elimina de forma segura la clave demo antes de destruir el resto de claves, evitando la validación que impedía la operación.
 - Los fallos de borrado se registran como diagnóstico de soporte mediante `DebugLogEntry`.
 
 ### Archivos
@@ -775,3 +774,17 @@ de cron retirados. Al integrar upstream no reintroducir Helm, esos jobs ni las
 guías de módulos retirados; los contratos externos `sure://`, `sureapp://`,
 `SureImport` e identificadores de paquetes siguen preservados.
 Ver [fase 11](docs/migration/pruning-phase-11.md).
+
+## Poda fase 12 — refinado final
+
+Retirados la familia demo (generador, refresco diario, mailer, ajustes, reset con
+datos de ejemplo, banner y clave API de monitorización), las valoraciones
+RentCast/Realie (proveedores, alta AVM de inmuebles, cron, contadores, columnas y
+capacidad `property_valuations`), el escritorio macOS con su SSO `sure://`, la app
+SwiftUI, los destinos iOS/web de Flutter, las notificaciones push APNs con su API,
+las gems de profiling y restos sin uso: controladores Stimulus, imágenes, helper,
+caché IA muerta, interfaces de test y 7.150 traducciones de módulos retirados.
+Se conservan Flutter Android (`sureapp://`), la API v1 para clientes propios
+futuros, Lookbook, idiomas y el filtro de categorización automática (Bayes).
+Al integrar upstream no reintroducir esos módulos. Ver
+[fase 12](docs/migration/pruning-phase-12.md).

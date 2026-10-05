@@ -224,21 +224,6 @@ class ApiKeyTest < ActiveSupport::TestCase
     assert monitoring_key.valid?
   end
 
-  test "visible scope excludes the demo monitoring key" do
-    # The demo key's exclusion from `.visible` is the revocation guard used by
-    # Settings::ApiKeysController#destroy. Lock the invariant so broadening the
-    # scope can't silently make the demo key revocable.
-    demo_key = ApiKey.create!(
-      user: @user,
-      name: "Demo Monitoring Key",
-      display_key: ApiKey::DEMO_MONITORING_KEY,
-      scopes: [ "read" ]
-    )
-
-    refute_includes ApiKey.visible, demo_key
-    refute_includes @user.api_keys.active.visible, demo_key
-  end
-
   test "should include active api keys in active scope" do
     @api_key.save!
     active_keys = ApiKey.active
@@ -279,43 +264,6 @@ class ApiKeyTest < ActiveSupport::TestCase
     @api_key.scopes = [ "invalid_scope" ]
     assert_not @api_key.valid?
     assert_includes @api_key.errors[:scopes], "must be either 'read' or 'read_write'"
-  end
-
-  test "should prevent destroying demo monitoring api key" do
-    demo_key = ApiKey.create!(
-      user: @user,
-      name: "Demo Monitoring Key",
-      display_key: ApiKey::DEMO_MONITORING_KEY,
-      scopes: [ "read" ]
-    )
-
-    assert_raises(ActiveRecord::RecordNotDestroyed) { demo_key.destroy! }
-    assert ApiKey.exists?(demo_key.id)
-  end
-
-  test "should prevent revoking demo monitoring api key" do
-    demo_key = ApiKey.create!(
-      user: @user,
-      name: "Demo Monitoring Key",
-      display_key: ApiKey::DEMO_MONITORING_KEY,
-      scopes: [ "read" ]
-    )
-
-    assert_raises(ActiveRecord::RecordNotDestroyed) { demo_key.revoke! }
-    demo_key.reload
-    assert_nil demo_key.revoked_at
-  end
-
-  test "should prevent deleting demo monitoring api key" do
-    demo_key = ApiKey.create!(
-      user: @user,
-      name: "Demo Monitoring Key",
-      display_key: ApiKey::DEMO_MONITORING_KEY,
-      scopes: [ "read" ]
-    )
-
-    assert_raises(ActiveRecord::RecordNotDestroyed) { demo_key.delete }
-    assert ApiKey.exists?(demo_key.id)
   end
 
   test "should allow destroying non-demo api key" do

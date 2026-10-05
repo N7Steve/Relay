@@ -58,7 +58,7 @@ class Settings::ApiKeysControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    new_key = @user.api_keys.active.visible.find_by(name: "Brand New Key")
+    new_key = @user.api_keys.active.find_by(name: "Brand New Key")
     assert new_key.present?
     assert_redirected_to settings_api_key_path(new_key, newly_created: true)
 
@@ -177,24 +177,6 @@ class Settings::ApiKeysControllerTest < ActionDispatch::IntegrationTest
     refute key2.revoked?
   end
 
-  test "destroy cannot revoke demo monitoring key" do
-    # set_api_key scopes to .visible which EXCLUDES the demo key, so the
-    # demo key id is not found by the controller and the request 404s
-    # before reaching the cannot_revoke branch.
-    demo_key = ApiKey.create!(
-      user: @user,
-      name: "Demo Monitoring Key",
-      display_key: ApiKey::DEMO_MONITORING_KEY,
-      scopes: [ "read" ]
-    )
-
-    delete settings_api_key_path(demo_key)
-    assert_response :not_found
-
-    demo_key.reload
-    refute demo_key.revoked?
-  end
-
   test "create generates a secure random API key" do
     post settings_api_keys_path, params: {
       api_key: {
@@ -203,7 +185,7 @@ class Settings::ApiKeysControllerTest < ActionDispatch::IntegrationTest
       }
     }
 
-    created_key = @user.api_keys.active.visible.find_by(name: "Random Key Test")
+    created_key = @user.api_keys.active.find_by(name: "Random Key Test")
     assert created_key.present?
     assert_redirected_to settings_api_key_path(created_key, newly_created: true)
     assert_includes created_key.scopes, "read"
@@ -230,7 +212,7 @@ class Settings::ApiKeysControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    new_key = member.api_keys.active.visible.find_by(name: "Member Key")
+    new_key = member.api_keys.active.find_by(name: "Member Key")
     assert new_key.present?
     assert_redirected_to settings_api_key_path(new_key, newly_created: true)
   end

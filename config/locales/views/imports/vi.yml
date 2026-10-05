@@ -209,7 +209,6 @@ vi:
       tags: "Nhãn"
       rules: "Quy tắc"
       merchants: "Nhà cung cấp"
-      recurring_transactions: "Giao dịch định kỳ"
       transfers: "Chuyển khoản"
       rejected_transfers: "Chuyển khoản bị từ chối"
       trades: "Giao dịch chứng khoán"

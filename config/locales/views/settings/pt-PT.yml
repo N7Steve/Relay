@@ -82,47 +82,10 @@ pt-PT:
           account: "account=%{value}"
           user: "user=%{value}"
           account_provider: "account_provider=%{value}"
-    llm_usages:
-      show:
-        page_title: "Utilização e custos dos modelos de IA"
-        subtitle: "Acompanhe a utilização da IA e os custos previstos"
-        start_date: "Data de início"
-        end_date: "Data de fim"
-        filter: "Filtrar"
-        total_requests: "Total de Pedidos"
-        total_tokens: "Total de Tokens"
-        prompt: "pré-preenchimento"
-        completion: "conclusão"
-        total_cost: "Custo Total"
-        avg_cost_per_request: "Custo Médio/Pedido"
-        based_on_requests: "Com base em %{with_cost} de %{total} pedidos com dados de custo"
-        cost_by_operation: "Custo por Operação"
-        cost_by_model: "Custo por Modelo"
-        recent_usage: "Utilização Recente"
-        col_date: "Data"
-        col_operation: "Operação"
-        col_model: "Modelo"
-        col_tokens: "Tokens"
-        col_cost: "Custo"
-        failed: "Falhadas"
-        no_usage_data: "Não foram encontrados dados de utilização para o período selecionado"
-        cost_estimates_title: "Sobre as Estimativas de Custo"
-        cost_estimates_description: "Os custos são estimados com base nos preços publicados dos serviços, verificados pela última vez em %{date}. Os custos reais podem variar. O preço é por 1 milhão de tokens e varia consoante o modelo. Os modelos personalizados ou autoalojados mostrarão \"N/A\" e não estão incluídos nos totais de custo."
     ai_prompts:
       show:
-        page_title: Prompts de IA
         openai_label: OpenAI
-        disable_ai: Desativar Assistente de IA
         prompt_instructions: Instruções do Prompt
-        main_system_prompt:
-          title: Prompt de Sistema Principal
-          subtitle: Instruções centrais que definem como o assistente de IA se comporta em todas as conversas de chat
-        transaction_categorizer:
-          title: Categorizador de Transações
-          subtitle: A IA categoriza automaticamente as suas transações com base nas suas categorias definidas
-        merchant_detector:
-          title: Detetor de Comerciantes
-          subtitle: A IA identifica e enriquece os dados das transações com informação sobre o comerciante
     appearances:
       show:
         page_title: Aparência
@@ -217,9 +180,6 @@ pt-PT:
         confirm_reset:
           body: Tem a certeza de que pretende repor a sua conta? Isto eliminará todas as suas contas, categorias, comerciantes, etiquetas e outros dados. Esta ação é irreversível.
           title: Repor conta?
-        confirm_reset_with_sample_data:
-          body: Tem a certeza de que pretende repor a sua conta e carregar dados de exemplo? Isto eliminará os seus dados existentes e substituí-los-á por dados de demonstração para poder explorar o Relay em segurança.
-          title: Repor conta e carregar dados de exemplo?
         confirm_remove_invitation:
           body: Tem a certeza de que pretende remover o convite para %{email}?
           title: Remover Convite
@@ -232,8 +192,6 @@ pt-PT:
           os seus dados. Esta ação é irreversível.
         reset_account: Repor conta
         reset_account_warning: Repor a sua conta eliminará todas as suas contas financeiras, categorias, comerciantes, etiquetas e outros dados, mas manterá a sua conta de utilizador intacta.
-        reset_account_with_sample_data: Repor e pré-carregar
-        reset_account_with_sample_data_warning: Elimine todos os seus dados existentes e carregue depois novos dados de exemplo para poder explorar um ambiente pré-preenchido.
         email: Email
         first_name: Primeiro Nome
         group_form_input_placeholder: Introduza o nome do grupo
@@ -390,79 +348,6 @@ pt-PT:
         message: "A sincronização bancária necessita de encriptação do Active Record configurada. Defina primary_key, deterministic_key e key_derivation_salt nas suas credenciais do Rails ou variáveis de ambiente."
       provider_form:
         save_and_connect: "Guardar e ligar"
-      coinbase_panel:
-        setup_instructions: "Para ligar a Coinbase:"
-        step1_html: Aceda a <a href="https://portal.cdp.coinbase.com/projects/api-keys" target="_blank" rel="noopener noreferrer" class="text-primary underline">Definições da API Coinbase</a>
-        step2: Crie uma nova chave de API com permissões apenas de leitura (ver contas, ver transações)
-        step3: Copie a sua chave de API e segredo de API e cole-os abaixo
-        api_key_label: Chave de API
-        api_key_placeholder: Introduza a sua chave de API Coinbase
-        api_secret_label: Segredo de API
-        api_secret_placeholder: Introduza o seu segredo de API Coinbase
-        connect_button: Ligar Coinbase
-        syncing: A sincronizar...
-        sync: Sincronizar
-        disconnect: Desligar
-        disconnect_confirm: Tem a certeza de que pretende desligar esta ligação Coinbase? As suas contas sincronizadas tornar-se-ão contas manuais.
-      binance_panel:
-        setup_instructions: "Para ligar a Binance, crie uma chave de API apenas de leitura:"
-        step1_html: 'Aceda a <a href="https://www.binance.com/en/my/settings/api-management" target="_blank" rel="noopener noreferrer" class="underline">Gestão de API Binance</a>'
-        step2: "Crie uma nova chave de API apenas com a permissão Ativar Leitura"
-        step3: "Cole abaixo a sua Chave de API e Segredo"
-        no_withdraw_title: "Apenas chave de leitura"
-        no_withdraw_body: "Não ative as permissões de levantamento ao criar a sua chave de API Binance. O Relay precisa apenas de acesso de leitura."
-        ip_hint_title: "Lista de permissões de IP necessária"
-        ip_hint_body: "Adicione o IP de saída do servidor da aplicação à lista de permissões da Chave de API Binance:"
-        ip_hint_contact_admin: "Contacte o seu administrador para obter o endereço IP de saída do servidor da aplicação."
-        api_key_label: Chave de API
-        api_key_placeholder: Cole a sua Chave de API Binance
-        api_secret_label: Segredo de API
-        api_secret_placeholder: Cole o seu Segredo de API Binance
-        connect_button: Ligar Binance
-        syncing: A sincronizar...
-        sync: Sincronizar
-        historical_import: "Definições de Importação Histórica"
-        sync_start_date_label: "Importar dados desde"
-        sync_start_date_help: "Selecione até que ponto no passado pretende obter as negociações históricas."
-        disconnect: Desligar
-        disconnect_confirm: "Tem a certeza de que pretende desligar a Binance?"
-      kraken_panel:
-        step1_html: 'Aceda a <a href="https://pro.kraken.com/app/settings/api" target="_blank" rel="noopener noreferrer" class="underline">Definições de API Kraken</a>'
-        step2: "Crie uma chave de API apenas com Query Funds e Query Closed Orders & Trades."
-        step3: "Cole abaixo a chave de API e a chave privada."
-        read_only_title: "Apenas sincronização de exchange de leitura"
-        read_only_body: "Não conceda permissões de negociação, cancelamento, levantamento, exportação, ledger, Earn, staking ou transferência. O Relay importa apenas saldos, posições e execuções de negociação à vista."
-        default_connection_name: Kraken
-        add_connection: Adicionar ligação Kraken
-        update_connection: Atualizar ligação
-        connection_name_label: Nome da ligação
-        connection_name_placeholder: Kraken Principal
-        api_key_label: Chave de API
-        api_key_placeholder: Cole a sua chave de API Kraken
-        keep_api_key_placeholder: Deixe em branco para manter a chave de API existente
-        api_secret_label: Chave Privada
-        api_secret_placeholder: Cole a sua chave privada Kraken
-        keep_api_secret_placeholder: Deixe em branco para manter a chave privada existente
-        setup_accounts: Configurar conta
-        syncing: A sincronizar...
-        sync: Sincronizar
-        disconnect: Desligar
-        disconnect_confirm: "Tem a certeza de que pretende desligar %{name}?"
-      onchain_wallet_panel:
-        add_wallet: Adicionar carteira
-        advanced: Avançado
-        disconnect_all: Desligar todas as carteiras
-        disconnect_all_confirm: Isto remove todos os endereços monitorizados e as respetivas contas. Continuar?
-        etherscan_api_key_label: Chave de API Etherscan (opcional)
-        etherscan_api_key_placeholder: Cole uma chave de API Etherscan
-        etherscan_hint: As leituras do Ethereum funcionam sem chave. Adicionar uma chave Etherscan apenas aumenta o limite de frequência para o Ethereum.
-        keep_etherscan_api_key: Deixe em branco para manter a chave existente
-        manage_wallets: Gerir carteiras
-        keyless_body: O Relay apenas lê dados públicos da cadeia. Não estão envolvidas chaves, frases-semente ou assinaturas, e nada pode ser gasto.
-        keyless_title: Apenas leitura, sem necessidade de chaves
-        save: Guardar
-        sync_start_date_hint: As transferências anteriores a esta data são ignoradas. Deixe em branco para importar tudo o que o explorador reportar.
-        sync_start_date_label: Ignorar transferências anteriores a
       enable_banking_panel:
         callback_url_instruction: "Para o URL de callback, utilize %{callback_url}."
         connection_error: Erro de Ligação
@@ -493,115 +378,5 @@ pt-PT:
         syncing: "A sincronizar"
         select_country: "Selecione o país..."
         country_label: "País"
-      lunchflow_panel:
-        step_1_html: "Aceda a %{link} e crie uma chave de API."
-        step_2: "Cole abaixo a sua chave e ligue."
-        step_3: "Depois, aceda a Contas para ligar as suas contas sincronizadas."
-        api_key_label: "Chave de API"
-        api_key_placeholder_new: "Cole aqui a chave de API"
-        api_key_placeholder_update: "Introduza a nova chave de API para atualizar"
-        base_url_label: "URL Base (Opcional)"
-        base_url_placeholder: "https://lunchflow.app/api/v1 (predefinido)"
-        save_and_connect: "Guardar e ligar"
-        update_connection: "Atualizar ligação"
-      akahu_panel:
-        step_1_html: "Aceda a %{link} e crie uma aplicação pessoal."
-        step_2: "Copie o seu token de aplicação e token de utilizador."
-        step_3: "Cole abaixo os tokens, guarde e, em seguida, ligue as suas contas sincronizadas."
-      up_panel:
-        step_1_html: "Aceda a %{link} e gere um token de acesso pessoal."
-        step_2: "Copie o seu token de acesso pessoal."
-        step_3: "Cole abaixo o token, guarde e, em seguida, ligue as suas contas sincronizadas."
-      simplefin_panel:
-        step_1_html: "Aceda a %{link} para obter um token de configuração de utilização única."
-        step_2: "Cole abaixo o token e ligue."
-        step_3: "Depois, aceda a Contas para ligar as suas contas sincronizadas."
-        setup_token_label: "Token de Configuração"
-        setup_token_placeholder: "Cole o token de configuração SimpleFIN"
-        save_and_connect: "Guardar e ligar"
-      plaid_panel:
-        step_1_html: "Abra %{link} e copie o seu Client ID e Secret Key."
-        step_2: "Escolha um ambiente. Utilize sandbox para testar e production para contas reais."
-        step_3: "Cole abaixo as suas credenciais e ligue."
-      plaid_eu_panel:
-        step_1_html: "Abra %{link} e copie o seu EU Client ID e Secret Key."
       not_found: Serviço não encontrado.
       sync_provider_no_items: Sem ligações disponíveis para sincronizar.
-      ibkr_panel:
-        steps:
-          step_1: 'No seu Client Portal IBKR, navegue até "Performance & Reports" > "Flex Queries".'
-          step_2: 'Clique no ícone "+" na secção "Activity Flex Query" para criar uma nova consulta.'
-          step_3: 'Dê um nome à consulta (por exemplo, "Relay Sync"), reveja depois os detalhes da Flex Query abaixo e ative as secções, campos e opções de configuração listados.'
-          step_4: 'Guarde a consulta, anote o seu "Query ID" e utilize depois o ícone de engrenagem na secção "Flex Web Service Configuration" para gerar um Token de acesso.'
-          step_5: "Cole abaixo o seu Query ID e Token, guarde a configuração e aceda depois a Contas para ligar as contas IBKR descobertas."
-        flex_query_details:
-          eyebrow: Flex Query
-          title: Secções, campos e configuração
-          summary: Expanda para ver as secções, campos e definições exatos que a sua Activity Flex Query IBKR deve incluir.
-          sections_heading: Ative estas secções e campos
-          configuration_heading: Defina estas opções de consulta
-        sections:
-          account_information: "Informações da Conta: Account ID, Currency"
-          cash_report: "Relatório de Numerário:"
-          cash_report_options: "Opções: None"
-          cash_report_fields: "Campos: Currency, Ending Cash"
-          cash_transactions: "Transações de Numerário:"
-          cash_transactions_options: "Opções: Dividends, Deposits & Withdrawals, Detail"
-          cash_transactions_fields: "Campos: Amount, Conid, Currency, FX Rate To Base, Report Date, Transaction ID, Type"
-          change_in_position_value_summary: "Alteração no Resumo do Valor da Posição: Currency, End Of Period Value"
-          net_asset_value: "Valor Líquido dos Ativos (NAV) em Base:"
-          net_asset_value_options: "Opções: None"
-          net_asset_value_fields: "Campos: Currency, Report Date, Total"
-          open_positions: "Posições Abertas:"
-          open_positions_options: "Opções: Summary"
-          open_positions_fields: "Campos: Asset Class, Conid, Cost Basis Price, Currency, FX Rate To Base, Mark Price, Quantity, Report Date, Security ID, Security ID Type, Side, Symbol"
-          trades: "Negociações:"
-          trades_options: "Opções: Execution"
-          trades_fields: "Campos: Asset Class, Buy/Sell, Conid, Currency, FX Rate To Base, IB Commission, IB Commission Currency, Quantity, Symbol, Trade Date, Trade ID, TradePrice, Transaction ID"
-        configuration:
-          models: "Modelos: Opcional"
-          format: "Formato: XML"
-          period: "Período: Últimos 365 Dias de Calendário"
-          date_format: "Formato de Data: yyyy-MM-dd"
-          time_format: "Formato de Hora: HH:mm:ss"
-          date_time_separator: "Separador Data/Hora: ; (ponto e vírgula)"
-          profit_and_loss: "Ganhos e Perdas: Predefinição"
-          all_other_options: 'Todas as outras opções de configuração: "No"'
-        report_window_note: "Os relatórios Flex IBKR estão limitados à janela de consulta que configurou no IBKR. O Relay importará as posições atuais completas mais até aos últimos 365 dias de atividade deste relatório."
-        sync: Sincronizar
-        disconnect_confirm: Desligar Interactive Brokers?
-        query_id_label: Query ID
-        query_id_placeholder_new: Introduza o seu IBKR Flex Query ID
-        query_id_placeholder_existing: Deixe em branco para manter o Query ID atual
-        token_label: Token
-        token_placeholder_new: Introduza o seu IBKR Flex Web Service Token
-        token_placeholder_existing: Deixe em branco para manter o Token atual
-        save_configuration: Guardar Configuração
-        update_configuration: Atualizar Configuração
-        status_configured_prefix: "%{summary}. Visite o"
-        accounts_tab: Contas
-        status_configured_suffix: separador para gerir as contas descobertas.
-        not_configured: Não configurado.
-      trading212_panel:
-        steps:
-          step_1: Aceda a Trading 212 → Definições → API (aplicação web ou móvel).
-          step_2: Gere uma nova chave de API — a Trading 212 mostrar-lhe-á um API ID e um Secret Key.
-          step_3: Cole ambos abaixo, selecione o seu ambiente e moeda da conta e guarde.
-        api_key_label: API ID
-        api_key_placeholder_new: Cole o seu Trading 212 API ID
-        api_key_placeholder_existing: Deixe em branco para manter o API ID atual
-        api_secret_label: Secret Key
-        api_secret_placeholder_new: Cole o seu Trading 212 Secret Key
-        api_secret_placeholder_existing: Deixe em branco para manter o Secret Key atual
-        environment_label: Ambiente
-        environment_live: Conta ao vivo
-        environment_demo: Conta de demonstração
-        currency_label: Moeda da conta
-        save_configuration: Guardar Configuração
-        update_configuration: Atualizar Configuração
-        sync: Sincronizar
-        disconnect_confirm: Desligar Trading 212?
-        status_configured_prefix: "Configurado. Visite o"
-        accounts_tab: Contas
-        status_configured_suffix: separador para gerir as contas descobertas.
-        not_configured: Não configurado.

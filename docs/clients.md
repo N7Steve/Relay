@@ -10,36 +10,38 @@ data. The supported product scope is summarized in
 | Client | Best for | Status | Entry point |
 | --- | --- | --- | --- |
 | Web app and PWA | Full everyday use and administration from any modern browser. | Primary client | Open the server URL. For local development see [Local Docker app](llm-guides/docker-local-app.md). |
-| macOS desktop app | Relay in a native Mac window with system app chrome and deep-link handling. | Native shell around the web app; built locally | See [Relay Desktop](../desktop/README.md). |
-| Flutter mobile app | Basic mobile access on Android and iOS: login, balances and transactions. | Companion app; built locally | See [Relay Mobile](../mobile/README.md). |
-| iOS/iPadOS SwiftUI app | Overview of balance sheet, accounts, budgets and insights with an API key. | Companion app; built locally | See [Relay for iOS](../bitrig/README.md). |
-| Custom API clients | Scripts, services, importers or dashboards. | HTTP API | See [docs/api/openapi.yaml](api/openapi.yaml) and the endpoint guides in [docs/api](api/). |
+| Flutter Android app | Mobile access: login, balances and transactions. | Companion app; APK built locally or by Mobile CI | See [Relay Mobile](../mobile/README.md). |
+| Custom API clients | Scripts, services, importers, dashboards or a future dedicated front end. | HTTP API | See [docs/api/openapi.yaml](api/openapi.yaml) and the endpoint guides in [docs/api](api/). |
 
-There is no public release channel, app store distribution or demo server for
-any client. The inherited release workflows are archived under
-[docs/archive/sure/workflows](archive/sure/workflows/). The external MCP endpoint
-and the AI assistant were retired in pruning phases 5 and 6.
+There is no public release channel, app store distribution or demo server. The
+macOS desktop app, the SwiftUI iOS/iPadOS app, the Flutter iOS and web targets
+and push notifications were removed in pruning phase 12; the external MCP
+endpoint and the AI assistant in phases 5 and 6. Their code remains in Git
+history.
 
 ## Web app
 
 The web app is the complete Relay experience: settings, Enable Banking
 connections, transactions, Agenda, reports, investments, budgets, goals,
 imports and backups. Install it with the [TrueNAS guide](hosting/truenas.md) or
-the generic [Docker guide](hosting/docker.md). The desktop app renders this same
-web app.
+the generic [Docker guide](hosting/docker.md).
 
 ## Native and API clients
 
 Native and custom clients authenticate with a user-generated `X-Api-Key`
 header, or with OAuth2 bearer tokens from Relay's Doorkeeper authorization
-server for registered app clients. External identifiers inherited from Sure
-(`sure://` and `sureapp://` schemes, bundle and package IDs, OAuth application
-names) are kept as external contracts so that existing installs keep working.
+server for registered app clients. The Android app's mobile SSO uses the
+`sureapp://oauth/callback` scheme inherited from Sure; it is kept as an external
+contract so existing installs keep working.
+
+A new client (for example a Windows app or a separate web front end) should use
+the API v1 endpoints with an API key or an OAuth application, and read
+server-calculated figures instead of re-implementing financial rules.
 
 ## Native reporting and device continuity
 
 Read monthly server-calculated totals and the daily spending comparison using
-[`GET /api/v1/cash_flow`](api/openapi.yaml). Native clients should
+[`GET /api/v1/cash_flow`](api/openapi.yaml). Clients should
 use these values instead of rebuilding Relay's reporting rules from transactions.
 
 Structural node `name` values are fallback labels; clients should localize
@@ -71,19 +73,3 @@ endpoints use `IncomeStatement::CashFlowGraph` and `IncomeStatement::Sankey`, sh
 the graph representation and aggregation without sharing authentication paths.
 The web dashboard keeps its original Sankey and renders the server-calculated
 chart below it only for users with preview features enabled.
-
-## Push notifications
-
-Push registration and delivery are disabled in self-hosted Relay; see
-[iOS push notifications](hosting/push-notifications.md). The
-`/api/v1/push_subscriptions` contract and its `device_key` proof remain for the
-retained clients: 32 securely random bytes encoded as 64 lowercase hex
-characters, stored only in secure device storage and preserved across logout.
-The server stores only its SHA-256 digest; knowing an APNs token alone never
-authorizes transferring a registration to another user.
-
-## Retired client integrations
-
-FinanceKit was retired in pruning phase 9F: the server no longer exposes
-`/api/v1/financekit/*`. Accounts linked before the retirement remain ordinary
-accounts; see [phase 9](migration/pruning-phase-9.md).

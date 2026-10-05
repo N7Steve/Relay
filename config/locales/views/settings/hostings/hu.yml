@@ -40,36 +40,11 @@ hu:
         title: Brandfetch beállítások
         high_res_label: Nagy felbontású logók engedélyezése
         high_res_description: Ha engedélyezve van, a logók 120x120 felbontásban kerülnek lekérésre 40x40 helyett. Ez élesebb képeket biztosít nagy felbontású kijelzőkön.
-      openai_settings:
-        description: Add meg a hozzáférési tokent, és opcionálisan konfigurálj egy egyéni OpenAI-kompatibilis szolgáltatót
-        env_configured_message: Sikeresen konfigurálva környezeti változókon keresztül.
-        access_token_label: Hozzáférési token
-        access_token_placeholder: Add meg ide a hozzáférési tokenedet
-        uri_base_label: API alap URL (nem kötelező)
-        uri_base_placeholder: "https://api.openai.com/v1 (alapértelmezett)"
-        model_label: Modell (nem kötelező)
-        model_placeholder: "gpt-4.1 (alapértelmezett)"
-        json_mode_label: JSON mód
-        json_mode_auto: Automatikus (ajánlott)
-        json_mode_strict: Szigorú (gondolkodó modellekhez a legjobb)
-        json_mode_none: Nincs (standard modellekhez a legjobb)
-        json_mode_json_object: JSON objektum
-        json_mode_help: "A szigorú mód a legjobb a gondolkodó modellekhez (qwen-thinking, deepseek-reasoner). A nincs mód a legjobb a standard modellekhez (llama, mistral, gpt-oss)."
-        budget_heading: Tokenköltségkeret
-        budget_description: Minden LLM-hívásra vonatkozik – csevegési előzmények, automatikus kategorizálás, kereskedő-felismerés és PDF-feldolgozás. Az alapértelmezések konzervatívak a kis kontextusablakú helyi modellekhez. Emeld meg a felhőalapú, nagyobb kontextusablakú modellekhez.
-        context_window_label: Kontextusablak (nem kötelező)
-        context_window_help: "Az összes token, amelyet a modell elfogad. Alapértelmezett: 2048 – emeld 8192+-ra felhőalapú OpenAI vagy nagy kontextusú helyi modelleknél."
-        max_response_tokens_label: Maximális válasz-tokenek (nem kötelező)
-        max_response_tokens_help: "A modell válaszához fenntartott tokenek. Alapértelmezett: 512. Csökkentsd, ha több helyet szeretnél a hosszabb előzményeknek."
-        max_items_per_call_label: Maximális elemek kötegenként (nem kötelező)
-        max_items_per_call_help: "Felső korlát az automatikus kategorizálási / kereskedő-felismerési kötegeknél. Alapértelmezett: 25. A nagyobb kötegek automatikusan felosztódnak a kontextusablakba féréshez."
-        title: OpenAI
       update:
         failure: Érvénytelen beállítási érték
         success: Beállítások mentve
         invalid_onboarding_state: Érvénytelen regisztrációs állapot
         invalid_sync_time: "Érvénytelen szinkronizálási időformátum. Kérjük, használd a ÓÓ:PP formátumot (pl.: 02:30)."
-        invalid_llm_budget: "%{field} értékének legalább %{minimum} egész számnak kell lennie."
         scheduler_sync_failed: A beállítások mentve, de a szinkronizálási ütemezés frissítése nem sikerült. Kérjük, próbáld újra, vagy ellenőrizd a szerver naplóit.
       clear_cache:
         cache_cleared: Az adatcache törölve. Ez néhány percet vehet igénybe.

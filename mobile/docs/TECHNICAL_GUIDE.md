@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Sure Flutter is a mobile client for the [Sure Finances Management System](https://github.com/we-promise/sure), developed with Flutter framework and supporting both Android and iOS platforms. This application provides core mobile functionality for the Sure Finances management system, allowing users to view and manage their financial accounts anytime, anywhere.
+Relay Mobile is the Android client for a self-hosted Relay server (based on [Sure](https://github.com/we-promise/sure)), built with Flutter. It lets users view and manage their financial accounts from a phone. The iOS and web targets were removed in pruning phase 12.
 
 ### Backend Relationship
 

@@ -442,8 +442,8 @@ class Loan < ApplicationRecord
   # been seen holding.
   #
   # `initial_balance` is the recorded contractual principal. The account form
-  # writes it beside the opening valuation and the demo generator does the
-  # same, so for anything created here the two agree. Plaid's student-loan
+  # writes it beside the opening valuation, so for anything created here the
+  # two agree. Plaid's student-loan
   # import writes `origination_principal_amount` into it, and there they can
   # disagree by the whole of the repayment history: a loan imported after
   # years of payments has a first tracked valuation part way down the curve,

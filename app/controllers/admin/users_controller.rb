@@ -32,12 +32,6 @@ module Admin
 
       @families = Family.order(:name, :created_at)
       @unused_families = Family.left_joins(:users).where(users: { id: nil }).order(:name, :created_at)
-      @demo_family_ids = ApiKey
-        .joins(:user)
-        .where(display_key: ApiKey::DEMO_MONITORING_KEY)
-        .distinct
-        .pluck("users.family_id")
-
       @sso_identity_blocks = SsoIdentityBlock.order(created_at: :desc)
 
       # Used by the view to hide the "remove" action for the sole remaining

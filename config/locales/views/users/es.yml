@@ -13,8 +13,6 @@ es:
     reset:
       success: Tu cuenta ha sido restablecida. Los datos se eliminarán en segundo plano en algún momento.
       unauthorized: No estás autorizado para realizar esta acción.
-    reset_with_sample_data:
-      success: Tu cuenta ha sido restablecida y se están preparando datos de muestra. Verás datos de demostración en breve.
     roles:
       admin: Admin
       member: Miembro

@@ -335,7 +335,6 @@ tr:
       categories: Kategoriler
       holdings: Varlıklar
       merchants: Satıcılar
-      recurring_transactions: Yinelenen İşlemler
       rejected_transfers: Reddedilen Transferler
       rules: Kurallar
       tags: Etiketler

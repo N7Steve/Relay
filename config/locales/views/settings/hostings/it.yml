@@ -39,60 +39,11 @@ it:
         title: Impostazioni Brandfetch
         high_res_label: Abilita loghi ad alta risoluzione
         high_res_description: Se abilitato, i loghi verranno recuperati alla risoluzione 120x120 invece di 40x40. Questo fornisce immagini più nitide su display ad alta densità.
-      llm_provider_selector:
-        title: Provider IA
-        description: Scegli quale LLM alimenta la chat IA. Le operazioni batch (categorizzazione transazioni, rilevamento commercianti e elaborazione PDF) usano sempre OpenAI.
-        env_configured_message: Configurato con successo tramite la variabile d'ambiente LLM_PROVIDER.
-        provider_label: Provider LLM attivo
-        provider_openai: OpenAI
-        provider_anthropic: Anthropic (Claude)
-        provider_help: Il cambio di provider ha effetto sulla prossima chat. Configura le credenziali del provider attivo qui sotto.
-        not_configured_hint: "Aggiungi una chiave API %{provider} qui sotto per attivarlo."
-        data_retention_heading: Gestione dati
-        data_retention: Gli input API non vengono usati per addestrare modelli per impostazione predefinita; le API hosted dei provider conservano i dati per ~30 giorni per fiducia e sicurezza. Gli endpoint personalizzati o self-hosted seguono la tua politica.
-      anthropic_settings:
-        title: Anthropic (Claude)
-        description: Inserisci la tua chiave API Anthropic. Opzionalmente punta l'URL base ad AWS Bedrock o GCP Vertex.
-        env_configured_message: Configurato con successo tramite variabili d'ambiente.
-        access_token_label: Chiave API
-        access_token_placeholder: Inserisci la tua chiave API Anthropic
-        base_url_label: URL base (facoltativo)
-        base_url_placeholder: "https://api.anthropic.com (predefinito)"
-        model_label: Modello predefinito (facoltativo)
-        model_placeholder: "claude-sonnet-4-6 (predefinito)"
-        model_help: Usato per chat ed elaborazione PDF. Le operazioni batch (categorizza, rilevamento commercianti) usano Haiku per il costo.
-      openai_settings:
-        description: Inserisci il token di accesso e opzionalmente configura un provider compatibile con OpenAI personalizzato
-        env_configured_message: Configurato con successo tramite variabili d'ambiente.
-        access_token_label: Token di accesso
-        access_token_placeholder: Inserisci il tuo token di accesso qui
-        uri_base_label: URL base API (facoltativo)
-        uri_base_placeholder: "https://api.openai.com/v1 (predefinito)"
-        model_label: Modello (facoltativo)
-        model_placeholder: "gpt-4.1 (predefinito)"
-        json_mode_label: Modalità JSON
-        json_mode_auto: Auto (consigliato)
-        json_mode_strict: Strict (ottimo per modelli thinking)
-        json_mode_none: Nessuno (ottimo per modelli standard)
-        json_mode_json_object: Oggetto JSON
-        json_mode_help: "La modalità Strict funziona meglio con i modelli thinking (qwen-thinking, deepseek-reasoner). La modalità None funziona meglio con i modelli standard (llama, mistral, gpt-oss)."
-        budget_heading: Budget token
-        budget_description: Si applica alle chiamate compatibili con OpenAI (chat, auto-categorizzazione, rilevamento commercianti ed elaborazione PDF). I valori predefiniti sono conservativi per i modelli locali a contesto ridotto. Aumenta per i modelli cloud con finestre di contesto più grandi.
-        context_window_label: Finestra di contesto (facoltativo)
-        context_window_help: "Token totali che il modello accetterà. Predefinito: 2048 — aumenta a 8192+ per OpenAI cloud o modelli locali a contesto ampio."
-        max_response_tokens_label: Token risposta massimi (facoltativo)
-        max_response_tokens_help: "Token riservati per la risposta del modello. Predefinito: 512. Diminuisci per liberare spazio per cronologie più lunghe."
-        max_items_per_call_label: Elementi massimi per batch (facoltativo)
-        max_items_per_call_help: "Limite superiore per batch di auto-categorizzazione/rilevamento commercianti. Predefinito: 25. I batch più grandi vengono suddivisi automaticamente per adattarsi alla finestra di contesto."
-        title: OpenAI
       update:
         failure: Valore impostazione non valido
         success: Impostazioni aggiornate
         invalid_onboarding_state: Stato di onboarding non valido
         invalid_sync_time: Formato orario di sincronizzazione non valido. Usa il formato HH:MM (es. 02:30).
-        invalid_llm_budget: "%{field} deve essere un numero intero ≥ %{minimum}."
-        invalid_anthropic_base_url: L'URL base di Anthropic deve essere un URL http(s).
-        anthropic_model_required_for_base_url: Il modello Anthropic è obbligatorio quando si imposta un URL base personalizzato.
         scheduler_sync_failed: Impostazioni salvate, ma aggiornamento pianificazione sincronizzazione fallito. Riprova o controlla i log del server.
       clear_cache:
         cache_cleared: Cache dati svuotata. Potrebbero volerci alcuni istanti per completare.

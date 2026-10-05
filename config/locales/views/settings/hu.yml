@@ -3,47 +3,10 @@ hu:
   views:
     settings:
   settings:
-    llm_usages:
-      show:
-        page_title: "LLM-használat és -költségek"
-        subtitle: "Kövesd nyomon az AI-használatot és a becsült költségeket"
-        start_date: "Kezdő dátum"
-        end_date: "Záró dátum"
-        filter: "Szűrő"
-        total_requests: "Összes kérés"
-        total_tokens: "Összes token"
-        prompt: "prompt"
-        completion: "befejezés"
-        total_cost: "Összes költség"
-        avg_cost_per_request: "Átl. költség/kérés"
-        based_on_requests: "%{total} kérésből %{with_cost} rendelkezik költségadattal"
-        cost_by_operation: "Költség műveletek szerint"
-        cost_by_model: "Költség modellek szerint"
-        recent_usage: "Legutóbbi használat"
-        col_date: "Dátum"
-        col_operation: "Művelet"
-        col_model: "Modell"
-        col_tokens: "Tokenek"
-        col_cost: "Költség"
-        failed: "Sikertelen"
-        no_usage_data: "Nem található használati adat a kiválasztott időszakra"
-        cost_estimates_title: "A költségbecslésekről"
-        cost_estimates_description: "A költségek a szolgáltatók közzétett árai alapján becsültek, utoljára ellenőrizve: %{date}. A tényleges költségek eltérhetnek. Az árazás millió tokenenként van megadva, és modellenként változik. Az egyéni vagy önállóan üzemeltetett modellek \"N/A\"-t mutatnak, és nem szerepelnek a költségösszesítőkben."
     ai_prompts:
       show:
-        page_title: MI promptok
         openai_label: OpenAI
-        disable_ai: MI asszisztens letiltása
         prompt_instructions: Prompt utasítások
-        main_system_prompt:
-          title: Fő rendszerprompt
-          subtitle: Alapvető utasítások, amelyek meghatározzák, hogyan viselkedik az MI asszisztens minden csevegési beszélgetésben
-        transaction_categorizer:
-          title: Tranzakció-kategorizáló
-          subtitle: Az MI automatikusan kategorizálja a tranzakcióidat a meghatározott kategóriák alapján
-        merchant_detector:
-          title: Kereskedő-felismerő
-          subtitle: Az MI azonosítja és kereskedőinformációkkal gazdagítja a tranzakcióadatokat
     appearances:
       show:
         page_title: Megjelenés
@@ -115,9 +78,6 @@ hu:
         confirm_reset:
           body: Biztosan vissza szeretnéd állítani a fiókodat? Ez törli az összes számládat, kategóriádat, kereskedődet, címkédet és egyéb adatodat. Ez a művelet nem vonható vissza.
           title: Fiók visszaállítása?
-        confirm_reset_with_sample_data:
-          body: Biztosan vissza szeretnéd állítani a fiókodat és betölteni a mintaadatokat? Ez törli a meglévő adataidat, és demo adatokkal helyettesíti azokat, hogy biztonságosan felfedezhessed a Relay-t.
-          title: Fiók visszaállítása és mintaadatok betöltése?
         confirm_remove_invitation:
           body: Biztosan el szeretnéd távolítani a %{email} részére szóló meghívót?
           title: Meghívó eltávolítása
@@ -129,8 +89,6 @@ hu:
         delete_account_warning: A fiók törlése véglegesen eltávolítja az összes adatodat, és nem vonható vissza.
         reset_account: Fiók visszaállítása
         reset_account_warning: A fiók visszaállítása törli az összes számládat, kategóriádat, kereskedődet, címkédet és egyéb adatodat, de a felhasználói fiókod megmarad.
-        reset_account_with_sample_data: Visszaállítás és előtöltés
-        reset_account_with_sample_data_warning: Töröld az összes meglévő adatodat, majd tölts be friss mintaadatokat, hogy egy előre kitöltött környezetben fedezhesd fel az alkalmazást.
         email: E-mail cím
         first_name: Keresztnév
         group_form_input_placeholder: Adj meg egy csoportnevet
@@ -270,62 +228,8 @@ hu:
       encryption_error:
         title: Titkosítási konfiguráció szükséges
         message: Az Active Record titkosítási kulcsok nincsenek konfigurálva. Kérjük, gondoskodj arról, hogy a titkosítási hitelesítő adatok (active_record_encryption.primary_key, active_record_encryption.deterministic_key és active_record_encryption.key_derivation_salt) megfelelően be legyenek állítva a Rails hitelesítő adataiban vagy a környezeti változókban, mielőtt szinkronizálási szolgáltatókat használnál.
-      coinbase_panel:
-        setup_instructions: "A Coinbase csatlakoztatásához:"
-        step1_html: Nyisd meg a <a href="https://portal.cdp.coinbase.com/projects/api-keys" target="_blank" rel="noopener noreferrer" class="text-primary underline">Coinbase API beállításait</a>
-        step2: Hozz létre egy új, csak olvasási jogosultsággal rendelkező API-kulcsot (számlák és tranzakciók megtekintése)
-        step3: Másold ki az API-kulcsot és az API-titkot, majd illeszd be az alábbiakba
-        api_key_label: API-kulcs
-        api_key_placeholder: Add meg a Coinbase API-kulcsodat
-        api_secret_label: API-titok
-        api_secret_placeholder: Add meg a Coinbase API-titkodat
-        connect_button: Coinbase csatlakoztatása
-        syncing: Szinkronizálás...
-        sync: Szinkronizálás
-        disconnect: Lecsatlakozás
-        disconnect_confirm: Biztosan le szeretnéd választani ezt a Coinbase-kapcsolatot? A szinkronizált számlák manuális számlákká válnak.
       binance_panel:
-        setup_instructions: "A Binance csatlakoztatásához hozz létre egy csak olvasási jogosultsággal rendelkező API-kulcsot:"
-        step1_html: 'Nyisd meg a <a href="https://www.binance.com/en/my/settings/api-management" target="_blank" rel="noopener noreferrer" class="underline">Binance API-kezelőjét</a>'
-        step2: "Hozz létre egy új API-kulcsot, csak olvasási engedéllyel"
-        step3: "Illeszd be az API-kulcsodat és az API-titkodat az alábbiakba"
         no_withdraw_warning: "Figyelmeztetés: NE engedélyezd a kifizetési jogosultságot"
-        no_withdraw_title: "Csak olvasható kulcs"
-        no_withdraw_body: "Ne engedélyezd a kifizetési jogosultságot a Binance API-kulcs létrehozásakor. A Relay csak olvasási hozzáférést igényel."
-        ip_hint_title: "IP-cím-engedélyezési lista szükséges"
-        ip_hint_body: "Add hozzá az alkalmazásszerver kimenő IP-címét a Binance API-kulcs engedélyezési listájához:"
-        ip_hint_contact_admin: "Az alkalmazásszerver kimenő IP-címéért fordulj a rendszergazdádhoz."
-        api_key_label: API-kulcs
-        api_key_placeholder: Illeszd be a Binance API-kulcsodat
-        api_secret_label: API-titok
-        api_secret_placeholder: Illeszd be a Binance API-titkodat
-        connect_button: Binance csatlakoztatása
-        syncing: Szinkronizálás...
-        sync: Szinkronizálás
-        disconnect: Lecsatlakozás
-        disconnect_confirm: "Biztosan le szeretnéd választani a Binance-t?"
-      kraken_panel:
-        step1_html: 'Nyisd meg a <a href="https://pro.kraken.com/app/settings/api" target="_blank" rel="noopener noreferrer" class="underline">Kraken API-beállításait</a>'
-        step2: "Hozz létre egy API-kulcsot csak Lekérdezési alapok és Lekérdezési zárt megbízások & ügyletek jogosultsággal."
-        step3: "Illeszd be az API-kulcsot és a privát kulcsot az alábbiakba."
-        read_only_title: "Csak olvasási tőzsdei szinkronizálás"
-        read_only_body: "Ne adj kereskedési, visszavonási, kifizetési, exportálási, főkönyvi, Earn, staking vagy átutalási jogosultságot. A Relay csak egyenlegeket, pozíciókat és spot ügyletek adatait importálja."
-        default_connection_name: Kraken
-        add_connection: Kraken-kapcsolat hozzáadása
-        update_connection: Kapcsolat frissítése
-        connection_name_label: Kapcsolat neve
-        connection_name_placeholder: Fő Kraken
-        api_key_label: API-kulcs
-        api_key_placeholder: Illeszd be a Kraken API-kulcsodat
-        keep_api_key_placeholder: Hagyd üresen a meglévő API-kulcs megtartásához
-        api_secret_label: Privát kulcs
-        api_secret_placeholder: Illeszd be a Kraken privát kulcsodat
-        keep_api_secret_placeholder: Hagyd üresen a meglévő privát kulcs megtartásához
-        setup_accounts: Számla beállítása
-        syncing: Szinkronizálás...
-        sync: Szinkronizálás
-        disconnect: Lecsatlakozás
-        disconnect_confirm: "Biztosan le szeretnéd választani a(z) %{name}-t?"
       enable_banking_panel:
         callback_url_instruction: "A visszahívási URL-hez használd a következőt: %{callback_url}."
         connection_error: Kapcsolódási hiba
@@ -356,84 +260,5 @@ hu:
         syncing: "Szinkronizálás"
         select_country: "Ország kiválasztása..."
         country_label: "Ország"
-      lunchflow_panel:
-        step_1_html: "Menj a(z) %{link} oldalra és hozz létre egy API-kulcsot."
-        step_2: "Illeszd be a kulcsodat alább és csatlakozz."
-        step_3: "Ezután menj a Számlák menübe a szinkronizált számlák összekapcsolásához."
-        api_key_label: "API-kulcs"
-        api_key_placeholder_new: "Illeszd be ide az API-kulcsot"
-        api_key_placeholder_update: "Add meg az új API-kulcsot a frissítéshez"
-        base_url_label: "Alap URL (nem kötelező)"
-        base_url_placeholder: "https://lunchflow.app/api/v1 (alapértelmezett)"
-        save_and_connect: "Mentés és csatlakozás"
-        update_connection: "Kapcsolat frissítése"
-      simplefin_panel:
-        step_1_html: "Menj a(z) %{link} oldalra egy egyszeri beállítási tokenért."
-        step_2: "Illeszd be a tokent alább és csatlakozz."
-        step_3: "Ezután menj a Számlák menübe a szinkronizált számlák összekapcsolásához."
-        setup_token_label: "Beállítási token"
-        setup_token_placeholder: "SimpleFIN beállítási token beillesztése"
-        save_and_connect: "Mentés és csatlakozás"
-      plaid_panel:
-        step_1_html: "Nyisd meg a(z) %{link} oldalt, és másold ki az ügyfél-azonosítódat és titkos kulcsodat."
-        step_2: "Válassz környezetet. Teszteléshez sandbox, éles számlákhoz production."
-        step_3: "Illeszd be a hitelesítő adataidat alább és csatlakozz."
-      plaid_eu_panel:
-        step_1_html: "Nyisd meg a(z) %{link} oldalt, és másold ki az EU ügyfél-azonosítódat és titkos kulcsodat."
       not_found: Szolgáltató nem található.
       sync_provider_no_items: Nincs elérhető kapcsolat a szinkronizáláshoz.
-      ibkr_panel:
-        steps:
-          step_1: 'Az IBKR ügyfélportálon menj a „Teljesítmény és Jelentések" > „Flex lekérdezések" menübe.'
-          step_2: 'Kattints a „+" ikonra az „Activity Flex Query" részben egy új lekérdezés létrehozásához.'
-          step_3: 'Nevezd el a lekérdezést (pl. „Relay Sync"), majd tekintsd át az alábbi Flex Query részleteket, és engedélyezd a felsorolt szakaszokat, mezőket és konfigurációs lehetőségeket.'
-          step_4: 'Mentsd el a lekérdezést, jegyezd fel a „Query ID"-t, majd a „Flex Web Service Configuration" részben a fogaskerék ikonnal hozz létre egy hozzáférési tokent.'
-          step_5: "Illeszd be a Query ID-t és a tokent alább, mentsd el a konfigurációt, majd menj a Számlák menübe a felderített IBKR-számlák összekapcsolásához."
-        flex_query_details:
-          eyebrow: Flex Query
-          title: Szakaszok, mezők és konfiguráció
-          summary: Bővítsd ki a pontos szakaszok, mezők és beállítások megtekintéséhez, amelyeket az IBKR Activity Flex Query-nek tartalmaznia kell.
-          sections_heading: Engedélyezd ezeket a szakaszokat és mezőket
-          configuration_heading: Állítsd be ezeket a lekérdezési opciókat
-        sections:
-          account_information: "Számla adatai: Számlaazonosító, Pénznem"
-          cash_report: "Készpénzjelentés:"
-          cash_report_options: "Opciók: Nincs"
-          cash_report_fields: "Mezők: Pénznem, Záró készpénz"
-          cash_transactions: "Készpénztranzakciók:"
-          cash_transactions_options: "Opciók: Osztalékok, Befizetések és kifizetések, Részletek"
-          cash_transactions_fields: "Mezők: Összeg, Conid, Pénznem, FX-árfolyam alaphoz, Jelentési dátum, Tranzakció-azonosító, Típus"
-          change_in_position_value_summary: "Pozícióérték változásának összefoglalója: Pénznem, Időszak végi érték"
-          net_asset_value: "Nettó eszközérték (NAV) alapban:"
-          net_asset_value_options: "Opciók: Nincs"
-          net_asset_value_fields: "Mezők: Pénznem, Jelentési dátum, Összesen"
-          open_positions: "Nyitott pozíciók:"
-          open_positions_options: "Opciók: Összefoglalás"
-          open_positions_fields: "Mezők: Eszközosztály, Conid, Bekerülési ár, Pénznem, FX-árfolyam alaphoz, Piaci ár, Mennyiség, Jelentési dátum, Értékpapír-azonosító, Értékpapír-azonosító típus, Oldal, Szimbólum"
-          trades: "Ügyletek:"
-          trades_options: "Opciók: Végrehajtás"
-          trades_fields: "Mezők: Eszközosztály, Vétel/Eladás, Conid, Pénznem, FX-árfolyam alaphoz, IB jutalék, IB jutalék pénzneme, Mennyiség, Szimbólum, Ügylet dátuma, Ügylet-azonosító, Ügylet ára, Tranzakció-azonosító"
-        configuration:
-          models: "Modellek: Opcionális"
-          format: "Formátum: XML"
-          period: "Időszak: Utolsó 365 naptári nap"
-          date_format: "Dátumformátum: éééé-HH-nn"
-          time_format: "Időformátum: ÓÓ:pp:mm"
-          date_time_separator: "Dátum/idő elválasztó: ; (pontosvessző)"
-          profit_and_loss: "Nyereség és veszteség: Alapértelmezett"
-          all_other_options: 'Minden egyéb konfigurációs opció: „Nem"'
-        report_window_note: "Az IBKR Flex-jelentések az IBKR-ben konfigurált lekérdezési ablakra korlátozódnak. A Relay a teljes aktuális pozíciókat, valamint a jelentésből legfeljebb 365 nap tevékenységet importál."
-        sync: Szinkronizálás
-        disconnect_confirm: Leválasztja az Interactive Brokers-t?
-        query_id_label: Lekérdezés azonosítója
-        query_id_placeholder_new: Add meg az IBKR Flex lekérdezés azonosítóját
-        query_id_placeholder_existing: Hagyd üresen a meglévő azonosító megtartásához
-        token_label: Token
-        token_placeholder_new: Add meg az IBKR Flex Web Service tokenedet
-        token_placeholder_existing: Hagyd üresen a meglévő token megtartásához
-        save_configuration: Konfiguráció mentése
-        update_configuration: Konfiguráció frissítése
-        status_configured_prefix: "%{summary}. Látogasd meg a"
-        accounts_tab: Számlák
-        status_configured_suffix: fület a felderített számlák kezeléséhez.
-        not_configured: Nincs konfigurálva.

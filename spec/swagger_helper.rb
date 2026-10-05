@@ -161,33 +161,6 @@ RSpec.configure do |config|
               insights: { type: :array, items: { '$ref' => '#/components/schemas/Insight' } }
             }
           },
-          PushSubscriptionRegistration: {
-            type: :object, required: %w[token environment platform],
-            properties: {
-              token: { type: :string, maxLength: 2048, pattern: "^(?:[0-9a-fA-F]{2})+$" },
-              environment: { type: :string, enum: %w[sandbox production] },
-              platform: { type: :string, enum: %w[ios] },
-              device_key: { type: :string, pattern: '^[0-9a-f]{64}$', description: 'Optional 256-bit installation secret, unique per server and kept in device secure storage. Required proof to replace another user’s registration for this device. Never returned.' }
-            }
-          },
-          PushSubscription: {
-            type: :object,
-            required: %w[id environment platform last_registered_at],
-            properties: {
-              id: { type: :string, format: :uuid },
-              environment: { type: :string, enum: %w[sandbox production] },
-              platform: { type: :string, enum: %w[ios] },
-              last_registered_at: { type: :string, format: :'date-time' }
-            }
-          },
-          RetryResponse: {
-            type: :object,
-            required: %w[message message_id],
-            properties: {
-              message: { type: :string },
-              message_id: { type: :string, format: :uuid }
-            }
-          },
           Account: {
             type: :object,
             required: %w[id name account_type],

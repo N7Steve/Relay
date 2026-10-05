@@ -1,9 +1,10 @@
 require "test_helper"
 require Rails.root.join("db/migrate/20261005120000_remove_retired_product_persistence")
+require Rails.root.join("db/migrate/20261005180000_remove_demo_valuation_and_push_persistence")
 
 class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
   self.use_transactional_tests = false
-  test "upgrades the phase 9 schema while preserving financial history and retained settings" do
+  test "upgrades the phase 9 schema through phase 12 while preserving financial history and retained settings" do
     connection = ActiveRecord::Base.connection
     original_path = connection.schema_search_path
     expected_columns = connection.tables.excluding("schema_migrations", "ar_internal_metadata").to_h do |table|
@@ -22,6 +23,9 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     insert_row(connection, "settings", var: "external_assistant_token", value: "retired-secret")
     insert_row(connection, "settings", var: "brand_fetch_client_id", value: "keep-logo-setting")
     insert_row(connection, "settings", var: "external_google_drive_enabled", value: "true")
+    insert_row(connection, "settings", var: "rentcast_api_key", value: "retired-avm-key")
+    insert_row(connection, "settings", var: "demo_family_refresh_enabled", value: "true")
+    user_id = insert_row(connection, "users", family_id: family_id, email: "upgrade@example.com", password_digest: "x")
     before = connection.select_one("SELECT * FROM balances WHERE id = '#{balance_id}'")
     managed_id = insert_row(connection, "accounts", family_id: family_id, name: "Managed pension", accountable_type: "Investment", currency: "EUR", balance: 456)
     item_id = insert_row(connection, "indexa_capital_items", family_id: family_id)
@@ -49,7 +53,7 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     assert_equal true, connection.select_value("SELECT managed_portfolio FROM accounts WHERE id = '#{managed_id}'")
     assert_equal performance, JSON.parse(connection.select_value("SELECT imported_performance FROM accounts WHERE id = '#{managed_id}'"))
     assert_equal performance, JSON.parse(connection.select_value("SELECT imported_performance FROM accounts WHERE id = '#{plain_managed_id}'"))
-    assert_equal %w[brand_fetch_client_id external_google_drive_enabled], connection.select_values("SELECT var FROM settings ORDER BY var")
+    assert_equal %w[brand_fetch_client_id demo_family_refresh_enabled external_google_drive_enabled rentcast_api_key], connection.select_values("SELECT var FROM settings ORDER BY var")
     RemoveRetiredProductPersistence::TABLES.each { |table| assert_not connection.table_exists?(table), table }
     %w[enable_banking_items exchange_rates security_prices scheduled_payments family_documents provider_request_counts oauth_access_tokens].each do |table|
       assert connection.table_exists?(table), table
@@ -57,11 +61,23 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     RemoveRetiredProductPersistence::COLUMNS.each do |table, fields|
       assert_empty fields & connection.columns(table).map(&:name)
     end
+
+    keys = RemoveDemoValuationAndPushPersistence::MigrationApiKey
+    keys.reset_column_information
+    demo_key = keys.create!(user_id: user_id, name: "Demo monitoring", display_key: RemoveDemoValuationAndPushPersistence::DEMO_MONITORING_KEY, scopes: [ "read" ], source: "monitoring")
+    own_key = keys.create!(user_id: user_id, name: "Own key", display_key: "own-key-#{SecureRandom.hex(8)}", scopes: [ "read" ], source: "web")
+    ActiveRecord::Migration.suppress_messages { RemoveDemoValuationAndPushPersistence.new.migrate(:up) }
+    assert_equal %w[brand_fetch_client_id external_google_drive_enabled], connection.select_values("SELECT var FROM settings ORDER BY var")
+    assert_not keys.exists?(demo_key.id)
+    assert keys.exists?(own_key.id)
+    %w[push_subscriptions provider_request_counts].each { |table| assert_not connection.table_exists?(table), table }
+    assert_empty %w[avm_provider avm_last_synced_on] & connection.columns("properties").map(&:name)
     actual_columns = connection.tables.excluding("schema_migrations", "ar_internal_metadata").to_h do |table|
       [ table, connection.columns(table).map { |column| [ column.name, column.sql_type, column.default, column.null ] }.sort_by(&:first) ]
     end
     assert_equal expected_columns, actual_columns, "Fresh installation and upgraded schemas must agree"
     assert_raises(ActiveRecord::IrreversibleMigration) { RemoveRetiredProductPersistence.new.migrate(:down) }
+    assert_raises(ActiveRecord::IrreversibleMigration) { RemoveDemoValuationAndPushPersistence.new.migrate(:down) }
     puts "Phase 10 isolated schema upgrade: #{elapsed.round(3)} seconds"
   ensure
     if connection && original_path

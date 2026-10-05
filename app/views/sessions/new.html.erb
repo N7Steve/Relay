@@ -1,14 +1,3 @@
-<% if @prefill_demo_credentials %>
-  <div class="mb-4">
-    <%= render DS::Alert.new(
-          variant: :info,
-          title: t(".demo_banner_title"),
-          message: t(".demo_banner_message"),
-          live: :polite
-        ) %>
-  </div>
-<% end %>
-
 <% passkey_login_enabled = AuthConfig.passkey_login_enabled? %>
 
 <% if AuthConfig.local_login_form_visible? %>

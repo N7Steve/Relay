@@ -226,7 +226,6 @@ it:
       tags: "Etichette"
       rules: "Regole"
       merchants: "Esercenti"
-      recurring_transactions: "Transazioni ricorrenti"
       transfers: "Bonifici"
       rejected_transfers: "Bonifici rifiutati"
       trades: "Operazioni"

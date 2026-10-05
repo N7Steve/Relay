@@ -29,16 +29,6 @@ pt-BR:
         label: Client ID
         placeholder: Insira seu Client ID aqui
         title: Configurações do Brandfetch
-      openai_settings:
-        description: Insira o token de acesso e configure opcionalmente um provedor compatível com OpenAI personalizado
-        env_configured_message: Configurado com sucesso através de variáveis de ambiente.
-        access_token_label: Token de Acesso
-        access_token_placeholder: Insira seu token de acesso aqui
-        uri_base_label: URL Base da API (Opcional)
-        uri_base_placeholder: "https://api.openai.com/v1 (padrão)"
-        model_label: Modelo (Opcional)
-        model_placeholder: "gpt-4.1 (padrão)"
-        title: OpenAI
       update:
         failure: Valor de configuração inválido
         success: Configurações atualizadas

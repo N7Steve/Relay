@@ -58,9 +58,6 @@
                     <% if family.id == Current.family.id %>
                       <%= render DS::Pill.new(label: t(".badges.current_family"), tone: :info) %>
                     <% end %>
-                    <% if @demo_family_ids.include?(family.id) %>
-                      <%= render DS::Pill.new(label: t(".badges.demo_family"), tone: :neutral) %>
-                    <% end %>
                   </div>
                   <p class="text-xs text-secondary">
                     <%= t(".family_summary",

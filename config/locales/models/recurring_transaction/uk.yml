@@ -24,9 +24,3 @@ uk:
     attributes:
       recurring_transaction:
         payment_url: Посилання для оплати
-  recurring_transactions:
-    allocator:
-      missing_rate: немає обмінного курсу з %{from} на %{to}; вкажіть суму вручну
-      unmeasurable: ця транзакція містить розподіл, який не можна конвертувати в %{currency}, тому неможливо визначити її залишок. Додайте обмінний курс на %{date} або спершу видаліть наявну оплату
-      over_allocated: розподіл %{amount} перевищує залишок транзакції %{capacity} %{currency}
-      exceeds_remaining: '%{amount} перевищує залишок %{remaining} за цей період'

@@ -11,40 +11,12 @@ class Settings::HostingsController < ApplicationController
       [ t("breadcrumbs.home"), root_path ],
       [ t("breadcrumbs.self_hosting"), nil ]
     ]
-
-    # Property valuation (AVM) providers: usage is shown against their tight
-    # monthly request caps when a key is configured
-    @rentcast_usage = Provider::Registry.get_provider(:rentcast)&.usage
-    @realie_usage = Provider::Registry.get_provider(:realie)&.usage
   end
 
   def update
     if hosting_params.key?(:onboarding_state)
       onboarding_state = hosting_params[:onboarding_state].to_s
       Setting.onboarding_state = onboarding_state
-    end
-
-    if hosting_params.key?(:demo_family_refresh_enabled) || hosting_params.key?(:demo_family_refresh_family_id)
-      unless Current.user.super_admin?
-        return redirect_to settings_hosting_path, alert: t(".not_authorized")
-      end
-      if hosting_params.key?(:demo_family_refresh_family_id)
-        family_id = hosting_params[:demo_family_refresh_family_id].presence
-        demo_email = Rails.application.config_for(:demo).with_indifferent_access.fetch(:email)
-        unless family_id.nil? || User.admin.exists?(family_id: family_id, email: demo_email) && !User.super_admin.exists?(family_id: family_id)
-          raise Setting::ValidationError, t(".invalid_demo_family")
-        end
-        if family_id.nil? && Setting.demo_family_refresh_enabled && hosting_params[:demo_family_refresh_enabled] != "0"
-          raise Setting::ValidationError, t(".select_demo_family")
-        end
-        Setting.demo_family_refresh_family_id = family_id
-      end
-      if hosting_params.key?(:demo_family_refresh_enabled)
-        if hosting_params[:demo_family_refresh_enabled] == "1" && Setting.demo_family_refresh_family_id.blank?
-          raise Setting::ValidationError, t(".select_demo_family")
-        end
-        Setting.demo_family_refresh_enabled = hosting_params[:demo_family_refresh_enabled] == "1"
-      end
     end
 
     if hosting_params.key?(:require_email_confirmation)
@@ -67,9 +39,6 @@ class Settings::HostingsController < ApplicationController
     if hosting_params.key?(:brand_fetch_high_res_logos)
       Setting.brand_fetch_high_res_logos = hosting_params[:brand_fetch_high_res_logos] == "1"
     end
-
-    update_encrypted_setting(:rentcast_api_key)
-    update_encrypted_setting(:realie_api_key)
 
     if hosting_params.key?(:syncs_include_pending)
       Setting.syncs_include_pending = hosting_params[:syncs_include_pending] == "1"
@@ -114,7 +83,7 @@ class Settings::HostingsController < ApplicationController
     # Strong parameters for the self-hosting settings form.
     def hosting_params
       return ActionController::Parameters.new unless params.key?(:setting)
-      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :demo_family_refresh_enabled, :demo_family_refresh_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :rentcast_api_key, :realie_api_key, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time)
+      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time)
       permitted
     end
 
@@ -134,18 +103,6 @@ class Settings::HostingsController < ApplicationController
       Rails.logger.error("[AutoSyncScheduler] Failed to sync scheduler: #{error.message}")
       Rails.logger.error(error.backtrace.join("\n"))
       flash[:alert] = t(".scheduler_sync_failed")
-    end
-
-    def update_encrypted_setting(param_key)
-      return unless hosting_params.key?(param_key)
-      value = hosting_params[param_key].to_s.strip
-
-      # "********" is the masked placeholder rendered for an existing key; it
-      # means "leave the stored value untouched". A blank submission, however,
-      # is an explicit request to clear the key, so persist nil in that case.
-      return if value == "********"
-
-      Setting.public_send(:"#{param_key}=", value.presence)
     end
 
     def current_user_timezone

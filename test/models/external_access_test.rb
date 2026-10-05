@@ -42,15 +42,15 @@ class ExternalAccessTest < ActiveSupport::TestCase
     assert_raises(ExternalAccess::Disabled) { Provider::EnableBanking.get("/accounts") }
   end
 
-  test "disabling property valuations prevents requests from an existing connection" do
+  test "disabling Google Drive prevents requests from an existing connection" do
     connection = Faraday.new do |faraday|
-      faraday.use ExternalAccess::RequestMiddleware, :property_valuations
+      faraday.use ExternalAccess::RequestMiddleware, :google_drive
       faraday.adapter :test do |stub|
-        stub.get("/valuations") { flunk "Transport must not execute" }
+        stub.get("/files") { flunk "Transport must not execute" }
       end
     end
-    Setting.stubs(:external_property_valuations_enabled).returns(false)
-    assert_raises(ExternalAccess::Disabled) { connection.get("/valuations") }
+    Setting.stubs(:external_google_drive_enabled).returns(false)
+    assert_raises(ExternalAccess::Disabled) { connection.get("/files") }
   end
 
   test "missing FX raises instead of valuing foreign currency at one" do

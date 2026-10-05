@@ -545,7 +545,6 @@ ca:
       tags: Etiquetes
       rules: Regles
       merchants: Comerços
-      recurring_transactions: Transaccions recurrents
       transfers: Transferències
       rejected_transfers: Transferències rebutjades
       trades: Operacions

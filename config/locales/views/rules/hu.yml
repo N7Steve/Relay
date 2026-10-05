@@ -92,12 +92,6 @@ hu:
         pending: Függőben lévő
         success: Sikeres
         failed: Sikertelen
-    clear_ai_cache:
-      button: AI-gyorsítótár visszaállítása
-      confirm_title: Visszaállítod az AI-gyorsítótárat?
-      confirm_body: Biztosan visszaállítod az AI-gyorsítótárat? Ez lehetővé teszi az AI-szabályok számára az összes tranzakció újrafeldolgozását. Ez további API-költségeket okozhat.
-      confirm_button: Gyorsítótár visszaállítása
-      success: Az AI-gyorsítótár törlése folyamatban van. Ez néhány percet igénybe vehet.
     condition_filters:
       transaction_type:
         income: Bevétel

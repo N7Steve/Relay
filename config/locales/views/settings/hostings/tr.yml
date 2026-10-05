@@ -2,19 +2,6 @@
 tr:
   settings:
     hostings:
-      anthropic_settings:
-        access_token_label: API Anahtarı
-        access_token_placeholder: Anthropic API anahtarınızı girin
-        base_url_label: Temel URL (İsteğe Bağlı)
-        base_url_placeholder: https://api.anthropic.com (varsayılan)
-        description: Anthropic API anahtarınızı girin. İsteğe bağlı olarak Temel URL'yi
-          AWS Bedrock veya GCP Vertex'e yönlendirebilirsiniz.
-        env_configured_message: Ortam değişkenleri aracılığıyla başarıyla yapılandırıldı.
-        model_help: Sohbet ve PDF işleme için kullanılır. Toplu işlemler (kategorilendirme,
-          satıcı tespiti) maliyet nedeniyle varsayılan olarak Haiku kullanır.
-        model_label: Varsayılan Model (İsteğe Bağlı)
-        model_placeholder: claude-sonnet-4-6 (varsayılan)
-        title: Anthropic (Claude)
       brand_fetch_settings:
         description: Brandfetch tarafından sağlanan İstemci Kimliğini girin
         env_configured_message: Brandfetch İstemci Kimliğinizi BRAND_FETCH_CLIENT_ID
@@ -58,68 +45,7 @@ tr:
           invite_only: Davet ile
           open: Açık
         title: Kayıt
-      llm_provider_selector:
-        data_retention: API girdileri varsayılan olarak modelleri eğitmek için kullanılmaz;
-          sağlayıcıların barındırılan API'leri, güven ve güvenlik amacıyla verileri
-          ~30 gün boyunca saklar. Özel veya kendi barındırdığınız uç noktalar kendi
-          politikanızı izler.
-        data_retention_heading: Veri işleme
-        description: Yapay zeka sohbetini hangi LLM'nin güçlendireceğini seçin. Toplu
-          işlemler (işlem kategorilendirme, satıcı tespiti ve PDF işleme) şu anda
-          her zaman OpenAI kullanır.
-        env_configured_message: LLM_PROVIDER ortam değişkeni aracılığıyla başarıyla
-          yapılandırıldı.
-        not_configured_hint: Etkinleştirmek için aşağıya bir %{provider} API anahtarı
-          ekleyin.
-        provider_anthropic: Anthropic (Claude)
-        provider_help: Sağlayıcı değiştirmek bir sonraki sohbette etkili olur. Aktif
-          sağlayıcının kimlik bilgilerini aşağıda yapılandırın.
-        provider_label: Aktif LLM sağlayıcısı
-        provider_openai: OpenAI
-        title: Yapay Zeka Sağlayıcısı
       not_authorized: Bu işlemi gerçekleştirmek için yetkiniz yok
-      openai_settings:
-        access_token_label: Erişim Token'ı
-        access_token_placeholder: Erişim token'ınızı buraya girin
-        budget_description: OpenAI uyumlu çağrılar için geçerlidir (sohbet, otomatik
-          kategorilendirme, satıcı tespiti ve PDF işleme). Varsayılanlar, küçük bağlamlı
-          yerel modeller için muhafazakârdır. Daha büyük bağlam pencerelerine sahip
-          bulut modelleri için yükseltin.
-        budget_heading: Token Bütçesi
-        context_window_help: 'Modelin kabul edeceği toplam token sayısı. Varsayılan:
-          2048 — bulut OpenAI veya büyük bağlamlı yerel modeller için 8192+''e yükseltin.'
-        context_window_label: Bağlam Penceresi (İsteğe Bağlı)
-        description: Erişim token'ını girin ve isteğe bağlı olarak özel bir OpenAI
-          uyumlu sağlayıcı yapılandırın
-        env_configured_message: Ortam değişkenleri aracılığıyla başarıyla yapılandırıldı.
-        json_mode_auto: Otomatik (önerilen)
-        json_mode_help: Sıkı mod, düşünen modellerle (qwen-thinking, deepseek-reasoner)
-          en iyi şekilde çalışır. Yok modu, standart modellerle (llama, mistral, gpt-oss)
-          en iyi şekilde çalışır.
-        json_mode_json_object: JSON Nesnesi
-        json_mode_label: JSON Modu
-        json_mode_none: Yok (standart modeller için en iyisi)
-        json_mode_strict: Sıkı (düşünen modeller için en iyisi)
-        max_items_per_call_help: 'Otomatik kategorilendirme / satıcı tespiti toplu
-          işlemleri için üst sınır. Varsayılan: 25. Daha büyük toplu işlemler bağlam
-          penceresine sığacak şekilde otomatik olarak bölünür.'
-        max_items_per_call_label: Toplu İşlem Başına Maksimum Öğe (İsteğe Bağlı)
-        max_response_tokens_help: 'Modelin yanıtı için ayrılan token sayısı. Varsayılan:
-          512. Daha uzun geçmiş için yer açmak amacıyla düşürün.'
-        max_response_tokens_label: Maksimum Yanıt Token'ı (İsteğe Bağlı)
-        model_label: Model (İsteğe Bağlı)
-        model_placeholder: gpt-4.1 (varsayılan)
-        title: OpenAI
-        uri_base_label: API Temel URL'si (İsteğe Bağlı)
-        uri_base_placeholder: https://api.openai.com/v1 (varsayılan)
-        model_function_calling_help: Yapay zeka asistanı verilerinizi fonksiyon çağrılarıyla okur; bu nedenle sağlayıcınızın araç/fonksiyon çağırmayı desteklediğini belirttiği bir model seçin. Bu desteği olmayan modellerde sohbet, anlaşılması güç bir sağlayıcı hatasıyla başarısız olur.
-        model_function_calling_link: Yapılandırılan modeli kontrol et
-        timeout_heading: Zaman aşımları
-        timeout_description: OpenAI uyumlu model çağrılarının Relay vazgeçmeden önce ne kadar süre çalışabileceğini belirler. Yavaş bir donanımda yerel model çalıştırıyorsanız bu değerleri artırın.
-        openai_request_timeout_label: Saniye Cinsinden İstek Zaman Aşımı (İsteğe Bağlı)
-        openai_request_timeout_help: 'Varsayılan: 60. Otomatik kategorizasyon, satıcı tespiti, sohbet, PDF işleme ve vektör deposu çağrıları dahil her OpenAI uyumlu HTTP isteğine uygulanır. OPENAI_REQUEST_TIMEOUT bu alanı geçersiz kılar.'
-        ai_response_timeout_label: Saniye Cinsinden Yanıt Zaman Aşımı (İsteğe Bağlı)
-        ai_response_timeout_help: 'Varsayılan: 90. Yalnızca sohbetin tüm yanıt turunu izleyen zamanlayıcıya uygulanır; bu yüzden toplam olarak hesaplayın: (1 + ASSISTANT_MAX_TOOL_CALL_ITERATIONS) × istek zaman aşımı, artı araç çalıştırma ve kuyruk süresi. AI_RESPONSE_TIMEOUT bu alanı geçersiz kılar.'
       show:
         clear_cache: Veri önbelleğini temizle
         clear_cache_warning: Veri önbelleğini temizlemek tüm döviz kurları, menkul
@@ -135,7 +61,6 @@ tr:
         invites: Davet Kodları
         sync_settings: Eşitleme Ayarları
         title: Kendi Sunucunda Barındırma
-        property_valuation_providers: Gayrimenkul Değerleme Sağlayıcıları
       sync_auto_sync_scheduler!:
         scheduler_sync_failed: Ayarlar kaydedildi, ancak eşitleme zamanlaması güncellenemedi.
           Lütfen tekrar deneyin veya sunucu günlüklerini kontrol edin.
@@ -161,28 +86,10 @@ tr:
         plan: "%{plan} planı"
         title: Synth Ayarları
       update:
-        anthropic_model_required_for_base_url: Özel bir Temel URL ayarlandığında Anthropic
-          Modeli gereklidir.
         failure: Geçersiz ayar değeri
-        invalid_anthropic_base_url: Anthropic Temel URL'si bir http(s) URL'si olmalıdır.
-        invalid_llm_budget: "%{field}, %{minimum} veya daha büyük bir tam sayı olmalıdır."
         invalid_onboarding_state: Geçersiz onboarding durumu
         invalid_sync_time: Geçersiz eşitleme saati biçimi. Lütfen HH:MM biçimini kullanın
           (örn. 02:30).
         scheduler_sync_failed: Ayarlar kaydedildi, ancak eşitleme zamanlaması güncellenemedi.
           Lütfen tekrar deneyin veya sunucu günlüklerini kontrol edin.
         success: Ayarlar güncellendi
-      rentcast_settings:
-        title: RentCast
-        description: Mülk eklerken ABD'deki mülk ayrıntılarını ve değer tahminlerini sorgulamak için RentCast API anahtarınızı girin. Ücretsiz katman, mülk sorguları ve günlük değerleme güncellemeleri arasında paylaşılan ayda 50 API isteğiyle sınırlıdır. Ücretli bir planda bu sınırı RENTCAST_MAX_REQUESTS_PER_MONTH ortam değişkeniyle yükseltin.
-        env_configured_message: RENTCAST_API_KEY ortam değişkeni aracılığıyla başarıyla yapılandırıldı.
-        label: API Anahtarı
-        placeholder: RentCast API anahtarınızı buraya girin
-        usage: Aylık %{limit} isteğin %{used} tanesi kullanıldı
-      realie_settings:
-        title: Realie
-        description: Mülk eklerken ABD'deki mülk ayrıntılarını ve değer tahminlerini sorgulamak için Realie API anahtarınızı girin. Ücretsiz katman, mülk sorguları ve günlük değerleme güncellemeleri arasında paylaşılan ayda 25 API isteğiyle sınırlıdır. Ücretli bir planda bu sınırı REALIE_MAX_REQUESTS_PER_MONTH ortam değişkeniyle yükseltin.
-        env_configured_message: REALIE_API_KEY ortam değişkeni aracılığıyla başarıyla yapılandırıldı.
-        label: API Anahtarı
-        placeholder: Realie API anahtarınızı buraya girin
-        usage: Aylık %{limit} isteğin %{used} tanesi kullanıldı

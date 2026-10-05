@@ -24,9 +24,3 @@ ru:
     attributes:
       recurring_transaction:
         payment_url: Ссылка для оплаты
-  recurring_transactions:
-    allocator:
-      missing_rate: нет обменного курса %{from} к %{to}; укажите сумму вручную
-      unmeasurable: часть этой операции уже распределена в сумме, которую нельзя конвертировать в %{currency}, поэтому её остаток невозможно рассчитать. Добавьте обменный курс на %{date} или сначала удалите существующую оплату
-      over_allocated: 'распределение %{amount} превышает остаток операции: %{capacity} %{currency}'
-      exceeds_remaining: '%{amount} превышает остаток %{remaining} за этот период'

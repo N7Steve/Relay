@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -1099,40 +1099,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
   create_table "properties", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "area_unit"
     t.integer "area_value"
-    t.date "avm_last_synced_on"
-    t.string "avm_provider"
     t.datetime "created_at", null: false
     t.jsonb "locked_attributes", default: {}
     t.string "subtype"
     t.datetime "updated_at", null: false
     t.integer "year_built"
-    t.index ["avm_last_synced_on"], name: "index_properties_on_avm_provider_sync", order: "NULLS FIRST", where: "(avm_provider IS NOT NULL)"
-    t.check_constraint "avm_provider IS NULL OR (avm_provider::text = ANY (ARRAY['rentcast'::character varying::text, 'realie'::character varying::text]))", name: "properties_avm_provider_check"
-  end
-
-  create_table "provider_request_counts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.integer "count", default: 0, null: false
-    t.datetime "created_at", null: false
-    t.string "period", null: false
-    t.string "provider_key", null: false
-    t.datetime "updated_at", null: false
-    t.index ["provider_key", "period"], name: "index_provider_request_counts_on_provider_key_and_period", unique: true
-  end
-
-  create_table "push_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "device_key_digest"
-    t.string "environment", null: false
-    t.datetime "last_registered_at", null: false
-    t.string "platform", default: "ios", null: false
-    t.string "token", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index "lower((token)::text)", name: "index_push_subscriptions_on_lower_token", unique: true
-    t.index ["last_registered_at"], name: "index_push_subscriptions_on_last_registered_at"
-    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
-    t.check_constraint "environment::text = ANY (ARRAY['sandbox'::character varying::text, 'production'::character varying::text])", name: "chk_push_subscriptions_environment"
-    t.check_constraint "platform::text = 'ios'::text", name: "chk_push_subscriptions_platform"
   end
 
   create_table "rejected_transfers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1600,7 +1571,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oidc_identities", "users"
-  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "rejected_transfers", "transactions", column: "inflow_transaction_id", on_delete: :cascade
   add_foreign_key "rejected_transfers", "transactions", column: "outflow_transaction_id", on_delete: :cascade
   add_foreign_key "rule_actions", "rules"

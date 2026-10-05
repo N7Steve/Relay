@@ -13,8 +13,6 @@ de:
     reset:
       success: Dein Konto wurde zurückgesetzt. Die Daten werden im Hintergrund in einiger Zeit gelöscht.
       unauthorized: Du bist nicht berechtigt, diese Aktion auszuführen.
-    reset_with_sample_data:
-      success: Dein Konto wurde zurückgesetzt, und Beispieldaten werden vorbereitet. In Kürze wirst du Demodaten sehen.
     roles:
       admin: Admin
       member: Mitglied

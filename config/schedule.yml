@@ -4,12 +4,6 @@ clean_syncs:
   queue: "scheduled"
   description: "Cleans up stale syncs and reaps imports, exports, and provider fetch flags stuck by lost jobs"
 
-sync_property_valuations:
-  cron: "30 1 1 * *" # monthly on the 1st at 1:30 AM
-  class: "SyncPropertyValuationsJob"
-  queue: "scheduled"
-  description: "Refreshes AVM property valuations once a month (providers enforce tight monthly request caps)"
-
 clean_data:
   cron: "0 3 * * *" # daily at 3:00 AM
   class: "DataCleanerJob"
@@ -21,12 +15,6 @@ clean_debug_log_entries:
   class: "DebugLogCleanupJob"
   queue: "scheduled"
   description: "Deletes debug log entries older than 90 days"
-
-refresh_demo_family:
-  cron: "0 5 * * *" # daily at 5:00 AM UTC
-  class: "DemoFamilyRefreshJob"
-  queue: "scheduled"
-  description: "Refreshes demo family data and emails super admins with daily usage summary"
 
 generate_scheduled_payments:
   cron: "0 1 * * *" # daily at 1:00 AM UTC

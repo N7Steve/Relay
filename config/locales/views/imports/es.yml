@@ -226,7 +226,6 @@ es:
       tags: Etiquetas
       rules: Reglas
       merchants: Comercios
-      recurring_transactions: Transacciones recurrentes
       transfers: Transferencias
       rejected_transfers: Transferencias rechazadas
       trades: Operaciones

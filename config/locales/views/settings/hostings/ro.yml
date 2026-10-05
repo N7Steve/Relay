@@ -28,16 +28,6 @@ ro:
         label: ID Client
         placeholder: Introdu ID-ul tău de Client aici
         title: Setări Brandfetch
-      openai_settings:
-        description: Introdu tokenul de acces și configurează opțional un furnizor personalizat compatibil cu OpenAI
-        env_configured_message: Configurat cu succes prin variabile de mediu.
-        access_token_label: Token de Acces
-        access_token_placeholder: Introdu tokenul tău de acces aici
-        uri_base_label: URL de Bază API (Opțional)
-        uri_base_placeholder: "https://api.openai.com/v1 (implicit)"
-        model_label: Model (Opțional)
-        model_placeholder: "gpt-4.1 (implicit)"
-        title: OpenAI
       update:
         failure: Valoare setare invalidă
         success: Setări actualizate

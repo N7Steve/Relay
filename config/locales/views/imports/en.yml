@@ -260,7 +260,6 @@ en:
       tags: "Tags"
       rules: "Rules"
       merchants: "Merchants"
-      recurring_transactions: "Recurring Transactions"
       transfers: "Transfers"
       rejected_transfers: "Rejected Transfers"
       trades: "Trades"

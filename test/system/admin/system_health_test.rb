@@ -1,47 +1,16 @@
 require "application_system_test_case"
 
 class Admin::SystemHealthTest < ApplicationSystemTestCase
-  include ActiveJob::TestHelper
-
   setup do
     sign_in users(:sure_support_staff)
     stub_healthy_sidekiq
   end
 
-  test "hosted super admin enables the test button by registering an iOS device" do
-    Apns::Client.stubs(:hosted?).returns(true)
-    Apns::Client.stubs(:configured?).returns(true)
-    Rails.stubs(:cache).returns(ActiveSupport::Cache::MemoryStore.new)
-    visit admin_system_health_path
-    assert_selector "button[role='tab']", count: 1
-    assert_selector "button[role='tab'][aria-selected='true']", text: "Background jobs"
-    assert_selector "h2", text: "Push notifications"
-    assert_button "Send test push notification", disabled: true
-    assert_text "Enable push notifications in the Relay iOS app"
-
-    user = users(:sure_support_staff)
-    user.push_subscriptions.create!(
-      token: "ab" * 32, environment: "sandbox", platform: "ios", last_registered_at: Time.current
-    )
+  test "super admin sees Sidekiq status without push notification controls" do
     visit admin_system_health_path(tab: "background_jobs")
-    assert_button "Send test push notification", disabled: false
-    Apns::Client.expects(:new).never
-    assert_enqueued_jobs 1, only: DeliverTestPushNotificationJob do
-      click_button "Send test push notification"
-      assert_text "Test notification queued"
-    end
-    assert_text "Queued"
-    assert_button "Send test push notification", disabled: true
-    Apns::Client.unstub(:new)
-    Apns::Client.any_instance.stubs(:deliver_test).returns(stub(ok?: true))
-    perform_enqueued_jobs only: DeliverTestPushNotificationJob
-    travel 31.seconds do
-      visit admin_system_health_path(tab: "background_jobs")
-      assert_text "Latest test requested at"
-      assert_text "Accepted by APNs"
-      assert_button "Send test push notification", disabled: false
-      page.save_screenshot(Rails.root.join("tmp", "system-health-background-push-notifications.png"))
-    end
+
+    assert_selector "h2", text: "Sidekiq status"
+    assert_no_text "Push notifications"
   end
 
   private

@@ -6,7 +6,7 @@ class Settings::ApiKeysController < ApplicationController
   before_action :set_api_key, only: [ :show, :destroy ]
 
   def index
-    @api_keys = Current.user.api_keys.active.visible.order(created_at: :desc)
+    @api_keys = Current.user.api_keys.active.order(created_at: :desc)
     @breadcrumbs = [
       [ t("breadcrumbs.home"), root_path ],
       [ t("breadcrumbs.api_keys"), nil ]
@@ -50,11 +50,8 @@ class Settings::ApiKeysController < ApplicationController
 
   private
 
-    # `.visible` excludes the demo monitoring key, so a demo key id 404s here
-    # before #destroy can revoke it — this is intentional (see the SECURITY note
-    # on ApiKey's `visible` scope).
     def set_api_key
-      @api_key = Current.user.api_keys.active.visible.find(params[:id])
+      @api_key = Current.user.api_keys.active.find(params[:id])
     end
 
     def api_key_params

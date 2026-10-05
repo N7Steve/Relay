@@ -1,6 +1,6 @@
 # Alcance del producto Relay
 
-Estado al cierre de la poda (fase 11, 5 de octubre de 2026). Este documento
+Estado al cierre de la poda (fase 12, 5 de octubre de 2026). Este documento
 resume qué mantiene Relay, qué se retiró y qué compatibilidad queda. El detalle,
 las pruebas y las decisiones de cada paso están en el
 [plan de poda](migration/pruning-plan.md) y los registros de cada fase.
@@ -21,8 +21,8 @@ basado en Sure. No existe modo SaaS, suscripción, telemetría ni servicio aloja
 | Acceso | Contraseña, MFA, passkeys/WebAuthn, OIDC/SAML/SSO, OAuth (Doorkeeper) y API keys |
 | Importación | CSV de transacciones, operaciones, cuentas, categorías, reglas y comercios; Mint, Actual, YNAB, QIF; documentos PDF almacenados sin extracción automática |
 | Recuperación | Exportación/importación ZIP completa (versión 3) con originales, informe de omisiones y readback |
-| Integraciones externas | Enable Banking (sincronización bancaria), Brandfetch (logos), Google Drive (exportación CSV programada), RentCast/Realie (valoración inmobiliaria). Todas desactivadas hasta que un administrador las habilita |
-| Clientes | Web/PWA, escritorio macOS (Tauri), Flutter Android/iOS, SwiftUI iOS/iPadOS y API v1 documentada en [OpenAPI](api/openapi.yaml). Ver [clientes](clients.md) |
+| Integraciones externas | Enable Banking (sincronización bancaria), Brandfetch (logos), Google Drive (exportación CSV programada). Todas desactivadas hasta que un administrador las habilita |
+| Clientes | Web/PWA, app Flutter para Android y API v1 documentada en [OpenAPI](api/openapi.yaml) para clientes propios futuros. Ver [clientes](clients.md) |
 | Almacenamiento | Active Storage local (`/rails/storage`) |
 
 ## Instalación, actualización y operación
@@ -54,6 +54,7 @@ basado en Sure. No existe modo SaaS, suscripción, telemetría ni servicio aloja
 | 9 | Proveedores de cotizaciones y tipos de cambio, almacenamiento remoto S3, FinanceKit | Precios/tipos ya guardados conservados |
 | 10 | 72 tablas y columnas, settings y vínculos exclusivos de lo anterior | Irreversible sin backup de servidor previo |
 | 11 | Chart Helm, proxy Pipelock, plantilla TrueNAS de volúmenes nombrados, guías de funciones retiradas | — |
+| 12 | Familia demo, RentCast/Realie, escritorio macOS, apps iOS (SwiftUI y destino iOS/web de Flutter), notificaciones push, gems de profiling y restos sin uso (controladores, imágenes, 7.150 traducciones) | Suscripciones push, contadores de peticiones AVM, columnas AVM de inmuebles, ajustes y clave API demo eliminados; las valoraciones ya guardadas se conservan |
 
 Reintroducir cualquiera de estos módulos requiere una decisión de producto
 explícita; su código sigue recuperable en Git.
@@ -70,10 +71,11 @@ explícita; su código sigue recuperable en Git.
   Ver [backups](llm-guides/backups.md).
 - **Cuentas antes conectadas** funcionan como manuales, conservando estrategia de
   saldo, posiciones autoritativas, observaciones de saldo y rendimiento de Indexa.
-- **Identificadores externos heredados** (`sure://`, `sureapp://`, IDs de paquete,
-  tipo `SureImport`, GlobalIDs históricos) se mantienen como contratos, no como
-  marca.
-- **Push iOS** permanece desactivado; el contrato API se conserva para los clientes.
+- **Identificadores externos heredados** (`sureapp://` de la app Android, ID de
+  paquete, tipo `SureImport`, GlobalIDs históricos) se mantienen como contratos, no
+  como marca. El esquema `sure://` del escritorio desapareció con él en fase 12.
+- **Inmuebles:** se crean y valoran manualmente; las valoraciones importadas antes
+  por RentCast/Realie siguen como valoraciones normales.
 - **Jobs y cron retirados:** sus clases de compatibilidad se eliminaron en fase 11
   tras comprobar en TrueNAS que no quedaban jobs ni cron pendientes. Un job
   serializado de un módulo retirado ya no se puede ejecutar; ver

@@ -92,12 +92,6 @@ es:
         pending: Pendiente
         success: Éxito
         failed: Fallido
-    clear_ai_cache:
-      button: Restablecer caché de IA
-      confirm_title: ¿Restablecer caché de IA?
-      confirm_body: ¿Estás seguro de que deseas restablecer la caché de IA? Esto permitirá que las reglas de IA vuelvan a procesar todas las transacciones. Esto puede incurrir en costes adicionales de API.
-      confirm_button: Restablecer caché
-      success: Se está limpiando la caché de IA. Esto puede tardar unos momentos.
     condition_filters:
       transaction_type:
         income: Ingreso

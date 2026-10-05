@@ -14,7 +14,7 @@ For more detailed technical documentation, see [docs/TECHNICAL_GUIDE.md](docs/TE
 ## Features
 
 - 🔐 Secure authentication with OAuth 2.0
-- 📱 Cross-platform support (Android & iOS)
+- 📱 Android client (the iOS and web targets were removed in pruning phase 12)
 - 💰 View all linked accounts
 - 🎨 Material Design 3 with light/dark theme support
 - 🔄 Token refresh for persistent sessions
@@ -24,8 +24,7 @@ For more detailed technical documentation, see [docs/TECHNICAL_GUIDE.md](docs/TE
 
 - Flutter SDK >= 3.0.0
 - Dart SDK >= 3.0.0
-- Android SDK (for Android builds)
-- Xcode (for iOS builds)
+- Android SDK
 
 ## Getting Started
 
@@ -37,11 +36,6 @@ Follow the official Flutter installation guide: https://docs.flutter.dev/get-sta
 
 ```bash
 flutter pub get
-
-# For iOS development, also install CocoaPods dependencies
-cd ios
-pod install
-cd ..
 ```
 
 ### 3. Generate App Icons
@@ -50,7 +44,7 @@ cd ..
 flutter pub run flutter_launcher_icons
 ```
 
-This step generates the app icons for all platforms based on the source icon in `assets/icon/app_icon.png`. This is required before building the app locally.
+This step generates the Android app icons based on the source icon in `assets/icon/app_icon.png`. This is required before building the app locally.
 
 ### 4. Configure API Endpoint
 
@@ -60,9 +54,6 @@ Edit `lib/services/api_config.dart` to point to your Relay server:
 // For local development with Android emulator
 static String _baseUrl = 'http://10.0.2.2:3000';
 
-// For local development with iOS simulator
-static String _baseUrl = 'http://localhost:3000';
-
 // For production
 static String _baseUrl = 'https://your-relay-server.example';
 ```
@@ -70,16 +61,7 @@ static String _baseUrl = 'https://your-relay-server.example';
 ### 5. Run the App
 
 ```bash
-# For Android
 flutter run -d android
-
-# For iOS
-flutter run -d <simulator-device-UDID>
-# or
-flutter run -d "iPhone 17 Pro"
-
-# For web (development only)
-flutter run -d chrome
 ```
 
 ## Project Structure
@@ -106,7 +88,6 @@ flutter run -d chrome
 │   └── widgets/               # Reusable widgets
 │       └── account_card.dart
 ├── android/                   # Android configuration
-├── ios/                       # iOS configuration
 ├── pubspec.yaml               # Dependencies
 └── README.md
 ```
@@ -149,18 +130,14 @@ The app includes automated CI/CD via GitHub Actions (`.github/workflows/flutter-
 
 - **Triggers**: On push/PR to `main` branch when Flutter files change
 - **Android Build**: Generates release APK and AAB artifacts
-- **iOS Build**: Generates iOS release build (unsigned)
 - **Quality Checks**: Code analysis and tests run before building
-- **Releases**: there is no automated store release; the inherited `mobile-release`/`ios-testflight` workflows are archived under `docs/archive/sure/workflows/`
-
-See [docs/iOS_TESTFLIGHT.md](docs/iOS_TESTFLIGHT.md) for the historical TestFlight secrets and setup.
+- **Releases**: there is no automated store release; build the APK from CI artifacts or locally. Signing is described in [docs/SIGNING_SETUP.md](docs/SIGNING_SETUP.md).
 
 ### Downloading Build Artifacts
 
 After a successful CI run, download artifacts from the GitHub Actions workflow:
 - `app-release-apk` - Android APK file
 - `app-release-aab` - Android App Bundle (for Play Store)
-- `ios-build-unsigned` - iOS app bundle (unsigned, see [iOS build guide](docs/iOS_BUILD.md) for signing)
 
 ## Building for Release
 
@@ -174,18 +151,6 @@ flutter build appbundle --release
 
 Android release metadata comes from `pubspec.yaml` (`version: <name>+<code>`). Keep the numeric build code increasing for every release so Android can install upgrades over older APKs.
 
-### iOS
-
-```bash
-# Ensure CocoaPods dependencies are installed first
-cd ios && pod install && cd ..
-
-# Build iOS release
-flutter build ios --release
-```
-
-For detailed iOS build instructions, troubleshooting, and CI/CD setup, see [docs/iOS_BUILD.md](docs/iOS_BUILD.md).
-
 ## Future Expansion
 
 This app provides a foundation for additional features:
@@ -194,7 +159,6 @@ This app provides a foundation for additional features:
 - Account sync
 - Budget management
 - Investment tracking
-- Push notifications
 - Biometric authentication
 
 ## License

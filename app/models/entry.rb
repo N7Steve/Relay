@@ -107,11 +107,6 @@ class Entry < ApplicationRecord
     pending.where("entries.date < ?", days.days.ago.to_date)
   }
 
-  # Family-scoped query for Enrichable#clear_ai_cache
-  def self.family_scope(family)
-    joins(:account).where(accounts: { family_id: family.id })
-  end
-
   # Uncategorized transaction entries on draft or active accounts.
   # Caller is responsible for scoping to accessible entries before applying this scope.
   #

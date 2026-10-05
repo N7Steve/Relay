@@ -304,35 +304,6 @@ when `Balance::ChartSeriesBuilder` raises. The chart degrades to
 target-line-only rather than 500ing. If you're debugging "why is the
 projection saved-line empty," check local debug logs first.
 
-## Demo data
-
-`Demo::Generator#generate_goals!` seeds nine goals chosen to surface
-every state on at least one card:
-
-- Active + computed status: `:reached`, `:on_track`, `:behind`,
-  `:no_target_date`, plus a past-due active goal that exercises the
-  "was due" header copy.
-- AASM: paused, archived, completed.
-- Two open pledges (banner + index callout).
-- One matched pledge bound to a real recent inflow transaction
-  (exercises the "Last pledge matched N days ago" header).
-
-Routing goals to different account pools (primary checking holds
-the bulk of the balance; secondary checking holds a tenth) is what
-forces certain goals to land below their target instead of overshooting.
-If you change the demo's account balances, the goal targets need to
-move too.
-
-To regenerate from scratch:
-
-```sh
-bundle exec rails db:drop db:create db:schema:load
-SKIP_CLEAR=1 bundle exec rake demo_data:default
-```
-
-`SKIP_CLEAR=0` clears existing data first; on a freshly-loaded schema
-the clear step has known issues with the `trades` constraint so the
-`SKIP_CLEAR=1` path is the reliable one.
 
 ## Background processes
 
@@ -341,7 +312,6 @@ the clear step has known issues with the `trades` constraint so the
 flips matching rows to `expired`.
 
 `GoalPledge::Reconciler` runs synchronously inside the existing import
-pipeline; it is not a separate job. Any provider sync (Plaid,
-SimpleFIN, Lunchflow, Enable Banking, Brex, IBKR, Kraken, SnapTrade) and
+pipeline; it is not a separate job. An Enable Banking sync and
 any manual balance reconciliation feeds through `Account::ProviderImportAdapter`
 or `Account::ReconciliationManager` and trips the reconciler hook.

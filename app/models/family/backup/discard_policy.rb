@@ -8,7 +8,8 @@ class Family::Backup::DiscardPolicy
     "Family" => %w[ai_prompt_overrides assistant_type bills_feed_token categorization_confidence_threshold categorization_provider categorization_shadow_rate data_enrichment_enabled recurring_transactions_disabled stripe_customer_id vector_store_id],
     "User" => %w[ai_enabled show_ai_sidebar last_viewed_chat_id],
     "FamilyDocument" => %w[provider_file_id],
-    "Security" => %w[price_provider offline_reason failed_fetch_at failed_fetch_count first_provider_price_on]
+    "Security" => %w[price_provider offline_reason failed_fetch_at failed_fetch_count first_provider_price_on],
+    "Property" => %w[avm_provider avm_last_synced_on]
   }.freeze
 
   def self.retired?(name)

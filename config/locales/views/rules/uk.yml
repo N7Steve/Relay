@@ -96,12 +96,6 @@ uk:
         pending: Очікується
         success: Успіх
         failed: Невдача
-    clear_ai_cache:
-      button: Скинути кеш ШІ
-      confirm_title: Скинути кеш ШІ?
-      confirm_body: Ви впевнені, що хочете скинути кеш ШІ? Це дозволить правилам ШІ повторно обробити всі транзакції. Це може призвести до додаткових витрат на API.
-      confirm_button: Скинути кеш
-      success: Кеш ШІ очищується. Це може зайняти кілька хвилин.
     condition_filters:
       transaction_type:
         income: Дохід

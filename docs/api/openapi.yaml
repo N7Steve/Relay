@@ -209,66 +209,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Insight"
-    PushSubscriptionRegistration:
-      type: object
-      required:
-      - token
-      - environment
-      - platform
-      properties:
-        token:
-          type: string
-          maxLength: 2048
-          pattern: "^(?:[0-9a-fA-F]{2})+$"
-        environment:
-          type: string
-          enum:
-          - sandbox
-          - production
-        platform:
-          type: string
-          enum:
-          - ios
-        device_key:
-          type: string
-          pattern: "^[0-9a-f]{64}$"
-          description: Optional 256-bit installation secret, unique per server and
-            kept in device secure storage. Required proof to replace another user’s
-            registration for this device. Never returned.
-    PushSubscription:
-      type: object
-      required:
-      - id
-      - environment
-      - platform
-      - last_registered_at
-      properties:
-        id:
-          type: string
-          format: uuid
-        environment:
-          type: string
-          enum:
-          - sandbox
-          - production
-        platform:
-          type: string
-          enum:
-          - ios
-        last_registered_at:
-          type: string
-          format: date-time
-    RetryResponse:
-      type: object
-      required:
-      - message
-      - message_id
-      properties:
-        message:
-          type: string
-        message_id:
-          type: string
-          format: uuid
     Account:
       type: object
       required:
@@ -5851,51 +5791,6 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
         '403':
           description: insufficient scope
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
-  "/api/v1/push_subscriptions":
-    post:
-      summary: Register an APNs device token
-      description: Unavailable in Relay's self-hosted installation. Legacy Apple credentials
-        do not enable push registration.
-      tags:
-      - Push Subscriptions
-      security:
-      - apiKeyAuth: []
-      parameters: []
-      responses:
-        '403':
-          description: push unavailable in Relay
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/PushSubscriptionRegistration"
-        required: true
-  "/api/v1/push_subscriptions/{id}":
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
-    delete:
-      summary: Unregister an APNs device token
-      description: Unavailable in Relay's self-hosted installation. Historical device
-        tokens remain stored.
-      tags:
-      - Push Subscriptions
-      security:
-      - apiKeyAuth: []
-      responses:
-        '403':
-          description: push unavailable in Relay
           content:
             application/json:
               schema:

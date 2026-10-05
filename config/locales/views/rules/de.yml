@@ -39,12 +39,6 @@ de:
         pending: Ausstehend
         success: Erfolgreich
         failed: Fehlgeschlagen
-    clear_ai_cache:
-      button: KI-Cache zurücksetzen
-      confirm_title: KI-Cache zurücksetzen?
-      confirm_body: Bist du sicher, dass du den KI-Cache zurücksetzen möchtest? Dadurch können KI-Regeln alle Transaktionen erneut verarbeiten. Dies kann zusätzliche API-Kosten verursachen.
-      confirm_button: Cache zurücksetzen
-      success: Der KI-Cache wird geleert. Das kann einen Moment dauern.
     condition_filters:
       transaction_type:
         income: Einnahme

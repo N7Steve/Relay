@@ -19,7 +19,6 @@ pt-PT:
           invite_only: Apenas por convite
       show:
         general: Definições Gerais
-        property_valuation_providers: Serviços de Avaliação de Imóveis
         sync_settings: Definições de Sincronização
         invites: Códigos de Convite
         title: Self-Hosting
@@ -41,78 +40,14 @@ pt-PT:
         title: Definições da Brandfetch
         high_res_label: Ativar logótipos de alta resolução
         high_res_description: Quando ativado, os logótipos serão obtidos com resolução de 120x120 em vez de 40x40. Isto fornece imagens mais nítidas em ecrãs high-DPI.
-      llm_provider_selector:
-        title: Serviço de IA
-        description: Escolha o modelo de IA utilizado pelo chat. As operações em lote, como a categorização de transações, a deteção de comerciantes e o processamento de PDFs, utilizam atualmente a OpenAI. 
-        env_configured_message: Configurado com sucesso através da variável de ambiente LLM_PROVIDER.
-        provider_label: Serviço de AI ativo
-        provider_openai: OpenAI
-        provider_anthropic: Anthropic (Claude)
-        provider_help: A mudança de serviço tem efeito no próximo chat. Configure abaixo as credenciais do serviço ativo.
-        not_configured_hint: "Adicione uma chave de API de %{provider} abaixo para a ativar."
-        data_retention_heading: Tratamento de dados
-        data_retention: As entradas da API não são utilizadas para treinar modelos por predefinição; as APIs alojadas dos serviços retêm dados durante ~30 dias para confiança e segurança. Os endpoints personalizados ou autoalojados seguem a sua própria política.
-      anthropic_settings:
-        title: Anthropic (Claude)
-        description: Introduza a sua chave de API da Anthropic. Opcionalmente, aponte a Base URL para o AWS Bedrock ou GCP Vertex.
-        env_configured_message: Configurado com sucesso através de variáveis de ambiente.
-        access_token_label: Chave de API
-        access_token_placeholder: Introduza a sua chave de API da Anthropic
-        base_url_label: URL Base (Opcional)
-        base_url_placeholder: "https://api.anthropic.com (predefinição)"
-        model_label: Modelo Predefinido (Opcional)
-        model_placeholder: "claude-sonnet-4-6 (predefinição)"
-        model_help: Utilizado para o chat e o processamento de PDF. As operações em lote (categorização, deteção de comerciantes) usam a Haiku por predefinição para poupar custos.
       openai_settings:
-        description: Introduza o token de acesso e configure opcionalmente um serviço personalizado compatível com OpenAI
-        env_configured_message: Configurado com sucesso através de variáveis de ambiente.
-        access_token_label: Token de Acesso
-        access_token_placeholder: Introduza o seu token de acesso aqui
-        uri_base_label: URL Base da API (Opcional)
-        uri_base_placeholder: "https://api.openai.com/v1 (predefinição)"
-        model_label: Modelo (Opcional)
-        model_placeholder: "gpt-4.1 (predefinição)"
-        json_mode_label: Modo JSON
-        json_mode_auto: Automático (recomendado)
-        json_mode_strict: Estrito (melhor para modelos de raciocínio)
-        json_mode_none: Nenhum (melhor para modelos padrão)
-        json_mode_json_object: Objeto JSON
-        json_mode_help: "O modo Estrito funciona melhor com modelos de raciocínio (qwen-thinking, deepseek-reasoner). O modo Nenhum funciona melhor com modelos padrão (llama, mistral, gpt-oss)."
-        budget_heading: Orçamento de Tokens
-        budget_description: Aplica-se a chamadas compatíveis com OpenAI (chat, categorização automática, deteção de comerciantes e processamento de PDF). Os valores predefinidos são conservadores para modelos locais de pequeno contexto. Aumente-os para modelos cloud com janelas de contexto maiores.
-        context_window_label: Janela de Contexto (Opcional)
-        context_window_help: "Total de tokens que o modelo aceitará. Predefinição: 2048 — aumente para 8192+ para a OpenAI cloud ou modelos locais de grande contexto."
-        max_response_tokens_label: Máx. de Tokens de Resposta (Opcional)
-        max_response_tokens_help: "Tokens reservados para a resposta do modelo. Predefinição: 512. Reduza para abrir espaço para um histórico mais longo."
-        max_items_per_call_label: Máx. de Itens por Lote (Opcional)
-        max_items_per_call_help: "Limite superior para os lotes de categorização automática / deteção de comerciantes. Predefinição: 25. Lotes maiores são automaticamente divididos para caberem na janela de contexto."
         ai_response_timeout_heading: Tempo Limite de Resposta do Chat
         ai_response_timeout_description: Quanto tempo o chat espera pelo assistente antes de mostrar um erro de "sem resposta". Aumente isto se executar um modelo local em hardware lento — as respostas dos serviços compatíveis com OpenAI não são transmitidas em fluxo e as rondas de chamadas de ferramentas não mostram nada, pelo que o chat pode permanecer em "A pensar…" durante toda a vez.
-        ai_response_timeout_label: Tempo Limite de Resposta em Segundos (Opcional)
-        ai_response_timeout_help: "Predefinição: 90. Isto cobre toda a vez, por isso dimensione-o como uma soma: (1 + ASSISTANT_MAX_TOOL_CALL_ITERATIONS) × OPENAI_REQUEST_TIMEOUT, mais o tempo de execução e de fila da ferramenta. Reduzir ASSISTANT_MAX_TOOL_CALL_ITERATIONS diminui o tamanho necessário e é, muitas vezes, a melhor alavanca em hardware lento."
-        title: OpenAI
-      rentcast_settings:
-        title: RentCast
-        description: Introduza a sua chave de API do RentCast para procurar detalhes de imóveis nos EUA e estimativas de valor ao adicionar um imóvel. O nível gratuito está limitado a 50 pedidos de API por mês, partilhados entre pesquisas de imóveis e atualizações diárias de valor. Num plano pago, aumente o limite com a variável de ambiente RENTCAST_MAX_REQUESTS_PER_MONTH.
-        env_configured_message: Configurado com sucesso através da variável de ambiente RENTCAST_API_KEY.
-        label: Chave de API
-        placeholder: Introduza a sua chave de API do RentCast aqui
-        usage: "%{used} de %{limit} pedidos mensais utilizados"
-      realie_settings:
-        title: Realie
-        description: Introduza a sua chave de API do Realie para procurar detalhes de imóveis nos EUA e estimativas de valor ao adicionar um imóvel. O nível gratuito está limitado a 25 pedidos de API por mês, partilhados entre pesquisas de imóveis e atualizações diárias de valor. Num plano pago, aumente o limite com a variável de ambiente REALIE_MAX_REQUESTS_PER_MONTH.
-        env_configured_message: Configurado com sucesso através da variável de ambiente REALIE_API_KEY.
-        label: Chave de API
-        placeholder: Introduza a sua chave de API do Realie aqui
-        usage: "%{used} de %{limit} pedidos mensais utilizados"
       update:
         failure: Valor de definição inválido
         success: Definições atualizadas
         invalid_onboarding_state: Estado de registo inválido
         invalid_sync_time: "Formato de hora de sincronização inválido. Utilize o formato HH:MM (ex.: 02:30)."
-        invalid_llm_budget: "%{field} tem de ser um número inteiro ≥ %{minimum}."
-        invalid_anthropic_base_url: A URL Base da Anthropic tem de ser um URL http(s).
-        anthropic_model_required_for_base_url: O Modelo da Anthropic é obrigatório quando está definida uma URL Base personalizada.
         scheduler_sync_failed: As definições foram guardadas, mas não foi possível atualizar o agendamento da sincronização. Tente novamente ou consulte os registos do servidor.
       clear_cache:
         cache_cleared: A cache de dados foi limpa. A operação pode demorar alguns momentos.

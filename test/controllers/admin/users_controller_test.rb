@@ -38,21 +38,6 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "(You)"
   end
 
-  test "index identifies a family backed by the demo monitoring key as demo data" do
-    demo_user = users(:family_admin)
-    demo_user.api_keys.create!(
-      name: "monitoring",
-      key: ApiKey::DEMO_MONITORING_KEY,
-      scopes: [ "read" ],
-      source: "monitoring"
-    )
-
-    get admin_users_url
-
-    assert_response :success
-    assert_includes response.body, "Demo data"
-  end
-
 
 
   test "index renders auth type pills for local and sso users" do
@@ -677,33 +662,6 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, family.name
     assert_includes response.body, "will also be deleted"
     assert_includes response.body, "1 account"
-  end
-
-  test "super admin can remove the last family user who owns the protected demo monitoring key" do
-    family = Family.create!(name: "Disposable Demo", currency: "USD")
-    target = family.users.create!(
-      email: "demo-key-owner@example.com",
-      password: "password123",
-      role: :guest
-    )
-    demo_key = target.api_keys.create!(
-      name: "monitoring",
-      key: ApiKey::DEMO_MONITORING_KEY,
-      scopes: [ "read" ],
-      source: "monitoring"
-    )
-
-    assert_enqueued_with(job: UserPurgeJob, args: [ target ]) do
-      delete admin_user_url(target), params: { confirmation_text: family.name }
-    end
-
-    assert_redirected_to admin_users_path
-    assert_equal I18n.t("admin.users.destroy.success"), flash[:notice]
-    assert_not ApiKey.exists?(demo_key.id)
-    assert_not target.reload.active?
-
-    perform_enqueued_jobs only: UserPurgeJob
-    assert_not Family.exists?(family.id)
   end
 
   test "associated-record removal failures are captured and shown without a server error" do

@@ -11,9 +11,6 @@ fr:
       success: Votre compte a été réinitialisé. Les données seront supprimées en arrière-plan
         dans un certain temps.
       unauthorized: Vous n'êtes pas autorisé à effectuer cette action.
-    reset_with_sample_data:
-      success: Votre compte a été réinitialisé et les données d'exemple sont en cours
-        de préparation. Vous verrez les données de démonstration sous peu.
     roles:
       admin: Administrateur
       member: Membre

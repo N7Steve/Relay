@@ -13,8 +13,6 @@ vi:
     reset:
       success: Tài khoản của bạn đã được đặt lại. Dữ liệu sẽ được xóa trong nền sau một thời gian.
       unauthorized: Bạn không được phép thực hiện hành động này
-    reset_with_sample_data:
-      success: Tài khoản của bạn đã được đặt lại và dữ liệu mẫu đang được chuẩn bị. Bạn sẽ thấy dữ liệu demo trong giây lát.
     roles:
       admin: Quản trị viên
       member: Thành viên

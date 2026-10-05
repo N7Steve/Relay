@@ -27,7 +27,6 @@ de:
         confirm_clear_cache:
           title: Daten-Cache leeren?
           body: Bist du sicher, dass du den Daten-Cache leeren möchtest? Dadurch werden alle Wechselkurse, Wertpapierpreise, Kontostände und andere Daten entfernt. Diese Aktion kann nicht rückgängig gemacht werden.
-        property_valuation_providers: Anbieter für Immobilienbewertung
       brand_fetch_settings:
         description: Gib die von Brandfetch bereitgestellte Client-ID ein.
         label: Client-ID
@@ -40,47 +39,12 @@ de:
         setup_step_2_html: Geh auf die Seite <a href="https://developers.brandfetch.com/dashboard/logo-api" target="_blank" rel="noopener noreferrer" class="underline">Logo API</a>.
         setup_step_3: Klick auf das Auge-Symbol unter „Your Client ID“, um die ID sichtbar zu machen, und füg sie unten ein.
         show_details: "(Details anzeigen)"
-      openai_settings:
-        description: Gib dein Zugriffstoken ein und konfiguriere optional einen benutzerdefinierten, OpenAI-kompatiblen Anbieter.
-        env_configured_message: Erfolgreich über Umgebungsvariablen konfiguriert.
-        access_token_label: Zugriffstoken
-        access_token_placeholder: Gib hier dein Zugriffstoken ein
-        uri_base_label: API-Basis-URL (optional)
-        uri_base_placeholder: "https://api.openai.com/v1 (Standard)"
-        model_label: Modell (optional)
-        model_placeholder: "gpt-4.1 (Standard)"
-        model_function_calling_help: Der KI-Assistent liest deine Daten mithilfe von Funktionsaufrufen. Wähl daher ein Modell, das laut Dokumentation deines Anbieters Tools beziehungsweise Function Calling unterstützt. Ohne diese Unterstützung schlägt der Chat mit einer wenig aussagekräftigen Fehlermeldung des Anbieters fehl.
-        model_function_calling_link: Konfiguriertes Modell prüfen
-        json_mode_label: JSON-Modus
-        json_mode_auto: Auto (empfohlen)
-        json_mode_strict: Streng (am besten für Denk-Modelle)
-        json_mode_none: Keiner (am besten für Standard-Modelle)
-        json_mode_json_object: JSON-Objekt
-        json_mode_help: "Der strenge Modus funktioniert am besten mit Denk-Modellen (qwen-thinking, deepseek-reasoner). Der Modus Keiner funktioniert am besten mit Standard-Modellen (llama, mistral, gpt-oss)."
-        title: OpenAI
-        budget_description: 'Gilt für alle OpenAI-kompatiblen Aufrufe: Chat, automatische Kategorisierung, Händlererkennung und PDF-Verarbeitung. Die Vorgaben sind auf kleine lokale Modelle ausgelegt. Für Cloud-Modelle mit größerem Kontextfenster kannst du sie anheben.'
-        budget_heading: Token-Budget
-        context_window_help: 'Gesamtzahl der Tokens, die das Modell annimmt. Standard: 2048 – für OpenAI in der Cloud oder lokale Modelle mit großem Kontext auf 8192 oder mehr anheben.'
-        context_window_label: Kontextfenster (optional)
-        max_items_per_call_help: 'Obergrenze für Stapel bei automatischer Kategorisierung und Händlererkennung. Standard: 25. Größere Stapel werden automatisch so zerlegt, dass sie ins Kontextfenster passen.'
-        max_items_per_call_label: Maximale Einträge pro Stapel (optional)
-        max_response_tokens_help: 'Tokens, die für die Antwort des Modells reserviert sind. Standard: 512. Niedriger ansetzen, um Platz für längere Verläufe zu schaffen.'
-        max_response_tokens_label: Maximale Antwort-Tokens (optional)
-        timeout_heading: Zeitlimits
-        timeout_description: Legt fest, wie lange Aufrufe OpenAI-kompatibler Modelle laufen dürfen, bevor Relay sie abbricht. Erhöhe diese Werte, wenn du ein lokales Modell auf langsamer Hardware betreibst.
-        openai_request_timeout_label: Anfragezeitlimit in Sekunden (optional)
-        openai_request_timeout_help: 'Standard: 60. Gilt für jede OpenAI-kompatible HTTP-Anfrage, einschließlich automatischer Kategorisierung, Händlererkennung, Chat, PDF-Verarbeitung und Vektorspeicher-Aufrufen. OPENAI_REQUEST_TIMEOUT überschreibt dieses Feld.'
-        ai_response_timeout_label: Antwortzeitlimit in Sekunden (optional)
-        ai_response_timeout_help: 'Standard: 90. Gilt nur für das Zeitlimit der gesamten Chat-Runde. Setz den Wert daher als Summe an: (1 + ASSISTANT_MAX_TOOL_CALL_ITERATIONS) × Anfragezeitlimit, plus Ausführungszeit der Tools und Wartezeit in der Warteschlange. AI_RESPONSE_TIMEOUT überschreibt dieses Feld.'
       update:
         failure: Ungültiger Einstellungswert
         success: Einstellungen aktualisiert
         invalid_onboarding_state: Ungültiger Onboarding-Status
         invalid_sync_time: Ungültiges Synchronisierungszeitformat. Bitte verwende das Format HH:MM (z. B. 02:30).
         scheduler_sync_failed: Gespeichert, aber der Sync-Zeitplan ließ sich nicht aktualisieren. Versuch es erneut oder sieh in den Server-Logs nach.
-        anthropic_model_required_for_base_url: Wenn du eine eigene Basis-URL setzt, musst du auch ein Anthropic-Modell angeben.
-        invalid_anthropic_base_url: Die Anthropic-Basis-URL muss eine http(s)-Adresse sein.
-        invalid_llm_budget: "%{field} muss eine ganze Zahl ≥ %{minimum} sein."
       clear_cache:
         cache_cleared: Daten-Cache wurde geleert. Dies kann einige Augenblicke dauern.
       not_authorized: Du bist nicht berechtigt, diese Aktion auszuführen.
@@ -92,45 +56,9 @@ de:
         include_pending_label: Ausstehende Transaktionen einbeziehen
         include_pending_description: Wenn aktiviert, werden ausstehende (noch nicht gebuchte) Transaktionen importiert und bei Buchung automatisch abgeglichen. Deaktivieren, wenn deine Bank unzuverlässige Ausstehend-Daten liefert.
         env_configured_message: Diese Einstellung ist deaktiviert, weil eine Anbieter-Umgebungsvariable (SIMPLEFIN_INCLUDE_PENDING oder PLAID_INCLUDE_PENDING) gesetzt ist. Entferne sie, um diese Einstellung zu aktivieren.
-      anthropic_settings:
-        access_token_label: API-Key
-        access_token_placeholder: Anthropic-API-Key eintragen
-        base_url_label: Basis-URL (optional)
-        base_url_placeholder: https://api.anthropic.com (Standard)
-        description: Trag deinen Anthropic-API-Key ein. Die Basis-URL kannst du wahlweise auf AWS Bedrock oder GCP Vertex zeigen lassen.
-        env_configured_message: Über Umgebungsvariablen eingerichtet.
-        model_help: Wird für Chat und PDF-Verarbeitung genutzt. Stapelverarbeitungen wie Kategorisierung und Händlererkennung nutzen aus Kostengründen standardmäßig Haiku.
-        model_label: Standardmodell (optional)
-        model_placeholder: claude-sonnet-4-6 (Standard)
-        title: Anthropic (Claude)
       ensure_admin:
         not_authorized: Dazu bist du nicht berechtigt
       ensure_super_admin_for_onboarding:
         not_authorized: Dazu bist du nicht berechtigt
-      llm_provider_selector:
-        data_retention: Eingaben über die API werden standardmäßig nicht zum Training genutzt; die gehosteten APIs der Anbieter speichern sie rund 30 Tage aus Sicherheitsgründen. Für eigene oder selbst gehostete Endpunkte gilt deine eigene Regelung.
-        data_retention_heading: Umgang mit Daten
-        description: Wähl, welches LLM den KI-Chat antreibt. Stapelverarbeitungen – Kategorisierung, Händlererkennung und PDF-Verarbeitung – laufen derzeit immer über OpenAI.
-        env_configured_message: Über die Umgebungsvariable LLM_PROVIDER eingerichtet.
-        not_configured_hint: Trag unten einen API-Key für %{provider} ein, um ihn zu aktivieren.
-        provider_anthropic: Anthropic (Claude)
-        provider_help: Ein Wechsel greift beim nächsten Chat. Die Zugangsdaten des aktiven Anbieters trägst du unten ein.
-        provider_label: Aktiver LLM-Anbieter
-        provider_openai: OpenAI
-        title: KI-Anbieter
-      realie_settings:
-        description: Trag deinen Realie-API-Key ein, um beim Anlegen einer Immobilie US-Objektdaten und Wertschätzungen abzurufen. Der kostenlose Tarif erlaubt 25 Anfragen pro Monat, geteilt zwischen Objektsuchen und täglichen Wertaktualisierungen. In einem Bezahltarif hebst du die Grenze über die Umgebungsvariable REALIE_MAX_REQUESTS_PER_MONTH an.
-        env_configured_message: Über die Umgebungsvariable REALIE_API_KEY eingerichtet.
-        label: API-Key
-        placeholder: Realie-API-Key hier eintragen
-        title: Realie
-        usage: "%{used} von %{limit} Anfragen diesen Monat genutzt"
-      rentcast_settings:
-        description: Trag deinen RentCast-API-Key ein, um beim Anlegen einer Immobilie US-Objektdaten und Wertschätzungen abzurufen. Der kostenlose Tarif erlaubt 50 Anfragen pro Monat, geteilt zwischen Objektsuchen und täglichen Wertaktualisierungen. In einem Bezahltarif hebst du die Grenze über die Umgebungsvariable RENTCAST_MAX_REQUESTS_PER_MONTH an.
-        env_configured_message: Über die Umgebungsvariable RENTCAST_API_KEY eingerichtet.
-        label: API-Key
-        placeholder: RentCast-API-Key hier eintragen
-        title: RentCast
-        usage: "%{used} von %{limit} Anfragen diesen Monat genutzt"
       sync_auto_sync_scheduler!:
         scheduler_sync_failed: Gespeichert, aber der Sync-Zeitplan ließ sich nicht aktualisieren. Versuch es erneut oder sieh in den Server-Logs nach.

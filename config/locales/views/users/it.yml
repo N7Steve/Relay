@@ -13,8 +13,6 @@ it:
     reset:
       success: Il tuo account è stato ripristinato. I dati verranno eliminati in background tra un po'.
       unauthorized: Non sei autorizzato a eseguire questa azione
-    reset_with_sample_data:
-      success: Il tuo account è stato ripristinato e i dati di esempio sono in fase di preparazione. Vedrai i dati demo a breve.
     roles:
       admin: Amministratore
       member: Membro

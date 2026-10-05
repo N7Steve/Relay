@@ -92,12 +92,6 @@ vi:
         pending: Đang chờ
         success: Thành công
         failed: Thất bại
-    clear_ai_cache:
-      button: Đặt lại bộ nhớ đệm AI
-      confirm_title: Đặt lại bộ nhớ đệm AI?
-      confirm_body: Bạn có chắc muốn đặt lại bộ nhớ đệm AI? Điều này cho phép các quy tắc AI xử lý lại tất cả giao dịch và có thể phát sinh thêm chi phí API.
-      confirm_button: Đặt lại bộ nhớ đệm
-      success: Bộ nhớ đệm AI đang được xóa. Quá trình này có thể mất vài giây.
     condition_filters:
       transaction_type:
         income: Thu nhập

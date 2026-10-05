@@ -5,19 +5,8 @@ ro:
   settings:
     ai_prompts:
       show:
-        page_title: Prompturi AI
         openai_label: OpenAI
-        disable_ai: Dezactivează Asistentul AI
         prompt_instructions: Instrucțiuni pentru prompturi
-        main_system_prompt:
-          title: Promptul principal de sistem
-          subtitle: Instrucțiuni de bază care definesc modul în care asistentul AI se comportă în toate conversațiile de chat
-        transaction_categorizer:
-          title: Categorizator de tranzacții
-          subtitle: AI categorizează automat tranzacțiile tale pe baza categoriilor definite
-        merchant_detector:
-          title: Detector de comercianți
-          subtitle: AI identifică și îmbogățește datele tranzacțiilor cu informații despre comercianți
     preferences:
       show:
         country: Țară
@@ -56,9 +45,6 @@ ro:
         confirm_reset:
           body: Ești sigur că vrei să-ți resetezi contul? Aceasta va șterge toate conturile, categoriile, comercianții, etichetele și alte date. Această acțiune nu poate fi anulată.
           title: Resetezi contul?
-        confirm_reset_with_sample_data:
-          body: Ești sigur că vrei să-ți resetezi contul și să încarci date eșantion? Aceasta va șterge datele existente și le va înlocui cu date demo, astfel încât să poți explora Relay în siguranță.
-          title: Resetezi contul și încarci date eșantion?
         confirm_remove_invitation:
           body: Ești sigur că vrei să anulezi invitația pentru %{email}?
           title: Anulează invitația
@@ -71,8 +57,6 @@ ro:
           datele tale și nu poate fi anulată.
         reset_account: Resetează contul
         reset_account_warning: Resetarea contului tău va șterge toate conturile, categoriile, comercianții, etichetele și alte date, dar îți va păstra contul de utilizator intact.
-        reset_account_with_sample_data: Resetează și preîncarcă
-        reset_account_with_sample_data_warning: Șterge toate datele existente și apoi încarcă date eșantion noi, astfel încât să poți explora într-un mediu pre-completat.
         email: Email
         first_name: Prenume
         household_form_input_placeholder: Introdu numele gospodăriei

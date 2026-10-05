@@ -95,11 +95,6 @@ Rails.application.routes.draw do
   # rate limited alongside the MFA WebAuthn endpoints in Rack::Attack.
   post "/sessions/passkey_options", to: "passkey_sessions#options", as: :passkey_session_options
   post "/sessions/passkey", to: "passkey_sessions#create", as: :passkey_session
-  # Desktop app SSO: opens the flow in the system browser (so passkeys/WebAuthn
-  # work), then hands a single-use, PKCE-bound code back via the sure:// scheme
-  # which the desktop webview exchanges for a normal web session.
-  post "/sessions/desktop_exchange", to: "sessions#desktop_exchange", as: :desktop_sso_exchange
-  get "/auth/desktop/:provider", to: "sessions#desktop_sso_start"
   get "/auth/mobile/:provider", to: "sessions#mobile_sso_start"
   match "/auth/:provider/callback", to: "sessions#openid_connect", via: %i[get post]
   match "/auth/failure", to: "sessions#failure", via: %i[get post]
@@ -116,7 +111,6 @@ Rails.application.routes.draw do
 
   resources :users, only: %i[update destroy] do
     delete :reset, on: :member
-    delete :reset_with_sample_data, on: :member
     patch :rule_prompt_settings, on: :member
     get :resend_confirmation_email, on: :member
   end
@@ -462,7 +456,6 @@ Rails.application.routes.draw do
       resource :cash_flow, only: [ :show ], controller: :cash_flows
       resource :balance_sheet, only: [ :show ], controller: :balance_sheet
       resources :insights, only: [ :index ]
-      resources :push_subscriptions, only: [ :create, :destroy ]
       resource :family_settings, only: [ :show ], controller: :family_settings
       post :sync, to: "sync#create", as: :sync_job
       resources :syncs, only: [ :index, :show ] do
@@ -538,9 +531,7 @@ Rails.application.routes.draw do
     # name even for singular resources, unlike its plural siblings above
     # that happen to round-trip cleanly). The controller file is singular,
     # so name it explicitly.
-    resource :system_health, only: :show, controller: "system_health" do
-      post :send_test_push
-    end
+    resource :system_health, only: :show, controller: "system_health"
   end
 
   # Defines the root path route ("/")

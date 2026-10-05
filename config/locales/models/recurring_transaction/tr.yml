@@ -24,9 +24,3 @@ tr:
     attributes:
       recurring_transaction:
         payment_url: Ödeme bağlantısı
-  recurring_transactions:
-    allocator:
-      missing_rate: '%{from} para biriminden %{to} para birimine döviz kuru yok; tutarı elle girin'
-      unmeasurable: bu işlemde %{currency} para birimine çevrilemeyen bir dağıtım var, bu yüzden işlemin kalan kısmı ölçülemiyor. %{date} için bir döviz kuru ekleyin veya önce mevcut ödemeyi kaldırın
-      over_allocated: '%{amount} dağıtmak, işlemin kalan %{capacity} %{currency} tutarını aşıyor'
-      exceeds_remaining: '%{amount}, bu dönemde kalan %{remaining} tutarını aşıyor'

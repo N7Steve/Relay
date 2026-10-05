@@ -9,7 +9,7 @@ class RetiredMarketDataTest < ActiveSupport::TestCase
        ExchangeRate::Importer SecuritiesController].each do |name|
       assert_nil name.safe_constantize, "#{name} should be retired"
     end
-    assert_equal %i[property_valuations], Provider::Registry::CONCEPTS
+    assert_not Provider::Registry.const_defined?(:CONCEPTS)
   end
 
   test "retired market data jobs are gone from the runtime" do

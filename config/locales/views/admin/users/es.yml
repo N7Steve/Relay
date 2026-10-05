@@ -18,7 +18,6 @@ es:
           manage_family: Gestionar %{family}
         badges:
           current_family: Tu grupo
-          demo_family: Datos de demostración
         subscription_status:
           active: Suscripción activa
           canceled: Suscripción cancelada

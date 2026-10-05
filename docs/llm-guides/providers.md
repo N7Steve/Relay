@@ -10,15 +10,15 @@ holdings and backups only.
 Account connector runtime is limited to Enable Banking. The
 [phase 7 record](../migration/pruning-phase-7.md) lists retired connectors and
 their historical persistence contract; FinanceKit followed in
-[phase 9F](../migration/pruning-phase-9.md). Brandfetch, Drive and property
-valuations remain independent. Do not restore removed connectors through configuration,
+[phase 9F](../migration/pruning-phase-9.md). Brandfetch and Drive remain
+independent; property valuations were removed in phase 12. Do not restore removed connectors through configuration,
 generators, upstream merges or reflection.
 
 Financial provider requests require explicit installation-wide activation through
 `ExternalAccess`. Check at the transport boundary so direct requests, existing
 client instances and previously queued jobs also respect suspension. Faraday
-connections use `ExternalAccess::RequestMiddleware` with `:bank_sync`,
-`:property_valuations` or `:ai` as appropriate. HTTParty bank
+connections use `ExternalAccess::RequestMiddleware` with `:bank_sync`
+or `:google_drive` as appropriate. HTTParty bank
 clients prepend `Provider::ExternalRequestGuard` to their singleton class.
 Other transports must check `ExternalAccess.require!` before opening a connection.
 

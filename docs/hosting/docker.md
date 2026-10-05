@@ -30,11 +30,10 @@ and credentials until a separately validated rotation.
 Optional integrations are configured through environment variables:
 [Google Drive exports](google-drive-exports.md), [Brandfetch logos](logos.md),
 [OIDC/SSO](oidc.md) and [passkeys](webauthn.md). Enable Banking connections are
-configured per family in the application; RentCast/Realie property-valuation keys
-in the self-hosting settings or `RENTCAST_API_KEY`/`REALIE_API_KEY`. Each external
-capability (bank sync, property valuations, logos, Google Drive) is off until an
-administrator enables it in the self-hosting settings; except logos, it can also
-be forced with `RELAY_EXTERNAL_<CAPABILITY>_ENABLED=true|false`.
+configured per family in the application. Each external capability is off by
+default: Brandfetch logos are enabled in the self-hosting settings, while bank
+sync and Google Drive are enabled with `RELAY_EXTERNAL_BANK_SYNC_ENABLED=true` and
+`RELAY_EXTERNAL_GOOGLE_DRIVE_ENABLED=true` (or the matching stored setting).
 
 Validate the rendered configuration without starting services:
 

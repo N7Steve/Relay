@@ -92,12 +92,6 @@ zh-TW:
         pending: 待處理
         success: 成功
         failed: 失敗
-    clear_ai_cache:
-      button: 重設 AI 快取
-      confirm_title: 要重設 AI 快取嗎？
-      confirm_body: 確定要重設 AI 快取嗎？這會讓 AI 規則重新處理所有交易，可能產生額外的 API 費用。
-      confirm_button: 重設快取
-      success: 正在清除 AI 快取，可能需要一點時間。
     condition_filters:
       transaction_type:
         income: 收入

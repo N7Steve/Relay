@@ -226,7 +226,6 @@ zh-TW:
       tags: 標籤
       rules: 規則
       merchants: 商家
-      recurring_transactions: 定期交易
       transfers: 轉帳
       rejected_transfers: 已拒絕的轉帳
       trades: 證券交易

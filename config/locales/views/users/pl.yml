@@ -10,9 +10,6 @@ pl:
       success: Twoje konto zostało zresetowane. Dane zostaną usunięte w tle za jakiś
         czas.
       unauthorized: Nie masz uprawnień do wykonania tej akcji
-    reset_with_sample_data:
-      success: Twoje konto zostało zresetowane, a dane przykładowe są przygotowywane.
-        Dane demo pojawią się wkrótce.
     roles:
       admin: Administrator
       member: Członek

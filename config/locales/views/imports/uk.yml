@@ -252,7 +252,6 @@ uk:
       tags: "Теги"
       rules: "Правила"
       merchants: "Продавці"
-      recurring_transactions: "Повторювані транзакції"
       transfers: "Перекази"
       rejected_transfers: "Відхилені перекази"
       trades: "Угоди"

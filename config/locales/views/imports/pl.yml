@@ -349,7 +349,6 @@ pl:
       categories: Kategorie
       holdings: Posiadane aktywa
       merchants: Kontrahenci
-      recurring_transactions: Transakcje cykliczne
       rejected_transfers: Odrzucone przelewy
       rules: Reguły
       tags: Tagi

@@ -255,7 +255,6 @@ pt-PT:
       tags: "Etiquetas"
       rules: "Regras"
       merchants: "Comerciantes"
-      recurring_transactions: "Transações Recorrentes"
       transfers: "Transferências"
       rejected_transfers: "Transferências Rejeitadas"
       trades: "Negociações"

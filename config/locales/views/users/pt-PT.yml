@@ -14,8 +14,6 @@ pt-PT:
     reset:
       success: A sua conta foi reposta. Os dados serão eliminados em segundo plano dentro de algum tempo.
       unauthorized: Não está autorizado a realizar esta ação
-    reset_with_sample_data:
-      success: A sua conta foi reposta e os dados de exemplo estão a ser preparados. Verá os dados de demonstração em breve.
     roles:
       admin: Administrador
       member: Membro

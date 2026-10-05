@@ -2,19 +2,6 @@
 pl:
   settings:
     hostings:
-      anthropic_settings:
-        access_token_label: Klucz API
-        access_token_placeholder: Wprowadź swój klucz API Anthropic
-        base_url_label: Bazowy URL (opcjonalnie)
-        base_url_placeholder: https://api.anthropic.com (domyślnie)
-        description: Wprowadź swój klucz API Anthropic. Opcjonalnie wskaż bazowy URL
-          na AWS Bedrock lub GCP Vertex.
-        env_configured_message: Skonfigurowano przez zmienne środowiskowe.
-        model_help: Używany do czatu i przetwarzania PDF. Operacje wsadowe (kategoryzacja,
-          wykrywanie kontrahenta) domyślnie korzystają z Haiku ze względu na koszt.
-        model_label: Domyślny model (opcjonalnie)
-        model_placeholder: claude-sonnet-4-6 (domyślnie)
-        title: Anthropic (Claude)
       brand_fetch_settings:
         description: Wprowadź Client ID otrzymany od Brandfetch
         env_configured_message: Skonfigurowano identyfikator klienta Brandfetch przez
@@ -91,100 +78,7 @@ pl:
           invite_only: Tylko na zaproszenie
           open: Otwarty
         title: Onboarding
-      llm_provider_selector:
-        data_retention: Dane wejściowe API domyślnie nie są używane do trenowania
-          modeli. Hostowane API dostawców przechowują dane przez około 30 dni w celach
-          bezpieczeństwa. Własne lub samodzielnie hostowane endpointy podlegają Twojej
-          własnej polityce.
-        data_retention_heading: Obsługa danych
-        description: Wybierz, który LLM napędza czat AI. Operacje wsadowe (kategoryzacja
-          transakcji, wykrywanie kontrahenta i przetwarzanie PDF) obecnie zawsze korzystają
-          z OpenAI.
-        env_configured_message: Skonfigurowano przez zmienną środowiskową LLM_PROVIDER.
-        not_configured_hint: Dodaj poniżej klucz API %{provider}, aby go aktywować.
-        provider_anthropic: Anthropic (Claude)
-        provider_help: Zmiana dostawcy zacznie obowiązywać przy następnym czacie.
-          Skonfiguruj poniżej dane uwierzytelniające aktywnego dostawcy.
-        provider_label: Aktywny dostawca LLM
-        provider_openai: OpenAI
-        title: Dostawca AI
       not_authorized: Nie masz uprawnień do wykonania tej akcji
-      openai_settings:
-        access_token_label: Token dostępu
-        access_token_placeholder: Wprowadź tutaj token dostępu
-        ai_response_timeout_help: 'Domyślnie: 90. Obejmuje całą turę, więc licz to
-          jako sumę: (1 + ASSISTANT_MAX_TOOL_CALL_ITERATIONS) × OPENAI_REQUEST_TIMEOUT,
-          plus czas wykonania narzędzi i czas w kolejce. Obniżenie ASSISTANT_MAX_TOOL_CALL_ITERATIONS
-          zmniejsza potrzebną wartość i często jest lepszą dźwignią na wolnym sprzęcie.'
-        ai_response_timeout_label: Limit czasu odpowiedzi w sekundach (opcjonalnie)
-        budget_description: Dotyczy wywołań kompatybilnych z OpenAI (czat, auto-kategoryzacja,
-          wykrywanie kontrahenta i przetwarzanie PDF). Wartości domyślne są ostrożne
-          dla lokalnych modeli z małym oknem kontekstu. Zwiększ dla modeli chmurowych
-          z większym oknem kontekstu.
-        budget_heading: Budżet tokenów
-        context_window_help: 'Łączna liczba tokenów akceptowana przez model. Domyślnie:
-          2048, zwiększ do 8192 lub więcej dla chmurowego OpenAI albo lokalnych modeli
-          z dużym kontekstem.'
-        context_window_label: Okno kontekstu (opcjonalnie)
-        description: Wprowadź token dostępu i opcjonalnie skonfiguruj niestandardowego
-          dostawcę zgodnego z OpenAI
-        env_configured_message: Pomyślnie skonfigurowano przez zmienne środowiskowe.
-        json_mode_auto: Auto (zalecane)
-        json_mode_help: Tryb ścisły najlepiej działa z modelami rozumującymi (qwen-thinking,
-          deepseek-reasoner). Tryb brak najlepiej działa z modelami standardowymi
-          (llama, mistral, gpt-oss).
-        json_mode_json_object: Obiekt JSON
-        json_mode_label: Tryb JSON
-        json_mode_none: Brak (najlepszy dla modeli standardowych)
-        json_mode_strict: Ścisły (najlepszy dla modeli rozumujących)
-        max_items_per_call_help: 'Górny limit dla wsadów auto-kategoryzacji / wykrywania
-          kontrahenta. Domyślnie: 25. Większe wsady są automatycznie dzielone, aby
-          zmieścić się w oknie kontekstu.'
-        max_items_per_call_label: Maks. elementów na wsad (opcjonalnie)
-        max_response_tokens_help: 'Tokeny zarezerwowane na odpowiedź modelu. Domyślnie:
-          512. Zmniejsz, aby zwolnić miejsce na dłuższą historię.'
-        max_response_tokens_label: Maks. tokenów odpowiedzi (opcjonalnie)
-        model_function_calling_help: Asystent AI odczytuje Twoje dane przez wywołania
-          funkcji, więc wybierz model, który Twój dostawca dokumentuje jako obsługujący
-          narzędzia/wywoływanie funkcji. Modele bez tej funkcji powodują niejasny
-          błąd dostawcy w czacie.
-        model_function_calling_link: Sprawdź skonfigurowany model
-        model_label: Model (opcjonalne)
-        model_placeholder: gpt-4.1 (domyślnie)
-        openai_request_timeout_help: 'Domyślnie: 60. Dotyczy każdego żądania HTTP
-          zgodnego z OpenAI, w tym automatycznej kategoryzacji, wykrywania sprzedawcy,
-          czatu, przetwarzania PDF oraz wywołań magazynu wektorów. OPENAI_REQUEST_TIMEOUT
-          nadpisuje to pole.'
-        openai_request_timeout_label: Limit czasu żądania w sekundach (opcjonalnie)
-        timeout_description: Określa, jak długo mogą trwać wywołania modeli zgodnych
-          z OpenAI, zanim Relay zrezygnuje. Zwiększ te wartości, jeśli uruchamiasz
-          lokalny model na wolnym sprzęcie.
-        timeout_heading: Limity czasu
-        title: OpenAI
-        uri_base_label: Bazowy URL API (opcjonalne)
-        uri_base_placeholder: https://api.openai.com/v1 (domyślnie)
-      realie_settings:
-        description: Wprowadź klucz API Realie, aby przy dodawaniu nieruchomości pobierać
-          szczegóły i szacunkową wartość nieruchomości w USA. Darmowy plan jest ograniczony
-          do 25 zapytań API miesięcznie, wspólnych dla wyszukiwania nieruchomości
-          i codziennego odświeżania wyceny. W płatnym planie zwiększ limit zmienną
-          środowiskową REALIE_MAX_REQUESTS_PER_MONTH.
-        env_configured_message: Skonfigurowano przez zmienną środowiskową REALIE_API_KEY.
-        label: Klucz API
-        placeholder: Wprowadź tutaj swój klucz API Realie
-        title: Realie
-        usage: Wykorzystano %{used} z %{limit} miesięcznych zapytań
-      rentcast_settings:
-        description: Wprowadź klucz API RentCast, aby przy dodawaniu nieruchomości
-          pobierać szczegóły i szacunkową wartość nieruchomości w USA. Darmowy plan
-          jest ograniczony do 50 zapytań API miesięcznie, wspólnych dla wyszukiwania
-          nieruchomości i codziennego odświeżania wyceny. W płatnym planie zwiększ
-          limit zmienną środowiskową RENTCAST_MAX_REQUESTS_PER_MONTH.
-        env_configured_message: Skonfigurowano przez zmienną środowiskową RENTCAST_API_KEY.
-        label: Klucz API
-        placeholder: Wprowadź tutaj swój klucz API RentCast
-        title: RentCast
-        usage: Wykorzystano %{used} z %{limit} miesięcznych zapytań
       show:
         clear_cache: Wyczyść pamięć podręczną danych
         clear_cache_warning: Wyczyszczenie pamięci podręcznej danych usunie wszystkie
@@ -198,7 +92,6 @@ pl:
         danger_zone: Strefa ryzyka
         general: Ustawienia ogólne
         invites: Kody zaproszeń
-        property_valuation_providers: Dostawcy wyceny nieruchomości
         sync_settings: Ustawienia synchronizacji
         title: Self-Hosting
       sync_auto_sync_scheduler!:
@@ -219,11 +112,7 @@ pl:
           Twój bank dostarcza niewiarygodne dane oczekujące.
         include_pending_label: Uwzględniaj transakcje oczekujące
       update:
-        anthropic_model_required_for_base_url: Model Anthropic jest wymagany, gdy
-          ustawiono niestandardowy URL bazowy.
         failure: Nieprawidłowa wartość ustawienia
-        invalid_anthropic_base_url: URL bazowy Anthropic musi być adresem http(s).
-        invalid_llm_budget: "%{field} musi być liczbą całkowitą ≥ %{minimum}."
         invalid_onboarding_state: Nieprawidłowy stan onboardingu
         invalid_sync_time: Nieprawidłowy format czasu synchronizacji. Użyj formatu
           HH:MM (np. 02:30).

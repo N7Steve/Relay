@@ -14,7 +14,6 @@ tr:
       enable: Hesabı etkinleştir
       exclude_from_reports: Tüm raporlardan hariç tut
       include_in_reports: Raporlara dahil et
-      link_lunchflow: Lunch Flow ile bağla
       link_provider: Sağlayıcı ile bağla
       remove_default: Varsayılanı kaldır
       set_default: Varsayılan olarak ayarla
@@ -81,7 +80,6 @@ tr:
         connected_entry: Hesabı bağla
         connected_entry_eu: AB hesabı bağla
         link_with_provider: "%{provider} ile bağla"
-        lunchflow_entry: Lunch Flow hesabı bağla
         manual_entry: Hesap bakiyesi gir
         title: Nasıl eklemek istersiniz?
       title: Ne eklemek istersiniz?

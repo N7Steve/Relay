@@ -11,7 +11,8 @@ Fase 9 publicada en `origin/main` en `d2e790ed6` (9A, 9E y 9F; 9B–9D conservad
 Steve informa el 5 de octubre de 2026 de que todo parece funcionar correctamente;
 este trabajo no inspecciona la instalación. Fase 10 publicada en `eaf35e3ff`; fase 11
 (cierre) completada. Ambas desplegadas en TrueNAS en `b6ba8735a` el 5 de octubre de 2026;
-Steve informa de que todo funciona. Ver [alcance final](../product-scope.md).
+Steve informa de que todo funciona. Fase 12 añade un refinado final seleccionado
+por Steve. Ver [alcance final](../product-scope.md).
 Ver los registros de [fase 7](pruning-phase-7.md), [fase 8](pruning-phase-8.md)
 y [fase 9](pruning-phase-9.md).
 
@@ -117,6 +118,7 @@ cualquier fase sin necesitar la siguiente para arreglar la aplicación**.
 | 9 | Extensiones restantes seleccionadas y reducidas | Bases 0–2 y módulos previos que afecten a cada extensión | Opcional por bloque |
 | 10 | Esquema y datos residuales tratados | Retirada y estabilidad del módulo concreto | Última; operaciones persistentes |
 | 11 | Cierre de soporte, documentación y métricas | Fases elegidas completadas | Cierre |
+| 12 | Refinado final: demo, AVM, clientes Apple/macOS, push, profilers y restos | 11 | Opcional, seleccionada |
 
 El orden de presentación es el recomendado. Una fase posterior solo puede
 adelantarse si sus dependencias reales están resueltas y se registra el cambio.
@@ -449,6 +451,21 @@ restante del importador debe tener consumidores y propósito vigentes.
 actualización y recuperación de datos soportadas y probadas.
 **Reversión:** unidades concretas de código/docs; lectores necesarios conservados.
 
+## Fase 12 — Refinado final
+
+**Selección de Steve, 5 de octubre de 2026,** tras revisar el resumen de la poda:
+
+- Restos sin uso: retirar código, assets, tests y traducciones sin consumidores.
+- Familia demo: retirar del back y del front.
+- Idiomas: conservar todos.
+- Gems: retirar profilers y benchmarks; conservar Lookbook (recomendación aceptada).
+- Clientes: conservar la app Flutter para Android y la API para clientes propios
+  futuros (Windows o un front Angular). Retirar escritorio macOS (aceptado), app
+  iOS y cualquier destino iOS; con ello, las notificaciones push APNs.
+- RentCast y Realie: retirar.
+
+Detalle, datos y pruebas en el [registro de fase 12](pruning-phase-12.md).
+
 ## Registro de ejecución
 
 La fase 0 está publicada en `eb538dae3`, la fase 1 en `a5299f36c`, la fase 2
@@ -458,7 +475,8 @@ Las fases 6–7 están publicadas; el reporte de Steve sobre el despliegue de fa
 se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fase 9 publicada en
 `d2e790ed6` y reportada funcional por Steve; fase 10 publicada en `eaf35e3ff`;
 fases 10 y 11 desplegadas juntas en `b6ba8735a` y reportadas funcionales (ver
-[registro de fase 11](pruning-phase-11.md)). La poda queda cerrada.
+[registro de fase 11](pruning-phase-11.md)). Fase 12 (refinado final) en su
+[registro](pruning-phase-12.md).
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |

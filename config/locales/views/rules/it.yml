@@ -92,12 +92,6 @@ it:
         pending: In attesa
         success: Successo
         failed: Fallita
-    clear_ai_cache:
-      button: Reimposta cache AI
-      confirm_title: Reimpostare la cache AI?
-      confirm_body: Sei sicuro di voler reimpostare la cache AI? Questo permetterà alle regole AI di rielaborare tutte le transazioni. Potrebbero verificarsi costi API aggiuntivi.
-      confirm_button: Reimposta cache
-      success: La cache AI è in fase di svuotamento. Potrebbe richiedere alcuni istanti.
     condition_filters:
       transaction_type:
         income: Entrata

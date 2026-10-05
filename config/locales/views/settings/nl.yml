@@ -5,19 +5,8 @@ nl:
   settings:
     ai_prompts:
       show:
-        page_title: AI Prompts
         openai_label: OpenAI
-        disable_ai: AI Assistent uitschakelen
         prompt_instructions: Prompt Instructies
-        main_system_prompt:
-          title: Hoofd Systeemprompt
-          subtitle: Kerninstructies die bepalen hoe de AI-assistent zich gedraagt in alle chatgesprekken
-        transaction_categorizer:
-          title: Transactie Categoriseerder
-          subtitle: AI categoriseert automatisch uw transacties op basis van uw gedefinieerde categorieën
-        merchant_detector:
-          title: Handelaar Detectie
-          subtitle: AI identificeert en verrijkt transactiegegevens met handelaarsinformatie
     preferences:
       show:
         country: Land
@@ -56,9 +45,6 @@ nl:
         confirm_reset:
           body: Weet u zeker dat u uw account wilt resetten? Dit zal al uw accounts, categorieën, handelaren, tags en andere gegevens verwijderen. Deze actie kan niet ongedaan worden gemaakt.
           title: Account resetten?
-        confirm_reset_with_sample_data:
-          body: Weet u zeker dat u uw account wilt resetten en voorbeeldgegevens wilt laden? Dit zal uw bestaande gegevens verwijderen en vervangen door demogegevens zodat u %{product_name} veilig kunt verkennen.
-          title: Account resetten en voorbeeldgegevens laden?
         confirm_remove_invitation:
           body: "Weet u zeker dat u de uitnodiging voor %{email} wilt verwijderen?"
           title: Uitnodiging verwijderen
@@ -71,8 +57,6 @@ nl:
           uw gegevens verwijderen en kan niet ongedaan worden gemaakt.
         reset_account: Account resetten
         reset_account_warning: Het resetten van uw account zal al uw accounts, categorieën, handelaren, tags en andere gegevens verwijderen, maar uw gebruikersaccount intact houden.
-        reset_account_with_sample_data: Resetten en vooraf laden
-        reset_account_with_sample_data_warning: Verwijder al uw bestaande gegevens en laad vervolgens nieuwe voorbeeldgegevens zodat u kunt verkennen met een vooraf gevulde omgeving.
         email: E-mail
         first_name: Voornaam
         household_form_input_placeholder: Voer huishoudnaam in

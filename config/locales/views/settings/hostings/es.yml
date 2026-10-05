@@ -2,9 +2,6 @@
 es:
   settings:
     hostings:
-      ai_features_settings:
-        title: Funciones de IA
-        description: Muestra y habilita el chat, los prompts, las importaciones asistidas, el consumo, las comprobaciones de salud en toda la instancia.
       invite_code_settings:
         description: Controla cómo se registran nuevas personas en tu instancia de %{product}.
         email_confirmation_description: Cuando está habilitado, los usuarios deben confirmar su dirección de correo electrónico al cambiarla o registrarse.
@@ -21,7 +18,6 @@ es:
           invite_only: Solo con invitación
       show:
         general: Configuración General
-        property_valuation_providers: Proveedores de valoración de propiedades
         sync_settings: Ajustes de Sincronización
         invites: Códigos de Invitación
         title: Configuración de instancia
@@ -45,80 +41,11 @@ es:
         title: Configuración de Brandfetch
         high_res_label: Activar logotipos de alta resolución
         high_res_description: Cuando está habilitado, los logotipos se obtendrán a una resolución de 120x120 en lugar de 40x40. Esto ofrece imágenes más nítidas en pantallas de alta densidad de píxeles (DPI).
-      llm_provider_selector:
-        title: Proveedor de IA
-        description: Elige qué LLM impulsa el chat de IA. Las operaciones por lotes (categorización de transacciones, detección de comercios y procesamiento de PDF) actualmente siempre usan OpenAI.
-        env_configured_message: Configurado correctamente mediante la variable de entorno LLM_PROVIDER.
-        provider_label: Proveedor LLM activo
-        provider_openai: OpenAI
-        provider_anthropic: Anthropic (Claude)
-        provider_help: El cambio de proveedor surte efecto en el siguiente chat. Configura abajo las credenciales del proveedor activo.
-        not_configured_hint: Añade abajo una clave API de %{provider} para activarlo.
-        data_retention_heading: Tratamiento de los datos
-        data_retention: Por defecto, las entradas a la API no se usan para entrenar modelos; las API alojadas de los proveedores conservan los datos ~30 días por motivos de confianza y seguridad. Los endpoints personalizados o autoalojados siguen tu propia política.
-      anthropic_settings:
-        title: Anthropic (Claude)
-        description: Introduce tu clave API de Anthropic. Opcionalmente, apunta la URL base a AWS Bedrock o GCP Vertex.
-        env_configured_message: Configurado correctamente mediante variables de entorno.
-        access_token_label: Clave API
-        access_token_placeholder: Introduce tu clave API de Anthropic
-        base_url_label: URL base (opcional)
-        base_url_placeholder: https://api.anthropic.com (predeterminada)
-        model_label: Modelo predeterminado (opcional)
-        model_placeholder: claude-sonnet-4-6 (predeterminado)
-        model_help: Se usa para el chat y el procesamiento de PDF. Las operaciones por lotes (categorización, detección de comercios) usan Haiku por defecto para reducir costes.
-      openai_settings:
-        description: Introduce el token de acceso y, opcionalmente, configura un proveedor compatible con OpenAI personalizado
-        env_configured_message: Configurado con éxito a través de variables de entorno.
-        access_token_label: Token de Acceso
-        access_token_placeholder: Introduce tu token de acceso aquí
-        uri_base_label: URL Base de la API (Opcional)
-        uri_base_placeholder: https://api.openai.com/v1 (por defecto)
-        model_label: Modelo (Opcional)
-        model_placeholder: gpt-4.1 (por defecto)
-        json_mode_label: Modo JSON
-        json_mode_auto: Automático (recomendado)
-        json_mode_strict: Estricto (mejor para modelos "thinking")
-        json_mode_none: Ninguno (mejor para modelos estándar)
-        json_mode_json_object: Objeto JSON
-        json_mode_help: El modo Estricto funciona mejor con modelos de razonamiento (qwen-thinking, deepseek-reasoner). El modo Ninguno funciona mejor con modelos estándar (llama, mistral, gpt-oss).
-        budget_heading: Presupuesto de tokens
-        budget_description: Se aplica a las llamadas compatibles con OpenAI (chat, categorización automática, detección de comercios y procesamiento de PDF). Los valores predeterminados son conservadores para modelos locales de contexto pequeño. Auméntalos para modelos en la nube con ventanas de contexto mayores.
-        context_window_label: Ventana de contexto (opcional)
-        context_window_help: 'Total de tokens que aceptará el modelo. Predeterminado: 2048 — súbelo a 8192 o más para OpenAI en la nube o modelos locales de contexto grande.'
-        max_response_tokens_label: Tokens máximos de respuesta (opcional)
-        max_response_tokens_help: 'Tokens reservados para la respuesta del modelo. Predeterminado: 512. Bájalo para dejar sitio a un historial más largo.'
-        max_items_per_call_label: Elementos máximos por lote (opcional)
-        max_items_per_call_help: 'Límite superior para los lotes de categorización automática / detección de comercios. Predeterminado: 25. Los lotes más grandes se dividen automáticamente para caber en la ventana de contexto.'
-        timeout_heading: Tiempos de espera
-        timeout_description: Controla cuánto tiempo pueden ejecutarse las llamadas a modelos compatibles con OpenAI antes de que Relay las cancele. Auméntalos si ejecutas un modelo local en hardware lento.
-        openai_request_timeout_label: Tiempo de espera de solicitud en segundos (opcional)
-        openai_request_timeout_help: "Predeterminado: 60. Se aplica a cada solicitud HTTP compatible con OpenAI, incluida la categorización automática, la detección de comercios, el chat, el procesamiento de PDF y las llamadas al almacén vectorial. OPENAI_REQUEST_TIMEOUT sobrescribe este campo."
-        ai_response_timeout_label: Tiempo de espera de respuesta en segundos (opcional)
-        ai_response_timeout_help: "Predeterminado: 90. Solo se aplica al monitor de turno completo del chat, así que dimensiona este valor como una suma: (1 + ASSISTANT_MAX_TOOL_CALL_ITERATIONS) × tiempo de espera de solicitud, más el tiempo de ejecución de herramientas y cola. AI_RESPONSE_TIMEOUT sobrescribe este campo."
-        title: OpenAI
-      rentcast_settings:
-        title: RentCast
-        description: Introduce tu clave API de RentCast para consultar detalles de propiedades de EE. UU. y estimaciones de valor al añadir una propiedad. El nivel gratuito está limitado a 50 solicitudes API al mes, compartidas entre búsquedas de propiedades y actualizaciones diarias de valoración. En un plan de pago, aumenta el límite con la variable de entorno RENTCAST_MAX_REQUESTS_PER_MONTH.
-        env_configured_message: Configurado correctamente mediante la variable de entorno RENTCAST_API_KEY.
-        label: Clave API
-        placeholder: Introduce aquí tu clave API de RentCast
-        usage: "%{used} de %{limit} solicitudes mensuales utilizadas"
-      realie_settings:
-        title: Realie
-        description: Introduce tu clave API de Realie para consultar detalles de propiedades de EE. UU. y estimaciones de valor al añadir una propiedad. El nivel gratuito está limitado a 25 solicitudes API al mes, compartidas entre búsquedas de propiedades y actualizaciones diarias de valoración. En un plan de pago, aumenta el límite con la variable de entorno REALIE_MAX_REQUESTS_PER_MONTH.
-        env_configured_message: Configurado correctamente mediante la variable de entorno REALIE_API_KEY.
-        label: Clave API
-        placeholder: Introduce aquí tu clave API de Realie
-        usage: "%{used} de %{limit} solicitudes mensuales utilizadas"
       update:
         failure: Valor de configuración no válido
         success: Configuración actualizada
         invalid_onboarding_state: Estado de incorporación no válido
         invalid_sync_time: Formato de hora de sincronización no válido. Por favor, usa el formato HH:MM (ej. 02:30).
-        invalid_llm_budget: '%{field} debe ser un número entero ≥ %{minimum}.'
-        invalid_anthropic_base_url: La URL base de Anthropic debe ser una URL http(s).
-        anthropic_model_required_for_base_url: El modelo de Anthropic es obligatorio cuando se define una URL base personalizada.
         scheduler_sync_failed: Ajustes guardados, pero no se pudo actualizar la programación de sincronización. Inténtalo de nuevo o revisa los registros del servidor.
       clear_cache:
         cache_cleared: La caché de datos ha sido limpiada. Esto puede tardar unos momentos en completarse.

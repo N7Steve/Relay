@@ -215,7 +215,6 @@ zh-CN:
       tags: 标签
       rules: 规则
       merchants: 商户
-      recurring_transactions: 循环交易
       transfers: 转账
       rejected_transfers: 被拒绝的转账
       trades: 交易

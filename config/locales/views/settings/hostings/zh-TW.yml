@@ -18,7 +18,6 @@ zh-TW:
           invite_only: 僅限邀請
       show:
         general: 一般設定
-        property_valuation_providers: 房產估價供應商
         sync_settings: 同步設定
         invites: 邀請碼
         title: 自行代管 (Self-Hosting)
@@ -40,74 +39,11 @@ zh-TW:
         title: Brandfetch 設定
         high_res_label: 啟用高解析度標誌
         high_res_description: 啟用後，標誌會以 120x120 而非 40x40 的解析度取得，在高 DPI 螢幕上會更清晰。
-      llm_provider_selector:
-        title: AI 供應商
-        description: 選擇由哪一個 LLM 驅動 AI 聊天。批次作業（交易分類、商家辨識與 PDF 處理）目前一律使用 OpenAI。
-        env_configured_message: 已透過 LLM_PROVIDER 環境變數成功設定。
-        provider_label: 目前啟用的 LLM 供應商
-        provider_openai: OpenAI
-        provider_anthropic: Anthropic (Claude)
-        provider_help: 切換供應商會在下一次聊天時生效。請在下方設定目前供應商的憑證。
-        not_configured_hint: 請在下方加入 %{provider} API 金鑰以啟用。
-        data_retention_heading: 資料處理方式
-        data_retention: API 輸入預設不會用於訓練模型；各供應商託管的 API 會為了信任與安全用途保留資料約 30 天。自訂或自行代管的端點則依照您自己的政策。
-      anthropic_settings:
-        title: Anthropic (Claude)
-        description: 輸入您的 Anthropic API 金鑰。您也可以把 Base URL 指向 AWS Bedrock 或 GCP Vertex。
-        env_configured_message: 已透過環境變數成功設定。
-        access_token_label: API 金鑰
-        access_token_placeholder: 輸入您的 Anthropic API 金鑰
-        base_url_label: Base URL（選填）
-        base_url_placeholder: https://api.anthropic.com（預設）
-        model_label: 預設模型（選填）
-        model_placeholder: claude-sonnet-4-6（預設）
-        model_help: 用於聊天與 PDF 處理。批次作業（自動分類、商家辨識）為了成本考量預設使用 Haiku。
-      openai_settings:
-        description: 輸入存取權杖 (Access Token)，並可選擇設定自訂的 OpenAI 相容供應商。
-        env_configured_message: 已透過環境變數成功設定。
-        access_token_label: 存取權杖 (Access Token)
-        access_token_placeholder: 在此輸入您的 Access Token
-        uri_base_label: API 基礎 URL（選填）
-        uri_base_placeholder: 預設為 https://api.openai.com/v1
-        model_label: 模型名稱（選填）
-        model_placeholder: 預設為 gpt-4.1
-        json_mode_label: JSON 模式
-        json_mode_auto: 自動（建議）
-        json_mode_strict: 嚴格 (Strict) - 最適合思考模型
-        json_mode_none: 無 (None) - 最適合標準模型
-        json_mode_json_object: JSON 物件 (JSON Object)
-        json_mode_help: 「嚴格模式」最適合思考模型（如 qwen-thinking, deepseek-reasoner）。「無模式」最適合標準模型（如 llama, mistral, gpt-oss）。
-        budget_heading: Token 預算
-        budget_description: 適用於相容 OpenAI 的呼叫（聊天、自動分類、商家辨識與 PDF 處理）。預設值是為了小上下文的本機模型而保守設定的。若使用上下文視窗較大的雲端模型，請把數值調高。
-        context_window_label: 上下文視窗（選填）
-        context_window_help: 模型可接受的 Token 總數。預設值：2048 - 使用雲端 OpenAI 或大上下文的本機模型時請提高到 8192 以上。
-        max_response_tokens_label: 回應 Token 數上限（選填）
-        max_response_tokens_help: 保留給模型回覆的 Token 數。預設值：512。調低可以空出更多空間給較長的對話紀錄。
-        max_items_per_call_label: 每批項目數上限（選填）
-        max_items_per_call_help: 自動分類／商家辨識每批次的上限。預設值：25。過大的批次會自動切分以符合上下文視窗。
-        title: OpenAI
-      rentcast_settings:
-        title: RentCast
-        description: 輸入您的 RentCast API 金鑰，即可在新增房產時查詢美國房產的細節與估價。免費方案每月限 50 次 API 請求，由房產查詢與每日估價更新共用。付費方案可用 RENTCAST_MAX_REQUESTS_PER_MONTH 環境變數提高上限。
-        env_configured_message: 已透過 RENTCAST_API_KEY 環境變數成功設定。
-        label: API 金鑰
-        placeholder: 在此輸入您的 RentCast API 金鑰
-        usage: 本月已使用 %{used} / %{limit} 次請求
-      realie_settings:
-        title: Realie
-        description: 輸入您的 Realie API 金鑰，即可在新增房產時查詢美國房產的細節與估價。免費方案每月限 25 次 API 請求，由房產查詢與每日估價更新共用。付費方案可用 REALIE_MAX_REQUESTS_PER_MONTH 環境變數提高上限。
-        env_configured_message: 已透過 REALIE_API_KEY 環境變數成功設定。
-        label: API 金鑰
-        placeholder: 在此輸入您的 Realie API 金鑰
-        usage: 本月已使用 %{used} / %{limit} 次請求
       update:
         failure: 設定值無效
         success: 設定已更新
         invalid_onboarding_state: 註冊狀態無效
         invalid_sync_time: 同步時間格式無效，請使用 HH:MM 格式（例如 02:30）。
-        invalid_llm_budget: '%{field} 必須是大於或等於 %{minimum} 的整數。'
-        invalid_anthropic_base_url: Anthropic Base URL 必須是 http(s) 網址。
-        anthropic_model_required_for_base_url: 設定自訂 Base URL 時，必須一併指定 Anthropic 模型。
         scheduler_sync_failed: 設定已儲存，但同步排程更新失敗。請再試一次，或查看伺服器紀錄檔。
       clear_cache:
         cache_cleared: 資料快取已清除。這可能需要一點時間才會完成。

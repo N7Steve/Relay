@@ -9,7 +9,6 @@ it:
     account:
       complete_setup: Completa configurazione
       edit: Modifica
-      link_lunchflow: Collega con Lunch Flow
       link_provider: Collega con provider
       unlink_provider: Scollega dal provider
       troubleshoot: Risoluzione problemi
@@ -67,7 +66,6 @@ it:
         connected_entry: Collega conto
         connected_entry_eu: Collega conto EU
         link_with_provider: "Collega con %{provider}"
-        lunchflow_entry: Collega conto Lunch Flow
         manual_entry: Inserisci saldo conto
         title: Come vuoi aggiungerlo?
       title: Cosa vuoi aggiungere?

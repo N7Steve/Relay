@@ -92,12 +92,6 @@ pt-PT:
         pending: Pendente
         success: Sucesso
         failed: Falhou
-    clear_ai_cache:
-      button: Repor cache de IA
-      confirm_title: Repor cache de IA?
-      confirm_body: Tem a certeza de que pretende repor a cache de IA? Isto permitirá que as regras de IA voltem a processar todas as transações. Poderão ocorrer custos adicionais de API.
-      confirm_button: Repor cache
-      success: A cache de IA está a ser limpa. Isto pode demorar alguns instantes.
     condition_filters:
       transaction_type:
         income: Rendimento

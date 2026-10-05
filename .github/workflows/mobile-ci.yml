@@ -5,7 +5,6 @@ on:
     paths:
       - 'mobile/**'
       - 'public/android-chrome-*.png'
-      - 'public/apple-touch-icon.png'
       - '.github/workflows/flutter-build.yml'
       - '.github/workflows/mobile-ci.yml'
   push:
@@ -14,7 +13,6 @@ on:
     paths:
       - 'mobile/**'
       - 'public/android-chrome-*.png'
-      - 'public/apple-touch-icon.png'
       - '.github/workflows/flutter-build.yml'
       - '.github/workflows/mobile-ci.yml'
 

@@ -12,7 +12,6 @@ class SelfHostedRetirementTest < ActionDispatch::IntegrationTest
         end
       end
       assert_raises(Provider::Registry::Error) { Provider::Registry.get_provider(:stripe) }
-      assert_not Apns::Client.hosted?
     end
   end
 

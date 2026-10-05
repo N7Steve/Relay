@@ -36,10 +36,6 @@ gem "sidekiq"
 gem "sidekiq-cron"
 gem "sidekiq-unique-jobs"
 
-# Monitoring
-gem "vernier"
-gem "rack-mini-profiler"
-
 # Active Storage
 gem "image_processing", ">= 1.2"
 
@@ -47,7 +43,6 @@ gem "image_processing", ">= 1.2"
 gem "ostruct"
 gem "bcrypt", "~> 3.1"
 gem "jwt"
-gem "apnotic", "~> 1.8"
 gem "jbuilder"
 gem "countries"
 
@@ -107,9 +102,6 @@ group :development do
   gem "ruby-lsp-rails"
   gem "web-console"
   gem "faker"
-  gem "benchmark-ips"
-  gem "stackprof"
-  gem "derailed_benchmarks"
   gem "foreman"
 end
 

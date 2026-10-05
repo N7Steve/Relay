@@ -14,5 +14,3 @@ ro:
     reset:
       success: Contul tău a fost resetat. Datele vor fi șterse în fundal în scurt timp.
       unauthorized: Nu ești autorizat să efectuezi această acțiune
-    reset_with_sample_data:
-      success: Contul tău a fost resetat și datele eșantion sunt în curs de pregătire. Vei vedea date demonstrative în curând.

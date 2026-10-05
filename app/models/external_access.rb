@@ -1,6 +1,6 @@
 class ExternalAccess
   Disabled = Class.new(StandardError)
-  CAPABILITIES = %i[bank_sync property_valuations logos google_drive].freeze
+  CAPABILITIES = %i[bank_sync logos google_drive].freeze
 
   def self.enabled?(capability)
     raise ArgumentError, "Unknown external capability: #{capability}" unless CAPABILITIES.include?(capability)

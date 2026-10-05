@@ -32,14 +32,6 @@ ca:
       estimated_cost: 'Cost estimat: ~$%{cost}'
       success: Totes les regles s'han posat a la cua per executar-se
       view_usage: Mostra l'historial d'ús
-    clear_ai_cache:
-      button: Buida la memòria cau d'IA
-      confirm_body: Segur que vols buidar la memòria cau d'IA? Això permetrà que les
-        regles d'IA tornin a processar totes les transaccions. Pot generar costos
-        d'API addicionals.
-      confirm_button: Buida la memòria cau
-      confirm_title: Vols buidar la memòria cau d'IA?
-      success: La memòria cau d'IA s'està netejant. Pot trigar uns instants.
     condition_filters:
       transaction_type:
         equal_to: Igual a

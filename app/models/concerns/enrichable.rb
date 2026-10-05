@@ -24,32 +24,6 @@ module Enrichable
     }
   end
 
-  class_methods do
-    # Override in models to define family-scoped query
-    def family_scope(family)
-      none
-    end
-
-    # Clears AI-sourced enrichments for every record of this type in the family.
-    # Returns the number of cache entries actually removed, not the number of
-    # records visited, so callers can report a figure that means something.
-    #
-    # A single bad record would otherwise abort the sweep and throw away the
-    # tally of everything already cleared, so callers may pass a block to handle
-    # per-record failures and keep going.
-    def clear_ai_cache(family, &on_record_error)
-      count = 0
-      family_scope(family).find_each do |record|
-        count += record.clear_ai_cache
-      rescue => e
-        raise unless on_record_error
-
-        on_record_error.call(record, e)
-      end
-      count
-    end
-  end
-
   # Convenience method for a single attribute
   def enrich_attribute(attr, value, source:, metadata: {}, ignore_locks: false)
     enrich_attributes({ attr => value }, source:, metadata:, ignore_locks:)
@@ -150,42 +124,6 @@ module Enrichable
     saved_changes.keys.reject { |attr| ignored_enrichable_attributes.include?(attr) }.each do |attr|
       lock_attr!(attr)
     end
-  end
-
-  # Returns the number of AI cache entries removed from this record.
-  def clear_ai_cache
-    removed_count = 0
-
-    ActiveRecord::Base.transaction do
-      ai_enrichments = data_enrichments.where(source: "ai")
-
-      # Only unlock attributes where current value still matches what AI set
-      # If user changed the value, they took ownership - don't unlock
-      attrs_to_unlock = ai_enrichments.select do |enrichment|
-        attr_name = enrichment.attribute_name
-        current_value = respond_to?(attr_name) ? send(attr_name) : self[attr_name]
-        current_value.to_s == enrichment.value.to_s
-      end.map(&:attribute_name).uniq
-
-      # Batch unlock in a single update
-      if attrs_to_unlock.any?
-        new_locked_attrs = locked_attributes.except(*attrs_to_unlock)
-        update_column(:locked_attributes, new_locked_attrs) if new_locked_attrs != locked_attributes
-      end
-
-      # Delete AI enrichment records
-      removed_count = ai_enrichments.delete_all
-
-      # Views and totals filtered on provenance are cached under
-      # Family#entries_cache_version, which only moves when an entry's
-      # timestamp changes. delete_all skips callbacks, so touch the record
-      # like a normal save would; `has_one :entry, touch: true` carries it to
-      # the entry. This stays inside the transaction so the cache invalidation
-      # commits or rolls back with the deletion.
-      touch if removed_count.positive?
-    end
-
-    removed_count
   end
 
   private

@@ -39,36 +39,11 @@ vi:
         title: Cài đặt Brandfetch
         high_res_label: Bật logo độ phân giải cao
         high_res_description: Khi bật, logo sẽ được lấy ở độ phân giải 120x120 thay vì 40x40. Điều này cung cấp hình ảnh sắc nét hơn trên màn hình độ phân giải cao.
-      openai_settings:
-        description: Nhập token truy cập và tùy chọn cấu hình nhà cung cấp tương thích OpenAI tùy chỉnh
-        env_configured_message: Đã cấu hình thành công qua biến môi trường.
-        access_token_label: Token truy cập
-        access_token_placeholder: Nhập token truy cập của bạn vào đây
-        uri_base_label: URL cơ sở API (Tùy chọn)
-        uri_base_placeholder: "https://api.openai.com/v1 (mặc định)"
-        model_label: Mô hình (Tùy chọn)
-        model_placeholder: "gpt-4.1 (mặc định)"
-        json_mode_label: Chế độ JSON
-        json_mode_auto: Tự động (khuyến nghị)
-        json_mode_strict: Nghiêm ngặt (tốt nhất cho mô hình suy nghĩ)
-        json_mode_none: Không (tốt nhất cho mô hình tiêu chuẩn)
-        json_mode_json_object: Đối tượng JSON
-        json_mode_help: "Chế độ nghiêm ngặt hoạt động tốt nhất với mô hình suy nghĩ (qwen-thinking, deepseek-reasoner). Chế độ không hoạt động tốt nhất với mô hình tiêu chuẩn (llama, mistral, gpt-oss)."
-        budget_heading: Ngân sách token
-        budget_description: Áp dụng cho mọi lần gọi LLM — lịch sử trò chuyện, phân loại tự động, phát hiện nhà cung cấp và xử lý PDF. Mặc định được đặt thận trọng cho các mô hình cục bộ ngữ cảnh nhỏ. Tăng lên cho các mô hình đám mây với cửa sổ ngữ cảnh lớn hơn.
-        context_window_label: Cửa sổ ngữ cảnh (Tùy chọn)
-        context_window_help: "Tổng số token mô hình sẽ chấp nhận. Mặc định: 2048 — tăng lên 8192+ cho OpenAI đám mây hoặc mô hình cục bộ ngữ cảnh lớn."
-        max_response_tokens_label: Số token phản hồi tối đa (Tùy chọn)
-        max_response_tokens_help: "Token dành cho phản hồi của mô hình. Mặc định: 512. Giảm để dành chỗ cho lịch sử dài hơn."
-        max_items_per_call_label: Số mục tối đa mỗi lô (Tùy chọn)
-        max_items_per_call_help: "Giới hạn trên cho lô phân loại tự động / phát hiện nhà cung cấp. Mặc định: 25. Lô lớn hơn được tự động cắt để phù hợp với cửa sổ ngữ cảnh."
-        title: OpenAI
       update:
         failure: Giá trị cài đặt không hợp lệ
         success: Cài đặt đã được cập nhật
         invalid_onboarding_state: Trạng thái giới thiệu không hợp lệ
         invalid_sync_time: "Định dạng thời gian đồng bộ không hợp lệ. Vui lòng sử dụng định dạng HH:MM (ví dụ: 02:30)."
-        invalid_llm_budget: "%{field} phải là số nguyên ≥ %{minimum}."
         scheduler_sync_failed: Đã lưu cài đặt, nhưng cập nhật lịch đồng bộ thất bại. Vui lòng thử lại hoặc kiểm tra nhật ký máy chủ.
       clear_cache:
         cache_cleared: Bộ nhớ đệm dữ liệu đã được xóa. Quá trình này có thể mất vài giây để hoàn tất.

@@ -13,5 +13,3 @@ nl:
     reset:
       success: Uw account is gereset. Gegevens worden op de achtergrond verwijderd.
       unauthorized: U bent niet geautoriseerd om deze actie uit te voeren
-    reset_with_sample_data:
-      success: Uw account is gereset en voorbeeldgegevens worden voorbereid. U zult binnenkort demogegevens zien.

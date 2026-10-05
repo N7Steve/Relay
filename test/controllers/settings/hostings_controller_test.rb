@@ -1,24 +1,8 @@
 require "test_helper"
-require "ostruct"
 
 class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
-  include ProviderTestHelper
-
   setup do
     sign_in users(:family_admin)
-
-    @provider = mock
-    Provider::Registry.stubs(:get_provider).with(:rentcast).returns(@provider)
-    Provider::Registry.stubs(:get_provider).with(:realie).returns(nil)
-    @usage_response = provider_success_response(
-      OpenStruct.new(
-        used: 10,
-        limit: 100,
-        utilization: 10,
-        plan: "free",
-      )
-    )
-    @provider.stubs(:usage).returns(@usage_response)
   end
 
   test "Brandfetch can be enabled and disabled even with a legacy environment override" do
@@ -55,8 +39,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get edit when self hosting is enabled" do
-    @provider.expects(:usage).returns(@usage_response)
-
     with_self_hosting do
       get settings_hosting_url
       assert_response :success
@@ -70,95 +52,8 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_includes response.body, "Configuración de instancia"
       assert_select "details > summary h2", text: I18n.t("settings.hostings.show.general", locale: :es)
-      assert_select "details > summary h2", text: I18n.t("settings.hostings.show.property_valuation_providers", locale: :es)
       assert_select "details > summary h2", text: I18n.t("settings.hostings.show.sync_settings", locale: :es)
       assert_select "details:not([open]) > summary h2", text: I18n.t("settings.hostings.show.danger_zone", locale: :es)
-    end
-  end
-
-  test "only a super admin can opt in and the selected family must own the demo email" do
-    # The configured demo email is already used by the new_email fixture.
-    demo_email = "disposable-demo@example.com"
-    Rails.application.stubs(:config_for).with(:demo).returns({ email: demo_email })
-
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_enabled: "1" } }
-      assert_not Setting.demo_family_refresh_enabled
-
-      sign_in users(:sure_support_staff)
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_enabled: "1" } }
-      assert_response :unprocessable_entity
-      assert_not Setting.demo_family_refresh_enabled
-
-      family = families(:dylan_family)
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_family_id: family.id } }
-      assert_response :unprocessable_entity
-
-      demo_family = Family.create!(name: "Disposable Demo")
-      demo_family.users.create!(first_name: "Demo", last_name: "Owner", email: demo_email, password: "password123", role: :admin)
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_family_id: demo_family.id } }
-      assert_redirected_to settings_hosting_path
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_enabled: "1" } }
-      assert Setting.demo_family_refresh_enabled
-    end
-  end
-
-  test "demo family selection excludes non-admin email owners and cannot be cleared while enabled" do
-    demo_email = "demo-selection@example.com"
-    Rails.application.stubs(:config_for).with(:demo).returns({ email: demo_email })
-    demo_family = Family.create!(name: "Demo Selection")
-    demo_user = demo_family.users.create!(first_name: "Demo", last_name: "Member", email: demo_email, password: "password123", role: :member)
-    sign_in users(:sure_support_staff)
-
-    with_self_hosting do
-      get settings_hosting_url
-      assert_response :success
-      assert_select "option[value='#{demo_family.id}']", count: 0
-
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_family_id: demo_family.id } }
-      assert_response :unprocessable_entity
-      assert_nil Setting.demo_family_refresh_family_id
-
-      demo_user.update!(role: :super_admin)
-      get settings_hosting_url
-      assert_select "option[value='#{demo_family.id}']", count: 0
-      demo_user.update!(role: :admin)
-      other_admin = demo_family.users.create!(first_name: "Instance", last_name: "Admin", email: "instance-admin@example.com", password: "password123", role: :super_admin)
-      get settings_hosting_url
-      assert_select "option[value='#{demo_family.id}']", count: 0
-      other_admin.update!(role: :member)
-      get settings_hosting_url
-      assert_select "option[value='#{demo_family.id}']", count: 1
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_family_id: demo_family.id } }
-      assert_redirected_to settings_hosting_path
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_enabled: "1" } }
-      assert Setting.demo_family_refresh_enabled
-
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_family_id: "" } }
-      assert_response :unprocessable_entity
-      assert_equal demo_family.id.to_s, Setting.demo_family_refresh_family_id
-      assert Setting.demo_family_refresh_enabled
-
-      patch settings_hosting_url, params: { setting: { demo_family_refresh_family_id: "", demo_family_refresh_enabled: "0" } }
-      assert_redirected_to settings_hosting_path
-      assert_nil Setting.demo_family_refresh_family_id
-      assert_not Setting.demo_family_refresh_enabled
-    end
-  end
-
-  test "can update rentcast api key when self hosting is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { rentcast_api_key: "rentcast-token" } }
-
-      assert_equal "rentcast-token", Setting.rentcast_api_key
-    end
-  end
-
-  test "can update realie api key when self hosting is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { realie_api_key: "realie-token" } }
-
-      assert_equal "realie-token", Setting.realie_api_key
     end
   end
 
@@ -172,7 +67,7 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
          setting[tinkoff_invest_api_key] setting[mansa_api_key]].each do |field|
         assert_select "[name='#{field}']", count: 0
       end
-      assert_select "[name='setting[rentcast_api_key]']"
+      %w[setting[rentcast_api_key] setting[realie_api_key]].each { |field| assert_select "[name='#{field}']", count: 0 }
 
       patch settings_hosting_url, params: { setting: { twelve_data_api_key: "ignored", exchange_rate_provider: "yahoo_finance",
                                                        securities_providers: [ "twelve_data" ] } }
@@ -180,25 +75,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to settings_hosting_url
       assert_not Setting.where(var: %w[twelve_data_api_key exchange_rate_provider securities_providers]).exists?
       assert_not Setting.respond_to?(:twelve_data_api_key)
-    end
-  end
-
-  test "can clear an encrypted api key by submitting a blank value" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { rentcast_api_key: "1234567890" } }
-      assert_equal "1234567890", Setting.rentcast_api_key
-
-      patch settings_hosting_url, params: { setting: { rentcast_api_key: "" } }
-      assert_nil Setting.rentcast_api_key
-    end
-  end
-
-  test "submitting the masked placeholder leaves an encrypted api key unchanged" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { rentcast_api_key: "1234567890" } }
-
-      patch settings_hosting_url, params: { setting: { rentcast_api_key: "********" } }
-      assert_equal "1234567890", Setting.rentcast_api_key
     end
   end
 
@@ -255,20 +131,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     assert_not Holding.exists?(holding.id)
     assert_not Balance.exists?(account_balance.id)
   end
-
-  test "does not overwrite token with masked placeholder" do
-    with_self_hosting do
-      Setting.rentcast_api_key = "real-secret"
-
-      patch settings_hosting_url, params: { setting: { rentcast_api_key: "********" } }
-
-      assert_equal "real-secret", Setting.rentcast_api_key
-    end
-  ensure
-    Setting.rentcast_api_key = nil
-  end
-
-  # Regression: issue #2465 symptom for the external assistant token.
 
   test "can clear data only when admin" do
     with_self_hosting do

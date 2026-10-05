@@ -32,14 +32,6 @@ pl:
       estimated_cost: 'Szacowany koszt: ~$%{cost}'
       success: Wszystkie reguły zostały dodane do kolejki wykonania
       view_usage: Zobacz historię użycia
-    clear_ai_cache:
-      button: Zresetuj cache AI
-      confirm_body: Czy na pewno chcesz zresetować cache AI? Umożliwi to regułom AI
-        ponowne przetworzenie wszystkich transakcji. Może to wygenerować dodatkowe
-        koszty API.
-      confirm_button: Zresetuj cache
-      confirm_title: Zresetować cache AI?
-      success: Trwa czyszczenie cache AI. To może potrwać chwilę.
     condition_filters:
       operators:
         contains: Zawiera

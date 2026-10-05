@@ -32,14 +32,6 @@ tr:
       estimated_cost: 'Tahmini maliyet: ~$%{cost}'
       success: Tüm kurallar çalıştırılmak üzere sıraya alındı
       view_usage: Kullanım geçmişini görüntüle
-    clear_ai_cache:
-      button: Yapay zeka önbelleğini sıfırla
-      confirm_body: Yapay zeka önbelleğini sıfırlamak istediğinizden emin misiniz?
-        Bu işlem, yapay zeka kurallarının tüm işlemleri yeniden işlemesine izin verecektir.
-        Bu, ek API maliyetlerine neden olabilir.
-      confirm_button: Önbelleği Sıfırla
-      confirm_title: Yapay zeka önbelleği sıfırlansın mı?
-      success: Yapay zeka önbelleği temizleniyor. Bu birkaç dakika sürebilir.
     condition_filters:
       transaction_type:
         equal_to: Eşittir

@@ -27,7 +27,6 @@ class User < ApplicationRecord
   has_one :google_drive_oauth_configuration, dependent: :destroy
   has_one :google_drive_connection, dependent: :destroy
   has_many :google_drive_export_schedules, dependent: :destroy
-  has_many :push_subscriptions, dependent: :destroy
   has_many :webauthn_credentials, dependent: :destroy
   has_many :mobile_devices, dependent: :destroy
   has_many :invitations, foreign_key: :inviter_id, dependent: :destroy
@@ -304,9 +303,6 @@ class User < ApplicationRecord
       .where(resource_owner_id: id, revoked_at: nil)
       .update_all(revoked_at: Time.current)
     sessions.destroy_all
-    # The demo monitoring key is protected from ordinary revocation, but this
-    # trusted teardown path must remove it before destroying the remaining keys.
-    api_keys.where(display_key: ApiKey::DEMO_MONITORING_KEY).delete_all
     api_keys.destroy_all
     mobile_devices.destroy_all
     webauthn_credentials.destroy_all
@@ -440,7 +436,7 @@ class User < ApplicationRecord
   def revoke_all_access_tokens
     tokens_revoked = Doorkeeper::AccessToken.where(resource_owner_id: id, revoked_at: nil).update_all(revoked_at: Time.current)
     grants_revoked = Doorkeeper::AccessGrant.where(resource_owner_id: id, revoked_at: nil).update_all(revoked_at: Time.current)
-    keys_revoked = api_keys.active.visible.update_all(revoked_at: Time.current)
+    keys_revoked = api_keys.active.update_all(revoked_at: Time.current)
 
     if tokens_revoked > 0 || grants_revoked > 0 || keys_revoked > 0
       Rails.logger.warn(

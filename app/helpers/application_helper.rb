@@ -150,10 +150,6 @@ module ApplicationHelper
     named_routes.route_defined?(:sidekiq_web_path) || named_routes.route_defined?(:sidekiq_web_url)
   end
 
-  def assistant_icon
-    "ai"
-  end
-
   # Renders Markdown text using Redcarpet
   def markdown(text)
     return "" if text.blank?

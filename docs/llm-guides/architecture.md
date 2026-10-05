@@ -139,7 +139,7 @@ MCP, external assistant transport and integrated AI were removed in phases 5–6
 OAuth, API keys and native authentication remain. Phase 10 drops conversations,
 tool calls, AI usage and preferences; retained documents, originals and import
 history remain part of the supported financial product.
-Serialized AI jobs finish without contacting providers. Insights use deterministic
+Phase 11 removed the consumers of serialized pre-pruning jobs. Insights use deterministic
 localized templates. Brandfetch logos are controlled by the instance preference;
 `RELAY_EXTERNAL_LOGOS_ENABLED` no longer overrides it. Other external capability
 environment overrides retain their existing behavior.
@@ -159,14 +159,12 @@ evaluation tables; the application no longer executes evaluation tasks.
 
 ## Provider interfaces and APIs
 
-Interchangeable provider concepts are registered at runtime through
-[Provider::Registry](../../app/models/provider/registry.rb) and
-[Setting](../../app/models/setting.rb), with environment overrides where supported.
-Interfaces live in `app/models/provider/*_concept.rb`, such as
-[PropertyValuationConcept](../../app/models/provider/property_valuation_concept.rb).
-One-off integrations can expose concrete methods without inventing a shared
-concept. Domain models should normally select providers through their `Provided`
-concerns rather than calling the registry throughout business logic.
+Enable Banking is the only account provider; its client lives in
+[Provider::EnableBanking](../../app/models/provider/enable_banking.rb).
+[Provider::Registry](../../app/models/provider/registry.rb) only resolves the
+GitHub release-notes client. Property valuation providers (RentCast/Realie) were
+removed in pruning phase 12. One-off integrations expose concrete methods; do not
+reintroduce a provider-concept registry without a second real provider.
 
 Concept providers inherit from [Provider](../../app/models/provider.rb) and use
 `with_provider_response` to return `Provider::Response` (`success?`, `data`,
