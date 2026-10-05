@@ -1,6 +1,6 @@
 # WebAuthn Configuration
 
-Sure supports passkeys, Touch ID, Windows Hello, and hardware security keys, both as a second factor and for passwordless sign-in. WebAuthn credentials are bound to the relying party ID used when they are registered, so production deployments should pin these values explicitly instead of deriving them from incoming request headers.
+Relay supports passkeys, Touch ID, Windows Hello, and hardware security keys, both as a second factor and for passwordless sign-in. WebAuthn credentials are bound to the relying party ID used when they are registered, so production deployments should pin these values explicitly instead of deriving them from incoming request headers.
 
 Set these environment variables for self-hosted deployments:
 
@@ -11,7 +11,7 @@ WEBAUTHN_ALLOWED_ORIGINS=https://sure.example.com
 
 `WEBAUTHN_RP_ID` is usually the registrable domain, such as `example.com`, not a full URL and not a hostname with a port. This lets credentials work across subdomains when the browser permits it.
 
-`WEBAUTHN_ALLOWED_ORIGINS` is a comma-separated list of full origins where users access Sure, including scheme and host. Examples:
+`WEBAUTHN_ALLOWED_ORIGINS` is a comma-separated list of full origins where users access Relay, including scheme and host. Examples:
 
 ```bash
 WEBAUTHN_ALLOWED_ORIGINS=https://sure.example.com,https://app.example.com
@@ -57,7 +57,7 @@ second factor can, after the upgrade, sign that user in on its own.
 This applies to a credential only if the authenticator that holds it made it
 discoverable. Registration asks with `residentKey: "preferred"`, which an
 authenticator is free to decline, and nothing in the database records what it
-decided — so Sure cannot tell you in advance which existing credentials are
+decided — so Relay cannot tell you in advance which existing credentials are
 affected. In practice password managers and platform authenticators (Proton
 Pass, iCloud Keychain, 1Password, Bitwarden, Windows Hello) store discoverable
 credentials by default, so theirs generally are; a credential an authenticator

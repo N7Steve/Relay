@@ -123,8 +123,7 @@ the calling workflow rather than assuming every save schedules a full sync.
 on login once per date when the family enables it and has active accounts.
 [AutoSyncScheduler](../../app/services/auto_sync_scheduler.rb) and the
 [Sidekiq schedule](../../config/schedule.yml) handle scheduled work. Sidekiq also
-runs [SyncJob](../../app/jobs/sync_job.rb), [ImportJob](../../app/jobs/import_job.rb)
-and [AssistantResponseJob](../../app/jobs/assistant_response_job.rb).
+runs [SyncJob](../../app/jobs/sync_job.rb) and [ImportJob](../../app/jobs/import_job.rb).
 
 [ExternalAccess](../../app/models/external_access.rb) controls bank sync, property
 valuations, external logos and Google Drive independently. New settings default

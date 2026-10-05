@@ -40,21 +40,10 @@ class AssistantRetirementTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "retired response jobs remain sinks without conversation persistence" do
+  test "retired assistant and PDF extraction jobs are gone from the runtime" do
     assert_not users(:family_admin).respond_to?(:chats)
-    assert_nil "Chat".safe_constantize
-    assert_no_enqueued_jobs do
-      AssistantResponseJob.perform_now("retired-prompt", "retired-response", backend: "builtin")
+    %w[Chat AssistantResponseJob WorkerAiHealthCheckJob ProcessPdfJob].each do |name|
+      assert_nil name.safe_constantize, "#{name} should be retired"
     end
-  end
-
-  test "queued PDF extraction fails locally while preserving original bytes" do
-    pdf_import = PdfImport.create!(family: families(:dylan_family))
-    pdf_import.pdf_file.attach(io: StringIO.new("%PDF-preserved"), filename: "original.pdf", content_type: "application/pdf")
-    pdf_import.update!(status: :importing)
-    ProcessPdfJob.perform_now(pdf_import)
-    assert pdf_import.reload.failed?
-    assert_equal "%PDF-preserved", pdf_import.pdf_file.download
-    assert_match(/retired/, pdf_import.error)
   end
 end

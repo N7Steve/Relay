@@ -8,7 +8,7 @@ class PdfImport < Import
     # PdfImport's importing status doubles as a processing claim: the AI
     # extraction claim from process_with_ai_later (no rows yet) or a regular
     # publish (rows being written). A lost job leaves the claim held forever —
-    # ProcessPdfJob's own reclaim only runs when the job is redelivered.
+    # no job reclaims it.
     # Which claim died is observable from the data: no rows attached → the AI
     # claim, reclaim to pending so the user can re-trigger; rows attached →
     # the publish died after import!'s commit, so finalize as complete
@@ -86,7 +86,7 @@ class PdfImport < Import
 
   # A PdfImport's importing status is a processing claim (AI extraction or
   # publish). Release a lost claim back to pending so the user can re-trigger
-  # processing, mirroring ProcessPdfJob's own reclaim; lost reverts keep the
+  # processing; lost reverts keep the
   # base revert_failed behavior.
   def force_fail!(error_message = Import.lost_error_message)
     return super if reverting?
@@ -221,7 +221,7 @@ class PdfImport < Import
       # insert_all! below bypasses ActiveRecord, so the `rows` association is
       # never populated with what it wrote. Reload before destroying, or a second
       # call on the same in-memory record (assign_account! regenerating after
-      # ProcessPdfJob already generated) clears a stale empty collection, deletes
+      # rows were already generated) clears a stale empty collection, deletes
       # nothing, and collides on (import_id, source_row_number).
       rows.reload.destroy_all
 
@@ -464,7 +464,7 @@ class PdfImport < Import
 
     # Regeneration can empty the row set (everything now matches) or refill it
     # (the new account matches nothing). Status has to follow, using the same
-    # rule ProcessPdfJob applies after initial processing -- otherwise a
+    # rule as initial processing -- otherwise a
     # fully-matched import sits at pending with no rows, which renders as the
     # processing screen forever and cannot be restarted.
     def refresh_status_after_regeneration!

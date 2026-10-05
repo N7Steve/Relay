@@ -86,7 +86,7 @@ class Settings::BackgroundJobsController < Admin::BaseController
           record.update!(status: :revert_failed, error: cancelled_error_message)
         else
           # importing is the AI-processing claim — release it so the user
-          # can re-trigger, mirroring ProcessPdfJob's own reclaim.
+          # can re-trigger.
           record.update!(status: :pending)
         end
       when Import

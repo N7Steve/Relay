@@ -193,16 +193,16 @@ explícitas, usan `relay_production`/`relay_user` y permiten build desde Git con
 `compose.source.yml`. La instalación Sure de TrueNAS 25.10.4 no se modifica.
 Los clientes web/PWA, Flutter, Tauri y Apple conservan sus funciones, reciben
 marca Relay y mantienen paquetes, callbacks e identificadores externos actuales.
-El CI de Helm heredado está archivado en `docs/archive/sure/workflows/chart-ci.yml`;
-no reactivar checks que acoplen versiones Relay al chart Sure en el alcance Docker.
-`compose.truenas.yml` permite instalación desde un solo YAML, con revisión Git
-fija, credenciales/cifrado persistentes generados en init y volúmenes del proyecto.
-Conservar el orden init → base/Redis → web con `db:prepare` → worker saludable.
-Las actualizaciones no regeneran claves ni cambian nombres de base/volúmenes;
-la pérdida de configuración con una base existente detiene la inicialización.
+El chart Helm y su CI se retiraron en la fase 11 (recuperables en Git); no
+reactivar checks que acoplen versiones Relay a Kubernetes en el alcance Docker.
+`compose.truenas.folder.yml` instala desde un solo YAML con carpetas en
+`AppsPool/relay`, credenciales/cifrado persistentes generados en init y
+actualizador `update-relay.sh`. Conservar el orden init → base/Redis → web con
+`db:prepare` → worker saludable. Las actualizaciones no regeneran claves ni
+cambian nombres de base/carpetas; la pérdida de configuración con una base
+existente detiene la inicialización. La variante histórica con volúmenes
+nombrados `compose.truenas.yml` se retiró en fase 11.
 Ver [instalación y actualización TrueNAS](docs/hosting/truenas.md).
-La tarea de webhooks Plaid EU
-requiere destino HTTPS de la instalación, sin dominio alojado de Sure por defecto.
 Lectores históricos STI/GlobalID, identificadores Sophtron/asistente externos y
 contratos nativos se distinguen de aliases de tareas/variables ya retirados.
 Los identificadores externos pendientes requieren inventariar primero las
@@ -596,7 +596,7 @@ Rutas afectadas: `app/models/concerns/syncable.rb`, modelos/importers/syncers de
 - Eliminación de presupuestos desde la UI/controlador.
 - Ajustes menores en insights, usuario, sesiones, assistant functions, tags y budgets.
 - Cambios en `Gemfile` para soporte de UI y documentación añadida al `README.md`.
-- Workflows: se conserva `.github/workflows/pipelock.yml`. Gittensor y los workflows heredados de distribución/publicación están archivados en `docs/archive/sure/workflows/`; ya no se ejecutan en Relay (3 de octubre de 2026).
+- Workflows: se conserva `.github/workflows/pipelock.yml` como escaneo de secretos de PR (sin validación Helm/proxy desde fase 11). Gittensor y los workflows heredados de distribución/publicación están archivados en `docs/archive/sure/workflows/`; ya no se ejecutan en Relay (3 de octubre de 2026).
 - Documentación/operación: `docs/archive/sure/rollback-instructions.md` e `docs/archive/sure/informe_scheduled_payments.md`.
 - Scripts de diagnóstico: `script/debug_subtypes.rb` y `script/debug_currency_methods.rb`.
 - Las 12 tareas antes llamadas `sure:*` usan solo `relay:*`; se retiran aliases legacy y fallbacks `SURE_*` el 3 de octubre de 2026 según la decisión de instancia única. La tarea de cifrado acepta `RELAY_BATCH_SIZE`, `RELAY_LIMIT` y `RELAY_DRY_RUN`, manteniendo argumentos y overrides sin prefijo; el dry-run predeterminado sigue activo. Ver [compatibilidad Relay](docs/llm-guides/relay-compatibility.md).
@@ -760,6 +760,18 @@ financiero local y la semántica de cartera gestionada. No conservar sus lectore
 de conexión ni reintroducirlos al integrar upstream. Backups antiguos validan su
 integridad y recuperan sólo el producto soportado, con omisiones explícitas;
 modelos/campos desconocidos y referencias financieras siguen siendo errores.
-Los sinks de jobs antiguos permanecen hasta la auditoría de colas de fase 11.
+Los sinks de jobs antiguos se retiraron en fase 11 tras auditar las colas.
 La eliminación es irreversible sin restauración del backup de servidor y sus
 originales con código compatible. Ver [fase 10](docs/migration/pruning-phase-10.md).
+
+## Poda fase 11 — cierre de soporte
+
+El alcance vigente está en [alcance del producto](docs/product-scope.md). Se
+retiran el chart Helm, el proxy Pipelock de ejemplo, la plantilla TrueNAS de
+volúmenes nombrados, las guías de funciones retiradas y las 31 clases que solo
+consumían jobs serializados antes de la poda, tras comprobar en TrueNAS que no
+quedaban jobs ni cron de esas clases. `ExternalSchedule` ya no conserva la lista
+de cron retirados. Al integrar upstream no reintroducir Helm, esos jobs ni las
+guías de módulos retirados; los contratos externos `sure://`, `sureapp://`,
+`SureImport` e identificadores de paquetes siguen preservados.
+Ver [fase 11](docs/migration/pruning-phase-11.md).

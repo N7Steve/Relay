@@ -1,14 +1,5 @@
 class ExternalAccess::JobPolicy
-  BANK_JOBS = %w[
-    SyncAllJob SyncAllProvidersJob SyncHourlyJob FinancekitInboxJob
-    TradeRepublicRepairJob SophtronRefreshPollJob SophtronInitialLoadJob
-    SnaptradeFollowUpSyncJob SnaptradeConnectionCleanupJob SnaptradeActivitiesFetchJob
-    SimplefinItem::BalancesOnlyJob SimplefinHoldingsApplyJob SimplefinConnectionUpdateJob
-    RedbarkConnectionCleanupJob QuestradeActivitiesFetchJob
-    PlaidTransactionsRefreshPollJob PlaidTransactionsRefreshJob
-    PlaidTransactionsRefreshFollowUpSyncJob PlaidTransactionsRefreshAllJob PlaidFollowUpSyncJob
-    IndexaCapitalConnectionCleanupJob IndexaCapitalActivitiesFetchJob
-  ].freeze
+  BANK_JOBS = %w[SyncAllJob SyncAllProvidersJob].freeze
 
   def self.capability(job_name)
     return :bank_sync if BANK_JOBS.include?(job_name)

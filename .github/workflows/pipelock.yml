@@ -16,19 +16,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Install Helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
-        with:
-          version: v3.21.4
-
-      - name: Build chart dependencies
-        shell: bash
-        run: |
-          helm repo add cloudnative-pg https://cloudnative-pg.github.io/charts
-          helm repo add ot-helm https://ot-container-kit.github.io/helm-charts
-          helm repo update
-          helm dependency build charts/sure
-
       - name: Pipelock Scan
         uses: luckyPipewrench/pipelock@4c748ab986d611138ce202ab800b16eca6fb589f # v3.4.0
         with:
@@ -39,8 +26,6 @@ jobs:
           exclude-paths: |
             .env.example
             compose.example.yml
-            docs/hosting/ai.md
-            app/models/provider/binance.rb
             config/locales/views/reports/ca.yml
             config/locales/views/reports/de.yml
             config/locales/views/reports/en.yml
@@ -59,43 +44,9 @@ jobs:
             config/locales/views/reports/zh-CN.yml
             config/locales/views/reports/zh-TW.yml
 
-      - name: Validate Pipelock deployment contracts
+      - name: Validate Compose example
         env:
           RELAY_IMAGE: relay:validation-only
           POSTGRES_PASSWORD: configuration-validation-only
           SECRET_KEY_BASE: configuration-validation-only
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          assert_no_blocklist() {
-            ruby -ryaml -e '
-              config = YAML.safe_load_file(ARGV.fetch(0), aliases: true)
-              abort "blocklist is configured but its vectors are not enabled" if config.key?("blocklist")
-            ' "$1"
-          }
-
-          pipelock check --config pipelock.example.yaml
-          assert_no_blocklist pipelock.example.yaml
-          vector_categories="dlp,entropy,scheme,response_injection,mcp_response,mcp_input,mcp_tools,clean"
-          pipelock test --fail-on-gap --category "${vector_categories}" --config pipelock.example.yaml
-          docker compose -f compose.example.yml config --quiet
-
-          rendered_config="${RUNNER_TEMP}/sure-pipelock.yaml"
-          helm template sure charts/sure \
-            --kube-version 1.25.0 \
-            --set pipelock.enabled=true \
-            --show-only templates/pipelock-configmap.yaml \
-            | awk '/pipelock.yaml: \|/{copy=1; next} copy{sub(/^    /, ""); print}' \
-            > "${rendered_config}"
-          test -s "${rendered_config}"
-          pipelock check --config "${rendered_config}"
-          assert_no_blocklist "${rendered_config}"
-          pipelock test --fail-on-gap --category "${vector_categories}" --config "${rendered_config}"
-
-          # Retired assistant overrides cannot require or expose a transport.
-          helm template sure charts/sure \
-            --set rails.externalAssistant.enabled=true \
-            --set rails.externalAssistant.url=https://agent.vendor.example/v1/chat \
-            --set pipelock.enabled=false \
-            >/dev/null
+        run: docker compose -f compose.example.yml config --quiet

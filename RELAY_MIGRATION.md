@@ -2,6 +2,14 @@
 
 Fecha de inicio: **2 de octubre de 2026**.
 
+> **Cierre, 5 de octubre de 2026:** la migración y la poda (fases 0–11) están
+> completadas. El estado vigente del producto es
+> [Alcance del producto Relay](docs/product-scope.md); el cierre se registra en
+> [fase 11](docs/migration/pruning-phase-11.md). Este documento es el registro
+> histórico de la migración: sus estados «pendientes» son fotografías de cada
+> entrega, y las referencias a Helm, Pipelock como proxy o
+> `compose.truenas.yml` describen configuración ya retirada.
+
 ## Estado consolidado al 4 de octubre de 2026
 
 Steve confirma que Relay está desplegado, con los datos de Sure importados,

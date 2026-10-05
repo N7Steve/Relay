@@ -1,6 +1,6 @@
 # Automatic Google Drive exports
 
-Sure can keep a transaction CSV in a user's personal Google Drive account. The
+Relay can keep a transaction CSV in a user's personal Google Drive account. The
 first run creates one file; later runs update that file by its Google Drive file
 ID, so renaming or moving it does not change the link.
 
@@ -9,14 +9,14 @@ ID, so renaming or moving it does not change the link.
 1. Create or select a Google Cloud project and enable the Google Drive API.
 2. Configure the OAuth consent screen.
 3. Create an OAuth 2.0 Web application client.
-4. Add this authorized redirect URI, using the public URL of the Sure instance:
+4. Add this authorized redirect URI, using the public URL of the Relay instance:
 
    ```text
    https://sure.example.com/google_drive_connection/callback
    ```
 
-5. In Sure, open **Settings → Exports**, expand **Google OAuth configuration**,
-   and save that user's OAuth client ID and client secret. Each Sure user can
+5. In Relay, open **Settings → Exports**, expand **Google OAuth configuration**,
+   and save that user's OAuth client ID and client secret. Each Relay user can
    use a different Google Cloud OAuth client.
 
 As an installation-wide fallback, configure the application and worker
@@ -54,7 +54,7 @@ that issued it.
 local run time is due. Sidekiq and Redis must be running for both the first export
 and later scheduled exports.
 
-Sure overwrites the generated CSV on every changed run. Users may rename or move
+Relay overwrites the generated CSV on every changed run. Users may rename or move
 the file, but manual edits inside it will be replaced. Disconnecting Google Drive
 or deleting a schedule leaves its existing Drive file untouched.
 
@@ -72,7 +72,7 @@ Analytical and snapshot files use UTF-8, comma-separated columns, decimal points
 and ISO dates. Snapshot schedules do not use transaction date ranges or category
 and tag filters.
 
-If the linked file is deleted, trashed, or loses write permission, Sure stops the
+If the linked file is deleted, trashed, or loses write permission, Relay stops the
 schedule instead of silently creating a new file with a different link. Reconnect
 the account when Google reports an invalid or revoked refresh token.
 

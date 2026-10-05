@@ -133,9 +133,9 @@ script above. A native update badge could refer to PostgreSQL or Redis instead.
 Native detection for Relay itself would require publishing images to a registry
 and following a maintained tag such as `stable`; that is not this deployment.
 
-The previous [`compose.truenas.yml`](../../compose.truenas.yml) remains available
-as the historical named-volume installation. It is not compatible with this
-folder updater; no migration or deletion of its data is performed.
+The earlier named-volume template `compose.truenas.yml` was removed in pruning
+phase 11; it was not compatible with this folder updater. It remains in Git
+history. Removing the template does not migrate or delete any installed data.
 
 References: [TrueNAS custom apps](https://apps.truenas.com/managing-apps/installing-custom-apps/),
 [TrueNAS custom app updates](https://apps.truenas.com/managing-apps/managing-installed-apps/#managing-custom-apps),

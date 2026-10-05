@@ -20,5 +20,9 @@ evidence. Restoring them requires defining Relay versions, destinations,
 credentials and client identities, and reviewing the complete workflow graph.
 Moving one file back is not a supported release procedure.
 
-Read-only CI remains active for Rails, JavaScript, security, Helm/Pipelock and
-Flutter. This archive does not remove the corresponding application features.
+Read-only CI remains active for Rails, JavaScript, security, Pipelock secret
+scanning and Flutter. The Helm chart (`charts/sure/`), the Pipelock forward-proxy
+example and the guides for retired features were removed in pruning phase 11
+and are recoverable from Git history; see
+[Relay product scope](../../product-scope.md).
+`hosting/` keeps the inherited Sure guides only as historical references.

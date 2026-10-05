@@ -1,23 +1,19 @@
-# Welcome to Sure!
+# Welcome to Relay!
 
 This guide aims to assist new users through:
 
-1. Creating a Sure account
+1. Creating a Relay account
 2. Adding your first accounts
 3. Recording transactions
 
-This guide also covers the differences between **asset** and **liability** accounts, a key concept for using and understanding balances in Sure!
+This guide also covers the differences between **asset** and **liability** accounts, a key concept for using and understanding balances in Relay!
 
-> **Important:** Sure is evolving quickly. If you find something inaccurate while following this guide, please:
-> 
-> - Ask in the [Discord](https://discord.gg/36ZGBsxYEK)
-> - Open an [issue](https://github.com/we-promise/sure/issues/new/choose)
-> - Or if you know the answer, open a [PR](https://github.com/we-promise/sure/compare)!
+> **Note:** Relay is a personal, self-hosted project. If you find something inaccurate in this guide, open an [issue](https://github.com/N7Steve/Relay/issues).
 
 
-## 1. Creating your Sure Account
+## 1. Creating your Relay Account
 
-Once Sure is installed, open a browser and navigate to [localhost:3000](http://localhost:3000).<br />
+Once Relay is installed, open a browser and navigate to [localhost:3000](http://localhost:3000).<br />
 On a fresh install you will land directly on the **Create account** page (pictured below) - there is no separate sign-up step.
 
 <img width="1280" height="713" alt="Landing page on a fresh install." src="assets/guide-create-account.png" />
@@ -27,32 +23,19 @@ On a fresh install you will land directly on the **Create account** page (pictur
 You'll be guided through a short series of screens to set your **login details**, **personal information**, and **preferences**.<br />
 When you arrive at the main dashboard, showing **No accounts yet**, you're all set up!
 
-<img width="1280" height="713" alt="Blank home screen of Sure, with no accounts yet." src="assets/guide-empty-dashboard.png" />
+<img width="1280" height="713" alt="Blank home screen of Relay, with no accounts yet." src="assets/guide-empty-dashboard.png" />
 <br />
 <br />
 
-> **Note:** The next sections of this guide cover how to **manually add accounts and transactions** in Sure.<br />
-> If you'd rather connect a data provider, Sure supports many of them, including:
+> **Note:** The next sections of this guide cover how to **manually add accounts and transactions** in Relay.<br />
+> If you would rather connect your bank, Relay supports [**Enable Banking**](https://enablebanking.com/) (European banks). An administrator enables bank sync in the self-hosting settings; the connection is then configured under **Settings > Bank sync**. Only **admin** users can connect a provider.
 >
-> - [**Plaid**](https://github.com/we-promise/sure/blob/main/docs/hosting/plaid.md) (US and EU)
-> - [**SimpleFIN**](https://beta-bridge.simplefin.org/)
-> - [**Lunch Flow**](https://www.lunchflow.app/)
-> - [**Enable Banking**](https://enablebanking.com/) (beta)
-> - [**Monobank**](https://github.com/we-promise/sure/blob/main/docs/hosting/monobank.md) (Ukrainian cards and jars)
-> - [**Fio banka**](https://github.com/we-promise/sure/blob/main/docs/hosting/fio.md) (Czech bank)
-> - [**Redbark**](https://github.com/we-promise/sure/blob/main/docs/hosting/redbark.md) (Australian banks)
-> - [**Up**](https://up.com.au/) (Australian bank)
-> - [**Akahu**](https://www.akahu.nz/) (New Zealand banks)
-> - [**CoinStats**](https://coinstats.app/) (beta, crypto)
->
-> See **Settings > Bank sync** in your instance for the full list of supported providers and their setup options. Only **admin** users can connect a provider.
->
-> Even if you use an integration, we still recommend reading through this guide to understand **account types** and how they work in Sure.
+> Even if you use an integration, we still recommend reading through this guide to understand **account types** and how they work in Relay.
 
 
-## 2. Account Types in Sure
+## 2. Account Types in Relay
 
-Sure supports several account types, which are grouped into **Assets** (things you own) and **Debts/Liabilities** (things you owe):
+Relay supports several account types, which are grouped into **Assets** (things you own) and **Debts/Liabilities** (things you owe):
 
 | Assets      | Debts/Liabilities |
 | ----------- | ----------------- |
@@ -139,7 +122,7 @@ You'll now see:
 
 To get this bar moving let's add some transactions!
 
-<img width="1280" height="713" alt="Home screen of Sure, showing one account and no transactions." src="assets/guide-dashboard-one-account.png" />
+<img width="1280" height="713" alt="Home screen of Relay, showing one account and no transactions." src="assets/guide-dashboard-one-account.png" />
 
 ## 7. Adding Transactions
 
@@ -158,7 +141,7 @@ You will now see the transaction you added in your **transaction history**, as w
 
 ## 8. Managing Investment Accounts
 
-If you're tracking investments in Sure, there are additional features to help you manage your portfolio accurately.
+If you're tracking investments in Relay, there are additional features to help you manage your portfolio accurately.
 
 ### Cost Basis Tracking
 
@@ -166,17 +149,17 @@ Cost basis tracking helps you understand the original purchase price of your inv
 
 #### Cost Basis Sources
 
-Sure tracks cost basis from three sources:
+Relay tracks cost basis from three sources:
 
 | Source | Description |
 | --- | --- |
 | **Manual** | User-entered values that you set directly |
 | **Calculated** | Computed from your buy trades and transaction history |
-| **Provider** | Imported from your financial institution (Plaid, SimpleFin, etc.) |
+| **Provider** | Imported from your financial institution (through Enable Banking or an import) |
 
 #### Priority Hierarchy
 
-When multiple sources provide cost basis data, Sure uses this priority:
+When multiple sources provide cost basis data, Relay uses this priority:
 
 **Manual > Calculated > Provider**
 
@@ -187,7 +170,7 @@ This means:
 
 #### Lock Protection
 
-When you manually set a cost basis, Sure automatically locks it to prevent automatic updates from overwriting your value. This ensures your manual entries remain intact during account syncs.
+When you manually set a cost basis, Relay automatically locks it to prevent automatic updates from overwriting your value. This ensures your manual entries remain intact during account syncs.
 
 #### Setting Cost Basis Manually
 
@@ -251,7 +234,7 @@ Activity labels help you classify and understand investment transactions. They a
 
 #### Available Activity Types
 
-Sure supports these investment activity labels:
+Relay supports these investment activity labels:
 
 | Label | Description |
 | --- | --- |
@@ -313,7 +296,7 @@ They help you quickly identify the nature of each investment transaction without
 ## 9. Next Steps
 
 Now that you have one account and your first transaction:
-- Explore the other account types that Sure offers, adding ones relevant to your finances.
+- Explore the other account types that Relay offers, adding ones relevant to your finances.
 - **Categorize** and **Tag** transactions for better searching and reporting.
 - Experiment with **Budgets** to track your spending habits.
 - If you have many historical transactions, use **Import** (the Import button on the Transactions page, or **Settings > Imports**) to load them in.

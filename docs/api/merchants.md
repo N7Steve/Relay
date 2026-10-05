@@ -1,6 +1,6 @@
 # Merchants API
 
-The Merchants API allows external applications to retrieve and bulk-import merchants within Sure. Merchants represent payees or vendors associated with transactions.
+The Merchants API allows external applications to retrieve and bulk-import merchants within Relay. Merchants represent payees or vendors associated with transactions.
 
 ## Generated OpenAPI specification
 
@@ -38,12 +38,12 @@ Refer to the generated [`openapi.yaml`](openapi.yaml) for request/response schem
 
 ## Merchant types
 
-Sure supports two types of merchants:
+Relay supports two types of merchants:
 
 | Type | Description |
 | --- | --- |
 | `FamilyMerchant` | Merchants created and owned by the family. |
-| `ProviderMerchant` | Merchants from external providers (e.g., Plaid) assigned to transactions. |
+| `ProviderMerchant` | Merchants from external providers (e.g., Enable Banking) assigned to transactions. |
 
 The `GET /api/v1/merchants` endpoint returns both types: all family merchants plus any provider merchants that are assigned to the family's transactions.
 

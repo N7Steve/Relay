@@ -11,6 +11,7 @@ being changed. These guides hold the detailed conventions and procedures.
 | Implement or verify full family backups | [Complete backups](backups.md) |
 | Migrate configuration and preserve historical backup data | [Relay configuration and historical data](relay-compatibility.md) |
 | Prepare the final installation cut and choose its scope | [Migration runbook](../migration/final-runbook.md) and [decision form](../migration/final-decisions.md) |
+| Know the maintained product scope and retired modules | [Relay product scope](../product-scope.md) |
 | Install/update Relay as a TrueNAS YAML Custom App | [TrueNAS deployment](../hosting/truenas.md) |
 | Start the app locally in Windows and test it in Chrome | [Local Docker app](docker-local-app.md) |
 | Write behavioral tests and fixtures | [Testing](testing.md) |

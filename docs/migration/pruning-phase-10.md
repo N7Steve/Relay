@@ -3,8 +3,10 @@
 5 de octubre de 2026. Base: fase 9 publicada en `d2e790ed6`.
 Selección autorizada: eliminar completamente los residuos exclusivos de módulos
 retirados, manteniendo el resultado financiero del producto conservado.
-Preparación sobre `main`; no se ha aplicado a TrueNAS ni a datos de instalación.
-Implementación validada; publicación pendiente de confirmación del usuario.
+Preparada sobre `main`, sin aplicarla a TrueNAS ni a datos de instalación durante la preparación.
+Publicada en `origin/main` en `eaf35e3ff`. La auditoría de colas de fase 11 (5 de octubre
+de 2026) muestra que TrueNAS ejecuta todavía `d2e790ed6` (fase 9): la migración de
+esta fase no se ha aplicado en la instalación y lo hará la siguiente actualización.
 
 ## Esquema y datos descartados
 

@@ -1,8 +1,6 @@
 require "test_helper"
 
 class RetiredMarketDataTest < ActiveSupport::TestCase
-  include ActiveJob::TestHelper
-
   test "market and exchange rate providers are gone from the runtime" do
     %w[Provider::TwelveData Provider::YahooFinance Provider::Tiingo Provider::Eodhd Provider::AlphaVantage
        Provider::Mansa Provider::Mfapi Provider::BinancePublic Provider::MoexPublic Provider::Frankfurter
@@ -14,18 +12,9 @@ class RetiredMarketDataTest < ActiveSupport::TestCase
     assert_equal %i[property_valuations], Provider::Registry::CONCEPTS
   end
 
-  test "old serialized market jobs finish without importing prices or rates" do
-    jobs = [
-      ImportMarketDataJob.new("mode" => "full", "clear_cache" => false),
-      ImportMarketDataJob.new,
-      SecurityHealthCheckJob.new,
-      YahooFinanceHealthCheckJob.new
-    ]
-
-    assert_no_difference [ "Security::Price.count", "ExchangeRate.count", "Security.count" ] do
-      assert_no_enqueued_jobs do
-        jobs.each { |job| ActiveJob::Base.execute(job.serialize) }
-      end
+  test "retired market data jobs are gone from the runtime" do
+    %w[ImportMarketDataJob SecurityHealthCheckJob YahooFinanceHealthCheckJob].each do |name|
+      assert_nil name.safe_constantize, "#{name} should be retired"
     end
   end
 

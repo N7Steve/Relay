@@ -1,12 +1,12 @@
-# Sure Mobile
+# Relay Mobile
 
-A Flutter mobile application for [Sure](https://github.com/we-promise/sure) personal finance management system. This is the mobile client that connects to the Sure backend server.
+A Flutter mobile application for Relay, a self-hosted personal finance server based on [Sure](https://github.com/we-promise/sure). This is the mobile client that connects to your Relay server.
 
 ## About
 
-This app is a mobile companion to the [Sure personal finance management system](https://github.com/we-promise/sure). It provides basic functionality to:
+This app is a mobile companion to the Relay server. It provides basic functionality to:
 
-- **Login** - Authenticate with your Sure Finances server
+- **Login** - Authenticate with your Relay server
 - **View Balance** - See all your accounts and their balances
 
 For more detailed technical documentation, see [docs/TECHNICAL_GUIDE.md](docs/TECHNICAL_GUIDE.md).
@@ -54,7 +54,7 @@ This step generates the app icons for all platforms based on the source icon in 
 
 ### 4. Configure API Endpoint
 
-Edit `lib/services/api_config.dart` to point to your Sure Finances server:
+Edit `lib/services/api_config.dart` to point to your Relay server:
 
 ```dart
 // For local development with Android emulator
@@ -64,7 +64,7 @@ static String _baseUrl = 'http://10.0.2.2:3000';
 static String _baseUrl = 'http://localhost:3000';
 
 // For production
-static String _baseUrl = 'https://your-sure-server.com';
+static String _baseUrl = 'https://your-relay-server.example';
 ```
 
 ### 5. Run the App
@@ -113,7 +113,7 @@ flutter run -d chrome
 
 ## API Integration
 
-This app integrates with the Sure Finances Rails API:
+This app integrates with the Relay Rails API:
 
 ### Authentication
 - `POST /api/v1/auth/login` - User authentication
@@ -151,9 +151,9 @@ The app includes automated CI/CD via GitHub Actions (`.github/workflows/flutter-
 - **Android Build**: Generates release APK and AAB artifacts
 - **iOS Build**: Generates iOS release build (unsigned)
 - **Quality Checks**: Code analysis and tests run before building
-- **TestFlight**: `mobile-release` (mobile tags) triggers `.github/workflows/ios-testflight.yml` for signed App Store Connect uploads as part of one release flow
+- **Releases**: there is no automated store release; the inherited `mobile-release`/`ios-testflight` workflows are archived under `docs/archive/sure/workflows/`
 
-See [mobile/docs/iOS_TESTFLIGHT.md](mobile/docs/iOS_TESTFLIGHT.md) for required secrets and setup.
+See [docs/iOS_TESTFLIGHT.md](docs/iOS_TESTFLIGHT.md) for the historical TestFlight secrets and setup.
 
 ### Downloading Build Artifacts
 
@@ -194,7 +194,6 @@ This app provides a foundation for additional features:
 - Account sync
 - Budget management
 - Investment tracking
-- AI chat assistant
 - Push notifications
 - Biometric authentication
 

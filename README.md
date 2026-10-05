@@ -14,12 +14,12 @@ data, planning, forecasts, and reports. Upstream changes are adopted selectively
 This is a personal project, developed for my own needs, without affiliation with
 the Sure or Maybe teams.
 
+- [Product scope: what Relay keeps and what was retired](docs/product-scope.md)
+- [Installation on TrueNAS](docs/hosting/truenas.md) or [generic Docker](docs/hosting/docker.md)
+- [Clients and API](docs/clients.md)
 - [Development guides](docs/llm-guides/README.md)
 - [Local Docker setup](docs/llm-guides/docker-local-app.md) and [tests](docs/llm-guides/docker-tests.md)
-- [Relay migration plan](RELAY_MIGRATION.md)
+- [Relay migration](RELAY_MIGRATION.md) and [pruning plan](docs/migration/pruning-plan.md)
 - [Historical Sure documents and release workflows](docs/archive/sure/README.md)
-
-Deployment and client documentation still contains inherited Sure configuration;
-consult the migration plan before using it for Relay.
 
 Licensed under [AGPLv3](LICENSE). Original history and attributions are retained.
