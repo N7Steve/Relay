@@ -1,39 +1,7 @@
 class Family < ApplicationRecord
-  has_many :financekit_items, dependent: :destroy
-  has_many :financekit_account_lineages, dependent: :destroy
-  has_many :financekit_conflicts, dependent: :destroy
-
-  # Historical instance billing data is retained until the schema cleanup phase.
-  has_one :subscription, dependent: :destroy
-
   include Syncable, AutoTransferMatchable
 
   include EnableBankingConnectable
-
-  has_many :akahu_items, dependent: :destroy
-  has_many :binance_items, dependent: :destroy
-  has_many :brex_items, dependent: :destroy
-  has_many :coinbase_items, dependent: :destroy
-  has_many :coinspot_items, dependent: :destroy
-  has_many :coinstats_items, dependent: :destroy
-  has_many :fio_items, dependent: :destroy
-  has_many :ibkr_items, dependent: :destroy
-  has_many :indexa_capital_items, dependent: :destroy
-  has_many :kraken_items, dependent: :destroy
-  has_many :lunchflow_items, dependent: :destroy
-  has_many :mercury_items, dependent: :destroy
-  has_many :monobank_items, dependent: :destroy
-  has_many :onchain_wallet_items, dependent: :destroy
-  has_many :plaid_items, dependent: :destroy
-  has_many :questrade_items, dependent: :destroy
-  has_many :redbark_items, dependent: :destroy
-  has_many :simplefin_items, dependent: :destroy
-  has_many :snaptrade_items, dependent: :destroy
-  has_many :sophtron_items, dependent: :destroy
-  has_many :trade_republic_items, dependent: :destroy
-  has_many :trading212_items, dependent: :destroy
-  has_many :up_items, dependent: :destroy
-  has_many :wise_items, dependent: :destroy
 
   DATE_FORMATS = [
     [ "MM-DD-YYYY", "%m-%d-%Y" ],
@@ -51,13 +19,6 @@ class Family < ApplicationRecord
   ].freeze
 
   MONIKERS = [ "Family", "Group" ].freeze
-  # Accept legacy values on restore; no assistant transport remains.
-  ASSISTANT_TYPES = %w[builtin external].freeze
-
-  # Which provider categorizes this family's transactions. Family-level rather
-  # than a global Setting because it decides whose transaction descriptions get
-  # sent to a third party — the same reason assistant_type lives here.
-  CATEGORIZATION_PROVIDERS = %w[llm jev].freeze
   SHARING_DEFAULTS = %w[shared private].freeze
 
   has_many :users, dependent: :destroy
@@ -82,7 +43,6 @@ class Family < ApplicationRecord
 
   has_many :tags, dependent: :destroy
   has_many :categories, dependent: :destroy
-  has_many :categorization_comparisons, dependent: :destroy
   has_many :merchants, dependent: :destroy, class_name: "FamilyMerchant"
   has_many :merchant_customizations, dependent: :destroy
 
@@ -180,9 +140,6 @@ class Family < ApplicationRecord
 
   public
 
-  has_many :llm_usages, dependent: :destroy
-  has_many :recurring_transactions, dependent: :destroy
-  has_many :recurring_occurrences, dependent: :destroy
   has_many :scheduled_payments, dependent: :destroy
   has_many :insights, dependent: :destroy
 
@@ -211,13 +168,6 @@ class Family < ApplicationRecord
   validates :date_format, inclusion: { in: DATE_FORMATS.map(&:last) }
   validates :month_start_day, inclusion: { in: 1..28 }
   validates :moniker, inclusion: { in: MONIKERS }
-  validates :assistant_type, inclusion: { in: ASSISTANT_TYPES }
-  validates :categorization_provider, inclusion: { in: CATEGORIZATION_PROVIDERS }
-  validates :categorization_confidence_threshold,
-            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
-  validates :categorization_shadow_rate,
-            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
-
   validates :default_account_sharing, inclusion: { in: SHARING_DEFAULTS }
   validates :personal_budgets, inclusion: { in: [ true, false ] }
   validates :household_budget_enabled, inclusion: { in: [ true, false ] }

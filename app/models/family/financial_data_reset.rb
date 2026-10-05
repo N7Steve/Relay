@@ -23,7 +23,6 @@ class Family::FinancialDataReset
     trades
     holdings
     balances
-    recurring_transactions
     rules
     rule_actions
     rule_conditions
@@ -40,34 +39,9 @@ class Family::FinancialDataReset
     syncs
     active_storage_attachments
   ].freeze
-  STATUS_COUNT_KEYS = (COUNT_KEYS - %i[syncs]) + %i[plaid_items]
+  STATUS_COUNT_KEYS = (COUNT_KEYS - %i[syncs])
   PROVIDER_ITEM_ASSOCIATIONS = %i[
-    financekit_items
-    binance_items
-    brex_items
-    coinbase_items
-    coinstats_items
     enable_banking_items
-    ibkr_items
-    indexa_capital_items
-    kraken_items
-    questrade_items
-    lunchflow_items
-    redbark_items
-    mercury_items
-    onchain_wallet_items
-    plaid_items
-    simplefin_items
-    snaptrade_items
-    sophtron_items
-    up_items
-    monobank_items
-    fio_items
-    akahu_items
-    coinspot_items
-    trade_republic_items
-    trading212_items
-    wise_items
   ].freeze
 
   Result = Struct.new(:user, :family, :dry_run, :before_counts, :deleted_counts, :after_counts, keyword_init: true)
@@ -163,14 +137,12 @@ class Family::FinancialDataReset
       scope(:balances).destroy_all
       scope(:account_shares).destroy_all
       scope(:account_providers).destroy_all
-      scope(:recurring_transactions).destroy_all
       scope(:rules).destroy_all
       scope(:budgets).destroy_all
       scope(:categories).destroy_all
       scope(:tags).destroy_all
       scope(:merchants).destroy_all
       delete_provider_items!
-      family.financekit_account_lineages.destroy_all
       scope(:accounts).destroy_all
     end
 
@@ -292,7 +264,6 @@ class Family::FinancialDataReset
           trades: Trade.joins(:entry).where(entries: { account_id: account_ids }),
           holdings: Holding.where(account_id: account_ids),
           balances: Balance.where(account_id: account_ids),
-          recurring_transactions: RecurringTransaction.where(family_id: family.id),
           rules: rule_scope,
           rule_actions: Rule::Action.where(rule_id: rule_ids),
           rule_conditions: Rule::Condition.where(rule_id: rule_ids),

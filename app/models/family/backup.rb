@@ -10,40 +10,32 @@ class Family::Backup
   VERSION = 1
   TYPES = %w[BackupManifest BackupRecord BackupAttachment].freeze
 
-  PROVIDERS = %w[Akahu Binance Brex Coinbase Coinspot Coinstats EnableBanking Fio Ibkr IndexaCapital Kraken Lunchflow Mercury Monobank OnchainWallet Plaid Questrade Redbark Simplefin Snaptrade Sophtron TradeRepublic Trading212 Up Wise].freeze
+  PROVIDERS = %w[EnableBanking].freeze
   MODEL_NAMES = (%w[
     Family User Account AccountShare BudgetShare Depository Investment Crypto
     Property Vehicle OtherAsset CreditCard Loan OtherLiability Address Category
     Tag Merchant MerchantCustomization FamilyMerchantAssociation Entry Transaction
     Trade Valuation Balance Holding AccountProvider Security Security::Price
     Budget BudgetCategory Rule Rule::Condition Rule::Action RuleRun NotificationDelivery
-    RecurringTransaction RecurrenceRule RecurringOccurrence RecurringAllocation
-    RecurringPriceChange RecurringMatchRejection Transfer RejectedTransfer Tagging
+    Transfer RejectedTransfer Tagging
     ScheduledPayment ScheduledPaymentEntry Goal GoalAccount GoalPledge
-    FamilyDocument AccountStatement Chat Message ToolCall Insight DataEnrichment
-    CategorizationComparison GoogleDriveConnection GoogleDriveOauthConfiguration
+    FamilyDocument AccountStatement Insight DataEnrichment
+    GoogleDriveConnection GoogleDriveOauthConfiguration
     GoogleDriveExportSchedule GoogleDriveExportTarget GoogleDriveExportRun
-    FinancekitItem FinancekitAccountLineage FinancekitAccount FinancekitBatch
-    FinancekitTransaction FinancekitBalanceObservation FinancekitConflict
     Import ImportSession ImportSourceMapping Import::Row Import::Mapping
-    ExchangeRate ExchangeRatePair
+    ExchangeRate
   ] + PROVIDERS.flat_map { |prefix| [ "#{prefix}Item", "#{prefix}Account" ] }).freeze
 
   EXCLUDED_FAMILY_TABLES = {
     "family_exports" => "Previously generated backups are output artifacts, not live family data",
-    "subscriptions" => "Billing contracts belong to the destination instance",
     "invitations" => "Pending authentication links must be issued by the destination instance",
-    "debug_log_entries" => "Operational diagnostics are instance history",
-    "llm_usages" => "Provider usage and billing are instance history"
+    "debug_log_entries" => "Operational diagnostics are instance history"
   }.freeze
 
   # Instance authentication and service-side indexes are deliberately regenerated.
   EXCLUDED_ATTRIBUTES = {
-    "Family" => %w[stripe_customer_id vector_store_id bills_feed_token],
     "User" => %w[password_digest otp_secret otp_required otp_backup_codes otp_last_used_at webauthn_id unconfirmed_email sessions_count last_login_at],
-    "Account" => %w[classification],
-    "FamilyDocument" => %w[provider_file_id],
-    "FinancekitBatch" => %w[sync_id]
+    "Account" => %w[classification]
   }.freeze
   PARENTS = {
     "Entry" => [ "Account", "account_id" ],
@@ -57,23 +49,12 @@ class Family::Backup
     "Rule::Action" => [ "Rule", "rule_id" ],
     "RuleRun" => [ "Rule", "rule_id" ],
     "NotificationDelivery" => [ "Rule", "rule_id" ],
-    "RecurrenceRule" => [ "RecurringTransaction", "recurring_transaction_id" ],
-    "RecurringAllocation" => [ "RecurringOccurrence", "recurring_occurrence_id" ],
-    "RecurringPriceChange" => [ "RecurringTransaction", "recurring_transaction_id" ],
-    "RecurringMatchRejection" => [ "RecurringTransaction", "recurring_transaction_id" ],
     "ScheduledPaymentEntry" => [ "ScheduledPayment", "scheduled_payment_id" ],
     "GoalAccount" => [ "Goal", "goal_id" ],
     "GoalPledge" => [ "Goal", "goal_id" ],
-    "Chat" => [ "User", "user_id" ],
-    "Message" => [ "Chat", "chat_id" ],
-    "ToolCall" => [ "Message", "message_id" ],
     "Security::Price" => [ "Security", "security_id" ],
     "GoogleDriveExportTarget" => [ "GoogleDriveExportSchedule", "google_drive_export_schedule_id" ],
     "GoogleDriveExportRun" => [ "GoogleDriveExportSchedule", "google_drive_export_schedule_id" ],
-    "FinancekitAccount" => [ "FinancekitItem", "financekit_item_id" ],
-    "FinancekitBatch" => [ "FinancekitItem", "financekit_item_id" ],
-    "FinancekitTransaction" => [ "FinancekitAccountLineage", "financekit_account_lineage_id" ],
-    "FinancekitBalanceObservation" => [ "FinancekitAccountLineage", "financekit_account_lineage_id" ],
     "Import::Row" => [ "Import", "import_id" ],
     "Import::Mapping" => [ "Import", "import_id" ]
   }.merge(PROVIDERS.to_h { |prefix| [ "#{prefix}Account", [ "#{prefix}Item", "#{prefix.underscore}_item_id" ] ] }).freeze
@@ -93,14 +74,7 @@ class Family::Backup
   end
 
   def self.models
-    @models ||= MODEL_NAMES.index_with do |name|
-      case name
-      when "Chat" then ConversationRecords::Chat
-      when "Message" then ConversationRecords::Message
-      when "ToolCall" then ConversationRecords::ToolCall
-      else name.constantize
-      end
-    end.freeze
+    @models ||= MODEL_NAMES.index_with(&:constantize).freeze
   end
 
   def self.attachment_model(name, attributes)
@@ -166,6 +140,8 @@ class Family::Backup
       .map { |document| { id: document.id, filename: document.filename, byte_size: document.file_size } }
     {
       snapshot_version: VERSION,
+      scope: "supported_product",
+      retired_backup_models: DiscardPolicy::MODELS,
       excluded_tables: EXCLUDED_FAMILY_TABLES,
       excluded_attributes: EXCLUDED_ATTRIBUTES,
       unavailable_document_originals: missing
@@ -186,11 +162,12 @@ class Family::Backup
     def build_scope(name)
       model = self.class.models.fetch(name)
       return model.where(id: @family.id) if name == "Family"
+      return model.where(family_id: @family.id).for_product_frontend if name == "Insight"
       return model.where(family_id: @family.id) if model.column_names.include?("family_id") && name != "Merchant"
 
       case name
       when "Merchant"
-        ids = @family.transactions.pluck(:merchant_id) + @family.recurring_transactions.pluck(:merchant_id) +
+        ids = @family.transactions.pluck(:merchant_id) +
           @family.scheduled_payments.pluck(:merchant_id) + @family.merchant_customizations.pluck(:merchant_id) +
           FamilyMerchantAssociation.where(family_id: @family.id).pluck(:merchant_id)
         ids += Rule::Action.where(rule_id: @family.rules.select(:id), action_type: "set_transaction_merchant").pluck(:value)
@@ -198,7 +175,7 @@ class Family::Backup
         model.where(family_id: @family.id).or(model.where(id: ids.compact))
       when "Security"
         model.where(id: @family.holdings.select(:security_id)).or(model.where(id: @family.trades.select(:security_id)))
-      when "ExchangeRate", "ExchangeRatePair"
+      when "ExchangeRate"
         currencies = [ @family.currency, "USD", *@family.enabled_currencies,
           *@family.accounts.distinct.pluck(:currency), *@family.entries.distinct.pluck(:currency),
           *@family.holdings.distinct.pluck(:currency), *@family.goals.distinct.pluck(:currency),

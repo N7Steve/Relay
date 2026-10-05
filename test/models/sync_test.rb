@@ -242,7 +242,7 @@ class SyncTest < ActiveSupport::TestCase
   end
 
   test "a retired connector job cannot resurrect a cancelled sync" do
-    sync = Sync.create!(syncable: plaid_items(:one), status: :syncing)
+    sync = Sync.create!(syncable: enable_banking_items(:one), status: :syncing)
     queued_copy = Sync.find(sync.id)
     assert sync.request_cancel!
     SyncJob.perform_now(queued_copy)

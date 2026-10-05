@@ -74,7 +74,7 @@ class Holding::Materializer
 
         # Skip provider-sourced holdings - they have authoritative data from the provider
         # (e.g., Coinbase, SimpleFIN) and should not be overwritten by calculated holdings
-        if existing&.account_provider_id.present?
+        if existing&.authoritative?
           Rails.logger.debug(
             "Holding::Materializer - Skipping provider-sourced holding id=#{existing.id} " \
             "security_id=#{existing.security_id} date=#{existing.date}"
@@ -176,7 +176,7 @@ class Holding::Materializer
       account.holdings
         .where(cost_basis_locked: true)
         .or(account.holdings.where.not(cost_basis_source: nil))
-        .or(account.holdings.where.not(account_provider_id: nil))
+        .or(account.holdings.authoritative)
         .or(account.holdings.where.not(cost_basis: nil))
         .index_by { |h| holding_key(h) }
     end
@@ -185,7 +185,7 @@ class Holding::Materializer
     # on the exact same key. This preserves reverse-calculated history for linked accounts.
     def cleanup_shadowed_calculated_holdings
       deleted_count = account.holdings
-        .where(account_provider_id: nil)
+        .calculated
         .where(<<~SQL)
           EXISTS (
             SELECT 1
@@ -194,7 +194,7 @@ class Holding::Materializer
               AND provider_holdings.security_id = holdings.security_id
               AND provider_holdings.date = holdings.date
               AND provider_holdings.currency = holdings.currency
-              AND provider_holdings.account_provider_id IS NOT NULL
+              AND (provider_holdings.account_provider_id IS NOT NULL OR provider_holdings.imported_snapshot = TRUE)
           )
         SQL
         .delete_all
@@ -207,14 +207,14 @@ class Holding::Materializer
       return unless provider_snapshot_date
 
       provider_security_ids = account.holdings
-        .where.not(account_provider_id: nil)
+        .authoritative
         .where(date: provider_snapshot_date)
         .distinct
         .pluck(:security_id)
       return if provider_security_ids.empty?
 
       deleted_count = account.holdings
-        .where(account_provider_id: nil, date: provider_snapshot_date, security_id: provider_security_ids)
+        .calculated.where(date: provider_snapshot_date, security_id: provider_security_ids)
         .delete_all
 
       Rails.logger.info("Cleaned up #{deleted_count} stale calculated holdings on latest provider snapshot date") if deleted_count > 0
@@ -257,7 +257,7 @@ class Holding::Materializer
       @provider_cost_basis_snapshots ||= begin
         ids = @holdings.map(&:security_id).uniq
         account.holdings
-          .where.not(account_provider_id: nil)
+          .authoritative
           .where.not(cost_basis: nil)
           .where(security_id: ids)
           .order(:date) # ascending required: carry_forward_provider_cost_basis scans and breaks on snap_date > holding.date
@@ -275,11 +275,11 @@ class Holding::Materializer
       # If there are no securities in the portfolio, only delete non-provider holdings
       if portfolio_security_ids.empty?
         Rails.logger.info("Clearing non-provider holdings (no securities from trades)")
-        account.holdings.where(account_provider_id: nil).delete_all
+        account.holdings.calculated.delete_all
       else
         # Keep provider holdings and holdings for known securities within date range
         deleted_count = account.holdings
-          .where(account_provider_id: nil)
+          .calculated
           .delete_by("date < ? OR security_id NOT IN (?)", account.start_date, portfolio_security_ids)
         Rails.logger.info("Purged #{deleted_count} stale holdings") if deleted_count > 0
       end

@@ -13,9 +13,7 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
       password: "password123",
       role: :admin,
       onboarded_at: Time.current,
-      ai_enabled: true,
-      show_sidebar: true,
-      show_ai_sidebar: true,
+            show_sidebar: true,
       ui_layout: :dashboard
     )
 
@@ -26,9 +24,7 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
       password: "password123",
       role: :super_admin,
       onboarded_at: Time.current,
-      ai_enabled: true,
-      show_sidebar: true,
-      show_ai_sidebar: true,
+            show_sidebar: true,
       ui_layout: :dashboard
     )
   end
@@ -122,7 +118,6 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
   test "refresh revokes old credentials and leaves historical billing unchanged until explicit deletion" do
     Setting.demo_family_refresh_family_id = @demo_family.id.to_s
     Setting.demo_family_refresh_enabled = true
-    @demo_family.create_subscription!(status: :active, stripe_id: "sub_demo_123")
     session = Session.create!(user: @demo_user)
     app = Doorkeeper::Application.create!(name: "Demo Retirement Test", redirect_uri: "https://example.com/callback", confidential: false)
     token = Doorkeeper::AccessToken.create!( # pipelock:ignore Credential in URL
@@ -146,7 +141,6 @@ class DemoFamilyRefreshJobTest < ActiveJob::TestCase
     assert key.reload.revoked?
     assert token.reload.revoked_at
     assert grant.reload.revoked_at
-    assert @demo_family.reload.subscription.active?
     assert @demo_family.destroy
   ensure
     Setting.demo_family_refresh_enabled = false

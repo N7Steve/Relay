@@ -100,16 +100,17 @@ internal accounts and entries through [Account::ProviderImportAdapter](../../app
 [AccountProvider](../../app/models/account_provider.rb) connects accounts to
 provider records. [Import](../../app/models/import.rb) supports manual import
 sessions, including CSV mapping and transformations. Enable Banking is the only
-account connector. Retired connector models, including FinanceKit since phase 9F,
-hold historical persistence for backup/GlobalID compatibility only; they have no
-remote runtime.
+account connector. Phase 10 removes retired connector models and tables,
+including FinanceKit. Existing balances, authoritative holdings and managed
+portfolio performance become local financial data without a retired connection.
 
 [Syncable](../../app/models/concerns/syncable.rb) schedules background syncs and
 [Sync](../../app/models/sync.rb) records their state, hierarchy and errors.
 [Account::Syncer](../../app/models/account/syncer.rb) delegates to the local
 [Account::Recalculator](../../app/models/account/recalculator.rb): materialization
-is transactional, uses reverse history for linked accounts and forward history
-for manual accounts, and applies cached provider balance overrides. It does not
+is transactional, uses reverse history for linked or previously linked accounts
+and forward history for other manual accounts, and applies retained local
+balance observations. It does not
 fetch market data. Missing prices/FX preserve previous balances and fail explicitly.
 Transfer matching after sync also runs without outbound market lookups.
 [Family::Syncer](../../app/models/family/syncer.rb) schedules all eligible Syncable
@@ -136,8 +137,9 @@ and [phase 9](../migration/pruning-phase-9.md) for market data, FinanceKit and
 local-only Active Storage.
 
 MCP, external assistant transport and integrated AI were removed in phases 5–6.
-OAuth, API keys and native authentication remain. Conversations, original files,
-historical PDF imports and usage ledgers remain local persistence readers.
+OAuth, API keys and native authentication remain. Phase 10 drops conversations,
+tool calls, AI usage and preferences; retained documents, originals and import
+history remain part of the supported financial product.
 Serialized AI jobs finish without contacting providers. Insights use deterministic
 localized templates. Brandfetch logos are controlled by the instance preference;
 `RELAY_EXTERNAL_LOGOS_ENABLED` no longer overrides it. Other external capability
@@ -145,17 +147,16 @@ environment overrides retain their existing behavior.
 See [phase 6](../migration/pruning-phase-6.md).
 
 Bills detection and scheduling are retired in phase 8. Agenda's
-`ScheduledPayment`/`ScheduledPaymentEntry` own planned payments. Recurring Bills
-models retain historical persistence and validated import/backup relationships,
-without generation, matching or sync callbacks. Serialized Bills jobs finish
-without effects; worker startup removes their persisted cron. Historical Bills
-insights remain exportable but are excluded from the active frontend and
-generator registry. See [phase 8](../migration/pruning-phase-8.md).
+`ScheduledPayment`/`ScheduledPaymentEntry` own planned payments. Phase 10 drops
+the six recurring Bills tables and their models, plus exclusive Bills insights.
+Serialized Bills jobs finish without effects; worker startup removes their
+persisted cron. Old backups report discarded Bills data without converting it
+to Agenda. See [phase 10](../migration/pruning-phase-10.md).
 
 Remote monitoring and LLM evaluation runtime were removed in pruning phase 3.
 `LocalDiagnostics` records failures through Rails logs and `DebugLogEntry.capture`.
-Legacy telemetry variables do not activate SDKs. Historical evaluation tables
-remain in the schema; the application no longer executes evaluation tasks.
+Legacy telemetry variables do not activate SDKs. Phase 10 removes the historical
+evaluation tables; the application no longer executes evaluation tasks.
 
 ## Provider interfaces and APIs
 

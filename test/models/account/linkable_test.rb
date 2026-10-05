@@ -44,32 +44,10 @@ class Account::LinkableTest < ActiveSupport::TestCase
 
 
 
-  test "supports_category_matcher? returns true for Up-linked accounts" do
-    up_item = UpItem.create!(family: @family, name: "Test Up", access_token: "up-access-token")
-    up_account = UpAccount.create!(up_item: up_item, name: "Up Spending", account_id: "up_acc_1", currency: "AUD")
-    AccountProvider.create!(account: @account, provider: up_account)
-
-    refute @account.supports_category_matcher?
-  end
-
-
   test "supports_category_matcher? returns false for unlinked accounts and providers without a matcher" do
     refute @account.supports_category_matcher?
 
-    simplefin_item = SimplefinItem.create!(
-      family: @family,
-      name: "Test SimpleFin",
-      access_url: "https://example.com/access_token"
-    )
-    simplefin_account = SimplefinAccount.create!(
-      simplefin_item: simplefin_item,
-      name: "Test Account",
-      account_id: "test-acct",
-      currency: "USD",
-      account_type: "checking",
-      current_balance: 0
-    )
-    @account.update!(simplefin_account: simplefin_account)
+    @account.account_providers.create!(provider: enable_banking_accounts(:one))
 
     refute @account.supports_category_matcher?
   end

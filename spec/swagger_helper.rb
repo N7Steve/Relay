@@ -906,8 +906,10 @@ RSpec.configure do |config|
           },
           ImportVerificationReadback: {
             type: :object,
-            description: 'RelayImport/SureImport backups only. Legacy imports compare NDJSON counts against database readback. Full snapshots verify restored attributes and original attachment bytes.',
+            description: 'RelayImport/SureImport backups only. Verification covers the supported product; retired modules are discarded and reported. Legacy imports compare supported NDJSON counts against database readback. Full snapshots verify supported attributes and original attachment bytes.',
             properties: {
+              scope: { type: :string, enum: %w[supported_product], description: 'Retired module data is excluded from verified recovery.' },
+              discarded_record_counts: { type: :object, additionalProperties: { type: :integer, minimum: 0 }, description: 'Legacy imports only. Counts by retired record type; full snapshots report omissions in warnings.details.' },
               status: { type: :string, enum: %w[not_verified matched mismatch failed reverted] },
               checked_at: { type: :string, format: :'date-time', nullable: true },
               verified_records: { type: :integer, minimum: 0, description: 'Full snapshots only. Restored records whose attributes were verified, including the family.' },
@@ -1528,10 +1530,8 @@ RSpec.configure do |config|
               exchange_operating_mic: { type: :string, nullable: true },
               exchange_name: { type: :string, nullable: true },
               offline: { type: :boolean },
-              offline_reason: { type: :string, nullable: true },
               website_url: { type: :string, nullable: true },
               logo_url: { type: :string, nullable: true },
-              first_provider_price_on: { type: :string, format: :date, nullable: true },
               created_at: { type: :string, format: :'date-time' },
               updated_at: { type: :string, format: :'date-time' }
             }

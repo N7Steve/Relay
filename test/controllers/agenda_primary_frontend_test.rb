@@ -6,7 +6,7 @@ class AgendaPrimaryFrontendTest < ActionDispatch::IntegrationTest
   end
 
   test "retired Bills routes cannot read or mutate historical data" do
-    id = recurring_transactions(:netflix_subscription).id
+    id = SecureRandom.uuid
     requests = [
       [ :get, "/bills" ], [ :get, "/bills/#{id}" ],
       [ :post, "/bills/detect" ], [ :post, "/bills/reset_feed_token" ],
@@ -22,7 +22,7 @@ class AgendaPrimaryFrontendTest < ActionDispatch::IntegrationTest
       [ :post, "/transfers/#{transfers(:one).id}/mark_as_recurring" ]
     ]
 
-    assert_no_difference [ "RecurringTransaction.count", "RecurringOccurrence.count", "RecurringAllocation.count", "ScheduledPayment.count" ] do
+    assert_no_difference [ "ScheduledPayment.count" ] do
       requests.each do |verb, path|
         public_send(verb, path)
         assert_response :not_found

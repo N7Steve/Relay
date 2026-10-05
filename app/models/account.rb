@@ -37,19 +37,9 @@ class Account < ApplicationRecord
   has_many :trades, through: :entries, source: :entryable, source_type: "Trade"
   has_many :holdings, dependent: :destroy
   has_many :balances, dependent: :destroy
-  has_many :recurring_transactions, dependent: :destroy
   has_many :goal_accounts, dependent: :destroy
   has_many :goals, through: :goal_accounts
   has_many :goal_pledges, dependent: :destroy
-  # Inverse for recurring transfers where this account is the destination.
-  # Account#recurring_transactions only matches account_id; without this
-  # association, destroying the destination account would hit the FK
-  # cascade silently and the AR cache wouldn't reflect the deletion.
-  has_many :inbound_recurring_transfers,
-           class_name: "RecurringTransaction",
-           foreign_key: :destination_account_id,
-           dependent: :destroy
-
   monetize :balance, :cash_balance
 
   enum :classification, { asset: "asset", liability: "liability" }, validate: { allow_nil: true }
@@ -74,7 +64,6 @@ class Account < ApplicationRecord
   scope :manual, -> {
     left_joins(:account_providers)
       .where(account_providers: { id: nil })
-      .where(plaid_account_id: nil, simplefin_account_id: nil)
   }
   scope :archived, -> { where(archived: true) }
   scope :not_archived, -> { where(archived: false) }
@@ -387,9 +376,7 @@ class Account < ApplicationRecord
   # True when the account has no live sync provider attached. Mirrors the
   # `Account.manual` scope so per-instance checks don't drift from the query.
   def manual?
-    account_providers.none? &&
-      plaid_account_id.blank? &&
-      simplefin_account_id.blank?
+    account_providers.none?
   end
 
   # Default GoalPledge kind for this account. Manual accounts get
@@ -466,7 +453,7 @@ class Account < ApplicationRecord
   def current_holdings
     if (provider_snapshot_date = latest_provider_holdings_snapshot_date)
       holdings
-        .where.not(account_provider_id: nil)
+        .authoritative
         .where(date: provider_snapshot_date)
         .where.not(qty: 0)
         .order(amount: :desc)
@@ -484,7 +471,7 @@ class Account < ApplicationRecord
   end
 
   def latest_provider_holdings_snapshot_date
-    holdings.where.not(account_provider_id: nil).maximum(:date)
+    holdings.authoritative.maximum(:date)
   end
 
   def start_date
@@ -540,11 +527,7 @@ class Account < ApplicationRecord
     return false unless investment?
     return true if Investment::MANAGED_PORTFOLIO_SUBTYPES.include?(subtype)
 
-    if account_providers.loaded?
-      account_providers.any? { |link| link.provider_type == "IndexaCapitalAccount" }
-    else
-      linked_to?("IndexaCapitalAccount")
-    end
+    self[:managed_portfolio]
   end
 
   def traded_standard_securities

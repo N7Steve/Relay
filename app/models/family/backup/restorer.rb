@@ -25,6 +25,9 @@ class Family::Backup::Restorer
     @attachments = rows.select { |row| row["type"] == "BackupAttachment" }
     payload = rows.select { |row| row["type"].in?(%w[BackupRecord BackupAttachment]) }.map(&:to_json).join("\n")
     fail_backup("Backup checksum mismatch") unless Digest::SHA256.hexdigest(payload) == @manifest["sha256"]
+    validate_source_integrity!
+    @discard_policy = Family::Backup::DiscardPolicy.new(@records, @attachments)
+    @records, @attachments = @discard_policy.apply!
     @source_records = {}
     @missing_import_accounts = {}
     @records.each do |row|
@@ -54,9 +57,6 @@ class Family::Backup::Restorer
         fail_backup("Invalid import mapping type") unless attrs["type"].in?(allowed)
       elsif model == User
         fail_backup("Invalid family member role") unless attrs["role"].in?(User.roles.keys)
-      end
-      if (types = Family::Backup::ConversationRecords::TYPES[name])
-        fail_backup("Invalid historical #{name} type") unless attrs["type"].in?(types)
       end
       @source_records[source_key(name, attrs["id"])] = data
     end
@@ -109,7 +109,7 @@ class Family::Backup::Restorer
 
       { code: "source_original_unavailable", message: "The source did not retain the original file for #{attrs['filename']}.", details: { source_id: attrs["id"], filename: attrs["filename"] } }
     end
-    document_warnings + @missing_import_accounts.map do |key, account_id|
+    document_warnings + @discard_policy.warnings + @missing_import_accounts.map do |key, account_id|
       { code: "historical_import_account_unavailable", message: "A historical import refers to an account absent from the backup; it will be restored without an account link.", details: { source_record: key, source_account_id: account_id } }
     end
   end
@@ -132,7 +132,7 @@ class Family::Backup::Restorer
 
     @family.with_lock(requires_new: true) do
       # Restoring into existing financial data would merge two different states.
-      fail_backup("Restore a full backup into a family without financial data") if @family.accounts.exists? || @family.goals.exists? || @family.scheduled_payments.exists? || @family.budgets.exists? || @family.recurring_transactions.exists? || @family.rules.exists?
+      fail_backup("Restore a full backup into a family without financial data") if @family.accounts.exists? || @family.goals.exists? || @family.scheduled_payments.exists? || @family.budgets.exists? || @family.rules.exists?
       allocate_targets!
       clear_unused_taxonomy!
       insert_records!
@@ -154,6 +154,28 @@ class Family::Backup::Restorer
   end
 
   private
+    def validate_source_integrity!
+      sources = {}
+      @records.each do |row|
+        data = row["data"]
+        fail_backup("Invalid backup record") unless data.is_a?(Hash) && data["attributes"].is_a?(Hash) && data["attributes"]["id"].present?
+        name = data["model"]
+        fail_backup("Unsupported backup model #{name}") unless Family::Backup::MODEL_NAMES.include?(name) || Family::Backup::DiscardPolicy.retired?(name)
+        key = record_key(data)
+        fail_backup("Duplicate source id #{key}") if sources.key?(key)
+        sources[key] = data
+        attrs = data["attributes"]
+        fail_backup("#{name} belongs to another family") if attrs["family_id"].present? && attrs["family_id"] != @manifest["family_id"]
+      end
+      @attachments.each do |row|
+        data = row["data"]
+        fail_backup("Invalid backup attachment") unless data.is_a?(Hash)
+        fail_backup("Attachment owner is missing") unless sources.key?(source_key(data["model"], data["record_id"]))
+        bytes = Base64.strict_decode64(data.fetch("content"))
+        fail_backup("Attachment checksum mismatch") unless bytes.bytesize == data["byte_size"] && Digest::MD5.base64digest(bytes) == data["checksum"]
+      end
+    end
+
     def persist_source_mappings!
       return unless @import_session
 
@@ -233,7 +255,7 @@ class Family::Backup::Restorer
         Security.where("upper(ticker) = ? AND COALESCE(upper(exchange_operating_mic), '') = ?", attrs["ticker"].upcase, attrs["exchange_operating_mic"].to_s.upcase).first
       when "Security::Price"
         Security::Price.find_by(security_id: @id_map[source_key("Security", attrs["security_id"])], date: attrs["date"], currency: attrs["currency"])
-      when "ExchangeRate", "ExchangeRatePair"
+      when "ExchangeRate"
         model.find_by(attrs.slice("from_currency", "to_currency", "date"))
       end
     end
@@ -345,7 +367,7 @@ class Family::Backup::Restorer
     end
 
     def shared_record?(data)
-      data["model"].in?(%w[Security Security::Price ExchangeRate ExchangeRatePair]) || (data["model"] == "Merchant" && data.dig("attributes", "type") == "ProviderMerchant")
+      data["model"].in?(%w[Security Security::Price ExchangeRate]) || (data["model"] == "Merchant" && data.dig("attributes", "type") == "ProviderMerchant")
     end
 
     def restore_attachments!
@@ -422,7 +444,7 @@ class Family::Backup::Restorer
       {
         accounts: accounts, entries: entries,
         summary: summary.merge("backup_restore" => { "sha256" => @manifest["sha256"], "id_map" => @id_map }),
-        verification: { "status" => "matched", "checked_at" => Time.current.iso8601, "expected_record_counts" => counts, "checked_counts" => counts.merge("families" => 1), "verified_records" => @records.size, "verified_attachments" => @attachments.size, "warnings" => warnings }
+        verification: { "scope" => "supported_product", "status" => "matched", "checked_at" => Time.current.iso8601, "expected_record_counts" => counts, "checked_counts" => counts.merge("families" => 1), "verified_records" => @records.size, "verified_attachments" => @attachments.size, "warnings" => warnings }
       }
     end
 end

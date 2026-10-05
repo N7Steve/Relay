@@ -1,5 +1,15 @@
 # Contratos de recuperación para la poda
 
+**Disposición vigente desde fase 10:** la selección de limpieza completa sustituye
+las retenciones históricas descritas en este registro de fase 1. Los lectores y
+tablas exclusivos de módulos retirados se eliminan. Las copias anteriores
+recuperan el producto soportado y reportan registros, adjuntos y atributos
+descartados; preservan historia financiera local y originales soportados.
+El historial completo de módulos retirados requiere el backup de servidor y su
+aplicación anterior. Ver [fase 10](pruning-phase-10.md) y la
+[guía actual de backups](../llm-guides/backups.md). El resto de este documento
+conserva la evidencia y los contratos anteriores a esa decisión.
+
 Fase 1, 4 de octubre de 2026. El nombre `BackupRecord.data.model` es un contrato
 persistido, no necesariamente el nombre de una clase activa de producto.
 El ZIP financiero sigue siendo versión 3 y el snapshot relacional versión 1.

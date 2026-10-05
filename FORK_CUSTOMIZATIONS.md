@@ -159,8 +159,8 @@ previo; el formato de los archivos JavaScript modificados sí pasa.
 | Área | Propiedad | Debe preservarse al actualizar upstream |
 | --- | --- | --- |
 | Pagos recurrentes / programados | Propia | Modelos, generación, confirmación/rechazo, transferencias recurrentes e integración en transacciones |
-| Bills / recurrencias detectadas | Retirado en fase 8 | Agenda es el único motor; conservar lectores históricos y backups, sin detección ni conversión automática |
-| Cotizaciones/divisas externas, FinanceKit y almacenamiento remoto | Retirados en fase 9 | Sólo precios/tipos guardados, Active Storage local y persistencia histórica FinanceKit; no reintroducir proveedores, API de publicador ni drivers S3/GCS |
+| Bills / recurrencias detectadas | Retirado en fase 8 | Agenda es el único motor; fase 10 elimina persistencia Bills y reporta descartes en backups, sin conversión automática |
+| Cotizaciones/divisas externas, FinanceKit y almacenamiento remoto | Retirados en fase 9 | Sólo precios/tipos guardados y Active Storage local; fase 10 elimina persistencia FinanceKit; no reintroducir proveedores, API de publicador ni drivers S3/GCS |
 | Informes personalizados | Propia | Resumen, desglose, gastos compartidos, exportación y secciones reordenables |
 | Tratamiento financiero y archivo de cuentas | Propia | Preservar “incluida”, “solo seguimiento” y “fuera de mis finanzas”; el archivo sólo afecta a la presentación |
 | Roboadvisor e inversiones | Propia | Rendimiento, flujos, liquidez neta estimada y tratamiento fiscal |
@@ -671,7 +671,7 @@ git diff
 4. En conflictos de transacciones/transferencias, comprobar también pagos programados, informes y exportaciones; comparten modelos y controladores.
 5. No aceptar automáticamente el `db/schema.rb`: validar primero las dieciséis migraciones propias.
 6. Si upstream incorpora una función equivalente, decidir expresamente si migrar a ella y añadir pruebas de regresión antes de retirar la implementación del fork.
-7. Mantener Bills retirado tras fase 8. No reintroducir motores, rutas, cron, API, feed, callbacks ni guards de frontend desde upstream. Conservar persistencia histórica y recuperación; portar funciones útiles a Agenda sólo con alcance seleccionado y pruebas propias, sin conectar ambos dominios.
+7. Mantener Bills retirado tras fase 8. No reintroducir motores, rutas, cron, API, feed, callbacks ni guards de frontend desde upstream. La fase 10 retira persistencia histórica y reporta omisiones en recuperación; portar funciones útiles a Agenda sólo con alcance seleccionado y pruebas propias, sin conectar ambos dominios.
 8. En cambios de `IncomeStatement::Totals`, verificar los dos indicadores internos de transferencias que cruzan la frontera (`transfer_to_excluded`/`transfer_from_excluded`) y versionar la clave de caché si cambia cualquier `Data.define` cacheado.
 9. Probar Money In / Out y Spending Trend con `month_start_day = 25`, incluyendo selector, etiquetas, fechas inicial/final y corte del período activo en hoy.
 10. En Inicio, mantener independientes los períodos de Flujo de caja, Salidas, Inversiones y Patrimonio neto. Verificar que cada selector persiste por usuario, actualiza sólo el cálculo de su card y conserva el estado de los demás widgets; no reintroducir el selector global.
@@ -744,3 +744,22 @@ precios/tipos guardados, Brandfetch, Google Drive, valoraciones RentCast/Realie,
 Goals, insights, presupuestos, todos los mecanismos de acceso y los demás
 clientes. Al integrar upstream no reintroducir esos proveedores, drivers ni la
 API de publicador. Ver [fase 9](docs/migration/pruning-phase-9.md).
+
+## Poda fase 10 — disposición definitiva de persistencia
+
+Esta fase sustituye las políticas de lectores históricos de las fases 1–9 para
+módulos retirados. Elimina tablas/modelos de los 25 conectores retirados,
+FinanceKit, Bills, conversaciones y uso IA, suscripciones comerciales y evaluación;
+también columnas, settings y vínculos exclusivos. Enable Banking, Brandfetch,
+Drive, valoraciones inmobiliarias, acceso, API, Agenda, presupuestos, Goals,
+insights vigentes y finanzas locales se preservan.
+
+Las cuentas desconectadas mantienen estrategia reverse, posiciones importadas
+autoritativas y observaciones de balance; Indexa conserva únicamente el rendimiento
+financiero local y la semántica de cartera gestionada. No conservar sus lectores
+de conexión ni reintroducirlos al integrar upstream. Backups antiguos validan su
+integridad y recuperan sólo el producto soportado, con omisiones explícitas;
+modelos/campos desconocidos y referencias financieras siguen siendo errores.
+Los sinks de jobs antiguos permanecen hasta la auditoría de colas de fase 11.
+La eliminación es irreversible sin restauración del backup de servidor y sus
+originales con código compatible. Ver [fase 10](docs/migration/pruning-phase-10.md).

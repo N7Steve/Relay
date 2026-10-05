@@ -25,13 +25,6 @@ class SureImport::Preflight
 
     # Shared ProviderMerchants that already exist with different details than the
     # file carries. The existing record is kept as-is, so the user sees what differs.
-    # Unnamed recurring transactions whose merchant is missing can't be imported
-    # (a series needs a merchant or a name), so they are skipped rather than
-    # imported without a merchant.
-    def skipped_unnamed_recurring_count
-      warnings.count { |warning| warning[:code] == "skipped_unnamed_recurring" }
-    end
-
     def provider_merchant_diff_warnings
       warnings.select { |warning| warning[:code] == "provider_merchant_diff" }
     end
@@ -44,7 +37,6 @@ class SureImport::Preflight
     "Tag" => %w[id name],
     "Merchant" => %w[id name],
     "ProviderMerchant" => %w[id name source],
-    "RecurringTransaction" => %w[id amount expected_day_of_month last_occurrence_date next_expected_date],
     "Transaction" => %w[id account_id date amount],
     "Transfer" => %w[inflow_transaction_id outflow_transaction_id],
     "RejectedTransfer" => %w[inflow_transaction_id outflow_transaction_id],
@@ -69,7 +61,6 @@ class SureImport::Preflight
   # older exports, not a sign of corrupt data.
   SOFT_REFERENCE_FIELDS = {
     "Transaction" => %w[merchant_id],
-    "RecurringTransaction" => %w[merchant_id],
     "Transaction split line" => %w[merchant_id]
   }.freeze
 
@@ -83,7 +74,6 @@ class SureImport::Preflight
   SOURCE_ID_TYPES = TAXONOMY_TYPES.merge(
     "ProviderMerchant" => :merchants,
     "Account" => :accounts,
-    "RecurringTransaction" => :recurring_transactions,
     "Transaction" => :transactions,
     "Budget" => :budgets
   ).freeze
@@ -91,7 +81,6 @@ class SureImport::Preflight
   REFERENCE_FIELDS = {
     "Balance" => { accounts: %w[account_id] },
     "Category" => { categories: %w[parent_id] },
-    "RecurringTransaction" => { accounts: %w[account_id], merchants: %w[merchant_id] },
     "Transaction" => { accounts: %w[account_id], categories: %w[category_id], merchants: %w[merchant_id] },
     "Transfer" => { transactions: %w[inflow_transaction_id outflow_transaction_id] },
     "RejectedTransfer" => { transactions: %w[inflow_transaction_id outflow_transaction_id] },
@@ -174,6 +163,11 @@ class SureImport::Preflight
         end
 
         @line_counts[type] += 1
+        if Family::Backup::DiscardPolicy.retired?(type)
+          add_warning(:retired_data_discarded, "Line #{line_number} #{type} belongs to a retired module and will be discarded.")
+          @valid_rows_count += 1
+          next
+        end
         unless Family::DataImporter::SUPPORTED_TYPES.include?(type)
           add_error(:unsupported_record_type, "Line #{line_number} has unsupported record type #{type}.")
           next
@@ -344,17 +338,11 @@ class SureImport::Preflight
       }
       if SOFT_REFERENCE_TYPES.include?(type)
         add_warning(:skipped_missing_reference, I18n.t("sure_import.preflight.skipped_missing_reference", **interpolations))
-      elsif unnamed_recurring_without_merchant?(record, type, field)
-        add_warning(:skipped_unnamed_recurring, I18n.t("sure_import.preflight.skipped_unnamed_recurring", **interpolations))
       elsif SOFT_REFERENCE_FIELDS.fetch(type, []).include?(field)
         add_warning(:skipped_missing_merchant_reference, I18n.t("sure_import.preflight.skipped_missing_merchant_reference", **interpolations))
       else
         add_error(:missing_reference, I18n.t("sure_import.preflight.missing_reference", **interpolations))
       end
-    end
-
-    def unnamed_recurring_without_merchant?(record, type, field)
-      type == "RecurringTransaction" && field == "merchant_id" && record[:data]["name"].blank?
     end
 
     def validate_tag_references(record, type)

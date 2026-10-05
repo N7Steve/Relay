@@ -19,19 +19,10 @@ class Account::SyncerTest < ActiveSupport::TestCase
       currency: "CHF",
       accountable: Investment.new(subtype: "brokerage")
     )
-    ibkr_account = family.ibkr_items.create!(
-      name: "IBKR",
-      query_id: "QUERY123",
-      token: "TOKEN123"
-    ).ibkr_accounts.create!(
-      name: "Main",
-      ibkr_account_id: "U1234567",
-      currency: "CHF"
-    )
-    AccountProvider.create!(account: account, provider: ibkr_account)
+    account.update!(reverse_balance_history: true, imported_balance_history: [ { report_date: "2026-05-07", total: "3351" } ])
 
     Balance::Materializer.any_instance.expects(:materialize_balances).once
-    IbkrAccount::HistoricalBalancesSync.any_instance.expects(:sync!).once
+    Account::ImportedBalanceHistory.any_instance.expects(:sync!).once
 
     Account::Syncer.new(account).perform_sync(OpenStruct.new(window_start_date: nil))
   end

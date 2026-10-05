@@ -41,15 +41,6 @@ class SyncCleanerJobTest < ActiveSupport::TestCase
     assert_equal "processing", fresh_export.reload.status
   end
 
-  test "leaves historical provider fetch flags unchanged" do
-    stuck = snaptrade_accounts(:fidelity_401k)
-    stuck.update_columns(activities_fetch_pending: true, updated_at: 7.hours.ago)
-
-    SyncCleanerJob.perform_now
-
-    assert stuck.reload.activities_fetch_pending
-  end
-
   test "a failing sweep does not block the others" do
     Sync.expects(:clean).raises(StandardError.new("boom"))
 

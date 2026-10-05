@@ -10,7 +10,6 @@ class SureImport < Import
     "Category" => :categories,
     "Tag" => :tags,
     "Merchant" => :merchants,
-    "RecurringTransaction" => :recurring_transactions,
     "Transaction" => :transactions,
     "Transfer" => :transfers,
     "RejectedTransfer" => :rejected_transfers,
@@ -325,6 +324,9 @@ class SureImport < Import
     end
 
     def build_readback_verification(before_counts:, status_for_mismatch:, reused_counts: {})
+      discarded_counts = summary.to_h.fetch("discarded_retired_modules", {}).select do |type, count|
+        Family::Backup::DiscardPolicy.retired?(type) && count.to_i.positive?
+      end
       after_counts = readback_count_snapshot
       actual_delta_counts = delta_counts(before_counts, after_counts)
       expected_counts = normalized_expected_record_counts
@@ -343,6 +345,7 @@ class SureImport < Import
       end
 
       {
+        "scope" => "supported_product",
         "status" => mismatches.empty? ? "matched" : status_for_mismatch,
         "checked_at" => Time.current.iso8601,
         "expected_record_counts" => expected_counts,
@@ -351,7 +354,9 @@ class SureImport < Import
         "actual_delta_counts" => actual_delta_counts,
         "checked_counts" => checked_counts,
         "reused_record_counts" => reused_counts.select { |_key, count| count.positive? },
-        "mismatches" => mismatches
+        "mismatches" => mismatches,
+        "discarded_record_counts" => discarded_counts,
+        "warnings" => discarded_counts.empty? ? [] : [ { "code" => "retired_data_discarded", "message" => "Only the supported financial product was restored. Data from retired modules was discarded.", "details" => { "records" => discarded_counts } } ]
       }
     end
 
@@ -362,7 +367,6 @@ class SureImport < Import
         categories: family.categories.count,
         tags: family.tags.count,
         merchants: family.merchants.count,
-        recurring_transactions: family.recurring_transactions.count,
         transactions: family.entries.where(entryable_type: "Transaction").count,
         transfers: Transfer.joins(inflow_transaction: { entry: :account }).where(accounts: { family_id: family.id }).count,
         rejected_transfers: RejectedTransfer.joins(inflow_transaction: { entry: :account }).where(accounts: { family_id: family.id }).count,

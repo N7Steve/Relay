@@ -11,10 +11,11 @@ ownership and sharing; entries, splits, transfers and rejected matches; locked
 attributes, provider metadata, reconciliation and import history; balances,
 holdings, securities, prices and relevant exchange rates; taxonomy and merchant
 customizations; budgets and budget sharing; rules, runs and notification delivery
-deduplication; Agenda series, tags and occurrences; recurring Bills and their
-allocations; goals, account allocations and pledges; documents and statements;
-family and member preferences; assistant conversations and insights; and provider
-connections, account payloads and Google Drive export configurations.
+deduplication; Agenda series, tags and occurrences; goals, account allocations
+and pledges; documents and statements; supported family and member preferences
+and insights; Enable Banking connections and account payloads; and Google Drive
+export configurations. Previously connected accounts retain local financial
+observations, authoritative holdings and managed portfolio performance.
 
 Active Storage originals are embedded as Base64 with size and checksum metadata.
 This includes account and merchant custom icons, provider logos, profile photos,
@@ -61,10 +62,9 @@ source administrator preferences and ownership map to that administrator. Other
 members retain their identities, roles and preferences and need destination
 password setup. A source super-admin becomes a family admin rather than acquiring
 instance administration. Source member emails already used by another family
-are rejected. Stripe subscriptions, generated export archives, operational logs
-and provider billing/usage history stay with their respective instances. Remote
-assistant vector indexes must be rebuilt from the restored original documents;
-external services can require reauthorization on the new instance.
+are rejected. Generated export archives, operational logs and property-provider usage history
+stay with their respective instances. Retained external services can require
+reauthorization on the new instance.
 
 Provider credentials are included and re-encrypted with the destination's Rails
 encryption configuration. Treat the downloaded archive as sensitive: its portable
@@ -76,20 +76,29 @@ new family-owned table has no disposition. New columns on existing models are
 included automatically; generated columns are verified but not written.
 
 Backup model names are stable persisted keys, independent of the implementation
-class. Conversation history uses the minimal
-`Family::Backup::ConversationRecords` persistence readers rather than active
-assistant models; STI values are retained as data and checked against the known
-historical types. Do not replace their wire names with the readers' Ruby namespaces.
-The snapshot/ZIP versions and current assistant behavior are unchanged.
-See [pruning recovery contracts](../migration/pruning-backup-contracts.md) for
-per-module dispositions, dependencies and the required recovery rehearsal before
-removing models. Historical readers still require their tables; they are not
-permission to drop data or to silently skip unsupported rows.
+class. Since phase 10, supported snapshots exclude retired connectors, FinanceKit,
+recurring Bills, conversations/tool calls, AI usage, commercial subscriptions,
+evaluation data and obsolete market metadata. Their exclusive tables and readers
+are removed. The snapshot/ZIP versions remain unchanged.
 
-Since pruning phase 8, recurring Bills models are historical persistence only.
-Restoring their rules, occurrences and allocations never generates new cycles
-or Agenda payments. Their existing wire names, relations and tables are retained;
-Agenda remains a separate domain. See [phase 8](../migration/pruning-phase-8.md).
+Older Sure/Relay archives are validated in their original form before filtering.
+The explicit names-only `Family::Backup::DiscardPolicy` reports discarded records,
+attachments and removed attributes as `retired_data_discarded`. Only the supported
+product is restored; verification carries `scope: supported_product`. Unknown
+models, unknown core fields, corrupt bytes and missing financial references still
+fail. Legacy nonrelational Bills rows also report omissions. No Bills-to-Agenda
+conversion occurs. Retired credentials, connection payloads, conversations and
+their exclusive originals cannot be recovered into the current product.
+
+Before discarding connection rows, the importer preserves reverse balance history,
+authoritative holdings, IBKR stored balances and Indexa performance history in
+generic account/holding fields. Missing linked managed portfolio data fails
+explicitly. Supported originals and relationships remain recoverable. Retired
+modules can only be recovered by restoring the previous complete server backup
+with its matching older application, separately from current-product recovery.
+See [phase 10](../migration/pruning-phase-10.md) for the exact disposition and
+irreversible database migration. Earlier integration records below describe their
+original scope; this phase supersedes their historical-reader policy.
 
 Run the backup round-trip tests plus the exporter, importer, SureImport,
 ImportSession and web/API import controller suites. Tests cover actual bytes,

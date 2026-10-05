@@ -3,6 +3,25 @@
 require "test_helper"
 
 class Api::V1::ImportsControllerTest < ActionDispatch::IntegrationTest
+  test "legacy backup verification exposes discarded data without claiming complete recovery" do
+    import = @family.imports.create!(type: "RelayImport")
+    content = [
+      { type: "Account", data: { id: "supported-account", name: "API supported recovery", balance: "100", currency: "EUR", accountable_type: "Depository" } },
+      { type: "Valuation", data: { id: "opening-anchor", account_id: "supported-account", date: "2026-10-01", amount: "100", currency: "EUR", kind: "opening_anchor" } },
+      { type: "RecurringTransaction", data: { id: "discarded-series" } }
+    ].map(&:to_json).join("\n")
+    import.ndjson_file.attach(io: StringIO.new(content), filename: "legacy.ndjson", content_type: "application/x-ndjson")
+    import.import!
+    get api_v1_import_url(import), headers: api_headers(@read_only_api_key)
+    assert_response :success
+    readback = JSON.parse(response.body).dig("data", "verification", "readback")
+    assert_equal "matched", readback["status"]
+    assert_equal "supported_product", readback["scope"]
+    assert_equal({ "RecurringTransaction" => 1 }, readback["discarded_record_counts"])
+    assert_equal "retired_data_discarded", readback["warnings"].sole["code"]
+    assert readback["warnings"].sole["message"].present?
+  end
+
   test "ZIP preflight is read only and ZIP creation stores a Relay snapshot" do
     source = Family.create!(name: "API ZIP source")
     bytes = Family::DataExporter.new(source).generate_export.string

@@ -1,9 +1,6 @@
 require "test_helper"
-require_relative "../../support/historical_financekit_helper"
 
 class Family::BackupTest < ActiveSupport::TestCase
-  include HistoricalFinancekitHelper
-
   setup do
     @source = Family.create!(name: "Portable family", currency: "EUR", country: "ES", timezone: "Europe/Madrid", date_format: "%d/%m/%Y")
     @target = families(:empty)
@@ -42,62 +39,6 @@ class Family::BackupTest < ActiveSupport::TestCase
     assert_equal "Already paid", restored.scheduled_payment_entries.find_by!(status: "rejected").rejection_reason
   end
 
-  test "round trips historical Bills relationships without producing Agenda or extra occurrences" do
-    @target = Family.create!(name: "First historical recovery", currency: "EUR")
-    @target.users.create!(email: "first-bills-restore@example.com", password: "password123", role: "admin")
-    entry = transaction(@account, "Historical payment", 20)
-    series = @source.recurring_transactions.create!(
-      account: @account, destination_account: @destination, merchant: @merchant, category: @category,
-      name: "Historical Bills", amount: 20, currency: "EUR", expected_day_of_month: 15,
-      last_occurrence_date: Date.new(2026, 8, 15), next_expected_date: Date.new(2026, 9, 15),
-      status: "active", bill_type: "transfer", payment_url: "https://example.com/pay",
-      matcher_hints: { "name_aliases" => [ "Original payment" ] }
-    )
-    replacement = series.dup
-    replacement.update!(name: "Replacement", amount: 25)
-    series.update!(replaced_by: replacement)
-    series.recurrence_rules.create!(frequency: "monthly", interval: 1, day_of_month: 15, position: 0)
-    occurrence = series.recurring_occurrences.create!(family: @source, original_due_on: entry.date,
-      due_on: entry.date, currency: "EUR", expected_amount: 20, status: "paid", closed_at: Time.current)
-    occurrence.allocations.create!(entry: entry, allocated_amount: 20, currency: "EUR", paid_on: entry.date,
-      state: "confirmed", source: "user_confirmed", source_amount: 20, source_currency: "EUR")
-    series.recurring_price_changes.create!(entry: entry, previous_amount: 15, new_amount: 20,
-      currency: "EUR", effective_on: entry.date, source: "detected")
-    series.recurring_match_rejections.create!(entry: entry)
-
-    assert_no_difference [ "ScheduledPayment.count", "ScheduledPaymentEntry.count" ] do
-      restore!
-    end
-
-    restored = @target.recurring_transactions.find_by!(name: series.name)
-    assert_equal "Checking", restored.account.name
-    assert_equal "Savings", restored.destination_account.name
-    assert_equal "Utilities", restored.category.name
-    assert_equal "Utilities", restored.merchant.name
-    assert_equal replacement.name, restored.replaced_by.name
-    assert_equal series.matcher_hints, restored.matcher_hints
-    assert_equal series.payment_url, restored.payment_url
-    assert_equal 15, restored.recurrence_rules.sole.day_of_month
-    assert_equal 1, @target.recurring_occurrences.count
-    restored_occurrence = restored.recurring_occurrences.sole
-    assert_equal occurrence.attributes.except("id", "family_id", "recurring_transaction_id"),
-      restored_occurrence.attributes.except("id", "family_id", "recurring_transaction_id")
-    assert_equal "Historical payment", restored_occurrence.allocations.sole.entry.name
-    assert_equal restored_occurrence.allocations.sole.entry, restored.recurring_price_changes.sole.entry
-    assert_equal restored_occurrence.allocations.sole.entry, restored.recurring_match_rejections.sole.entry
-
-    second_target = Family.create!(name: "Second historical recovery", currency: "EUR")
-    second_target.users.create!(email: "second-bills-restore@example.com", password: "password123", role: "admin")
-    content = nil
-    Zip::File.open_buffer(Family::DataExporter.new(@target).generate_export) { |zip| content = zip.read("all.ndjson") }
-    assert_no_difference [ "ScheduledPayment.count", "ScheduledPaymentEntry.count" ] do
-      Family::DataImporter.new(second_target, content).import!
-    end
-    assert_equal 1, second_target.recurring_occurrences.count
-    assert_equal "Replacement", second_target.recurring_transactions.find_by!(name: series.name).replaced_by.name
-    assert_equal "Historical payment", second_target.recurring_occurrences.sole.allocations.sole.entry.name
-  end
-
   test "round trips custom account and provider merchant icons, receipts and documents as bytes" do
     entry = transaction(@account, "Receipt", 20)
     provider = ProviderMerchant.create!(name: "Portable provider", source: "plaid")
@@ -130,7 +71,7 @@ class Family::BackupTest < ActiveSupport::TestCase
   end
 
   test "reports legacy documents whose source never retained the original" do
-    document = @source.family_documents.create!(filename: "legacy.pdf", file_size: 100, provider_file_id: "remote-only", status: "ready")
+    document = @source.family_documents.create!(filename: "legacy.pdf", file_size: 100, status: "ready")
     content = nil
     report = nil
     Zip::File.open_buffer(Family::DataExporter.new(@source).generate_export) do |zip|
@@ -183,46 +124,6 @@ class Family::BackupTest < ActiveSupport::TestCase
     assert_equal BigDecimal("120"), restored.area_value
     assert_equal "Madrid", restored.address.locality
     assert_not @target.accounts.find_by!(name: "Checking").enable_category_matcher
-  end
-
-  test "round trips provider credentials, raw payloads and account links" do
-    item = @source.simplefin_items.create!(name: "Bank", access_url: "https://test-token@example.com/simplefin")
-    provider_account = item.simplefin_accounts.create!(account_id: "checking", name: "Checking", account_type: "checking", currency: "EUR", current_balance: 900, raw_payload: { "pending" => true })
-    @account.account_providers.create!(provider: provider_account)
-
-    restore!
-
-    restored = @target.simplefin_items.sole
-    assert_equal item.access_url, restored.access_url
-    assert_equal provider_account.raw_payload, restored.simplefin_accounts.sole.raw_payload
-    assert_equal restored.simplefin_accounts.sole, @target.accounts.find_by!(name: "Checking").account_providers.sole.provider
-  end
-
-  test "round trips historical FinanceKit rows and their account link after the publisher retirement" do
-    owner = @source.users.create!(first_name: "Wallet", last_name: "Owner", email: "historical-wallet-backup@example.com",
-      password: "password123", role: :admin)
-    item, lineage = create_historical_financekit_link(family: @source, user: owner, account: @account)
-    entry = transaction(@account, "Wallet purchase", 12)
-    wallet_transaction = FinancekitTransaction.create!(financekit_account_lineage: lineage, entry: entry,
-      source_id: SecureRandom.uuid, generation: 1, sequence: 1, status: "booked", raw_payload: { "amount" => "12" })
-    FinancekitConflict.create!(family: @source, financekit_item: item, financekit_account_lineage: lineage,
-      financekit_transaction: wallet_transaction, kind: "balance_observation_conflict")
-    content = nil
-    Zip::File.open_buffer(Family::DataExporter.new(@source).generate_export) { |zip| content = zip.read("all.ndjson") }
-    publisher_id = item.publisher_id
-    # Recovery normally targets a fresh installation; free the globally unique identifiers here.
-    item.update_columns(publisher_id: SecureRandom.uuid, enrollment_id: SecureRandom.uuid)
-
-    Family::DataImporter.new(@target, content).import!
-
-    restored_item = @target.financekit_items.sole
-    restored_lineage = @target.financekit_account_lineages.sole
-    assert_equal publisher_id, restored_item.publisher_id
-    assert_equal @target, restored_item.user.family
-    assert_equal "Checking", restored_lineage.account.name
-    assert_equal restored_lineage, @target.accounts.find_by!(name: "Checking").account_providers.sole.provider
-    assert_equal "Wallet purchase", restored_lineage.financekit_transactions.sole.entry.name
-    assert_equal restored_lineage.financekit_transactions.sole, @target.financekit_conflicts.sole.financekit_transaction
   end
 
   test "round trips statement files and reconciliation links" do
@@ -316,7 +217,6 @@ class Family::BackupTest < ActiveSupport::TestCase
     content = Family::Backup.new(source).generate_ndjson
     # Simulate a separate instance, where these member emails are available.
     source.users.each { |user| user.update_column(:email, "source-#{user.id}@example.com") }
-    source.plaid_items.each { |item| item.update_column(:plaid_id, "source-#{item.id}") }
 
     result = Family::DataImporter.new(@target, content).import!
 

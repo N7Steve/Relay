@@ -402,6 +402,8 @@ es:
       finalize_upload: Por favor, finaliza la subida de tu archivo.
       finalize_mappings: Por favor, finaliza tus mapeos antes de continuar.
     ready:
+      retired_data_title: Se descartarán datos de funciones retiradas
+      retired_data_description: Relay recupera los datos financieros soportados y los archivos originales. Se descartan las conexiones antiguas, Bills, las conversaciones y las preferencias obsoletas. El informe de verificación registra lo omitido.
       full_backup_title: Restauración completa
       full_backup_counts:
         one: Un registro de datos, más los adjuntos originales.

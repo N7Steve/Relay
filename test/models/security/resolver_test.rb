@@ -21,16 +21,6 @@ class Security::ResolverTest < ActiveSupport::TestCase
     end
   end
 
-  test "keeps the stored price provider of a historical security" do
-    db_security = Security.create!(ticker: "CSPX", exchange_operating_mic: "XLON", country_code: "GB")
-    db_security.update_columns(price_provider: "tiingo")
-
-    resolved = Security::Resolver.new("CSPX", exchange_operating_mic: "XLON", country_code: "GB").resolve
-
-    assert_equal db_security, resolved
-    assert_equal "tiingo", resolved.reload.price_provider
-  end
-
   test "returns nil when symbol blank" do
     assert_raises(ArgumentError) { Security::Resolver.new(nil).resolve }
     assert_raises(ArgumentError) { Security::Resolver.new("").resolve }

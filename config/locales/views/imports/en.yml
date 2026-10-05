@@ -457,6 +457,8 @@ en:
       finalize_upload: Please finalize your file upload.
       finalize_mappings: Please finalize your mappings before proceeding.
     ready:
+      retired_data_title: Data from retired features will be discarded
+      retired_data_description: Relay restores the supported financial data and original files. Old connector connections, Bills, conversations and obsolete preferences are discarded. The verification report records what was omitted.
       full_backup_title: Full backup restoration
       full_backup_counts:
         one: One data record, plus original attachments.

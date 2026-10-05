@@ -6,7 +6,7 @@ class TradesTest < ApplicationSystemTestCase
   setup do
     sign_in @user = users(:family_admin)
 
-    @user.update!(show_sidebar: false, show_ai_sidebar: false)
+    @user.update!(show_sidebar: false)
 
     @account = accounts(:investment)
 

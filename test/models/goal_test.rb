@@ -383,6 +383,7 @@ class GoalTest < ActiveSupport::TestCase
 
 
   test "pledge_action_label_key flips on manual-only goals" do
+    @connected.account_providers.create!(provider: enable_banking_accounts(:one))
     assert_equal "goals.show.pledge_just_transferred", @goal.pledge_action_label_key
     @goal.goal_accounts.where(account_id: @connected.id).destroy_all
     # After removing the only connected account, the goal is manual-only;

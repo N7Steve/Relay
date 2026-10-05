@@ -83,8 +83,9 @@ Compose usa un archivo de variables vacío explícito. La imagen excluye `.env*`
 claves de Rails, almacenamiento y otros datos locales mediante `.dockerignore`.
 No añadir credenciales reales ni montar volúmenes de producción.
 
-Las tareas de pruebas cargan `db/schema.rb` sobre su base `relay_test` antes de
-ejecutar; reemplazan los datos de esa base de pruebas. No ejecutan migraciones
+Las tareas de pruebas recrean exclusivamente su base `relay_test` y cargan
+`db/schema.rb` antes de ejecutar; eliminan sus datos y las tablas que hayan
+desaparecido del esquema. No ejecutan migraciones
 históricas, despliegues, el servidor de desarrollo ni workers programados.
 Las pruebas de interfaz arrancan su servidor temporal mediante Capybara.
 

@@ -8,8 +8,8 @@ class Account::CurrentBalanceManagerTest < ActiveSupport::TestCase
     # Create account_provider to make the account actually linked
     # (The fixture has plaid_account but that's the legacy association)
     @linked_account.account_providers.find_or_create_by!(
-      provider_type: "PlaidAccount",
-      provider_id: plaid_accounts(:one).id
+      provider_type: "EnableBankingAccount",
+      provider_id: enable_banking_accounts(:one).id
     )
   end
 

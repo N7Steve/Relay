@@ -23,6 +23,13 @@ class Holding < ApplicationRecord
   validates :external_id, uniqueness: { scope: :account_id }, allow_blank: true
   validates :cost_basis_source, inclusion: { in: COST_BASIS_SOURCES }, allow_nil: true
 
+  scope :authoritative, -> { where("account_provider_id IS NOT NULL OR imported_snapshot = TRUE") }
+  scope :calculated, -> { where(account_provider_id: nil, imported_snapshot: false) }
+
+  def authoritative?
+    account_provider_id.present? || imported_snapshot?
+  end
+
   scope :chronological, -> { order(:date) }
   scope :for, ->(security) { where(security_id: security).order(:date) }
   scope :with_locked_cost_basis, -> { where(cost_basis_locked: true) }

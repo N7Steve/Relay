@@ -257,6 +257,21 @@ class SureImportTest < ActiveSupport::TestCase
     assert_equal "matched", @import.readback_verification["status"]
   end
 
+  test "legacy readback reports matched supported data and discarded retired records" do
+    attach_ndjson(build_ndjson([
+      { type: "Account", data: { id: "supported-account", name: "Supported recovery", balance: "100", currency: "EUR", accountable_type: "Depository" } },
+      { type: "Valuation", data: { id: "opening-anchor", account_id: "supported-account", date: "2026-10-01", amount: "100", currency: "EUR", kind: "opening_anchor" } },
+      { type: "RecurringTransaction", data: { id: "discarded-series" } }
+    ]))
+    @import.import!
+    verification = @import.reload.readback_verification
+    assert_equal "matched", verification["status"]
+    assert_equal "supported_product", verification["scope"]
+    assert_equal({ "RecurringTransaction" => 1 }, verification["discarded_record_counts"])
+    assert_equal "retired_data_discarded", verification["warnings"].sole["code"]
+    assert_equal 1, verification.dig("actual_delta_counts", "accounts")
+  end
+
   test "publishes import successfully" do
     attach_ndjson(build_ndjson([
       { type: "Account", data: {
@@ -604,7 +619,7 @@ class SureImportTest < ActiveSupport::TestCase
 
   test "preflight catches missing fields unsupported types duplicate valuations and references" do
     attach_ndjson(build_ndjson([
-      { type: "RecurringTransaction", data: { id: "recurring-1" } },
+      { type: "Transaction", data: { id: "incomplete-transaction" } },
       { type: "MysteryType", data: { id: "mystery-1" } },
       { type: "Account", data: {
         id: "account-1",
@@ -1061,38 +1076,6 @@ class SureImportTest < ActiveSupport::TestCase
     assert_equal "https://new.example", @family.merchants.find_by!(name: "New Cafe").website_url
     assert_equal "https://kept.example", kept.reload.website_url
     assert_equal "https://fresh.example", updated.reload.website_url
-  end
-
-  test "a named recurring transaction whose merchant is missing imports without a merchant" do
-    attach_ndjson(recurring_with_missing_merchant_ndjson(name: "Gym membership"))
-
-    result = @import.sure_preflight
-    assert result.valid?, result.error_message
-    assert_equal 1, result.skipped_missing_merchant_count
-    assert_equal 0, result.skipped_unnamed_recurring_count
-
-    assert_difference -> { @family.recurring_transactions.count }, 1 do
-      @import.publish
-    end
-
-    assert_equal "complete", @import.status
-    recurring = @family.recurring_transactions.find_by!(name: "Gym membership")
-    assert_nil recurring.merchant_id
-  end
-
-  test "an unnamed recurring transaction whose merchant is missing is skipped and reported as such" do
-    attach_ndjson(recurring_with_missing_merchant_ndjson)
-
-    result = @import.sure_preflight
-    assert result.valid?, result.error_message
-    assert_equal 1, result.skipped_unnamed_recurring_count
-    assert_equal 0, result.skipped_missing_merchant_count
-
-    assert_no_difference -> { @family.recurring_transactions.count } do
-      @import.publish
-    end
-
-    assert_equal "complete", @import.status
   end
 
   private

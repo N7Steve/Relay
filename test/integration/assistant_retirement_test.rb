@@ -40,17 +40,12 @@ class AssistantRetirementTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "history creation does not enqueue a provider response" do
-    user = users(:family_admin)
-    chat = user.chats.create!(title: "Historical conversation")
+  test "retired response jobs remain sinks without conversation persistence" do
+    assert_not users(:family_admin).respond_to?(:chats)
+    assert_nil "Chat".safe_constantize
     assert_no_enqueued_jobs do
-      chat.messages.create!(type: "UserMessage", content: "Preserved question", ai_model: "legacy")
+      AssistantResponseJob.perform_now("retired-prompt", "retired-response", backend: "builtin")
     end
-    prompt = chat.messages.sole
-    response = chat.messages.create!(type: "AssistantMessage", content: "", status: :pending, ai_model: "legacy")
-    AssistantResponseJob.perform_now(prompt, response, backend: "builtin")
-    assert response.reload.failed?
-    assert_equal "Preserved question", prompt.reload.content
   end
 
   test "queued PDF extraction fails locally while preserving original bytes" do

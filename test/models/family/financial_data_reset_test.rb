@@ -41,14 +41,14 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
 
   test "sync counts use the family sync scope without double counting" do
     account = @family.accounts.first
-    provider_item = @family.plaid_items.first
+    provider_item = @family.enable_banking_items.first
     @family.syncs.create!
     account.syncs.create!
     provider_item.syncs.create!
 
     result = Family::FinancialDataReset.new(user: @user).call
 
-    expected = Sync.for_family(@family).or(Sync.where(syncable_type: "PlaidItem", syncable_id: @family.plaid_items.select(:id))).count
+    expected = Sync.for_family(@family).or(Sync.where(syncable_type: "EnableBankingItem", syncable_id: @family.enable_banking_items.select(:id))).count
     assert_equal expected, result.before_counts[:syncs]
   end
 
@@ -120,32 +120,25 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
       currency: "USD",
       accountable: Depository.new
     )
-    plaid_item = @other_family.plaid_items.create!(
-      name: "Provider Reset Bank",
-      plaid_id: "provider_reset_item",
-      access_token: "provider_reset_access_token",
-      plaid_region: "us"
+    enable_banking_item = @other_family.enable_banking_items.create!(
+      name: "Provider Reset Bank", country_code: "ES", application_id: "test-app", client_certificate: "test-cert",
     )
-    plaid_account = plaid_item.plaid_accounts.create!(
-      plaid_id: "provider_reset_account",
-      plaid_type: "depository",
-      current_balance: 100,
+    enable_banking_account = enable_banking_item.enable_banking_accounts.create!(
+      uid: SecureRandom.uuid, current_balance: 100,
       currency: "USD",
       name: "Provider Reset Account"
     )
-    account_provider = AccountProvider.create!(account: account, provider: plaid_account)
-    plaid_item.logo.attach(io: StringIO.new("logo"), filename: "logo.png", content_type: "image/png")
-    attachment = plaid_item.logo.attachment
+    account_provider = AccountProvider.create!(account: account, provider: enable_banking_account)
+    enable_banking_item.logo.attach(io: StringIO.new("logo"), filename: "logo.png", content_type: "image/png")
+    attachment = enable_banking_item.logo.attachment
 
-    plaid_provider = mock
-    Provider::Registry.stubs(:plaid_provider_for_region).returns(plaid_provider)
-    plaid_provider.expects(:remove_item).never
+    enable_banking_provider = mock
 
     result = Family::FinancialDataReset.new(family: @other_family, dry_run: false, confirmed: true).call
 
     assert_equal 0, result.after_counts.values.sum
-    assert_not PlaidItem.exists?(plaid_item.id)
-    assert_not PlaidAccount.exists?(plaid_account.id)
+    assert_not EnableBankingItem.exists?(enable_banking_item.id)
+    assert_not EnableBankingAccount.exists?(enable_banking_account.id)
     assert_not AccountProvider.exists?(account_provider.id)
     assert_not ActiveStorage::Attachment.exists?(attachment.id)
   end
@@ -231,16 +224,6 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
         amount: 100,
         currency: "USD"
       )
-      recurring_transaction = family.recurring_transactions.create!(
-        account: account,
-        merchant: merchant,
-        amount: 12,
-        currency: "USD",
-        expected_day_of_month: 1,
-        last_occurrence_date: 1.month.ago.to_date,
-        next_expected_date: 1.month.from_now.to_date,
-        status: "active"
-      )
       rule = family.rules.build(name: "#{label} Rule", resource_type: "transaction").tap do |rule|
         rule.conditions.build(condition_type: "transaction_name", operator: "like", value: label)
         rule.actions.build(action_type: "set_transaction_category", value: category.id)
@@ -279,24 +262,19 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
       family_export = family.family_exports.create!(status: "completed")
       family_export.export_file.attach(io: StringIO.new("zip"), filename: "#{safe_label}.zip", content_type: "application/zip")
       account_statement = create_account_statement!(family: family, account: account, label: label)
-      plaid_item = family.plaid_items.create!(
-        name: "#{label} Plaid Item",
-        plaid_id: "plaid_item_#{safe_label}_#{family.id.delete("-")}",
-        access_token: "access_#{safe_label}_#{family.id.delete("-")}",
-        plaid_region: "us"
+      enable_banking_item = family.enable_banking_items.create!(
+        name: "#{label} EnableBanking Item", country_code: "ES", application_id: "test-app", client_certificate: "test-cert",
       )
-      plaid_account = plaid_item.plaid_accounts.create!(
-        plaid_id: "plaid_account_#{safe_label}",
-        plaid_type: "depository",
-        current_balance: 100,
+      enable_banking_account = enable_banking_item.enable_banking_accounts.create!(
+        uid: SecureRandom.uuid, current_balance: 100,
         currency: family.currency,
-        name: "#{label} Plaid Account"
+        name: "#{label} EnableBanking Account"
       )
-      account_provider = AccountProvider.create!(account: account, provider: plaid_account)
-      plaid_item.logo.attach(io: StringIO.new("logo"), filename: "#{safe_label}.png", content_type: "image/png")
+      account_provider = AccountProvider.create!(account: account, provider: enable_banking_account)
+      enable_banking_item.logo.attach(io: StringIO.new("logo"), filename: "#{safe_label}.png", content_type: "image/png")
       family_sync = family.syncs.create!
       account_sync = account.syncs.create!
-      provider_sync = plaid_item.syncs.create!
+      provider_sync = enable_banking_item.syncs.create!
 
       {
         account: account,
@@ -317,7 +295,6 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
         rejected_transfer: rejected_transfer,
         balance: balance,
         holding: holding,
-        recurring_transaction: recurring_transaction,
         rule: rule,
         rule_action: rule.actions.first,
         rule_condition: rule.conditions.first,
@@ -329,8 +306,8 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
         import_mapping: import_mapping,
         family_export: family_export,
         account_statement: account_statement,
-        plaid_item: plaid_item,
-        plaid_account: plaid_account,
+        enable_banking_item: enable_banking_item,
+        enable_banking_account: enable_banking_account,
         account_provider: account_provider,
         family_sync: family_sync,
         account_sync: account_sync,
@@ -401,7 +378,7 @@ class Family::FinancialDataResetTest < ActiveSupport::TestCase
           attachment_snapshot(records[:transaction], "attachments"),
           attachment_snapshot(records[:family_export], "export_file"),
           attachment_snapshot(records[:account_statement], "original_file"),
-          attachment_snapshot(records[:plaid_item], "logo")
+          attachment_snapshot(records[:enable_banking_item], "logo")
         ]
       )
     end

@@ -15,7 +15,7 @@ class AccountsController < ApplicationController
           .listable_without_active_connector
           .where(id: @accessible_account_ids)
           .with_attached_logo
-          .includes(:accountable, :account_providers, :plaid_account, :simplefin_account)
+          .includes(:accountable, :account_providers)
           .order(:name)
     @enable_banking_items = visible_provider_items(family.enable_banking_items.ordered.with_attached_logo)
 
@@ -241,7 +241,6 @@ class AccountsController < ApplicationController
         end
 
         @account.account_providers.reload.destroy_all
-        @account.update!(plaid_account_id: nil, simplefin_account_id: nil)
       end
 
       redirect_to accounts_path, notice: t("accounts.unlink.success")

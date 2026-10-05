@@ -6,7 +6,7 @@ class Account::Syncer
   end
 
   def perform_sync(sync)
-    Rails.logger.info("Processing balances (#{account.linked? ? 'reverse' : 'forward'})")
+    Rails.logger.info("Processing balances (#{account.reverse_balance_history? ? 'reverse' : 'forward'})")
     Account::Recalculator.new(account).recalculate(window_start_date: sync.window_start_date)
   end
 

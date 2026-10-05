@@ -679,11 +679,10 @@ class Family::AutoTransferMatchableTest < ActiveSupport::TestCase
     # validates its polymorphic `provider` association is present, so this needs
     # a real (if otherwise-unused) PlaidAccount row rather than an arbitrary id.
     def link_account!(account)
-      plaid_account = PlaidAccount.create!(
-        plaid_item: plaid_items(:one),
-        plaid_id: "acc_mock_#{SecureRandom.hex(6)}",
+      plaid_account = EnableBankingAccount.create!(
+        enable_banking_item: enable_banking_items(:one),
+        uid: "acc_mock_#{SecureRandom.hex(6)}",
         name: "Linked #{account.name}",
-        plaid_type: "depository",
         currency: account.currency,
         current_balance: 0
       )

@@ -1,9 +1,7 @@
 require "test_helper"
-require_relative "../../support/historical_financekit_helper"
 
 class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
-  include HistoricalFinancekitHelper
 
   setup do
     ensure_tailwind_build
@@ -14,8 +12,6 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "Apple Wallet is neither offered nor shown for historical connections" do
-    create_historical_financekit_link
-
     get settings_providers_url
 
     assert_response :success
@@ -77,12 +73,6 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "sync all control submits with POST" do
-    SimplefinItem.create!(
-      family: families(:dylan_family),
-      name: "Test SimpleFIN Sync All Control",
-      access_url: "https://bridge.simplefin.org/simplefin/access"
-    )
-
     with_self_hosting do
       get settings_providers_url
       assert_response :success
@@ -104,11 +94,6 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
 
 
   test "POST sync_all enqueues SyncAllProvidersJob" do
-    SimplefinItem.create!(
-      family: families(:dylan_family),
-      name: "Test SimpleFIN Sync All",
-      access_url: "https://bridge.simplefin.org/simplefin/access"
-    )
     families(:dylan_family).update_column(:last_sync_all_attempted_at, nil)
 
     assert_enqueued_with(job: SyncAllProvidersJob) do

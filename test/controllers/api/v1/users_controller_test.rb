@@ -138,6 +138,8 @@ class Api::V1::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_includes %w[complete data_remaining], body["status"]
     assert_equal body["counts"].values.sum.zero?, body["reset_complete"]
     assert_equal expected_reset_count_keys.sort, body["counts"].keys.sort
+    assert_not body["counts"].key?("plaid_items")
+    assert_not body["counts"].key?("recurring_transactions")
     assert_equal 1, body["counts"]["import_sessions"]
     assert_equal 1, body["counts"]["import_source_mappings"]
   end

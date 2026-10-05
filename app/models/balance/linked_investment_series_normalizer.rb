@@ -62,7 +62,7 @@ class Balance::LinkedInvestmentSeriesNormalizer
 
       def stable_provider_holding_start_dates(account_ids)
         rows = Holding.where(account_id: account_ids)
-          .where.not(account_provider_id: nil)
+          .authoritative
           .group(:account_id, :date)
           .order(account_id: :asc, date: :desc)
           .pluck(:account_id, :date, Arel.sql("array_agg(security_id ORDER BY security_id)"))
@@ -92,7 +92,7 @@ class Balance::LinkedInvestmentSeriesNormalizer
   # Trims points before supported provider history and prepends an anchor point at inception
   # if coarse sampling missed the opening date within the requested period.
   def normalize
-    return series unless account.linked? && account.balance_type == :investment
+    return series unless account.reverse_balance_history? && account.balance_type == :investment
 
     first_supported_history_date = supported_history_start_date
     return series unless first_supported_history_date.present?
@@ -157,7 +157,7 @@ class Balance::LinkedInvestmentSeriesNormalizer
     end
 
     def provider_holdings_scope
-      @provider_holdings_scope ||= account.holdings.where.not(account_provider_id: nil)
+      @provider_holdings_scope ||= account.holdings.authoritative
     end
 
     def stable_provider_holding_start_date

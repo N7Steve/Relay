@@ -12,23 +12,11 @@ class Account::ProviderImportAdapterCrossProviderTest < ActiveSupport::TestCase
     # Provider A (e.g., Plaid)
     ap_a = AccountProvider.create!(
       account: investment_account,
-      provider: plaid_accounts(:one)
+      provider: enable_banking_accounts(:one)
     )
 
     # Provider B (e.g., SimpleFin)
-    item = SimplefinItem.create!(family: families(:dylan_family), name: "SF Conn", access_url: "https://example.com/access")
-    sfa_b = SimplefinAccount.create!(
-      simplefin_item: item,
-      name: "SF Invest",
-      account_id: "sf_inv_cross_provider",
-      currency: "USD",
-      account_type: "investment",
-      current_balance: 1000
-    )
-    ap_b = AccountProvider.create!(
-      account: investment_account,
-      provider: sfa_b
-    )
+    ap_b = AccountProvider.create!(account: accounts(:depository), provider: enable_banking_accounts(:two))
 
     # Use a date that will not collide with existing fixture holdings for this account
     holding_date = Date.today - 3.days

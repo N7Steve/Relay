@@ -173,22 +173,6 @@ class CreditCardsControllerTest < ActionDispatch::IntegrationTest
 
 
 
-  test "does not persist a historical connector setting from account params" do
-    simplefin_account = create_linked_simplefin_account
-
-    patch credit_card_path(@account), params: {
-      account: {
-        name: @account.name,
-        accountable_type: "CreditCard",
-        simplefin: { balance_sign_override: "credit" }
-      }
-    }
-
-    assert_redirected_to @account
-    assert_nil simplefin_account.reload.balance_sign_override
-  end
-
-
   private
     def create_linked_enable_banking_account
       enable_banking_item = EnableBankingItem.create!(
@@ -208,23 +192,5 @@ class CreditCardsControllerTest < ActionDispatch::IntegrationTest
       )
       AccountProvider.create!(account: @account, provider: enable_banking_account)
       enable_banking_account
-    end
-
-    def create_linked_simplefin_account
-      simplefin_item = SimplefinItem.create!(
-        family: @account.family,
-        name: "Test SimpleFIN",
-        access_url: "https://example.com/token"
-      )
-      simplefin_account = SimplefinAccount.create!(
-        simplefin_item: simplefin_item,
-        name: "Linked card",
-        account_id: "simplefin-linked-card",
-        currency: "USD",
-        account_type: "credit",
-        current_balance: -25
-      )
-      AccountProvider.create!(account: @account, provider: simplefin_account)
-      simplefin_account
     end
 end

@@ -387,7 +387,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
     security = securities(:aapl)
     account_provider = AccountProvider.create!(
       account: investment_account,
-      provider: plaid_accounts(:one)
+      provider: enable_banking_accounts(:one)
     )
 
     holding = adapter.import_holding(
@@ -444,16 +444,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
     security = securities(:aapl)
 
     # Create an account provider
-    plaid_account = PlaidAccount.create!(
-      current_balance: 1000,
-      available_balance: 1000,
-      currency: "USD",
-      name: "Test Plaid Account",
-      plaid_item: plaid_items(:one),
-      plaid_id: "acc_mock_test_1",
-      plaid_type: "investment",
-      plaid_subtype: "brokerage"
-    )
+    plaid_account = enable_banking_accounts(:one)
 
     provider = AccountProvider.create!(
       account: investment_account,

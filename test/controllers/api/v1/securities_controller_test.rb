@@ -84,6 +84,8 @@ class Api::V1::SecuritiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal @holding_security.exchange_operating_mic, response_data["exchange_operating_mic"]
     assert_equal "standard", response_data["kind"]
     assert_not response_data.key?("price_provider")
+    assert_not response_data.key?("offline_reason")
+    assert_not response_data.key?("first_provider_price_on")
   end
 
   test "returns not found for another family's security" do

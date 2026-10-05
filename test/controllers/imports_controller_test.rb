@@ -413,8 +413,8 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     get import_url(import)
 
     assert_response :success
-    assert_includes response.body, I18n.t("imports.ready.missing_merchant_warning_title")
-    assert_includes response.body, I18n.t("imports.ready.skipped_recurring_description", count: 1).squish
+    assert_includes response.body, I18n.t("imports.ready.retired_data_title")
+    assert_includes response.body, I18n.t("imports.ready.retired_data_description")
     assert_not_includes response.body, "merchant reference in this file"
   end
 

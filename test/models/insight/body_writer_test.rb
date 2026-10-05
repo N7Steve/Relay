@@ -7,8 +7,6 @@ class Insight::BodyWriterTest < ActiveSupport::TestCase
   end
 
   test "writes the template body when nobody in the family has AI enabled" do
-    @family.users.update_all(ai_enabled: false)
-
     body = Insight::BodyWriter.new(@family).write(generated_insight)
 
     assert_equal I18n.t("insights.templates.idle_cash", **generated_insight.facts.symbolize_keys), body

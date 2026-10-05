@@ -1,13 +1,11 @@
 require "test_helper"
-require_relative "../support/historical_financekit_helper"
 
 class RetiredFinancekitIntegrationTest < ActionDispatch::IntegrationTest
-  include HistoricalFinancekitHelper
-
   setup do
     @user = users(:family_admin)
     @account = accounts(:depository)
-    @item, @lineage = create_historical_financekit_link(account: @account)
+    @account.update!(reverse_balance_history: true)
+    @publisher_id = SecureRandom.uuid
   end
 
   test "former publisher and connection endpoints are not routed" do
@@ -19,9 +17,9 @@ class RetiredFinancekitIntegrationTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     post "/api/v1/financekit/connections", headers: headers
     assert_response :not_found
-    post "/api/v1/financekit/publishers/#{@item.publisher_id}/batches", headers: headers, params: "{}"
+    post "/api/v1/financekit/publishers/#{@publisher_id}/batches", headers: headers, params: "{}"
     assert_response :not_found
-    get "/api/v1/financekit/publishers/#{@item.publisher_id}/batches/#{SecureRandom.uuid}", headers: headers
+    get "/api/v1/financekit/publishers/#{@publisher_id}/batches/#{SecureRandom.uuid}", headers: headers
     assert_response :not_found
   end
 
@@ -33,21 +31,5 @@ class RetiredFinancekitIntegrationTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#financekit-accounts", count: 0
     assert_select "#manual-accounts a[href=?]", account_path(@account)
-  end
-
-  test "unlinking a historical Wallet account keeps its data and the historical connection" do
-    sign_in @user
-
-    get confirm_unlink_account_path(@account)
-    assert_response :success
-    assert_no_match "Apple Wallet connection", response.body
-
-    assert_no_difference [ "Entry.count", "FinancekitItem.count", "FinancekitAccountLineage.count" ] do
-      delete unlink_account_path(@account)
-    end
-
-    assert_redirected_to accounts_path
-    assert_empty @account.reload.account_providers
-    assert_equal "active", @item.reload.status
   end
 end

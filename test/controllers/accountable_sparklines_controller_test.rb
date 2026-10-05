@@ -29,7 +29,7 @@ class AccountableSparklinesControllerTest < ActionDispatch::IntegrationTest
   test "linked investment sparkline does not load full account records" do
     AccountProvider.create!(
       account: accounts(:investment),
-      provider: snaptrade_accounts(:fidelity_401k)
+      provider: enable_banking_accounts(:one)
     )
 
     Rails.cache.clear

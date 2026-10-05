@@ -6,9 +6,9 @@ class Account::Recalculator
   def recalculate(window_start_date: nil)
     ExternalAccess.locally do
       @account.transaction do
-        strategy = @account.linked? ? :reverse : :forward
+        strategy = @account.reverse_balance_history? ? :reverse : :forward
         Balance::Materializer.new(@account, strategy: strategy, window_start_date: window_start_date).materialize_balances
-        apply_cached_provider_balances
+        apply_imported_balance_history
       end
     end
   rescue Money::ConversionError, Security::MissingPriceError => error
@@ -21,10 +21,7 @@ class Account::Recalculator
   end
 
   private
-    def apply_cached_provider_balances
-      return unless @account.linked_to?("IbkrAccount")
-
-      provider = @account.account_providers.find_by(provider_type: "IbkrAccount")&.provider
-      IbkrAccount::HistoricalBalancesSync.new(provider).sync! if provider
+    def apply_imported_balance_history
+      Account::ImportedBalanceHistory.new(@account).sync! if @account.imported_balance_history.present?
     end
 end

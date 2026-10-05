@@ -835,46 +835,6 @@ class Family::DataExporterTest < ActiveSupport::TestCase
     end
   end
 
-  test "exports recurring transactions in NDJSON" do
-    merchant = @family.merchants.create!(name: "Internet Provider")
-    recurring_transaction = @family.recurring_transactions.create!(
-      account: @account,
-      merchant: merchant,
-      amount: -89.99,
-      currency: "USD",
-      expected_day_of_month: 14,
-      last_occurrence_date: Date.parse("2024-01-14"),
-      next_expected_date: Date.parse("2024-02-14"),
-      status: "active",
-      occurrence_count: 6,
-      manual: true,
-      payment_url: "https://pay.example.com/internet",
-      expected_amount_min: -95,
-      expected_amount_max: -85,
-      expected_amount_avg: -89.99
-    )
-
-    zip_data = @exporter.generate_export
-
-    Zip::File.open_buffer(zip_data) do |zip|
-      ndjson_content = zip.read("all.ndjson")
-      recurring_data = ndjson_content
-        .split("\n")
-        .map { |line| JSON.parse(line) }
-        .find { |line| line["type"] == "RecurringTransaction" && line.dig("data", "id") == recurring_transaction.id }
-
-      assert recurring_data
-      assert_equal recurring_transaction.id, recurring_data["data"]["id"]
-      assert_equal @account.id, recurring_data["data"]["account_id"]
-      assert_equal merchant.id, recurring_data["data"]["merchant_id"]
-      assert_equal "-89.99", BigDecimal(recurring_data["data"]["amount"].to_s).to_s("F")
-      assert_equal "active", recurring_data["data"]["status"]
-      assert_equal true, recurring_data["data"]["manual"]
-      assert_equal "https://pay.example.com/internet", recurring_data["data"]["payment_url"]
-      assert_not recurring_data["data"].key?("family_id")
-    end
-  end
-
   test "exports provider merchants referenced by transactions in NDJSON" do
     provider_merchant = ProviderMerchant.create!(name: "AMZN MKTP", source: "plaid", provider_merchant_id: "plaid_amzn")
     @account.entries.create!(
@@ -912,26 +872,6 @@ class Family::DataExporterTest < ActiveSupport::TestCase
         .find { |record| record["type"] == "ProviderMerchant" && record.dig("data", "id") == provider_merchant.id }["data"]
 
       assert_not data.key?("color")
-    end
-  end
-
-  test "exports provider merchants referenced by recurring transactions in NDJSON" do
-    provider_merchant = ProviderMerchant.create!(name: "Recurring Provider Merchant", source: "ai")
-    @family.recurring_transactions.create!(
-      account: @account,
-      merchant: provider_merchant,
-      amount: -12.99,
-      currency: "USD",
-      expected_day_of_month: 5,
-      last_occurrence_date: Date.parse("2024-01-05"),
-      next_expected_date: Date.parse("2024-02-05")
-    )
-
-    zip_data = @exporter.generate_export
-
-    Zip::File.open_buffer(zip_data) do |zip|
-      ndjson_records = zip.read("all.ndjson").split("\n").map { |line| JSON.parse(line) }
-      assert ndjson_records.any? { |record| record["type"] == "ProviderMerchant" && record.dig("data", "id") == provider_merchant.id }
     end
   end
 

@@ -69,8 +69,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     account.holdings.create!(
@@ -112,8 +112,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     account.holdings.create!(
@@ -171,8 +171,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     opening_date = 8.days.ago.to_date
@@ -236,8 +236,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     opening_date = 8.days.ago.to_date
@@ -279,8 +279,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     trade_date = 8.days.ago.to_date
@@ -321,8 +321,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     opening_date = 8.days.ago.to_date
@@ -364,8 +364,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     opening_date = 2.years.ago.to_date
@@ -407,8 +407,8 @@ class Account::ChartableTest < ActiveSupport::TestCase
     account.entries.destroy_all
     account.holdings.destroy_all
 
-    coinstats_item = account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account.account_providers.create!(provider: coinstats_account)
 
     early_trade_date = 15.days.ago.to_date

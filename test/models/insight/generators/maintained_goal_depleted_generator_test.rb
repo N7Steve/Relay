@@ -19,7 +19,6 @@ class Insight::Generators::MaintainedGoalDepletedGeneratorTest < ActiveSupport::
   end
 
   test "writes the maintained reserve insight in German" do
-    @family.users.update_all(ai_enabled: false)
     reserve(name: "Notgroschen", balance: 4_000, target: 6_000)
 
     generated = I18n.with_locale(:de) { generate.first }

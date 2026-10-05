@@ -1,5 +1,5 @@
-# Stable names used by historical snapshots, polymorphic links and queued jobs.
-# These models contain persistence only and are never registered as adapters.
+# Retired type names used to cancel already serialized sync jobs.
+# These names have no persistence classes or tables since phase 10.
 class RetiredAccountConnector
   PREFIXES = %w[Akahu Binance Brex Coinbase Coinspot Coinstats Financekit Fio Ibkr IndexaCapital Kraken Lunchflow Mercury Monobank OnchainWallet Plaid Questrade Redbark Simplefin Snaptrade Sophtron TradeRepublic Trading212 Up Wise].freeze
 

@@ -124,18 +124,8 @@ class Investment::RoboadvisorPerformance
       0.to_d
     end
 
-    def provider_account
-      @provider_account ||= account.account_providers
-        .find { |link| link.provider_type == "IndexaCapitalAccount" }
-        &.provider
-    end
-
     def performance_payload
-      @performance_payload ||= provider_account&.raw_payload.to_h
-        .with_indifferent_access
-        .fetch(:performance_history, {})
-        .to_h
-        .with_indifferent_access
+      @performance_payload ||= account.imported_performance.to_h.with_indifferent_access
     end
 
     def return_index

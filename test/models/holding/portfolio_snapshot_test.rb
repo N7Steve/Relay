@@ -55,8 +55,8 @@ class Holding::PortfolioSnapshotTest < ActiveSupport::TestCase
     create_trade(@aapl, account: @account, qty: 10, price: 100, date: 5.days.ago)
     create_trade(@msft, account: @account, qty: 5, price: 200, date: 5.days.ago)
 
-    coinstats_item = @account.family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Provider", currency: "USD")
+    coinstats_item = @account.family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(name: "Provider", currency: "USD", uid: SecureRandom.uuid)
     account_provider = AccountProvider.create!(account: @account, provider: coinstats_account)
 
     @account.holdings.create!(

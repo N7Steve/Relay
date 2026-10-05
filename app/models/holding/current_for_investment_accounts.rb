@@ -1,19 +1,19 @@
 class Holding::CurrentForInvestmentAccounts
   CURRENT_HOLDINGS_SQL = <<~SQL.squish.freeze
     (
-      holdings.account_provider_id IS NOT NULL
+      (holdings.account_provider_id IS NOT NULL OR holdings.imported_snapshot = TRUE)
       AND holdings.updated_at::date = (
         SELECT MAX(provider_holdings.updated_at::date)
         FROM holdings provider_holdings
         WHERE provider_holdings.account_id = holdings.account_id
-          AND provider_holdings.account_provider_id IS NOT NULL
+          AND (provider_holdings.account_provider_id IS NOT NULL OR provider_holdings.imported_snapshot = TRUE)
       )
     ) OR (
       NOT EXISTS (
         SELECT 1
         FROM holdings provider_holdings
         WHERE provider_holdings.account_id = holdings.account_id
-          AND provider_holdings.account_provider_id IS NOT NULL
+          AND (provider_holdings.account_provider_id IS NOT NULL OR provider_holdings.imported_snapshot = TRUE)
       )
       AND holdings.currency = (
         SELECT accounts.currency

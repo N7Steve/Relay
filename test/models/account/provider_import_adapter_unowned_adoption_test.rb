@@ -10,15 +10,7 @@ class Account::ProviderImportAdapterUnownedAdoptionTest < ActiveSupport::TestCas
     security = securities(:aapl)
 
     # Create a SimpleFin provider for this account (the importer)
-    item = SimplefinItem.create!(family: families(:dylan_family), name: "SF Conn", access_url: "https://example.com/access")
-    sfa = SimplefinAccount.create!(
-      simplefin_item: item,
-      name: "SF Invest",
-      account_id: "sf_inv_unowned_claim",
-      currency: "USD",
-      account_type: "investment",
-      current_balance: 1000
-    )
+    sfa = enable_banking_accounts(:one)
     ap = AccountProvider.create!(account: investment_account, provider: sfa)
 
     holding_date = Date.today - 4.days

@@ -5,55 +5,8 @@ class AccountProviderTest < ActiveSupport::TestCase
     @account = accounts(:depository)
     @family = families(:dylan_family)
 
-    # Create provider items
-    @plaid_item = PlaidItem.create!(
-      family: @family,
-      plaid_id: "test_plaid_item",
-      access_token: "test_token",
-      name: "Test Bank"
-    )
-
-    @simplefin_item = SimplefinItem.create!(
-      family: @family,
-      name: "Test SimpleFin Bank",
-      access_url: "https://example.com/access"
-    )
-
-    # Create provider accounts
-    @plaid_account = PlaidAccount.create!(
-      plaid_item: @plaid_item,
-      name: "Plaid Checking",
-      plaid_id: "plaid_123",
-      plaid_type: "depository",
-      currency: "USD",
-      current_balance: 1000
-    )
-
-    @simplefin_account = SimplefinAccount.create!(
-      simplefin_item: @simplefin_item,
-      name: "SimpleFin Checking",
-      account_id: "sf_123",
-      account_type: "checking",
-      currency: "USD",
-      current_balance: 2000
-    )
-  end
-
-  test "allows an account to have multiple different provider types" do
-    # Should be able to link both Plaid and SimpleFin to same account
-    plaid_provider = AccountProvider.create!(
-      account: @account,
-      provider: @plaid_account
-    )
-
-    simplefin_provider = AccountProvider.create!(
-      account: @account,
-      provider: @simplefin_account
-    )
-
-    assert_equal 2, @account.account_providers.count
-    assert_includes @account.account_providers, plaid_provider
-    assert_includes @account.account_providers, simplefin_provider
+    @plaid_account = enable_banking_accounts(:one)
+    @simplefin_account = enable_banking_accounts(:two)
   end
 
   test "prevents duplicate provider type for same account" do
@@ -64,14 +17,7 @@ class AccountProviderTest < ActiveSupport::TestCase
     )
 
     # Create another PlaidAccount
-    another_plaid_account = PlaidAccount.create!(
-      plaid_item: @plaid_item,
-      name: "Another Plaid Account",
-      plaid_id: "plaid_456",
-      plaid_type: "savings",
-      currency: "USD",
-      current_balance: 5000
-    )
+    another_plaid_account = enable_banking_accounts(:two)
 
     # Should not be able to link another PlaidAccount to same account
     duplicate_provider = AccountProvider.new(
@@ -108,7 +54,7 @@ class AccountProviderTest < ActiveSupport::TestCase
       provider: @plaid_account
     )
 
-    assert_nil provider.adapter
+    assert_kind_of Provider::EnableBankingAdapter, provider.adapter
   end
 
   test "historical provider_name uses its stable local type" do
@@ -122,7 +68,7 @@ class AccountProviderTest < ActiveSupport::TestCase
       provider: @simplefin_account
     )
 
-    assert_equal "plaid_account", plaid_provider.provider_name
-    assert_equal "simplefin_account", simplefin_provider.provider_name
+    assert_equal "enable_banking", plaid_provider.provider_name
+    assert_equal "enable_banking", simplefin_provider.provider_name
   end
 end

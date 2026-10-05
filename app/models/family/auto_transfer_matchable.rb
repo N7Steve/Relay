@@ -332,8 +332,6 @@ module Family::AutoTransferMatchable
     def linked_account_sql(accounts_alias)
       <<~SQL.squish
         (
-          #{accounts_alias}.plaid_account_id IS NOT NULL OR
-          #{accounts_alias}.simplefin_account_id IS NOT NULL OR
           EXISTS (SELECT 1 FROM account_providers WHERE account_providers.account_id = #{accounts_alias}.id)
         )
       SQL

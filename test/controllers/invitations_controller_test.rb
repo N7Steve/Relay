@@ -113,8 +113,6 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
       role: :member,
       ui_layout: :dashboard,
       show_sidebar: true,
-      show_ai_sidebar: true,
-      ai_enabled: false
     )
 
     assert_difference("Invitation.count") do

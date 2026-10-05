@@ -150,6 +150,17 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
       "Trade-derived cost_basis should override provider cost_basis when available"
   end
 
+  test "preserves detached imported snapshots during manual forward recalculation" do
+    holding = @account.holdings.create!(security: @aapl, date: Date.current, qty: 4,
+      price: 125, amount: 500, currency: "USD", imported_snapshot: true)
+    create_trade(@aapl, account: @account, qty: 1, price: 100, date: Date.current)
+    Holding::Materializer.new(@account, strategy: :forward).materialize_holdings
+    assert_equal 4.to_d, holding.reload.qty
+    assert_equal 500.to_d, holding.amount
+    assert holding.imported_snapshot?
+    assert_nil holding.account_provider_id
+  end
+
   test "recalculates calculated cost_basis when new trades are added" do
     date = Date.current
 
@@ -169,8 +180,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
   end
 
   test "preserves calculated history for provider-sourced holdings on reverse materialization" do
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid,
       name: "Brokerage",
       currency: "USD"
     )
@@ -201,8 +212,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
   test "cleans up calculated current-day holdings when a provider snapshot exists in another currency" do
     ExchangeRate.create!(from_currency: "EUR", to_currency: "USD", date: Date.current, rate: 1.2)
 
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid,
       name: "Brokerage",
       currency: "USD"
     )
@@ -229,8 +240,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
   end
 
   test "carries forward provider cost_basis to calculated rows past the provider snapshot date" do
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Brokerage", currency: "USD")
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid, name: "Brokerage", currency: "USD")
     account_provider = AccountProvider.create!(account: @account, provider: coinstats_account)
 
     # Provider snapshot two days ago with known cost basis, but no trades.
@@ -259,8 +270,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
   end
 
   test "does not overwrite an existing calculated cost_basis with provider carry-forward" do
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Brokerage", currency: "USD")
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid, name: "Brokerage", currency: "USD")
     account_provider = AccountProvider.create!(account: @account, provider: coinstats_account)
 
     Holding.create!(
@@ -298,8 +309,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
   end
 
   test "refreshes stale provider carry-forward when a newer provider snapshot arrives" do
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Brokerage", currency: "USD")
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid, name: "Brokerage", currency: "USD")
     account_provider = AccountProvider.create!(account: @account, provider: coinstats_account)
 
     # With no entries, start_date = yesterday, so materializer only descends to
@@ -348,8 +359,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
   end
 
   test "does not overwrite a zero-valued manual cost_basis with provider carry-forward" do
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Brokerage", currency: "USD")
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid, name: "Brokerage", currency: "USD")
     account_provider = AccountProvider.create!(account: @account, provider: coinstats_account)
 
     Holding.create!(
@@ -380,8 +391,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
     snap_date = 2.days.ago.to_date
     ExchangeRate.create!(from_currency: "EUR", to_currency: "USD", date: snap_date, rate: 1.2)
 
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Brokerage", currency: "EUR")
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid, name: "Brokerage", currency: "EUR")
     account_provider = AccountProvider.create!(account: @account, provider: coinstats_account)
 
     Holding.create!(
@@ -404,8 +415,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
     snap_date = 2.days.ago.to_date
     # No ExchangeRate created — EUR→USD conversion will raise Money::ConversionError
 
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(name: "Brokerage", currency: "EUR")
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid, name: "Brokerage", currency: "EUR")
     account_provider = AccountProvider.create!(account: @account, provider: coinstats_account)
 
     Holding.create!(
@@ -428,8 +439,8 @@ class Holding::MaterializerTest < ActiveSupport::TestCase
   test "preserves same-day non-provider holdings for securities absent from the provider snapshot" do
     ExchangeRate.create!(from_currency: "EUR", to_currency: "USD", date: Date.current, rate: 1.2)
 
-    coinstats_item = @family.coinstats_items.create!(name: "CoinStats", api_key: "test-key")
-    coinstats_account = coinstats_item.coinstats_accounts.create!(
+    coinstats_item = @family.enable_banking_items.create!(name: "Imported history", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
+    coinstats_account = coinstats_item.enable_banking_accounts.create!(uid: SecureRandom.uuid,
       name: "Brokerage",
       currency: "USD"
     )

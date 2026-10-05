@@ -23,6 +23,25 @@ class ImportsTest < ApplicationSystemTestCase
     assert_instance_of RelayImport, @user.family.imports.ordered.first
   end
 
+  test "retired modules are disclosed before publishing a legacy backup" do
+    Tempfile.create([ "previous-product", ".ndjson" ]) do |file|
+      file.write(file_fixture("imports/relay.ndjson").read)
+      file.write("\n" + { type: "RecurringTransaction", data: { id: "discarded-series" } }.to_json)
+      file.flush
+      visit new_import_path(type: "RelayImport")
+      attach_file "import[import_file]", file.path, make_visible: true
+      assert_text "Data from retired features will be discarded"
+      page.save_screenshot(Rails.root.join("tmp/screenshots/phase10-discard-warning.png"))
+      click_on "Publish import"
+      assert_text "Import in progress"
+      perform_enqueued_jobs(only: ImportJob)
+      click_on "Check status"
+      assert_text "Import successful"
+    end
+    assert_equal 1, @user.family.imports.ordered.first.summary.dig("discarded_retired_modules", "RecurringTransaction")
+    assert_equal 1, @user.family.imports.ordered.first.readback_verification.dig("discarded_record_counts", "RecurringTransaction")
+  end
+
   test "complete Sure ZIP backup import" do
     sign_in @user = users(:empty)
     source = Family.create!(name: "Browser backup source")

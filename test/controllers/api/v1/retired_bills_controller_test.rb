@@ -6,9 +6,9 @@ class Api::V1::RetiredBillsControllerTest < ActionDispatch::IntegrationTest
     user.api_keys.active.destroy_all
     key = ApiKey.create!(user: user, name: "Retired Bills test", scopes: [ "read_write" ], display_key: "test_#{SecureRandom.hex(8)}")
     headers = api_headers(key)
-    id = recurring_transactions(:netflix_subscription).id
+    id = SecureRandom.uuid
 
-    assert_no_difference [ "RecurringTransaction.count", "RecurringOccurrence.count", "ScheduledPayment.count" ] do
+    assert_no_difference [ "ScheduledPayment.count" ] do
       [ [ :get, "" ], [ :get, "/#{id}" ], [ :post, "" ], [ :patch, "/#{id}" ], [ :delete, "/#{id}" ] ].each do |verb, suffix|
         public_send(verb, "/api/v1/recurring_transactions#{suffix}", headers: headers)
         assert_response :not_found

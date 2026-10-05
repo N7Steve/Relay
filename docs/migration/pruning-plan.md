@@ -396,6 +396,9 @@ almacenamiento, identidades o cuentas no se revierten únicamente con Git.
 ## Fase 10 — Tratar datos y esquema residuales
 
 **Selección confirmada: limpieza completa de residuos de funciones retiradas.**
+Implementación preparada y validada sobre `main`; publicación pendiente
+de confirmación. Ver [registro de fase 10](pruning-phase-10.md) para las 72 tablas,
+conversiones financieras, omisiones de backups y reversión mediante restauración.
 Punto de partida: inventario en el [registro de fase 9](pruning-phase-9.md#traspaso-a-fase-10).
 Ejecutar por módulo, incluyendo retiradas de fases anteriores; no dejar tablas o
 lectores exclusivos solo para conservar historia de módulos que ya no existen.
@@ -451,7 +454,8 @@ en `ee3341fd3`, la fase 3 en `feccab08c`, la fase 4 en `92ee241a1` y la fase 5
 en `ecc901083`. Los registros de cada fase recogen alcance, pruebas y límites.
 Las fases 6–7 están publicadas; el reporte de Steve sobre el despliegue de fase 7
 se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fase 9 publicada en
-`d2e790ed6` y reportada funcional por Steve; fases 10–11 pendientes con selección registrada. Este trabajo no verifica directamente TrueNAS.
+`d2e790ed6` y reportada funcional por Steve; fase 10 validada sin publicar, fase 11
+pendiente, ambas con selección registrada. Este trabajo no verifica directamente TrueNAS.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |

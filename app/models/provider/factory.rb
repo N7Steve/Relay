@@ -13,7 +13,7 @@ class Provider::Factory
     # @param account [Account] Optional account reference
     # @return [Provider::Base] An adapter instance
     def create_adapter(provider_account, account: nil)
-      return nil if provider_account.nil? || RetiredAccountConnector.model_names.include?(provider_account.class.name)
+      return nil if provider_account.nil?
 
       provider_type = provider_account.class.name
       adapter_class = find_adapter_class(provider_type)

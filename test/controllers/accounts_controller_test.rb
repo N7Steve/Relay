@@ -4,10 +4,12 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   test "historical connector accounts remain visible without reconnecting them" do
     sign_in users(:family_admin)
     historical = accounts(:connected)
+    historical.update!(reverse_balance_history: true)
     get accounts_url
     assert_response :success
     assert_select "a[href=?]", account_path(historical), minimum: 1
-    assert historical.reload.linked?
+    assert historical.reload.manual?
+    assert historical.reverse_balance_history?
     assert_nil historical.provider
   end
 
@@ -474,7 +476,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "confirms unlink for linked account" do
-    plaid_account = plaid_accounts(:one)
+    plaid_account = enable_banking_accounts(:one)
     AccountProvider.create!(account: @account, provider: plaid_account)
 
     get confirm_unlink_account_url(@account)
@@ -488,7 +490,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "unlinks linked account successfully with new system" do
-    plaid_account = plaid_accounts(:one)
+    plaid_account = enable_banking_accounts(:one)
     AccountProvider.create!(account: @account, provider: plaid_account)
     @account.reload
 
@@ -502,20 +504,12 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Account unlinked successfully. It is now a manual account.", flash[:notice]
   end
 
-  test "unlinks linked account successfully with legacy system" do
-    plaid_account = plaid_accounts(:one)
-    @account.update!(plaid_account_id: plaid_account.id)
-    @account.reload
-
-    assert @account.linked?
-
+  test "formerly connected local accounts do not require unlinking" do
+    @account.update!(reverse_balance_history: true)
+    assert @account.manual?
     delete unlink_account_url(@account)
-    @account.reload
-
-    assert_not @account.linked?
-    assert_nil @account.plaid_account_id
-    assert_redirected_to accounts_path
-    assert_equal "Account unlinked successfully. It is now a manual account.", flash[:notice]
+    assert_redirected_to account_url(@account)
+    assert @account.reload.reverse_balance_history?
   end
 
   test "redirects when unlinking unlinked account" do
@@ -525,7 +519,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "unlinked account can be deleted" do
-    plaid_account = plaid_accounts(:one)
+    plaid_account = enable_banking_accounts(:one)
     AccountProvider.create!(account: @account, provider: plaid_account)
     @account.reload
 
@@ -600,7 +594,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "select_provider redirects for already linked account" do
-    plaid_account = plaid_accounts(:one)
+    plaid_account = enable_banking_accounts(:one)
     AccountProvider.create!(account: @account, provider: plaid_account)
 
     get select_provider_account_url(@account)

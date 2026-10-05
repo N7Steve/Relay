@@ -15,9 +15,7 @@ empty:
   # order(:created_at).first becomes non-deterministic (test/models/account_test.rb).
   created_at: <%= 4.days.ago %>
   role: admin
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true
   ui_layout: dashboard
 
 sure_support_staff:
@@ -28,9 +26,7 @@ sure_support_staff:
   password_digest: $2a$04$deKu1NIqviMgrl.4NkXcieFkAmLa33RN9Tw/R/Llr22eMd4x/o/RO
   role: super_admin
   onboarded_at: <%= 3.days.ago %>
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true
   ui_layout: dashboard
 
 family_admin:
@@ -41,9 +37,7 @@ family_admin:
   password_digest: $2a$04$deKu1NIqviMgrl.4NkXcieFkAmLa33RN9Tw/R/Llr22eMd4x/o/RO
   role: admin
   onboarded_at: <%= 3.days.ago %>
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true
   ui_layout: dashboard
 
 family_member:
@@ -54,9 +48,7 @@ family_member:
   password_digest: $2a$04$deKu1NIqviMgrl.4NkXcieFkAmLa33RN9Tw/R/Llr22eMd4x/o/RO
   onboarded_at: <%= 3.days.ago %>
   role: member
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true
   ui_layout: dashboard
 
 new_email:
@@ -68,9 +60,7 @@ new_email:
   password_digest: $2a$04$deKu1NIqviMgrl.4NkXcieFkAmLa33RN9Tw/R/Llr22eMd4x/o/RO
   onboarded_at: <%= Time.current %>
   role: member
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true
   ui_layout: dashboard
 
 intro_user:
@@ -81,9 +71,7 @@ intro_user:
   password_digest: $2a$04$deKu1NIqviMgrl.4NkXcieFkAmLa33RN9Tw/R/Llr22eMd4x/o/RO
   onboarded_at: <%= 1.day.ago %>
   role: guest
-  ai_enabled: true
   show_sidebar: false
-  show_ai_sidebar: false
   ui_layout: intro
 
 inactive_trial_user:
@@ -94,9 +82,7 @@ inactive_trial_user:
   password_digest: $2a$04$deKu1NIqviMgrl.4NkXcieFkAmLa33RN9Tw/R/Llr22eMd4x/o/RO
   role: admin
   onboarded_at: <%= 90.days.ago %>
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true
   ui_layout: dashboard
 
 # SSO-only user: created via JIT provisioning, no local password
@@ -108,7 +94,6 @@ sso_only:
   password_digest: ~
   role: member
   onboarded_at: <%= 1.day.ago %>
-  ai_enabled: true
 
 # Additional test users expected by PersonalBudgetTest
 josh:
@@ -119,9 +104,7 @@ josh:
   password_digest: $2a$12$XoNBo/cMCyzpYtvhrPAhsubG21mELX48RAcjSVCRctW8dG8wrDIla
   onboarded_at: <%= 2.days.ago %>
   role: member
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true
 ann:
   family: empty
   first_name: Ann
@@ -130,6 +113,4 @@ ann:
   password_digest: $2a$12$XoNBo/cMCyzpYtvhrPAhsubG21mELX48RAcjSVCRctW8dG8wrDIla
   onboarded_at: <%= 2.days.ago %>
   role: member
-  ai_enabled: true
   show_sidebar: true
-  show_ai_sidebar: true

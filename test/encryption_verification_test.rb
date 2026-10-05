@@ -242,9 +242,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
 
 
   test "lunchflow account payloads are encrypted" do
-    skip "No lunchflow accounts in fixtures" unless LunchflowAccount.any?
+    skip "No lunchflow accounts in fixtures" unless EnableBankingAccount.any?
 
-    account = LunchflowAccount.first
+    account = EnableBankingAccount.first
     original_payload = account.raw_payload
 
     # Should be able to read encrypted fields without error

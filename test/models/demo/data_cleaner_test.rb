@@ -9,13 +9,11 @@ class Demo::DataCleanerTest < ActiveSupport::TestCase
 
   test "clears a family with a Stripe subscription without calling Stripe" do
     family = Family.create!(name: "Demo Family")
-    family.create_subscription!(status: :active, stripe_id: "sub_demo_123")
     Provider::Registry.expects(:get_provider).with(:stripe).never
 
     clear!
 
     assert_equal 0, Family.count
-    assert_equal 0, Subscription.count
   end
 
   test "clears the last active super admin" do
@@ -62,13 +60,11 @@ class Demo::DataCleanerTest < ActiveSupport::TestCase
   # The guards are disarmed before any family goes. A reset that fails after
   # that must not leave subscriptions cancelled and the super admin demoted.
   test "a failed reset rolls back what it already did" do
-    subscription = subscriptions(:active)
     super_admin = User.find_by!(role: "super_admin")
     Family.any_instance.stubs(:destroy!).raises(ActiveRecord::RecordNotDestroyed.new("Failed to destroy Family"))
 
     assert_raises(ActiveRecord::RecordNotDestroyed) { clear! }
 
-    assert_equal "active", subscription.reload.status
     assert_equal "super_admin", super_admin.reload.role
   end
 

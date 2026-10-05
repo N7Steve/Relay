@@ -258,14 +258,14 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
 
   test "does not overwrite token with masked placeholder" do
     with_self_hosting do
-      Setting.external_assistant_token = "real-secret"
+      Setting.rentcast_api_key = "real-secret"
 
-      patch settings_hosting_url, params: { setting: { external_assistant_token: "********" } }
+      patch settings_hosting_url, params: { setting: { rentcast_api_key: "********" } }
 
-      assert_equal "real-secret", Setting.external_assistant_token
+      assert_equal "real-secret", Setting.rentcast_api_key
     end
   ensure
-    Setting.external_assistant_token = nil
+    Setting.rentcast_api_key = nil
   end
 
   # Regression: issue #2465 symptom for the external assistant token.

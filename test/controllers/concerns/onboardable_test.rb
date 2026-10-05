@@ -14,7 +14,6 @@ class OnboardableTest < ActionDispatch::IntegrationTest
 
   test "onboarded users can visit dashboard without a subscription" do
     @user.update!(onboarded_at: 1.day.ago)
-    @user.family.subscription&.destroy!
 
     get root_path
     assert_response :success
@@ -22,12 +21,9 @@ class OnboardableTest < ActionDispatch::IntegrationTest
 
   test "expired historical trial does not block dashboard access or mutate billing" do
     @user.update!(onboarded_at: 1.day.ago)
-    @user.family.subscription&.destroy!
-    subscription = @user.family.create_subscription!(status: :trialing, trial_ends_at: 90.days.ago)
 
     get root_path
     assert_response :success
-    assert_equal "trialing", subscription.reload.status
     assert_select "a[href='/subscription/upgrade']", count: 0
   end
 end

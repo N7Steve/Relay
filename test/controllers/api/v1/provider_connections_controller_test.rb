@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require_relative "../../../support/historical_financekit_helper"
 
 class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTest
-  include HistoricalFinancekitHelper
-
   setup do
     @user = users(:family_admin)
     @family = @user.family
@@ -35,8 +32,6 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
   end
 
   test "only retained connections are exposed for either read scope" do
-    create_historical_financekit_link(family: @family, user: @user)
-
     [ @api_key, @read_write_key ].each do |key|
       get api_v1_provider_connections_url, headers: api_headers(key)
       assert_response :success
@@ -130,7 +125,7 @@ class Api::V1::ProviderConnectionsControllerTest < ActionDispatch::IntegrationTe
     assert_not connection["credentials_configured"]
   end
   test "excludes another family's provider connections" do
-    other_item = snaptrade_items(:unauthorized_item)
+    other_item = EnableBankingItem.create!(family: families(:empty), name: "Other family", country_code: "ES", application_id: "test-app", client_certificate: "test-cert")
 
     get api_v1_provider_connections_url, headers: api_headers(@api_key)
     assert_response :success

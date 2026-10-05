@@ -90,7 +90,7 @@ class SettingTest < ActiveSupport::TestCase
        exchange_rate_provider securities_provider securities_providers enabled_securities_providers].each do |name|
       assert_not Setting.respond_to?(name), "Setting.#{name} should be retired"
     end
-    assert_equal %i[rentcast_api_key realie_api_key external_assistant_token],
+    assert_equal %i[rentcast_api_key realie_api_key],
       Setting::EncryptedSettingFields::ENCRYPTED_FIELDS
   end
 end

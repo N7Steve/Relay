@@ -1681,10 +1681,23 @@ components:
           minimum: 0
     ImportVerificationReadback:
       type: object
-      description: RelayImport/SureImport backups only. Legacy imports compare NDJSON
-        counts against database readback. Full snapshots verify restored attributes
-        and original attachment bytes.
+      description: RelayImport/SureImport backups only. Verification covers the supported
+        product; retired modules are discarded and reported. Legacy imports compare
+        supported NDJSON counts against database readback. Full snapshots verify supported
+        attributes and original attachment bytes.
       properties:
+        scope:
+          type: string
+          enum:
+          - supported_product
+          description: Retired module data is excluded from verified recovery.
+        discarded_record_counts:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+          description: Legacy imports only. Counts by retired record type; full snapshots
+            report omissions in warnings.details.
         status:
           type: string
           enum:
@@ -2803,18 +2816,11 @@ components:
           nullable: true
         offline:
           type: boolean
-        offline_reason:
-          type: string
-          nullable: true
         website_url:
           type: string
           nullable: true
         logo_url:
           type: string
-          nullable: true
-        first_provider_price_on:
-          type: string
-          format: date
           nullable: true
         created_at:
           type: string
@@ -3216,7 +3222,6 @@ components:
           - trades
           - holdings
           - balances
-          - recurring_transactions
           - rules
           - rule_actions
           - rule_conditions
@@ -3231,7 +3236,6 @@ components:
           - family_merchant_associations
           - provider_items
           - active_storage_attachments
-          - plaid_items
           additionalProperties:
             type: integer
             minimum: 0
@@ -3293,9 +3297,6 @@ components:
             balances:
               type: integer
               minimum: 0
-            recurring_transactions:
-              type: integer
-              minimum: 0
             rules:
               type: integer
               minimum: 0
@@ -3336,9 +3337,6 @@ components:
               type: integer
               minimum: 0
             active_storage_attachments:
-              type: integer
-              minimum: 0
-            plaid_items:
               type: integer
               minimum: 0
 paths:

@@ -12,12 +12,7 @@ class Investment::RoboadvisorPerformanceTest < ActiveSupport::TestCase
   end
 
   test "uses Indexa time-weighted index without treating a contribution as return" do
-    item = @family.indexa_capital_items.create!(name: "Indexa", api_token: "token")
-    provider_account = item.indexa_capital_accounts.create!(
-      name: "Indexa managed", indexa_capital_account_id: "IDX12345",
-      account_number: "IDX12345", currency: "USD", current_balance: 2_030,
-      raw_payload: {
-        performance_history: {
+    @account.update!(managed_portfolio: true, imported_performance: {
           return: {
             pl: 30,
             index: { "20260731" => 1.0, "20260815" => 1.01, "20260831" => 1.03 }
@@ -27,10 +22,8 @@ class Investment::RoboadvisorPerformanceTest < ActiveSupport::TestCase
             { date: "2026-08-15", total_amount: 2_010 },
             { date: "2026-08-31", total_amount: 2_030 }
           ]
-        }
       }
     )
-    AccountProvider.create!(provider: provider_account, account: @account)
     performance = Investment::RoboadvisorPerformance.new(@account)
     period = Date.new(2026, 8, 1)..Date.new(2026, 8, 31)
 

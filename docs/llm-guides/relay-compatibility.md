@@ -125,6 +125,14 @@ Nothing here starts a server or migrates an existing database.
 
 ## Reverting this naming change
 
+Phase 10 adds a separate irreversible schema cleanup. Its old-backup reader
+recovers the supported product and reports omitted retired modules; it preserves
+the `RelayImport`/`SureImport` contracts above. The API no longer emits retired
+security acquisition metadata or Bills/Plaid reset counters. Reverting the naming
+change alone cannot recover tables discarded by phase 10. See
+[phase 10](../migration/pruning-phase-10.md) before any installation update or
+database recovery.
+
 Reverting code restores the old task/configuration names. Existing attachments
 and Relay backup payloads remain readable. Before reverting, switch configured
 `RELAY_*` names back to `SURE_*` , and use the legacy

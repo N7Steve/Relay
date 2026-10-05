@@ -46,7 +46,7 @@ class Insight < ApplicationRecord
 
   # Everything the user hasn't acknowledged; what the feed renders.
   scope :visible, -> { where(status: [ :active, :read ]) }
-  # Retain historical Bills insights in backups, outside the active product.
+  # Reject Bills types from old data; phase 10 excludes them from backups too.
   scope :for_product_frontend, -> {
     where.not(insight_type: BILLS_BACKED_TYPES)
   }

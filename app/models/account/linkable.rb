@@ -5,25 +5,25 @@ module Account::Linkable
     # New generic provider association
     has_many :account_providers, dependent: :destroy
 
-    # Legacy provider associations - kept for backward compatibility during migration
-    belongs_to :plaid_account, optional: true
-    belongs_to :simplefin_account, optional: true
-
     # SQL-level mirror of `linked?`. Use this for set-based checks (e.g. bulk
     # `EXISTS`) so both definitions stay in sync. If `linked?` adds a new
     # provider source, update this scope too.
     scope :linked, -> {
       left_outer_joins(:account_providers)
         .where(
-          "account_providers.id IS NOT NULL OR accounts.plaid_account_id IS NOT NULL OR accounts.simplefin_account_id IS NOT NULL"
+          "account_providers.id IS NOT NULL"
         )
         .distinct
     }
   end
 
-  # A "linked" account gets transaction and balance data from a third party like Plaid or SimpleFin
+  def reverse_balance_history?
+    linked? || self[:reverse_balance_history]
+  end
+
+  # A linked account has an active connector
   def linked?
-    account_providers.any? || plaid_account.present? || simplefin_account.present?
+    account_providers.any?
   end
 
   # An "offline" or "unlinked" account is one where the user tracks values and

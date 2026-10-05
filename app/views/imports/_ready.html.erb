@@ -5,7 +5,6 @@
 <% import_summary_empty = resources_with_counts.empty? && !(full_backup && dry_run.values.sum.positive?) %>
 <% sure_preflight_result = import.is_a?(SureImport) ? import.sure_preflight : nil %>
 <% missing_merchant_count = sure_preflight_result&.skipped_missing_merchant_count.to_i %>
-<% skipped_recurring_count = sure_preflight_result&.skipped_unnamed_recurring_count.to_i %>
 <% reused_taxonomy_count = sure_preflight_result&.reused_taxonomy_count.to_i %>
 <% provider_merchant_diffs = sure_preflight_result&.provider_merchant_diff_warnings || [] %>
 
@@ -15,6 +14,9 @@
 </div>
 
 <div class="mx-auto max-w-2xl space-y-4">
+  <% if sure_preflight_result&.warnings&.any? { |warning| warning[:code] == "retired_data_discarded" } %>
+    <%= render DS::Alert.new(variant: :warning, title: t(".retired_data_title"), message: t(".retired_data_description")) %>
+  <% end %>
   <% if full_backup %>
     <%= render DS::Alert.new(variant: :warning, title: t(".full_backup_title"), message: [t(".full_backup_description"), t(".full_backup_counts", count: dry_run.values.sum)].join(" ")) %>
     <% if sure_preflight_result.warnings.any? { |warning| warning[:code] == "source_original_unavailable" } %>
@@ -27,13 +29,12 @@
   <% if sure_preflight_result && !sure_preflight_result.valid? %>
     <%= render DS::Alert.new(variant: :error, message: sure_preflight_result.error_message) %>
   <% end %>
-  <% if missing_merchant_count > 0 || skipped_recurring_count > 0 %>
+  <% if missing_merchant_count > 0 %>
     <%= render DS::Alert.new(
       variant: :warning,
       title: t(".missing_merchant_warning_title"),
       message: [
-        (t(".missing_merchant_warning_description", count: missing_merchant_count) if missing_merchant_count > 0),
-        (t(".skipped_recurring_description", count: skipped_recurring_count) if skipped_recurring_count > 0)
+        t(".missing_merchant_warning_description", count: missing_merchant_count)
       ].compact.join(" ")
     ) %>
   <% end %>

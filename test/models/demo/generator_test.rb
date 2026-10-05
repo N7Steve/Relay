@@ -192,7 +192,7 @@ class Demo::GeneratorTest < ActiveSupport::TestCase
 
     def assert_no_wallet_demo_data
       assert @family.accounts.exists?(name: "Chase Premier Checking")
-      assert_empty @family.financekit_items
+      assert_not @family.respond_to?(:financekit_items)
       assert_not @family.accounts.exists?(name: [ "Apple Card", "Apple Cash", "Nancy's Apple Cash" ])
     end
 
@@ -204,9 +204,7 @@ class Demo::GeneratorTest < ActiveSupport::TestCase
         password: "password123",
         role: :admin,
         onboarded_at: Time.current,
-        ai_enabled: true,
-        show_sidebar: true,
-        show_ai_sidebar: true,
+                show_sidebar: true,
         ui_layout: :dashboard
       )
     end

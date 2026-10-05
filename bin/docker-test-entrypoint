@@ -30,6 +30,8 @@ case task
 when "unit", "system", "build"
   # Only the dedicated relay_test database inside this Compose project.
   # Load the current schema for fixtures without running historical migrations.
+  # schema:load alone leaves tables removed by pruning in an existing database.
+  rails!("db:drop")
   rails!("db:create")
   rails!("db:schema:load")
   rails!("assets:precompile")

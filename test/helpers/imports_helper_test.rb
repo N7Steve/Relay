@@ -5,7 +5,7 @@ class ImportsHelperTest < ActionView::TestCase
   test "dry run resource labels come from locale keys" do
     %i[
       transactions balances accounts categories tags rules merchants
-      recurring_transactions transfers rejected_transfers trades holdings
+      transfers rejected_transfers trades holdings
       valuations budgets budget_categories
     ].each do |key|
       assert_equal I18n.t("imports.dry_run_resources.#{key}"), dry_run_resource(key).label
@@ -18,7 +18,7 @@ class ImportsHelperTest < ActionView::TestCase
 
     resources = %i[
       transactions balances accounts categories tags rules merchants
-      recurring_transactions transfers rejected_transfers trades holdings
+      transfers rejected_transfers trades holdings
       valuations budgets budget_categories
     ].map { |key| dry_run_resource(key) }
     resources.each do |resource|
