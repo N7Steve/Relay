@@ -93,10 +93,6 @@ ru:
         format_label: Формат
         leave_empty: Оставить пустым
         name_label: Имя
-        no_security_provider_warning: Поставщик цен на ценные бумаги не настроен.
-          Ваши импорты торгов будут работать, но Relay не будет заполнять историю цен.
-          Пожалуйста, перейдите в настройки, чтобы настроить это.
-        note_label: Заметка
         price_label: Цена
         quantity_label: Количество
         select_column: Выберите колонку

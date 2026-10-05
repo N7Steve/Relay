@@ -62,9 +62,6 @@ pl:
       no_category: Brak kategorii
       note_label: Notatka
       note_placeholder: Dodaj tutaj dodatkowe notatki...
-      provider_disabled_warning: Aktualizacje cen wstrzymane. Dostawca %{provider}
-        jest wyłączony. Włącz go ponownie w Ustawieniach albo przypisz aktywo do innego
-        dostawcy.
       quantity_label: Ilość
       sell: Sprzedaż
       settings: Ustawienia

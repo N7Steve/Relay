@@ -1,9 +1,8 @@
+# Compatibility sink for serialized jobs from before pruning phase 9A.
 class SecurityHealthCheckJob < ApplicationJob
   queue_as :scheduled
 
   def perform
-    return if Rails.env.development?
-
-    Security::HealthChecker.check_all
+    Rails.logger.info("[RetiredMarketData] Ignored SecurityHealthCheckJob")
   end
 end

@@ -95,11 +95,6 @@ tr:
         format_label: Format
         leave_empty: Boş bırak
         name_label: Ad
-        no_security_provider_warning: Menkul kıymet fiyat sağlayıcısı yapılandırılmamış.
-          Alım satım içe aktarmalarınız çalışacak, ancak Relay geçmiş fiyat verilerini
-          geriye dönük olarak doldurmayacaktır. Bunu yapılandırmak için lütfen ayarlarınıza
-          gidin.
-        note_label: Not
         price_label: Fiyat
         quantity_label: Miktar
         select_column: Sütun seçin

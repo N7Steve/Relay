@@ -1,7 +1,6 @@
 class Provider
   module Metadata
     REGISTRY = {
-      financekit:     { region: "US / UK", kinds: %w[Bank],            maturity: :beta,   logo_text: "AW", logo_color: nil, domain: "apple.com", name: "Apple Wallet" },
       enable_banking: { region: "EU",      kinds: %w[Bank],            maturity: :beta,   logo_text: "EB", logo_color: "#9333ea", domain: "enablebanking.com" }
     }.freeze
 

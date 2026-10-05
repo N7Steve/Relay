@@ -83,9 +83,6 @@ pt-BR:
     update:
       success: "Conta %{type} atualizada"
     sidebar:
-      missing_data: Dados históricos ausentes
-      missing_data_description: "%{product} usa provedores terceirizados para buscar taxas de câmbio históricas, preços de títulos e muito mais. Esses dados são necessários para calcular saldos de contas históricos com precisão."
-      configure_providers: Configure seus provedores aqui.
       tabs:
         all: Todas
         assets: Ativos

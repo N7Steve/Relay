@@ -92,60 +92,32 @@ class HoldingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "manual", @holding.cost_basis_source
   end
 
-  test "remap_security brings offline security back online" do
-    # Given: the target security is marked offline (e.g. created by a failed QIF import)
+  test "remap_security accepts a typed ticker and reuses the stored security" do
     msft = securities(:msft)
-    msft.update!(offline: true, failed_fetch_count: 3)
 
-    # When: user explicitly selects it from the provider search and saves
-    patch remap_security_holding_path(@holding), params: { security_id: "MSFT|XNAS" }
+    patch remap_security_holding_path(@holding), params: { security_id: " MSFT|XNAS " }
 
-    # Then: the security is brought back online and the holding is remapped
     assert_redirected_to account_path(@holding.account, tab: "holdings")
-    @holding.reload
-    msft.reload
-    assert_equal msft.id, @holding.security_id
-    assert_not msft.offline?
-    assert_equal 0, msft.failed_fetch_count
+    assert_equal msft.id, @holding.reload.security_id
   end
 
-  test "sync_prices redirects with alert for offline security" do
-    @holding.security.update!(offline: true)
+  test "remap_security creates an offline security for an unknown ticker" do
+    assert_difference "Security.count", 1 do
+      patch remap_security_holding_path(@holding), params: { security_id: "NEWCO" }
+    end
 
-    post sync_prices_holding_path(@holding)
-
-    assert_redirected_to account_path(@holding.account, tab: "holdings")
-    assert_equal I18n.t("holdings.sync_prices.unavailable"), flash[:alert]
+    security = @holding.reload.security
+    assert_equal "NEWCO", security.ticker
+    assert security.offline?
   end
 
-  test "sync_prices syncs market data and redirects with notice" do
-    Security.any_instance.expects(:import_provider_prices).with(
-      start_date: 31.days.ago.to_date,
-      end_date: Date.current,
-      clear_cache: true
-    ).returns([ 31, nil ])
-    Security.any_instance.stubs(:import_provider_details)
-    materializer = mock("materializer")
-    materializer.expects(:materialize_balances).once
-    Balance::Materializer.expects(:new).with(
-      @holding.account,
-      strategy: :forward,
-      security_ids: [ @holding.security_id ]
-    ).returns(materializer)
+  test "price sync and provider search are no longer routed" do
+    get holding_path(@holding)
 
-    post sync_prices_holding_path(@holding)
-
-    assert_redirected_to account_path(@holding.account, tab: "holdings")
-    assert_equal I18n.t("holdings.sync_prices.success"), flash[:notice]
-  end
-
-  test "sync_prices shows provider error inline when provider returns no prices" do
-    Security.any_instance.stubs(:import_provider_prices).returns([ 0, "Yahoo Finance rate limit exceeded" ])
-    Security.any_instance.stubs(:import_provider_details)
-
-    post sync_prices_holding_path(@holding)
-
-    assert_redirected_to account_path(@holding.account, tab: "holdings")
-    assert_equal "Yahoo Finance rate limit exceeded", flash[:alert]
+    assert_response :success
+    assert_no_match "sync_prices", response.body
+    assert_select "input[name='security_id'][type='text']"
+    assert_not respond_to?(:sync_prices_holding_path)
+    assert_not respond_to?(:securities_path)
   end
 end

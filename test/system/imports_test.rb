@@ -5,9 +5,6 @@ class ImportsTest < ApplicationSystemTestCase
 
   setup do
     sign_in @user = users(:family_admin)
-
-    # Trade securities will be imported as "offline" tickers
-    Security.stubs(:provider).returns(nil)
   end
 
   test "Relay backup import" do

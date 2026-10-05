@@ -2,23 +2,6 @@
 pl:
   settings:
     hostings:
-      alpha_vantage_settings:
-        description: Wprowadź klucz API z Alpha Vantage. Obsługuje europejskie ETF-y
-          na London Stock Exchange, XETRA i innych giełdach.
-        env_configured_message: Skonfigurowano przez zmienną środowiskową ALPHA_VANTAGE_API_KEY.
-        label: Klucz API
-        no_health_check_note: Sprawdzenie stanu połączenia jest niedostępne dla tego
-          dostawcy ze względu na ścisły limit zapytań.
-        placeholder: Wprowadź tutaj swój klucz API Alpha Vantage
-        rate_limit_warning: Darmowy plan Alpha Vantage jest ograniczony do 25 zapytań
-          API dziennie. Najlepiej sprawdza się jako dodatkowy dostawca dla europejskich
-          ETF-ów niedostępnych u innych dostawców.
-        show_details: "(pokaż szczegóły)"
-        step_1_html: Wejdź na <a href="https://www.alphavantage.co/support/#api-key"
-          target="_blank" rel="noopener noreferrer" class="underline">alphavantage.co</a>
-          i odbierz darmowy klucz API.
-        step_2: Skopiuj klucz API i wklej go poniżej.
-        title: Alpha Vantage
       anthropic_settings:
         access_token_label: Klucz API
         access_token_placeholder: Wprowadź swój klucz API Anthropic
@@ -58,24 +41,6 @@ pl:
         not_authorized: Nie masz uprawnień do wykonania tej akcji
       ensure_super_admin_for_onboarding:
         not_authorized: Nie masz uprawnień do wykonania tej akcji
-      eodhd_settings:
-        description: Wprowadź token API otrzymany od EODHD. Obsługuje europejskie
-          ETF-y na LSE, XETRA i innych międzynarodowych giełdach.
-        env_configured_message: Skonfigurowano przez zmienną środowiskową EODHD_API_KEY.
-        label: Token API
-        placeholder: Wprowadź tutaj swój token API EODHD
-        rate_limit_warning: Darmowy plan EODHD jest ograniczony do 20 zapytań API
-          dziennie. Najlepiej sprawdza się jako dodatkowy dostawca dla europejskich
-          ETF-ów niedostępnych u innych dostawców.
-        show_details: "(pokaż szczegóły)"
-        step_1_html: Wejdź na <a href="https://eodhd.com/register" target="_blank"
-          rel="noopener noreferrer" class="underline">eodhd.com</a> i załóż darmowe
-          konto.
-        step_2_html: Przejdź do <a href="https://eodhd.com/cp/dashboard" target="_blank"
-          rel="noopener noreferrer" class="underline">Dashboard</a>, aby znaleźć token
-          API.
-        step_3: Skopiuj token API i wklej go poniżej.
-        title: EODHD
       gus_sdp_settings:
         clear_api_key: Wyczyść zapisany klucz API
         clear_api_key_confirm: Usunąć zapisany klucz API GUS?
@@ -198,45 +163,6 @@ pl:
         title: OpenAI
         uri_base_label: Bazowy URL API (opcjonalne)
         uri_base_placeholder: https://api.openai.com/v1 (domyślnie)
-      provider_selection:
-        binance_public_hint: za darmo, bez klucza API - tylko kryptowaluty (BTC, ETH
-          itd.)
-        description: Wybierz usługę do pobierania kursów walut i cen papierów wartościowych.
-          Yahoo Finance jest darmowe i nie wymaga klucza API. Twelve Data wymaga darmowego
-          klucza API, ale może oferować szersze pokrycie danych.
-        env_configured_message: Wybór dostawcy jest wyłączony, ponieważ ustawiono
-          zmienne środowiskowe (EXCHANGE_RATE_PROVIDER lub SECURITIES_PROVIDER). Aby
-          włączyć wybór tutaj, usuń te zmienne z konfiguracji.
-        exchange_rate_description: Wybierz jednego dostawcę do pobierania kursów walut.
-        exchange_rate_provider_label: Dostawca kursów walut
-        exchange_rate_title: Dostawca kursów walut
-        mfapi_hint: za darmo, bez klucza API - tylko indyjskie fundusze inwestycyjne
-        moex_public_hint: za darmo, bez klucza API - rosyjskie akcje, fundusze i obligacje
-          (MOEX), łącznie z kursem RUB
-        providers:
-          alpha_vantage: Alpha Vantage
-          binance_public: Binance
-          eodhd: EODHD
-          frankfurter: Frankfurter
-          mfapi: MFAPI.in
-          moex_public: MOEX
-          tiingo: Tiingo
-          tinkoff_invest: T-Invest (T-Bank)
-          twelve_data: Twelve Data
-          yahoo_finance: Yahoo Finance
-        requires_api_key: wymaga klucza API
-        requires_api_key_alpha_vantage: wymaga klucza API, limit 25 zapytań dziennie
-        requires_api_key_eodhd: wymaga klucza API, limit 20 zapytań dziennie
-        securities_description: Włącz jednego lub więcej dostawców do pobierania cen
-          akcji, ETF-ów i funduszy inwestycyjnych. Podczas wyszukiwania odpytywani
-          są wszyscy włączeni dostawcy, a wyniki są łączone.
-        securities_provider_label: Dostawca papierów wartościowych (cen akcji)
-        securities_title: Dostawcy papierów wartościowych
-        tinkoff_invest_hint: wymaga tokenu tylko do odczytu - ceny rosyjskich akcji/funduszy/obligacji
-          + logotypy marek
-        title: Wybór dostawcy
-        twelve_data_hint: wymaga klucza API, 800 jednostek dziennie
-        yahoo_finance_hint: za darmo, bez klucza API
       realie_settings:
         description: Wprowadź klucz API Realie, aby przy dodawaniu nieruchomości pobierać
           szczegóły i szacunkową wartość nieruchomości w USA. Darmowy plan jest ograniczony
@@ -270,7 +196,6 @@ pl:
             i innych danych. Tej akcji nie można cofnąć.
           title: Wyczyścić pamięć podręczną danych?
         danger_zone: Strefa ryzyka
-        financial_data_providers: Dostawcy danych finansowych
         general: Ustawienia ogólne
         invites: Kody zaproszeń
         property_valuation_providers: Dostawcy wyceny nieruchomości
@@ -293,59 +218,6 @@ pl:
           będą importowane i automatycznie uzgadniane po zaksięgowaniu. Wyłącz, jeśli
           Twój bank dostarcza niewiarygodne dane oczekujące.
         include_pending_label: Uwzględniaj transakcje oczekujące
-      tiingo_settings:
-        description: Wprowadź token API otrzymany od Tiingo. Darmowy plan obsługuje
-          50 unikalnych symboli na godzinę i ponad 30 lat danych historycznych.
-        env_configured_message: Skonfigurowano pomyślnie przez zmienną środowiskową
-          TIINGO_API_KEY.
-        label: Token API
-        placeholder: Wpisz tutaj swój token API Tiingo
-        show_details: "(pokaż szczegóły)"
-        step_1_html: Odwiedź <a href="https://www.tiingo.com" target="_blank" rel="noopener
-          noreferrer" class="underline">tiingo.com</a> i załóż darmowe konto.
-        step_2_html: Przejdź na stronę <a href="https://www.tiingo.com/account/api/token"
-          target="_blank" rel="noopener noreferrer" class="underline">Token API</a>.
-        step_3: Skopiuj swój token API i wklej go poniżej.
-        title: Tiingo
-      tinkoff_invest_settings:
-        description: Wprowadź token API T-Invest tylko do odczytu. Służy do pobierania
-          logo marek dla papierów wartościowych (w tym funduszy i obligacji, nawet
-          gdy ich ceny podaje MOEX) oraz, jeśli włączone powyżej, cen instrumentów
-          rosyjskich.
-        env_configured_message: Skonfigurowano pomyślnie przez zmienną środowiskową
-          TINKOFF_INVEST_API_KEY.
-        label: Token API
-        moex_only_notice: Nie dotyczy cen powyżej — T-Invest jest używane do pobierania
-          logo marek dla wszystkich Twoich papierów wartościowych, gdy tylko skonfigurowano
-          token, niezależnie od pola wyboru powyżej.
-        placeholder: Wpisz tutaj swój token API T-Invest
-        show_details: "(pokaż szczegóły)"
-        step_1: Otwórz T-Bank Investments, następnie Ustawienia, następnie Tokeny
-          API (wymaga otwartego rachunku maklerskiego T-Bank).
-        step_2: Utwórz token z dostępem tylko do odczytu.
-        step_3: Skopiuj token i wklej go poniżej.
-        title: T-Invest (T-Bank)
-      twelve_data_settings:
-        api_calls_used: "%{used} / %{limit} wykorzystanych dziennych wywołań API (%{percentage})"
-        description: Wprowadź klucz API otrzymany od Twelve Data
-        env_configured_message: Pomyślnie skonfigurowano przez zmienną środowiskową
-          TWELVE_DATA_API_KEY.
-        label: Klucz API
-        placeholder: Wprowadź tutaj klucz API
-        plan: plan %{plan}
-        plan_upgrade_warning_description: Poniższych tickerów w Twoim portfelu nie
-          można synchronizować przy Twoim aktualnym planie Twelve Data.
-        plan_upgrade_warning_title: Niektóre tickery wymagają płatnego planu
-        requires_plan: wymaga planu %{plan}
-        show_details: "(pokaż szczegóły)"
-        step_1_html: Odwiedź <a href="https://twelvedata.com/register" target="_blank"
-          rel="noopener noreferrer" class="underline">twelvedata.com</a> i załóż darmowe
-          konto Twelve Data Developer.
-        step_2_html: Przejdź na stronę <a href="https://twelvedata.com/account/api-keys"
-          target="_blank" rel="noopener noreferrer" class="underline">Klucze API</a>.
-        step_3: Odkryj swój klucz tajny i wklej go poniżej.
-        title: Twelve Data
-        view_pricing: Zobacz cennik Twelve Data
       update:
         anthropic_model_required_for_base_url: Model Anthropic jest wymagany, gdy
           ustawiono niestandardowy URL bazowy.
@@ -358,24 +230,3 @@ pl:
         scheduler_sync_failed: Ustawienia zapisano, ale nie udało się zaktualizować
           harmonogramu synchronizacji. Spróbuj ponownie lub sprawdź logi serwera.
         success: Ustawienia zostały zaktualizowane
-      yahoo_finance_settings:
-        connection_failed: Nie można połączyć z Yahoo Finance
-        description: Yahoo Finance zapewnia bezpłatny dostęp do cen akcji, kursów
-          walut i danych finansowych bez potrzeby klucza API.
-        rate_limited_message: Nie jest wymagane żadne działanie. Relay wstrzyma dodatkowe
-          kontrole stanu na 30 minut. Operacje na cenach i kursach wymiany działają
-          niezależnie.
-        rate_limited_title: Osiągnięto limit zapytań Yahoo Finance.
-        status_active: Yahoo Finance jest aktywne i działa
-        status_healthy: Yahoo Finance działa poprawnie.
-        status_inactive: Połączenie z Yahoo Finance nie powiodło się
-        status_rate_limited: Yahoo Finance tymczasowo ogranicza liczbę zapytań.
-        status_unavailable: Yahoo Finance jest obecnie niedostępne.
-        status_unknown: Trwa sprawdzanie stanu Yahoo Finance.
-        title: Yahoo Finance
-        troubleshooting: Sprawdź połączenie internetowe i ustawienia zapory. Yahoo
-          Finance może być tymczasowo niedostępne.
-        unavailable_message: Nie udało się połączyć z Yahoo Finance albo otrzymano
-          nieoczekiwaną odpowiedź. Sprawdź połączenie internetowe i spróbuj ponownie
-          później.
-        unavailable_title: Nie udało się zweryfikować Yahoo Finance.

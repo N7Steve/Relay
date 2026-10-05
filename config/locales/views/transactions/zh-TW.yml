@@ -239,8 +239,6 @@ zh-TW:
       security_not_listed_hint: 找不到您的證券嗎？請選擇清單最下方的「自行輸入代碼」。
       ticker_placeholder: AAPL
       ticker_hint: 輸入股票或 ETF 的代碼（例如 AAPL、MSFT）
-      ticker_search_placeholder: 搜尋代碼...
-      ticker_search_hint: 可用代碼或公司名稱搜尋，也可以直接輸入自訂代碼
       price_mismatch_title: 價格可能不符
       price_mismatch_message: 您輸入的價格（每股 %{entered_price}）和 %{ticker} 目前的市價（%{market_price}）差距很大。如果看起來不對，可能是選錯證券了，請改用「自行輸入代碼」指定正確的那一檔。
       quantity_label: 數量（股數）

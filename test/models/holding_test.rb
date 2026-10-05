@@ -74,7 +74,7 @@ class HoldingTest < ActiveSupport::TestCase
     nvda_qty = BigDecimal("5") + BigDecimal("30")
     expected_nvda_usd = nvda_total_usd / nvda_qty
 
-    ExchangeRate.stubs(:find_or_fetch_rate).returns(OpenStruct.new(rate: 1))
+    ExchangeRate.stubs(:find_rate).returns(OpenStruct.new(rate: 1))
     assert_equal Money.new(expected_amzn_usd, "CAD").exchange_to("USD"), @amzn.avg_cost
     assert_equal Money.new(expected_nvda_usd, "CAD").exchange_to("USD"), @nvda.avg_cost
   end

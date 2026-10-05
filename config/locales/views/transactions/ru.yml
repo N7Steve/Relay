@@ -144,9 +144,6 @@ ru:
       success: Операция преобразована в сделку
       ticker_hint: Введите тикер акции или ETF (например, AAPL, MSFT)
       ticker_placeholder: AAPL
-      ticker_search_hint: Поиск по символу тикера или названию компании, или введите
-        пользовательский тикер
-      ticker_search_placeholder: Поиск тикера...
       title: Преобразовать в сделку с ценными бумагами
       trade_type_hint: Покупка или продажа акций ценной бумаги
       trade_type_label: Тип сделки

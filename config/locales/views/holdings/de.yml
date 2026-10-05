@@ -66,11 +66,8 @@ de:
       settings: Einstellungen
       security_label: Wertpapier
       originally: "war %{ticker}"
-      search_security: Wertpapier suchen
-      search_security_placeholder: Nach Ticker oder Name suchen
       cancel: Abbrechen
       remap_security: Speichern
-      no_security_provider: Wertpapier-Provider nicht konfiguriert. Suche nach Wertpapieren nicht möglich.
       security_remapped_label: Wertpapier umgebildet
       provider_sent: "Provider: %{ticker}"
       reset_to_provider: Auf Provider zurücksetzen
@@ -88,17 +85,3 @@ de:
       unlock_cost_basis: Freigeben
       unlock_confirm_title: Einstandspreis freigeben?
       unlock_confirm_body: Der Einstandspreis kann dann durch Provider-Syncs oder Trade-Berechnungen aktualisiert werden.
-      last_price_update: Letzte Kursaktualisierung
-      market_data_label: Marktdaten
-      market_data_sync_button: Aktualisieren
-      never: Nie
-      provider_disabled_warning: Kursaktualisierung pausiert – der Anbieter %{provider} ist deaktiviert. Wechsle unten den Anbieter oder aktivier ihn in den Einstellungen wieder.
-      switch_provider_button: Wechseln
-      switch_provider_description: "%{provider} ist deaktiviert. Such dieses Wertpapier bei einem anderen aktiven Anbieter."
-      switch_provider_label: Anbieter wechseln
-      syncing: Sync läuft …
-      truncated_history_warning: Kurshistorie liegt erst ab %{date} vor. Für frühere Tage hat der gewählte Anbieter keine Daten. Das kommt vor, wenn das Papier erst nach deinem Kaufdatum notiert wurde oder der Anbieter im aktuellen Tarif nur einen begrenzten Verlauf liefert.
-    sync_prices:
-      provider_error: Die aktuellen Kurse ließen sich nicht abrufen. Versuch es in ein paar Minuten noch einmal.
-      success: Marktdaten aktualisiert.
-      unavailable: Für Offline-Wertpapiere gibt es keinen Marktdaten-Abgleich.

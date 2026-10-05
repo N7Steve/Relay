@@ -75,7 +75,6 @@ zh-TW:
         title: 您想如何新增？
       title: 您想新增什麼內容？
     show:
-      limited_fx_history_warning: 匯率歷史只有 %{date}之後的資料。當匯率供應商只提供有限的歷史區間時，這個日期之前的交易會改用近似的匯率換算。
       tabs:
         activity: 活動紀錄
         holdings: 持股
@@ -124,9 +123,6 @@ zh-TW:
     update:
       success: '%{type} 帳戶已更新'
     sidebar:
-      missing_data: 缺少歷史資料
-      missing_data_description: '%{product} 會向第三方供應商取得歷史匯率、證券價格等資料。要算出正確的歷史餘額就需要這些資料。'
-      configure_providers: 在此設定您的供應商。
       tabs:
         all: 全部
         assets: 資產

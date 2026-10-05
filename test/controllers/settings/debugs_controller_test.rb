@@ -91,7 +91,7 @@ class Settings::DebugsControllerTest < ActionDispatch::IntegrationTest
     assert_match @entry.message, response.body
   end
 
-  test "FinanceKit diagnostics are visible and filterable by provider and family" do
+  test "historical FinanceKit diagnostics remain visible and filterable by provider and family" do
     sign_in users(:sure_support_staff)
     DebugLogEntry.capture(category: "provider_sync", level: "error", message: "FinanceKit import requires repair",
       source: "Financekit::Processor", provider_key: "financekit", family: families(:dylan_family),

@@ -964,7 +964,7 @@ end
   end
 
   test "exchange_rate endpoint returns rate for different currencies" do
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "EUR", to: "USD", date: Date.current)
                 .returns(1.2)
 
@@ -993,7 +993,7 @@ end
 
   test "exchange_rate endpoint uses provided date" do
     custom_date = 3.days.ago.to_date
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "EUR", to: "USD", date: custom_date)
                 .returns(1.25)
 
@@ -1041,7 +1041,7 @@ end
   end
 
   test "exchange_rate endpoint returns 404 when rate not found" do
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "EUR", to: "USD", date: Date.current)
                 .returns(nil)
 

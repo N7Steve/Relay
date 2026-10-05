@@ -55,34 +55,6 @@ zh-CN:
         max_response_tokens_help: 限制模型单次回答可生成的 Token 数。
         max_items_per_call_label: 每次调用最大项目数
         max_items_per_call_help: 限制单次请求传给模型的数据项数量。
-      provider_selection:
-        description: 选择用于获取汇率和证券价格的服务。Yahoo Finance 免费且无需 API 密钥。Twelve Data 需要免费的
-          API 密钥，但可能提供更全面的数据覆盖。
-        env_configured_message: 提供商选择已禁用，因为环境变量（EXCHANGE_RATE_PROVIDER 或 SECURITIES_PROVIDER）已设置。要在此处启用选择，请从配置中移除这些环境变量。
-        exchange_rate_provider_label: 汇率数据提供商
-        providers:
-          twelve_data: Twelve Data
-          yahoo_finance: Yahoo Finance
-          tiingo: Tiingo
-          eodhd: EODHD
-          alpha_vantage: Alpha Vantage
-          mfapi: MFAPI.in
-          binance_public: Binance
-          moex_public: MOEX
-        securities_provider_label: 证券（股票价格）数据提供商
-        title: 数据提供商选择
-        exchange_rate_title: 汇率提供商
-        exchange_rate_description: 选择用于同步汇率数据的提供商。
-        securities_title: 证券价格提供商
-        securities_description: 选择用于同步证券和投资价格的提供商。
-        twelve_data_hint: Twelve Data 支持股票、ETF 和部分基金价格。
-        yahoo_finance_hint: Yahoo Finance 可作为免密钥价格来源。
-        requires_api_key: 需要 API Key
-        requires_api_key_eodhd: EODHD 需要 API Token。
-        requires_api_key_alpha_vantage: Alpha Vantage 需要 API Key。
-        mfapi_hint: MFAPI.in 可用于部分印度基金数据。
-        binance_public_hint: Binance 公共接口可用于加密资产行情。
-        moex_public_hint: 免费，无需 API 密钥 -- 俄罗斯股票、基金和债券（MOEX），包括 RUB 外汇
       show:
         clear_cache: 清除数据缓存
         clear_cache_warning: 清除数据缓存将移除所有汇率、证券价格、账户余额及其他数据。这不会删除账户、交易记录、分类或其他用户自有数据。
@@ -90,27 +62,10 @@ zh-CN:
           body: 确定要清除数据缓存吗？这将移除所有汇率、证券价格、账户余额及其他数据，且不可撤销。
           title: 确认清除数据缓存？
         danger_zone: 高风险操作
-        financial_data_providers: 金融数据提供商
         general: 通用设置
         invites: 邀请码设置
         title: 自托管配置
         sync_settings: 同步设置
-      twelve_data_settings:
-        api_calls_used: 已使用 %{used} / %{limit} 次每日 API 调用（%{percentage}）
-        description: 请输入 Twelve Data 提供的 API 密钥
-        env_configured_message: 已通过 TWELVE_DATA_API_KEY 环境变量成功配置。
-        label: API 密钥
-        placeholder: 在此输入您的 API 密钥
-        plan: "%{plan} 套餐"
-        title: Twelve Data 设置
-        show_details: "（显示详情）"
-        step_1_html: 注册或登录 Twelve Data。
-        step_2_html: 前往 <a href="https://twelvedata.com/account/api-keys" target="_blank" rel="noopener noreferrer" class="underline">API Keys</a> 页面。
-        step_3: 显示 API 密钥并粘贴到下方。
-        plan_upgrade_warning_title: 部分代码需要付费计划
-        plan_upgrade_warning_description: 当前 Twelve Data 计划无法同步下列持仓价格。
-        requires_plan: 需要 %{plan} 计划
-        view_pricing: 查看 Twelve Data 价格
       update:
         failure: 设置值无效
         invalid_onboarding_state: 无效的新用户注册状态
@@ -120,13 +75,6 @@ zh-CN:
         invalid_anthropic_base_url: Anthropic Base URL 无效。
         anthropic_model_required_for_base_url: 设置 Anthropic Base URL 时必须填写模型。
         scheduler_sync_failed: 设置已保存，但同步计划更新失败。请重试或检查服务器日志。
-      yahoo_finance_settings:
-        connection_failed: 无法连接到 Yahoo Finance
-        description: Yahoo Finance 提供免费的股票价格、汇率和金融数据访问，无需 API 密钥。
-        status_active: Yahoo Finance 已激活并正常工作
-        status_inactive: Yahoo Finance 连接失败
-        title: Yahoo Finance 设置
-        troubleshooting: 请检查您的互联网连接和防火墙设置。Yahoo Finance 可能暂时不可用。
       llm_provider_selector:
         title: AI 提供商
         description: 选择 Relay 调用的 LLM 提供商。
@@ -149,38 +97,6 @@ zh-CN:
         model_label: 默认模型（可选）
         model_placeholder: claude-sonnet-4-6（默认）
         model_help: 留空时使用系统默认模型。
-      tiingo_settings:
-        title: Tiingo
-        description: 使用 Tiingo 同步证券价格。
-        env_configured_message: 已通过环境变量配置 Tiingo。
-        label: API 令牌
-        placeholder: 粘贴 Tiingo API Token
-        show_details: "（显示详情）"
-        step_1_html: 注册或登录 Tiingo。
-        step_2_html: 前往 <a href="https://www.tiingo.com/account/api/token" target="_blank" rel="noopener noreferrer" class="underline">API Token</a> 页面。
-        step_3: 复制 API Token 并粘贴到下方。
-      eodhd_settings:
-        title: EODHD
-        description: 使用 EODHD 同步证券价格。
-        env_configured_message: 已通过环境变量配置 EODHD。
-        label: API 令牌
-        placeholder: 粘贴 EODHD API Token
-        show_details: "（显示详情）"
-        step_1_html: 注册或登录 EODHD。
-        step_2_html: 打开 API Token 页面。
-        step_3: 复制 API Token 并粘贴到下方。
-        rate_limit_warning: 免费或低阶计划可能有调用频率限制。
-      alpha_vantage_settings:
-        title: Alpha Vantage
-        description: 使用 Alpha Vantage 同步证券价格。
-        env_configured_message: 已通过环境变量配置 Alpha Vantage。
-        label: API 密钥
-        placeholder: 粘贴 Alpha Vantage API Key
-        show_details: "（显示详情）"
-        step_1_html: 注册或登录 Alpha Vantage。
-        step_2: 前往 API Key 页面并复制密钥。
-        rate_limit_warning: 免费计划可能有调用频率限制。
-        no_health_check_note: 此提供商暂无健康检查。
       ensure_admin:
         not_authorized: 您没有执行此操作的权限。
       ensure_super_admin_for_onboarding:

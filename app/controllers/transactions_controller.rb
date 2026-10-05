@@ -428,7 +428,7 @@ class TransactionsController < ApplicationController
     if account.currency == currency_from
       render json: { same_currency: true, rate: 1.0 }
     else
-      rate_obj = ExchangeRate.find_or_fetch_rate(
+      rate_obj = ExchangeRate.find_rate(
         from: currency_from,
         to: account.currency,
         date: date
@@ -737,7 +737,7 @@ class TransactionsController < ApplicationController
       if params[:security_id] == "__custom__"
         # User selected "Enter custom ticker" - check for combobox selection or manual entry
         if params[:ticker].present?
-          # Combobox selection: format is "SYMBOL|EXCHANGE|PROVIDER"
+          # Ticker value: format is "SYMBOL|EXCHANGE"
           parsed = Security.parse_combobox_id(params[:ticker])
           if parsed[:ticker].blank?
             flash[:alert] = t("transactions.convert_to_trade.errors.enter_ticker")
@@ -747,8 +747,7 @@ class TransactionsController < ApplicationController
           Security::Resolver.new(
             parsed[:ticker].strip,
             exchange_operating_mic: parsed[:exchange_operating_mic] || params[:exchange_operating_mic].presence,
-            country_code: user_country,
-            price_provider: parsed[:price_provider]
+            country_code: user_country
           ).resolve
         elsif params[:custom_ticker].present?
           # Manual entry from combobox's name_when_new or fallback text field
@@ -771,7 +770,7 @@ class TransactionsController < ApplicationController
         end
         found
       elsif params[:ticker].present?
-        # Direct combobox (no existing holdings) - format is "SYMBOL|EXCHANGE|PROVIDER"
+        # Direct ticker entry (no existing holdings) - format is "SYMBOL|EXCHANGE"
         parsed = Security.parse_combobox_id(params[:ticker])
         if parsed[:ticker].blank?
           flash[:alert] = t("transactions.convert_to_trade.errors.enter_ticker")
@@ -781,8 +780,7 @@ class TransactionsController < ApplicationController
         Security::Resolver.new(
           parsed[:ticker].strip,
           exchange_operating_mic: parsed[:exchange_operating_mic] || params[:exchange_operating_mic].presence,
-          country_code: user_country,
-          price_provider: parsed[:price_provider]
+          country_code: user_country
         ).resolve
       elsif params[:custom_ticker].present?
         # Manual entry from combobox's name_when_new (no existing holdings path)

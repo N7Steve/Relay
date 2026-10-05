@@ -42,8 +42,7 @@ module Provider::PropertyValuationConcept
 
   private
     # Defaults to the provider's free tier cap; users on paid plans can raise
-    # it via ENV (e.g. RENTCAST_MAX_REQUESTS_PER_MONTH), mirroring the
-    # AlphaVantage/Tiingo request limit overrides.
+    # it via ENV (e.g. RENTCAST_MAX_REQUESTS_PER_MONTH).
     def max_requests_per_month
       ENV.fetch("#{self.class.name.demodulize.underscore.upcase}_MAX_REQUESTS_PER_MONTH", self.class::MAX_REQUESTS_PER_MONTH).to_i
     end

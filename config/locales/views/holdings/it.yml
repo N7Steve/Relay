@@ -16,10 +16,6 @@ it:
       security_not_found: Impossibile trovare il titolo selezionato.
     reset_security:
       success: Titolo reimpostato al valore del provider.
-    sync_prices:
-      success: Dati di mercato sincronizzati con successo.
-      unavailable: La sincronizzazione dei dati di mercato non è disponibile per i titoli offline.
-      provider_error: Impossibile recuperare i prezzi aggiornati. Riprova tra qualche minuto.
     errors:
       security_collision: "Impossibile rimappare: hai già una posizione per %{ticker} in data %{date}."
     cost_basis_sources:
@@ -70,16 +66,8 @@ it:
       settings: Impostazioni
       security_label: Titolo
       originally: "era %{ticker}"
-      search_security: Cerca titolo
-      search_security_placeholder: Cerca per simbolo o nome
       cancel: Annulla
       remap_security: Salva
-      provider_disabled_warning: "Aggiornamenti prezzi in pausa — il provider %{provider} è disabilitato. Passa a un altro provider qui sotto o riabilitalo nelle Impostazioni."
-      truncated_history_warning: "Lo storico dei prezzi è disponibile solo dal %{date} in poi. Le date precedenti non hanno dati dal provider selezionato — questo può succedere quando l'asset è stato quotato dopo la data del tuo acquisto, o quando il provider offre solo una finestra storica limitata nel suo piano attuale."
-      switch_provider_label: Cambia provider
-      switch_provider_description: "%{provider} è disabilitato. Cerca questo titolo su un altro provider abilitato."
-      switch_provider_button: Cambia
-      no_security_provider: Provider titoli non configurato. Impossibile cercare titoli.
       security_remapped_label: Titolo rimappato
       provider_sent: "Provider ha inviato: %{ticker}"
       reset_to_provider: Reimposta al provider
@@ -97,8 +85,3 @@ it:
       shares_label: Azioni
       book_value_label: Valore di Libro
       market_value_label: Valore di Mercato
-      market_data_label: Dati di mercato
-      market_data_sync_button: Aggiorna
-      last_price_update: Ultimo aggiornamento prezzo
-      syncing: Sincronizzazione in corso...
-      never: Mai

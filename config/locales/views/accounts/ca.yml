@@ -133,10 +133,6 @@ ca:
         owed: Import degut
       header:
         complete_setup: Completa la configuració
-      limited_fx_history_warning: L'historial de tipus de canvi només està disponible
-        a partir del %{date}. Les transaccions anteriors a aquesta data utilitzen
-        conversions de divisa aproximades — això pot passar quan el proveïdor de FX
-        només ofereix una finestra històrica limitada.
       menu:
         confirm_accept: Elimina "%{name}"
         confirm_body_html: "<p>En eliminar aquest compte, s'esborrarà l'historial
@@ -163,11 +159,6 @@ ca:
         statements: Extractes
         schedule: Amortització
     sidebar:
-      configure_providers: Configura els teus proveïdors aquí.
-      missing_data: Falten dades històriques
-      missing_data_description: "%{product} utilitza proveïdors externs per obtenir
-        tipus de canvi històrics, preus de valors i més. Aquestes dades són necessàries
-        per calcular saldos històrics precisos dels comptes."
       new_account: Nou compte
       new_account_group: Afegeix %{account_group}
       new_asset: Nou actiu

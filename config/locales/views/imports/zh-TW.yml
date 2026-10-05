@@ -99,8 +99,6 @@ zh-TW:
         price_label: 價格
         account_label: 帳戶
         name_label: 名稱
-        note_label: 備註
-        no_security_provider_warning: 尚未設定證券價格供應商。您的交易匯入仍可運作，但 Relay 不會回補價格歷史。請前往設定完成設定。
         date_format_label: 日期格式
         apply_configuration: 套用設定
       category_import:

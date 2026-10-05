@@ -414,7 +414,7 @@ class TransfersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "exchange_rate endpoint returns rate for different currencies" do
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "USD", to: "EUR", date: Date.current)
                 .returns(OpenStruct.new(rate: 0.92))
 
@@ -430,7 +430,7 @@ class TransfersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "exchange_rate endpoint returns error when exchange rate unavailable" do
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "USD", to: "EUR", date: Date.current)
                 .returns(nil)
 
@@ -454,7 +454,7 @@ class TransfersControllerTest < ActionDispatch::IntegrationTest
       accountable: Depository.new
     )
 
-    ExchangeRate.stubs(:find_or_fetch_rate).returns(nil)
+    ExchangeRate.stubs(:find_rate).returns(nil)
 
     assert_no_difference "Transfer.count" do
       post transfers_url, params: {

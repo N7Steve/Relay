@@ -119,8 +119,6 @@ nl:
       security_not_listed_hint: Ziet u uw effect niet? Selecteer "Voer aangepaste ticker in" onderaan de lijst.
       ticker_placeholder: AAPL
       ticker_hint: Voer het aandelen/ETF ticker symbool in (bijv. AAPL, MSFT)
-      ticker_search_placeholder: Zoek naar een ticker...
-      ticker_search_hint: Zoek op ticker symbool of bedrijfsnaam, of typ een aangepaste ticker
       price_mismatch_title: Prijs komt mogelijk niet overeen
       price_mismatch_message: "Uw prijs (%{entered_price}/aandeel) verschilt aanzienlijk van de huidige marktprijs van %{ticker} (%{market_price}). Als dit verkeerd lijkt, heeft u mogelijk het verkeerde effect geselecteerd — probeer \"Voer aangepaste ticker in\" te gebruiken om het juiste effect op te geven."
       quantity_label: Hoeveelheid (Aandelen)

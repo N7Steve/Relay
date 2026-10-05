@@ -22,14 +22,12 @@ class Provider::FamilyGeneratorTest < ActiveSupport::TestCase
     ERB.new(template, trim_mode: "-").result(context.instance_eval { binding })
   end
 
-  test "the unlinking scaffold renders to valid Ruby and carries the disposition seam" do
+  test "the unlinking scaffold renders to valid Ruby and retains imported data" do
     rendered = render_template("unlinking_concern.rb.tt", class_name: "Gocardless", file_name: "gocardless")
 
     assert_parses rendered
-    # A generated provider retains by default and refuses a discard it has not
-    # implemented, rather than accepting one and keeping the data.
-    assert_includes rendered, "disposition: ProviderDisconnectable::DEFAULT_DISPOSITION"
-    assert_includes rendered, "does not implement the #{'#{disposition}'} disposition"
+    assert_includes rendered, "def unlink_all!(dry_run: false)"
+    assert_not_includes rendered, "ProviderDisconnectable"
   end
 
   test "appends to a single-line enum" do

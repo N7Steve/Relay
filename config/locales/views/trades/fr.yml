@@ -60,7 +60,6 @@ fr:
       no_category: Aucune catégorie
       note_label: Note
       note_placeholder: Ajoutez tout commentaire supplémentaire ici...
-      provider_disabled_warning: Mises à jour des prix en pause — le fournisseur %{provider} est désactivé. Réactivez-le dans les paramètres ou réassociez l'holding à un autre fournisseur.
       quantity_label: Quantité
       sell: Vendre
       settings: Paramètres

@@ -166,8 +166,6 @@ de:
       security_not_listed_hint: Dein Wertpapier nicht dabei? Wähle unten in der Liste „Eigenes Tickersymbol eingeben“.
       ticker_placeholder: AAPL
       ticker_hint: Gib das Aktien-/ETF-Tickersymbol ein (z. B. AAPL, MSFT)
-      ticker_search_placeholder: Nach Ticker suchen…
-      ticker_search_hint: Nach Tickersymbol oder Firmenname suchen oder eigenes Tickersymbol eingeben
       price_mismatch_title: Preis weicht möglicherweise ab
       price_mismatch_message: "Dein Preis (%{entered_price}/Aktie) weicht deutlich vom aktuellen Marktpreis von %{ticker} (%{market_price}) ab. Wenn das falsch erscheint, hast du vielleicht das falsche Wertpapier gewählt — versuche „Eigenes Tickersymbol eingeben“, um das richtige anzugeben."
       quantity_label: Menge (Aktien)

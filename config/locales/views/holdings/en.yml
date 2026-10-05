@@ -16,10 +16,6 @@ en:
       security_not_found: Could not find the selected security.
     reset_security:
       success: Security reset to provider value.
-    sync_prices:
-      success: Market data synced successfully.
-      unavailable: Market data sync is not available for offline securities.
-      provider_error: Could not fetch latest prices. Please try again in a few minutes.
     errors:
       security_collision: "Cannot remap: you already have a holding for %{ticker} on %{date}."
     cost_basis_sources:
@@ -72,16 +68,10 @@ en:
       settings: Settings
       security_label: Security
       originally: "was %{ticker}"
-      search_security: Search security
-      search_security_placeholder: Search by ticker or name
       cancel: Cancel
       remap_security: Save
-      provider_disabled_warning: "Price updates paused — %{provider} provider is disabled. Switch to another provider below or re-enable it in Settings."
-      truncated_history_warning: "Price history is only available from %{date} onwards. Earlier dates have no data from the selected provider — this can happen when the asset was listed after your trade date, or when the provider only offers a limited historical window on its current plan."
-      switch_provider_label: Switch provider
-      switch_provider_description: "%{provider} is disabled. Search for this security from another enabled provider."
-      switch_provider_button: Switch
-      no_security_provider: Security provider not configured. Cannot search for securities.
+      security_ticker: Ticker
+      security_ticker_placeholder: "AAPL or AAPL|XNAS"
       security_remapped_label: Security remapped
       provider_sent: "Provider sent: %{ticker}"
       reset_to_provider: Reset to provider
@@ -99,8 +89,3 @@ en:
       shares_label: Shares
       book_value_label: Book Value
       market_value_label: Market Value
-      market_data_label: Market data
-      market_data_sync_button: Refresh
-      last_price_update: Last price update
-      syncing: Syncing...
-      never: Never

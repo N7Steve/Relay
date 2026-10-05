@@ -10,13 +10,10 @@
   ) %>
 <% end %>
 
-<% if @manual_accounts.empty? && @financekit_accounts.empty? && @enable_banking_items.empty? %>
+<% if @manual_accounts.empty? && @enable_banking_items.empty? %>
   <%= render "empty" %>
 <% else %>
   <div class="space-y-2">
-    <% if @financekit_accounts.any? %>
-      <%= render "accounts/index/financekit_accounts", accounts: @financekit_accounts %>
-    <% end %>
     <% if @enable_banking_items.any? %>
       <%= render @enable_banking_items.sort_by(&:created_at) %>
     <% end %>

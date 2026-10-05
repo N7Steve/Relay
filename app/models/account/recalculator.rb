@@ -11,7 +11,7 @@ class Account::Recalculator
         apply_cached_provider_balances
       end
     end
-  rescue Money::ConversionError, Security::Provided::SecurityInfoMissingError => error
+  rescue Money::ConversionError, Security::MissingPriceError => error
     DebugLogEntry.capture(
       category: "balance_calculation", level: "warn", message: error.message,
       source: self.class.name, family: @account.family, account: @account,

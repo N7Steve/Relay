@@ -232,8 +232,6 @@ hu:
       security_not_listed_hint: Nem látod az értékpapírodat? Válaszd az "Egyedi ticker megadása" lehetőséget a lista alján.
       ticker_placeholder: AAPL
       ticker_hint: Add meg a részvény/ETF ticker szimbólumát (pl. AAPL, MSFT)
-      ticker_search_placeholder: Ticker keresése...
-      ticker_search_hint: Keress ticker szimbólum vagy cégnév alapján, vagy írj be egyedi tickert
       price_mismatch_title: Az ár eltérhet
       price_mismatch_message: "Az árad (%{entered_price}/részvény) jelentősen eltér a(z) %{ticker} aktuális piaci árától (%{market_price}). Ha ez tévesnek tűnik, lehet, hogy rossz értékpapírt választottál — próbáld meg az \"Egyedi ticker megadása\" opciót a helyes értékpapír megadásához."
       quantity_label: Mennyiség (részvény)

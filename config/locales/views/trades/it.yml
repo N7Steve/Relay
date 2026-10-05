@@ -46,7 +46,6 @@ it:
       delete_subtitle: Questa azione non può essere annullata
       delete_title: Elimina Movimento
       details: Dettagli
-      provider_disabled_warning: "Aggiornamenti prezzi in pausa — il provider %{provider} è disabilitato. Riabilitalo nelle Impostazioni o rimappa la posizione su un altro provider."
       exclude_subtitle: Questo movimento non verrà incluso nei rapporti e nei calcoli
       exclude_title: Escludi dall'analisi
       no_category: Nessuna categoria

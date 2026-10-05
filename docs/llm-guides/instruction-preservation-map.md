@@ -29,7 +29,7 @@ instructions outside this repository are outside the consolidation.
 | `.cursor/rules/api-endpoint-consistency.mdc` | Thin scoped adapter | Shared API checklist; retain exactly the three API v1 scopes and `alwaysApply: false`. |
 | `.cursor/rules/cursor_rules.mdc` | Retire generic template | Cursor rule format/loading reference belongs in `harness-adapters.md`; Prisma examples do not describe this Rails app. |
 | `.cursor/rules/self_improve.mdc` | Retire automatic trigger | Keep guidance maintenance advice in `harness-adapters.md`; intentionally stop always-on instructions to generate new rules when patterns occur in three files. |
-| `docs/llm-guides/adding-a-securities-provider.md` | Preserve in place | Detailed repeatable provider workflow, registry, MIC/currency handling, configuration, UI/locales and verification. |
+| `docs/llm-guides/adding-a-securities-provider.md` | Retired in pruning phase 9A | Market data providers were removed; the walkthrough remains recoverable in Git history. |
 | `docs/llm-guides/gating-a-preview-feature.md` | Preserve in place | Feature gate and rollout workflow. |
 | `docs/llm-guides/goals.md` | Preserve in place | Goals domain, reconciliation, statuses and data guidance. |
 | `docs/llm-guides/wealth-agent-harness.md` | Preserve in place | Product integration boundary, read-only tools, provenance and monthly runbook. Not repository-wide coding policy. |
@@ -192,3 +192,10 @@ historical persistence readers. Removed importers, processors, initializers and
 the global account-provider generator are historical references, not guidance to
 restore those features. Pending/FX privacy, tenancy and diagnostic obligations
 continue in the current [provider guide](providers.md).
+
+## Pruning phase 9 override
+
+[Phase 9](../migration/pruning-phase-9.md) retires market/FX providers (9A),
+remote Active Storage services (9E) and FinanceKit (9F), while keeping
+Brandfetch, Google Drive, Goals, insights, budgets, access mechanisms and the
+other native clients. References above to those retired pieces are historical.

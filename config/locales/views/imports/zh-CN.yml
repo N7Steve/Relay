@@ -99,8 +99,6 @@ zh-CN:
         price_label: 价格
         account_label: 账户
         name_label: 名称
-        note_label: 备注
-        no_security_provider_warning: 证券价格提供方尚未配置。您的交易导入仍可进行，但 Relay 不会回填价格历史。请前往设置进行配置。
         date_format_label: 日期格式
         apply_configuration: 应用配置
       category_import:

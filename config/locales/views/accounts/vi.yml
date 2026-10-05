@@ -69,7 +69,6 @@ vi:
         title: Bạn muốn thêm bằng cách nào?
       title: Bạn muốn thêm gì?
     show:
-      limited_fx_history_warning: "Lịch sử tỷ giá hối đoái chỉ khả dụng từ %{date} trở đi. Các giao dịch trước ngày này sử dụng chuyển đổi tiền tệ xấp xỉ."
       tabs:
         activity: Hoạt động
         holdings: Danh mục nắm giữ
@@ -116,9 +115,6 @@ vi:
     update:
       success: "Đã cập nhật tài khoản %{type}"
     sidebar:
-      missing_data: Thiếu dữ liệu lịch sử
-      missing_data_description: "%{product} sử dụng nhà cung cấp bên thứ ba để lấy tỷ giá hối đoái lịch sử, giá chứng khoán và nhiều hơn nữa. Dữ liệu này cần thiết để tính số dư tài khoản lịch sử chính xác."
-      configure_providers: Cấu hình nhà cung cấp của bạn tại đây.
       tabs:
         all: Tất cả
         assets: Tài sản

@@ -91,9 +91,9 @@ trigger are retired, as recorded in the preservation map.
 
 ## Skills considered
 
-[Adding a securities provider](adding-a-securities-provider.md) and
-[gating a preview feature](gating-a-preview-feature.md) are bounded, repeatable
-workflows and therefore plausible skill candidates. Skills have real ecosystem
+[Gating a preview feature](gating-a-preview-feature.md) is a bounded, repeatable
+workflow and therefore a plausible skill candidate. The securities-provider
+walkthrough was retired with market data providers in pruning phase 9A. Skills have real ecosystem
 support: both Copilot and Junie document the open format and shared
 `.agents/skills/` locations.
 [Copilot customization reference](https://docs.github.com/en/copilot/reference/customization-cheat-sheet),

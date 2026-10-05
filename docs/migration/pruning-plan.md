@@ -7,8 +7,10 @@ Estado actualizado el 5 de octubre de 2026: fases 0–7 implementadas y
 publicadas en `origin/main`. Steve informa de que fase 7 está desplegada y
 aparentemente funciona correctamente; este trabajo no inspecciona la instalación.
 Fase 8 incorporada a `main` y `origin/main` en `b49f8dcda`; despliegue no verificado.
-Fases 9–11 pendientes de implementación, con preferencias finales registradas.
-Ver los registros de [fase 7](pruning-phase-7.md) y [fase 8](pruning-phase-8.md).
+Fase 9 implementada y validada localmente (9A, 9E y 9F; 9B–9D conservados),
+pendiente de confirmación para commit/push. Fases 10–11 pendientes.
+Ver los registros de [fase 7](pruning-phase-7.md), [fase 8](pruning-phase-8.md)
+y [fase 9](pruning-phase-9.md).
 
 La petición autoriza preparar este plan. La selección de una fase autorizará
 su implementación dentro del alcance descrito. Commit/push y operaciones sobre
@@ -315,8 +317,8 @@ que no usa ninguno ni tiene cuentas sincronizadas o datos que conservar.
 Implementación publicada. Steve informa el 5 de octubre de 2026 de su despliegue
 y funcionamiento aparentemente correcto; evidencia local y límites en el
 [registro de fase 7](pruning-phase-7.md).
-Se mantienen los límites de FinanceKit, cotizaciones/divisas y módulos compartidos
-descritos más abajo.
+FinanceKit y cotizaciones/divisas se retiraron después en la
+[fase 9](pruning-phase-9.md).
 
 No ejecutar como un gran borrado. **Cada lote es una subfase desplegable y pasa
 todo el contrato de cierre antes de comenzar el siguiente.**
@@ -375,6 +377,7 @@ Las decisiones ya están fijadas en las preferencias finales anteriores: 9A reti
 adquisición externa; 9B/9D conservan Brandfetch/Drive; 9C conserva Goals/insights y
 presupuestos actuales; 9E conserva acceso y retira S3; 9F retira solo FinanceKit.
 La tabla siguiente conserva criterios técnicos, subordinados a esa selección.
+Implementación y evidencia en el [registro de fase 9](pruning-phase-9.md).
 
 | Bloque | Decisión y alcance | Final estable y validación específica |
 | --- | --- | --- |
@@ -444,8 +447,8 @@ La fase 0 está publicada en `eb538dae3`, la fase 1 en `a5299f36c`, la fase 2
 en `ee3341fd3`, la fase 3 en `feccab08c`, la fase 4 en `92ee241a1` y la fase 5
 en `ecc901083`. Los registros de cada fase recogen alcance, pruebas y límites.
 Las fases 6–7 están publicadas; el reporte de Steve sobre el despliegue de fase 7
-se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fases 9–11 pendientes de
-implementación con selección registrada. Este trabajo no verifica directamente TrueNAS.
+se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fase 9 validada localmente
+y pendiente de publicación; fases 10–11 pendientes con selección registrada. Este trabajo no verifica directamente TrueNAS.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |

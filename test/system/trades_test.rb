@@ -10,10 +10,6 @@ class TradesTest < ApplicationSystemTestCase
 
     @account = accounts(:investment)
 
-    # Disable provider to focus on form testing
-    Security.stubs(:provider).returns(nil)
-    Security.stubs(:providers).returns([])
-
     visit_account_portfolio
   end
 

@@ -121,10 +121,6 @@ tr:
         owed: Borç miktarı
       header:
         complete_setup: Kurulumu tamamla
-      limited_fx_history_warning: Döviz kuru geçmişi yalnızca %{date} tarihinden itibaren
-        mevcuttur. Bu tarihten önceki işlemler yaklaşık kur dönüşümleri kullanır —
-        bu durum, döviz sağlayıcısının sınırlı bir geçmiş veri aralığı sunması nedeniyle
-        oluşabilir.
       menu:
         confirm_accept: "%{name} hesabını sil"
         confirm_body_html: "<p>Bu hesabı silerek, değer geçmişini silmiş olacaksınız
@@ -150,11 +146,6 @@ tr:
         statements: Ekstreler
         schedule: Ödeme planı
     sidebar:
-      configure_providers: Sağlayıcılarınızı buradan yapılandırın.
-      missing_data: Eksik geçmiş veri
-      missing_data_description: "%{product}, geçmiş döviz kurlarını, menkul kıymet
-        fiyatlarını ve daha fazlasını almak için üçüncü taraf sağlayıcılar kullanır.
-        Bu veriler, doğru geçmiş hesap bakiyelerini hesaplamak için gereklidir."
       new_account: Yeni hesap
       new_account_group: Yeni %{account_group}
       new_asset: Yeni varlık

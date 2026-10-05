@@ -8,12 +8,12 @@ class DebugLogEntryTest < ActiveSupport::TestCase
       message: "Provider event",
       source: "Provider::Test",
       account: accounts(:depository),
-      provider: :twelve_data,
+      provider: :enable_banking,
       metadata: { test: true }
     )
 
     assert entry.persisted?
-    assert_equal "twelve_data", entry.provider_key
+    assert_equal "enable_banking", entry.provider_key
     assert_equal accounts(:depository), entry.account
     assert_equal accounts(:depository).family, entry.family
   end

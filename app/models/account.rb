@@ -91,7 +91,7 @@ class Account < ApplicationRecord
   # have a connector card. Keep those accounts visible in the ordinary groups.
   scope :listable_without_active_connector, -> {
     where.not(status: :pending_deletion).where.not(
-      id: AccountProvider.where(provider_type: %w[EnableBankingAccount FinancekitAccountLineage]).select(:account_id)
+      id: AccountProvider.where(provider_type: "EnableBankingAccount").select(:account_id)
     )
   }
 

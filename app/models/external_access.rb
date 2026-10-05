@@ -1,11 +1,9 @@
 class ExternalAccess
   Disabled = Class.new(StandardError)
-  CAPABILITIES = %i[bank_sync market_data property_valuations logos google_drive].freeze
+  CAPABILITIES = %i[bank_sync property_valuations logos google_drive].freeze
 
   def self.enabled?(capability)
     raise ArgumentError, "Unknown external capability: #{capability}" unless CAPABILITIES.include?(capability)
-    return false if capability == :market_data && local_recalculation?
-
     if capability == :logos
       return Setting.external_logos_enabled == true
     end

@@ -1,9 +1,9 @@
 require "test_helper"
-require_relative "../../support/financekit_test_helper"
+require_relative "../../support/historical_financekit_helper"
 
 class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
-  include FinancekitTestHelper
+  include HistoricalFinancekitHelper
 
   setup do
     ensure_tailwind_build
@@ -13,101 +13,17 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
     Provider::Factory.ensure_adapters_loaded
   end
 
-  test "Apple Wallet is available through a disabled App Store button" do
-    get settings_providers_url
-
-    assert_response :success
-    assert_select "div[data-provider-name='apple wallet'][data-provider-region='us / uk'][data-provider-kind='bank']" do
-      assert_select "button[disabled]", text: "App Store"
-      assert_select "span[title='Coming soon!']"
-      assert_select "a", count: 0
-      assert_select "p", text: "US / UK · Bank"
-    end
-  end
-
-  test "linked Wallet accounts appear with upload and import summaries" do
-    financekit_setup
-    @item.update!(last_accepted_at: 2.hours.ago, last_imported_at: 1.hour.ago)
+  test "Apple Wallet is neither offered nor shown for historical connections" do
+    create_historical_financekit_link
 
     get settings_providers_url
 
     assert_response :success
     assert_select "[data-provider-name='apple wallet']", count: 0
-    assert_select "details#financekit-connection" do
-      assert_select "a[href=?]", account_path(@source.account), text: "Test Wallet"
-      assert_select "span", text: "Sync active"
-      assert_select "dt", text: "Last accepted by Relay"
-      assert_select "dt", text: "Last imported into your family"
-      assert_select "time[datetime=?]", @item.last_accepted_at.iso8601
-      assert_select "time[datetime=?]", @item.last_imported_at.iso8601
-      assert_select "form", count: 0
-    end
-    assert_select "form[action=?]", sync_provider_settings_providers_path(provider_key: "financekit"), count: 0
-    assert_includes @controller.view_assigns["connected"].map { |entry| entry[:provider_key] }, "financekit"
-  end
-
-  test "Wallet repairs retain linked accounts and missing timestamps show Not yet" do
-    financekit_setup
-    @item.mark_repair!("test_repair")
-
-    get settings_providers_url
-
-    assert_response :success
-    assert_select "details#financekit-connection" do
-      assert_select "span", text: "Repair required — open the Relay iOS app"
-      assert_select "dd", text: "Not yet", count: 2
-      assert_select "a", text: "Test Wallet"
-    end
-    assert_includes @controller.view_assigns["needs_attention"].map { |entry| entry[:provider_key] }, "financekit"
-  end
-
-  test "revoked Wallet connections return to available providers" do
-    financekit_setup
-    @item.disconnect!
-
-    get settings_providers_url
-
-    assert_response :success
     assert_select "details#financekit-connection", count: 0
-    assert_select "[data-provider-name='apple wallet'] button[disabled]", text: "App Store"
-  end
-
-
-  test "Wallet settings retain disabled accounts but exclude pending deletion" do
-    financekit_setup
-    @source.account.update!(status: "disabled")
-    get settings_providers_url
-    assert_response :success
-    assert_select "details#financekit-connection a[href=?]", account_path(@source.account)
-
-    @source.account.update!(status: "pending_deletion")
-    get settings_providers_url
-    assert_response :success
-    assert_select "details#financekit-connection", count: 0
-    assert_select "a[href=?]", account_path(@source.account), count: 0
-    assert_select "[data-provider-name='apple wallet']"
-  end
-
-  test "Wallet summary excludes another family's connections" do
-    financekit_setup(user: users(:empty))
-
-    get settings_providers_url
-
-    assert_response :success
-    assert_select "details#financekit-connection", count: 0
-    assert_select "[data-provider-name='apple wallet']"
-  end
-
-  test "Wallet summary excludes accounts the current admin cannot access" do
-    financekit_setup
-    @source.account.account_shares.destroy_all
-    @source.account.update!(owner: users(:family_member))
-
-    get settings_providers_url
-
-    assert_response :success
-    assert_select "details#financekit-connection", count: 0
-    assert_select "[data-provider-name='apple wallet']"
+    assert_select "button[disabled]", text: "App Store", count: 0
+    assert_equal [ "enable_banking" ], @controller.view_assigns.values_at("connected", "needs_attention", "available")
+      .flatten.map { |entry| entry[:provider_key] }
   end
 
   test "GET /settings/bank_sync redirects permanently to /settings/providers" do

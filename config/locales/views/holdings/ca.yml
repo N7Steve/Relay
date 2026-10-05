@@ -63,55 +63,29 @@ ca:
       delete_title: Elimina la posició
       edit_security: Edita el valor
       history: Historial
-      last_price_update: Última actualització de preu
-      market_data_label: Dades de mercat
-      market_data_sync_button: Actualitza
       market_value_label: Valor de mercat
-      never: Mai
-      no_security_provider: Proveïdor de valors no configurat. No es poden cercar
-        valors.
       no_trade_history: No hi ha historial d'operacions per a aquesta posició.
       originally: era %{ticker}
       overview: Resum
       portfolio_weight_label: Pes a la cartera
-      provider_disabled_warning: Actualitzacions de preu en pausa — el proveïdor %{provider}
-        està desactivat. Canvia a un altre proveïdor o torna'l a activar a Configuració.
       provider_sent: 'El proveïdor ha enviat: %{ticker}'
       remap_security: Desa
       reset_confirm_body: Això canviarà el valor de %{current} a %{original} i mourà
         totes les operacions associades.
       reset_confirm_title: Vols restablir el valor al del proveïdor?
       reset_to_provider: Restableix al del proveïdor
-      search_security: Cerca valor
-      search_security_placeholder: Cerca per símbol o nom
       security_label: Valor
       security_remapped_label: Valor reassignat
       settings: Configuració
       shares_label: Accions
-      switch_provider_button: Canvia
-      switch_provider_description: "%{provider} està desactivat. Cerca aquest valor
-        en un altre proveïdor activat."
-      switch_provider_label: Canvia de proveïdor
-      syncing: Sincronitzant...
       ticker_label: Símbol
       total_return_label: Rendiment total
       trade_history_entry: "%{qty} accions de %{security} a %{price}"
-      truncated_history_warning: L'historial de preus només està disponible a partir
-        del %{date}. Les dates anteriors no tenen dades del proveïdor seleccionat
-        — això pot passar quan l'actiu es va llistar després de la data de l'operació,
-        o quan el proveïdor només ofereix una finestra històrica limitada al seu pla
-        actual.
       unknown: Desconegut
       unlock_confirm_body: Això permetrà que el cost base s'actualitzi per les sincronitzacions
         del proveïdor o pels càlculs d'operacions.
       unlock_confirm_title: Vols desbloquejar el cost base?
       unlock_cost_basis: Desbloqueja
-    sync_prices:
-      provider_error: No s'han pogut obtenir els preus més recents. Torna-ho a provar
-        d'aquí a uns minuts.
-      success: Dades de mercat sincronitzades correctament.
-      unavailable: La sincronització de dades de mercat no està disponible per a valors
-        sense connexió.
     unlock_cost_basis:
       success: Cost base desbloquejat. Pot actualitzar-se a la propera sincronització.
     update:

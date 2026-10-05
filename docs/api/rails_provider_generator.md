@@ -1,13 +1,13 @@
 # Rails `Provider` Generator Guide
 
 The `provider:family` generator scaffolds integrations with credentials owned by
-one family. Phase 7 retains Enable Banking and FinanceKit as active account
-integrations. Adding a connector requires an explicit product decision; do not
+one family. Enable Banking is the only active account integration after
+pruning phases 7 and 9F. Adding a connector requires an explicit product decision; do not
 use this generator to reactivate a retired connector.
 
 The global account-provider generator and its shared credential registry were
-removed in [pruning phase 7](../migration/pruning-phase-7.md). Market/FX and other
-shared services use their existing provider patterns; this generator is for
+removed in [pruning phase 7](../migration/pruning-phase-7.md). Market/FX providers
+were removed in [phase 9A](../migration/pruning-phase-9.md); this generator is for
 account integrations only.
 
 ## Quick Start

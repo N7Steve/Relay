@@ -227,8 +227,6 @@ zh-CN:
       security_not_listed_hint: 找不到您的证券？请在列表底部选择“输入自定义代码”。
       ticker_placeholder: AAPL
       ticker_hint: 输入股票/ETF 代码（例如 AAPL、MSFT）
-      ticker_search_placeholder: 搜索代码...
-      ticker_search_hint: 可按代码或公司名称搜索，或直接输入自定义代码
       price_mismatch_title: 价格可能不匹配
       price_mismatch_message: "您的价格（%{entered_price}/股）与 %{ticker} 当前市场价格（%{market_price}）差异较大。如果这看起来不对，您可能选错了证券——请尝试使用“输入自定义代码”指定正确的证券。"
       quantity_label: 数量（股）

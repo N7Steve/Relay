@@ -1,81 +1,11 @@
 require "application_system_test_case"
-require_relative "../../support/financekit_test_helper"
 
 class Settings::ProvidersTest < ApplicationSystemTestCase
-  include FinancekitTestHelper
   setup do
     @user = users(:family_admin)
     @family = families(:dylan_family)
     @family.enable_banking_items.destroy_all
     login_as @user
-  end
-
-  test "Wallet account links leave the provider frame and open transaction activity" do
-    financekit_setup(user: @user)
-    accept_and_apply
-
-    visit settings_providers_path
-    wallet = find("details#financekit-connection")
-    wallet.find("summary").click unless wallet.matches_selector?("details[open]")
-    find("details", text: "Apple Wallet").native.save_screenshot(Rails.root.join("tmp", "apple-wallet-connected.png"))
-    within "details#financekit-connection" do
-      click_link "Test Wallet"
-    end
-
-    assert_current_path account_path(@source.account)
-    assert_selector "header h2", text: "Test Wallet"
-    assert_text "Synthetic shop"
-
-    visit accounts_path
-    within "#financekit-accounts" do
-      click_link "Test Wallet"
-    end
-    assert_current_path account_path(@source.account)
-    assert_text "Synthetic shop"
-  end
-
-
-
-
-  test "Wallet advertises App Store availability without a web connection flow" do
-    visit settings_providers_path
-    find('[data-providers-filter-target="input"]').set("Apple Wallet")
-
-    within available_provider_cards_container do
-      assert_text "US / UK"
-      assert_text "Bank"
-      assert_button "App Store", disabled: true
-      assert_selector '[title="Coming soon!"]'
-      assert_no_selector "a[data-turbo-frame='drawer']", visible: true
-      find('[data-providers-filter-target="card"]', text: "Apple Wallet").native.save_screenshot(
-        Rails.root.join("tmp", "apple-wallet-available.png"))
-    end
-  end
-
-  test "Wallet unlink confirmation disconnects the publisher and keeps account activity" do
-    financekit_setup(user: @user)
-    accept_and_apply
-
-    visit accounts_path
-    within "#financekit-accounts" do
-      find("button[aria-haspopup='menu']").click
-      click_link "Unlink from provider"
-    end
-    dialog = find("dialog[open]")
-    within dialog do
-      assert_text I18n.t("accounts.confirm_unlink.warning_wallet_connection")
-      dialog.native.save_screenshot(Rails.root.join("tmp", "apple-wallet-unlink.png"))
-      click_on "Confirm and unlink"
-    end
-
-    assert_no_selector "dialog[open]"
-    assert_current_path accounts_path
-    within "#manual-accounts" do
-      click_link "Test Wallet"
-    end
-    assert_current_path account_path(@source.account)
-    assert_text "Synthetic shop"
-    assert_equal "revoked", @item.reload.status
   end
 
   test "shows status pill on section header for a configured provider" do
@@ -140,8 +70,8 @@ class Settings::ProvidersTest < ApplicationSystemTestCase
     assert_operator connections_y, :<, enable_banking_y, "Your connections heading should appear above Enable Banking section"
     assert_operator enable_banking_y, :<, available_y, "Enable Banking should appear above Available heading"
 
-    available_grid_top = available_provider_cards_container.native.location.y
-    assert_operator available_y, :<, available_grid_top, "Available heading should appear above the card grid"
+    # Enable Banking is the only retained connector, so nothing else is available once it is connected.
+    assert_text I18n.t("settings.providers.groups.empty_available")
   end
 
   test "action needed group is absent when no providers have issues" do

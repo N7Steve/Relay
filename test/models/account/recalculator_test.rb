@@ -17,7 +17,6 @@ class Account::RecalculatorTest < ActiveSupport::TestCase
   test "manual entries recalculate without any external capability" do
     @account.entries.create!(name: "Expense", date: Date.current - 1, amount: 100,
       currency: "USD", entryable: Transaction.new)
-    Account::MarketDataImporter.any_instance.expects(:import_all).never
     Account::Recalculator.new(@account).recalculate
     assert_equal 900, @account.reload.balance
     assert_equal 900, @account.balances.order(:date).last.balance

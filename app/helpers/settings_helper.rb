@@ -96,18 +96,6 @@ module SettingsHelper
     end
   end
 
-  def financekit_provider_summary(connections)
-    return { status: :off } if connections.empty?
-
-    items = connections.map { |connection| connection[:item] }
-    count = connections.flat_map { |connection| connection[:accounts].map(&:id) }.uniq.size
-    {
-      status: items.any? { |item| item.status == "repair_required" } ? :warn : :ok,
-      meta: t("settings.providers.financekit.linked_accounts", count: count),
-      last_synced_at: items.filter_map(&:last_imported_at).max
-    }
-  end
-
   def settings_nav_footer
     previous_setting = adjacent_setting(request.path, -1)
     next_setting = adjacent_setting(request.path, 1)
@@ -126,38 +114,6 @@ module SettingsHelper
       concat(previous_setting)
       concat(next_setting)
     end
-  end
-
-  def yahoo_finance_health_presentation(status)
-    status = status.to_sym if status.respond_to?(:to_sym)
-    status = :unknown unless %i[healthy rate_limited unavailable unknown].include?(status)
-
-    presentation = {
-      status_class: {
-        healthy: "bg-success",
-        rate_limited: "bg-warning",
-        unavailable: "bg-destructive",
-        unknown: "bg-surface-inset"
-      }.fetch(status),
-      status_text: t("settings.hostings.yahoo_finance_settings.status_#{status}")
-    }
-
-    presentation[:alert] = case status
-    when :rate_limited
-      {
-        title: t("settings.hostings.yahoo_finance_settings.rate_limited_title"),
-        message: t("settings.hostings.yahoo_finance_settings.rate_limited_message"),
-        variant: :warning
-      }
-    when :unavailable
-      {
-        title: t("settings.hostings.yahoo_finance_settings.unavailable_title"),
-        message: t("settings.hostings.yahoo_finance_settings.unavailable_message"),
-        variant: :warning
-      }
-    end
-
-    presentation
   end
 
   # Below this many synced accounts, the per-row pills already give the user

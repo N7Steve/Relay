@@ -85,7 +85,6 @@ es:
         title: ¿Cómo te gustaría añadirla?
       title: ¿Qué te gustaría añadir?
     show:
-      limited_fx_history_warning: El historial de tipos de cambio solo está disponible desde %{date}. Las transacciones anteriores a esa fecha usan conversiones de divisa aproximadas; esto puede ocurrir cuando el proveedor de tipos de cambio solo ofrece una ventana histórica limitada.
       tabs:
         activity: Actividad
         holdings: Posiciones
@@ -132,9 +131,6 @@ es:
     update:
       success: Cuenta %{type} actualizada
     sidebar:
-      missing_data: Faltan datos históricos
-      missing_data_description: '%{product} utiliza proveedores externos para obtener tipos de cambio históricos, precios de valores y más. Estos datos son necesarios para calcular saldos históricos precisos de las cuentas.'
-      configure_providers: Configura tus proveedores aquí.
       tabs:
         all: Todo
         assets: Activos

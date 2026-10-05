@@ -141,7 +141,7 @@ class ExchangeRatesControllerTest < ActionDispatch::IntegrationTest
     # Create mock object that returns a rate
     rate_obj = OpenStruct.new(rate: 1.2)
 
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "EUR", to: "USD", date: Date.current)
                 .returns(rate_obj)
 
@@ -156,8 +156,8 @@ class ExchangeRatesControllerTest < ActionDispatch::IntegrationTest
     assert_instance_of Float, json_response["rate"]
   end
 
-  test "returns error when find_or_fetch_rate raises exception" do
-    ExchangeRate.expects(:find_or_fetch_rate)
+  test "returns error when find_rate raises exception" do
+    ExchangeRate.expects(:find_rate)
                 .with(from: "EUR", to: "USD", date: Date.current)
                 .raises(StandardError, "Rate fetch failed")
 

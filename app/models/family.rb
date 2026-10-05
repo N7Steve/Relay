@@ -487,49 +487,6 @@ class Family < ApplicationRecord
     country != "US" && country != "CA"
   end
 
-  def requires_securities_data_provider?
-    # If family has any trades, they need a provider for historical prices
-    trades.any?
-  end
-
-  def requires_exchange_rates_data_provider?
-    # If family has any accounts not denominated in the family's currency, they need a provider for historical exchange rates
-    return true if accounts.where.not(currency: self.currency).any?
-
-    # If family has any entries in different currencies, they need a provider for historical exchange rates
-    uniq_currencies = entries.pluck(:currency).uniq
-    return true if uniq_currencies.count > 1
-    return true if uniq_currencies.count > 0 && uniq_currencies.first != self.currency
-
-    false
-  end
-
-  def missing_data_provider?
-    (requires_securities_data_provider? && Security.provider.nil?) ||
-    (requires_exchange_rates_data_provider? && ExchangeRate.provider.nil?)
-  end
-
-  # Returns securities with plan restrictions for a specific provider
-  # @param provider [String] The provider name (e.g., "TwelveData")
-  # @return [Array<Hash>] Array of hashes with ticker, name, required_plan, provider
-  def securities_with_plan_restrictions(provider:)
-    security_ids = trades.joins(:security).pluck("securities.id").uniq
-    return [] if security_ids.empty?
-
-    restrictions = Security.plan_restrictions_for(security_ids, provider: provider)
-    return [] if restrictions.empty?
-
-    Security.where(id: restrictions.keys).map do |security|
-      restriction = restrictions[security.id]
-      {
-        ticker: security.ticker,
-        name: security.name,
-        required_plan: restriction[:required_plan],
-        provider: restriction[:provider]
-      }
-    end
-  end
-
   def oldest_entry_date
     entries.order(:date).first&.date || Date.current
   end

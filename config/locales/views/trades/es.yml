@@ -46,7 +46,6 @@ es:
       delete_subtitle: Esta acción no se puede deshacer
       delete_title: Eliminar operación
       details: Detalles
-      provider_disabled_warning: Actualizaciones de precios en pausa — el proveedor %{provider} está desactivado. Vuelve a activarlo en Ajustes o reasigna la posición a otro proveedor.
       exclude_subtitle: Esta operación no se incluirá en informes y cálculos
       exclude_title: Excluir de los análisis
       no_category: Sin categoría

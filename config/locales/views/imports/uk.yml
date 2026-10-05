@@ -105,8 +105,6 @@ uk:
         price_label: "Ціна"
         account_label: "Рахунок"
         name_label: "Назва"
-        note_label: "Примітка"
-        no_security_provider_warning: "Постачальника цін на цінні папери не налаштовано. Ваш імпорт угод працюватиме, але Relay не заповнюватиме історію цін. Будь ласка, перейдіть до налаштувань, щоб налаштувати це."
         date_format_label: "Формат дати"
         apply_configuration: "Застосувати конфігурацію"
       category_import:

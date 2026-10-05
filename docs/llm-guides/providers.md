@@ -1,23 +1,24 @@
 # Provider integration guidance
 
-Read [architecture](architecture.md) for provider concepts, runtime registry
-selection and `Provided` concerns. For a new securities price provider, follow
-[the complete workflow](adding-a-securities-provider.md), including response
-types, MIC mapping, currency handling, settings encryption, UI, locales and tests.
+Read [architecture](architecture.md) for provider concepts and runtime registry
+selection. Security prices and exchange rates have no providers since
+[phase 9A](../migration/pruning-phase-9.md): they come from stored rows, trades,
+holdings and backups only.
 
 ## External capability boundaries
 
-Account connector runtime is limited to Enable Banking and FinanceKit. The
+Account connector runtime is limited to Enable Banking. The
 [phase 7 record](../migration/pruning-phase-7.md) lists retired connectors and
-their historical persistence contract. Market/FX providers, Brandfetch and Drive
-remain independent. Do not restore removed connectors through configuration,
+their historical persistence contract; FinanceKit followed in
+[phase 9F](../migration/pruning-phase-9.md). Brandfetch, Drive and property
+valuations remain independent. Do not restore removed connectors through configuration,
 generators, upstream merges or reflection.
 
 Financial provider requests require explicit installation-wide activation through
 `ExternalAccess`. Check at the transport boundary so direct requests, existing
 client instances and previously queued jobs also respect suspension. Faraday
 connections use `ExternalAccess::RequestMiddleware` with `:bank_sync`,
-`:market_data`, `:property_valuations` or `:ai` as appropriate. HTTParty bank
+`:property_valuations` or `:ai` as appropriate. HTTParty bank
 clients prepend `Provider::ExternalRequestGuard` to their singleton class.
 Other transports must check `ExternalAccess.require!` before opening a connection.
 

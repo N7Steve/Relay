@@ -40,15 +40,14 @@ class Trade::CreateForm
   end
 
   private
-    # Users can either look up a ticker from a provider or enter a manual, "offline" ticker (that we won't fetch prices for)
+    # Users enter a ticker; Relay resolves it to a stored or local security
     def security
       parsed = ticker.present? ? Security.parse_combobox_id(ticker) : { ticker: manual_ticker }
       return nil if parsed[:ticker].blank?
 
       Security::Resolver.new(
         parsed[:ticker],
-        exchange_operating_mic: parsed[:exchange_operating_mic],
-        price_provider: parsed[:price_provider]
+        exchange_operating_mic: parsed[:exchange_operating_mic]
       ).resolve
     end
 

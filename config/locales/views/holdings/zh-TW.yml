@@ -16,10 +16,6 @@ zh-TW:
       security_not_found: 找不到所選的證券。
     reset_security:
       success: 證券已重設為供應商提供的值。
-    sync_prices:
-      success: 市場資料同步成功。
-      unavailable: 離線證券無法同步市場資料。
-      provider_error: 無法取得最新價格，請幾分鐘後再試。
     errors:
       security_collision: 無法重新對應：您在 %{date} 已經有一筆 %{ticker} 的持股了。
     cost_basis_sources:
@@ -70,16 +66,8 @@ zh-TW:
       settings: 設定
       security_label: 證券
       originally: 原為 %{ticker}
-      search_security: 搜尋證券
-      search_security_placeholder: 以代號或名稱搜尋
       cancel: 取消
       remap_security: 儲存
-      provider_disabled_warning: 價格更新已暫停 - %{provider} 供應商已停用。請在下方改用其他供應商，或到設定中重新啟用它。
-      truncated_history_warning: 價格歷史只有 %{date}之後的資料。更早的日期在所選供應商那裡沒有資料 - 可能是這檔資產在您的交易日之後才掛牌，也可能是該供應商目前的方案只提供有限的歷史區間。
-      switch_provider_label: 切換供應商
-      switch_provider_description: '%{provider} 已停用。請從另一個已啟用的供應商搜尋這檔證券。'
-      switch_provider_button: 切換
-      no_security_provider: 尚未設定證券資料供應商，無法搜尋證券。
       security_remapped_label: 證券已重新對應
       provider_sent: 供應商送來的是：%{ticker}
       reset_to_provider: 重設為供應商的值
@@ -97,8 +85,3 @@ zh-TW:
       shares_label: 股數
       book_value_label: 帳面價值
       market_value_label: 市場價值
-      market_data_label: 市場資料
-      market_data_sync_button: 重新整理
-      last_price_update: 上次價格更新
-      syncing: 同步中...
-      never: 從未更新

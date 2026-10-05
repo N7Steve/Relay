@@ -246,8 +246,6 @@ pt-PT:
       security_not_listed_hint: Não encontra o seu título? Selecione "Introduzir ticker personalizado" no final da lista.
       ticker_placeholder: AAPL
       ticker_hint: Introduza o símbolo do ticker da ação/ETF (por exemplo, AAPL, MSFT)
-      ticker_search_placeholder: Procurar um ticker...
-      ticker_search_hint: Procure por símbolo do ticker ou nome da empresa, ou introduza um ticker personalizado
       price_mismatch_title: O preço pode não corresponder
       price_mismatch_message: "O seu preço (%{entered_price}/ação) difere significativamente do preço de mercado atual de %{ticker} (%{market_price}). Se isto parecer errado, poderá ter selecionado o título errado — tente usar \"Introduzir ticker personalizado\" para especificar o correto."
       quantity_label: Quantidade (Ações)

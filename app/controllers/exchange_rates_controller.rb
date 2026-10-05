@@ -21,7 +21,7 @@ class ExchangeRatesController < ApplicationController
     end
 
     begin
-      rate_obj = ExchangeRate.find_or_fetch_rate(from: from_currency, to: to_currency, date: date)
+      rate_obj = ExchangeRate.find_rate(from: from_currency, to: to_currency, date: date)
     rescue StandardError
       return render json: { error: "Failed to fetch exchange rate" }, status: :bad_request
     end

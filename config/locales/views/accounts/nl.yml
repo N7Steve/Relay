@@ -91,9 +91,6 @@ nl:
     update:
       success: "%{type} account bijgewerkt"
     sidebar:
-      missing_data: Ontbrekende historische gegevens
-      missing_data_description: "%{product} gebruikt externe providers om historische wisselkoersen, beveiligingsprijzen en meer op te halen. Deze gegevens zijn nodig om nauwkeurige historische accountbalansen te berekenen."
-      configure_providers: Configureer hier uw providers.
       tabs:
         all: Alle
         assets: Activa

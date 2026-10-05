@@ -74,9 +74,6 @@ ro:
     update:
       success: "Cont %{type} actualizat"
     sidebar:
-      missing_data: Lipsesc date istorice
-      missing_data_description: "%{product} folosește furnizori terți pentru a prelua cursurile de schimb istorice, prețurile titlurilor de valoare și multe altele. Aceste date sunt necesare pentru a calcula soldurile istorice corecte ale conturilor."
-      configure_providers: Configurează furnizorii aici.
       tabs:
         all: Toate
         assets: Active

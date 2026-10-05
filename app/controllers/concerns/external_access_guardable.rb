@@ -6,12 +6,12 @@ module ExternalAccessGuardable
     rescue_from ExternalAccess::Disabled do
       head :forbidden
     end
-    rescue_from Money::ConversionError, Security::Provided::SecurityInfoMissingError do |error|
+    rescue_from Money::ConversionError, Security::MissingPriceError do |error|
       render_insufficient_financial_data(error)
     end
     rescue_from ActionView::Template::Error do |error|
       cause = error.cause
-      raise error unless cause.is_a?(Money::ConversionError) || cause.is_a?(Security::Provided::SecurityInfoMissingError)
+      raise error unless cause.is_a?(Money::ConversionError) || cause.is_a?(Security::MissingPriceError)
 
       render_insufficient_financial_data(cause)
     end

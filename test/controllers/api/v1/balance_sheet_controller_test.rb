@@ -25,8 +25,7 @@ class Api::V1::BalanceSheetControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
-  test "missing FX returns explicit insufficient data without external access" do
-    Setting.stubs(:external_market_data_enabled).returns(false)
+  test "missing FX returns explicit insufficient data" do
     @family.accounts.create!(name: "Foreign account", balance: 1000, currency: "JPY", accountable: Depository.new)
     ExchangeRate.where(from_currency: "JPY", to_currency: @family.currency).delete_all
 

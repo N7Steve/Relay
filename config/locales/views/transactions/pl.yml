@@ -144,8 +144,6 @@ pl:
       success: Transakcja została zamieniona na transakcję giełdową
       ticker_hint: Wprowadź symbol giełdowy akcji lub ETF-u, np. AAPL lub MSFT
       ticker_placeholder: AAPL
-      ticker_search_hint: Szukaj po symbolu, nazwie spółki lub wpisz własny ticker
-      ticker_search_placeholder: Szukaj tickera...
       title: Zamień na transakcję papieru wartościowego
       trade_type_hint: Kupno lub sprzedaż akcji papieru wartościowego
       trade_type_label: Typ transakcji giełdowej

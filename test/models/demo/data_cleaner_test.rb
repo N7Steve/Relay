@@ -45,7 +45,7 @@ class Demo::DataCleanerTest < ActiveSupport::TestCase
   # Family.destroy_all skipped a family whose destroy aborted without a word,
   # then wiped the settings, invite codes and exchange rates anyway.
   test "a family that cannot be destroyed stops the reset before anything else goes" do
-    Setting.exchange_rate_provider = "yahoo_finance"
+    Setting.brand_fetch_client_id = "kept-client"
     families = Family.count
     exchange_rates = ExchangeRate.count
     assert exchange_rates.positive?, "the fixtures carry exchange rates for this check"
@@ -56,7 +56,7 @@ class Demo::DataCleanerTest < ActiveSupport::TestCase
 
     assert_equal families, Family.count
     assert_equal exchange_rates, ExchangeRate.count
-    assert_equal "yahoo_finance", Setting.exchange_rate_provider
+    assert_equal "kept-client", Setting.brand_fetch_client_id
   end
 
   # The guards are disarmed before any family goes. A reset that fails after

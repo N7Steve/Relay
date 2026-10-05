@@ -99,8 +99,6 @@ hu:
         price_label: Ár
         account_label: Számla
         name_label: Név
-        note_label: Megjegyzés
-        no_security_provider_warning: Az értékpapír-árszolgáltató nincs konfigurálva. Az ügyletek importálása működni fog, de a Relay nem tölti fel a korábbi árfolyamadatokat. Kérjük, menj a beállításokhoz és konfiguráld.
         date_format_label: Dátumformátum
         apply_configuration: Konfiguráció alkalmazása
       category_import:

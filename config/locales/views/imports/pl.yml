@@ -95,10 +95,6 @@ pl:
         format_label: Format
         leave_empty: Zostaw puste
         name_label: Nazwa
-        no_security_provider_warning: Dostawca cen papierów wartościowych nie jest
-          skonfigurowany. Import transakcji zadziała, ale Relay nie uzupełni historii
-          cen. Skonfiguruj to w ustawieniach.
-        note_label: Notatka
         price_label: Cena
         quantity_label: Ilość
         select_column: Wybierz kolumnę

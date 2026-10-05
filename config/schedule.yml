@@ -1,30 +1,8 @@
-import_market_data:
-  cron: "0 22 * * 1-5" # 5:00 PM EST / 6:00 PM EDT (NY time) Monday through Friday
-  class: "ImportMarketDataJob"
-  queue: "scheduled"
-  description: "Imports market data daily at 5:00 PM EST (1 hour after market close)"
-  args:
-    mode: "full"
-    clear_cache: false
-  
 clean_syncs:
   cron: "0 * * * *" # every hour
   class: "SyncCleanerJob"
   queue: "scheduled"
   description: "Cleans up stale syncs and reaps imports, exports, and provider fetch flags stuck by lost jobs"
-
-process_financekit_inbox:
-  cron: "*/5 * * * *"
-  class: "FinancekitInboxJob"
-  queue: "high_priority"
-  description: "Applies durable FinanceKit publisher batches and retries downstream work"
-
-run_security_health_checks:
-  cron: "0 2 * * 1-5" # 2:00 AM EST / 3:00 AM EDT (NY time) Monday through Friday
-  class: "SecurityHealthCheckJob"
-  queue: "scheduled"
-  description: "Runs security health checks to detect issues with security data"
-
 
 sync_property_valuations:
   cron: "30 1 1 * *" # monthly on the 1st at 1:30 AM

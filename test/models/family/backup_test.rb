@@ -1,6 +1,9 @@
 require "test_helper"
+require_relative "../../support/historical_financekit_helper"
 
 class Family::BackupTest < ActiveSupport::TestCase
+  include HistoricalFinancekitHelper
+
   setup do
     @source = Family.create!(name: "Portable family", currency: "EUR", country: "ES", timezone: "Europe/Madrid", date_format: "%d/%m/%Y")
     @target = families(:empty)
@@ -193,6 +196,33 @@ class Family::BackupTest < ActiveSupport::TestCase
     assert_equal item.access_url, restored.access_url
     assert_equal provider_account.raw_payload, restored.simplefin_accounts.sole.raw_payload
     assert_equal restored.simplefin_accounts.sole, @target.accounts.find_by!(name: "Checking").account_providers.sole.provider
+  end
+
+  test "round trips historical FinanceKit rows and their account link after the publisher retirement" do
+    owner = @source.users.create!(first_name: "Wallet", last_name: "Owner", email: "historical-wallet-backup@example.com",
+      password: "password123", role: :admin)
+    item, lineage = create_historical_financekit_link(family: @source, user: owner, account: @account)
+    entry = transaction(@account, "Wallet purchase", 12)
+    wallet_transaction = FinancekitTransaction.create!(financekit_account_lineage: lineage, entry: entry,
+      source_id: SecureRandom.uuid, generation: 1, sequence: 1, status: "booked", raw_payload: { "amount" => "12" })
+    FinancekitConflict.create!(family: @source, financekit_item: item, financekit_account_lineage: lineage,
+      financekit_transaction: wallet_transaction, kind: "balance_observation_conflict")
+    content = nil
+    Zip::File.open_buffer(Family::DataExporter.new(@source).generate_export) { |zip| content = zip.read("all.ndjson") }
+    publisher_id = item.publisher_id
+    # Recovery normally targets a fresh installation; free the globally unique identifiers here.
+    item.update_columns(publisher_id: SecureRandom.uuid, enrollment_id: SecureRandom.uuid)
+
+    Family::DataImporter.new(@target, content).import!
+
+    restored_item = @target.financekit_items.sole
+    restored_lineage = @target.financekit_account_lineages.sole
+    assert_equal publisher_id, restored_item.publisher_id
+    assert_equal @target, restored_item.user.family
+    assert_equal "Checking", restored_lineage.account.name
+    assert_equal restored_lineage, @target.accounts.find_by!(name: "Checking").account_providers.sole.provider
+    assert_equal "Wallet purchase", restored_lineage.financekit_transactions.sole.entry.name
+    assert_equal restored_lineage.financekit_transactions.sole, @target.financekit_conflicts.sole.financekit_transaction
   end
 
   test "round trips statement files and reconciliation links" do

@@ -239,8 +239,6 @@ it:
       security_not_listed_hint: Non trovi il tuo titolo? Seleziona "Inserisci ticker personalizzato" in fondo alla lista.
       ticker_placeholder: ENEL
       ticker_hint: Inserisci il simbolo del titolo/ETF (es. ENEL, ISP)
-      ticker_search_placeholder: Cerca un ticker...
-      ticker_search_hint: Cerca per simbolo ticker o nome azienda, o digita un ticker personalizzato
       price_mismatch_title: Il prezzo potrebbe non corrispondere
       price_mismatch_message: "Il tuo prezzo (%{entered_price}/azione) differisce significativamente dal prezzo di mercato attuale di %{ticker} (%{market_price}). Se sembra errato, potresti aver selezionato il titolo sbagliato — prova a usare \"Inserisci ticker personalizzato\" per specificare quello corretto."
       quantity_label: Quantità (Azioni)

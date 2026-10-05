@@ -44,7 +44,7 @@ class Money
   #   custom_rate: explicit exchange rate to use (skips lookup if provided, including nil check)
   # Priority:
   #   1. Use custom_rate if explicitly provided (not nil)
-  #   2. Look up rate via store.find_or_fetch_rate
+  #   2. Look up rate via store.find_rate
   #   3. Raise ConversionError if no valid rate available
   def exchange_to(other_currency, date: Date.current, custom_rate: nil)
     iso_code = currency.iso_code
@@ -57,7 +57,7 @@ class Money
       if custom_rate.present?
         exchange_rate = custom_rate.to_d
       else
-        exchange_rate = store.find_or_fetch_rate(from: iso_code, to: other_iso_code, date: date)&.rate
+        exchange_rate = store.find_rate(from: iso_code, to: other_iso_code, date: date)&.rate
       end
 
       raise ConversionError.new(from_currency: iso_code, to_currency: other_iso_code, date: date) unless exchange_rate && exchange_rate > 0

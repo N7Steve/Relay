@@ -8,14 +8,10 @@ class ExternalAccessTest < ActiveSupport::TestCase
     end
   end
 
-  test "local recalculation cannot fetch market data even when enabled" do
-    assert ExternalAccess.enabled?(:market_data)
-    ExternalAccess.locally do
-      assert_nil ExchangeRate.provider
-      assert_empty Security.providers
-      assert_raises(ExternalAccess::Disabled) { ExternalAccess.require!(:market_data) }
-    end
-    assert ExternalAccess.enabled?(:market_data)
+  test "market data is not an external capability" do
+    assert_not_includes ExternalAccess::CAPABILITIES, :market_data
+    assert_raises(ArgumentError) { ExternalAccess.enabled?(:market_data) }
+    assert_not Setting.respond_to?(:external_market_data_enabled)
   end
 
   test "local execution state is restored after an error" do
@@ -46,19 +42,18 @@ class ExternalAccessTest < ActiveSupport::TestCase
     assert_raises(ExternalAccess::Disabled) { Provider::EnableBanking.get("/accounts") }
   end
 
-  test "disabling market data prevents requests from an existing connection" do
+  test "disabling property valuations prevents requests from an existing connection" do
     connection = Faraday.new do |faraday|
-      faraday.use ExternalAccess::RequestMiddleware, :market_data
+      faraday.use ExternalAccess::RequestMiddleware, :property_valuations
       faraday.adapter :test do |stub|
-        stub.get("/prices") { flunk "Transport must not execute" }
+        stub.get("/valuations") { flunk "Transport must not execute" }
       end
     end
-    Setting.stubs(:external_market_data_enabled).returns(false)
-    assert_raises(ExternalAccess::Disabled) { connection.get("/prices") }
+    Setting.stubs(:external_property_valuations_enabled).returns(false)
+    assert_raises(ExternalAccess::Disabled) { connection.get("/valuations") }
   end
 
   test "missing FX raises instead of valuing foreign currency at one" do
-    Setting.stubs(:external_market_data_enabled).returns(false)
     ExchangeRate.where(from_currency: "JPY", to_currency: "CHF").delete_all
     rates = ExchangeRate.rates_for([ "JPY" ], to: "CHF")
     assert_equal 1, rates["CHF"]

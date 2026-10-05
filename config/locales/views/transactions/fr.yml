@@ -121,8 +121,6 @@ fr:
       success: Transaction convertie en transaction boursière
       ticker_hint: Saisissez le symbole ticker de l'action ou de l'ETF (ex. AAPL, MSFT)
       ticker_placeholder: AAPL
-      ticker_search_hint: Recherchez par symbole ticker ou nom d'entreprise, ou saisissez un ticker personnalisé
-      ticker_search_placeholder: Rechercher un ticker…
       title: Convertir en transaction boursière
       trade_type_hint: Acheter ou vendre des actions d'un titre
       trade_type_label: Type de transaction boursière

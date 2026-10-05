@@ -128,10 +128,6 @@ fr:
         owed: Montant dû
       header:
         complete_setup: Configuration complète
-      limited_fx_history_warning: L'historique des taux de change n'est disponible
-        qu'à partir du %{date}. Les transactions antérieures à cette date utilisent
-        des conversions de devises approximatives — cela peut se produire lorsque
-        le fournisseur FX n'offre qu'une fenêtre historique limitée.
       menu:
         confirm_accept: Supprimer "%{name}"
         confirm_body_html: "<p>En supprimant ce compte, vous effacerez son historique
@@ -157,11 +153,6 @@ fr:
         overview: Aperçu
         statements: Déclarations
     sidebar:
-      configure_providers: Configurez vos fournisseurs ici.
-      missing_data: Données historiques manquantes
-      missing_data_description: "%{product} utilise des fournisseurs tiers pour récupérer
-        l'historique des taux de change, des cours des titres, etc. Ces données sont
-        nécessaires au calcul précis des soldes historiques des comptes."
       new_account: Nouveau compte
       new_account_group: Nouveau %{account_group}
       new_asset: Nouvel actif

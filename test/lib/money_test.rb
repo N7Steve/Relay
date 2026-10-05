@@ -189,13 +189,13 @@ class MoneyTest < ActiveSupport::TestCase
   end
 
   test "converts currency when rate available" do
-    ExchangeRate.expects(:find_or_fetch_rate).returns(OpenStruct.new(rate: 1.2))
+    ExchangeRate.expects(:find_rate).returns(OpenStruct.new(rate: 1.2))
 
     assert_equal Money.new(1000).exchange_to(:eur), Money.new(1000 * 1.2, :eur)
   end
 
   test "raises when no conversion rate available and no fallback provided" do
-    ExchangeRate.expects(:find_or_fetch_rate).returns(nil)
+    ExchangeRate.expects(:find_rate).returns(nil)
 
     assert_raises(Money::ConversionError) do
       Money.new(1000).exchange_to(:jpy)
@@ -212,7 +212,7 @@ class MoneyTest < ActiveSupport::TestCase
   end
 
   test "conversion error raised by exchange_to carries a descriptive message" do
-    ExchangeRate.expects(:find_or_fetch_rate).returns(nil)
+    ExchangeRate.expects(:find_rate).returns(nil)
 
     error = assert_raises(Money::ConversionError) do
       Money.new(1000, :usd).exchange_to(:jpy, date: Date.new(2026, 9, 10))
@@ -222,7 +222,7 @@ class MoneyTest < ActiveSupport::TestCase
   end
 
   test "uses custom rate when provided" do
-    ExchangeRate.expects(:find_or_fetch_rate).never
+    ExchangeRate.expects(:find_rate).never
 
     assert_equal Money.new(1250, :jpy), Money.new(1000, :usd).exchange_to(:jpy, custom_rate: 1.25)
   end

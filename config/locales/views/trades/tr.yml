@@ -61,9 +61,6 @@ tr:
       no_category: Kategori yok
       note_label: Not
       note_placeholder: Ek notlarınızı buraya ekleyin...
-      provider_disabled_warning: Fiyat güncellemeleri duraklatıldı — %{provider} sağlayıcısı
-        devre dışı. Ayarlar'dan yeniden etkinleştirin veya varlığı başka bir sağlayıcıya
-        yeniden eşleyin.
       quantity_label: Miktar
       sell: Sat
       settings: Ayarlar

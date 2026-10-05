@@ -12,9 +12,8 @@ class RetiredAccountConnectorTest < ActiveSupport::TestCase
     end
     assert_empty Rails.application.routes.routes.select { |route| route.defaults[:controller].to_s.start_with?("webhooks/") }
     assert Provider::Factory.registered?("EnableBankingAccount")
-    assert Provider::Factory.registered?("FinancekitAccountLineage")
+    assert_not Provider::Factory.registered?("FinancekitAccountLineage")
     assert_equal "enable_banking_items", Rails.application.routes.recognize_path("/enable_banking_items/callback", method: :get)[:controller]
-    assert Provider::BinancePublic
   end
 
   test "an old serialized sync is finalized without importing or deleting historical data" do
@@ -56,6 +55,6 @@ class RetiredAccountConnectorTest < ActiveSupport::TestCase
     retained = Family.reflect_on_all_associations(:has_many).select do |association|
       association.name.to_s.end_with?("_items") && association.klass.included_modules.include?(Syncable)
     end
-    assert_equal %i[enable_banking_items financekit_items], retained.map(&:name).sort
+    assert_equal %i[enable_banking_items], retained.map(&:name).sort
   end
 end

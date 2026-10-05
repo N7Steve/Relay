@@ -101,8 +101,6 @@ pt-PT:
         price_label: Preço
         account_label: Conta
         name_label: Designação
-        note_label: Nota
-        no_security_provider_warning: O serviço de preços de valores mobiliários não está configurado.  As suas importações de negociações funcionarão, mas a Relay não preencherá o histórico de preços.  Vá às suas definições para configurar isto.
         date_format_label: Formato de data
         apply_configuration: Aplicar configuração
       category_import:

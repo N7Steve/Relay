@@ -77,7 +77,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
   # foreign disposal. The conversion itself is covered in TradeTest, which
   # counts the queries directly; what has to hold HERE is that the card asks
   # for the preload at all -- the page's own rate lookups share a SQL shape
-  # with `ExchangeRate.find_or_fetch_rate`, so counting them measures the rest
+  # with `ExchangeRate.find_rate`, so counting them measures the rest
   # of the page rather than this.
   test "the card preloads the rates its disposals need" do
     account = @family.accounts.create!(name: "Brokerage USD", balance: 50_000,

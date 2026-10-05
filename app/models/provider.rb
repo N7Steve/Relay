@@ -55,8 +55,6 @@ class Provider
     def require_external_access!
       if self.class.name.in?(%w[Provider::Rentcast Provider::Realie])
         ExternalAccess.require!(:property_valuations)
-      elsif self.class.included_modules.include?(Provider::SecurityConcept) || self.class.included_modules.include?(Provider::ExchangeRateConcept)
-        ExternalAccess.require!(:market_data)
       elsif self.class.name != "Provider::Github"
         ExternalAccess.require!(:bank_sync)
       end

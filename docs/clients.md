@@ -160,4 +160,7 @@ owner or removed by that owner; knowing the APNs token alone never authorizes tr
 
 ## FinanceKit device publisher
 
-The native Apple client can enroll as a FinanceKit device publisher, map explicitly selected Wallet accounts, and upload an ordered local outbox during foreground or iOS-granted background execution. Setup and repair use normal Sure authentication; uploads use a revocable one-purpose credential that cannot read Sure data. Stable server-issued account lineages preserve identity across publisher replacement. See the [OpenAPI reference](api/openapi.yaml) and [operator guide](hosting/financekit.md).
+Retired in pruning phase 9F. The server no longer exposes `/api/v1/financekit/*`
+and the native clients in this repository do not use it. Accounts linked before
+the retirement remain visible as ordinary accounts; see
+[phase 9](migration/pruning-phase-9.md).

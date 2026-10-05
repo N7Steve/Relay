@@ -160,6 +160,7 @@ previo; el formato de los archivos JavaScript modificados sí pasa.
 | --- | --- | --- |
 | Pagos recurrentes / programados | Propia | Modelos, generación, confirmación/rechazo, transferencias recurrentes e integración en transacciones |
 | Bills / recurrencias detectadas | Retirado en fase 8 | Agenda es el único motor; conservar lectores históricos y backups, sin detección ni conversión automática |
+| Cotizaciones/divisas externas, FinanceKit y almacenamiento remoto | Retirados en fase 9 | Sólo precios/tipos guardados, Active Storage local y persistencia histórica FinanceKit; no reintroducir proveedores, API de publicador ni drivers S3/GCS |
 | Informes personalizados | Propia | Resumen, desglose, gastos compartidos, exportación y secciones reordenables |
 | Tratamiento financiero y archivo de cuentas | Propia | Preservar “incluida”, “solo seguimiento” y “fuera de mis finanzas”; el archivo sólo afecta a la presentación |
 | Roboadvisor e inversiones | Propia | Rendimiento, flujos, liquidez neta estimada y tratamiento fiscal |
@@ -732,3 +733,14 @@ Agenda, forecast local, transferencias, splits, presupuestos/Goals e insights
 retenidos. Las seis tablas Bills y su persistencia histórica permanecen, con
 relaciones y originales recuperables sin generación ni conversión automática.
 Ver [fase 8](docs/migration/pruning-phase-8.md).
+
+## Poda fase 9 — extensiones curadas
+
+Retirados los proveedores de cotizaciones y divisas con su capacidad
+`market_data`, cron, ajustes, búsqueda y sincronización manual; los servicios
+remotos de Active Storage y sus gems; y FinanceKit con su API, panel, inbox,
+purga y demostración. Preservar multimoneda, tipos manuales por movimiento,
+precios/tipos guardados, Brandfetch, Google Drive, valoraciones RentCast/Realie,
+Goals, insights, presupuestos, todos los mecanismos de acceso y los demás
+clientes. Al integrar upstream no reintroducir esos proveedores, drivers ni la
+API de publicador. Ver [fase 9](docs/migration/pruning-phase-9.md).

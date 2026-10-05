@@ -98,7 +98,7 @@ class BudgetAvailableCashTest < ActiveSupport::TestCase
       name: "Trip", target_amount: 1_000, currency: "EUR"
     ) { |g| g.goal_accounts.build(account: account, allocated_amount: 1_000) }
 
-    ExchangeRate.stubs(:find_or_fetch_rate).returns(OpenStruct.new(rate: 1.2))
+    ExchangeRate.stubs(:find_rate).returns(OpenStruct.new(rate: 1.2))
 
     assert_equal 1_200, @budget.available_cash
     assert_equal 1_200, @budget.earmarked_for_goals
@@ -113,7 +113,7 @@ class BudgetAvailableCashTest < ActiveSupport::TestCase
       name: "EUR pot", currency: "EUR", balance: 1_000
     )
 
-    ExchangeRate.stubs(:find_or_fetch_rate).returns(OpenStruct.new(rate: 1.2))
+    ExchangeRate.stubs(:find_rate).returns(OpenStruct.new(rate: 1.2))
 
     assert_equal 1_200, @budget.available_cash
   end
@@ -126,7 +126,7 @@ class BudgetAvailableCashTest < ActiveSupport::TestCase
       name: "EUR pot", currency: "EUR", balance: 1_000
     )
 
-    ExchangeRate.stubs(:find_or_fetch_rate).returns(nil)
+    ExchangeRate.stubs(:find_rate).returns(nil)
 
     assert_equal 1_000, @budget.available_cash
   end

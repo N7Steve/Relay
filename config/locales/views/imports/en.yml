@@ -101,8 +101,6 @@ en:
         price_label: Price
         account_label: Account
         name_label: Name
-        note_label: Note
-        no_security_provider_warning: The security prices provider is not configured.  Your trade imports will work, but Relay will not backfill price history.  Please go to your settings to configure this.
         date_format_label: Date format
         apply_configuration: Apply configuration
       category_import:

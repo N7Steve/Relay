@@ -6,8 +6,6 @@ class TradeImportTest < ActiveSupport::TestCase
 
   setup do
     @subject = @import = imports(:trade)
-    @provider = mock
-    Security.stubs(:provider).returns(@provider)
   end
 
   test "csv_template uses ISO dates" do

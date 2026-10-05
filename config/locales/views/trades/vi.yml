@@ -45,7 +45,6 @@ vi:
       delete_subtitle: Hành động này không thể hoàn tác
       delete_title: Xóa giao dịch chứng khoán
       details: Chi tiết
-      provider_disabled_warning: "Cập nhật giá tạm dừng — nhà cung cấp %{provider} đã bị tắt. Bật lại trong Cài đặt hoặc ánh xạ lại danh mục nắm giữ sang nhà cung cấp khác."
       exclude_subtitle: Giao dịch này sẽ không được đưa vào báo cáo và tính toán
       exclude_title: Loại trừ khỏi phân tích
       no_category: Không có danh mục

@@ -66,9 +66,6 @@ en:
       enable_category_matcher_hint: When enabled, the provider's suggested category is applied to imported transactions. Disable to leave new transactions uncategorized.
     index:
       accounts: Accounts
-      financekit_accounts:
-        title: Apple Wallet
-        description: Manage Apple Wallet connections and sync in the Relay iOS app.
       cancel_sync: Cancel sync
       manual_accounts:
         other_accounts: Other accounts
@@ -93,7 +90,6 @@ en:
         title: How would you like to add it?
       title: What would you like to add?
     show:
-      limited_fx_history_warning: "Exchange rate history is only available from %{date} onwards. Transactions before this date use approximate currency conversions — this can happen when the FX provider only offers a limited historical window."
       tabs:
         activity: Activity
         holdings: Holdings
@@ -147,9 +143,6 @@ en:
     update:
       success: "%{type} account updated"
     sidebar:
-      missing_data: Missing historical data
-      missing_data_description: "%{product} uses third party providers to fetch historical exchange rates, security prices, and more. This data is required to calculate accurate historical account balances."
-      configure_providers: Configure your providers here.
       tabs:
         all: All
         assets: Assets
@@ -202,7 +195,6 @@ en:
       title: Unlink account from provider?
       description_html: "You are about to unlink <strong>%{account_name}</strong> from <strong>%{provider_name}</strong>. This will convert it to a manual account."
       warning_title: What this means
-      warning_wallet_connection: All accounts in this Apple Wallet connection will be unlinked. Their transactions and balances will be preserved. You can reconnect through the Relay iOS app with a new Wallet setup.
       warning_no_sync: The account will no longer sync automatically with your provider
       warning_manual_updates: You will need to add transactions and update balances manually
       warning_transactions_kept: All existing transactions and balances will be preserved

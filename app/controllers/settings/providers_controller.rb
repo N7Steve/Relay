@@ -103,15 +103,6 @@ class Settings::ProvidersController < ApplicationController
     def prepare_show_context
       @enable_banking_items = Current.family.enable_banking_items.ordered # Enable Banking panel needs session info for status display
 
-      # Wallet uploads are managed on iOS. Only expose linked accounts the
-      # current admin can access, including connections that need repair.
-      accessible_account_ids = Current.family.accounts.accessible_by(Current.user).pluck(:id).to_set
-      @financekit_connections = Current.family.financekit_items.where(status: %w[active repair_required])
-        .ordered.includes(:accounts).filter_map do |item|
-          accounts = item.accounts.select { |account| accessible_account_ids.include?(account.id) && !account.pending_deletion? }
-          { item: item, accounts: accounts } if accounts.any?
-        end
-
       @provider_sync_health = compute_provider_sync_health(family_panel_items)
 
       entries = build_provider_entries
@@ -119,7 +110,7 @@ class Settings::ProvidersController < ApplicationController
       @connected        = entries.select { |e| e[:summary][:status] == :ok }
       @needs_attention  = entries.select { |e| [ :warn, :err ].include?(e[:summary][:status]) }
       @available        = entries.select { |e| e[:summary][:status] == :off }
-      @can_sync_all = (@connected + @needs_attention).any? { |entry| entry[:sync_supported] != false }
+      @can_sync_all = (@connected + @needs_attention).any?
 
       @health = view_context.provider_health_strip(connected: @connected, needs_attention: @needs_attention)
     end
@@ -166,7 +157,7 @@ class Settings::ProvidersController < ApplicationController
 
     # Builds retained connection summaries for the settings page.
     def build_provider_entries
-      family_entries = FAMILY_PANELS.map do |panel|
+      FAMILY_PANELS.map do |panel|
         {
           provider_key: panel[:key],
           title: panel[:title],
@@ -176,19 +167,6 @@ class Settings::ProvidersController < ApplicationController
           maturity: Provider::Metadata.for(panel[:key])[:maturity],
           summary: view_context.provider_summary(panel[:key])
         }
-      end
-
-      wallet_entry = {
-        provider_key: "financekit", title: Provider::Metadata.for(:financekit)[:name],
-        turbo_id: "financekit", partial: "financekit_panel", maturity: :beta,
-        external_link: {
-          text: t("settings.providers.financekit.app_store"), href: nil,
-          tooltip: t("settings.providers.financekit.coming_soon")
-        },
-        sync_supported: false,
-        summary: view_context.financekit_provider_summary(@financekit_connections)
-      }
-
-      (family_entries + [ wallet_entry ]).sort_by { |entry| entry[:title].downcase }
+      end.sort_by { |entry| entry[:title].downcase }
     end
 end

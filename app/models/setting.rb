@@ -14,8 +14,6 @@ class Setting < RailsSettings::Base
     false
   end
 
-  # Third-party API keys
-  field :twelve_data_api_key, type: :string, default: ENV["TWELVE_DATA_API_KEY"]
   # Historical configuration only; no transport or settings form consumes these.
   field :external_assistant_url, type: :string
   field :external_assistant_token, type: :string
@@ -56,22 +54,6 @@ class Setting < RailsSettings::Base
     "https://cdn.brandfetch.io/#{path}/icon/fallback/#{fallback}/w/#{w}/h/#{h}?c=#{brand_fetch_client_id}"
   end
 
-  # Provider selection
-  field :exchange_rate_provider, type: :string, default: ENV.fetch("EXCHANGE_RATE_PROVIDER", "twelve_data")
-  field :securities_provider, type: :string, default: ENV.fetch("SECURITIES_PROVIDER", "twelve_data")
-
-  # Multi-provider: comma-separated list of enabled securities providers
-  field :securities_providers, type: :string, default: ENV.fetch("SECURITIES_PROVIDERS", "")
-
-  # New provider API keys (encrypted at rest â€” see EncryptedSettingFields below)
-  field :tiingo_api_key, type: :string, default: ENV["TIINGO_API_KEY"]
-  field :eodhd_api_key, type: :string, default: ENV["EODHD_API_KEY"]
-  field :alpha_vantage_api_key, type: :string, default: ENV["ALPHA_VANTAGE_API_KEY"]
-  field :tinkoff_invest_api_key, type: :string, default: ENV["TINKOFF_INVEST_API_KEY"]
-  # Mansa API (mansaapi.com) â€” African exchanges, including NGX (Nigeria),
-  # which none of the providers above cover. See Provider::Mansa.
-  field :mansa_api_key, type: :string, default: ENV["MANSA_API_KEY"]
-
   # Property valuation (AVM) provider API keys
   field :rentcast_api_key, type: :string, default: ENV["RENTCAST_API_KEY"]
   field :realie_api_key, type: :string, default: ENV["REALIE_API_KEY"]
@@ -85,12 +67,6 @@ class Setting < RailsSettings::Base
   # encryption was enabled) the raw value is returned as-is.
   module EncryptedSettingFields
     ENCRYPTED_FIELDS = %i[
-      twelve_data_api_key
-      tiingo_api_key
-      eodhd_api_key
-      alpha_vantage_api_key
-      tinkoff_invest_api_key
-      mansa_api_key
       rentcast_api_key
       realie_api_key
       external_assistant_token
@@ -136,16 +112,6 @@ class Setting < RailsSettings::Base
 
   class << self
     prepend EncryptedSettingFields
-  end
-
-  def self.enabled_securities_providers
-    plural = ENV["SECURITIES_PROVIDERS"].presence || securities_providers.presence
-    if plural.present?
-      plural.to_s.split(",").map(&:strip).reject(&:blank?)
-    else
-      # Backward compat: fall back to singular setting
-      [ ENV["SECURITIES_PROVIDER"].presence || securities_provider.presence ].compact
-    end
   end
 
   field :syncs_include_pending, type: :boolean, default: true

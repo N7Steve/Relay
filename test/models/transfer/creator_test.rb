@@ -258,7 +258,7 @@ class Transfer::CreatorTest < ActiveSupport::TestCase
     gbp_account = @family.accounts.create!(name: "GBP Account", balance: 1000, currency: "GBP", accountable: Depository.new)
 
     # Mock the exchange rate lookup
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "USD", to: "GBP", date: @date)
                 .returns(OpenStruct.new(rate: 0.79))
 
@@ -283,7 +283,7 @@ class Transfer::CreatorTest < ActiveSupport::TestCase
     jpy_account = @family.accounts.create!(name: "JPY Account", balance: 100000, currency: "JPY", accountable: Depository.new)
 
     # Mock no exchange rate found
-    ExchangeRate.expects(:find_or_fetch_rate)
+    ExchangeRate.expects(:find_rate)
                 .with(from: "USD", to: "JPY", date: @date)
                 .returns(nil)
 

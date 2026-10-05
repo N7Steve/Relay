@@ -1,12 +1,9 @@
 require "test_helper"
 
 class Holding::PortfolioCacheTest < ActiveSupport::TestCase
-  include EntriesTestHelper, ProviderTestHelper
+  include EntriesTestHelper
 
   setup do
-    @provider = mock
-    Security.stubs(:provider).returns(@provider)
-
     @account = families(:empty).accounts.create!(
       name: "Test Brokerage",
       balance: 10000,

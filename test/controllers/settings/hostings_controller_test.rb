@@ -8,20 +8,17 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:family_admin)
 
     @provider = mock
-    Provider::Registry.stubs(:get_provider).with(:twelve_data).returns(@provider)
-
-    @provider.stubs(:health_status).returns(:healthy)
-    Provider::Registry.stubs(:get_provider).with(:yahoo_finance).returns(@provider)
-    Provider::Registry.stubs(:get_provider).with(:rentcast).returns(nil)
+    Provider::Registry.stubs(:get_provider).with(:rentcast).returns(@provider)
     Provider::Registry.stubs(:get_provider).with(:realie).returns(nil)
-    @provider.stubs(:usage).returns(provider_success_response(
+    @usage_response = provider_success_response(
       OpenStruct.new(
         used: 10,
         limit: 100,
         utilization: 10,
         plan: "free",
       )
-    ))
+    )
+    @provider.stubs(:usage).returns(@usage_response)
   end
 
   test "Brandfetch can be enabled and disabled even with a legacy environment override" do
@@ -73,7 +70,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_includes response.body, "Configuración de instancia"
       assert_select "details > summary h2", text: I18n.t("settings.hostings.show.general", locale: :es)
-      assert_select "details > summary h2", text: I18n.t("settings.hostings.show.financial_data_providers", locale: :es)
       assert_select "details > summary h2", text: I18n.t("settings.hostings.show.property_valuation_providers", locale: :es)
       assert_select "details > summary h2", text: I18n.t("settings.hostings.show.sync_settings", locale: :es)
       assert_select "details:not([open]) > summary h2", text: I18n.t("settings.hostings.show.danger_zone", locale: :es)
@@ -166,108 +162,43 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "shows Yahoo Finance rate limiting as a warning" do
-    @provider.stubs(:health_status).returns(:rate_limited)
-
-    with_env_overrides("EXCHANGE_RATE_PROVIDER" => "yahoo_finance") do
-      with_self_hosting do
-        get settings_hosting_url
-
-        assert_response :success
-        assert_select "div[class~=?]", "bg-warning/10"
-        assert_includes response.body, "Yahoo Finance is temporarily rate limiting requests."
-        assert_includes response.body, "Yahoo Finance rate limit reached."
-        assert_includes response.body, "No action is required."
-        assert_not_includes response.body, "firewall"
-      end
-    end
-  end
-
-  test "renders healthy unavailable and unknown Yahoo Finance states" do
-    @provider.stubs(:health_status).returns(:healthy, :unavailable, :unknown)
-
-    with_env_overrides("EXCHANGE_RATE_PROVIDER" => "yahoo_finance") do
-      with_self_hosting do
-        get settings_hosting_url
-        assert_includes response.body, "Yahoo Finance is active and working."
-        assert_select "div[class~=?]", "bg-success"
-
-        get settings_hosting_url
-        assert_includes response.body, "Yahoo Finance is currently unavailable."
-        assert_includes response.body, "Could not verify Yahoo Finance."
-        assert_includes response.body, "Check your internet connection and try again later."
-        assert_not_includes response.body, "firewall"
-        assert_select "div[class~=?]", "bg-destructive"
-
-        get settings_hosting_url
-        assert_includes response.body, "Yahoo Finance status is being checked."
-        assert_not_includes response.body, "Could not verify Yahoo Finance."
-        assert_not_includes response.body, "Yahoo Finance rate limit reached."
-        assert_select "div[class~=?]", "bg-surface-inset"
-      end
-    end
-  end
-
-  test "renders Spanish Yahoo Finance health guidance" do
-    @provider.stubs(:health_status).returns(:rate_limited, :unavailable, :unknown)
-
-    with_env_overrides("EXCHANGE_RATE_PROVIDER" => "yahoo_finance") do
-      with_self_hosting do
-        get settings_hosting_url(locale: :es)
-        assert_includes response.body, "Yahoo Finance está limitando temporalmente las solicitudes."
-        assert_includes response.body, "No es necesario realizar ninguna acción."
-
-        get settings_hosting_url(locale: :es)
-        assert_includes response.body, "Yahoo Finance no está disponible en este momento."
-        assert_includes response.body, "Comprueba tu conexión a internet"
-
-        get settings_hosting_url(locale: :es)
-        assert_includes response.body, "Se está comprobando el estado de Yahoo Finance."
-      end
-    end
-  end
-
-  # Italian translates part of yahoo_finance_settings but not the rate-limited
-  # strings this path renders (status_rate_limited, rate_limited_title,
-  # rate_limited_message), which is what makes it exercise the fallback. Move to
-  # another such locale if it gains them, rather than dropping the coverage.
-  test "falls back to English for untranslated Yahoo Finance health guidance" do
-    @provider.stubs(:health_status).returns(:rate_limited)
-
-    with_env_overrides("EXCHANGE_RATE_PROVIDER" => "yahoo_finance") do
-      with_self_hosting do
-        get settings_hosting_url(locale: :it)
-
-        assert_includes response.body, "Yahoo Finance is temporarily rate limiting requests."
-        assert_not_includes response.body, "translation missing"
-      end
-    end
-  end
-
-  test "can update settings when self hosting is enabled" do
+  test "market data providers are not configurable" do
     with_self_hosting do
-      patch settings_hosting_url, params: { setting: { twelve_data_api_key: "1234567890" } }
+      get settings_hosting_url
 
-      assert_equal "1234567890", Setting.twelve_data_api_key
+      assert_response :success
+      %w[setting[exchange_rate_provider] setting[securities_providers][] setting[twelve_data_api_key]
+         setting[tiingo_api_key] setting[eodhd_api_key] setting[alpha_vantage_api_key]
+         setting[tinkoff_invest_api_key] setting[mansa_api_key]].each do |field|
+        assert_select "[name='#{field}']", count: 0
+      end
+      assert_select "[name='setting[rentcast_api_key]']"
+
+      patch settings_hosting_url, params: { setting: { twelve_data_api_key: "ignored", exchange_rate_provider: "yahoo_finance",
+                                                       securities_providers: [ "twelve_data" ] } }
+
+      assert_redirected_to settings_hosting_url
+      assert_not Setting.where(var: %w[twelve_data_api_key exchange_rate_provider securities_providers]).exists?
+      assert_not Setting.respond_to?(:twelve_data_api_key)
     end
   end
 
   test "can clear an encrypted api key by submitting a blank value" do
     with_self_hosting do
-      patch settings_hosting_url, params: { setting: { twelve_data_api_key: "1234567890" } }
-      assert_equal "1234567890", Setting.twelve_data_api_key
+      patch settings_hosting_url, params: { setting: { rentcast_api_key: "1234567890" } }
+      assert_equal "1234567890", Setting.rentcast_api_key
 
-      patch settings_hosting_url, params: { setting: { twelve_data_api_key: "" } }
-      assert_nil Setting.twelve_data_api_key
+      patch settings_hosting_url, params: { setting: { rentcast_api_key: "" } }
+      assert_nil Setting.rentcast_api_key
     end
   end
 
   test "submitting the masked placeholder leaves an encrypted api key unchanged" do
     with_self_hosting do
-      patch settings_hosting_url, params: { setting: { twelve_data_api_key: "1234567890" } }
+      patch settings_hosting_url, params: { setting: { rentcast_api_key: "1234567890" } }
 
-      patch settings_hosting_url, params: { setting: { twelve_data_api_key: "********" } }
-      assert_equal "1234567890", Setting.twelve_data_api_key
+      patch settings_hosting_url, params: { setting: { rentcast_api_key: "********" } }
+      assert_equal "1234567890", Setting.rentcast_api_key
     end
   end
 
@@ -350,161 +281,6 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to settings_hosting_url
       assert_equal I18n.t("settings.hostings.not_authorized"), flash[:alert]
     end
-  end
-
-  # --- Securities provider toggle ---
-
-  test "can update securities providers" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "twelve_data", "yahoo_finance" ] } }
-
-      assert_redirected_to settings_hosting_url
-      assert_equal "twelve_data,yahoo_finance", Setting.securities_providers
-    end
-  ensure
-    Setting.securities_providers = ""
-  end
-
-  test "filters out invalid provider names" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "twelve_data", "fake_provider", "hacked" ] } }
-
-      assert_redirected_to settings_hosting_url
-      # Only valid providers are stored
-      enabled = Setting.enabled_securities_providers
-      assert_includes enabled, "twelve_data"
-      refute_includes enabled, "fake_provider"
-      refute_includes enabled, "hacked"
-    end
-  ensure
-    Setting.securities_providers = ""
-  end
-
-  test "removing a provider marks linked securities offline" do
-    with_self_hosting do
-      security = Security.create!(ticker: "CSPX", exchange_operating_mic: "XLON", price_provider: "tiingo", offline: false)
-
-      # First enable tiingo
-      Setting.securities_providers = "twelve_data,tiingo"
-
-      # Then remove tiingo
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "twelve_data" ] } }
-
-      security.reload
-      assert security.offline?, "Security should be marked offline when its provider is removed"
-      assert_equal "provider_disabled", security.offline_reason
-    end
-  ensure
-    Setting.securities_providers = ""
-  end
-
-  test "re-adding a provider brings securities back online" do
-    with_self_hosting do
-      security = Security.create!(
-        ticker: "CSPX2", exchange_operating_mic: "XLON",
-        price_provider: "tiingo", offline: true, offline_reason: "provider_disabled"
-      )
-
-      # Start without tiingo
-      Setting.securities_providers = "twelve_data"
-
-      # Re-add tiingo
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "twelve_data", "tiingo" ] } }
-
-      security.reload
-      refute security.offline?, "Security should come back online when its provider is re-added"
-      assert_nil security.offline_reason
-    end
-  ensure
-    Setting.securities_providers = ""
-  end
-
-  test "unchecking every securities provider does not re-enable twelve_data via the legacy fallback" do
-    with_self_hosting do
-      # Start from the out-of-the-box default (only twelve_data enabled)
-      assert_equal [ "twelve_data" ], Setting.enabled_securities_providers
-
-      patch settings_hosting_url, params: { setting: { securities_providers: [] } }
-
-      assert_redirected_to settings_hosting_url
-      assert_equal [], Setting.enabled_securities_providers
-    end
-  ensure
-    # Explicitly restore the real default value rather than assigning nil —
-    # rails-settings-cached's cache layer doesn't reliably invalidate on
-    # delete within a single test process, so a later test can still read
-    # back the just-deleted blank override instead of falling through to
-    # the field's default.
-    Setting.securities_providers = ""
-    Setting.securities_provider = "twelve_data"
-  end
-
-  # --- T-Invest visibility (issue #3089) ---
-
-  test "hides T-Invest settings when neither tinkoff_invest nor moex_public is enabled" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "twelve_data" ] } }
-
-      get settings_hosting_url
-
-      assert_response :success
-      # "T-Invest (T-Bank)" also appears as a checkbox label in the always-rendered
-      # securities checklist, so assert on the settings block's own field instead.
-      assert_select "input[name='setting[tinkoff_invest_api_key]']", false
-    end
-  ensure
-    Setting.securities_providers = ""
-  end
-
-  test "shows T-Invest settings when tinkoff_invest is enabled, without the moex-only notice" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "tinkoff_invest" ] } }
-
-      get settings_hosting_url
-
-      assert_response :success
-      assert_select "input[name='setting[tinkoff_invest_api_key]']"
-      assert_not_includes response.body, I18n.t("settings.hostings.tinkoff_invest_settings.moex_only_notice")
-    end
-  ensure
-    Setting.securities_providers = ""
-  end
-
-  test "shows T-Invest settings with the moex-only notice when moex_public is enabled, even without tinkoff_invest" do
-    with_self_hosting do
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "moex_public" ] } }
-
-      notices = {
-        en: "Not enabled for prices above — T-Invest is used to fetch brand logos for all your securities whenever a token is configured, independent of the checkbox above.",
-        de: "Oben nicht für Kursdaten aktiviert – sobald ein Token eingerichtet ist, ruft T-Invest unabhängig vom obigen Kontrollkästchen Logos für alle deine Wertpapiere ab."
-      }
-      notices.each do |locale, notice|
-        get settings_hosting_url(locale: locale)
-
-        assert_response :success
-        assert_select "input[name='setting[tinkoff_invest_api_key]']"
-        assert_includes response.body, notice
-        assert_equal notice, I18n.t("settings.hostings.tinkoff_invest_settings.moex_only_notice", locale: locale, fallback: false, raise: true)
-      end
-    end
-  ensure
-    Setting.securities_providers = ""
-  end
-
-  test "shows T-Invest settings when a token is already configured, even with neither checkbox enabled" do
-    with_self_hosting do
-      Setting.tinkoff_invest_api_key = "some-token"
-      patch settings_hosting_url, params: { setting: { securities_providers: [ "twelve_data" ] } }
-
-      get settings_hosting_url
-
-      assert_response :success
-      assert_select "input[name='setting[tinkoff_invest_api_key]']"
-      assert_includes response.body, I18n.t("settings.hostings.tinkoff_invest_settings.moex_only_notice")
-    end
-  ensure
-    Setting.securities_providers = ""
-    Setting.tinkoff_invest_api_key = nil
   end
 
   private

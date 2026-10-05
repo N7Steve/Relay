@@ -118,7 +118,6 @@ de:
         statements: Auszüge
       header:
         complete_setup: Setup abschließen
-      limited_fx_history_warning: Wechselkurse liegen erst ab %{date} vor. Transaktionen davor rechnen mit Näherungswerten, was vorkommt, wenn der Kursanbieter nur einen begrenzten Verlauf liefert.
       tabs:
         activity: Aktivität
         holdings: Bestände
@@ -128,9 +127,6 @@ de:
     update:
       success: "%{type}-Konto aktualisiert"
     sidebar:
-      missing_data: Fehlende historische Daten
-      missing_data_description: "%{product} verwendet Drittanbieter, um historische Wechselkurse, Wertpapierpreise und weitere Daten abzurufen. Diese Daten sind erforderlich, um genaue historische Kontostände zu berechnen."
-      configure_providers: Konfiguriere deine Anbieter hier
       tabs:
         all: Alle
         assets: Vermögen

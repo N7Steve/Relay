@@ -120,7 +120,7 @@ class Provider::Factory
       end
 
       # Discover all adapter files in the provider directory
-      # Returns adapter class names (e.g., ["EnableBankingAdapter", "FinancekitAdapter"])
+      # Returns adapter class names (e.g., ["EnableBankingAdapter"])
       def adapter_files
         return [] unless defined?(Rails)
 

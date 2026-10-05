@@ -41,8 +41,9 @@ An [Account](../../app/models/account.rb) has its own balance and currency.
 preferred currency is used to normalize reports; it does not mean every stored
 amount is already in that currency. [Money](../../lib/money.rb) handles monetary
 operations and formatting, with [ExchangeRate](../../app/models/exchange_rate.rb)
-and its [Provided concern](../../app/models/exchange_rate/provided.rb) supplying
-dated conversion rates.
+supplying stored dated conversion rates. Relay has no exchange rate or security
+price provider since pruning phase 9A: rates and prices come from stored rows,
+trade and holding prices and backups. Missing data fails explicitly.
 
 ## Accounts, balances and entries
 
@@ -98,9 +99,10 @@ connection metadata and provider account payloads; processors normalize them int
 internal accounts and entries through [Account::ProviderImportAdapter](../../app/models/account/provider_import_adapter.rb).
 [AccountProvider](../../app/models/account_provider.rb) connects accounts to
 provider records. [Import](../../app/models/import.rb) supports manual import
-sessions, including CSV mapping and transformations. Account connectors are
-Enable Banking and FinanceKit. Retired connector models hold historical
-persistence for backup/GlobalID compatibility only; they have no remote runtime.
+sessions, including CSV mapping and transformations. Enable Banking is the only
+account connector. Retired connector models, including FinanceKit since phase 9F,
+hold historical persistence for backup/GlobalID compatibility only; they have no
+remote runtime.
 
 [Syncable](../../app/models/concerns/syncable.rb) schedules background syncs and
 [Sync](../../app/models/sync.rb) records their state, hierarchy and errors.
@@ -123,11 +125,15 @@ on login once per date when the family enables it and has active accounts.
 runs [SyncJob](../../app/jobs/sync_job.rb), [ImportJob](../../app/jobs/import_job.rb)
 and [AssistantResponseJob](../../app/jobs/assistant_response_job.rb).
 
-[ExternalAccess](../../app/models/external_access.rb) controls bank sync, market
-data, property valuations, external logos and Google Drive independently. New
-settings default off; credentials do not activate access. AI is retired in phase 6; historical preferences cannot enable it. Market import jobs remain separate from
-local accounting. See the [phase 2 transition](../migration/pruning-phase-2.md)
-before deploying existing installations, especially those using Drive/Brandfetch.
+[ExternalAccess](../../app/models/external_access.rb) controls bank sync, property
+valuations, external logos and Google Drive independently. New settings default
+off; credentials do not activate access. AI is retired in phase 6; historical
+preferences cannot enable it. Market data acquisition is retired in phase 9A:
+serialized market jobs finish without effects and worker startup removes their
+persisted cron. See the [phase 2 transition](../migration/pruning-phase-2.md)
+before deploying existing installations, especially those using Drive/Brandfetch,
+and [phase 9](../migration/pruning-phase-9.md) for market data, FinanceKit and
+local-only Active Storage.
 
 MCP, external assistant transport and integrated AI were removed in phases 5–6.
 OAuth, API keys and native authentication remain. Conversations, original files,
@@ -156,9 +162,8 @@ remain in the schema; the application no longer executes evaluation tasks.
 Interchangeable provider concepts are registered at runtime through
 [Provider::Registry](../../app/models/provider/registry.rb) and
 [Setting](../../app/models/setting.rb), with environment overrides where supported.
-Interfaces live in `app/models/provider/*_concept.rb`, including
-[SecurityConcept](../../app/models/provider/security_concept.rb) and
-[ExchangeRateConcept](../../app/models/provider/exchange_rate_concept.rb).
+Interfaces live in `app/models/provider/*_concept.rb`, such as
+[PropertyValuationConcept](../../app/models/provider/property_valuation_concept.rb).
 One-off integrations can expose concrete methods without inventing a shared
 concept. Domain models should normally select providers through their `Provided`
 concerns rather than calling the registry throughout business logic.
@@ -167,7 +172,7 @@ Concept providers inherit from [Provider](../../app/models/provider.rb) and use
 `with_provider_response` to return `Provider::Response` (`success?`, `data`,
 `error`). Raise when valid data cannot be produced inside that wrapper; it
 converts failures into the response contract. See [provider guidance](providers.md)
-and [adding a securities provider](adding-a-securities-provider.md) for details.
+for details.
 
 Web interaction uses Turbo/Stimulus with server-rendered views. External
 `/api/v1` endpoints support separate Doorkeeper OAuth and `X-Api-Key`

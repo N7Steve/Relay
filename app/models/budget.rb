@@ -500,16 +500,13 @@ class Budget < ApplicationRecord
   end
 
   private
-    # `find_or_fetch_rate`, not `find_rate` — the latter does not exist, and
-    # every multi-currency family opening this page hit a NoMethodError.
-    #
     # No rate for the day leaves the amount as it stands. A cash panel that
     # renders with one figure unconverted is wrong by the spread; one that
     # raises takes the whole budget page down with it.
     def convert_to_budget_currency(amount, from_currency)
       return amount.to_d if from_currency == currency
 
-      rate = ExchangeRate.find_or_fetch_rate(from: from_currency, to: currency, date: Date.current)&.rate
+      rate = ExchangeRate.find_rate(from: from_currency, to: currency, date: Date.current)&.rate
       rate ? amount.to_d * rate : amount.to_d
     end
     def income_statement

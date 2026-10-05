@@ -69,7 +69,6 @@ hu:
         title: Hogyan szeretnéd hozzáadni?
       title: Mit szeretnél hozzáadni?
     show:
-      limited_fx_history_warning: "Az árfolyam-előzmények csak %{date} dátumtól érhetők el. Az ezt megelőző tranzakciókhoz közelítő árfolyamok kerülnek alkalmazásra – ez akkor fordulhat elő, ha a devizaárfolyam-szolgáltató csak korlátozott előzményadatokat kínál."
       tabs:
         activity: Tevékenység
         holdings: Portfólió
@@ -116,9 +115,6 @@ hu:
     update:
       success: "%{type} számla frissítve"
     sidebar:
-      missing_data: Hiányzó előzményadatok
-      missing_data_description: "%{product} harmadik feles szolgáltatóktól kéri le a historikus árfolyamokat, értékpapír-árakat és egyéb adatokat. Ezek szükségesek a pontos számlaegyenleg-előzmények kiszámításához."
-      configure_providers: Konfiguráld itt a szolgáltatóidat.
       tabs:
         all: Összes
         assets: Vagyon

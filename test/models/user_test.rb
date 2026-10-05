@@ -1,8 +1,10 @@
 require "test_helper"
 require "concurrent"
+require_relative "../support/historical_financekit_helper"
 
 class UserTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
+  include HistoricalFinancekitHelper
 
   uses_transaction :test_first_user_role_lock_makes_concurrent_family_creators_deterministic,
     :"test_verify_otp?_claim_otp_time_step!_lets_only_one_of_two_racing_connections_claim_a_step"
@@ -720,66 +722,31 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user, plaid_item.owner
   end
 
-  test "transfer_to_family! moves unmapped FinanceKit items owned by the user" do
+  test "transfer_to_family! moves historical FinanceKit rows owned by the user" do
     user = users(:family_member)
-    source_family = user.family
     new_family = Family.create!(name: "Transferred FinanceKit Family")
-    user.update!(role: "admin", preferences: user.preferences.merge("preview_features_enabled" => true))
-    financekit_item = Financekit::Enrollment.create!(user, {
-      "enrollment_id" => SecureRandom.uuid,
-      "protocol_version" => Financekit::VERSION,
-      "consent" => {
-        "version" => 1,
-        "granted_at" => Time.current.iso8601,
-        "selected_source_account_ids" => [ SecureRandom.uuid ],
-        "upload_authorized" => true,
-        "family_visibility_acknowledged" => true,
-        "remote_processing_acknowledged" => true
-      }
-    }).item
+    account = Account.create!(family: user.family, owner: user, name: "Historical Wallet",
+      balance: 100, currency: "USD", accountable: Depository.new(subtype: "checking"))
+    item, lineage = create_historical_financekit_link(family: user.family, user: user, account: account)
+    conflict = FinancekitConflict.create!(family: user.family, financekit_item: item,
+      financekit_account_lineage: lineage, kind: "balance_observation_conflict")
 
     user.transfer_to_family!(new_family, role: "admin")
 
-    assert_equal new_family, user.reload.family
-    assert_equal new_family, financekit_item.reload.family
-    assert financekit_item.pending_account_setup?
-    assert_not_equal source_family, financekit_item.family
+    assert_equal new_family, account.reload.family
+    assert_equal new_family, item.reload.family
+    assert_equal new_family, lineage.reload.family
+    assert_equal new_family, conflict.reload.family
   end
 
-  test "transfer_to_family! rejects FinanceKit lineages mapped by another user" do
+  test "transfer_to_family! rejects historical FinanceKit links created by another user" do
     user = users(:family_member)
     other_user = users(:family_admin)
     source_family = user.family
     new_family = Family.create!(name: "Rejected FinanceKit Family")
     moved_account = Account.create!(family: source_family, owner: user, name: "Shared FinanceKit Checking",
       balance: 100, currency: "USD", accountable: Depository.new(subtype: "checking"))
-    AccountShare.create!(account: moved_account, user: other_user, permission: "full_control")
-    other_user.update!(preferences: other_user.preferences.merge("preview_features_enabled" => true))
-    source_id = SecureRandom.uuid
-    financekit_item = Financekit::Enrollment.create!(other_user, {
-      "enrollment_id" => SecureRandom.uuid,
-      "protocol_version" => Financekit::VERSION,
-      "consent" => {
-        "version" => 1,
-        "granted_at" => Time.current.iso8601,
-        "selected_source_account_ids" => [ source_id ],
-        "upload_authorized" => true,
-        "family_visibility_acknowledged" => true,
-        "remote_processing_acknowledged" => true
-      }
-    }).item
-    FinancekitAccount.map!(financekit_item, source_id, {
-      "expected_version" => 0,
-      "action" => "link",
-      "account_id" => moved_account.id,
-      "name" => "Shared FinanceKit Checking",
-      "institution_name" => "Apple Wallet",
-      "currency" => "USD",
-      "accountable_type" => "Depository",
-      "subtype" => "checking",
-      "ledger_timezone" => "America/New_York"
-    })
-    financekit_item.activate!
+    item, lineage = create_historical_financekit_link(family: source_family, user: other_user, account: moved_account)
 
     error = assert_raises(ActiveRecord::RecordInvalid) do
       user.transfer_to_family!(new_family, role: "admin")
@@ -788,8 +755,8 @@ class UserTest < ActiveSupport::TestCase
     assert_includes error.record.errors[:base], I18n.t("activerecord.errors.models.user.attributes.base.provider_item_has_other_accounts")
     assert_equal source_family, user.reload.family
     assert_equal source_family, moved_account.reload.family
-    assert_equal source_family, financekit_item.reload.family
-    assert_equal source_family, financekit_item.financekit_account_lineages.sole.reload.family
+    assert_equal source_family, item.reload.family
+    assert_equal source_family, lineage.reload.family
   end
 
   test "transfer_to_family! rejects provider items linked to accounts outside the transfer" do

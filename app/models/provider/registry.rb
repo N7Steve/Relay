@@ -3,7 +3,7 @@ class Provider::Registry
 
   Error = Class.new(StandardError)
 
-  CONCEPTS = %i[exchange_rates securities property_valuations]
+  CONCEPTS = %i[property_valuations]
 
   validates :concept, inclusion: { in: CONCEPTS }
 
@@ -20,76 +20,8 @@ class Provider::Registry
 
 
     private
-      def twelve_data
-        api_key = ENV["TWELVE_DATA_API_KEY"].presence || Setting.twelve_data_api_key
-
-        return nil unless api_key.present?
-
-        Provider::TwelveData.new(api_key)
-      end
-
       def github
         Provider::Github.new
-      end
-
-      def yahoo_finance
-        Provider::YahooFinance.new
-      end
-
-      def tiingo
-        api_key = ENV["TIINGO_API_KEY"].presence || Setting.tiingo_api_key # pipelock:ignore
-
-        return nil unless api_key.present?
-
-        Provider::Tiingo.new(api_key)
-      end
-
-      def eodhd
-        api_key = ENV["EODHD_API_KEY"].presence || Setting.eodhd_api_key # pipelock:ignore
-
-        return nil unless api_key.present?
-
-        Provider::Eodhd.new(api_key)
-      end
-
-      def alpha_vantage
-        api_key = ENV["ALPHA_VANTAGE_API_KEY"].presence || Setting.alpha_vantage_api_key # pipelock:ignore
-
-        return nil unless api_key.present?
-
-        Provider::AlphaVantage.new(api_key)
-      end
-
-      def mansa
-        api_key = ENV["MANSA_API_KEY"].presence || Setting.mansa_api_key # pipelock:ignore
-
-        return nil unless api_key.present?
-
-        Provider::Mansa.new(api_key)
-      end
-
-      def mfapi
-        Provider::Mfapi.new
-      end
-
-      def binance_public
-        Provider::BinancePublic.new
-      end
-
-      def moex_public
-        Provider::MoexPublic.new
-      end
-
-      def frankfurter
-        Provider::Frankfurter.new
-      end
-
-      def tinkoff_invest
-        api_key = ENV["TINKOFF_INVEST_API_KEY"].presence || Setting.tinkoff_invest_api_key # pipelock:ignore
-
-        return nil unless api_key.present?
-
-        Provider::TinkoffInvest.new(api_key)
       end
 
       def rentcast
@@ -136,10 +68,6 @@ class Provider::Registry
 
     def available_providers
       case concept
-      when :exchange_rates
-        %i[twelve_data yahoo_finance moex_public frankfurter]
-      when :securities
-        %i[twelve_data yahoo_finance tiingo eodhd alpha_vantage mfapi binance_public moex_public tinkoff_invest mansa]
       when :property_valuations
         %i[rentcast realie]
       else

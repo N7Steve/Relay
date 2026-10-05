@@ -6,27 +6,27 @@ class Demo::GeneratorTest < ActiveSupport::TestCase
     @admin_user = create_user!(@family, "demo-admin@example.com")
   end
 
-  test "production sample reset includes Wallet in the normal accounts and transactions phases" do
+  test "production sample reset creates only retained account types" do
     Rails.stubs(:env).returns(ActiveSupport::EnvironmentInquirer.new("production"))
     generator = Demo::Generator.new(seed: 42)
-    stub_non_wallet_activity(generator)
+    stub_transaction_activity(generator)
     @family.expects(:sync_later)
 
     generator.generate_new_user_data_for!(@family, email: @admin_user.email)
 
-    assert_wallet_demo_activity
+    assert_no_wallet_demo_data
   end
 
-  test "production default demo includes Wallet in the normal accounts and transactions phases" do
+  test "production default demo creates only retained account types" do
     Rails.stubs(:env).returns(ActiveSupport::EnvironmentInquirer.new("production"))
     generator = Demo::Generator.new(seed: 42)
     generator.stubs(:create_family_and_users!).returns(@family)
     generator.stubs(:create_monitoring_api_key!)
-    stub_non_wallet_activity(generator)
+    stub_transaction_activity(generator)
 
     generator.generate_default_data!(skip_clear: true)
 
-    assert_wallet_demo_activity
+    assert_no_wallet_demo_data
   end
 
   test "monitoring api key creation reassigns stale demo monitoring key owned by another user" do
@@ -177,7 +177,7 @@ class Demo::GeneratorTest < ActiveSupport::TestCase
   private
     # Exercise the actual account/transaction orchestration without generating
     # years of unrelated spending, securities, budgets and goals in each test.
-    def stub_non_wallet_activity(generator)
+    def stub_transaction_activity(generator)
       %i[load_securities! generate_salary_history! generate_housing_transactions!
          generate_food_transactions! generate_transportation_transactions!
          generate_entertainment_transactions! generate_shopping_transactions!
@@ -190,18 +190,10 @@ class Demo::GeneratorTest < ActiveSupport::TestCase
       end
     end
 
-    def assert_wallet_demo_activity
-      item = @family.financekit_items.find_by!(enrollment_id: Demo::FinancekitGenerator::ENROLLMENT_ID)
-      assert_equal [ "Apple Card", "Apple Cash", "Nancy's Apple Cash" ], item.accounts.order(:name).pluck(:name)
-      assert item.accounts.all?(&:linked?)
-      assert item.accounts.all? { |account| account.entries.exists? }
-      assert item.last_imported_at
-      card = item.accounts.find_by!(name: "Apple Card")
-      checking = @family.accounts.find_by!(name: "Chase Premier Checking")
-      assert_equal checking, card.entries.find_by!(name: "Apple Card Payment").entryable.transfer.from_account
-      assert item.accounts.find_by!(name: "Apple Cash").entries.exists?(name: "Apple Card Daily Cash")
-      assert item.accounts.find_by!(name: "Nancy's Apple Cash").entries.exists?(name: "Movie Theater")
-      assert_not @family.accounts.exists?(name: "Wallet Demo Checking")
+    def assert_no_wallet_demo_data
+      assert @family.accounts.exists?(name: "Chase Premier Checking")
+      assert_empty @family.financekit_items
+      assert_not @family.accounts.exists?(name: [ "Apple Card", "Apple Cash", "Nancy's Apple Cash" ])
     end
 
     def create_user!(family, email)

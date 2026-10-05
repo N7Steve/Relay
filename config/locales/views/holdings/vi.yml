@@ -16,10 +16,6 @@ vi:
       security_not_found: Không tìm thấy chứng khoán đã chọn.
     reset_security:
       success: Chứng khoán đã được đặt lại về giá trị từ nhà cung cấp.
-    sync_prices:
-      success: Đã đồng bộ dữ liệu thị trường thành công.
-      unavailable: Đồng bộ dữ liệu thị trường không khả dụng cho chứng khoán ngoại tuyến.
-      provider_error: Không thể tải giá mới nhất. Vui lòng thử lại sau vài phút.
     errors:
       security_collision: "Không thể ánh xạ lại: bạn đã có danh mục nắm giữ cho %{ticker} vào ngày %{date}."
     cost_basis_sources:
@@ -70,16 +66,8 @@ vi:
       settings: Cài đặt
       security_label: Chứng khoán
       originally: "là %{ticker}"
-      search_security: Tìm kiếm chứng khoán
-      search_security_placeholder: Tìm theo mã ticker hoặc tên
       cancel: Hủy
       remap_security: Lưu
-      provider_disabled_warning: "Cập nhật giá tạm dừng — nhà cung cấp %{provider} đã bị tắt. Chuyển sang nhà cung cấp khác bên dưới hoặc bật lại trong Cài đặt."
-      truncated_history_warning: "Lịch sử giá chỉ khả dụng từ %{date} trở đi. Các ngày trước đó không có dữ liệu từ nhà cung cấp đã chọn."
-      switch_provider_label: Chuyển nhà cung cấp
-      switch_provider_description: "%{provider} đã bị tắt. Tìm kiếm chứng khoán này từ nhà cung cấp khác đã bật."
-      switch_provider_button: Chuyển
-      no_security_provider: Chưa cấu hình nhà cung cấp chứng khoán. Không thể tìm kiếm chứng khoán.
       security_remapped_label: Chứng khoán đã được ánh xạ lại
       provider_sent: "Nhà cung cấp gửi: %{ticker}"
       reset_to_provider: Đặt lại về nhà cung cấp
@@ -97,8 +85,3 @@ vi:
       shares_label: Cổ phiếu
       book_value_label: Giá trị sổ sách
       market_value_label: Giá trị thị trường
-      market_data_label: Dữ liệu thị trường
-      market_data_sync_button: Làm mới
-      last_price_update: Cập nhật giá lần cuối
-      syncing: Đang đồng bộ...
-      never: Chưa bao giờ

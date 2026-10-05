@@ -136,8 +136,6 @@ ca:
       success: Transacció convertida en operació
       ticker_hint: Introdueix el símbol del valor (p. ex. AAPL, MSFT)
       ticker_placeholder: AAPL
-      ticker_search_hint: Cerca per símbol o nom d'empresa, o escriu un símbol personalitzat
-      ticker_search_placeholder: Cerca un símbol...
       title: Converteix en operació de valors
       trade_type_hint: Compra o ven accions d'un valor
       trade_type_label: Tipus d'operació

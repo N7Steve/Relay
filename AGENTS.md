@@ -45,5 +45,5 @@ Adding or modifying `app/controllers/api/v1/` endpoints requires Minitest behavi
 ## Provider and feature work
 
 - Read [provider sync guidance](docs/llm-guides/providers.md) when changing imports, pending transactions, FX metadata or diagnostics. Use `DebugLogEntry.capture(...)` for support-relevant failures and partial responses, with provider/source metadata and family/account-provider context where available.
-- For securities providers, follow [adding a securities provider](docs/llm-guides/adding-a-securities-provider.md).
+- Security prices and exchange rates have no external providers since pruning phase 9A; do not reintroduce them without an explicit product decision. See [phase 9](docs/migration/pruning-phase-9.md).
 - For feature rollout, follow [preview-feature gating](docs/llm-guides/gating-a-preview-feature.md); for goals, read the [Goals guide](docs/llm-guides/goals.md).

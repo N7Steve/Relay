@@ -25,18 +25,7 @@
         }} %>
 
       <% if %w[buy sell].include?(type) %>
-        <% if Security.providers.any? %>
-          <div class="form-field combobox">
-            <%= form.combobox :ticker,
-                            securities_path(country_code: Current.family.country),
-                            name_when_new: "model[manual_ticker]",
-                            label: t(".holding"),
-                            placeholder: t(".ticker_placeholder"),
-                            required: true %>
-          </div>
-        <% else %>
-          <%= form.text_field :manual_ticker, label: t(".holding"), placeholder: t(".ticker_placeholder"), required: true %>
-        <% end %>
+        <%= form.text_field :manual_ticker, label: t(".holding"), placeholder: t(".ticker_placeholder"), required: true %>
       <% end %>
 
       <% if %w[dividend interest].include?(type) %>

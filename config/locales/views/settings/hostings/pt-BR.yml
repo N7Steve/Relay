@@ -16,7 +16,6 @@ pt-BR:
           invite_only: Apenas convidados
       show:
         general: Configurações Gerais
-        financial_data_providers: Provedores de Dados Financeiros
         invites: Códigos de Convite
         title: Self-Hosting
         danger_zone: Zona de Perigo
@@ -25,15 +24,6 @@ pt-BR:
         confirm_clear_cache:
           title: Limpar cache de dados?
           body: Tem certeza de que deseja limpar o cache de dados? Isso removerá todas as taxas de câmbio, preços de ativos, saldos de contas e outros dados. Esta ação não pode ser desfeita.
-      provider_selection:
-        title: Seleção de Provedor
-        description: Escolha qual serviço usar para buscar taxas de câmbio e preços de ativos. O Yahoo Finance é gratuito e não requer uma chave de API. O Twelve Data requer uma chave de API gratuita, mas pode oferecer maior cobertura de dados.
-        exchange_rate_provider_label: Provedor de Taxas de Câmbio
-        securities_provider_label: Provedor de Ativos (Preços de Ações)
-        env_configured_message: A seleção de provedor está desabilitada porque variáveis de ambiente (EXCHANGE_RATE_PROVIDER ou SECURITIES_PROVIDER) estão definidas. Para habilitar a seleção aqui, remova essas variáveis de ambiente da sua configuração.
-        providers:
-          twelve_data: Twelve Data
-          yahoo_finance: Yahoo Finance
       brand_fetch_settings:
         description: Insira o Client ID fornecido pelo Brandfetch
         label: Client ID
@@ -49,21 +39,6 @@ pt-BR:
         model_label: Modelo (Opcional)
         model_placeholder: "gpt-4.1 (padrão)"
         title: OpenAI
-      yahoo_finance_settings:
-        title: Yahoo Finance
-        description: O Yahoo Finance fornece acesso gratuito a preços de ações, taxas de câmbio e dados financeiros sem exigir uma chave de API.
-        status_active: O Yahoo Finance está ativo e funcionando
-        status_inactive: Falha na conexão com o Yahoo Finance
-        connection_failed: Não foi possível conectar ao Yahoo Finance
-        troubleshooting: Verifique sua conexão com a internet e as configurações de firewall. O Yahoo Finance pode estar temporariamente indisponível.
-      twelve_data_settings:
-        api_calls_used: "%{used} / %{limit} chamadas diárias da API usadas (%{percentage})"
-        description: Insira a chave de API fornecida pela Twelve Data
-        env_configured_message: Configurado com sucesso através da variável de ambiente TWELVE_DATA_API_KEY.
-        label: Chave de API
-        placeholder: Insira sua chave de API aqui
-        plan: "plano %{plan}"
-        title: Twelve Data
       update:
         failure: Valor de configuração inválido
         success: Configurações atualizadas

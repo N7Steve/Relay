@@ -12,35 +12,7 @@ class Settings::HostingsController < ApplicationController
       [ t("breadcrumbs.self_hosting"), nil ]
     ]
 
-    # Determine which providers are currently selected
-    exchange_rate_provider = ENV["EXCHANGE_RATE_PROVIDER"].presence || Setting.exchange_rate_provider
-    enabled_securities = Setting.enabled_securities_providers
-
-    # Show provider settings if used for FX or enabled for securities
-    @show_twelve_data_settings = exchange_rate_provider == "twelve_data" || enabled_securities.include?("twelve_data")
-    @show_yahoo_finance_settings = exchange_rate_provider == "yahoo_finance" || enabled_securities.include?("yahoo_finance")
-    @show_tiingo_settings = enabled_securities.include?("tiingo")
-    @show_eodhd_settings = enabled_securities.include?("eodhd")
-    @show_alpha_vantage_settings = enabled_securities.include?("alpha_vantage")
-    @show_mansa_settings = enabled_securities.include?("mansa")
-    tinkoff_invest_checked = enabled_securities.include?("tinkoff_invest")
-    tinkoff_invest_configured = ENV["TINKOFF_INVEST_API_KEY"].present? || Setting.tinkoff_invest_api_key.present?
-    @show_tinkoff_invest_settings = tinkoff_invest_checked || enabled_securities.include?("moex_public") || tinkoff_invest_configured
-    @tinkoff_invest_moex_only = @show_tinkoff_invest_settings && !tinkoff_invest_checked
-
-    # Only fetch provider data if we're showing the section
-    if @show_twelve_data_settings
-      twelve_data_provider = Provider::Registry.get_provider(:twelve_data)
-      @twelve_data_usage = twelve_data_provider&.usage
-      @plan_restricted_securities = Current.family.securities_with_plan_restrictions(provider: "TwelveData")
-    end
-
-    if @show_yahoo_finance_settings
-      @yahoo_finance_provider = Provider::Registry.get_provider(:yahoo_finance)
-      @yahoo_finance_health_status = @yahoo_finance_provider&.health_status || :unknown
-    end
-
-    # Property valuation (AVM) providers â€” usage is shown against their tight
+    # Property valuation (AVM) providers: usage is shown against their tight
     # monthly request caps when a key is configured
     @rentcast_usage = Provider::Registry.get_provider(:rentcast)&.usage
     @realie_usage = Provider::Registry.get_provider(:realie)&.usage
@@ -96,48 +68,6 @@ class Settings::HostingsController < ApplicationController
       Setting.brand_fetch_high_res_logos = hosting_params[:brand_fetch_high_res_logos] == "1"
     end
 
-    update_encrypted_setting(:twelve_data_api_key)
-
-    if hosting_params.key?(:exchange_rate_provider)
-      Setting.exchange_rate_provider = hosting_params[:exchange_rate_provider]
-    end
-
-    if hosting_params.key?(:securities_provider)
-      Setting.securities_provider = hosting_params[:securities_provider]
-    end
-
-    if hosting_params.key?(:securities_providers)
-      new_providers = Array(hosting_params[:securities_providers]).reject(&:blank?) & Security.valid_price_providers
-      old_providers = Setting.enabled_securities_providers
-
-      Setting.securities_providers = new_providers.join(",")
-
-      Setting.securities_provider = "" if new_providers.empty?
-
-      # Mark securities linked to removed providers as offline so they aren't
-      # silently queried against an incompatible fallback provider (e.g. MFAPI
-      # scheme codes sent to TwelveData). The price_provider is preserved so
-      # provider_status can report :provider_unavailable.
-      removed = old_providers - new_providers
-      removed.each do |removed_provider|
-        Security.where(price_provider: removed_provider, offline: false)
-                .in_batches.update_all(offline: true, offline_reason: "provider_disabled")
-      end
-
-      # Bring securities back online when their provider is re-enabled â€” but only
-      # those that were taken offline by a provider toggle, not by health checks.
-      added = new_providers - old_providers
-      added.each do |added_provider|
-        Security.where(price_provider: added_provider, offline: true, offline_reason: "provider_disabled")
-                .in_batches.update_all(offline: false, offline_reason: nil, failed_fetch_count: 0, failed_fetch_at: nil)
-      end
-    end
-
-    update_encrypted_setting(:tiingo_api_key)
-    update_encrypted_setting(:eodhd_api_key)
-    update_encrypted_setting(:alpha_vantage_api_key)
-    update_encrypted_setting(:tinkoff_invest_api_key)
-    update_encrypted_setting(:mansa_api_key)
     update_encrypted_setting(:rentcast_api_key)
     update_encrypted_setting(:realie_api_key)
 
@@ -184,7 +114,7 @@ class Settings::HostingsController < ApplicationController
     # Strong parameters for the self-hosting settings form.
     def hosting_params
       return ActionController::Parameters.new unless params.key?(:setting)
-      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :demo_family_refresh_enabled, :demo_family_refresh_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :twelve_data_api_key, :tiingo_api_key, :eodhd_api_key, :alpha_vantage_api_key, :tinkoff_invest_api_key, :mansa_api_key, :rentcast_api_key, :realie_api_key, :exchange_rate_provider, :securities_provider, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time, securities_providers: [])
+      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :demo_family_refresh_enabled, :demo_family_refresh_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :rentcast_api_key, :realie_api_key, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time)
       permitted
     end
 

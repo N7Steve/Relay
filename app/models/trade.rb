@@ -236,10 +236,10 @@ class Trade < ApplicationRecord
     # side of parity.
     #
     # Converted in THIS direction, and not the other, because it is the
-    # direction the data holds: MarketDataImporter's first required pair is
-    # every entry currency against its account's, so a EUR disposal in a USD
-    # account has a EUR->USD row for the day it happened, while USD->EUR is
-    # only ever there by accident of another account.
+    # direction stored rates are recorded in: every entry currency against its
+    # account's, so a EUR disposal in a USD account has a EUR->USD row for the
+    # day it happened, while USD->EUR is only ever there by accident of
+    # another account.
     #
     # Exact date, exact direction, no parity fallback and no nearest-rate
     # lookback. A disposal happened on one known day; the rate for that day is

@@ -1,8 +1,6 @@
 class Security < ApplicationRecord
-  include Provided, PlanRestrictionTracker
-
-  # Transient attribute for search results -- not persisted
-  attr_accessor :search_currency
+  # Raised by local recalculation when no stored, trade or holding price covers a date.
+  MissingPriceError = Class.new(StandardError)
 
   # ISO 10383 MIC codes mapped to user-friendly exchange names
   # Source: https://www.iso20022.org/market-identifier-codes
@@ -17,12 +15,9 @@ class Security < ApplicationRecord
 
   KINDS = %w[standard cash].freeze
 
-  # Known securities provider keys — derived from the registry so adding a new
-  # provider to Registry#available_providers automatically allows it here.
-  # Evaluated at runtime (not boot) so runtime-enabled providers are accepted.
-  def self.valid_price_providers
-    Provider::Registry.for_concept(:securities).provider_keys.map(&:to_s)
-  end
+  # Exchange code stored on crypto pairs by the price provider retired in pruning phase 9A.
+  CRYPTO_MIC = "BNCX".freeze
+  CRYPTO_QUOTE_CURRENCIES = %w[USD EUR JPY BRL TRY].freeze
 
   # Builds the Brandfetch crypto URL for a base asset (e.g. "BTC"). Returns
   # nil when Brandfetch isn't configured.
@@ -84,7 +79,6 @@ class Security < ApplicationRecord
 
   before_validation :upcase_symbols
   before_save :generate_logo_url_from_brandfetch, if: :should_generate_logo?
-  before_save :reset_first_provider_price_on_if_provider_changed
 
   has_many :trades, dependent: :nullify, class_name: "Trade"
   has_many :prices, dependent: :destroy
@@ -92,7 +86,6 @@ class Security < ApplicationRecord
   validates :ticker, presence: true
   validates :ticker, uniqueness: { scope: :exchange_operating_mic, case_sensitive: false }
   validates :kind, inclusion: { in: KINDS }
-  validates :price_provider, inclusion: { in: ->(_) { Security.valid_price_providers } }, allow_nil: true
   validates :asset_class, inclusion: { in: ASSET_CLASSES }, allow_nil: true
   validates :asset_sub_class, inclusion: { in: ASSET_SUB_CLASSES }, allow_nil: true
   validates :classification_source, inclusion: { in: CLASSIFICATION_SOURCES }, allow_nil: true
@@ -100,10 +93,10 @@ class Security < ApplicationRecord
   scope :online, -> { where(offline: false) }
   scope :standard, -> { where(kind: "standard") }
 
-  # Parses the combobox ID format "SYMBOL|EXCHANGE|PROVIDER" into a hash.
+  # Parses a "SYMBOL|EXCHANGE" ticker value. Older clients may append a provider segment, which is ignored.
   def self.parse_combobox_id(value)
     parts = value.to_s.split("|", 3)
-    { ticker: parts[0].presence, exchange_operating_mic: parts[1].presence, price_provider: parts[2].presence }
+    { ticker: parts[0].presence, exchange_operating_mic: parts[1].presence }
   end
 
   # Lazily finds or creates a synthetic cash security for an account.
@@ -125,24 +118,18 @@ class Security < ApplicationRecord
     kind == "cash"
   end
 
-  # True when this security represents a crypto asset. Today the only signal
-  # is the Binance ISO MIC — when we add a second crypto provider, extend
-  # this check rather than duplicating the test at every call site.
   def crypto?
-    exchange_operating_mic == Provider::BinancePublic::BINANCE_MIC
+    exchange_operating_mic == CRYPTO_MIC
   end
 
-  # Strips the display-currency suffix from a crypto ticker (BTCUSD -> BTC,
-  # ETHEUR -> ETH). Returns nil for non-crypto securities or when the ticker
-  # doesn't end in a supported quote.
+  # Base asset of a stored crypto pair (BTCUSD, BTC-EUR or CRYPTO:BTC -> BTC).
   def crypto_base_asset
     return nil unless crypto?
 
-    # Delegated rather than parsed here: this stripped a fiat suffix only, so it
-    # answered nil for the "CRYPTO:BTC" form the holdings processors store — the
-    # form every crypto integration writes — and those securities carried no
-    # logo at all. The provider already parses every shape it accepts.
-    Provider::BinancePublic.parse_ticker(ticker)&.dig(:base)
+    symbol = ticker.to_s.upcase.delete_prefix("CRYPTO:")
+    quote = CRYPTO_QUOTE_CURRENCIES.find { |currency| symbol.length > currency.length && symbol.end_with?(currency) }
+    symbol = symbol.delete_suffix(quote).sub(/[-\/_ ]\z/, "") if quote
+    symbol.presence
   end
 
   # Single source of truth for which logo URL the UI should render.
@@ -250,21 +237,9 @@ class Security < ApplicationRecord
   end
 
   def current_price
-    @current_price ||= find_or_fetch_price
+    @current_price ||= prices.find_by(date: Date.current)
     return nil if @current_price.nil?
     Money.new(@current_price.price, @current_price.currency)
-  end
-
-  def to_combobox_option
-    ComboboxOption.new(
-      symbol: ticker,
-      name: name,
-      logo_url: logo_url,
-      exchange_operating_mic: exchange_operating_mic,
-      country_code: country_code,
-      price_provider: price_provider,
-      currency: search_currency
-    )
   end
 
   def brandfetch_icon_url(width: nil, height: nil)
@@ -305,17 +280,5 @@ class Security < ApplicationRecord
       else
         brandfetch_icon_url
       end
-    end
-
-    # When a user remaps a security to a different provider (via the holdings
-    # remap combobox or Security::Resolver), the previously-discovered
-    # first_provider_price_on belongs to the OLD provider and may no longer
-    # reflect what the new provider can serve. Reset it so the next sync's
-    # fallback rediscovers the correct earliest date for the new provider.
-    # Skip when the caller explicitly set both columns in the same save.
-    def reset_first_provider_price_on_if_provider_changed
-      return unless price_provider_changed?
-      return if first_provider_price_on_changed?
-      self.first_provider_price_on = nil
     end
 end

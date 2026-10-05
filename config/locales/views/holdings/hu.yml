@@ -16,10 +16,6 @@ hu:
       security_not_found: A kiválasztott értékpapír nem található.
     reset_security:
       success: Értékpapír visszaállítva a szolgáltató értékére.
-    sync_prices:
-      success: Piaci adatok sikeresen szinkronizálva.
-      unavailable: Az offline értékpapíroknál a piaci adatok szinkronizálása nem elérhető.
-      provider_error: Nem sikerült lekérni a legújabb árakat. Próbáld meg újra néhány perc múlva.
     errors:
       security_collision: "Nem lehet átrendeli: már van egy pozíciód a(z) %{ticker} részvényből %{date} dátummal."
     cost_basis_sources:
@@ -70,16 +66,8 @@ hu:
       settings: Beállítások
       security_label: Értékpapír
       originally: "korábban: %{ticker}"
-      search_security: Értékpapír keresése
-      search_security_placeholder: Keresés szimbólum vagy név alapján
       cancel: Mégse
       remap_security: Mentés
-      provider_disabled_warning: "Az árfrissítés szünetel – a(z) %{provider} szolgáltató le van tiltva. Válassz másik szolgáltatót alább, vagy engedélyezd újra a Beállításokban."
-      truncated_history_warning: "Az árfolyamtörténet csak %{date} dátumtól érhető el. A korábbi dátumoknál a kiválasztott szolgáltatótól nem érkeztek adatok – ez akkor fordulhat elő, ha az eszközt az ügyletkötés után vezették be, vagy a szolgáltató az aktuális csomagján korlátozott historikus ablakot kínál."
-      switch_provider_label: Szolgáltató váltása
-      switch_provider_description: "A(z) %{provider} le van tiltva. Keress rá erre az értékpapírra egy másik engedélyezett szolgáltatónál."
-      switch_provider_button: Váltás
-      no_security_provider: Az értékpapír-szolgáltató nincs beállítva. Nem lehet értékpapírt keresni.
       security_remapped_label: Értékpapír átrendeli
       provider_sent: "Szolgáltató által küldött: %{ticker}"
       reset_to_provider: Visszaállítás a szolgáltató értékére
@@ -97,8 +85,3 @@ hu:
       shares_label: Részvények
       book_value_label: Könyv szerinti érték
       market_value_label: Piaci érték
-      market_data_label: Piaci adatok
-      market_data_sync_button: Frissítés
-      last_price_update: Utolsó árfrissítés
-      syncing: Szinkronizálás...
-      never: Soha

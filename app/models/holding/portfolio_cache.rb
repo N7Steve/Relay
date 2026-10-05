@@ -33,7 +33,7 @@ class Holding::PortfolioCache
     end
 
     if price_with_priority.nil? && ExternalAccess.local_recalculation?
-      raise Security::Provided::SecurityInfoMissingError, "Missing price for security #{security_id} on #{date}; enter a manual price"
+      raise Security::MissingPriceError, "Missing price for security #{security_id} on #{date}; enter a manual price"
     end
     return nil unless price_with_priority
 

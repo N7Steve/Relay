@@ -47,7 +47,6 @@ class ExternalAccessControllerTest < ActionDispatch::IntegrationTest
   test "sidebar warns about missing FX and preserves navigation to manual input" do
     users(:family_admin).family.update!(currency: "EUR")
     ExchangeRate.where(to_currency: "EUR").delete_all
-    Setting.stubs(:external_market_data_enabled).returns(false)
     get new_depository_path
     assert_response :success
     assert_match I18n.t("external_access.insufficient_data", details: "").strip, response.body

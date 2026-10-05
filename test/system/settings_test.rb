@@ -51,8 +51,6 @@ class SettingsTest < ApplicationSystemTestCase
   test "can update self hosting settings" do
     sign_in users(:sure_support_staff)
 
-    Provider::Registry.stubs(:get_provider).with(:twelve_data).returns(nil)
-    Provider::Registry.stubs(:get_provider).with(:yahoo_finance).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:rentcast).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:realie).returns(nil)
     Provider::Registry.stubs(:get_provider).with(:github).returns(stub(fetch_latest_release_notes: nil, fetch_release_notes: nil))

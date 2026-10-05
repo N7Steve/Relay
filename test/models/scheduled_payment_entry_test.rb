@@ -286,7 +286,7 @@ class ScheduledPaymentEntryTest < ActiveSupport::TestCase
     target.update!(currency: "EUR")
     @sp.update!(payment_type: "transfer", target_account: target)
     occurrence = @sp.scheduled_payment_entries.create!(scheduled_date: Date.current)
-    ExchangeRate.expects(:find_or_fetch_rate).with(from: "USD", to: "EUR", date: Date.yesterday)
+    ExchangeRate.expects(:find_rate).with(from: "USD", to: "EUR", date: Date.yesterday)
       .returns(OpenStruct.new(rate: BigDecimal("0.9")))
 
     occurrence.confirm!(date_override: Date.yesterday)
@@ -301,7 +301,7 @@ class ScheduledPaymentEntryTest < ActiveSupport::TestCase
     target.update!(currency: "EUR")
     @sp.update!(payment_type: "transfer", target_account: target)
     occurrence = @sp.scheduled_payment_entries.create!(scheduled_date: Date.current)
-    ExchangeRate.stubs(:find_or_fetch_rate).returns(nil)
+    ExchangeRate.stubs(:find_rate).returns(nil)
 
     assert_no_difference [ "Entry.count", "Transaction.count", "Transfer.count" ] do
       assert_raises(Money::ConversionError) { occurrence.confirm! }

@@ -60,9 +60,6 @@ ca:
       no_category: Sense categoria
       note_label: Nota
       note_placeholder: Afegeix aquí qualsevol nota addicional...
-      provider_disabled_warning: Actualitzacions de preu en pausa — el proveïdor %{provider}
-        està desactivat. Torna a activar-lo a la configuració o reassigna la posició
-        a un altre proveïdor.
       quantity_label: Quantitat
       sell: Venda
       settings: Configuració

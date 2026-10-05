@@ -207,7 +207,7 @@ class SecurityTest < ActiveSupport::TestCase
   end
 
   test "crypto? is true for Binance MIC and false otherwise" do
-    crypto = Security.new(ticker: "BTCUSD", exchange_operating_mic: Provider::BinancePublic::BINANCE_MIC)
+    crypto = Security.new(ticker: "BTCUSD", exchange_operating_mic: Security::CRYPTO_MIC)
     equity = Security.new(ticker: "AAPL",   exchange_operating_mic: "XNAS")
     offline = Security.new(ticker: "ACME",  exchange_operating_mic: nil)
 
@@ -218,7 +218,7 @@ class SecurityTest < ActiveSupport::TestCase
 
   test "crypto_base_asset strips the display-currency suffix" do
     %w[USD EUR JPY BRL TRY].each do |quote|
-      sec = Security.new(ticker: "BTC#{quote}", exchange_operating_mic: Provider::BinancePublic::BINANCE_MIC)
+      sec = Security.new(ticker: "BTC#{quote}", exchange_operating_mic: Security::CRYPTO_MIC)
       assert_equal "BTC", sec.crypto_base_asset, "expected BTC#{quote} -> BTC"
     end
   end
@@ -272,7 +272,7 @@ class SecurityTest < ActiveSupport::TestCase
 
     sec = Security.new(
       ticker: "BTCUSD",
-      exchange_operating_mic: Provider::BinancePublic::BINANCE_MIC
+      exchange_operating_mic: Security::CRYPTO_MIC
     )
 
     assert_equal(
@@ -286,7 +286,7 @@ class SecurityTest < ActiveSupport::TestCase
 
     sec = Security.new(
       ticker: "BTCUSD",
-      exchange_operating_mic: Provider::BinancePublic::BINANCE_MIC,
+      exchange_operating_mic: Security::CRYPTO_MIC,
       logo_url: "https://example.com/btc.png"
     )
 
@@ -339,7 +339,7 @@ class SecurityTest < ActiveSupport::TestCase
 
     sec = Security.create!(
       ticker: "BTCUSD",
-      exchange_operating_mic: Provider::BinancePublic::BINANCE_MIC
+      exchange_operating_mic: Security::CRYPTO_MIC
     )
 
     assert_equal(
@@ -352,15 +352,21 @@ class SecurityTest < ActiveSupport::TestCase
   # Kraken, CoinStats and Binance all write "CRYPTO:BTC" — and this answered nil
   # for all of them, so none of their securities carried a logo.
   test "resolves the base asset from a prefixed crypto ticker" do
-    security = Security.new(ticker: "CRYPTO:BTC", exchange_operating_mic: Provider::BinancePublic::BINANCE_MIC)
+    security = Security.new(ticker: "CRYPTO:BTC", exchange_operating_mic: Security::CRYPTO_MIC)
 
     assert_equal "BTC", security.crypto_base_asset
   end
 
   test "still resolves the pair form the search results produce" do
-    security = Security.new(ticker: "BTCUSD", exchange_operating_mic: Provider::BinancePublic::BINANCE_MIC)
+    security = Security.new(ticker: "BTCUSD", exchange_operating_mic: Security::CRYPTO_MIC)
 
     assert_equal "BTC", security.crypto_base_asset
+  end
+
+  test "resolves separated pairs and bare stablecoins without a provider" do
+    assert_equal "BTC", Security.new(ticker: "BTC-EUR", exchange_operating_mic: Security::CRYPTO_MIC).crypto_base_asset
+    assert_equal "USDT", Security.new(ticker: "USDT", exchange_operating_mic: Security::CRYPTO_MIC).crypto_base_asset
+    assert_equal "USDT", Security.new(ticker: "USDTUSD", exchange_operating_mic: Security::CRYPTO_MIC).crypto_base_asset
   end
 
   test "a non-crypto security has no base asset" do

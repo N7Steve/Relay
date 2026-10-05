@@ -238,8 +238,6 @@ vi:
       security_not_listed_hint: Không thấy chứng khoán? Chọn "Nhập mã ticker tùy chỉnh" ở cuối danh sách.
       ticker_placeholder: AAPL
       ticker_hint: "Nhập mã cổ phiếu/ETF (ví dụ: AAPL, MSFT)"
-      ticker_search_placeholder: Tìm kiếm mã ticker...
-      ticker_search_hint: Tìm theo mã ticker hoặc tên công ty, hoặc nhập mã ticker tùy chỉnh
       price_mismatch_title: Giá có thể không khớp
       price_mismatch_message: "Giá của bạn (%{entered_price}/cổ phiếu) khác đáng kể so với giá thị trường hiện tại của %{ticker} (%{market_price}). Nếu có vẻ sai, bạn có thể đã chọn nhầm chứng khoán — thử \"Nhập mã ticker tùy chỉnh\"."
       quantity_label: Số lượng (Cổ phiếu)

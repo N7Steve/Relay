@@ -45,7 +45,6 @@ hu:
       delete_subtitle: Ez a művelet nem vonható vissza
       delete_title: Ügylet törlése
       details: Részletek
-      provider_disabled_warning: "Az árfrissítés szünetel – a(z) %{provider} szolgáltató le van tiltva. Engedélyezd újra a Beállításokban, vagy rendeld hozzá a pozíciót egy másik szolgáltatóhoz."
       exclude_subtitle: Ez az ügylet nem kerül bele a riportokba és a számításokba
       exclude_title: Kizárás az elemzésből
       no_category: Nincs kategória

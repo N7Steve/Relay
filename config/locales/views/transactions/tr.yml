@@ -136,9 +136,6 @@ tr:
       success: İşlem alım satıma dönüştürüldü
       ticker_hint: Hisse senedi/ETF sembolünü girin (örn. AAPL, MSFT)
       ticker_placeholder: AAPL
-      ticker_search_hint: Sembol veya şirket adına göre arayın ya da özel bir sembol
-        yazın
-      ticker_search_placeholder: Sembol ara...
       title: Menkul Kıymet Alım Satımına Dönüştür
       trade_type_hint: Bir menkul kıymetin hisselerini alın veya satın
       trade_type_label: Alım Satım Türü

@@ -85,28 +85,12 @@ class SettingTest < ActiveSupport::TestCase
     assert_nil Setting.brand_fetch_icon_url("example.com")
   end
 
-  test "enabled_securities_providers falls back to twelve_data when nothing is configured" do
-    with_env_overrides("SECURITIES_PROVIDERS" => nil, "SECURITIES_PROVIDER" => nil) do
-      assert_equal [ "twelve_data" ], Setting.enabled_securities_providers
+  test "market data provider settings are retired" do
+    %i[twelve_data_api_key tiingo_api_key eodhd_api_key alpha_vantage_api_key tinkoff_invest_api_key mansa_api_key
+       exchange_rate_provider securities_provider securities_providers enabled_securities_providers].each do |name|
+      assert_not Setting.respond_to?(name), "Setting.#{name} should be retired"
     end
-  end
-
-  test "enabled_securities_providers returns an empty list when explicitly cleared, not the legacy default" do
-    original_providers = Setting.securities_providers
-    original_provider = Setting.securities_provider
-
-    Setting.securities_providers = ""
-    Setting.securities_provider = ""
-
-    assert_equal [], Setting.enabled_securities_providers
-  ensure
-    # Restore whatever was there before this test, not a hardcoded value —
-    # and restore via assignment (not nil) either way, since
-    # rails-settings-cached's cache layer doesn't reliably invalidate on
-    # delete within a single test process, so a later test can still read
-    # back the just-deleted blank override instead of falling through to
-    # the field's default.
-    Setting.securities_providers = original_providers.presence || ""
-    Setting.securities_provider = original_provider.presence || "twelve_data"
+    assert_equal %i[rentcast_api_key realie_api_key external_assistant_token],
+      Setting::EncryptedSettingFields::ENCRYPTED_FIELDS
   end
 end
