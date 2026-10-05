@@ -1,5 +1,10 @@
 <script>
   if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.setAttribute("data-theme", "dark");
+    // Signed-out pages have no stored preference to render, so reuse the last palette.
+    var preference = document.documentElement.getAttribute("data-theme-user-preference-value");
+    if (localStorage.palette === 'relay' && (!preference || preference === 'system')) {
+      document.documentElement.setAttribute("data-palette", "relay");
+    }
   }
 </script>

@@ -29,6 +29,7 @@ nb:
       theme_system: System
       theme_light: Lys
       theme_dark: Mørk
+      theme_relay: Relay
       locale: Språk
       currency: Valuta
       date_format: Datoformat

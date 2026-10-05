@@ -34,6 +34,7 @@ it:
       theme_system: Sistema
       theme_light: Chiaro
       theme_dark: Scuro
+      theme_relay: Relay
       locale: Lingua
       currency: Valuta
       date_format: Formato data

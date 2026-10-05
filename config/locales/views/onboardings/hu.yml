@@ -34,6 +34,7 @@ hu:
       theme_system: Rendszer
       theme_light: Világos
       theme_dark: Sötét
+      theme_relay: Relay
       locale: Nyelv
       currency: Pénznem
       date_format: Dátumformátum

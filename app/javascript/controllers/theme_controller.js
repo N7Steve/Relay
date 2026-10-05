@@ -1,5 +1,9 @@
 import { Controller } from "@hotwired/stimulus";
 
+// Palettes layered on top of the dark theme. They keep data-theme="dark" so
+// every dark-mode token and chart keeps working, and add data-palette.
+const DARK_PALETTES = ["relay"];
+
 export default class extends Controller {
   static values = { userPreference: String };
 
@@ -18,35 +22,41 @@ export default class extends Controller {
 
   // Called when a theme radio button is clicked
   updateTheme(event) {
-    const selectedTheme = event.currentTarget.value;
-    if (selectedTheme === "system") {
-      this.setTheme(this.systemPrefersDark());
-    } else if (selectedTheme === "dark") {
-      this.setTheme(true);
-    } else {
-      this.setTheme(false);
-    }
+    this.applyPreference(event.currentTarget.value);
   }
 
   // Applies theme based on the userPreferenceValue (from server)
   applyTheme() {
-    if (this.userPreferenceValue === "system") {
+    this.applyPreference(this.userPreferenceValue);
+  }
+
+  applyPreference(preference) {
+    if (preference === "system") {
       this.setTheme(this.systemPrefersDark());
-    } else if (this.userPreferenceValue === "dark") {
-      this.setTheme(true);
+    } else if (DARK_PALETTES.includes(preference)) {
+      this.setTheme(true, preference);
     } else {
-      this.setTheme(false);
+      this.setTheme(preference === "dark");
     }
   }
 
-  // Sets the data-theme attribute and broadcasts a `theme:change` event so
-  // imperative consumers (D3/SVG/canvas) can repaint without polling.
-  setTheme(isDark) {
+  // Sets the data-theme (and optional data-palette) attribute and broadcasts a
+  // `theme:change` event so imperative consumers (D3/SVG/canvas) can repaint
+  // without polling.
+  setTheme(isDark, palette = null) {
     const theme = isDark ? "dark" : "light";
+    const root = document.documentElement;
     localStorage.theme = theme;
-    document.documentElement.setAttribute("data-theme", theme);
-    document.documentElement.dispatchEvent(
-      new CustomEvent("theme:change", { detail: { theme } }),
+    if (palette) {
+      localStorage.palette = palette;
+      root.setAttribute("data-palette", palette);
+    } else {
+      localStorage.removeItem("palette");
+      root.removeAttribute("data-palette");
+    }
+    root.setAttribute("data-theme", theme);
+    root.dispatchEvent(
+      new CustomEvent("theme:change", { detail: { theme, palette } }),
     );
   }
 

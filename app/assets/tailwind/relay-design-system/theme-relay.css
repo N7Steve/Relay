@@ -1,0 +1,134 @@
+/*
+ * Relay theme: a dark palette taken from the Relay logo.
+ *
+ * The theme controller renders it as data-theme="dark" plus data-palette="relay",
+ * so every dark-mode token, `theme-dark` variant and chart keeps working. This
+ * file only swaps the neutral scale for blue-violet greys and adds restrained
+ * gradients and blur. Nothing here applies without data-palette="relay".
+ */
+
+@layer base {
+  [data-theme="dark"][data-palette="relay"] {
+    /* Logo hues, toned down for interface use. */
+    --relay-cyan: #3fd0f5;
+    --relay-blue: #4c78ff;
+    --relay-violet: #8a5cff;
+    --relay-magenta: #c95cf0;
+
+    /* Neutral scale tinted towards the logo's indigo. Tailwind v4 utilities
+       read these variables, so bg-gray-*, text-gray-* and every token built on
+       them follow the palette. */
+    --color-black: #080a1a;
+    --color-gray-25: #f6f7fc;
+    --color-gray-50: #eff0f8;
+    --color-gray-100: #e3e5f2;
+    --color-gray-200: #cdd0e6;
+    --color-gray-300: #b0b4d4;
+    --color-gray-400: #8d92b8;
+    --color-gray-500: #6a6f98;
+    --color-gray-600: #4d527b;
+    --color-gray-700: #343960;
+    --color-gray-800: #232749;
+    --color-gray-900: #161935;
+
+    --color-surface: var(--color-black);
+    --color-surface-hover: color-mix(in oklab, var(--color-gray-800) 70%, transparent);
+    --color-surface-inset: color-mix(in oklab, var(--color-gray-800) 80%, transparent);
+    --color-surface-inset-hover: var(--color-gray-800);
+    --color-container: color-mix(in oklab, var(--color-gray-900) 86%, transparent);
+    --color-container-hover: color-mix(in oklab, var(--color-gray-800) 85%, transparent);
+    --color-container-inset: color-mix(in oklab, var(--color-gray-800) 70%, transparent);
+    --color-container-inset-hover: color-mix(in oklab, var(--color-gray-700) 70%, transparent);
+
+    --color-link: #7fa8ff;
+    --color-info: var(--relay-blue);
+    --color-focus-ring: color-mix(in oklab, var(--relay-violet) 70%, transparent);
+    --color-nav-indicator: var(--relay-blue);
+    --color-toggle-track: var(--color-gray-700);
+    --color-shadow: color-mix(in oklab, var(--relay-violet) 12%, transparent);
+
+    --shadow-xs: 0px 1px 2px 0px color-mix(in oklab, #000000 35%, transparent);
+    --shadow-sm: 0px 2px 8px 0px color-mix(in oklab, #000000 35%, transparent);
+    --shadow-md: 0px 6px 14px -4px color-mix(in oklab, #000000 45%, transparent);
+    --shadow-lg: 0px 16px 28px -8px color-mix(in oklab, #000000 50%, transparent);
+    --shadow-xl: 0px 24px 40px -10px color-mix(in oklab, #000000 55%, transparent);
+    --utility-shadow-border-xs: var(--shadow-xs), 0px 0px 0px 1px color-mix(in oklab, var(--color-gray-300) 10%, transparent);
+    --utility-shadow-border-sm: var(--shadow-sm), 0px 0px 0px 1px color-mix(in oklab, var(--color-gray-300) 10%, transparent);
+    --utility-shadow-border-md: var(--shadow-md), 0px 0px 0px 1px color-mix(in oklab, var(--color-gray-300) 12%, transparent);
+    --utility-shadow-border-lg: var(--shadow-lg), 0px 0px 0px 1px color-mix(in oklab, var(--color-gray-300) 12%, transparent);
+    --utility-shadow-border-xl: var(--shadow-xl), 0px 0px 0px 1px color-mix(in oklab, var(--color-gray-300) 12%, transparent);
+
+    --utility-bg-inverse: #e8e7fb;
+    --utility-bg-inverse-hover: #d9d7f5;
+    --utility-text-inverse: var(--color-gray-900);
+    --utility-text-secondary: var(--color-gray-300);
+    --utility-text-subdued: var(--color-gray-400);
+    --utility-border-primary: color-mix(in oklab, var(--color-gray-300) 22%, transparent);
+    --utility-border-secondary: color-mix(in oklab, var(--color-gray-300) 16%, transparent);
+    --utility-border-subdued: color-mix(in oklab, var(--color-gray-300) 10%, transparent);
+    --utility-divide-subdued: color-mix(in oklab, var(--color-gray-300) 10%, transparent);
+    --utility-button-bg-accent: color-mix(in oklab, var(--relay-blue) 14%, transparent);
+    --utility-button-bg-accent-hover: color-mix(in oklab, var(--relay-blue) 22%, transparent);
+    --utility-tab-item-active: var(--color-gray-700);
+    --utility-tab-item-hover: var(--color-gray-800);
+    --utility-tab-bg-group: color-mix(in oklab, var(--color-black) 60%, transparent);
+
+    --relay-glow:
+      radial-gradient(70rem 40rem at -10% -15%, color-mix(in oklab, var(--relay-blue) 16%, transparent), transparent 70%),
+      radial-gradient(55rem 35rem at 110% 0%, color-mix(in oklab, var(--relay-violet) 12%, transparent), transparent 70%),
+      radial-gradient(60rem 40rem at 90% 115%, color-mix(in oklab, var(--relay-magenta) 7%, transparent), transparent 70%);
+    --relay-gradient: linear-gradient(120deg, var(--relay-blue), var(--relay-violet));
+
+    color-scheme: dark;
+    accent-color: var(--relay-violet);
+  }
+
+  /* Soft logo-coloured glows behind the app shell and the auth/settings pages. */
+  html[data-palette="relay"],
+  [data-palette="relay"] [data-controller~="app-layout"] {
+    background-image: var(--relay-glow);
+    background-attachment: fixed;
+  }
+
+  /* Cards: a faint top sheen and a light blur over the glows. */
+  [data-palette="relay"] .bg-container {
+    background-image: linear-gradient(180deg, color-mix(in oklab, var(--color-gray-200) 4%, transparent), transparent 45%);
+    backdrop-filter: blur(14px);
+  }
+
+  /* Sticky headers and the mobile tab bar become frosted glass. */
+  [data-palette="relay"] .sticky.bg-surface,
+  [data-palette="relay"] nav.fixed.bg-surface {
+    background-color: color-mix(in oklab, var(--color-surface) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  [data-palette="relay"] .bg-nav-indicator {
+    background-image: linear-gradient(180deg, var(--relay-cyan), var(--relay-violet));
+  }
+
+  /* Primary actions carry the logo gradient; everything else stays neutral. */
+  [data-palette="relay"] .button--primary {
+    background-image: var(--relay-gradient);
+    color: var(--color-white);
+    box-shadow: 0 6px 18px -8px color-mix(in oklab, var(--relay-violet) 70%, transparent);
+  }
+
+  [data-palette="relay"] .button--primary:hover {
+    background-image: linear-gradient(120deg, color-mix(in oklab, var(--relay-blue) 88%, white), color-mix(in oklab, var(--relay-violet) 88%, white));
+  }
+
+  [data-palette="relay"] .button--primary :is(svg, .lucide) {
+    color: var(--color-white);
+  }
+
+  [data-palette="relay"] .button--primary:disabled {
+    background-image: none;
+    box-shadow: none;
+    color: var(--utility-text-inverse);
+  }
+
+  [data-palette="relay"] ::selection {
+    background-color: color-mix(in oklab, var(--relay-violet) 40%, transparent);
+  }
+}

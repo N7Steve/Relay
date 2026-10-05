@@ -29,6 +29,7 @@ pt-BR:
       theme_system: Sistema
       theme_light: Claro
       theme_dark: Escuro
+      theme_relay: Relay
       locale: Idioma
       currency: Moeda
       date_format: Formato de data

@@ -94,6 +94,7 @@ en:
         theme_title: Theme
         theme_subtitle: Choose a preferred theme for the app
         theme_dark: Dark
+        theme_relay: Relay
         theme_light: Light
         theme_system: System
         modals_title: Modals

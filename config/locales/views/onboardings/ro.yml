@@ -29,6 +29,7 @@ ro:
       theme_system: Sistem
       theme_light: Deschis
       theme_dark: Întunecat
+      theme_relay: Relay
       locale: Limbă
       currency: Monedă
       date_format: Format dată

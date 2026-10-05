@@ -24,6 +24,7 @@ tr:
           ayrı satırlar olarak görünür.
         split_grouped_title: Bölünmüş işlemleri grupla
         theme_dark: Koyu
+        theme_relay: Relay
         theme_light: Açık
         theme_subtitle: Uygulama için tercih edilen temayı seçin
         theme_system: Sistem

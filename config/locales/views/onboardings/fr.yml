@@ -32,6 +32,7 @@ fr:
       submit: Terminer
       subtitle: Configurons vos préférences.
       theme_dark: Sombre
+      theme_relay: Relay
       theme_light: Clair
       theme_system: Système
       title: Configurez vos préférences

@@ -92,6 +92,7 @@ pt-PT:
         theme_title: Tema
         theme_subtitle: Escolha um tema preferido para a aplicação
         theme_dark: Escuro
+        theme_relay: Relay
         theme_light: Claro
         theme_system: Sistema
         modals_title: Modais

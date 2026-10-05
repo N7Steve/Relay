@@ -31,7 +31,14 @@ export default class extends Controller {
   }
 
   setTheme(event) {
-    document.documentElement.setAttribute("data-theme", event.target.value);
+    const value = event.target.value;
+    const root = document.documentElement;
+    root.setAttribute("data-theme", value === "relay" ? "dark" : value);
+    if (value === "relay") {
+      root.setAttribute("data-palette", "relay");
+    } else {
+      root.removeAttribute("data-palette");
+    }
   }
 
   applyBrowserLocaleDefaults() {

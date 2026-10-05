@@ -76,7 +76,7 @@
       <%= form.hidden_field :redirect_to, value: "goals" %>
 
       <div class="mb-4">
-        <%= form.select :theme, [[t(".theme_system"), "system"], [t(".theme_light"), "light"], [t(".theme_dark"), "dark"]], { label: t(".color_theme") }, data: { action: "onboarding#setTheme" } %>
+        <%= form.select :theme, [[t(".theme_system"), "system"], [t(".theme_light"), "light"], [t(".theme_dark"), "dark"], [t(".theme_relay"), "relay"]], { label: t(".color_theme") }, data: { action: "onboarding#setTheme" } %>
       </div>
 
       <div class="space-y-4 mb-4">

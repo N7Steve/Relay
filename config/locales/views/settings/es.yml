@@ -49,6 +49,7 @@ es:
         theme_title: Tema
         theme_subtitle: Elige el tema que prefieras para la aplicación
         theme_dark: Oscuro
+        theme_relay: Relay
         theme_light: Claro
         theme_system: Sistema
         modals_title: Modales

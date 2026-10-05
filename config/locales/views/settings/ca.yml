@@ -18,6 +18,7 @@ ca:
           apareixen com a files individuals.
         split_grouped_title: Agrupa les transaccions dividides
         theme_dark: Fosc
+        theme_relay: Relay
         theme_light: Clar
         theme_subtitle: Tria el tema preferit per a l'aplicació
         theme_system: Sistema

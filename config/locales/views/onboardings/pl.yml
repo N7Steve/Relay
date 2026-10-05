@@ -32,6 +32,7 @@ pl:
       submit: Zakończ
       subtitle: Skonfigurujmy Twoje preferencje.
       theme_dark: Ciemny
+      theme_relay: Relay
       theme_light: Jasny
       theme_system: Systemowy
       title: Skonfiguruj swoje preferencje

@@ -49,6 +49,7 @@ zh-CN:
         theme_title: 主题
         theme_subtitle: 为应用选择偏好的主题
         theme_dark: 深色
+        theme_relay: Relay
         theme_light: 浅色
         theme_system: 跟随系统
         modals_title: 模态框

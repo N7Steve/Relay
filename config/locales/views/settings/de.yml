@@ -67,6 +67,7 @@ de:
         split_grouped_description: Zeigt geteilte Transaktionen in der Liste gebündelt unter ihrer Ursprungsbuchung. Ist die Option aus, erscheint jede Teilbuchung als eigene Zeile.
         split_grouped_title: Geteilte Transaktionen gruppieren
         theme_dark: Dunkel
+        theme_relay: Relay
         theme_light: Hell
         theme_subtitle: Wähle das Erscheinungsbild der App
         theme_system: System

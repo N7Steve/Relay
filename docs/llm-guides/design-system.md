@@ -18,6 +18,17 @@ and existing [`DS::*` components](../../app/components/DS/) before building UI.
 - Reviewers escalate DS reuse and repeated-shape violations to close/rewrite.
   Token, icon/SVG, localization and scale violations are request-changes.
 
+## Themes
+
+Users choose light, dark, system or Relay in Settings → Appearance. Relay is the
+dark theme plus `data-palette="relay"` on `<html>`: it keeps `data-theme="dark"`,
+so `theme-dark` variants and charts keep working, and
+[`theme-relay.css`](../../app/assets/tailwind/relay-design-system/theme-relay.css)
+swaps the neutral scale for blue-violet greys and adds the logo gradients and
+blur. Build UI with functional tokens and it follows every theme; do not style
+`data-palette` outside that file. Primary buttons carry the `button--primary`
+hook for the gradient.
+
 For templates, Hotwire, Stimulus and localization guidance, see the
 [UI guide](ui.md).
 

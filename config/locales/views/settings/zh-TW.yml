@@ -92,6 +92,7 @@ zh-TW:
         theme_title: 主題
         theme_subtitle: 選擇您偏好的應用程式主題
         theme_dark: 深色
+        theme_relay: Relay
         theme_light: 淺色
         theme_system: 跟隨系統
         modals_title: 模態視窗

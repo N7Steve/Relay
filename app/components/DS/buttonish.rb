@@ -2,7 +2,7 @@
 class DS::Buttonish < DesignSystemComponent
   VARIANTS = {
     primary: {
-      container_classes: "text-inverse bg-inverse hover:bg-inverse-hover disabled:bg-gray-500 theme-dark:disabled:bg-gray-400",
+      container_classes: "button--primary text-inverse bg-inverse hover:bg-inverse-hover disabled:bg-gray-500 theme-dark:disabled:bg-gray-400",
       icon_classes: "text-inverse"
     },
     secondary: {

@@ -34,6 +34,7 @@ zh-TW:
       theme_system: 跟隨系統
       theme_light: 淺色
       theme_dark: 深色
+      theme_relay: Relay
       locale: 語言
       currency: 幣別
       date_format: 日期格式

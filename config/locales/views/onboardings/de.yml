@@ -34,6 +34,7 @@ de:
       theme_system: System
       theme_light: Hell
       theme_dark: Dunkel
+      theme_relay: Relay
       locale: Sprache
       currency: Währung
       date_format: Datumsformat

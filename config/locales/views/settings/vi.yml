@@ -49,6 +49,7 @@ vi:
         theme_title: Giao diện
         theme_subtitle: Chọn giao diện ưa thích cho ứng dụng
         theme_dark: Tối
+        theme_relay: Relay
         theme_light: Sáng
         theme_system: Hệ thống
         modals_title: Hộp thoại

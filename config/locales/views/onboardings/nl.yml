@@ -29,6 +29,7 @@ nl:
       theme_system: Systeem
       theme_light: Licht
       theme_dark: Donker
+      theme_relay: Relay
       locale: Taal
       currency: Valuta
       date_format: Datumformaat

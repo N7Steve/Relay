@@ -42,12 +42,15 @@ class User < ApplicationRecord
   accepts_nested_attributes_for :family, update_only: true
 
   MFA_BACKUP_CODE_COUNT = 8
+  # "relay" is the dark theme with the Relay logo palette layered on top.
+  THEMES = %w[light dark system relay].freeze
 
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate :ensure_valid_profile_image
   validates :default_period, inclusion: { in: Period::PERIODS.keys }
   validates :default_account_order, inclusion: { in: AccountOrder::ORDERS.keys }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
+  validates :theme, inclusion: { in: THEMES }, allow_nil: true
 
   # Password is required on create unless the user is being created via SSO JIT.
   # SSO JIT users have password_digest = nil and authenticate via OIDC only.

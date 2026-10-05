@@ -150,6 +150,18 @@ module ApplicationHelper
     named_routes.route_defined?(:sidekiq_web_path) || named_routes.route_defined?(:sidekiq_web_url)
   end
 
+  # Root theme attributes rendered before JavaScript runs, so the stored
+  # preference paints without a flash. Palettes such as "relay" are dark themes
+  # with their own data-palette layer.
+  def theme_root_attributes(preference = Current.user&.theme)
+    preference = preference.presence || "system"
+    {
+      "data-theme" => preference == "relay" ? "dark" : preference,
+      "data-palette" => ("relay" if preference == "relay"),
+      "data-theme-user-preference-value" => preference
+    }.compact
+  end
+
   # Renders Markdown text using Redcarpet
   def markdown(text)
     return "" if text.blank?

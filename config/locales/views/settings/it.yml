@@ -49,6 +49,7 @@ it:
         theme_title: Tema
         theme_subtitle: Scegli un tema preferito per l'app
         theme_dark: Scuro
+        theme_relay: Relay
         theme_light: Chiaro
         theme_system: Sistema
         modals_title: Finestre modali

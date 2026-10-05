@@ -32,6 +32,7 @@ tr:
       submit: Tamamla
       subtitle: Tercihlerinizi yapılandıralım.
       theme_dark: Koyu
+      theme_relay: Relay
       theme_light: Açık
       theme_system: Sistem
       title: Tercihlerinizi yapılandırın

@@ -15,6 +15,7 @@ fr:
         split_grouped_description: Affiche les transactions fractionnées groupées sous leur parent dans la liste des transactions. Lorsque cette option est désactivée, les enfants fractionnés apparaissent comme des lignes individuelles.
         split_grouped_title: Grouper les transactions fractionnées
         theme_dark: Sombre
+        theme_relay: Relay
         theme_light: Clair
         theme_subtitle: Choisissez un thème préféré pour l'application
         theme_system: Système

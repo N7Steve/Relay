@@ -34,6 +34,7 @@ vi:
       theme_system: Hệ thống
       theme_light: Sáng
       theme_dark: Tối
+      theme_relay: Relay
       locale: Ngôn ngữ
       currency: Tiền tệ
       date_format: Định dạng ngày

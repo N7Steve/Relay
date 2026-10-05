@@ -32,6 +32,7 @@ ca:
       submit: Finalitza
       subtitle: Configurem les teves preferències.
       theme_dark: Fosc
+      theme_relay: Relay
       theme_light: Clar
       theme_system: Sistema
       title: Configura les teves preferències

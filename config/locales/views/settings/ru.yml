@@ -23,6 +23,7 @@ ru:
           отображаются как отдельные строки.
         split_grouped_title: Группировать разделённые операции
         theme_dark: Тёмная
+        theme_relay: Relay
         theme_light: Светлая
         theme_subtitle: Выберите предпочитаемую тему для приложения
         theme_system: Системная

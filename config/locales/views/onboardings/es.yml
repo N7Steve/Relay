@@ -34,6 +34,7 @@ es:
       theme_system: Sistema
       theme_light: Claro
       theme_dark: Oscuro
+      theme_relay: Relay
       locale: Idioma
       currency: Moneda
       date_format: Formato de fecha
