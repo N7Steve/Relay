@@ -6,7 +6,8 @@ Base: [análisis de migración y poda](pruning-analysis.md).
 Estado actualizado el 5 de octubre de 2026: fases 0–7 implementadas y
 publicadas en `origin/main`. Steve informa de que fase 7 está desplegada y
 aparentemente funciona correctamente; este trabajo no inspecciona la instalación.
-Fase 8 implementada y validada localmente, sin commit/push. Fases 9–11 pendientes.
+Fase 8 incorporada a `main` y `origin/main` en `b49f8dcda`; despliegue no verificado.
+Fases 9–11 pendientes de implementación, con preferencias finales registradas.
 Ver los registros de [fase 7](pruning-phase-7.md) y [fase 8](pruning-phase-8.md).
 
 La petición autoriza preparar este plan. La selección de una fase autorizará
@@ -14,6 +15,62 @@ su implementación dentro del alcance descrito. Commit/push y operaciones sobre
 la instalación siguen las reglas de [AGENTS.md](../../AGENTS.md).
 
 ## Objetivo y reglas de ejecución
+
+### Preferencias finales de Steve para las fases 9–11
+
+Selección recibida el 5 de octubre de 2026. Este apartado actualiza las decisiones
+anteriores y prevalece sobre las recomendaciones de conservar residuos históricos
+cuando entren en conflicto con la limpieza aquí elegida. Registra preferencias
+para que otro agente continúe con fase 9; esta entrega solo modifica documentación.
+
+- **Brandfetch y Google Drive: conservar expresamente.** Mantener sus funciones,
+  configuración y contratos necesarios; no tratarlos como candidatos de retirada.
+- **Mercado/divisas:** Steve considera irrelevante la adquisición externa y no
+  prevé usar proveedores bajo demanda. Adoptar como alcance de 9A la retirada de
+  proveedores externos exclusivos y sus automatismos, sin añadir proveedores a
+  demanda. Conservar monedas, importación/entrada manual, precios y tipos de cambio
+  necesarios para cálculos del núcleo, inversiones e informes. Esta preferencia
+  no autoriza eliminar la contabilidad multimoneda ni inventar tasas/precios.
+- **Goals e insights: conservar por ahora.** Presupuestos/Plan no tienen una
+  decisión explícita de retirada en esta respuesta: conservar su funcionamiento
+  actual, sin interpretar la omisión como autorización para eliminarlos.
+- **Acceso: conservar todo por ahora**, incluido acceso local, login externo,
+  MFA, passkeys, OAuth y contratos de autenticación de clientes mantenidos.
+- **Almacenamiento: local; retirar S3** y sus opciones, dependencias y drivers
+  exclusivos. Mantener originales y adjuntos del producto conservado. Si hubiera
+  originales en S3, registrar su ubicación y resolver la transición a local;
+  no afirmar que se copiaron o verificaron sin hacerlo.
+- **FinanceKit: eliminar.** Conservar el resto de clientes por ahora. Retirar
+  integración, permisos, UI, API, jobs y persistencia exclusivos de FinanceKit,
+  sin eliminar aplicaciones Apple ni contratos compartidos con otros clientes.
+- **Esquema: limpiar todas las funciones muertas.** La retirada completa incluye
+  tablas, columnas, asociaciones, settings, tokens, índices y lectores/modelos
+  exclusivos. No dejar código o persistencia históricos únicamente por comodidad.
+  Revisar también residuos de fases anteriores, incluidos Bills, IA, conectores y
+  plataforma comercial. Mantener las migraciones históricas y añadir migraciones
+  nuevas; conservar elementos compartidos que aún tengan consumidores válidos.
+- **Cierre: alcance coherente con el producto resultante y documentarlo todo**:
+  retiradas y conservación, configuración, instalación, actualizaciones, imports,
+  backups, contratos, limitaciones y recuperación. No ampliar retiradas de hosting
+  o clientes que no se hayan seleccionado expresamente.
+
+**Contexto de recuperación y tolerancia al riesgo:** Steve informa de que mantiene
+una instalación de Sure original desplegada y varios backups de sus datos. Acepta
+roturas temporales o pérdida de datos de Relay durante esta poda: puede corregir,
+redesplegar y reimportar. No es una verificación de esos backups por este agente ni
+permiso para modificar Sure o sus copias. No bloquear la preparación de la limpieza
+por exigir conservar datos de funciones retiradas. Seguir validando el núcleo
+retenido y explicar pérdidas, incompatibilidades y requisitos de reimportación.
+
+**Traspaso al siguiente agente:** abordar fase 9 por bloques completos con estas
+decisiones, y preparar fase 10 para eliminar sus residuos y los de fases previas.
+No pedir de nuevo las preferencias ya resueltas. Cuando un backup antiguo contenga
+módulos eliminados, adaptar el importador para recuperar el núcleo conservado con
+una política explícita de descarte y un informe de lo omitido; no conservar clases
+muertas ni declarar restauración íntegra de datos descartados. Las comprobaciones
+de importación deben cubrir ese contrato. Commit/push siguen requiriendo la
+confirmación de AGENTS.md; este encargo no solicita publicar cambios ni ejecutar
+migraciones sobre instalaciones reales.
 
 Reducir Relay a un núcleo financiero self-hosted y curado, preservando exactitud,
 Agenda, informes, inversiones, permisos, importaciones y recuperación de datos.
@@ -27,7 +84,8 @@ cualquier fase sin necesitar la siguiente para arreglar la aplicación**.
   No publicar una mitad de fase que requiera la otra para funcionar.
 - No cambiar cálculos financieros por el mero hecho de eliminar un conector.
   No borrar datos, tablas, adjuntos ni migraciones históricas en fases de código.
-- Mantener lectores históricos cuando sean necesarios para recuperación.
+- Mantener lectores históricos solo si sirven al núcleo conservado; eliminar los
+  exclusivos de funciones retiradas conforme a las preferencias finales.
   El código del producto retirado queda recuperable en Git, fuera del runtime.
 - Una puerta temporal tiene alcance completo y criterio de retirada. No basta
   ocultar navegación; tampoco crear un sistema de plugins para esta poda.
@@ -280,7 +338,8 @@ Por lote:
 5. Resolver cron/jobs pendientes, verificar eager loading, backup y núcleo.
 
 **Límite:** cotizaciones/divisas no son conectores de cuentas y se tratan en 9A.
-FinanceKit se conserva mientras se mantenga el cliente Apple que lo utiliza.
+La selección final de 9F retira FinanceKit y conserva los demás clientes,
+incluidos los Apple; adaptar sus consumidores compartidos al quitar la integración.
 **Final estable:** cuentas previamente enlazadas siguen consultables y exactas,
 con funcionamiento manual cuando se ha aprobado su conversión.
 **Reversión:** sin conversión, revert de código; con conversión, restauración o
@@ -289,7 +348,8 @@ procedimiento inverso ensayado. Volver al código anterior no revincula una cuen
 ## Fase 8 — Retirar Bills y recurrencias detectadas
 
 **Selección confirmada:** alcance completo implementado y validado localmente.
-Evidencia en [registro de fase 8](pruning-phase-8.md); publicación pendiente de confirmación.
+Evidencia en [registro de fase 8](pruning-phase-8.md); incorporada en `b49f8dcda`.
+El registro conserva la evidencia de preparación previa a esa publicación.
 
 - Suspender detección/materialización Bills y retirar sus cron, feeds, endpoints,
   asignaciones, detección de series y consumidores en movimientos/transferencias.
@@ -311,36 +371,44 @@ sin conversión automática que deshacer.
 
 Cada bloque se decide, implementa y entrega por separado. Conservar una extensión
 con propósito explícito cuenta como resolución; no obliga a eliminarla.
+Las decisiones ya están fijadas en las preferencias finales anteriores: 9A retira
+adquisición externa; 9B/9D conservan Brandfetch/Drive; 9C conserva Goals/insights y
+presupuestos actuales; 9E conserva acceso y retira S3; 9F retira solo FinanceKit.
+La tabla siguiente conserva criterios técnicos, subordinados a esa selección.
 
 | Bloque | Decisión y alcance | Final estable y validación específica |
 | --- | --- | --- |
-| 9A. Mercado y divisas | Elegir entrada manual o pocos proveedores a demanda. Retirar proveedores y cron no elegidos, manteniendo precios/rates históricos y cálculos. | Inversiones/roboadvisor/multimoneda exactos con datos disponibles; ausencias claras, sin fallback engañoso. Validar precios en distintas divisas y fechas. |
+| 9A. Mercado y divisas | Retirar adquisición externa, proveedores exclusivos y cron; conservar entrada/importación manual y datos necesarios para cálculos del núcleo. No añadir proveedores bajo demanda. | Inversiones/roboadvisor/multimoneda exactos con datos disponibles; ausencias claras, sin fallback engañoso. Validar precios en distintas divisas y fechas. |
 | 9B. Logos | **Conservar Brandfetch: Steve confirma su uso en fase 0.** Curar URLs remotas ajenas si procede, manteniendo adjuntos e iniciales como alternativas. | Resolución Brandfetch conservada cuando se permite esa capacidad; modo sin logos remotos y originales locales válidos. |
-| 9C. Plan, presupuestos, Goals e insights | Elegir por función. Si se suspende: cerrar rutas, cron, callbacks y generación; si se elimina: completar consumidores/backup. Conservar señales locales elegidas. | Dashboard, Agenda, categorías e informes sin referencias rotas; no se generan datos de módulos suspendidos; permisos y cálculos de módulos retenidos correctos. |
+| 9C. Plan, presupuestos, Goals e insights | Conservar Goals e insights por ahora. Mantener Plan/presupuestos actuales al no haberse seleccionado su retirada. | Dashboard, Agenda, categorías e informes sin referencias rotas; permisos y cálculos de módulos retenidos correctos. |
 | 9D. Drive | **Conservar: Steve confirma su uso en fase 0.** Preservar OAuth por usuario y exportaciones/programaciones propias; separar esta capacidad del autosync bancario. | Renovación/permisos/destino y reintentos ensayados; backup y CSV local siguen funcionando. |
-| 9E. Login externo y almacenamiento | Retirar solo protocolos/drivers no usados. Comprobar primero un acceso local válido y dónde residen los originales. No confundir S3 self-hosted con cloud. | Login/MFA/passkeys y originales accesibles. Cambiar almacenamiento requiere copiar/verificar archivos en un trabajo operativo aparte. |
-| 9F. Clientes nativos y FinanceKit | Mantener decisión previa hasta seleccionar clientes soportados. Retirar frontend/distribución/API exclusivos solo después de esa selección. | Clientes conservados compilan y usan los contratos vigentes; quitar uno no rompe OAuth/push/API de otro. |
+| 9E. Login externo y almacenamiento | Conservar todos los mecanismos de acceso por ahora. Usar almacenamiento local; retirar S3 y componentes exclusivos. | Login/MFA/passkeys y originales accesibles. Cambiar almacenamiento requiere copiar/verificar archivos en un trabajo operativo aparte. |
+| 9F. Clientes nativos y FinanceKit | Retirar FinanceKit y sus consumidores exclusivos. Conservar todos los demás clientes por ahora. | Clientes conservados compilan y usan los contratos vigentes sin FinanceKit; quitar la integración no rompe OAuth/push/API compartidos. |
 
 **Reversión por bloque:** registrar estado/configuración alterados. Cambios de
 almacenamiento, identidades o cuentas no se revierten únicamente con Git.
 
 ## Fase 10 — Tratar datos y esquema residuales
 
-Ejecutar por módulo retirado y estable; no es una migración masiva obligatoria.
+**Selección confirmada: limpieza completa de residuos de funciones retiradas.**
+Ejecutar por módulo, incluyendo retiradas de fases anteriores; no dejar tablas o
+lectores exclusivos solo para conservar historia de módulos que ya no existen.
 
 - Enumerar tablas, columnas, settings, tokens, índices y referencias que quedaron.
-- Confirmar ausencia de consumidores actuales y disposición recuperable de datos.
+- Confirmar ausencia de consumidores actuales; documentar los datos descartados
+  y cómo reimportar el núcleo conservado desde backups de Sure.
 - Preparar migraciones Rails nuevas; mantener las históricas. Retirar constraints
   e índices solo cuando corresponda y mantener cobertura de backups.
 - Ensayar sobre una copia aislada, verificar historial/restauración y expresar
   bloqueos de tablas, espacio, duración estimada y carácter reversible/irreversible.
 - Presentar eliminación persistente concreta antes de operar datos reales;
   backup completo de instalación y recuperación ensayada son prerrequisitos.
-- Conservar cualquier tabla/lector cuya retirada cueste más que mantenerlo.
-  Una app pequeña no exige destruir toda huella histórica.
+- Eliminar tablas/lectores exclusivos aunque conservarlos resulte más cómodo;
+  preservar únicamente componentes compartidos del producto que sigue soportado.
 
 **Final estable:** mismo resultado financiero y datos necesarios recuperables,
-con esquema reducido solo donde hay beneficio demostrado.
+con esquema sin persistencia exclusiva de funciones retiradas y pérdidas elegidas
+documentadas, conforme a la tolerancia al riesgo indicada por Steve.
 **Cierre específico:** instalación nueva, actualización desde versión previa y
 recuperación de backup anterior con la disposición elegida.
 **Reversión:** si se borraron datos, restauración del backup; identificar las
@@ -348,6 +416,11 @@ escrituras posteriores que se perderían. Un `down` que recrea tablas vacías no
 restaura información y no se presenta como rollback completo.
 
 ## Fase 11 — Cerrar el soporte y medir la reducción
+
+**Selección confirmada:** documentar exhaustivamente el alcance conservado y la
+limpieza realizada, incluidas pérdidas deliberadas y compatibilidad de backups.
+Los lectores históricos exclusivos se retiran en fase 10; cualquier adaptación
+restante del importador debe tener consumidores y propósito vigentes.
 
 - Eliminar documentación/configuración activa de hosting y canales no soportados;
   archivar solo referencias útiles, preservar licencia e historia.
@@ -357,7 +430,7 @@ restaura información y no se presenta como rollback completo.
   comprobaciones de seguridad y calidad aplicables.
 - Retirar compatibilidad de jobs transitoria solo tras verificar que no quedan
   queued/retry/scheduled jobs de las versiones que la necesitan. Distinguirla de
-  lectores de backups históricos, que pueden permanecer.
+  adaptaciones de importación del núcleo conservado, que pueden permanecer.
 - Comparar métricas iniciales y finales; registrar las extensiones retenidas y
   su motivo. No declarar ahorro de rendimiento que no se haya medido.
 
@@ -371,8 +444,8 @@ La fase 0 está publicada en `eb538dae3`, la fase 1 en `a5299f36c`, la fase 2
 en `ee3341fd3`, la fase 3 en `feccab08c`, la fase 4 en `92ee241a1` y la fase 5
 en `ecc901083`. Los registros de cada fase recogen alcance, pruebas y límites.
 Las fases 6–7 están publicadas; el reporte de Steve sobre el despliegue de fase 7
-se recoge arriba. Fase 8 implementada y validada localmente; fases
-9–11 pendientes. Este trabajo no verifica directamente TrueNAS.
+se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fases 9–11 pendientes de
+implementación con selección registrada. Este trabajo no verifica directamente TrueNAS.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |
