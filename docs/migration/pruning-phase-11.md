@@ -14,6 +14,8 @@ scheduled, retry, dead, procesos y cron). Resultado:
   ejecución de `update-relay.sh`, que antes guarda el backup completo de servidor.
 - Un proceso Sidekiq, ningún job en curso y **ningún job** en colas, scheduled,
   retry ni dead.
+- Tras desplegar (sección «Despliegue»), la misma auditoría en `b6ba8735a` da el
+  mismo resultado: sin jobs y las mismas 8 entradas cron vigentes.
 - Cron persistido: solo las 8 entradas vigentes cuyo capability está activo.
   No queda ninguna definición retirada (`sync_hourly`, Bills, FinanceKit,
   mercado, comercial).
@@ -154,5 +156,16 @@ configuración, ya que no se mantiene desde la fase 9.
 Con esta fase la poda queda completa: producto y documentación coinciden.
 Instalación nueva (schema load), actualización (migración de fase 10 ensayada)
 y recuperación de datos (ZIP v3 y backups antiguos con descarte) están cubiertas
-por las pruebas. Queda una operación pendiente fuera del repositorio: **actualizar
-TrueNAS**, que aplicará en una sola ejecución las fases 10 y 11 con backup previo.
+por las pruebas y por el despliegue real descrito abajo.
+
+## Despliegue
+
+5 de octubre de 2026. Steve ejecutó `update-relay.sh` en TrueNAS: build de
+`b6ba8735a`, parada de web/worker, backup completo de servidor en
+`backups/relay-20261005T191634Z-UFjRQTmm` y actualización aplicando en una sola
+ejecución las fases 10 y 11. Web arrancó sano, worker activo, ambos en
+`b6ba8735a`, sin migraciones pendientes. La auditoría Sidekiq posterior no muestra
+jobs y conserva las 8 entradas cron vigentes. Steve informa de que saldos y el
+resto de funciones probadas van bien; es su reporte, no una inspección de datos
+por este agente. Ese backup es la única vía para recuperar los datos descartados
+en fase 10.

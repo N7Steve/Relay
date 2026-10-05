@@ -10,8 +10,8 @@ Fase 8 incorporada a `main` y `origin/main` en `b49f8dcda`; despliegue no verifi
 Fase 9 publicada en `origin/main` en `d2e790ed6` (9A, 9E y 9F; 9B–9D conservados).
 Steve informa el 5 de octubre de 2026 de que todo parece funcionar correctamente;
 este trabajo no inspecciona la instalación. Fase 10 publicada en `eaf35e3ff`; fase 11
-(cierre) completada. La auditoría de colas de fase 11 muestra TrueNAS aún en fase 9:
-la próxima actualización aplicará fases 10 y 11. Ver [alcance final](../product-scope.md).
+(cierre) completada. Ambas desplegadas en TrueNAS en `b6ba8735a` el 5 de octubre de 2026;
+Steve informa de que todo funciona. Ver [alcance final](../product-scope.md).
 Ver los registros de [fase 7](pruning-phase-7.md), [fase 8](pruning-phase-8.md)
 y [fase 9](pruning-phase-9.md).
 
@@ -456,9 +456,9 @@ en `ee3341fd3`, la fase 3 en `feccab08c`, la fase 4 en `92ee241a1` y la fase 5
 en `ecc901083`. Los registros de cada fase recogen alcance, pruebas y límites.
 Las fases 6–7 están publicadas; el reporte de Steve sobre el despliegue de fase 7
 se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fase 9 publicada en
-`d2e790ed6` y reportada funcional por Steve, y es la revisión que ejecuta TrueNAS
-según la auditoría de fase 11; fase 10 publicada en `eaf35e3ff`; fase 11 en su
-[registro](pruning-phase-11.md). Con ella la poda queda cerrada.
+`d2e790ed6` y reportada funcional por Steve; fase 10 publicada en `eaf35e3ff`;
+fases 10 y 11 desplegadas juntas en `b6ba8735a` y reportadas funcionales (ver
+[registro de fase 11](pruning-phase-11.md)). La poda queda cerrada.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |

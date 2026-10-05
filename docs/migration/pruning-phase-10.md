@@ -5,8 +5,9 @@ Selección autorizada: eliminar completamente los residuos exclusivos de módulo
 retirados, manteniendo el resultado financiero del producto conservado.
 Preparada sobre `main`, sin aplicarla a TrueNAS ni a datos de instalación durante la preparación.
 Publicada en `origin/main` en `eaf35e3ff`. La auditoría de colas de fase 11 (5 de octubre
-de 2026) muestra que TrueNAS ejecuta todavía `d2e790ed6` (fase 9): la migración de
-esta fase no se ha aplicado en la instalación y lo hará la siguiente actualización.
+de 2026) mostró TrueNAS aún en `d2e790ed6` (fase 9). Desplegada ese mismo día junto con
+la fase 11 (`b6ba8735a`): la migración se aplicó sin errores tras el backup de servidor
+`relay-20261005T191634Z-UFjRQTmm`; Steve informa de que saldos y funciones van bien.
 
 ## Esquema y datos descartados
 
