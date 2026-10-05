@@ -7,8 +7,9 @@ Estado actualizado el 5 de octubre de 2026: fases 0–7 implementadas y
 publicadas en `origin/main`. Steve informa de que fase 7 está desplegada y
 aparentemente funciona correctamente; este trabajo no inspecciona la instalación.
 Fase 8 incorporada a `main` y `origin/main` en `b49f8dcda`; despliegue no verificado.
-Fase 9 implementada y validada localmente (9A, 9E y 9F; 9B–9D conservados),
-pendiente de confirmación para commit/push. Fases 10–11 pendientes.
+Fase 9 publicada en `origin/main` en `d2e790ed6` (9A, 9E y 9F; 9B–9D conservados).
+Steve informa el 5 de octubre de 2026 de que todo parece funcionar correctamente;
+este trabajo no inspecciona la instalación. Siguiente: fase 10; después fase 11.
 Ver los registros de [fase 7](pruning-phase-7.md), [fase 8](pruning-phase-8.md)
 y [fase 9](pruning-phase-9.md).
 
@@ -64,8 +65,9 @@ permiso para modificar Sure o sus copias. No bloquear la preparación de la limp
 por exigir conservar datos de funciones retiradas. Seguir validando el núcleo
 retenido y explicar pérdidas, incompatibilidades y requisitos de reimportación.
 
-**Traspaso al siguiente agente:** abordar fase 9 por bloques completos con estas
-decisiones, y preparar fase 10 para eliminar sus residuos y los de fases previas.
+**Traspaso al siguiente agente:** fase 9 completada (ver su registro). Abordar
+fase 10 para eliminar los residuos de fase 9 y de las fases previas, empezando por
+el inventario de [traspaso a fase 10](pruning-phase-9.md#traspaso-a-fase-10).
 No pedir de nuevo las preferencias ya resueltas. Cuando un backup antiguo contenga
 módulos eliminados, adaptar el importador para recuperar el núcleo conservado con
 una política explícita de descarte y un informe de lo omitido; no conservar clases
@@ -394,6 +396,7 @@ almacenamiento, identidades o cuentas no se revierten únicamente con Git.
 ## Fase 10 — Tratar datos y esquema residuales
 
 **Selección confirmada: limpieza completa de residuos de funciones retiradas.**
+Punto de partida: inventario en el [registro de fase 9](pruning-phase-9.md#traspaso-a-fase-10).
 Ejecutar por módulo, incluyendo retiradas de fases anteriores; no dejar tablas o
 lectores exclusivos solo para conservar historia de módulos que ya no existen.
 
@@ -447,8 +450,8 @@ La fase 0 está publicada en `eb538dae3`, la fase 1 en `a5299f36c`, la fase 2
 en `ee3341fd3`, la fase 3 en `feccab08c`, la fase 4 en `92ee241a1` y la fase 5
 en `ecc901083`. Los registros de cada fase recogen alcance, pruebas y límites.
 Las fases 6–7 están publicadas; el reporte de Steve sobre el despliegue de fase 7
-se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fase 9 validada localmente
-y pendiente de publicación; fases 10–11 pendientes con selección registrada. Este trabajo no verifica directamente TrueNAS.
+se recoge arriba. Fase 8 incorporada en `b49f8dcda`; fase 9 publicada en
+`d2e790ed6` y reportada funcional por Steve; fases 10–11 pendientes con selección registrada. Este trabajo no verifica directamente TrueNAS.
 Para cada fase/subfase registrar:
 
 | Campo | Contenido |

@@ -3,8 +3,10 @@
 Ejecutada el 5 de octubre de 2026 a petición de Steve («continúa con la fase 9»),
 con las preferencias finales ya registradas en el [plan](pruning-plan.md).
 HEAD inicial: `eca54c6b7`; `main` sincronizado con `origin/main`.
-Implementación validada localmente en `main`, sin commit/push, migraciones de
-esquema ni operaciones sobre TrueNAS, colas o datos reales.
+Publicada en `origin/main` en `d2e790ed6`, sin migraciones de esquema ni
+operaciones sobre TrueNAS, colas o datos reales. Steve informa el 5 de octubre de
+2026, tras desplegar y probar la interfaz, de que todo parece funcionar
+correctamente; es su reporte, no una inspección de la instalación.
 
 ## Resolución por bloque
 
@@ -150,8 +152,7 @@ instalación. Las ejecuciones intermedias fallidas no cuentan como cierre verde.
 
 ## Publicación y reversión
 
-Commit/push requieren la confirmación del resultado conforme a
-[AGENTS.md](../../AGENTS.md). Despliegue: actualizar web y worker juntos y
+Publicada tras la confirmación de Steve («sube todo a main»). Despliegue: actualizar web y worker juntos y
 dejar `ACTIVE_STORAGE_SERVICE` sin definir o en `local`. No hay migraciones.
 
 Reversión por bloque con el código anterior: 9E devuelve los drivers remotos
@@ -159,3 +160,42 @@ Reversión por bloque con el código anterior: 9E devuelve los drivers remotos
 conservan su estado; ningún dispositivo de este repositorio publica); 9A devuelve los proveedores, que siguen
 requiriendo activación explícita. Los datos históricos se conservan en todos
 los casos.
+
+## Traspaso a fase 10
+
+Estado: fases 0–9 publicadas; fase 10 seleccionada como limpieza completa de
+residuos (ver [plan](pruning-plan.md#fase-10--tratar-datos-y-esquema-residuales)).
+No volver a pedir preferencias ya resueltas. Commit/push siguen las reglas de
+[AGENTS.md](../../AGENTS.md); no ejecutar migraciones sobre instalaciones reales.
+
+Residuos conocidos al cerrar fase 9 (inventario de partida, no exhaustivo):
+
+- **FinanceKit:** siete tablas `financekit_*`, sus modelos históricos, entradas
+  en `RetiredAccountConnector`, `Family::Backup`, `Family::FinancialDataReset`,
+  `User#transfer_to_family!`, `ProviderConnectionStatus` ya limpio, jobs sumidero
+  `FinancekitInboxJob`/`FinancekitPurgeJob`, `test/support/historical_financekit_helper.rb`.
+- **Mercado/FX:** tabla `exchange_rate_pairs` y modelo histórico; columnas de
+  `securities` (`price_provider`, `offline_reason`, `failed_fetch_*`,
+  `first_provider_price_on`) aún expuestas por la API de valores (cambio de
+  contrato API: Minitest, rswag y OpenAPI); filas de `settings` antiguas
+  (`external_market_data_enabled`, claves API, proveedores); jobs sumidero
+  `ImportMarketDataJob`, `SecurityHealthCheckJob`, `YahooFinanceHealthCheckJob`.
+  Conservar `exchange_rates` y `security_prices`: son datos del núcleo.
+- **Almacenamiento:** comprobar `active_storage_blobs.service_name` antes de
+  cualquier limpieza; el inicializador de 9E debe permanecer.
+- **Fases anteriores:** tablas/modelos Item/Account de conectores de fase 7;
+  seis tablas Bills de fase 8 y sus columnas/preferencias/token; tablas de
+  evaluación IA (fase 3), chats/mensajes/usage IA (fases 5–6), billing
+  comercial (fase 4); ajustes históricos de asistente externo.
+- **Código/recursos muertos:** traducciones de chat/IA y proveedores LLM
+  (`settings/hostings`, `admin/system_health`), paneles de conectores retirados
+  en otros idiomas, parcial `_categorization_shadow_results`,
+  `Provider::HttpTransport`, `Provider::EvmExplorer`, `app/models/provider/{openai,anthropic,stripe}`
+  si no tienen consumidores, cassettes VCR OpenAI/Plaid/Stripe, tres exclusiones
+  obsoletas de Brakeman, guías `docs/hosting` de conectores retirados (fase 11).
+- **Jobs sumidero:** su retirada exige verificar colas vacías de esas clases
+  (fase 11 según el plan).
+
+Para cada tabla retirada, adaptar el importador de backups con política de
+descarte explícita e informe de lo omitido, y cubrirlo con pruebas de importación.
+
