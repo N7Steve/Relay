@@ -149,7 +149,7 @@ class Transaction::Search
       # legs of a Transfer. Shared with Entry.uncategorized_transactions so
       # this list, the uncategorized badge count and the Quick Categorize
       # wizard can't drift apart. https://github.com/we-promise/sure/issues/2592
-      uncategorized_condition = "categories.id IS NULL AND transactions.kind NOT IN (?)"
+      uncategorized_condition = "categories.id IS NULL AND transactions.kind NOT IN (?) AND transactions.extra->>'native_managed_operation' IS NULL"
       uncategorized_excluded_kinds = Transaction::UNCATEGORIZED_EXCLUDED_KINDS
 
       # Build condition based on whether parent_category_ids is empty

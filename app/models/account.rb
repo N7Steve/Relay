@@ -6,6 +6,7 @@ class Account < ApplicationRecord
     saved_change_to_cashflow_boundary? || saved_change_to_archived? || saved_change_to_exclude_from_reports?
   }
   after_update :reclassify_boundary_transfers, if: :saved_change_to_cashflow_boundary?
+  after_update :normalize_managed_transfer_names, if: :saved_change_to_name?
   before_validation :assign_default_owner, if: -> { owner_id.blank? }
   before_validation :normalize_financial_treatment
 
@@ -629,6 +630,17 @@ class Account < ApplicationRecord
       return unless defined?(@invalid_financial_treatment)
 
       errors.add(:financial_treatment, :inclusion)
+    end
+
+    def normalize_managed_transfer_names
+      transaction_ids = entries.where(entryable_type: "Transaction").select(:entryable_id)
+      Transfer.where(inflow_transaction_id: transaction_ids)
+        .or(Transfer.where(outflow_transaction_id: transaction_ids))
+        .includes(inflow_transaction: { entry: :account }, outflow_transaction: { entry: :account })
+        .find_each(&:normalize_managed_legs!)
+      if managed_portfolio?
+        transactions.where(kind: "investment_contribution").includes(:entry).find_each(&:save!)
+      end
     end
 
     def reclassify_boundary_transfers

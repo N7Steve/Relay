@@ -11,6 +11,7 @@ class TransfersController < ApplicationController
     @transfer = Transfer.new
     apply_duplicate_attributes!
     @from_account_id ||= params[:from_account_id]
+    @to_account_id ||= params[:to_account_id]
   end
 
   def show
@@ -183,6 +184,7 @@ class TransfersController < ApplicationController
         .alphabetically
         .includes(
           :account_providers,
+          :accountable,
           logo_attachment: :blob
         )
     end
@@ -236,11 +238,13 @@ class TransfersController < ApplicationController
     end
 
     def update_transfer_details
-      @transfer.outflow_transaction.update!(category_id: transfer_update_params[:category_id])
-      @transfer.inflow_transaction.update!(category_id: transfer_update_params[:category_id])
+      if @transfer.categorizable? && transfer_update_params.key?(:category_id)
+        @transfer.outflow_transaction.update!(category_id: transfer_update_params[:category_id])
+        @transfer.inflow_transaction.update!(category_id: transfer_update_params[:category_id])
+      end
       @transfer.update!(notes: transfer_update_params[:notes])
 
-      if transfer_update_params.key?(:name)
+      if @transfer.categorizable? && transfer_update_params.key?(:name)
         new_name = transfer_update_params[:name].presence
         if new_name
           @transfer.outflow_transaction.entry.update!(name: new_name, user_modified: true)

@@ -104,7 +104,7 @@
           <div data-controller="autocomplete" data-autocomplete-url-value="<%= descriptions_transactions_path %>" data-autocomplete-account-id-value="<%= @entry.account_id %>">
             <%= f.text_field :name,
                   label: t(".name_label"),
-                  disabled: @entry.split_child? || @edit_locked,
+                  disabled: @entry.split_child? || @edit_locked || @entry.transaction.native_managed_operation.present?,
                   "data-auto-submit-form-target": "auto",
                   data: {
                     autocomplete_target: "input",
@@ -135,7 +135,7 @@
                     "data-auto-submit-form-target": "auto" %>
             </div>
             <%= f.fields_for :entryable do |ef| %>
-              <% unless @entry.account.managed_portfolio? %>
+              <% unless @entry.account.managed_portfolio? || @entry.transaction.native_managed_operation.present? %>
                 <%= render DS::CategorySelect.new(
                       form: ef,
                       categories: Current.family.categories.alphabetically_by_hierarchy,

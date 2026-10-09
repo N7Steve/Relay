@@ -53,3 +53,21 @@ restaura esa clasificación; conserva los nuevos cierres absolutos como nativos.
 
 Las copias completas conservan todos los metadatos. El formato NDJSON portable
 también incluye los cierres absolutos para permitir restaurarlos y recalcularlos.
+
+## Nombres y clasificación nativos
+
+La migración posterior `20261009133000_normalize_managed_operation_names_and_categories`
+normaliza todo el historial de estas carteras: `Valoración DD/MM/YYYY`,
+`Aportación · Cartera`, `Retirada · Cartera` y `Traspaso · Origen → Destino`.
+Los nombres usan el idioma de la familia. En transferencias se actualizan ambas
+partes, incluida la cuenta bancaria. Renombrar una cartera actualiza los nombres
+de sus transferencias vinculadas.
+
+Estas operaciones muestran una clasificación nativa de solo lectura y no tienen
+categoría personalizable ni aparecen como pendientes de categorizar. El backend
+aplica la misma regla a formularios, edición masiva, reglas e importaciones.
+Los importes, fechas, notas, etiquetas y relaciones contables se conservan.
+La migración guarda el nombre y la categoría anteriores en
+`transactions.extra.native_operation_original`, sin sobrescribirlos al repetirse;
+estos metadatos también se incluyen en las copias portables. Su reversión restaura
+el nombre y la categoría original si esta sigue existiendo.

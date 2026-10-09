@@ -117,7 +117,7 @@ module Family::AutoTransferMatchable
         transfer.reclassify_transactions!
 
         # Assign Investment Contributions category for transfers to investment accounts
-        if outflow_kind == "investment_contribution"
+        if outflow_kind == "investment_contribution" && transfer.categorizable?
           outflow_txn = outflow_transaction
           if outflow_txn.category_id.blank?
             unless investment_category_loaded

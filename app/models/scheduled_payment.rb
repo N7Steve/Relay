@@ -168,6 +168,12 @@ class ScheduledPayment < ApplicationRecord
             spe.transfer_entry.entryable.tags = tags
           end
         end
+
+        [ spe.entry, spe.transfer_entry ].compact.each do |entry|
+          next unless entry.transaction? && entry.transaction.native_managed_operation.present?
+          Investment::NativeOperation.normalize_entry(entry)
+          entry.save!
+        end
       end
     end
   end

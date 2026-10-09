@@ -1,5 +1,5 @@
 <% account_currencies = Current.family.accounts.map { |a| [a.id, a.currency] }.to_h.to_json %>
-<%= styled_form_with model: transfer, class: "space-y-4", data: { turbo_frame: "_top", controller: "transfer-form", transfer_form_exchange_rate_url_value: exchange_rate_path, transfer_form_account_currencies_value: account_currencies } do |f| %>
+<%= styled_form_with model: transfer, class: "space-y-4", data: { turbo_frame: "_top", controller: "transfer-form managed-transfer", managed_transfer_accounts_value: managed_transfer_form_accounts(@accounts).to_json, managed_transfer_names_value: managed_transfer_form_names.to_json, transfer_form_exchange_rate_url_value: exchange_rate_path, transfer_form_account_currencies_value: account_currencies } do |f| %>
   <% if transfer.errors.present? %>
     <div class="text-destructive flex items-center gap-2">
       <%= icon "circle-alert", size: "sm" %>
@@ -34,8 +34,8 @@
   <% end %>
 
   <section class="space-y-2">
-    <%= f.collection_select :from_account_id, @accounts, :id, :name, { prompt: t(".select_account"), label: t(".from"), selected: @from_account_id, variant: :logo }, { required: true, data: { transfer_form_target: "fromAccount", action: "change->transfer-form#checkCurrencyDifference" } } %>
-    <%= f.collection_select :to_account_id, @accounts, :id, :name, { prompt: t(".select_account"), label: t(".to"), selected: @to_account_id, variant: :logo }, { required: true, data: { transfer_form_target: "toAccount", action: "change->transfer-form#checkCurrencyDifference" } } %>
+    <%= f.collection_select :from_account_id, @accounts, :id, :name, { prompt: t(".select_account"), label: t(".from"), selected: @from_account_id, variant: :logo }, { required: true, data: { transfer_form_target: "fromAccount", managed_transfer_target: "fromAccount", action: "change->transfer-form#checkCurrencyDifference change->managed-transfer#refresh" } } %>
+    <%= f.collection_select :to_account_id, @accounts, :id, :name, { prompt: t(".select_account"), label: t(".to"), selected: @to_account_id, variant: :logo }, { required: true, data: { transfer_form_target: "toAccount", managed_transfer_target: "toAccount", action: "change->transfer-form#checkCurrencyDifference change->managed-transfer#refresh" } } %>
 
     <div class="grid grid-cols-2 gap-2">
       <%= f.number_field :amount,
@@ -56,16 +56,26 @@
             data: { transfer_form_target: "date", action: "change->transfer-form#checkCurrencyDifference" } %>
     </div>
 
-    <%= f.text_field :name,
-          label: t(".name"),
-          placeholder: t(".name_placeholder") %>
-
-    <%= render DS::CategorySelect.new(
-          form: f,
-          categories: @categories,
-          selected_id: f.object.category_id,
-          blank_label: t("transactions.form.category_prompt")
-        ) %>
+    <fieldset class="space-y-2" data-managed-transfer-target="editableFields">
+      <%= f.text_field :name,
+            label: t(".name"),
+            placeholder: t(".name_placeholder") %>
+      <%= render DS::CategorySelect.new(
+            form: f,
+            categories: @categories,
+            selected_id: f.object.category_id,
+            blank_label: t("transactions.form.category_prompt")
+          ) %>
+    </fieldset>
+    <div class="space-y-2" data-managed-transfer-target="nativeFields" hidden>
+      <p class="text-sm font-medium text-primary" data-managed-transfer-target="name"></p>
+      <% %w[contribution withdrawal transfer].each do |operation| %>
+        <span data-managed-transfer-target="labels" data-operation="<%= operation %>" hidden>
+          <%= render DS::Pill.new(label: t("investment_values.operations.#{operation}"), tone: :info, marker: false, icon: "arrow-left-right") %>
+        </span>
+      <% end %>
+      <p class="text-sm text-secondary"><%= t("investment_values.operations.controlled") %></p>
+    </div>
     <%= render DS::TagSelect.new(
           form: f,
           tags: @tags,

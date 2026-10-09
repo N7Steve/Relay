@@ -1,6 +1,6 @@
 class Transfer < ApplicationRecord
-  belongs_to :inflow_transaction, class_name: "Transaction"
-  belongs_to :outflow_transaction, class_name: "Transaction"
+  belongs_to :inflow_transaction, class_name: "Transaction", inverse_of: :transfer_as_inflow
+  belongs_to :outflow_transaction, class_name: "Transaction", inverse_of: :transfer_as_outflow
 
   has_many :fee_transactions, class_name: "Transaction", foreign_key: :transfer_id,
            inverse_of: :fee_transfer, dependent: :destroy
@@ -20,6 +20,9 @@ class Transfer < ApplicationRecord
   validate :transfer_within_date_range
   validate :transfer_has_same_family
   validate :transfer_has_no_value_adjustment
+  before_validation :assign_managed_operation
+  after_save :normalize_managed_legs!
+  after_destroy :clear_managed_operation
 
   class << self
     def outflow_kind_for(source, destination)
@@ -113,6 +116,7 @@ class Transfer < ApplicationRecord
   end
 
   def name
+    return native_name if managed_operation
     return @name if @name.present?
 
     outflow_name = outflow_transaction&.entry&.name
@@ -149,7 +153,25 @@ class Transfer < ApplicationRecord
   end
 
   def categorizable?
-    true
+    managed_operation.nil?
+  end
+
+  def managed_operation
+    Investment::NativeOperation.transfer_type(from_account, to_account) unless destroyed?
+  end
+
+  def native_name
+    Investment::NativeOperation.transfer_name(from_account, to_account)
+  end
+
+  def normalize_managed_legs!
+    assign_managed_operation
+    [ outflow_transaction, inflow_transaction ].compact.each do |transaction|
+      entry = transaction.entry
+      next unless entry
+      entry.entryable = transaction
+      entry.save! if entry.changed? || transaction.changed?
+    end
   end
 
   def reject!
@@ -214,6 +236,23 @@ class Transfer < ApplicationRecord
   end
 
   private
+    def assign_managed_operation
+      operation = managed_operation
+      [ outflow_transaction, inflow_transaction ].compact.each do |transaction|
+        next unless transaction.entry
+        if operation
+          Investment::NativeOperation.assign(transaction.entry, operation, native_name)
+        elsif transaction.extra&.key?("native_managed_operation")
+          transaction.extra = transaction.extra.except("native_managed_operation")
+        end
+      end
+    end
+
+    def clear_managed_operation
+      Transaction.where(id: [ inflow_transaction_id, outflow_transaction_id ])
+        .update_all("extra = extra - 'native_managed_operation'")
+    end
+
     def transfer_has_no_value_adjustment
       if [ inflow_transaction, outflow_transaction ].compact.any?(&:investment_value_adjustment?)
         errors.add(:base, :invalid)

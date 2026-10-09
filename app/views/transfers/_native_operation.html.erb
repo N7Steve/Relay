@@ -1,0 +1,6 @@
+<%# locals: (name:, operation:) %>
+<div class="space-y-2 p-3">
+  <p class="text-sm font-medium text-primary"><%= name %></p>
+  <%= render DS::Pill.new(label: t("investment_values.operations.#{operation}"), tone: :info, marker: false, icon: "arrow-left-right") %>
+  <p class="text-sm text-secondary"><%= t("investment_values.operations.controlled") %></p>
+</div>

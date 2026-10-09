@@ -18,3 +18,12 @@ es:
       before_opening: debe ser posterior a la fecha del saldo inicial
       balance_tracking: La actualización de valor requiere una cartera gestionada sin operaciones ni posiciones individuales.
       category: Las carteras gestionadas usan operaciones nativas en lugar de categorías de gastos.
+    operations:
+      contribution: "Aportación"
+      withdrawal: "Retirada"
+      transfer: "Traspaso entre carteras"
+      valuation: "Valoración"
+      contribution_name: "Aportación · %{portfolio}"
+      withdrawal_name: "Retirada · %{portfolio}"
+      transfer_name: "Traspaso · %{from} → %{to}"
+      controlled: "El nombre y el tipo se asignan automáticamente a partir de las cuentas."

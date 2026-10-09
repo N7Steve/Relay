@@ -3,6 +3,8 @@
 <div id="<%= dom_id(transaction, "category_menu_#{variant}") %>" class="min-w-0 overflow-hidden">
   <% if transaction.investment_value_adjustment? %>
     <%= render DS::Pill.new(label: t("investment_values.adjustment"), tone: :info, marker: false, icon: "chart-line") %>
+  <% elsif (operation = transaction.native_managed_operation) %>
+    <%= render DS::Pill.new(label: t("investment_values.operations.#{operation}"), tone: :info, marker: false, icon: "arrow-left-right") %>
   <% elsif entry&.from_scheduled_payment? %>
     <%# Read-only badge for scheduled payment entries %>
     <div class="hidden lg:flex">

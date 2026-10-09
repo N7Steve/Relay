@@ -132,12 +132,16 @@
       <% if transfer_sp_locked %>
         <%# Read-only display for scheduled payment transfers %>
         <div class="pb-4 px-3 pt-2 text-sm space-y-3 text-primary">
-          <div class="form-field">
-            <div class="form-field__body">
-              <label class="form-field__label"><%= t("transactions.show.name_label", default: "Name") %></label>
-              <p class="text-sm text-primary py-1"><%= @transfer.outflow_transaction.entry.name %></p>
+          <% if @transfer.managed_operation %>
+            <%= render "native_operation", name: @transfer.native_name, operation: @transfer.managed_operation %>
+          <% else %>
+            <div class="form-field">
+              <div class="form-field__body">
+                <label class="form-field__label"><%= t("transactions.show.name_label", default: "Name") %></label>
+                <p class="text-sm text-primary py-1"><%= @transfer.outflow_transaction.entry.name %></p>
+              </div>
             </div>
-          </div>
+          <% end %>
           <% if @transfer.categorizable? && @transfer.outflow_transaction.category.present? %>
             <div class="form-field">
               <div class="form-field__body">
@@ -173,9 +177,13 @@
         <%# Editable form for normal transfers %>
         <%= styled_form_with model: @transfer,
                 data: { controller: "auto-submit-form" }, class: "space-y-2" do |f| %>
-          <%= f.text_field :name,
-                label: t("transactions.show.name_label", default: "Name"),
-                "data-auto-submit-form-target": "auto" %>
+          <% if @transfer.managed_operation %>
+            <%= render "transfers/native_operation", name: @transfer.name, operation: @transfer.managed_operation %>
+          <% else %>
+            <%= f.text_field :name,
+                  label: t("transactions.show.name_label", default: "Name"),
+                  "data-auto-submit-form-target": "auto" %>
+          <% end %>
           <% if @transfer.categorizable? %>
             <%= f.collection_select :category_id, @categories, :id, :name, { label: t(".category"), include_blank: t(".uncategorized"), selected: @transfer.outflow_transaction.category&.id, variant: :badge, searchable: true }, "data-auto-submit-form-target": "auto" %>
           <% end %>

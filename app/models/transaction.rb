@@ -35,11 +35,16 @@ class Transaction < ApplicationRecord
     BigDecimal(value.to_s) if investment_value_adjustment? && value.present?
   end
 
-  validate :managed_category_is_native
+  before_validation -> { Investment::NativeOperation.normalize_entry(entry) }
+  after_save -> { entry.save! if entry&.changed? && native_managed_operation.present? }
 
-  def managed_category_is_native
-    if investment_value_adjustment? && validation_context != :backup_restore && category_id.present? && category_id_changed? && entry&.account&.managed_portfolio? && !transfer?
-      errors.add(:category, I18n.t("investment_values.errors.category"))
+  def native_managed_operation
+    return "valuation" if investment_value_adjustment?
+    return unless transfer? || extra&.key?("native_managed_operation") || entry&.account&.managed_portfolio?
+    operation = paired_transfer&.managed_operation
+    return operation if operation
+    if investment_contribution? && entry&.account&.managed_portfolio?
+      entry.amount&.negative? ? "contribution" : "withdrawal"
     end
   end
 
@@ -157,9 +162,9 @@ class Transaction < ApplicationRecord
   # categorize. Every other kind with a NULL category does.
   #
   # This is deliberately neither of the two lists above:
-  #   - vs TRANSFER_KINDS: loan_payment and investment_contribution remain
-  #     categorizable, even though contributions are excluded from budget
-  #     analytics by BUDGET_EXCLUDED_KINDS.
+  #   - vs TRANSFER_KINDS: loan_payment and ordinary investment_contribution remain
+  #     categorizable (native managed operations are excluded separately), even
+  #     though contributions are excluded from budget analytics by BUDGET_EXCLUDED_KINDS.
   #   - vs BUDGET_EXCLUDED_KINDS: one_time is a real, categorizable
   #     expense/income that is only excluded from budget *analytics* so it
   #     doesn't skew medians. "Has no category" and "counts toward the

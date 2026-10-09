@@ -34,6 +34,7 @@ class Entry < ApplicationRecord
   validate :cannot_unexclude_split_parent
   validate :split_child_date_matches_parent
   before_validation :preserve_legacy_import_protection
+  before_validation -> { Investment::NativeOperation.normalize_entry(self) }
 
   before_destroy :prevent_individual_child_deletion, if: :split_child?
   before_destroy :prevent_deletion_if_scheduled_payment_linked
@@ -133,6 +134,7 @@ class Entry < ApplicationRecord
       .where(accounts: { status: %w[draft active] })
       .where(transactions: { category_id: nil })
       .where.not(transactions: { kind: Transaction::UNCATEGORIZED_EXCLUDED_KINDS })
+      .where("transactions.extra->>'native_managed_operation' IS NULL")
       .where(entries: { excluded: false })
   }
 

@@ -595,7 +595,7 @@ class Family::DataImporter
           category_id: new_category_id,
           merchant_id: new_merchant_id,
           kind: data["kind"] || "standard",
-          extra: data["investment_value"].present? ? transaction.extra.to_h.merge("investment_value" => data["investment_value"]) : transaction.extra,
+          extra: transaction.extra.to_h.merge(data.slice("investment_value", "native_operation_original", "native_managed_operation").compact),
           forecast_behavior: Transaction.forecast_behavior_for_import(kind: data["kind"], behavior: data["forecast_behavior"])
         )
 
@@ -729,7 +729,7 @@ class Family::DataImporter
       destination_account = transfer.inflow_transaction.entry.account
       outflow_kind = imported_transfer_outflow_kind(transfer)
       outflow_attrs = { kind: outflow_kind }
-      if outflow_kind == "investment_contribution" && transfer.outflow_transaction.category_id.blank?
+      if outflow_kind == "investment_contribution" && transfer.categorizable? && transfer.outflow_transaction.category_id.blank?
         outflow_attrs[:category] = destination_account.family.investment_contributions_category
       end
 

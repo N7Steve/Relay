@@ -11,8 +11,8 @@ class Transfer::Creator
     @destination_account = family.accounts.find(destination_account_id) # early throw if not found
     @date = date
     @amount = amount.to_d
-    @name = name.presence
-    @category_id = category_id
+    @name = Investment::NativeOperation.transfer_name(@source_account, @destination_account) || name.presence
+    @category_id = Investment::NativeOperation.transfer_type(@source_account, @destination_account) ? nil : category_id
     @source_fee_amount = source_fee_amount.to_d
     @destination_fee_amount = destination_fee_amount.to_d
     @tag_ids = Array(tag_ids).reject(&:blank?)
@@ -166,7 +166,9 @@ class Transfer::Creator
 
     def outflow_transaction
       kind = outflow_transaction_kind
-      resolved_category = if kind == "investment_contribution"
+      resolved_category = if Investment::NativeOperation.transfer_type(source_account, destination_account)
+        nil
+      elsif kind == "investment_contribution"
         investment_contributions_category
       elsif category_id.present?
         family.categories.find_by(id: category_id)

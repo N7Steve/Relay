@@ -58,6 +58,11 @@ por una exclusión universal de todos los kinds de transferencia.
 | Salida hacia fuera de finanzas | `transfer_to_excluded` | Gasto del extremo dentro de finanzas |
 | Entrada desde fuera de finanzas | `transfer_from_excluded` | Ingreso del extremo dentro de finanzas |
 
+Las transferencias vinculadas a carteras gestionadas tienen nombre determinista
+y clasificación nativa de solo lectura en ambos extremos. No admiten categorías
+personalizadas ni aparecen como pendientes de categorizar. Esta presentación no
+cambia los kinds, importes ni reglas de frontera de la tabla anterior.
+
 Una cuenta `tracking` queda fuera de informes pero no cambia la frontera de
 transferencias. `outside_finances` queda fuera y establece la frontera.
 Archivar afecta la navegación, no equivale a excluir de finanzas. El patrimonio

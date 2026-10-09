@@ -60,8 +60,8 @@ class Investment::ValueUpdate
     false
   end
 
-  def self.name_for(date)
-    I18n.t("investment_values.name", date: I18n.l(date, format: "%d/%m/%Y"))
+  def self.name_for(date, locale: I18n.locale)
+    I18n.t("investment_values.name", locale: locale, date: date.strftime("%d/%m/%Y"))
   end
 
   def self.refresh_adjustments!(account)

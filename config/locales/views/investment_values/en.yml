@@ -18,3 +18,12 @@ en:
       before_opening: must be after the opening balance date
       balance_tracking: Value updates require a managed portfolio without individually tracked trades or holdings.
       category: Managed portfolios use native operations instead of spending categories.
+    operations:
+      contribution: "Contribution"
+      withdrawal: "Withdrawal"
+      transfer: "Portfolio transfer"
+      valuation: "Valuation"
+      contribution_name: "Contribution · %{portfolio}"
+      withdrawal_name: "Withdrawal · %{portfolio}"
+      transfer_name: "Portfolio transfer · %{from} → %{to}"
+      controlled: "The name and type are assigned automatically from the selected accounts."

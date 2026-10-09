@@ -382,6 +382,8 @@ class Family::DataExporter
           tag_ids: transaction.tag_ids,
           kind: transaction.kind,
           investment_value: transaction.extra["investment_value"],
+          native_operation_original: transaction.extra["native_operation_original"],
+          native_managed_operation: transaction.extra["native_managed_operation"],
           forecast_behavior: transaction.forecast_behavior,
           created_at: transaction.created_at,
           updated_at: transaction.updated_at
@@ -551,6 +553,8 @@ class Family::DataExporter
           tag_ids: transaction.tag_ids,
           kind: transaction.kind,
           investment_value: transaction.extra["investment_value"],
+          native_operation_original: transaction.extra["native_operation_original"],
+          native_managed_operation: transaction.extra["native_managed_operation"],
           forecast_behavior: transaction.forecast_behavior,
           created_at: transaction.created_at,
           updated_at: transaction.updated_at
