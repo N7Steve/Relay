@@ -262,6 +262,8 @@ Rails.application.routes.draw do
       post :unlock
     end
   end
+  resources :investment_values, only: %i[new create show update]
+
   resources :valuations, only: %i[show new create update destroy] do
     post :confirm_create, on: :collection
     post :confirm_update, on: :member

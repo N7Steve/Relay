@@ -22,7 +22,17 @@ class Balance::SyncCache
   end
 
   def get_valuation(date)
-    entries_by_date[date]&.find { |e| e.valuation? }
+    day_entries = entries_by_date[date] || []
+    if account.managed_portfolio?
+      update = day_entries.reverse.find { |e| e.transaction? && e.transaction.investment_value_target.present? }
+      if update
+        # An absolute native update is the day's closing observation. The actual
+        # transaction remains in the flows exactly once with its signed delta.
+        return Entry.new(amount: update.transaction.investment_value_target, currency: account.currency,
+          date: date, entryable: Valuation.new(kind: "reconciliation"))
+      end
+    end
+    day_entries.find(&:valuation?)
   end
 
   def get_holdings_value(date)

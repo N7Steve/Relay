@@ -247,7 +247,7 @@ class ScheduledPayment::WealthForecast
       transfer && historical_asset_ids.include?(transfer.from_account&.id) && historical_asset_ids.include?(transfer.to_account&.id)
     end
 
-    def economic_delta(entry) = convert(-entry.amount, entry.currency, entry.date)
+    def economic_delta(entry) = entry.transaction.investment_value_adjustment? ? 0.to_d : convert(-entry.amount, entry.currency, entry.date)
 
     def investment_monthly_log_returns
       @investment_monthly_log_returns ||= investment_periods.filter_map do |period|
@@ -329,7 +329,8 @@ class ScheduledPayment::WealthForecast
     end
 
     def market_pnl_for(balance)
-      pnl = balance.net_market_flows
+      adjustments = native_investment_adjustments.fetch([ balance.account_id, balance.date ], 0.to_d)
+      pnl = balance.net_market_flows + adjustments
       return pnl unless balance_only_investment_ids.include?(balance.account_id)
       return pnl if first_investment_balance_dates[balance.account_id] == balance.date
 
@@ -339,6 +340,20 @@ class ScheduledPayment::WealthForecast
       # transaction/trade flows are already removed by the balance equation,
       # the adjustment is the deterministic equivalent of market P&L here.
       pnl + balance.cash_adjustments + balance.non_cash_adjustments
+    end
+
+    def native_investment_adjustments
+      @native_investment_adjustments ||= begin
+        accounts = historical_investment_accounts.index_by(&:id)
+        Entry.where(account_id: accounts.keys, excluded: false)
+          .excluding_pending.excluding_split_parents
+          .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
+          .where(transactions: { kind: "investment_value_adjustment" })
+          .each_with_object(Hash.new(0.to_d)) do |entry, result|
+            account = accounts.fetch(entry.account_id)
+            result[[ entry.account_id, entry.date ]] += Money.new(-entry.amount, entry.currency).exchange_to(account.currency, date: entry.date).amount
+          end
+      end
     end
 
     def first_investment_balance_dates

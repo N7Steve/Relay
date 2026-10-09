@@ -1,0 +1,6 @@
+<%= render DS::Dialog.new do |dialog| %>
+  <% dialog.with_header(title: t("investment_values.title")) %>
+  <% dialog.with_body do %>
+    <%= render "form", value_update: @value_update, url: investment_values_path, method: :post %>
+  <% end %>
+<% end %>

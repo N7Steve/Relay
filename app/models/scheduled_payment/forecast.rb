@@ -91,7 +91,7 @@ class ScheduledPayment::Forecast
 
     def eligible_historical_entries
       historical_scope
-        .where.not(transactions: { kind: Transaction::TRANSFER_KINDS })
+        .where.not(transactions: { kind: Transaction::TRANSFER_KINDS + [ "investment_value_adjustment" ] })
         .merge(Transaction.non_exceptional_for_forecast)
     end
 

@@ -1,7 +1,9 @@
 <%# locals: (transaction:, variant:, entry: nil, in_split_group: false) %>
 
 <div id="<%= dom_id(transaction, "category_menu_#{variant}") %>" class="min-w-0 overflow-hidden">
-  <% if entry&.from_scheduled_payment? %>
+  <% if transaction.investment_value_adjustment? %>
+    <%= render DS::Pill.new(label: t("investment_values.adjustment"), tone: :info, marker: false, icon: "chart-line") %>
+  <% elsif entry&.from_scheduled_payment? %>
     <%# Read-only badge for scheduled payment entries %>
     <div class="hidden lg:flex">
       <%= render "categories/badge", category: transaction.category %>

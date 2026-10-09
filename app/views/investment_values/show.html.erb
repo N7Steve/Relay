@@ -1,0 +1,19 @@
+<%= render DS::Dialog.new(frame: "drawer", responsive: true) do |dialog| %>
+  <% dialog.with_header(title: @entry.name) %>
+  <% dialog.with_body do %>
+    <p class="text-xl font-semibold privacy-sensitive <%= investment_value_color(@entry) %>"><%= investment_value_change(@entry) %></p>
+    <% if @entry.transaction.investment_value_target %>
+      <% if @account.permission_for(Current.user).in?([:owner, :full_control]) %>
+        <%= render "form", value_update: @value_update, url: investment_value_path(@entry), method: :patch %>
+      <% else %>
+        <p class="text-sm text-secondary"><%= t("investment_values.recorded_value", value: format_money(Money.new(@entry.transaction.investment_value_target, @entry.currency))) %></p>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-secondary"><%= t("investment_values.historical") %></p>
+      <%= render DS::Link.new(text: t("investment_values.edit_historical"), href: transaction_path(@entry), frame: :drawer) %>
+    <% end %>
+    <% if @entry.notes.present? %>
+      <p class="text-sm text-secondary whitespace-pre-wrap"><%= @entry.notes %></p>
+    <% end %>
+  <% end %>
+<% end %>

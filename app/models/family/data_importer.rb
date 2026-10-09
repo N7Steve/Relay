@@ -595,6 +595,7 @@ class Family::DataImporter
           category_id: new_category_id,
           merchant_id: new_merchant_id,
           kind: data["kind"] || "standard",
+          extra: data["investment_value"].present? ? transaction.extra.to_h.merge("investment_value" => data["investment_value"]) : transaction.extra,
           forecast_behavior: Transaction.forecast_behavior_for_import(kind: data["kind"], behavior: data["forecast_behavior"])
         )
 
@@ -614,7 +615,7 @@ class Family::DataImporter
           entry.source = session_entry_source
         end
 
-        entry.save!
+        entry.save!(context: :backup_restore)
 
         map_source!(:transactions, old_id, transaction)
         split_rows = importable_split_rows(data)

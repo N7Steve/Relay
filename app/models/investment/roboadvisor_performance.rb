@@ -25,6 +25,7 @@ class Investment::RoboadvisorPerformance
   end
 
   def provider_rate_for(date_range)
+    return if local_value_updates?(date_range.end)
     points = return_index
     before = points.select { |date, _value| date < date_range.begin }.max_by(&:first)
     ending = points.select { |date, _value| date <= date_range.end }.max_by(&:first)
@@ -45,7 +46,7 @@ class Investment::RoboadvisorPerformance
   end
 
   def total_profit_loss
-    native = parse_decimal(return_payload[:pl])
+    native = parse_decimal(return_payload[:pl]) unless local_value_updates?
     return native unless native.nil?
 
     balance_profit_loss(nil)
@@ -53,19 +54,20 @@ class Investment::RoboadvisorPerformance
 
   def opening_balance(date)
     portfolio = portfolio_points.select { |row_date, _amount| row_date <= date }.max_by(&:first)
-    return portfolio.last if portfolio
+    return portfolio.last if portfolio && !local_value_updates?(date)
 
     balance = account.balances.where("date < ?", date).order(date: :desc).first
     balance&.balance
   end
 
   def provider_history?
-    return_index.any?
+    return_index.any? && !local_value_updates?
   end
 
   private
 
     def native_profit_loss_for(date_range)
+      return if local_value_updates?(date_range.end)
       return if return_index.empty? || portfolio_points.empty?
 
       total = 0.to_d
@@ -107,11 +109,12 @@ class Investment::RoboadvisorPerformance
     end
 
     def performance_transactions(date_range)
-      entries = account.entries
+      entries = account.entries.excluding_pending.excluding_split_parents
         .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
         .where(excluded: false)
         .where.not(transactions: { kind: Transaction::TRANSFER_KINDS })
-        .where(transactions: { investment_activity_label: RETURN_ACTIVITY_LABELS })
+        .where("transactions.kind = ? OR transactions.investment_activity_label IN (?) OR transactions.investment_activity_label IS NULL",
+          "investment_value_adjustment", RETURN_ACTIVITY_LABELS.compact)
       entries = entries.where(date: date_range) if date_range
       entries.to_a
     end
@@ -120,8 +123,12 @@ class Investment::RoboadvisorPerformance
       Money.new(-entry.amount, entry.currency)
         .exchange_to(account.currency, date: entry.date)
         .amount
-    rescue Money::ConversionError
-      0.to_d
+    end
+
+    def local_value_updates?(ending = Date.current)
+      account.transactions.where(kind: "investment_value_adjustment")
+        .where("transactions.extra ? 'investment_value'").joins(:entry)
+        .where("entries.date <= ?", ending).exists?
     end
 
     def performance_payload

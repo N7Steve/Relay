@@ -437,7 +437,8 @@ class InvestmentStatement
         .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
         .where(excluded: false, date: period.date_range)
         .where.not(transactions: { kind: Transaction::TRANSFER_KINDS })
-        .where(transactions: { investment_activity_label: Investment::RoboadvisorPerformance::RETURN_ACTIVITY_LABELS })
+        .where("transactions.kind = ? OR transactions.investment_activity_label IN (?) OR transactions.investment_activity_label IS NULL",
+          "investment_value_adjustment", Investment::RoboadvisorPerformance::RETURN_ACTIVITY_LABELS.compact)
 
       entries.sum { |entry| convert_to_family_currency(-entry.amount, entry.currency) }
     end

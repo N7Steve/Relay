@@ -14,6 +14,10 @@ class TransactionsController < ApplicationController
     prefill_params_from_duplicate!
     super
     apply_duplicate_attributes!
+    if @entry.account&.managed_portfolio?
+      redirect_to new_investment_value_path(account_id: @entry.account_id)
+      return
+    end
     set_new_transaction_form_options
   end
 
@@ -125,6 +129,11 @@ class TransactionsController < ApplicationController
 
     return unless require_account_permission!(account)
 
+    if account.managed_portfolio?
+      redirect_to new_investment_value_path(account_id: account.id), status: :see_other
+      return
+    end
+
     idempotency_key = submitted_idempotency_key
 
     # Sequential double-submit guard: the form was already submitted
@@ -163,7 +172,17 @@ class TransactionsController < ApplicationController
     respond_with_created_entry(existing_entry)
   end
 
+  def show
+    if @entry.transaction&.investment_value_target
+      redirect_to investment_value_path(@entry)
+    end
+  end
+
   def update
+    if @entry.transaction&.investment_value_target
+      redirect_to investment_value_path(@entry), status: :see_other
+      return
+    end
     if @entry.update(permitted_entry_params)
       transaction = @entry.transaction
       transaction.record_category_usage!
@@ -643,8 +662,8 @@ class TransactionsController < ApplicationController
         .manual
         .active
         .alphabetically
-        .includes(:account_providers, logo_attachment: :blob)
-        .to_a
+        .includes(:account_providers, :accountable, logo_attachment: :blob)
+        .to_a.reject(&:managed_portfolio?)
       @categories = Current.family.categories.alphabetically_by_hierarchy.to_a
       @merchants = Current.family.available_merchants_for(Current.user).alphabetically.to_a
       @tags = Current.family.tags.alphabetically.to_a

@@ -6,6 +6,8 @@ class Account::Recalculator
   def recalculate(window_start_date: nil)
     ExternalAccess.locally do
       @account.transaction do
+        @account.lock! if @account.managed_portfolio?
+        Investment::ValueUpdate.refresh_adjustments!(@account)
         strategy = @account.reverse_balance_history? ? :reverse : :forward
         Balance::Materializer.new(@account, strategy: strategy, window_start_date: window_start_date).materialize_balances
         apply_imported_balance_history

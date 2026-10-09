@@ -1,0 +1,20 @@
+es:
+  investment_values:
+    title: Actualizar valor de la cartera
+    submit: Actualizar valor
+    name: "Valoración %{date}"
+    help: Introduce el valor total de la cartera. Las aportaciones y retiradas se contabilizan por separado; la diferencia aparece en el historial como un ajuste de valor de inversión.
+    date: Fecha
+    total_value: Valor total de la cartera
+    adjustment: Ajuste de valor de inversión
+    recorded_value: "Valor registrado de la cartera: %{value}"
+    historical: Ajuste de valor histórico. Se han conservado su fecha e importe originales.
+    edit_historical: Ver movimiento original
+    saved: Valor de la cartera actualizado
+    contribution: Aportar dinero
+    withdrawal: Retirar dinero
+    errors:
+      duplicate_date: "Ya existe una actualización de valor en esta fecha."
+      before_opening: debe ser posterior a la fecha del saldo inicial
+      balance_tracking: La actualización de valor requiere una cartera gestionada sin operaciones ni posiciones individuales.
+      category: Las carteras gestionadas usan operaciones nativas en lugar de categorías de gastos.

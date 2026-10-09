@@ -135,14 +135,16 @@
                     "data-auto-submit-form-target": "auto" %>
             </div>
             <%= f.fields_for :entryable do |ef| %>
-              <%= render DS::CategorySelect.new(
-                    form: ef,
-                    categories: Current.family.categories.alphabetically_by_hierarchy,
-                    selected_id: ef.object.category_id,
-                    disabled: @entry.split_child? || @annotate_locked,
-                    auto_submit: true,
-                    blank_label: t(".uncategorized")
-                  ) %>
+              <% unless @entry.account.managed_portfolio? %>
+                <%= render DS::CategorySelect.new(
+                      form: ef,
+                      categories: Current.family.categories.alphabetically_by_hierarchy,
+                      selected_id: ef.object.category_id,
+                      disabled: @entry.split_child? || @annotate_locked,
+                      auto_submit: true,
+                      blank_label: t(".uncategorized")
+                    ) %>
+              <% end %>
             <% end %>
           <% else %>
             <%= f.date_field :date,
@@ -364,7 +366,7 @@
             <% end %>
           </div>
         <% end %>
-        <% if @entry.account.investment? || @entry.account.crypto? %>
+        <% if (@entry.account.investment? || @entry.account.crypto?) && !@entry.account.managed_portfolio? %>
           <div class="pb-4">
             <%= styled_form_with model: @entry,
                   url: transaction_path(@entry),
@@ -460,7 +462,7 @@
             </div>
           <% end %>
           <!-- Convert to Trade (Investment Accounts Only, not already converted) -->
-          <% if @entry.account.investment? && @entry.entryable.is_a?(Transaction) && !@entry.excluded? %>
+          <% if @entry.account.investment? && !@entry.account.managed_portfolio? && @entry.entryable.is_a?(Transaction) && !@entry.excluded? %>
             <div class="flex items-center justify-between gap-2 p-3">
               <div class="text-sm space-y-1">
                 <h4 class="text-primary"><%= t(".convert_to_trade_title") %></h4>

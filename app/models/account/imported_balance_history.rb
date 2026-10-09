@@ -10,12 +10,20 @@ class Account::ImportedBalanceHistory
     return if normalized_rows.empty?
 
     rows = balance_rows
+    # Local absolute updates supersede the retained, disconnected observations.
+    first_update = account.transactions.excluding_pending.where(kind: "investment_value_adjustment")
+      .where("transactions.extra ? 'investment_value'").joins(:entry).minimum("entries.date")
+    rows = rows.select { |row| row[:date] < first_update } if first_update
     return if rows.empty?
 
     account.balances.upsert_all(
       rows,
       unique_by: %i[account_id date currency]
     )
+  end
+
+  def closing_values_before(date)
+    normalized_rows.select { |row| row[:date] < date }.to_h { |row| [ row[:date], row[:total] ] }
   end
 
   private

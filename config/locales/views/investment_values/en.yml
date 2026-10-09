@@ -1,0 +1,20 @@
+en:
+  investment_values:
+    title: Update portfolio value
+    submit: Update value
+    name: "Valuation %{date}"
+    help: Enter the total portfolio value. Contributions and withdrawals are accounted for separately; the difference appears in your history as an investment value adjustment.
+    date: Date
+    total_value: Total portfolio value
+    adjustment: Investment value adjustment
+    recorded_value: "Recorded portfolio value: %{value}"
+    historical: Historical value adjustment. Its original date and amount have been preserved.
+    edit_historical: View original movement
+    saved: Portfolio value updated
+    contribution: Contribute money
+    withdrawal: Withdraw money
+    errors:
+      duplicate_date: "Already has a value update on this date."
+      before_opening: must be after the opening balance date
+      balance_tracking: Value updates require a managed portfolio without individually tracked trades or holdings.
+      category: Managed portfolios use native operations instead of spending categories.

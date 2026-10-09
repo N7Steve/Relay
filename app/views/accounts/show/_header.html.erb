@@ -33,6 +33,9 @@
     </div>
 
     <div class="flex items-center gap-1 ml-auto">
+      <% if account.managed_portfolio? && account.permission_for(Current.user).in?([:owner, :full_control]) %>
+        <%= render DS::Link.new(text: t("investment_values.submit"), href: new_investment_value_path(account_id: account.id), variant: :primary, frame: :modal) %>
+      <% end %>
       <% if Rails.env.development? || self_hosted? %>
         <%= icon(
             "refresh-cw",

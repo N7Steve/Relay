@@ -260,6 +260,11 @@ module Family::AutoTransferMatchable
           WHERE
             inflow_candidates.entryable_type = 'Transaction' AND
             inflow_candidates.excluded = FALSE AND
+            NOT EXISTS (
+              SELECT 1 FROM transactions native_adjustments
+              WHERE native_adjustments.kind = 'investment_value_adjustment'
+                AND native_adjustments.id IN (inflow_candidates.entryable_id, outflow_candidates.entryable_id)
+            ) AND
             inflow_candidates.amount < 0 AND
             inflow_accounts.family_id = :family_id AND
             outflow_accounts.family_id = :family_id AND
@@ -314,6 +319,11 @@ module Family::AutoTransferMatchable
           WHERE
             inflow_candidates.entryable_type = 'Transaction' AND
             inflow_candidates.excluded = FALSE AND
+            NOT EXISTS (
+              SELECT 1 FROM transactions native_adjustments
+              WHERE native_adjustments.kind = 'investment_value_adjustment'
+                AND native_adjustments.id IN (inflow_candidates.entryable_id, outflow_candidates.entryable_id)
+            ) AND
             inflow_candidates.amount < 0 AND
             inflow_accounts.family_id = :family_id AND
             outflow_accounts.family_id = :family_id AND

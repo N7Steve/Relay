@@ -5,7 +5,14 @@
 
       <%# Show menu if: manual (can add balance) OR non-crypto (can add transactions) %>
       <%# This hides the menu only for linked crypto accounts who have no actions %>
-      <% if !account.linked? || !account.crypto? %>
+      <% if account.managed_portfolio? && account.permission_for(Current.user).in?([:owner, :full_control]) %>
+        <%= render DS::Menu.new(variant: "button") do |menu| %>
+          <% menu.with_button(text: t("accounts.show.activity.new"), variant: "secondary", icon: "plus") %>
+          <% menu.with_item(variant: "link", text: t("investment_values.title"), icon: "chart-line", href: new_investment_value_path(account_id: account.id), data: { turbo_frame: :modal }) %>
+          <% menu.with_item(variant: "link", text: t("investment_values.contribution"), icon: "arrow-down-left", href: new_transfer_path(to_account_id: account.id), data: { turbo_frame: :modal }) %>
+          <% menu.with_item(variant: "link", text: t("investment_values.withdrawal"), icon: "arrow-up-right", href: new_transfer_path(from_account_id: account.id), data: { turbo_frame: :modal }) %>
+        <% end %>
+      <% elsif !account.managed_portfolio? && (!account.linked? || !account.crypto?) %>
         <%= render DS::Menu.new(variant: "button") do |menu| %>
           <% menu.with_button(text: t("accounts.show.activity.new"), variant: "secondary", icon: "plus") %>
 

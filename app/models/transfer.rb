@@ -19,6 +19,7 @@ class Transfer < ApplicationRecord
   validate :transfer_has_opposite_amounts
   validate :transfer_within_date_range
   validate :transfer_has_same_family
+  validate :transfer_has_no_value_adjustment
 
   class << self
     def outflow_kind_for(source, destination)
@@ -213,6 +214,12 @@ class Transfer < ApplicationRecord
   end
 
   private
+    def transfer_has_no_value_adjustment
+      if [ inflow_transaction, outflow_transaction ].compact.any?(&:investment_value_adjustment?)
+        errors.add(:base, :invalid)
+      end
+    end
+
     def transfer_has_different_accounts
       return unless inflow_transaction&.entry && outflow_transaction&.entry
       errors.add(:base, :different_accounts) if to_account == from_account

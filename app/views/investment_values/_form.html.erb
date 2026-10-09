@@ -1,0 +1,11 @@
+<%# locals: (value_update:, url:, method:) %>
+<%= styled_form_with model: value_update, scope: :investment_value, url: url, method: method, class: "space-y-4", data: { turbo_frame: "_top" } do |form| %>
+  <% if value_update.errors.any? %>
+    <%= render "shared/form_errors", model: value_update %>
+  <% end %>
+  <%= hidden_field_tag "investment_value[account_id]", value_update.account.id %>
+  <p class="text-sm text-secondary"><%= t("investment_values.help") %></p>
+  <%= form.date_field :date, label: t("investment_values.date"), required: true, min: Entry.min_supported_date + 1.day, max: Date.current %>
+  <%= form.money_field :amount, label: t("investment_values.total_value"), min: 0, disable_currency: true, required: true %>
+  <%= form.submit t("investment_values.submit") %>
+<% end %>

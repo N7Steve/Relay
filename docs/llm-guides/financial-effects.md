@@ -32,6 +32,7 @@ familias, cuentas, fechas o monedas. El llamador debe mantener esos filtros.
 | Padre de división | Excluido para evitar duplicación | `split!` lo marca excluido | Excluido |
 | Hijos de división 60/40 | Total 100, aunque el hijo de 40 esté excluido | Solo 60 si el hijo de 40 está excluido | Solo el hijo de 60 en ese caso |
 | Valoración | Ancla absoluta de valor/deuda | No es Transaction | Excluida |
+| Ajuste nativo de cartera gestionada | Diferencia firmada; los nuevos cierres conservan el total declarado | Excluido de ingresos/gastos y de pendiente de categorizar | Rendimiento de inversión, separado del residual de gastos |
 | Trade | Movimiento de efectivo y posiciones | Excluido de IncomeStatement::Totals | Excluido |
 
 Los informes tienen filtros adicionales por estado de cuenta, tratamiento,

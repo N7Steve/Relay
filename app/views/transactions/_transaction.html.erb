@@ -1,5 +1,9 @@
 <%# locals: (entry:, balance_trend: nil, view_ctx: "global", in_split_group: false) %>
 
+<% if entry.transaction.investment_value_adjustment? %>
+  <%= render "investment_values/adjustment", entry: entry %>
+<% else %>
+
 <% transaction = entry.entryable %>
 <% transaction_security_logo_url = transaction.activity_security&.display_logo_url %>
 <% transaction_merchant_logo_url = transaction.merchant&.display_logo_url(family: Current.family) %>
@@ -233,4 +237,5 @@
       </div>
     </div>
   <% end %>
+<% end %>
 <% end %>

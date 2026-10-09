@@ -30,6 +30,19 @@ class Transaction < ApplicationRecord
 
   after_save :clear_merchant_unlinked_association, if: :merchant_id_previously_changed?
 
+  def investment_value_target
+    value = extra&.dig("investment_value", "target")
+    BigDecimal(value.to_s) if investment_value_adjustment? && value.present?
+  end
+
+  validate :managed_category_is_native
+
+  def managed_category_is_native
+    if investment_value_adjustment? && validation_context != :backup_restore && category_id.present? && category_id_changed? && entry&.account&.managed_portfolio? && !transfer?
+      errors.add(:category, I18n.t("investment_values.errors.category"))
+    end
+  end
+
   # Accessors for exchange_rate stored in extra jsonb field
   def exchange_rate
     extra&.dig("exchange_rate")
@@ -69,6 +82,7 @@ class Transaction < ApplicationRecord
   public
 
   enum :kind, {
+    investment_value_adjustment: "investment_value_adjustment", # Native managed-portfolio market movement
     standard: "standard", # A regular transaction, included in budget analytics
     funds_movement: "funds_movement", # Movement of funds between accounts, excluded from budget analytics
     cc_payment: "cc_payment", # A CC payment, excluded from budget analytics (CC payments offset the sum of expense transactions)
@@ -104,7 +118,7 @@ class Transaction < ApplicationRecord
   # Kinds excluded from budget/income-statement analytics.
   # loan_payment and transfer_to_excluded are intentionally NOT here —
   # they represent real cash outflow from a budgeting perspective.
-  BUDGET_EXCLUDED_KINDS = %w[funds_movement one_time cc_payment investment_contribution].freeze
+  BUDGET_EXCLUDED_KINDS = %w[funds_movement one_time cc_payment investment_contribution investment_value_adjustment].freeze
 
   scope :budget_reportable, -> { where(budget_inclusion_sql) }
   scope :exceptional_for_forecast, -> { where(exceptional_forecast_sql) }
@@ -150,7 +164,7 @@ class Transaction < ApplicationRecord
   #     expense/income that is only excluded from budget *analytics* so it
   #     doesn't skew medians. "Has no category" and "counts toward the
   #     budget" are different questions; only the former belongs here.
-  UNCATEGORIZED_EXCLUDED_KINDS = %w[funds_movement cc_payment].freeze
+  UNCATEGORIZED_EXCLUDED_KINDS = %w[funds_movement cc_payment investment_value_adjustment].freeze
 
   # All valid investment activity labels (for UI dropdown)
   ACTIVITY_LABELS = [
