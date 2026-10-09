@@ -87,7 +87,7 @@ class SharedExpensesCalculator
       .where(accounts: { family_id: @family.id })
       .merge(Account.visible.included_in_reports)
       .where(entries: { entryable_type: "Transaction", excluded: false, date: date_range })
-      .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+      .budget_reportable
       .where(category_id: category_ids)
       .where("entries.amount < 0")
 
@@ -114,7 +114,7 @@ class SharedExpensesCalculator
         .merge(Account.visible.included_in_reports)
         .where(taggings: { tag_id: tag.id })
         .where(entries: { entryable_type: "Transaction", excluded: false })
-        .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+        .budget_reportable
     end
 
     def expense_transactions_scope(date_range)
@@ -124,7 +124,7 @@ class SharedExpensesCalculator
         .where(accounts: { family_id: @family.id })
         .merge(Account.visible.included_in_reports)
         .where(entries: { entryable_type: "Transaction", excluded: false, date: date_range })
-        .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+        .budget_reportable
         .where("entries.amount > 0")
     end
 

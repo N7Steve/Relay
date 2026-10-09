@@ -7,6 +7,7 @@ class Account < ApplicationRecord
   }
   after_update :reclassify_boundary_transfers, if: :saved_change_to_cashflow_boundary?
   before_validation :assign_default_owner, if: -> { owner_id.blank? }
+  before_validation :normalize_financial_treatment
 
   # Unlink scheduled entries before cleanup_transfers/entries tries to delete
   # them. Destination accounts must release their schedules' foreign keys too.
@@ -86,6 +87,7 @@ class Account < ApplicationRecord
 
   def financial_treatment
     return @invalid_financial_treatment if defined?(@invalid_financial_treatment)
+    return self[:financial_treatment] if self[:financial_treatment].present? && !will_save_change_to_cashflow_boundary? && !will_save_change_to_exclude_from_reports?
     return "outside_finances" if cashflow_boundary?
     return "tracking" if exclude_from_reports?
 
@@ -100,6 +102,7 @@ class Account < ApplicationRecord
     end
 
     remove_instance_variable(:@invalid_financial_treatment) if defined?(@invalid_financial_treatment)
+    self[:financial_treatment] = treatment
 
     case treatment
     when "included"
@@ -525,6 +528,7 @@ class Account < ApplicationRecord
   # while still behaving as roboadvisors for performance and trading surfaces.
   def managed_portfolio?
     return false unless investment?
+    return accountable.tracking_mode == "managed" if accountable.tracking_mode.present?
     return true if Investment::MANAGED_PORTFOLIO_SUBTYPES.include?(subtype)
 
     self[:managed_portfolio]
@@ -602,6 +606,10 @@ class Account < ApplicationRecord
   end
 
   private
+    def normalize_financial_treatment
+      self[:financial_treatment] = financial_treatment unless defined?(@invalid_financial_treatment)
+    end
+
 
     def custom_logo_available?
       if Current.family&.id == family_id
@@ -635,8 +643,7 @@ class Account < ApplicationRecord
         destination = transfer.to_account
         next unless source && destination
 
-        transfer.outflow_transaction.update!(kind: Transfer.outflow_kind_for(source, destination))
-        transfer.inflow_transaction.update!(kind: Transfer.inflow_kind_for(source, destination))
+        transfer.reclassify_transactions!
       end
     end
 

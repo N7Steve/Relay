@@ -15,6 +15,10 @@ en:
     unlock:
       success: Entry unlocked. It may be updated on next sync.
     protection:
+      import_policy: Import protection
+      unlocked_policy: No independent import protection
+      protected_policy: Protect against import updates
+      independent_policy_description: Analytical exclusion is independent of import protection. Use Allow sync to update to explicitly clear protection and field locks.
       tooltip: Protected from sync
       title: Protected from sync
       description: Your edits to this entry won't be overwritten by provider sync.

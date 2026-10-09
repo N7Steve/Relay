@@ -1,6 +1,9 @@
 <%= render DS::Dialog.new do |dialog| %>
   <% dialog.with_header(title: t(".header.title"), subtitle: t(".header.subtitle")) %>
   <% dialog.with_body do %>
+    <% if @multiple_candidates %>
+      <%= render DS::Alert.new(variant: :warning, message: t(".review_candidates")) %>
+    <% end %>
     <%= styled_form_with(
           url: transaction_transfer_match_path(@entry),
           scope: :transfer_match,

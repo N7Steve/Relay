@@ -15,7 +15,9 @@ class IncomeStatement::Totals
     # No finance accounts means no transactions to report
     return [] if @included_account_ids&.empty?
 
-    ActiveRecord::Base.connection.select_all(query_sql).map do |row|
+    rows = ActiveRecord::Base.connection.select_all(query_sql)
+    validate_conversion_data!(rows)
+    rows.map do |row|
       TotalsRow.new(
         parent_category_id: row["parent_category_id"],
         category_id: row["category_id"],
@@ -59,7 +61,8 @@ class IncomeStatement::Totals
           is_transfer_to_excluded,
           is_transfer_from_excluded,
           SUM(total) as total,
-          SUM(entry_count) as transactions_count
+          SUM(entry_count) as transactions_count,
+          MIN(missing_rate) as missing_rate
         FROM (
           #{transactions_subquery_sql}
           UNION ALL
@@ -80,13 +83,14 @@ class IncomeStatement::Totals
           COUNT(ae.id) as transactions_count,
           false as is_uncategorized_investment,
           (at.kind = 'transfer_to_excluded') as is_transfer_to_excluded,
-          (at.kind = 'transfer_from_excluded') as is_transfer_from_excluded
+          (at.kind = 'transfer_from_excluded') as is_transfer_from_excluded,
+          #{missing_rate_sql} as missing_rate
         FROM (#{@transactions_scope.to_sql}) at
         #{entries_join_sql("at")}
         #{accounts_join_sql}
         LEFT JOIN categories c ON c.id = at.category_id
         #{exchange_rates_join_sql}
-        WHERE at.kind NOT IN (#{budget_excluded_kinds_sql})
+        WHERE #{budget_inclusion_sql("at")}
           AND ae.excluded = false
           AND a.family_id = :family_id
           AND a.status IN ('draft', 'active')
@@ -107,13 +111,14 @@ class IncomeStatement::Totals
           COUNT(ae.id) as entry_count,
           false as is_uncategorized_investment,
           (at.kind = 'transfer_to_excluded') as is_transfer_to_excluded,
-          (at.kind = 'transfer_from_excluded') as is_transfer_from_excluded
+          (at.kind = 'transfer_from_excluded') as is_transfer_from_excluded,
+          #{missing_rate_sql} as missing_rate
         FROM (#{@transactions_scope.to_sql}) at
         #{entries_join_sql("at")}
         #{accounts_join_sql}
         LEFT JOIN categories c ON c.id = at.category_id
         #{exchange_rates_join_sql}
-        WHERE at.kind NOT IN (#{budget_excluded_kinds_sql})
+        WHERE #{budget_inclusion_sql("at")}
           #{investment_activity_label_sql("at")}
           AND ae.excluded = false
           AND a.family_id = :family_id
@@ -133,7 +138,8 @@ class IncomeStatement::Totals
       <<~SQL
         SELECT NULL as category_id, NULL as parent_category_id, NULL as classification,
                NULL as total, NULL as entry_count, NULL as is_uncategorized_investment,
-               NULL as is_transfer_to_excluded, NULL as is_transfer_from_excluded
+               NULL as is_transfer_to_excluded, NULL as is_transfer_from_excluded,
+               NULL::text as missing_rate
         WHERE false
       SQL
     end

@@ -1,6 +1,7 @@
 require "test_helper"
 require Rails.root.join("db/migrate/20261005120000_remove_retired_product_persistence")
 require Rails.root.join("db/migrate/20261005180000_remove_demo_valuation_and_push_persistence")
+require Rails.root.join("db/migrate/20261007120000_add_independent_financial_attributes")
 
 class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
   self.use_transactional_tests = false
@@ -72,6 +73,7 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     assert keys.exists?(own_key.id)
     %w[push_subscriptions provider_request_counts].each { |table| assert_not connection.table_exists?(table), table }
     assert_empty %w[avm_provider avm_last_synced_on] & connection.columns("properties").map(&:name)
+    ActiveRecord::Migration.suppress_messages { AddIndependentFinancialAttributes.new.migrate(:up) }
     actual_columns = connection.tables.excluding("schema_migrations", "ar_internal_metadata").to_h do |table|
       [ table, connection.columns(table).map { |column| [ column.name, column.sql_type, column.default, column.null ] }.sort_by(&:first) ]
     end

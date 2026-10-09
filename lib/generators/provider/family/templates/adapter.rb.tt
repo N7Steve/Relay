@@ -2,8 +2,8 @@ class Provider::<%= class_name %>Adapter < Provider::Base
   include Provider::Syncable
   include Provider::InstitutionMetadata
 
-  # Register this adapter with the factory
-  Provider::Factory.register("<%= class_name %>Account", self)
+  # A new connector requires an approved product decision and an explicit
+  # mapping in Provider::Factory. Generating this class does not enable it.
 
   # Define which account types this provider supports
   def self.supported_account_types

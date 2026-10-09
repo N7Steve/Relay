@@ -1,13 +1,6 @@
 class Provider::Factory
   class AdapterNotFoundError < StandardError; end
   class << self
-    # Register a provider adapter
-    # @param provider_type [String] The provider account class name (e.g., "EnableBankingAccount")
-    # @param adapter_class [Class] The adapter class (e.g., Provider::EnableBankingAdapter)
-    def register(provider_type, adapter_class)
-      registry[provider_type] = adapter_class
-    end
-
     # Creates an adapter for a given provider account
     # @param provider_account [ApplicationRecord] The provider-specific account
     # @param account [Account] Optional account reference
@@ -35,24 +28,7 @@ class Provider::Factory
     # Get list of registered provider types
     # @return [Array<String>] List of registered provider type names
     def registered_provider_types
-      ensure_adapters_loaded
-      registry.keys.sort
-    end
-
-    # Ensures all provider adapters are loaded and registered
-    # Uses Rails autoloading to discover adapters dynamically
-    def ensure_adapters_loaded
-      # Eager load all adapter files to trigger their registration
-      adapter_files.each do |adapter_name|
-        adapter_class_name = "Provider::#{adapter_name}"
-
-        # Use Rails autoloading (constantize) instead of require
-        begin
-          adapter_class_name.constantize
-        rescue NameError => e
-          Rails.logger.warn("Failed to load adapter: #{adapter_class_name} - #{e.message}")
-        end
-      end
+      [ "EnableBankingAccount" ]
     end
 
     # Check if a provider type has a registered adapter
@@ -65,8 +41,7 @@ class Provider::Factory
     # Get all registered adapter classes
     # @return [Array<Class>] List of registered adapter classes
     def registered_adapters
-      ensure_adapters_loaded
-      registry.values.uniq
+      [ Provider::EnableBankingAdapter ]
     end
 
     # Get adapters that support a specific account type
@@ -95,39 +70,11 @@ class Provider::Factory
       end
     end
 
-    # Clear all registered adapters (useful for testing)
-    def clear_registry!
-      @registry = {}
-    end
-
     private
-
-      def registry
-        @registry ||= {}
-      end
-
-      # Find adapter class, attempting to load all adapters if not registered
+      # Resolve the sole supported connector at call time so Rails reloads do
+      # not leave a cached class or depend on an adapter's load order.
       def find_adapter_class(provider_type)
-        # Return if already registered
-        return registry[provider_type] if registry[provider_type]
-
-        # Load all adapters to ensure they're registered
-        # This triggers their self-registration calls
-        ensure_adapters_loaded
-
-        # Check registry again after loading
-        registry[provider_type]
-      end
-
-      # Discover all adapter files in the provider directory
-      # Returns adapter class names (e.g., ["EnableBankingAdapter"])
-      def adapter_files
-        return [] unless defined?(Rails)
-
-        pattern = Rails.root.join("app/models/provider/*_adapter.rb")
-        Dir[pattern].map do |file|
-          File.basename(file, ".rb").camelize
-        end
+        Provider::EnableBankingAdapter if provider_type == "EnableBankingAccount"
       end
   end
 end

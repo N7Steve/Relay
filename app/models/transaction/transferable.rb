@@ -12,8 +12,14 @@ module Transaction::Transferable
     after_save :sync_transfer_category, if: :saved_change_to_category_id?
   end
 
-  def transfer
+  def paired_transfer
     transfer_as_inflow || transfer_as_outflow
+  end
+
+  # Compatibility for existing callers: this has always returned the paired
+  # transfer. A fee's parent is exposed separately through fee_transfer.
+  def transfer
+    paired_transfer
   end
 
   def transfer_match_candidates(
@@ -26,17 +32,19 @@ module Transaction::Transferable
       family_matches_scope(date_window: date_window, exchange_rate_tolerance: exchange_rate_tolerance, outflow_transaction_id: self.id)
     end
 
+    ids = candidates_scope.flat_map { |match| [ match.inflow_transaction_id, match.outflow_transaction_id ] }.uniq
+    transactions = Transaction.includes(entry: :account).where(id: ids).index_by(&:id)
     candidates_scope.map do |match|
       Transfer.new(
-        inflow_transaction_id: match.inflow_transaction_id,
-        outflow_transaction_id: match.outflow_transaction_id,
+        inflow_transaction: transactions.fetch(match.inflow_transaction_id),
+        outflow_transaction: transactions.fetch(match.outflow_transaction_id),
       )
     end
   end
 
   private
     def sync_transfer_category
-      xfer = transfer
+      xfer = paired_transfer
       return unless xfer
 
       sibling = if xfer.inflow_transaction_id == id

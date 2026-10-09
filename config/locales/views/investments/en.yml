@@ -4,6 +4,17 @@ en:
     edit:
       edit: Edit %{account}
     form:
+      tax_treatment: Tax treatment
+      tracking_mode: Portfolio tracking
+      keep_tracking: Keep existing tracking
+      tax_treatments:
+        taxable: Taxable
+        tax_deferred: Tax deferred
+        tax_exempt: Tax exempt
+        tax_advantaged: Other tax benefits
+      tracking_modes:
+        positions: Positions and trades
+        managed: Managed portfolio value
       none: None
       subtype_prompt: Select investment type
     new:

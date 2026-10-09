@@ -101,7 +101,7 @@ class Transfer::Creator
     # keeps a genuinely different transfer from being silently discarded
     # in favor of returning the old one.
     def find_existing_transfer
-      transfer = source_account.entries.find_by(idempotency_key: idempotency_key)&.entryable&.transfer
+      transfer = source_account.entries.find_by(idempotency_key: idempotency_key)&.entryable&.paired_transfer
       return nil unless transfer
       return nil unless matches_request?(transfer)
 

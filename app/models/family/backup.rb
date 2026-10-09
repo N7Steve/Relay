@@ -7,7 +7,7 @@ class Family::Backup
   class InvalidBackupError < StandardError
     def code = "invalid_backup"
   end
-  VERSION = 1
+  VERSION = 2
   TYPES = %w[BackupManifest BackupRecord BackupAttachment].freeze
 
   PROVIDERS = %w[EnableBanking].freeze

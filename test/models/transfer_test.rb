@@ -220,4 +220,86 @@ class TransferTest < ActiveSupport::TestCase
     transfer.fee_transactions << entry1.entryable << entry2.entryable
     assert_equal 5, transfer.total_fee
   end
+
+  test "fees retain original currencies and never combine a mixed currency numeric total" do
+    transfer = transfers(:one)
+    source = transfer.from_account.entries.create!(name: "EUR fee", date: Date.current, amount: 2, currency: "EUR", entryable: Transaction.new)
+    destination = transfer.to_account.entries.create!(name: "USD fee", date: Date.current, amount: 3, currency: "USD", entryable: Transaction.new)
+    transfer.fee_transactions << [ source.entryable, destination.entryable ]
+
+    assert_nil transfer.total_fee
+    assert_equal({ "EUR" => 2, "USD" => 3 }, transfer.fees_by_currency)
+    assert_equal "EUR", transfer.fees_by_leg.fetch(:source).first.currency.iso_code
+    assert_equal "USD", transfer.fees_by_leg.fetch(:destination).first.currency.iso_code
+    assert_nil transfer.source_total_money
+  end
+
+  test "fee parent and paired transfer are distinct relationships" do
+    transfer = transfers(:one)
+    fee = create_transaction(account: transfer.from_account, amount: 5).entryable
+    transfer.fee_transactions << fee
+
+    assert_equal transfer, fee.reload.fee_transfer
+    assert_nil fee.paired_transfer
+    assert_nil fee.transfer
+    assert_equal transfer, transfer.outflow_transaction.paired_transfer
+    assert_equal transfer, transfer.outflow_transaction.transfer
+    assert_nil transfer.outflow_transaction.fee_transfer
+    assert_equal transfer.id, fee.attributes["transfer_id"]
+  end
+
+  test "deleting a fee preserves the paired transfer and its entries" do
+    transfer = transfers(:one)
+    fee = create_transaction(account: transfer.from_account, amount: 5).entryable
+    transfer.fee_transactions << fee
+
+    assert_no_difference "Transfer.count" do
+      fee.entry.destroy!
+    end
+
+    assert transfer.reload.inflow_transaction.entry.present?
+    assert transfer.outflow_transaction.entry.present?
+    assert_empty transfer.fee_transactions
+  end
+
+  test "rejecting a paired transfer removes its fees and preserves ordinary legs" do
+    transfer = transfers(:one)
+    fee_entry = create_transaction(account: transfer.from_account, amount: 5)
+    transfer.fee_transactions << fee_entry.entryable
+    inflow_entry = transfer.inflow_transaction.entry
+    outflow_entry = transfer.outflow_transaction.entry
+
+    transfer.reject!
+
+    assert_not Entry.exists?(fee_entry.id)
+    assert_equal "standard", inflow_entry.reload.entryable.kind
+    assert_equal "standard", outflow_entry.reload.entryable.kind
+    assert_nil inflow_entry.entryable.paired_transfer
+    assert_nil outflow_entry.entryable.paired_transfer
+  end
+
+  test "reclassification derives both kinds and preserves manual categories" do
+    transfer = transfers(:one)
+    outflow_category = transfer.outflow_transaction.category_id
+    inflow_category = transfer.inflow_transaction.category_id
+    transfer.outflow_transaction.update_column(:kind, "standard")
+    transfer.inflow_transaction.update_column(:kind, "standard")
+
+    transfer.reclassify_transactions!
+
+    assert_equal Transfer.outflow_kind_for(transfer.from_account, transfer.to_account), transfer.outflow_transaction.reload.kind
+    assert_equal Transfer.inflow_kind_for(transfer.from_account, transfer.to_account), transfer.inflow_transaction.reload.kind
+    assert_equal outflow_category, transfer.outflow_transaction.category_id
+    assert_equal inflow_category, transfer.inflow_transaction.category_id
+  end
+
+  test "failed reclassification rolls back both legs even inside an outer transaction" do
+    transfer = transfers(:one)
+    transfer.outflow_transaction.update_column(:kind, "standard")
+    transfer.inflow_transaction.expects(:update!).raises(ActiveRecord::RecordInvalid.new(transfer.inflow_transaction))
+
+    assert_raises(ActiveRecord::RecordInvalid) { transfer.reclassify_transactions! }
+
+    assert_equal "standard", transfer.outflow_transaction.reload.kind
+  end
 end

@@ -99,7 +99,7 @@ module Accountable
         if account.currency == family.currency
           account.balance
         else
-          account.balance * (rates[account.currency] || 1)
+          account.balance * rates[account.currency]
         end
       }
     end

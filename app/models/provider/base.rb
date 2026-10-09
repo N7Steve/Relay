@@ -1,22 +1,6 @@
-# Base class for all provider adapters
-# Provides common interface for working with different third-party data providers
-#
-# To create a new provider adapter:
-# 1. Inherit from Provider::Base
-# 2. Implement #provider_name
-# 3. Include optional modules (Provider::Syncable, Provider::InstitutionMetadata)
-# 4. Register with Provider::Factory in the class body
-#
-# Example:
-#   class Provider::AcmeAdapter < Provider::Base
-#     Provider::Factory.register("AcmeAccount", self)
-#     include Provider::Syncable
-#     include Provider::InstitutionMetadata
-#
-#     def provider_name
-#       "acme"
-#     end
-#   end
+# Financial normalization interface used by Enable Banking.
+# Provider::Factory resolves the supported adapter explicitly; loading a file
+# does not register a new connector. Historical metadata readers are independent.
 class Provider::Base
   attr_reader :provider_account, :account
 
@@ -26,7 +10,7 @@ class Provider::Base
   end
 
   # Provider identification - must be implemented by subclasses
-  # @return [String] The provider name (e.g., "plaid", "simplefin")
+  # @return [String] The provider name ("enable_banking")
   def provider_name
     raise NotImplementedError, "#{self.class} must implement #provider_name"
   end

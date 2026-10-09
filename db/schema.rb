@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -97,6 +97,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_180000) do
   end
 
   create_table "accounts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "financial_treatment"
     t.integer "account_providers_count", default: 0, null: false
     t.uuid "accountable_id"
     t.string "accountable_type"
@@ -428,6 +429,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_180000) do
   end
 
   create_table "entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "import_protected"
     t.uuid "account_id", null: false
     t.decimal "amount", precision: 19, scale: 4, null: false
     t.datetime "created_at", null: false
@@ -916,6 +918,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_180000) do
   end
 
   create_table "investments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "tax_treatment"
+    t.string "tracking_mode"
     t.datetime "created_at", null: false
     t.jsonb "locked_attributes", default: {}
     t.string "subtype"
@@ -1381,6 +1385,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_180000) do
   end
 
   create_table "transactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "posting_status"
     t.uuid "category_id"
     t.datetime "created_at", null: false
     t.string "external_id"

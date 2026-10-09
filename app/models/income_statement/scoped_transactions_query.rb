@@ -21,7 +21,19 @@ module IncomeStatement::ScopedTransactionsQuery
     # rate. Contribution/loan-payment outflows are flipped positive so they
     # add to expense totals.
     def converted_amount_sql(t)
-      "CASE WHEN #{t}.kind IN ('transfer_to_excluded', 'investment_contribution', 'loan_payment') THEN ABS(ae.amount * COALESCE(er.rate, 1)) ELSE ae.amount * COALESCE(er.rate, 1) END"
+      rate = FinancialConversion.rate_sql(currency: "ae.currency")
+      "CASE WHEN #{t}.kind IN ('transfer_to_excluded', 'investment_contribution', 'loan_payment') THEN ABS(ae.amount * (#{rate})) ELSE ae.amount * (#{rate}) END"
+    end
+
+    # Keep detection in the same query and account scope as the amounts. A
+    # missing foreign rate must block the result, not produce a partial total.
+    # Currency and ISO date travel together so the reported pair is accurate.
+    def missing_rate_sql
+      FinancialConversion.missing_sql(currency: "ae.currency", date: "ae.date")
+    end
+
+    def validate_conversion_data!(rows)
+      FinancialConversion.validate!(rows, to: @family.currency)
     end
 
     def entries_join_sql(t)
@@ -53,8 +65,8 @@ module IncomeStatement::ScopedTransactionsQuery
       SQL
     end
 
-    def budget_excluded_kinds_sql
-      @budget_excluded_kinds_sql ||= Transaction::BUDGET_EXCLUDED_KINDS.map { |k| "'#{k}'" }.join(", ")
+    def budget_inclusion_sql(t)
+      Transaction.budget_inclusion_sql(t)
     end
 
     def pending_providers_sql(t = "t")

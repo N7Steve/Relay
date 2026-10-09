@@ -9,6 +9,7 @@ class InvestmentStatement::Totals
     return empty_result if @account_ids.empty?
 
     result = ActiveRecord::Base.connection.select_one(query_sql)
+    FinancialConversion.validate!([ result ], to: @family.currency)
 
     {
       contributions: result["contributions"]&.to_d || 0,
@@ -40,7 +41,7 @@ class InvestmentStatement::Totals
     # Aggregate trades by direction (buy vs sell)
     # Buys (qty > 0) = contributions (cash going out to buy securities)
     # Sells (qty < 0) = withdrawals (cash coming in from selling securities)
-    # Missing FX rates preserve InvestmentStatement's existing 1:1 fallback.
+    # Missing foreign rates block the whole aggregate.
     #
     # account_ids is already scoped to the family's visible (draft/active)
     # investment accounts, so the query trusts that input and skips a join back
@@ -48,8 +49,9 @@ class InvestmentStatement::Totals
     def aggregation_sql
       <<~SQL
         SELECT
-          COALESCE(SUM(CASE WHEN trades.qty > 0 THEN ABS(entries.amount * COALESCE(er.rate, 1)) ELSE 0 END), 0) as contributions,
-          COALESCE(SUM(CASE WHEN trades.qty < 0 THEN ABS(entries.amount * COALESCE(er.rate, 1)) ELSE 0 END), 0) as withdrawals,
+          COALESCE(SUM(CASE WHEN trades.qty > 0 THEN ABS(entries.amount * (#{FinancialConversion.rate_sql(currency: 'entries.currency')})) ELSE 0 END), 0) as contributions,
+          COALESCE(SUM(CASE WHEN trades.qty < 0 THEN ABS(entries.amount * (#{FinancialConversion.rate_sql(currency: 'entries.currency')})) ELSE 0 END), 0) as withdrawals,
+          #{FinancialConversion.missing_sql(currency: 'entries.currency', date: 'entries.date', condition: 'trades.qty != 0')} AS missing_rate,
           COUNT(trades.id) as trades_count
         FROM entries
         JOIN trades ON trades.id = entries.entryable_id AND entries.entryable_type = 'Trade'

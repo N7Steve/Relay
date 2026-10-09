@@ -1,5 +1,5 @@
 class InvestmentsController < ApplicationController
   include AccountableResource
 
-  permitted_accountable_attributes :id, :subtype
+  permitted_accountable_attributes :id, :subtype, :tax_treatment, :tracking_mode
 end

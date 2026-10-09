@@ -55,7 +55,8 @@ class ScheduledPayment::Forecast
 
   def ignored_one_time_count
     @ignored_one_time_count ||= historical_scope
-      .where(date: completed_periods.first.begin..completed_periods.last.end, transactions: { kind: "one_time" }).count
+      .where(date: completed_periods.first.begin..completed_periods.last.end)
+      .merge(Transaction.exceptional_for_forecast).count
   end
 
   def ending_balance(scenario)
@@ -89,17 +90,13 @@ class ScheduledPayment::Forecast
     end
 
     def eligible_historical_entries
-      linked_ids = ScheduledPaymentEntry.where.not(entry_id: nil).select(:entry_id)
-      historical_scope.where.not(id: linked_ids)
-        .where.not(transactions: { kind: Transaction::TRANSFER_KINDS + [ "one_time" ] })
+      historical_scope
+        .where.not(transactions: { kind: Transaction::TRANSFER_KINDS })
+        .merge(Transaction.non_exceptional_for_forecast)
     end
 
     def historical_scope
-      @historical_scope ||= account.entries
-        .where(entryable_type: "Transaction", excluded: false)
-        .excluding_pending
-        .excluding_split_parents
-        .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id")
+      @historical_scope ||= account.entries.eligible_for_forecast_history
     end
 
     def historical_monthly_changes
@@ -111,7 +108,7 @@ class ScheduledPayment::Forecast
         applicable = first_activity ? periods.drop_while { |period| period.end < first_activity } : []
 
         applicable.map do |period|
-          -entries.select { |entry| period.cover?(entry.date) }.sum(&:amount)
+          -entries.select { |entry| period.cover?(entry.date) }.sum { |entry| historical_amount(entry) }
         end
       end
     end
@@ -125,24 +122,22 @@ class ScheduledPayment::Forecast
         ).to_a.reject { |entry| explained_by_schedule?(entry) }
         first_activity = historical_scope.where(date: periods.first.begin..periods.last.end).minimum(:date)
         observed = first_activity ? periods.drop_while { |period| period.end < first_activity } : []
-        observed.empty? ? 0.to_d : -entries.sum(&:amount) / BigDecimal(observed.size.to_s)
+        observed.empty? ? 0.to_d : -entries.sum { |entry| historical_amount(entry) } / BigDecimal(observed.size.to_s)
       end
     end
 
     def explained_by_schedule?(entry)
-      matching_payments.any? do |payment|
-        next false unless payment.title.to_s.squish.casecmp?(entry.name.to_s.squish)
-        next false unless payment.expense? == entry.amount.positive?
-
-        tolerance = payment.amount_estimated? ? BigDecimal("0.35") : BigDecimal("0.10")
-        amount_matches = (entry.amount.abs - payment.amount).abs <= payment.amount * tolerance
-        amount_matches && payment.occurrences_in((entry.date - 5.days)..(entry.date + 5.days)).any?
-      end
+      schedule_explanation.explains?(entry)
     end
 
-    def matching_payments
-      @matching_payments ||= family.scheduled_payments.accessible_by(user)
-        .where(account_id: account.id, payment_type: %w[expense income]).to_a
+    def historical_amount(entry)
+      entry.amount_money.exchange_to(account.currency, date: entry.date).amount
+    end
+
+    def schedule_explanation
+      @schedule_explanation ||= ScheduledPayment::HistoryExplanation.new(
+        payments: family.scheduled_payments.accessible_by(user).to_a
+      )
     end
 
     def central_monthly_change

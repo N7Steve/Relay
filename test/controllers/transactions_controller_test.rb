@@ -9,6 +9,15 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     @entry = entries(:transaction)
   end
 
+  test "legacy exceptional movement displays its effective forecast behavior" do
+    @entry.entryable.update_columns(kind: "one_time", forecast_behavior: "normal")
+
+    get transaction_url(@entry)
+
+    assert_response :success
+    assert_select "select[name='entry[entryable_attributes][forecast_behavior]'] option[selected][value='exceptional_once']", 1
+  end
+
   test "index caches uncategorized_count across requests" do
     # Test environment uses null_store; swap in a memory store so the cache
     # actually persists between the two requests below.

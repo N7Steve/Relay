@@ -4,6 +4,7 @@ en:
     create:
       success: Transfer created
     new:
+      review_candidates: Several movements could match. Review the account, date and original amount before confirming a pair.
       header:
         title: Match transfer or payment
         subtitle: Match the corresponding transaction in another account or create one if it doesn't exist.

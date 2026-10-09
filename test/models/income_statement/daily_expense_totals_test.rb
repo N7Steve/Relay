@@ -59,12 +59,15 @@ class IncomeStatement::DailyExpenseTotalsTest < ActiveSupport::TestCase
     assert_equal 200, daily_series.first.total
   end
 
-  test "falls back to no conversion when the day's rate is missing" do
+  test "blocks the series when the day's foreign rate is missing" do
     eur_account = @family.accounts.create! name: "EUR Checking", currency: "EUR", balance: 1000, accountable: Depository.new
 
     create_transaction(account: eur_account, amount: 100, currency: "EUR", date: Date.current)
 
-    assert_equal 100, daily_series.first.total
+    error = assert_raises(Money::ConversionError) { daily_series }
+    assert_equal "EUR", error.from_currency
+    assert_equal @family.currency, error.to_currency
+    assert_equal Date.current, error.date
   end
 
   test "returns days in chronological order" do

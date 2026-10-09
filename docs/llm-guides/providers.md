@@ -65,6 +65,13 @@ as a partial response, and reconciles pending-to-booked records without losing
 protected user edits. Keep its namespaced metadata and settlement tests.
 Retired connector environment flags no longer influence this preference.
 
+Canonical `posting_status` is normalized on validated writes without removing
+source metadata. NULL rows use every retained historical pending namespace;
+scopes, searches and settlement lookups agree. `Entry.import_protected` governs
+independent import protection; analytical `excluded` is no longer its source for
+new records. Historical NULL protection retains the previous promise until an
+explicit unlock. Split structure, field locks and importer priorities remain.
+
 `Transaction#extra`, pending scopes, FX metadata, transaction-name rule matching
 and import reconciliation still read historical namespaces. Preserve those local
 readers: removing a transport does not authorize changing existing amounts,
@@ -82,13 +89,15 @@ for reading this persisted convention.
 
 ## Historical persistence and queued work
 
-Retired Item/Account classes retain encryption, associations and attachment
-declarations. They do not include Syncable, perform imports, register adapters
-or contact upstream services on destruction. Serialized connector jobs are
-compatibility consumers that cancel without side effects; shared queues are
-never purged. `DestroyJob` preserves retired records. Explicit financial reset
-remains a separately confirmed operation, with family-scoped historical data.
+Phase 10 removed retired Item/Account classes and exclusive tables after their
+persistence disposition was approved. Historical backup compatibility now lives
+in `Family::Backup::DiscardPolicy` and its restoration translations, preserving
+supported financial observations, holdings and performance history before
+discarding retired records. Do not remove those translations or historical
+transaction metadata readers when simplifying the runtime factory.
 
-Do not delete those classes, tables, original attachments, migration translation
-data or historical migrations until the later persistence disposition is approved
-and its backup compatibility has been validated.
+`Provider::Factory` resolves only Enable Banking explicitly; new files cannot
+register additional providers. Serialized retired connector jobs remain
+compatibility consumers that finish without connector effects; shared queues
+are never purged. See the phase 10 record and the complete backup guide for the
+current persistence contract.

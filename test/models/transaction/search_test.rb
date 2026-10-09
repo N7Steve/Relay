@@ -410,7 +410,7 @@ class Transaction::SearchTest < ActiveSupport::TestCase
     assert_equal Money.new(0, "USD"), totals.income_money
   end
 
-  test "totals handles missing exchange rates gracefully" do
+  test "totals identifies missing exchange rates instead of converting at parity" do
     # Create EUR transaction without exchange rate
     eur_entry = create_transaction(
       account: @checking_account,
@@ -420,12 +420,10 @@ class Transaction::SearchTest < ActiveSupport::TestCase
     )
 
     search = Transaction::Search.new(@family)
-    totals = search.totals
-
-    assert_equal 1, totals.count
-    # Should use rate of 1 when exchange rate is missing
-    assert_equal Money.new(100, "USD"), totals.expense_money # EUR 100 * 1
-    assert_equal Money.new(0, "USD"), totals.income_money
+    error = assert_raises(Money::ConversionError) { search.totals }
+    assert_equal "EUR", error.from_currency
+    assert_equal "USD", error.to_currency
+    assert_equal eur_entry.date, error.date
   end
 
   test "totals respects category filters" do

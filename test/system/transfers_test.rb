@@ -53,6 +53,13 @@ class TransfersTest < ApplicationSystemTestCase
       date: Date.current,
       rate: 0.92
     )
+    # The transaction list also converts the EUR leg to the family's USD.
+    ExchangeRate.create!(
+      from_currency: "EUR",
+      to_currency: "USD",
+      date: Date.current,
+      rate: 1 / BigDecimal("0.92")
+    )
 
     transfer_date = Date.current
 

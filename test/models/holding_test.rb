@@ -57,6 +57,9 @@ class HoldingTest < ActiveSupport::TestCase
   end
 
   test "calculates average cost basis from another currency" do
+    [ 1.day.ago.to_date, Date.current ].each do |date|
+      ExchangeRate.find_or_create_by!(from_currency: "CAD", to_currency: "USD", date: date) { |rate| rate.rate = 1 }
+    end
     create_trade(@amzn.security, account: @account, qty: 10, price: 212.00, date: 1.day.ago.to_date, currency: "CAD")
     create_trade(@amzn.security, account: @account, qty: 15, price: 216.00, date: Date.current, currency: "CAD")
 

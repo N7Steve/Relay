@@ -39,6 +39,43 @@ class Family::BackupTest < ActiveSupport::TestCase
     assert_equal "Already paid", restored.scheduled_payment_entries.find_by!(status: "rejected").rejection_reason
   end
 
+  test "round trips paired transfers and fee parent references without changing stored fields" do
+    outflow = transaction(@account, "Portable transfer", 100)
+    inflow = transaction(@destination, "Portable transfer", -100)
+    transfer = Transfer.create!(outflow_transaction: outflow.entryable, inflow_transaction: inflow.entryable, status: "confirmed")
+    fee = transaction(@account, "Portable fee", 5)
+    transfer.fee_transactions << fee.entryable
+
+    restore!
+
+    restored_outflow = @target.entries.find_by!(name: "Portable transfer", amount: 100).entryable
+    restored_fee = @target.entries.find_by!(name: "Portable fee").entryable
+    restored_transfer = restored_outflow.paired_transfer
+    assert_equal restored_transfer, restored_fee.fee_transfer
+    assert_equal restored_transfer.id, restored_fee.attributes["transfer_id"]
+    assert_nil restored_fee.paired_transfer
+    assert_equal [ restored_fee.id ], restored_transfer.fee_transactions.pluck(:id)
+    assert_equal BigDecimal("-100"), restored_transfer.inflow_transaction.entry.amount
+  end
+
+  test "restores legacy and independent exceptional behavior without changing backup attributes" do
+    legacy = transaction(@account, "Legacy exceptional", 200)
+    legacy.entryable.update_columns(kind: "one_time", forecast_behavior: "normal")
+    modern = transaction(@account, "Independent exceptional", 300)
+    modern.entryable.update!(forecast_behavior: "exceptional_once")
+
+    restore!
+
+    restored_legacy = @target.entries.find_by!(name: legacy.name).entryable
+    restored_modern = @target.entries.find_by!(name: modern.name).entryable
+    assert_equal "one_time", restored_legacy.kind
+    assert_equal "normal", restored_legacy.forecast_behavior
+    assert_predicate restored_legacy, :exceptional_for_forecast?
+    assert_equal "standard", restored_modern.kind
+    assert_equal "exceptional_once", restored_modern.forecast_behavior
+    assert_not @target.transactions.budget_reportable.exists?(id: [ restored_legacy.id, restored_modern.id ])
+  end
+
   test "round trips custom account and provider merchant icons, receipts and documents as bytes" do
     entry = transaction(@account, "Receipt", 20)
     provider = ProviderMerchant.create!(name: "Portable provider", source: "plaid")
@@ -353,6 +390,32 @@ class Family::BackupTest < ActiveSupport::TestCase
       assert_raises(Family::Backup::InvalidBackupError) { import.import! }
     end
     assert_equal "failed", import.reload.verification_status
+  end
+
+  test "version one backups preserve excluded protection" do
+    entry = transaction(@account, "Legacy protected", 123)
+    entry.update!(excluded: true, import_protected: false)
+    content = rewrite_backup do |rows|
+      rows.first["data"]["version"] = 1
+      rows.each do |row|
+        next unless row.dig("data", "model") == "Entry"
+        row["data"]["attributes"].delete("import_protected")
+      end
+    end
+    Family::DataImporter.new(@target, content).import!
+    restored = @target.entries.find_by!(name: entry.name)
+    assert restored.import_protected?
+    restored.update!(excluded: false)
+    assert restored.protected_from_sync?
+  end
+
+  test "version two backups preserve an excluded movement explicitly unlocked for import" do
+    entry = transaction(@account, "Modern unlocked", 123)
+    entry.update!(excluded: true, import_protected: false)
+    restore!
+    modern = @target.entries.find_by!(name: "Modern unlocked")
+    assert modern.excluded?
+    assert_not modern.protected_from_sync?
   end
 
   private

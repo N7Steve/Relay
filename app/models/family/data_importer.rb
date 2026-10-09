@@ -595,7 +595,7 @@ class Family::DataImporter
           category_id: new_category_id,
           merchant_id: new_merchant_id,
           kind: data["kind"] || "standard",
-          forecast_behavior: data["forecast_behavior"] || (data["kind"] == "one_time" ? "exceptional_once" : "normal")
+          forecast_behavior: Transaction.forecast_behavior_for_import(kind: data["kind"], behavior: data["forecast_behavior"])
         )
 
         entry ||= Entry.new(entryable: transaction)
@@ -606,7 +606,8 @@ class Family::DataImporter
           name: data["name"] || "Imported transaction",
           currency: data["currency"] || account.currency,
           notes: data["notes"],
-          excluded: data["excluded"] || false
+          excluded: data["excluded"] || false,
+          import_protected: data.fetch("import_protected", data["excluded"] || false)
         )
         if @import_session
           entry.external_id = session_entry_external_id("Transaction", old_id)
@@ -660,6 +661,7 @@ class Family::DataImporter
           merchant_id_provided: row.key?("merchant_id"),
           notes: row["notes"],
           excluded: boolean_import_value(row, "excluded", default: false),
+          import_protected: boolean_import_value(row, "import_protected", default: boolean_import_value(row, "excluded", default: false)),
           tag_ids: mapped_tag_ids(row["tag_ids"], record_type: "Transaction"),
           tag_ids_provided: row.key?("tag_ids"),
           kind: row["kind"],
@@ -675,7 +677,8 @@ class Family::DataImporter
             name: row[:name],
             amount: row[:amount],
             category_id: row[:category_id],
-            excluded: row[:excluded]
+            excluded: row[:excluded],
+            import_protected: row[:import_protected]
           }
         end
       )
@@ -685,7 +688,10 @@ class Family::DataImporter
         transaction.update!(
           merchant_id: row[:merchant_id_provided] ? row[:merchant_id] : transaction.merchant_id,
           kind: row[:kind].presence || transaction.kind,
-          forecast_behavior: row[:forecast_behavior].presence || transaction.forecast_behavior
+          forecast_behavior: Transaction.forecast_behavior_for_import(
+            kind: row[:kind].presence || transaction.kind,
+            behavior: row[:forecast_behavior].presence || transaction.forecast_behavior
+          )
         )
         child_entry.update!(notes: row[:notes]) if row[:notes].present?
 

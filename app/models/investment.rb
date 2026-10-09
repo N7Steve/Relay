@@ -2,7 +2,12 @@ class Investment < ApplicationRecord
   MANAGED_PORTFOLIO_SUBTYPES = %w[roboadvisor managed_fund].freeze
   include Accountable
 
-  after_update :migrate_trades_to_transactions, if: :subtype_migrated_to_generic?
+  NEW_ACCOUNT_SUBTYPES = %w[brokerage roboadvisor pension other].freeze
+  TAX_TREATMENTS = %w[taxable tax_deferred tax_exempt tax_advantaged].freeze
+  TRACKING_MODES = %w[positions managed].freeze
+  normalizes :tracking_mode, with: ->(value) { value.presence }
+  validates :tax_treatment, inclusion: { in: TAX_TREATMENTS.map(&:to_sym) }
+  validates :tracking_mode, inclusion: { in: TRACKING_MODES }, allow_nil: true
 
   # Tax treatment categories:
   # - taxable: Gains taxed when realized
@@ -101,7 +106,7 @@ class Investment < ApplicationRecord
   }.freeze
 
   def tax_treatment
-    SUBTYPES.dig(subtype, :tax_treatment) || :taxable
+    self[:tax_treatment]&.to_sym || SUBTYPES.dig(subtype, :tax_treatment) || :taxable
   end
 
   class << self
@@ -134,7 +139,14 @@ class Investment < ApplicationRecord
 
     # Returns subtypes grouped by region for use with grouped_options_for_select
     # Optionally accepts currency to prioritize user's region first
-    def subtypes_grouped_for_select(currency: nil)
+    def subtypes_grouped_for_select(currency: nil, current_subtype: nil)
+      keys = NEW_ACCOUNT_SUBTYPES.dup
+      keys << current_subtype if current_subtype.present? && !keys.include?(current_subtype)
+      [ [ region_label_for(nil), keys.map { |key| [ long_subtype_label_for(key) || key, key ] } ] ]
+    end
+
+    # Historical catalogue remains available for import mapping and compatibility.
+    def legacy_subtypes_grouped_for_select(currency: nil)
       user_region = CURRENCY_REGION_MAP[currency]
       grouped = SUBTYPES.group_by { |_, v| v[:region] }
 
@@ -152,33 +164,4 @@ class Investment < ApplicationRecord
       end
     end
   end
-
-  private
-
-    def subtype_migrated_to_generic?
-      saved_change_to_subtype? && MANAGED_PORTFOLIO_SUBTYPES.include?(subtype)
-    end
-
-    def migrate_trades_to_transactions
-      # `account` returns the Account model because of the polymorphic has_one
-      return unless account
-
-      account.entries.where(entryable_type: "Trade").find_each do |entry|
-        trade = entry.entryable
-
-        Transaction.transaction do
-          # Create an equivalent Transaction, taking any useful categorization labels available
-          transaction = Transaction.create!(
-            category_id: trade.category_id,
-            investment_activity_label: trade.investment_activity_label
-          )
-
-          # Repoint the common Entry to the generic new Transaction
-          entry.update!(entryable: transaction)
-
-          # Purge the now defunct trade metrics (ticker, price, quantity)
-          trade.destroy!
-        end
-      end
-    end
 end

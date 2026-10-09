@@ -414,7 +414,8 @@ class Family < ApplicationRecord
 
       investment_ids = accounts
         .joins("INNER JOIN investments ON investments.id = accounts.accountable_id AND accounts.accountable_type = 'Investment'")
-        .where(investments: { subtype: tax_advantaged_subtypes })
+        .where("investments.tax_treatment IN (:treatments) OR (investments.tax_treatment IS NULL AND investments.subtype IN (:subtypes))",
+          treatments: %w[tax_deferred tax_exempt tax_advantaged], subtypes: tax_advantaged_subtypes)
         .pluck(:id)
 
       # Crypto accounts have an explicit tax_treatment column

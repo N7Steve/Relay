@@ -23,7 +23,7 @@ class Entry < ApplicationRecord
   has_one :scheduled_payment_entry, foreign_key: :entry_id, class_name: "ScheduledPaymentEntry"
   has_one :transfer_scheduled_payment_entry, foreign_key: :transfer_entry_id, class_name: "ScheduledPaymentEntry"
 
-  delegated_type :entryable, types: Entryable::TYPES, dependent: :destroy
+  delegated_type :entryable, types: Entryable::TYPES, inverse_of: :entry, dependent: :destroy
   accepts_nested_attributes_for :entryable
 
   validates :date, :name, :amount, :currency, presence: true
@@ -33,6 +33,7 @@ class Entry < ApplicationRecord
 
   validate :cannot_unexclude_split_parent
   validate :split_child_date_matches_parent
+  before_validation :preserve_legacy_import_protection
 
   before_destroy :prevent_individual_child_deletion, if: :split_child?
   before_destroy :prevent_deletion_if_scheduled_payment_linked
@@ -76,9 +77,8 @@ class Entry < ApplicationRecord
   # Pending transaction scopes - check Transaction.extra for provider pending flags
   # Works with any provider that stores pending status in extra["provider_name"]["pending"]
   scope :pending, -> {
-    conditions = Transaction::PENDING_PROVIDERS.map { |p| "(transactions.extra -> '#{p}' ->> 'pending')::boolean = true" }
     joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
-      .where(conditions.join(" OR "))
+      .where(Transaction.pending_sql("transactions"))
   }
 
   scope :excluding_pending, -> {
@@ -89,7 +89,7 @@ class Entry < ApplicationRecord
       OR NOT EXISTS (
         SELECT 1 FROM transactions t
         WHERE t.id = entries.entryable_id
-        AND (#{Transaction::PENDING_CHECK_SQL})
+        AND (#{Transaction::CANONICAL_PENDING_CHECK_SQL})
       )
     SQL
   }
@@ -100,6 +100,18 @@ class Entry < ApplicationRecord
         SELECT 1 FROM entries ce WHERE ce.parent_entry_id = entries.id
       )
     SQL
+  }
+
+  # Exclusion from analytics does not erase a movement from the account balance.
+  # Callers retain responsibility for account access and date/currency scoping.
+  scope :eligible_for_balance, -> { excluding_pending.excluding_split_parents }
+
+  # Common input to account and wealth forecasts. Each forecast still applies
+  # its own transfer, Agenda and statistical behavior rules to this history.
+  scope :eligible_for_forecast_history, -> {
+    eligible_for_balance
+      .where(entryable_type: "Transaction", excluded: false)
+      .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id")
   }
 
   # Find stale pending transactions (pending for more than X days with no matching posted version)
@@ -360,7 +372,11 @@ class Entry < ApplicationRecord
   #
   # @return [Boolean] true if entry should be skipped during provider sync
   def protected_from_sync?
-    excluded? || user_modified? || import_locked?
+    protected_by_import_policy? || user_modified? || import_locked? || split_child?
+  end
+
+  def protected_by_import_policy?
+    import_protected.nil? ? excluded? : import_protected?
   end
 
   # Bulk-marks the entries of the given transactions as user-modified so a
@@ -397,11 +413,12 @@ class Entry < ApplicationRecord
   end
 
   # Returns the reason this entry is protected from sync, or nil if not protected.
-  # Priority: excluded > user_modified > import_locked
+  # Structural split protection > independent import policy > manual edits/import locks.
   #
-  # @return [Symbol, nil] :excluded, :user_modified, :import_locked, or nil
+  # @return [Symbol, nil] :split, :import_protected, :user_modified, :import_locked, or nil
   def protection_reason
-    return :excluded if excluded?
+    return :split if split_parent? || split_child?
+    return :import_protected if protected_by_import_policy?
     return :user_modified if user_modified?
     return :import_locked if import_locked?
     nil
@@ -435,7 +452,7 @@ class Entry < ApplicationRecord
   # @return [void]
   def unlock_for_sync!
     self.class.transaction do
-      update!(user_modified: false, import_locked: false, locked_attributes: {})
+      update!(import_protected: false, user_modified: false, import_locked: false, locked_attributes: {})
       entryable&.update!(locked_attributes: {})
     end
   end
@@ -471,7 +488,8 @@ class Entry < ApplicationRecord
         child_transaction = Transaction.new(
           category_id: split_attrs[:category_id],
           merchant_id: entryable.try(:merchant_id),
-          kind: entryable.try(:kind)
+          kind: entryable.try(:kind),
+          forecast_behavior: Transaction.forecast_behavior_for_import(kind: entryable.try(:kind), behavior: entryable.try(:forecast_behavior))
         )
 
         child_entries.create!(
@@ -483,6 +501,7 @@ class Entry < ApplicationRecord
           notes: split_attrs[:notes],
           import: import,
           import_locked: import_locked,
+          import_protected: split_attrs.fetch(:import_protected, protected_by_import_policy?),
           excluded: TRUTHY_VALUES.include?(split_attrs[:excluded]),
           entryable: child_transaction
         )
@@ -583,6 +602,12 @@ class Entry < ApplicationRecord
   end
 
   private
+    def preserve_legacy_import_protection
+      return unless import_protected.nil?
+
+      self.import_protected = persisted? ? excluded_in_database : false
+    end
+
 
     def cannot_unexclude_split_parent
       return unless excluded_changed?(from: true, to: false) && split_parent?

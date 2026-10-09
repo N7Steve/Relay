@@ -134,6 +134,7 @@ class BalanceSheet::NetWorthBreakdownSeriesBuilder
       shares_version = user ? AccountShare.where(user: user).maximum(:updated_at)&.to_i : nil
       key = [
         "balance_sheet_net_worth_breakdown_series",
+        "strict_fx_v1", family.currency, ExchangeRate.maximum(:updated_at)&.to_f, ExchangeRate.count,
         CACHE_VERSION,
         user&.id,
         shares_version,

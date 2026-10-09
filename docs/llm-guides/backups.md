@@ -6,6 +6,14 @@ other ZIP entries. CSVs and the previous NDJSON records remain available for
 interchange. Older exports still use the legacy importer; they cannot recover
 data or files that their exporter never included.
 
+The relational snapshot inside export version 3 now has snapshot version 2.
+It preserves independent import protection, investment tax/tracking attributes,
+canonical posting status and account financial treatment. Snapshot version 1 is
+still accepted: excluded entries retain their former import protection during
+translation, after checksum verification. Version 2 preserves explicit unlocks
+even when a movement remains analytically excluded. Legacy NDJSON retains
+original exceptional behavior and translates its historical exclusion protection.
+
 The snapshot covers accounts and all accountable details and addresses; account
 ownership and sharing; entries, splits, transfers and rejected matches; locked
 attributes, provider metadata, reconciliation and import history; balances,

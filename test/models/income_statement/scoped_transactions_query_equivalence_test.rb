@@ -1,7 +1,7 @@
 require "test_helper"
 
 # Proves the IncomeStatement::ScopedTransactionsQuery refactor preserves
-# behavior: each refactored query class must return exactly what its
+# behavior for reportable rows with known rates: each query returns what its
 # pre-refactor implementation returned. The legacy implementations are
 # verbatim copies from main (test/support/legacy_income_statement_*.rb), and
 # each test runs both over the same data across the class's full option
@@ -40,7 +40,10 @@ class IncomeStatement::ScopedTransactionsQueryEquivalenceTest < ActiveSupport::T
 
     ExchangeRate.create! from_currency: "EUR", to_currency: "USD", date: 5.days.ago.to_date, rate: 2
     create_transaction(account: @eur, amount: 40, currency: "EUR", date: 5.days.ago.to_date)
-    create_transaction(account: @eur, amount: 10, currency: "EUR", date: 10.days.ago.to_date) # no rate row, falls back to 1
+    # Missing FX now fails explicitly (covered by ConversionPolicyTest); this
+    # equivalence suite compares the unchanged behavior for known conversions.
+    ExchangeRate.create! from_currency: "EUR", to_currency: "USD", date: 10.days.ago.to_date, rate: 2
+    create_transaction(account: @eur, amount: 10, currency: "EUR", date: 10.days.ago.to_date)
 
     create_transaction(account: @retirement, amount: 300, date: 5.days.ago.to_date) # tax-advantaged, excluded
     create_transaction(account: @unreported, amount: 45, date: 5.days.ago.to_date) # exclude_from_reports, excluded

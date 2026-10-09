@@ -3,7 +3,12 @@ class TransferMatchesController < ApplicationController
 
   def new
     @accounts = Current.family.accounts.writable_by(Current.user).sidebar_visible.alphabetically.where.not(id: @entry.account_id)
-    @transfer_match_candidates = @entry.transaction.transfer_match_candidates
+    writable_ids = @accounts.pluck(:id)
+    @transfer_match_candidates = @entry.transaction.transfer_match_candidates.select do |candidate|
+      other_account = @entry.amount.positive? ? candidate.inflow_transaction.entry.account_id : candidate.outflow_transaction.entry.account_id
+      writable_ids.include?(other_account)
+    end
+    @multiple_candidates = @transfer_match_candidates.many?
   end
 
   def create
@@ -16,21 +21,18 @@ class TransferMatchesController < ApplicationController
     Transfer.transaction do
       @transfer.save!
 
-      # Use BOTH accounts for kind logic
+      # Keep investment category assignment separate from kind classification.
       source_account = @transfer.outflow_transaction.entry.account
       destination_account = @transfer.inflow_transaction.entry.account
       outflow_kind = Transfer.outflow_kind_for(source_account, destination_account)
-      inflow_kind = Transfer.inflow_kind_for(source_account, destination_account)
-
-      outflow_attrs = { kind: outflow_kind }
+      @transfer.reclassify_transactions!
 
       if outflow_kind == "investment_contribution"
         category = destination_account.family.investment_contributions_category
-        outflow_attrs[:category] = category if category.present? && @transfer.outflow_transaction.category_id.blank?
+        if category.present? && @transfer.outflow_transaction.category_id.blank?
+          @transfer.outflow_transaction.update!(category: category)
+        end
       end
-
-      @transfer.outflow_transaction.update!(outflow_attrs)
-      @transfer.inflow_transaction.update!(kind: inflow_kind)
     end
 
     @transfer.sync_account_later

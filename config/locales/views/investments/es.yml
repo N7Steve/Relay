@@ -4,6 +4,17 @@ es:
     edit:
       edit: Editar %{account}
     form:
+      tax_treatment: Tratamiento fiscal
+      tracking_mode: Seguimiento de la cartera
+      keep_tracking: Conservar seguimiento actual
+      tax_treatments:
+        taxable: Sujeto a impuestos
+        tax_deferred: Impuestos diferidos
+        tax_exempt: Exento
+        tax_advantaged: Otras ventajas fiscales
+      tracking_modes:
+        positions: Posiciones y operaciones
+        managed: Valor de cartera gestionada
       none: Ninguno
       subtype_prompt: Selecciona el tipo de inversión
     new:

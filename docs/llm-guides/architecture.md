@@ -88,9 +88,42 @@ four-day match.
 The destination determines the outflow's kind: loan payment, credit-card payment,
 investment contribution or ordinary funds movement. In [Transaction's budget
 classification](../../app/models/transaction.rb), funds movement and credit-card
-payments are excluded, while loan payments and investment contributions count as
+payments and investment contributions are excluded, while loan payments count as
 expenses. Preserve these distinctions rather than treating every transfer as
 excluded from income/expense reporting.
+
+Statistical behavior belongs to `forecast_behavior`, independently of kind.
+Use `Transaction.budget_reportable` (or its shared SQL fragment in aggregate
+queries) for budget eligibility: exceptional movements remain excluded even
+when their kind is standard or a transfer. Historical `one_time` inputs retain
+their meaning through the legacy adapter and backup readers.
+
+See the [financial effects matrix](financial-effects.md) for current balance,
+report and forecast rules. Entry selection for balances and forecast history is
+shared through `eligible_for_balance` and `eligible_for_forecast_history`;
+callers must retain their authorized account scope.
+
+IncomeStatement, transaction search, investment aggregates, cost basis and
+balance/gains series reject missing foreign rates with `Money::ConversionError`
+before returning a converted total. Only same-currency amounts use unity.
+`FinancialConversion` shares SQL rate/detection/validation fragments; do not
+silently restore a parity fallback. CSV exports retain original currency/amount.
+
+Investment creation offers brokerage, managed portfolio, pension and other.
+Historical subtypes remain readable/editable. Tax treatment and tracking mode
+are independent nullable attributes with legacy fallbacks. Changing subtype or
+tracking must never destroy trades, holdings or performance history.
+
+Entry.import_protected is independent of analytical exclusion. NULL retains
+historical exclusion protection until normalized; new exclusions alone do not
+protect a row. Explicit unlock clears import/user/field protections while split
+structure remains protected in the provider adapter. Complete snapshots v2
+preserve these attributes and restore v1 exclusion protection compatibly.
+
+Posting status and account financial treatment have canonical nullable columns;
+validated writes normalize them while historical readers preserve all pending
+namespaces and account flags. See [persistence stages](../migration/financial-domain-stages.md)
+for the prepared additive migration, isolated inventory and deferred integrity.
 
 ## Ingestion and background work
 
@@ -103,6 +136,10 @@ sessions, including CSV mapping and transformations. Enable Banking is the only
 account connector. Phase 10 removes retired connector models and tables,
 including FinanceKit. Existing balances, authoritative holdings and managed
 portfolio performance become local financial data without a retired connection.
+
+`Provider::Factory` resolves Enable Banking explicitly at call time, without file
+discovery, adapter self-registration or a mutable registry. Generators do not
+enable additional connectors.
 
 [Syncable](../../app/models/concerns/syncable.rb) schedules background syncs and
 [Sync](../../app/models/sync.rb) records their state, hierarchy and errors.

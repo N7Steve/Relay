@@ -77,6 +77,15 @@ module Family::AutoTransferMatchable
     end.uniq
     transactions_by_id = Transaction.includes(entry: :account).where(id: transaction_ids).index_by(&:id)
 
+    # A candidate must be the unique best choice for BOTH legs. Never resolve a
+    # tie by database ordering or by consuming a competing candidate first.
+    best_by_leg = candidates_scope.flat_map { |match| [ [ match.inflow_transaction_id, match ], [ match.outflow_transaction_id, match ] ] }
+      .group_by(&:first).transform_values do |pairs|
+        matches = pairs.map(&:last)
+        rank = matches.map { |match| [ match.match_rank.to_i, match.date_diff.to_i ] }.min
+        matches.select { |match| [ match.match_rank.to_i, match.date_diff.to_i ] == rank }
+      end
+
     # Track which transactions we've already matched to avoid duplicates
     used_transaction_ids = Set.new
     investment_category = nil
@@ -84,13 +93,17 @@ module Family::AutoTransferMatchable
 
     Transfer.transaction do
       candidates_scope.each do |match|
+        next unless [ match.inflow_transaction_id, match.outflow_transaction_id ].all? do |id|
+          best_by_leg.fetch(id).one? && best_by_leg.fetch(id).first.equal?(match)
+        end
         next if used_transaction_ids.include?(match.inflow_transaction_id) ||
                used_transaction_ids.include?(match.outflow_transaction_id)
 
         # Skip this candidate when the transfer for this exact pair was not created
         # (a concurrent sync claimed one of the transactions for a different pairing);
         # marking it matched here would leave a transaction matched with no Transfer.
-        next unless find_or_create_transfer!(match)
+        transfer = find_or_create_transfer!(match)
+        next unless transfer
 
         inflow_transaction = transactions_by_id.fetch(match.inflow_transaction_id)
         outflow_transaction = transactions_by_id.fetch(match.outflow_transaction_id)
@@ -98,9 +111,10 @@ module Family::AutoTransferMatchable
         destination_account = inflow_transaction.entry.account
         outflow_kind = Transfer.outflow_kind_for(source_account, destination_account)
 
-        # The kind is determined by both source and destination accounts
-        inflow_transaction.update!(kind: Transfer.inflow_kind_for(source_account, destination_account))
-        outflow_transaction.update!(kind: outflow_kind)
+        # Reuse the already loaded legs while classifying the persisted pair.
+        transfer.inflow_transaction = inflow_transaction
+        transfer.outflow_transaction = outflow_transaction
+        transfer.reclassify_transactions!
 
         # Assign Investment Contributions category for transfers to investment accounts
         if outflow_kind == "investment_contribution"

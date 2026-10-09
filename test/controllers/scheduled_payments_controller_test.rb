@@ -212,6 +212,7 @@ class ScheduledPaymentsControllerTest < ActionDispatch::IntegrationTest
       @category.update!(name: "Suscripciones y Digital")
       merchant = @family.merchants.create!(name: "Suno")
       entries = (2..9).map do |month|
+        ExchangeRate.find_or_initialize_by(from_currency: "EUR", to_currency: @family.currency, date: Date.new(2026, month, 6)).update!(rate: 1.1)
         @account.entries.create!(
           id: month == 9 ? "adfc406c-8c75-4b3f-8240-7045d1af486f" : SecureRandom.uuid,
           name: "Suno", date: Date.new(2026, month, 6),

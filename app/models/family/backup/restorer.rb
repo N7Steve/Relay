@@ -20,7 +20,7 @@ class Family::Backup::Restorer
     fail_backup("Missing or duplicate backup manifest") unless manifests.one?
     @manifest = manifests.first.fetch("data")
     fail_backup("Invalid backup manifest") unless @manifest.is_a?(Hash)
-    fail_backup("Unsupported backup version") unless @manifest["version"] == Family::Backup::VERSION
+    fail_backup("Unsupported backup version") unless @manifest["version"].in?([ 1, Family::Backup::VERSION ])
     @records = rows.select { |row| row["type"] == "BackupRecord" }
     @attachments = rows.select { |row| row["type"] == "BackupAttachment" }
     payload = rows.select { |row| row["type"].in?(%w[BackupRecord BackupAttachment]) }.map(&:to_json).join("\n")
@@ -285,6 +285,11 @@ class Family::Backup::Restorer
     def target_attributes(data)
       model = Family::Backup.models.fetch(data["model"])
       attrs = data["attributes"].deep_dup
+      # Snapshots before the independent protection policy protected excluded
+      # records implicitly. Preserve that promise when restoring old snapshots.
+      if data["model"] == "Entry" && @manifest["version"] == 1
+        attrs["import_protected"] = attrs["excluded"] || false
+      end
       attrs.each do |field, value|
         next if field.start_with?("raw_") || field == "sanitized_parser_output"
         if model.columns_hash.fetch(field).type.in?(%i[json jsonb]) || value.is_a?(Array)

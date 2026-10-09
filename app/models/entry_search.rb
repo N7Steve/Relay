@@ -98,7 +98,7 @@ class EntrySearch
         AND EXISTS (
           SELECT 1 FROM transactions t
           WHERE t.id = entries.entryable_id
-          AND (#{Transaction::PENDING_CHECK_SQL})
+          AND (#{Transaction::CANONICAL_PENDING_CHECK_SQL})
         )
       SQL
 
@@ -107,7 +107,7 @@ class EntrySearch
         OR NOT EXISTS (
           SELECT 1 FROM transactions t
           WHERE t.id = entries.entryable_id
-          AND (#{Transaction::PENDING_CHECK_SQL})
+          AND (#{Transaction::CANONICAL_PENDING_CHECK_SQL})
         )
       SQL
 

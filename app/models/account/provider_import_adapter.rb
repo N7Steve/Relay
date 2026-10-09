@@ -4,10 +4,7 @@ class Account::ProviderImportAdapter
   # than spelled out, so a newly supported provider cannot silently drop out of
   # pending→posted reconciliation. Frozen constant built from a frozen provider list:
   # no user input reaches the SQL (same reasoning as Transaction::PENDING_CHECK_SQL).
-  PENDING_LOOKUP_SQL = Transaction::PENDING_PROVIDERS
-    .map { |provider| "(transactions.extra -> '#{provider}' ->> 'pending')::boolean = true" }
-    .join(" OR ")
-    .freeze
+  PENDING_LOOKUP_SQL = Transaction::CANONICAL_PENDING_CHECK_SQL.gsub(/\bt\./, "transactions.").freeze
 
   attr_reader :account, :skipped_entries
 
@@ -1033,7 +1030,8 @@ class Account::ProviderImportAdapter
   # @param entry [Entry] The entry to check
   # @return [String, nil] Skip reason or nil if entry can be synced
   def determine_skip_reason(entry)
-    return "excluded" if entry.excluded?
+    return "split" if entry.split_parent? || entry.split_child?
+    return "import_protected" if entry.protected_by_import_policy?
     return "user_modified" if entry.user_modified?
     return "import_locked" if entry.import_locked?
     nil

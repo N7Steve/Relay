@@ -356,6 +356,11 @@
                 </div>
                 <%= f.toggle :excluded, { data: { auto_submit_form_target: "auto" } } %>
               </div>
+                <%= f.select :import_protected,
+                      [[t("entries.protection.unlocked_policy"), false], [t("entries.protection.protected_policy"), true]],
+                      { label: t("entries.protection.import_policy"), selected: @entry.protected_by_import_policy? },
+                      { disabled: @edit_locked || @split_locked, data: { auto_submit_form_target: "auto" } } %>
+                <p class="text-sm text-secondary"><%= t("entries.protection.independent_policy_description") %></p>
             <% end %>
           </div>
         <% end %>
@@ -400,7 +405,7 @@
                   </div>
                   <%= ef.select :forecast_behavior,
                         Transaction.forecast_behaviors.keys.map { |behavior| [t(".forecast_behaviors.#{behavior}"), behavior] },
-                        {},
+                        { selected: @entry.entryable.effective_forecast_behavior },
                         class: "bg-container border border-secondary rounded-lg text-sm text-primary",
                         data: { auto_submit_form_target: "auto" } %>
                 </div>

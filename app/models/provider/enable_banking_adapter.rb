@@ -2,9 +2,6 @@ class Provider::EnableBankingAdapter < Provider::Base
   include Provider::Syncable
   include Provider::InstitutionMetadata
 
-  # Register this adapter with the factory
-  Provider::Factory.register("EnableBankingAccount", self)
-
   # Define which account types this provider supports
   def self.supported_account_types
     %w[Depository CreditCard]

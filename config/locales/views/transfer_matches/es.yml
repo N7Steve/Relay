@@ -4,6 +4,7 @@ es:
     create:
       success: Transferencia creada
     new:
+      review_candidates: Hay varios movimientos posibles. Revisa la cuenta, fecha e importe original antes de confirmar una pareja.
       header:
         title: Vincular transferencia o pago
         subtitle: Vincula la transacción correspondiente en otra cuenta o crea una si no existe.

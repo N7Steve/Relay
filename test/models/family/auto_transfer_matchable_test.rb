@@ -19,6 +19,29 @@ class Family::AutoTransferMatchableTest < ActiveSupport::TestCase
     end
   end
 
+  test "equal best candidates for either leg remain available for manual review" do
+    outflow = create_transaction(account: @depository, amount: 812, date: Date.current)
+    2.times { create_transaction(account: @credit_card, amount: -812, date: Date.current) }
+
+    assert_no_difference "Transfer.count" do
+      @family.auto_match_transfers!
+      @family.auto_match_transfers!
+    end
+    assert_equal 2, outflow.entryable.transfer_match_candidates.size
+    assert_nil outflow.entryable.paired_transfer
+  end
+
+  test "unique closer counterpart wins regardless of a more distant alternative" do
+    outflow = create_transaction(account: @depository, amount: 813, date: Date.current)
+    closer = create_transaction(account: @credit_card, amount: -813, date: Date.current)
+    farther = create_transaction(account: @credit_card, amount: -813, date: 2.days.ago.to_date)
+
+    @family.auto_match_transfers!
+
+    assert_equal closer.entryable_id, outflow.entryable.paired_transfer.inflow_transaction_id
+    assert_nil farther.entryable.paired_transfer
+  end
+
   test "concurrent unique-index race does not abort the surrounding transaction" do
     outflow_entry = create_transaction(date: 1.day.ago.to_date, account: @depository, amount: 500)
     inflow_entry = create_transaction(date: Date.current, account: @credit_card, amount: -500)

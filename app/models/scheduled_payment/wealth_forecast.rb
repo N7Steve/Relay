@@ -187,7 +187,7 @@ class ScheduledPayment::WealthForecast
           entries = historical_entries.select { |entry| period.cover?(entry.date) }
           remaining = entries.dup
           agenda, remaining = remaining.partition { |entry| explained_by_schedule?(entry) }
-          exceptional, remaining = remaining.partition { |entry| entry.entryable.forecast_exceptional_once? }
+          exceptional, remaining = remaining.partition { |entry| entry.entryable.exceptional_for_forecast? }
           irregular, remaining = remaining.partition { |entry| entry.entryable.forecast_irregular_recurring? }
           internal, ordinary = remaining.partition { |entry| internal_transfer?(entry) }
 
@@ -207,22 +207,20 @@ class ScheduledPayment::WealthForecast
     def historical_entries
       @historical_entries ||= begin
         range = cashflow_periods.first.begin..cashflow_periods.last.end
-        Entry.where(account_id: historical_asset_ids, entryable_type: "Transaction", excluded: false, date: range)
-          .excluding_pending.excluding_split_parents
-          .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id")
+        Entry.where(account_id: historical_asset_ids, date: range).eligible_for_forecast_history
           .includes(entryable: [ :transfer_as_inflow, :transfer_as_outflow ]).to_a
       end
     end
 
     def ordinary_cashflow_entries
       historical_entries.reject do |entry|
-        explained_by_schedule?(entry) || entry.entryable.forecast_exceptional_once? ||
+        explained_by_schedule?(entry) || entry.entryable.exceptional_for_forecast? ||
           entry.entryable.forecast_irregular_recurring? || internal_transfer?(entry)
       end
     end
 
     def exceptional_entries
-      @exceptional_entries ||= historical_entries.select { |entry| entry.entryable.forecast_exceptional_once? }
+      @exceptional_entries ||= historical_entries.select { |entry| entry.entryable.exceptional_for_forecast? }
     end
 
     def irregular_entries
@@ -245,7 +243,7 @@ class ScheduledPayment::WealthForecast
     end
 
     def internal_transfer?(entry)
-      transfer = entry.entryable.transfer
+      transfer = entry.entryable.paired_transfer
       transfer && historical_asset_ids.include?(transfer.from_account&.id) && historical_asset_ids.include?(transfer.to_account&.id)
     end
 
@@ -358,33 +356,10 @@ class ScheduledPayment::WealthForecast
       @accessible_payments ||= include_agenda ? family.scheduled_payments.accessible_by(user).to_a : []
     end
 
-    def linked_entry_ids
-      @linked_entry_ids ||= ScheduledPaymentEntry.where(scheduled_payment_id: accessible_payments.map(&:id))
-        .where.not(entry_id: nil).pluck(:entry_id).to_set
-    end
-
     def explained_by_schedule?(entry)
       return false unless include_agenda
-
-      @schedule_explanations ||= {}
-      @schedule_explanations.fetch(entry.id) do
-        @schedule_explanations[entry.id] = linked_entry_ids.include?(entry.id) ||
-          matching_payments_by_account.fetch(entry.account_id, []).any? do |payment|
-            next false unless payment.title.to_s.squish.casecmp?(entry.name.to_s.squish)
-            next false unless payment.expense? == entry.amount.positive?
-            next false unless payment.currency == entry.currency
-
-            tolerance = payment.amount_estimated? ? BigDecimal("0.35") : BigDecimal("0.10")
-            amount_matches = (entry.amount.abs - payment.amount).abs <= payment.amount * tolerance
-            amount_matches && payment.occurrences_in((entry.date - 5.days)..(entry.date + 5.days)).any?
-          end
-      end
-    end
-
-    def matching_payments_by_account
-      @matching_payments_by_account ||= accessible_payments.select do |payment|
-        payment.account_id.in?(historical_asset_ids) && payment.payment_type.in?(%w[expense income])
-      end.group_by(&:account_id)
+      @schedule_explanation ||= ScheduledPayment::HistoryExplanation.new(payments: accessible_payments)
+      @schedule_explanation.explains?(entry)
     end
 
     def scenarios

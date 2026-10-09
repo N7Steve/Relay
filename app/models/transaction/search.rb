@@ -57,12 +57,8 @@ class Transaction::Search
   # Compute totals for the specific search, excluding tax-advantaged accounts
   def totals
     @totals ||= begin
-      # v3: bumped because the Uncategorized filter's exclusion set changed
-      # (see #2592) -- without a version bump, a totals entry cached under
-      # the old logic would keep being served (same cache_key_base) after
-      # deploy, disagreeing with the (uncached) transactions_scope list
-      # until entries_cache_version next changes for that family.
-      Rails.cache.fetch("transaction_search_totals/v3/#{cache_key_base}") do
+      # v4 rejects missing foreign rates; never reuse a cached parity fallback.
+      Rails.cache.fetch("transaction_search_totals/v4/#{cache_key_base}") do
         scope = transactions_scope
 
         # Exclude tax-advantaged accounts from totals calculation
@@ -72,22 +68,23 @@ class Transaction::Search
         result = scope
                   .select(
                     ActiveRecord::Base.sanitize_sql_array([
-                      "COALESCE(SUM(CASE WHEN entries.amount >= 0 AND transactions.kind NOT IN (?) THEN ABS(entries.amount * COALESCE(er.rate, 1)) ELSE 0 END), 0) as expense_total",
+                      "COALESCE(SUM(CASE WHEN entries.amount >= 0 AND transactions.kind NOT IN (?) THEN ABS(entries.amount * (#{conversion_rate_sql})) ELSE 0 END), 0) as expense_total",
                       Transaction::TRANSFER_KINDS
                     ]),
                     ActiveRecord::Base.sanitize_sql_array([
-                      "COALESCE(SUM(CASE WHEN entries.amount < 0 AND transactions.kind NOT IN (?) THEN ABS(entries.amount * COALESCE(er.rate, 1)) ELSE 0 END), 0) as income_total",
+                      "COALESCE(SUM(CASE WHEN entries.amount < 0 AND transactions.kind NOT IN (?) THEN ABS(entries.amount * (#{conversion_rate_sql})) ELSE 0 END), 0) as income_total",
                       Transaction::TRANSFER_KINDS
                     ]),
                     ActiveRecord::Base.sanitize_sql_array([
-                      "COALESCE(SUM(CASE WHEN entries.amount < 0 AND transactions.kind IN (?) THEN ABS(entries.amount * COALESCE(er.rate, 1)) ELSE 0 END), 0) as transfer_inflow_total",
+                      "COALESCE(SUM(CASE WHEN entries.amount < 0 AND transactions.kind IN (?) THEN ABS(entries.amount * (#{conversion_rate_sql})) ELSE 0 END), 0) as transfer_inflow_total",
                       Transaction::TRANSFER_KINDS
                     ]),
                     ActiveRecord::Base.sanitize_sql_array([
-                      "COALESCE(SUM(CASE WHEN entries.amount >= 0 AND transactions.kind IN (?) THEN ABS(entries.amount * COALESCE(er.rate, 1)) ELSE 0 END), 0) as transfer_outflow_total",
+                      "COALESCE(SUM(CASE WHEN entries.amount >= 0 AND transactions.kind IN (?) THEN ABS(entries.amount * (#{conversion_rate_sql})) ELSE 0 END), 0) as transfer_outflow_total",
                       Transaction::TRANSFER_KINDS
                     ]),
-                    "COUNT(entries.id) as transactions_count"
+                    "COUNT(entries.id) as transactions_count",
+                    "#{FinancialConversion.missing_sql(currency: 'entries.currency', date: 'entries.date', target: ActiveRecord::Base.connection.quote(family.currency))} AS missing_rate"
                   )
                   .joins(
                     ActiveRecord::Base.sanitize_sql_array([
@@ -96,6 +93,8 @@ class Transaction::Search
                     ])
                   )
                   .take
+
+        FinancialConversion.validate!([ result ].compact, to: family.currency)
 
         Totals.new(
           count: result&.transactions_count.to_i,
@@ -114,12 +113,17 @@ class Transaction::Search
       family.id,
       Digest::SHA256.hexdigest(attributes.sort.to_h.to_json), # cached by filters
       family.entries_cache_version,
+      family.currency, ExchangeRate.maximum(:updated_at)&.to_f, ExchangeRate.count,
       Digest::SHA256.hexdigest(family.tax_advantaged_account_ids.sort.to_json), # stable across processes
       accessible_account_ids ? Digest::SHA256.hexdigest(accessible_account_ids.sort.to_json) : "all"
     ].join("/")
   end
 
   private
+    def conversion_rate_sql
+      FinancialConversion.rate_sql(currency: "entries.currency", target: ActiveRecord::Base.connection.quote(family.currency))
+    end
+
     Totals = Data.define(:count, :income_money, :expense_money, :transfer_inflow_money, :transfer_outflow_money)
 
     # Applies the habitual transaction scope unless the caller explicitly asks

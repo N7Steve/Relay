@@ -6,6 +6,7 @@ being changed. These guides hold the detailed conventions and procedures.
 | Task | Guide |
 | --- | --- |
 | Understand the domain and write Rails code | [Architecture and conventions](architecture.md) |
+| Preserve balance, report and forecast behavior | [Financial effects matrix](financial-effects.md) |
 | Set up an environment, run checks or prepare a PR | [Development and verification](development.md) |
 | Run local Linux tests and checks from Windows with Docker | [Docker tests](docker-tests.md) |
 | Implement or verify full family backups | [Complete backups](backups.md) |

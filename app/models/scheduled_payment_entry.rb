@@ -42,7 +42,7 @@ class ScheduledPaymentEntry < ApplicationRecord
       return unless confirmed?
       entry_to_destroy = entry
       transfer_entry_to_destroy = transfer_entry
-      transfer = entry_to_destroy&.entryable&.try(:transfer)
+      transfer = entry_to_destroy&.entryable&.try(:paired_transfer)
 
       # Release FK constraints before destroying entries
       update_columns(

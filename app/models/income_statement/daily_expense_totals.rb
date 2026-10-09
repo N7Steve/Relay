@@ -21,7 +21,9 @@ class IncomeStatement::DailyExpenseTotals
     # No finance accounts means no transactions to report
     return [] if @included_account_ids&.empty?
 
-    ActiveRecord::Base.connection.select_all(query_sql).map do |row|
+    rows = ActiveRecord::Base.connection.select_all(query_sql)
+    validate_conversion_data!(rows)
+    rows.map do |row|
       DailyTotal.new(date: row["day"].to_date, total: row["total"])
     end
   end
@@ -39,16 +41,17 @@ class IncomeStatement::DailyExpenseTotals
     # by alias) because only some databases accept aliases there.
     def query_sql_body
       <<~SQL
-        SELECT day, total FROM (
+        SELECT day, total, missing_rate FROM (
           SELECT
             ae.date as day,
             #{classification_sql("at")} as classification,
-            ABS(SUM(#{converted_amount_sql("at")})) as total
+            ABS(SUM(#{converted_amount_sql("at")})) as total,
+            #{missing_rate_sql} as missing_rate
           FROM (#{@transactions_scope.to_sql}) at
           #{entries_join_sql("at")}
           #{accounts_join_sql}
           #{exchange_rates_join_sql}
-          WHERE at.kind NOT IN (#{budget_excluded_kinds_sql})
+          WHERE #{budget_inclusion_sql("at")}
             #{investment_activity_label_sql("at")}
             AND ae.excluded = false
             AND a.family_id = :family_id

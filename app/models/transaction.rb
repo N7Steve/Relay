@@ -3,7 +3,8 @@ class Transaction < ApplicationRecord
 
   belongs_to :category, optional: true
   belongs_to :merchant, optional: true
-  belongs_to :transfer, optional: true
+  belongs_to :fee_transfer, class_name: "Transfer", foreign_key: :transfer_id,
+             inverse_of: :fee_transactions, optional: true
 
   has_many :taggings, as: :taggable, dependent: :destroy
   has_many :tags, through: :taggings
@@ -72,8 +73,8 @@ class Transaction < ApplicationRecord
     funds_movement: "funds_movement", # Movement of funds between accounts, excluded from budget analytics
     cc_payment: "cc_payment", # A CC payment, excluded from budget analytics (CC payments offset the sum of expense transactions)
     loan_payment: "loan_payment", # A payment to a Loan account, treated as an expense in budgets
-    one_time: "one_time", # A one-time expense/income, excluded from budget analytics
-    investment_contribution: "investment_contribution", # Transfer to investment/crypto account, treated as an expense in budgets
+    one_time: "one_time", # Legacy input/storage value; new writes use forecast_behavior
+    investment_contribution: "investment_contribution", # Transfer to investment/crypto account, excluded from budget analytics
     transfer_to_excluded: "transfer_to_excluded", # Crossing out of the user's financial boundary; treated as an expense
     transfer_from_excluded: "transfer_from_excluded" # Crossing into the user's financial boundary; treated as income
   }
@@ -84,7 +85,17 @@ class Transaction < ApplicationRecord
     irregular_recurring: "irregular_recurring"
   }, prefix: :forecast, validate: true
 
-  before_validation :synchronize_legacy_one_time_behavior
+  before_validation :normalize_legacy_one_time_kind
+  before_validation :normalize_posting_status
+  validates :posting_status, inclusion: { in: %w[pending posted] }, allow_nil: true
+  after_save :clear_forecast_behavior_assignment
+
+  # Explicitly selecting normal must also override a historical one_time row
+  # whose stored forecast_behavior was already normal (and hence is not dirty).
+  def forecast_behavior=(value)
+    @forecast_behavior_explicitly_assigned = true
+    super
+  end
 
   # All kinds where money moves between accounts (transfer? returns true).
   # Used for search filters, rule conditions, and UI display.
@@ -95,6 +106,36 @@ class Transaction < ApplicationRecord
   # they represent real cash outflow from a budgeting perspective.
   BUDGET_EXCLUDED_KINDS = %w[funds_movement one_time cc_payment investment_contribution].freeze
 
+  scope :budget_reportable, -> { where(budget_inclusion_sql) }
+  scope :exceptional_for_forecast, -> { where(exceptional_forecast_sql) }
+  scope :non_exceptional_for_forecast, -> { where.not(exceptional_forecast_sql) }
+
+  # SQL aliases are supplied only by the internal report query builders.
+  def self.budget_inclusion_sql(table_alias = "transactions")
+    kinds = BUDGET_EXCLUDED_KINDS.map { |kind| connection.quote(kind) }.join(", ")
+    "#{table_alias}.kind NOT IN (#{kinds}) AND #{table_alias}.forecast_behavior != 'exceptional_once'"
+  end
+
+  def self.exceptional_forecast_sql(table_alias = "transactions")
+    "#{table_alias}.kind = 'one_time' OR #{table_alias}.forecast_behavior = 'exceptional_once'"
+  end
+
+  def exceptional_for_forecast?
+    forecast_exceptional_once? || one_time?
+  end
+
+  def effective_forecast_behavior
+    self.class.forecast_behavior_for_import(kind: kind, behavior: forecast_behavior)
+  end
+
+  # Old exports can contain one_time plus the default normal behavior. Preserve
+  # their analytical exclusion when importing through the validating model path.
+  def self.forecast_behavior_for_import(kind:, behavior:)
+    return "exceptional_once" if kind == "one_time" && (behavior.blank? || behavior == "normal")
+
+    behavior.presence || "normal"
+  end
+
   # Kinds that never belong in the "Uncategorized" bucket, whichever surface
   # asks for it (the Transactions category filter, the uncategorized badge
   # count, the Quick Categorize wizard). These are the paired legs of a
@@ -102,10 +143,9 @@ class Transaction < ApplicationRecord
   # categorize. Every other kind with a NULL category does.
   #
   # This is deliberately neither of the two lists above:
-  #   - vs TRANSFER_KINDS: loan_payment and investment_contribution are
-  #     budget-tracked outflows the dashboard counts under Uncategorized, so
-  #     hiding them left the dashboard figure unreproducible from the list
-  #     with no way to find the transactions (see #2592).
+  #   - vs TRANSFER_KINDS: loan_payment and investment_contribution remain
+  #     categorizable, even though contributions are excluded from budget
+  #     analytics by BUDGET_EXCLUDED_KINDS.
   #   - vs BUDGET_EXCLUDED_KINDS: one_time is a real, categorizable
   #     expense/income that is only excluded from budget *analytics* so it
   #     doesn't skew medians. "Has no category" and "counts toward the
@@ -133,25 +173,26 @@ class Transaction < ApplicationRecord
     .map { |p| "(t.extra -> '#{p}' ->> 'pending')::boolean = true" }
     .join(" OR ")
     .freeze
+  CANONICAL_PENDING_CHECK_SQL = "COALESCE(t.posting_status = 'pending', (#{PENDING_CHECK_SQL}), false)".freeze
 
   # Pending transaction scopes - filter based on provider pending flags in extra JSONB
   # Works with any provider that stores pending status in extra["provider_name"]["pending"]
   scope :pending, -> {
-    conditions = PENDING_PROVIDERS.map { |provider| "(transactions.extra -> '#{provider}' ->> 'pending')::boolean = true" }
-    where(conditions.join(" OR "))
+    where(pending_sql("transactions"))
   }
 
   scope :excluding_pending, -> {
-    conditions = PENDING_PROVIDERS.map { |provider| "(transactions.extra -> '#{provider}' ->> 'pending')::boolean IS DISTINCT FROM true" }
-    where(conditions.join(" AND "))
+    where.not(pending_sql("transactions"))
   }
 
   # SQL snippet for raw queries that must exclude pending transactions.
   # Use in income statements, balance sheets, and raw analytics.
   def self.pending_providers_sql(table_alias = "t")
-    PENDING_PROVIDERS.map do |provider|
-      "AND (#{table_alias}.extra -> '#{provider}' ->> 'pending')::boolean IS DISTINCT FROM true"
-    end.join("\n")
+    "AND NOT (#{pending_sql(table_alias)})"
+  end
+
+  def self.pending_sql(table_alias = "t")
+    CANONICAL_PENDING_CHECK_SQL.gsub(/\bt\./, "#{table_alias}.")
   end
 
   # Overarching grouping method for all transfer-type transactions
@@ -191,6 +232,12 @@ class Transaction < ApplicationRecord
   end
 
   def pending?
+    return posting_status == "pending" if posting_status.present? && !will_save_change_to_extra?
+
+    legacy_pending?
+  end
+
+  def legacy_pending?
     extra_data = extra.is_a?(Hash) ? extra : {}
     PENDING_PROVIDERS.any? do |provider|
       ActiveModel::Type::Boolean.new.cast(extra_data.dig(provider, "pending"))
@@ -396,14 +443,25 @@ class Transaction < ApplicationRecord
   end
 
   private
+    def normalize_posting_status
+      return if will_save_change_to_posting_status? && posting_status.present?
+      return unless posting_status.nil? || will_save_change_to_extra?
 
-    def synchronize_legacy_one_time_behavior
-      if will_save_change_to_kind? && kind == "one_time" && !will_save_change_to_forecast_behavior?
+      self.posting_status = legacy_pending? ? "pending" : "posted"
+    end
+
+
+    def normalize_legacy_one_time_kind
+      return unless kind == "one_time"
+
+      unless @forecast_behavior_explicitly_assigned || will_save_change_to_forecast_behavior?
         self.forecast_behavior = "exceptional_once"
-      elsif will_save_change_to_forecast_behavior?
-        self.kind = "one_time" if forecast_exceptional_once?
-        self.kind = "standard" if kind == "one_time" && !forecast_exceptional_once?
       end
+      self.kind = "standard"
+    end
+
+    def clear_forecast_behavior_assignment
+      @forecast_behavior_explicitly_assigned = false
     end
 
     def validate_attachments

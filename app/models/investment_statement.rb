@@ -172,10 +172,11 @@ class InvestmentStatement
     account_ids = investment_account_ids
     return nil if account_ids.empty?
 
-    absolute_return = ActiveRecord::Base.connection.select_value(
+    absolute_return = converted_aggregate(
       ActiveRecord::Base.sanitize_sql_array([
         <<~SQL.squish,
-          SELECT COALESCE(SUM(b.net_market_flows * COALESCE(er.rate, 1)), 0)
+          SELECT COALESCE(SUM(b.net_market_flows * (#{FinancialConversion.rate_sql(currency: 'b.currency', target: ':currency')})), 0) AS total,
+            #{FinancialConversion.missing_sql(currency: 'b.currency', date: 'b.date', target: ':currency')} AS missing_rate
           FROM balances b
           JOIN accounts a ON a.id = b.account_id
           LEFT JOIN exchange_rates er ON (
@@ -204,10 +205,11 @@ class InvestmentStatement
     # double-counting the first day's net_market_flows in both the denominator and absolute_return).
     # FX conversion is done in SQL (matching absolute_return) so balance rows whose currency
     # differs from the account's current currency (e.g. after a currency change) are still picked up.
-    start_value = ActiveRecord::Base.connection.select_value(
+    start_value = converted_aggregate(
       ActiveRecord::Base.sanitize_sql_array([
         <<~SQL.squish,
-          SELECT COALESCE(SUM(b.end_balance * COALESCE(er.rate, 1)), 0)
+          SELECT COALESCE(SUM(b.end_balance * (#{FinancialConversion.rate_sql(currency: 'b.currency', target: ':currency')})), 0) AS total,
+            #{FinancialConversion.missing_sql(currency: 'b.currency', date: ':period_start', target: ':currency')} AS missing_rate
           FROM accounts a
           INNER JOIN balances b ON b.account_id = a.id
           LEFT JOIN exchange_rates er ON (
@@ -373,7 +375,7 @@ class InvestmentStatement
     transfers = []
 
     transactions.each do |txn|
-      t = txn.transfer
+      t = txn.paired_transfer
       next unless t
       next if seen_transfer_ids.include?(t.id)
       seen_transfer_ids << t.id
@@ -463,8 +465,14 @@ class InvestmentStatement
       return amount if amount.nil?
       numeric = amount.is_a?(Money) ? amount.amount : amount
       return numeric if from_currency == family.currency
-      rate = exchange_rates[from_currency] || 1
+      rate = exchange_rates[from_currency]
       numeric * rate
+    end
+
+    def converted_aggregate(sql)
+      result = ActiveRecord::Base.connection.select_one(sql)
+      FinancialConversion.validate!([ result ], to: family.currency)
+      result["total"]
     end
 
     def all_time_totals
@@ -558,8 +566,9 @@ class InvestmentStatement
       account_ids_hash = Digest::MD5.hexdigest(account_ids.sort.join(","))
 
       Rails.cache.fetch([
-        "investment_statement", "totals_query", family.id, user&.id,
-        account_ids_hash, date_range.begin, date_range.end, family.entries_cache_version
+        "investment_statement", "totals_query", "v2", family.id, user&.id,
+        account_ids_hash, date_range.begin, date_range.end, family.entries_cache_version,
+        family.currency, ExchangeRate.maximum(:updated_at)&.to_f, ExchangeRate.count
       ]) { Totals.new(family, account_ids: account_ids, date_range: date_range).call }
     end
 

@@ -15,6 +15,10 @@ es:
     unlock:
       success: Entrada desbloqueada. Podría actualizarse en la próxima sincronización.
     protection:
+      import_policy: Protección de importación
+      unlocked_policy: Sin protección independiente de importación
+      protected_policy: Proteger frente a actualizaciones de importación
+      independent_policy_description: La exclusión analítica es independiente de la protección. Usa Permitir actualizar para desbloquear expresamente la protección y los campos.
       tooltip: Protegido contra sincronización
       title: Protegido contra sincronización
       description: Los cambios que realices en esta entrada no serán sobrescritos por la sincronización del proveedor.

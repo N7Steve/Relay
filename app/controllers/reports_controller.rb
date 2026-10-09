@@ -447,7 +447,7 @@ class ReportsController < ApplicationController
         .merge(Account.data_visible)
         .merge(Account.included_in_reports)
         .where(entries: { entryable_type: "Transaction", excluded: false, date: @period.date_range })
-        .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+        .budget_reportable
         .includes(:merchant, entry: :account, category: :parent)
       transactions = exclude_tax_advantaged_accounts(transactions)
 
@@ -715,7 +715,7 @@ class ReportsController < ApplicationController
       holding_rates = ExchangeRate.rates_for(foreign_holding_currencies, to: currency, date: Date.current)
       convert_current = ->(amount, from) {
         numeric = to_numeric.call(amount)
-        from == currency ? numeric : numeric * (holding_rates[from] || 1)
+        from == currency ? numeric : numeric * holding_rates[from]
       }
 
       # Realized gains are locked at trade time, so convert each at its own
@@ -737,7 +737,7 @@ class ReportsController < ApplicationController
       end
       convert_trade = ->(amount, from, date) {
         numeric = to_numeric.call(amount)
-        from == currency ? numeric : numeric * (rates_by_trade_date.dig(date, from) || 1)
+        from == currency ? numeric : numeric * rates_by_trade_date.fetch(date)[from]
       }
 
       # Build metrics per treatment
@@ -892,7 +892,7 @@ class ReportsController < ApplicationController
         .merge(Account.data_visible)
         .merge(Account.included_in_reports)
         .where(entries: { entryable_type: "Transaction", excluded: false, date: @period.date_range })
-        .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+        .budget_reportable
         .includes(entry: :account, category: [])
       transactions = exclude_tax_advantaged_accounts(transactions)
 
@@ -931,7 +931,7 @@ class ReportsController < ApplicationController
         .merge(Account.data_visible)
         .merge(Account.included_in_reports)
         .where(entries: { entryable_type: "Transaction", excluded: false, date: @period.date_range })
-        .where.not(kind: Transaction::BUDGET_EXCLUDED_KINDS)
+        .budget_reportable
         .includes(entry: :account, category: [])
       transactions = exclude_tax_advantaged_accounts(transactions)
 

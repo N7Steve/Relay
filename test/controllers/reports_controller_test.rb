@@ -9,6 +9,19 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     @family = @user.family
   end
 
+  test "a missing foreign rate prevents a complete report and identifies the required conversion" do
+    date = Date.current.beginning_of_month
+    ExchangeRate.where(from_currency: "EUR", to_currency: @family.currency, date: date).delete_all
+    create_transaction(account: accounts(:depository), amount: 100, currency: "EUR", date: date)
+
+    get reports_path
+
+    assert_response :unprocessable_content
+    assert_includes response.body, "EUR"
+    assert_includes response.body, @family.currency
+    assert_includes response.body, date.iso8601
+  end
+
   # The per-trade line under the realised-gains card rendered
   # `Money.new(gain.value, Current.family.currency)` -- taking the number out of
   # the Trend and re-labelling it as family currency with no conversion at all.
@@ -28,6 +41,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     security = Security.create!(ticker: "EUX#{SecureRandom.hex(3)}", name: "Euro Listed")
 
     ExchangeRate.create!(from_currency: "EUR", to_currency: "USD", date: date, rate: 1.5)
+    ExchangeRate.find_or_initialize_by(from_currency: "EUR", to_currency: "USD", date: Date.current).update!(rate: 1.5)
     account.holdings.create!(security: security, date: date, qty: 5, price: 150,
                              amount: BigDecimal(750), currency: "EUR", cost_basis: 100)
     create_trade(security, account: account, qty: -2, date: date, price: 150, currency: "EUR")
@@ -58,6 +72,8 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     # and 2nd of a month a fresh row for its first day breaks uniqueness.
     ExchangeRate.find_or_initialize_by(from_currency: "EUR", to_currency: "GBP", date: date).update!(rate: 0.8)
     ExchangeRate.create!(from_currency: "GBP", to_currency: "USD", date: date, rate: 1.25)
+    ExchangeRate.find_or_initialize_by(from_currency: "EUR", to_currency: "USD", date: date).update!(rate: 1)
+    ExchangeRate.find_or_initialize_by(from_currency: "GBP", to_currency: "USD", date: Date.current).update!(rate: 1.25)
     account.holdings.create!(security: security, date: date, qty: 5, price: 150,
                              amount: BigDecimal(750), currency: "GBP", cost_basis: 100)
     create_trade(security, account: account, qty: -2, date: date, price: 150, currency: "EUR")

@@ -10,7 +10,9 @@ class IncomeStatement::CategoryStats
   def call
     return [] if @account_ids&.empty?
 
-    ActiveRecord::Base.connection.select_all(sanitized_query_sql).map do |row|
+    rows = ActiveRecord::Base.connection.select_all(sanitized_query_sql)
+    validate_conversion_data!(rows)
+    rows.map do |row|
       StatRow.new(
         category_id: row["category_id"],
         classification: row["classification"],
@@ -41,14 +43,15 @@ class IncomeStatement::CategoryStats
             c.id as category_id,
             date_trunc(:interval, ae.date) as period,
             #{classification_sql("t")} as classification,
-            SUM(#{converted_amount_sql("t")}) as total
+            SUM(#{converted_amount_sql("t")}) as total,
+            #{missing_rate_sql} as missing_rate
           FROM transactions t
           #{entries_join_sql("t")}
           #{accounts_join_sql}
           LEFT JOIN categories c ON c.id = t.category_id
           #{exchange_rates_join_sql}
           WHERE a.family_id = :family_id
-            AND t.kind NOT IN (#{budget_excluded_kinds_sql})
+            AND #{budget_inclusion_sql("t")}
             AND ae.excluded = false
             AND a.exclude_from_reports = false
             #{pending_providers_sql}
@@ -60,7 +63,8 @@ class IncomeStatement::CategoryStats
           category_id,
           classification,
           ABS(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY total)) as median,
-          ABS(AVG(total)) as avg
+          ABS(AVG(total)) as avg,
+          MIN(missing_rate) as missing_rate
         FROM period_totals
         GROUP BY category_id, classification;
       SQL

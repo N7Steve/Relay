@@ -5,6 +5,10 @@ one family. Enable Banking is the only active account integration after
 pruning phases 7 and 9F. Adding a connector requires an explicit product decision; do not
 use this generator to reactivate a retired connector.
 
+`Provider::Factory` resolves Enable Banking explicitly. A newly generated adapter
+is not discovered or enabled automatically; an approved new connector requires
+updating that explicit mapping and its tests.
+
 The global account-provider generator and its shared credential registry were
 removed in [pruning phase 7](../migration/pruning-phase-7.md). Market/FX providers
 were removed in [phase 9A](../migration/pruning-phase-9.md); this generator is for
@@ -237,8 +241,7 @@ class Provider::MyBankAdapter < Provider::Base
   include Provider::Syncable
   include Provider::InstitutionMetadata
 
-  # Register this adapter with the factory
-  Provider::Factory.register("MyBankAccount", self)
+  # Enable through an explicit Provider::Factory mapping only after approval.
 
   def provider_name
     "my_bank"

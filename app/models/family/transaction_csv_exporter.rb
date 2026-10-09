@@ -5,7 +5,7 @@ class Family::TransactionCsvExporter
 
   UTF_8_BOM = "\uFEFF"
   SEMICOLON_LANGUAGES = %w[ca de es fr hu it nb nl pl pt ro ru tr uk vi].freeze
-  HEADERS = %w[source_account destination_account merchant title amount date category tags].freeze
+  HEADERS = %w[source_account destination_account merchant title amount currency date category tags].freeze
   DRIVE_HEADERS = %w[
     entry_id transaction_id source_account_id source_account destination_account_id
     destination_account merchant title amount currency date category tags updated_at
@@ -56,7 +56,7 @@ class Family::TransactionCsvExporter
 
       seen_transfer_ids = {}
       transactions.filter_map do |transaction|
-        transfer = transaction.transfer
+        transfer = transaction.paired_transfer
         next transaction unless transfer
         next if seen_transfer_ids[transfer.id]
 
@@ -150,7 +150,7 @@ class Family::TransactionCsvExporter
 
     def serialize(transaction)
       entry = transaction.entry
-      transfer = transaction.transfer
+      transfer = transaction.paired_transfer
 
       return serialize_for_drive(transaction, entry, transfer) if schema == :drive
 
@@ -160,6 +160,7 @@ class Family::TransactionCsvExporter
         spreadsheet_safe(transaction.merchant&.name),
         spreadsheet_safe(entry.name),
         amount_value(entry.amount),
+        entry.currency,
         entry.date&.iso8601,
         spreadsheet_safe(category_name(transaction.category)),
         spreadsheet_safe(transaction.tags.map(&:name).sort.join(", "))
@@ -233,7 +234,7 @@ class Family::TransactionCsvExporter
     end
 
     def clean_transaction_type(transaction)
-      return "transfer" if transaction.transfer? || transaction.transfer.present?
+      return "transfer" if transaction.transfer? || transaction.paired_transfer.present?
 
       transaction.entry.amount.negative? ? "income" : "expense"
     end

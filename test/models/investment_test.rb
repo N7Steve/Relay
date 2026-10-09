@@ -170,10 +170,25 @@ class InvestmentTest < ActiveSupport::TestCase
     end
   end
 
-  test "subtypes_grouped_for_select places India region first for INR users" do
-    grouped = Investment.subtypes_grouped_for_select(currency: "INR")
-    assert grouped.any?, "grouped should not be empty"
-    first_group_label = grouped.first[0]
-    assert_equal I18n.t("accounts.subtype_regions.in"), first_group_label
+  test "new accounts offer the short catalogue while editing retains their historical subtype" do
+    options = Investment.subtypes_grouped_for_select(currency: "INR").flat_map(&:last).map(&:last)
+    assert_equal %w[brokerage roboadvisor pension other], options
+    legacy = Investment.subtypes_grouped_for_select(current_subtype: "401k").flat_map(&:last).map(&:last)
+    assert_includes legacy, "401k"
+    assert_equal 5, legacy.size
+  end
+
+  test "tax treatment and tracking can change independently without destroying trades" do
+    account = accounts(:investment)
+    trade_ids = account.trades.pluck(:id)
+    assert trade_ids.any?
+
+    account.accountable.update!(subtype: "roboadvisor", tax_treatment: "tax_exempt", tracking_mode: "positions")
+
+    assert_equal trade_ids.sort, account.reload.trades.pluck(:id).sort
+    assert_equal :tax_exempt, account.tax_treatment
+    assert_not account.managed_portfolio?
+    assert account.supports_trades?
+    assert_includes account.family.tax_advantaged_account_ids, account.id
   end
 end

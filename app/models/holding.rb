@@ -313,10 +313,13 @@ class Holding < ApplicationRecord
         Trade::INTERNAL_MOVEMENT_LABELS
       )
 
-      total_cost, total_qty = trades.pick(
-        Arel.sql("SUM(trades.price * trades.qty * COALESCE(exchange_rates.rate, 1))"),
-        Arel.sql("SUM(trades.qty)")
+      target = self.class.connection.quote(account.currency)
+      total_cost, total_qty, missing_rate = trades.pick(
+        Arel.sql(ActiveRecord::Base.sanitize_sql_array([ "SUM(trades.price * trades.qty * (CASE WHEN trades.currency = ? THEN 1 ELSE exchange_rates.rate END))", account.currency ])),
+        Arel.sql("SUM(trades.qty)"),
+        Arel.sql(FinancialConversion.missing_sql(currency: "trades.currency", date: "entries.date", target: target, rate: "exchange_rates.rate"))
       )
+      FinancialConversion.validate!([ { "missing_rate" => missing_rate } ], to: account.currency)
 
       # Return nil when no trades exist - cost basis is genuinely unknown
       # Previously this fell back to current market price, which was misleading

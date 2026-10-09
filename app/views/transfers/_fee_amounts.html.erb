@@ -1,0 +1,2 @@
+<%# locals: (amounts:) %>
+<%= safe_join(amounts.map { |amount| format_money(amount * -1) }, ", ") %>

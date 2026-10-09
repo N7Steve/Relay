@@ -5,6 +5,20 @@ class Family::DataImporterTest < ActiveSupport::TestCase
     @family = families(:empty)
   end
 
+  test "imports legacy one time rows with default behavior as independent exceptional transactions" do
+    records = [
+      { type: "Account", data: { id: "legacy-account", name: "Legacy account", balance: "0", currency: "USD", accountable_type: "Depository" } },
+      { type: "Transaction", data: { id: "legacy-one-time", account_id: "legacy-account", name: "Legacy exceptional", date: "2026-08-10", amount: "100", currency: "USD", kind: "one_time", forecast_behavior: "normal" } }
+    ]
+
+    Family::DataImporter.new(@family, build_ndjson(records)).import!
+
+    transaction = @family.entries.find_by!(name: "Legacy exceptional").entryable
+    assert_predicate transaction, :standard?
+    assert_predicate transaction, :forecast_exceptional_once?
+    assert_not @family.transactions.budget_reportable.exists?(transaction.id)
+  end
+
   test "imports accounts with accountable data" do
     ndjson = build_ndjson([
       {

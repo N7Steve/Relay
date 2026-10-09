@@ -7,6 +7,10 @@ class ScheduledPayment < ApplicationRecord
   FIXED_AMOUNT_TOLERANCE = BigDecimal("0.05")
   ESTIMATED_AMOUNT_TOLERANCE = BigDecimal("0.40")
 
+  FORECAST_DATE_TOLERANCE_DAYS = 5
+  FORECAST_FIXED_AMOUNT_TOLERANCE = BigDecimal("0.10")
+  FORECAST_ESTIMATED_AMOUNT_TOLERANCE = BigDecimal("0.35")
+
   belongs_to :family
   belongs_to :account
   belongs_to :category, optional: true
@@ -226,6 +230,21 @@ class ScheduledPayment < ApplicationRecord
     occurrences
   end
 
+  # A heuristic explanation for forecasts, not a persisted historical match.
+  # Callers select accessible payments for the entry's account and handle links.
+  def explains_forecast_entry?(entry)
+    return false unless account_id == entry.account_id
+    return false unless title.to_s.squish.casecmp?(entry.name.to_s.squish)
+    return false unless expense? == entry.amount.positive?
+    return false if currency != entry.currency
+
+    tolerance = amount_estimated? ? FORECAST_ESTIMATED_AMOUNT_TOLERANCE : FORECAST_FIXED_AMOUNT_TOLERANCE
+    return false unless (entry.amount.abs - amount).abs <= amount * tolerance
+
+    window = FORECAST_DATE_TOLERANCE_DAYS.days
+    occurrences_in((entry.date - window)..(entry.date + window)).any?
+  end
+
   # Links existing entries that match this SP's pattern to create confirmed SPEs.
   # Searches by: same name, account, category, merchant, tags and currency;
   # compatible amount and date within the historical schedule tolerance.
@@ -315,7 +334,7 @@ class ScheduledPayment < ApplicationRecord
       return :direction unless correct_direction
       return :tags if entry.entryable.tags.map { |tag| tag.id.to_s }.sort != expected_tag_ids
 
-      transfer = entry.entryable.transfer
+      transfer = entry.entryable.paired_transfer
       if transfer?
         correct_accounts = transfer &&
           transfer.from_account.id == account_id &&
@@ -347,7 +366,7 @@ class ScheduledPayment < ApplicationRecord
     def link_historical_source_entry!(entry)
       return :already_linked if entry.from_scheduled_payment?
 
-      transfer = entry.entryable.transfer
+      transfer = entry.entryable.paired_transfer
       transfer_entry = transfer&.inflow_transaction&.entry
       return :already_linked if transfer_entry&.from_scheduled_payment?
 

@@ -2,7 +2,8 @@ class Transfer < ApplicationRecord
   belongs_to :inflow_transaction, class_name: "Transaction"
   belongs_to :outflow_transaction, class_name: "Transaction"
 
-  has_many :fee_transactions, class_name: "Transaction", dependent: :destroy
+  has_many :fee_transactions, class_name: "Transaction", foreign_key: :transfer_id,
+           inverse_of: :fee_transfer, dependent: :destroy
 
   attr_accessor :source_fee_amount, :destination_fee_amount, :tag_ids
   attr_writer :name
@@ -60,8 +61,43 @@ class Transfer < ApplicationRecord
   end
 
   def total_fee
-    derived_source_fee_amount + derived_destination_fee_amount
+    totals = fees_by_currency
+    return nil if totals.many?
+
+    totals.values.first || 0.to_d
   end
+
+  def fees_by_currency
+    fee_transactions.joins(:entry).group("entries.currency").sum("entries.amount")
+  end
+
+  # Original denominations, grouped independently for each transfer leg.
+  def fees_by_leg
+    { source: from_account.id, destination: to_account.id }.transform_values do |account_id|
+      fee_transactions.joins(:entry).where(entries: { account_id: account_id })
+        .group("entries.currency").sum("entries.amount").map { |currency, amount| Money.new(amount, currency) }
+    end
+  end
+
+  def source_total_money
+    total_with_fees(outflow_transaction.entry.amount_money, :source)
+  end
+
+  def destination_total_money
+    fees = fees_by_leg.fetch(:destination)
+    amount = -inflow_transaction.entry.amount_money
+    return nil unless fees.all? { |fee| fee.currency.iso_code == amount.currency.iso_code }
+
+    fees.reduce(amount) { |total, fee| total - fee }
+  end
+
+  def total_with_fees(amount, leg)
+    fees = fees_by_leg.fetch(leg)
+    return nil unless fees.all? { |fee| fee.currency.iso_code == amount.currency.iso_code }
+
+    fees.reduce(amount) { |total, fee| total + fee }
+  end
+  private :total_with_fees
 
   def derived_source_fee_amount
     fee_transactions.joins(:entry).where(entries: { account_id: from_account.id }).sum("entries.amount")
@@ -147,6 +183,15 @@ class Transfer < ApplicationRecord
 
   def confirm!
     update!(status: "confirmed")
+  end
+
+  # Reuse the same financial classification after linking or boundary changes.
+  # Permissions, category assignment and recalculation remain with the caller.
+  def reclassify_transactions!
+    Transfer.transaction(requires_new: true) do
+      outflow_transaction.update!(kind: self.class.outflow_kind_for(from_account, to_account))
+      inflow_transaction.update!(kind: self.class.inflow_kind_for(from_account, to_account))
+    end
   end
 
   def date

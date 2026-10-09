@@ -6,9 +6,6 @@ class Settings::ProvidersControllerTest < ActionDispatch::IntegrationTest
   setup do
     ensure_tailwind_build
     sign_in users(:family_admin)
-
-    # Ensure provider adapters are loaded for all tests
-    Provider::Factory.ensure_adapters_loaded
   end
 
   test "Apple Wallet is neither offered nor shown for historical connections" do
