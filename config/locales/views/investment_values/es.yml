@@ -7,6 +7,9 @@ es:
     date: Fecha
     total_value: Valor total de la cartera
     adjustment: Ajuste de valor de inversión
+    increase: Subida del valor de la cartera
+    decrease: Bajada del valor de la cartera
+    unchanged: Valor de la cartera sin cambios
     recorded_value: "Valor registrado de la cartera: %{value}"
     historical: Ajuste de valor histórico. Se han conservado su fecha e importe originales.
     edit_historical: Ver movimiento original

@@ -2,12 +2,21 @@
 <%= turbo_frame_tag dom_id(entry) do %>
   <%= turbo_frame_tag dom_id(entry.transaction) do %>
     <div class="flex items-center justify-between gap-3 p-3 lg:p-4 text-sm">
-      <div class="min-w-0 space-y-1">
-        <%= link_to entry.name, investment_value_path(entry), class: "font-medium text-primary hover:underline", data: { turbo_frame: "drawer" } %>
-        <p class="text-xs text-secondary"><%= entry.account.name %> · <%= t("investment_values.adjustment") %></p>
-        <% if entry.transaction.investment_value_target %>
-          <p class="text-xs text-secondary privacy-sensitive"><%= t("investment_values.recorded_value", value: format_money(Money.new(entry.transaction.investment_value_target, entry.currency))) %></p>
-        <% end %>
+      <div class="pr-4 lg:pr-10 flex items-center gap-3 lg:gap-4 min-w-0">
+        <%= check_box_tag dom_id(entry, "selection"),
+              disabled: true,
+              class: "checkbox checkbox--light hidden lg:block",
+              aria: { label: entry.name },
+              data: { id: entry.id, entry_type: "Transaction", bulk_edit: false, bulk_select_target: "row", checkbox_toggle_target: "selectionEntry" } %>
+        <%= render DS::FilledIcon.new(icon: investment_value_icon(entry), variant: :surface,
+              size: "lg", rounded: true, class_name: investment_value_color(entry), description: investment_value_direction(entry)) %>
+        <div class="min-w-0 space-y-1">
+          <%= link_to entry.name, investment_value_path(entry), class: "font-medium text-primary hover:underline", data: { turbo_frame: "drawer" } %>
+          <p class="text-xs text-secondary"><%= entry.account.name %> · <%= t("investment_values.adjustment") %></p>
+          <% if entry.transaction.investment_value_target %>
+            <p class="text-xs text-secondary privacy-sensitive"><%= t("investment_values.recorded_value", value: format_money(Money.new(entry.transaction.investment_value_target, entry.currency))) %></p>
+          <% end %>
+        </div>
       </div>
       <p class="font-semibold whitespace-nowrap privacy-sensitive <%= investment_value_color(entry) %>"><%= investment_value_change(entry) %></p>
     </div>

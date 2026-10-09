@@ -20,6 +20,10 @@ class InvestmentValuesTest < ApplicationSystemTestCase
     assert_text "Portfolio value updated"
     assert_text "+$114.71"
     entry = @account.entries.transactions.order(:created_at).last
+    within "turbo-frame#entry_#{entry.id}" do
+      assert_selector "input[type='checkbox'][disabled]"
+      assert_selector ".text-success[role='img'][aria-label='Portfolio value increased'] svg"
+    end
     click_link entry.name
     within "turbo-frame#drawer" do
       fill_in "Total portfolio value", with: "950"
@@ -27,6 +31,11 @@ class InvestmentValuesTest < ApplicationSystemTestCase
     end
     assert_text "Portfolio value updated"
     assert_text "-$50.00"
+    within "turbo-frame#entry_#{entry.id}" do
+      assert_selector "input[type='checkbox'][disabled]"
+      assert_selector ".text-destructive[role='img'][aria-label='Portfolio value decreased'] svg"
+    end
+    page.save_screenshot(Rails.root.join("tmp/screenshots/native-valuation-direction.png"))
     assert_equal 950, @account.reload.balance
     assert_equal 1, @account.transactions.where(kind: "investment_value_adjustment").count
   end
