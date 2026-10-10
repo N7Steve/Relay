@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'relay-v3';
+const CACHE_VERSION = 'relay-v4';
 const OFFLINE_ASSETS = [
   '/offline.html',
   '/relay-logo.png'
