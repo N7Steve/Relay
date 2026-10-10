@@ -1,6 +1,9 @@
 ---
 en:
   transactions:
+    shared_expense_field:
+      label: Shared expenses
+      description: Shared with your partner 50/50. An expense adds half to the outstanding debt; income settles it by its full amount.
     filters:
       unknown_account: "Unknown Account"
     bulk_updates:

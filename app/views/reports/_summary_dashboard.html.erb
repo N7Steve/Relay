@@ -1,4 +1,4 @@
-<%# TEMPORARY: Modified layout (2 rows of 3) - see rollback_gc.md for original %>
+<%# Summary metrics, including personal spending and shared debt. %>
 
 <%# === ROW 1: Existing metrics (3 cols) === %>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -101,7 +101,7 @@
 
 <%# === ROW 2: Custom metrics (3 cols) === %>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <%# TEMPORARY: Rent Income Card - see rollback_gc.md %>
+  <%# Employment income %>
   <div class="bg-container rounded-xl shadow-border-xs p-6">
     <div class="flex items-start justify-between mb-3">
       <div class="flex items-center gap-2">
@@ -122,7 +122,7 @@
     </div>
   </div>
 
-  <%# TEMPORARY: Adjusted Expenses Card - see rollback_gc.md %>
+  <%# Personal share of expenses %>
   <div class="bg-container rounded-xl shadow-border-xs p-6">
     <div class="flex items-start justify-between mb-3">
       <div class="flex items-center gap-2">
@@ -143,13 +143,13 @@
     </div>
   </div>
 
-  <%# TEMPORARY: Shared Expenses Debt Card - see rollback_gc.md %>
+  <%# Shared expenses with the partner %>
   <div class="bg-container rounded-xl shadow-border-xs p-6">
     <div class="flex items-start justify-between mb-3">
       <div class="flex items-center gap-2">
         <%= icon("users", class: "w-5 h-5") %>
         <h3 class="text-sm font-medium text-secondary">
-          Gastos compartidos
+          <%= t("transactions.shared_expense_field.label") %>
         </h3>
       </div>
     </div>
@@ -161,15 +161,15 @@
         </p>
         <p class="text-sm text-subdued">
           <% if shared_expenses[:pending_debt].amount > 0 %>
-            Deuda pendiente
+            <%= t("reports.shared_expenses.pending") %>
           <% else %>
-            Sin deuda pendiente
+            <%= t("reports.shared_expenses.settled") %>
           <% end %>
         </p>
       </div>
     <% else %>
       <p class="text-base text-subdued">
-        Sin datos de gastos compartidos
+        <%= t("reports.shared_expenses.empty") %>
       </p>
     <% end %>
   </div>

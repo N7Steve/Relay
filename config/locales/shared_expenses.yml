@@ -1,0 +1,12 @@
+en:
+  reports:
+    shared_expenses:
+      pending: Outstanding debt
+      settled: No outstanding debt
+      empty: No shared expenses yet
+es:
+  reports:
+    shared_expenses:
+      pending: Deuda pendiente
+      settled: Sin deuda pendiente
+      empty: Sin datos de gastos compartidos

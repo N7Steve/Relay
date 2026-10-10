@@ -328,6 +328,12 @@
 
     <% if can_edit_entry? && !scheduled_payment_locked %>
       <% dialog.with_section(title: t(".settings")) do %>
+        <%= styled_form_with model: @entry, url: transaction_path(@entry), class: "p-3", data: { controller: "auto-submit-form" } do |f| %>
+          <%= hidden_field_tag :grouped, "true" if params[:grouped] == "true" %>
+          <%= f.fields_for :entryable do |ef| %>
+            <%= render "transactions/shared_expense_field", form: ef %>
+          <% end %>
+        <% end %>
         <%# Create recurring payment from this transaction — only for non-SP, non-transfer entries %>
         <% unless @entry.from_scheduled_payment? || @entry.transaction.transfer? %>
           <div class="flex items-center justify-between gap-2 p-3">

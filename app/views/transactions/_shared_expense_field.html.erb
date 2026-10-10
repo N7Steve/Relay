@@ -1,0 +1,8 @@
+<%# locals: (form:) %>
+<div class="space-y-1 text-sm">
+  <%= form.label :shared_expense, class: "flex items-center gap-2 text-primary" do %>
+    <%= form.check_box :shared_expense, class: "checkbox", data: { auto_submit_form_target: "auto" } %>
+    <%= t("transactions.shared_expense_field.label") %>
+  <% end %>
+  <p class="text-secondary"><%= t("transactions.shared_expense_field.description") %></p>
+</div>

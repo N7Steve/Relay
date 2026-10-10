@@ -1,6 +1,15 @@
-<%# locals: (name:, operation:) %>
-<div class="space-y-2 p-3">
-  <p class="text-sm font-medium text-primary"><%= name %></p>
-  <%= render DS::Pill.new(label: t("investment_values.operations.#{operation}"), tone: :info, marker: false, icon: "arrow-left-right") %>
-  <p class="text-sm text-secondary"><%= t("investment_values.operations.controlled") %></p>
+<%# locals: (name:, operation: nil, dynamic: false) %>
+<div class="flex items-center justify-between gap-3 min-w-0">
+  <%= tag.p name, class: "text-sm font-medium text-primary min-w-0 truncate", data: dynamic ? { managed_transfer_target: "name" } : {} %>
+  <div class="shrink-0">
+    <% if dynamic %>
+      <% %w[contribution withdrawal transfer].each do |type| %>
+        <span data-managed-transfer-target="labels" data-operation="<%= type %>" hidden>
+          <%= render DS::Pill.new(label: t("investment_values.operations.#{type}"), tone: :info, marker: false, icon: "arrow-left-right") %>
+        </span>
+      <% end %>
+    <% else %>
+      <%= render DS::Pill.new(label: t("investment_values.operations.#{operation}"), tone: :info, marker: false, icon: "arrow-left-right") %>
+    <% end %>
+  </div>
 </div>

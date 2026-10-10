@@ -13,8 +13,12 @@ class ManagedTransfersTest < ApplicationSystemTestCase
     assert_text "Contribution · Managed portfolio"
     assert_selector "fieldset[data-managed-transfer-target='editableFields'][disabled]", visible: :all
     assert_no_selector "input[name='transfer[name]']", visible: true
+    assert_no_selector "[data-controller='tag-select']", visible: true
+    assert_no_text I18n.t("investment_values.operations.controlled")
+    page.save_screenshot(Rails.root.join("tmp/screenshots/native-contribution-form.png"))
     select_ds("To", accounts(:credit_card))
     assert_selector "input[name='transfer[name]']", visible: true
+    assert_selector "[data-controller='tag-select']", visible: true
     select_ds("To", @portfolio)
     fill_in "transfer[amount]", with: 100
     click_button "Create transfer"
@@ -25,6 +29,7 @@ class ManagedTransfersTest < ApplicationSystemTestCase
     find("summary", text: /details/i).click
     assert_no_selector "input[name='transfer[name]']", visible: :all
     assert_no_selector "input[name='transfer[category_id]']", visible: :all
+    assert_no_selector "[data-controller='tag-select']", visible: true
     assert_selector "input[name='transfer[amount]']"
     page.save_screenshot(Rails.root.join("tmp/screenshots/native-managed-transfer.png"))
   end

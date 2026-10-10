@@ -66,21 +66,15 @@
             selected_id: f.object.category_id,
             blank_label: t("transactions.form.category_prompt")
           ) %>
-    </fieldset>
-    <div class="space-y-2" data-managed-transfer-target="nativeFields" hidden>
-      <p class="text-sm font-medium text-primary" data-managed-transfer-target="name"></p>
-      <% %w[contribution withdrawal transfer].each do |operation| %>
-        <span data-managed-transfer-target="labels" data-operation="<%= operation %>" hidden>
-          <%= render DS::Pill.new(label: t("investment_values.operations.#{operation}"), tone: :info, marker: false, icon: "arrow-left-right") %>
-        </span>
-      <% end %>
-      <p class="text-sm text-secondary"><%= t("investment_values.operations.controlled") %></p>
-    </div>
-    <%= render DS::TagSelect.new(
+      <%= render DS::TagSelect.new(
           form: f,
           tags: @tags,
           selected_ids: Array(f.object.tag_ids)
         ) %>
+    </fieldset>
+    <div data-managed-transfer-target="nativeFields" hidden>
+      <%= render "transfers/native_operation", name: "", dynamic: true %>
+    </div>
 
     <% convert_input = capture do %>
       <%= f.number_field :exchange_rate,

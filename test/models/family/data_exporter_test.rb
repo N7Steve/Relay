@@ -49,6 +49,21 @@ class Family::DataExporterTest < ActiveSupport::TestCase
     @rule.save!
   end
 
+  test "interchange NDJSON preserves native shared classification on parent and split lines" do
+    entry = create_transaction_entry(@account, amount: 100, date: Date.current, name: "Native shared")
+    entry.transaction.update!(shared_expense: true)
+    children = entry.split!([ { name: "Shared line", amount: 60 }, { name: "Personal line", amount: 40 } ])
+    children.last.transaction.update!(shared_expense: false)
+    Zip::File.open_buffer(@exporter.generate_export) do |zip|
+      record = zip.read("all.ndjson").each_line.map { |line| JSON.parse(line) }
+        .find { |row| row["type"] == "Transaction" && row.dig("data", "id") == entry.transaction.id }
+      assert_equal true, record.dig("data", "shared_expense")
+      lines = record.dig("data", "split_lines").index_by { |line| line["name"] }
+      assert_equal true, lines.fetch("Shared line")["shared_expense"]
+      assert_equal false, lines.fetch("Personal line")["shared_expense"]
+    end
+  end
+
   test "generates a zip file with all required files" do
     zip_data = @exporter.generate_export
 

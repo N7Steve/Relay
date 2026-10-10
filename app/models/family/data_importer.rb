@@ -595,6 +595,7 @@ class Family::DataImporter
           category_id: new_category_id,
           merchant_id: new_merchant_id,
           kind: data["kind"] || "standard",
+          shared_expense: shared_expense_for_import(data, new_tag_ids),
           extra: transaction.extra.to_h.merge(data.slice("investment_value", "native_operation_original", "native_managed_operation").compact),
           forecast_behavior: Transaction.forecast_behavior_for_import(kind: data["kind"], behavior: data["forecast_behavior"])
         )
@@ -636,6 +637,14 @@ class Family::DataImporter
       end
     end
 
+    # Only historical backups infer classification from tags. Explicit false in
+    # a new backup must survive even when the old label is still attached.
+    def shared_expense_for_import(data, tag_ids)
+      return boolean_import_value(data, "shared_expense", default: false) if data.key?("shared_expense")
+
+      @family.tags.where(id: tag_ids, name: "Gastos compartidos").exists?
+    end
+
     def mapped_tag_ids(old_tag_ids, record_type:)
       Array(old_tag_ids).map do |old_tag_id|
         mapped_id(:tags, old_tag_id, record_type: record_type)
@@ -666,6 +675,7 @@ class Family::DataImporter
           tag_ids: mapped_tag_ids(row["tag_ids"], record_type: "Transaction"),
           tag_ids_provided: row.key?("tag_ids"),
           kind: row["kind"],
+          shared_expense: row.slice("shared_expense"),
           forecast_behavior: row["forecast_behavior"]
         }
       end
@@ -686,7 +696,9 @@ class Family::DataImporter
 
       children.zip(split_rows).each do |child_entry, row|
         transaction = child_entry.entryable
+        tag_ids = row[:tag_ids_provided] ? row[:tag_ids] : fallback_tag_ids
         transaction.update!(
+          shared_expense: shared_expense_for_import(row[:shared_expense], tag_ids),
           merchant_id: row[:merchant_id_provided] ? row[:merchant_id] : transaction.merchant_id,
           kind: row[:kind].presence || transaction.kind,
           forecast_behavior: Transaction.forecast_behavior_for_import(
@@ -696,7 +708,6 @@ class Family::DataImporter
         )
         child_entry.update!(notes: row[:notes]) if row[:notes].present?
 
-        tag_ids = row[:tag_ids_provided] ? row[:tag_ids] : fallback_tag_ids
         tag_ids.each do |tag_id|
           transaction.taggings.create!(tag_id: tag_id)
         end

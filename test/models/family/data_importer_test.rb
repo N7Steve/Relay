@@ -5,6 +5,23 @@ class Family::DataImporterTest < ActiveSupport::TestCase
     @family = families(:empty)
   end
 
+  test "legacy transaction backups infer shared expenses but explicit false wins and split lines retain classification" do
+    records = [
+      { type: "Account", data: { id: "bank", name: "Bank", balance: "0", currency: "USD", accountable_type: "Depository" } },
+      { type: "Tag", data: { id: "shared-tag", name: "Gastos compartidos" } },
+      { type: "Transaction", data: { id: "expense", account_id: "bank", name: "Shared", date: "2026-09-10", amount: "100", tag_ids: [ "shared-tag" ],
+        split_lines: [ { id: "first", name: "First", amount: "60", shared_expense: true }, { id: "second", name: "Second", amount: "40", shared_expense: false } ] } },
+      { type: "Transaction", data: { id: "settlement", account_id: "bank", name: "Settlement", date: "2026-09-10", amount: "-20", tag_ids: [ "shared-tag" ] } },
+      { type: "Transaction", data: { id: "ordinary", account_id: "bank", name: "Ordinary", date: "2026-09-10", amount: "100", tag_ids: [ "shared-tag" ], shared_expense: false } }
+    ]
+    Family::DataImporter.new(@family, build_ndjson(records)).import!
+    assert @family.entries.find_by!(name: "Shared").transaction.shared_expense?
+    assert @family.entries.find_by!(name: "First").transaction.shared_expense?
+    assert_not @family.entries.find_by!(name: "Second").transaction.shared_expense?
+    assert @family.entries.find_by!(name: "Settlement").transaction.shared_expense?
+    assert_not @family.entries.find_by!(name: "Ordinary").transaction.shared_expense?
+  end
+
   test "imports legacy one time rows with default behavior as independent exceptional transactions" do
     records = [
       { type: "Account", data: { id: "legacy-account", name: "Legacy account", balance: "0", currency: "USD", accountable_type: "Depository" } },

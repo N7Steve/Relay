@@ -523,7 +523,8 @@ class TransactionsController < ApplicationController
       )
       @entry.entryable.assign_attributes(
         category_id: duplicate_source.entryable.category_id,
-        merchant_id: duplicate_source.entryable.merchant_id
+        merchant_id: duplicate_source.entryable.merchant_id,
+        shared_expense: duplicate_source.entryable.shared_expense
       )
       @entry.entryable.tag_ids = duplicate_source.entryable.tag_ids
     end
@@ -548,7 +549,7 @@ class TransactionsController < ApplicationController
     def entry_params
       entry_params = params.require(:entry).permit(
         :name, :date, :amount, :currency, :excluded, :import_protected, :notes, :nature, :entryable_type,
-        entryable_attributes: [ :id, :category_id, :merchant_id, :kind, :forecast_behavior, :investment_activity_label, :exchange_rate, { tag_ids: [] } ]
+        entryable_attributes: [ :id, :category_id, :merchant_id, :kind, :forecast_behavior, :shared_expense, :investment_activity_label, :exchange_rate, { tag_ids: [] } ]
       )
 
       nature = entry_params.delete(:nature)

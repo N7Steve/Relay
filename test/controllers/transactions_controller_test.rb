@@ -9,6 +9,33 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     @entry = entries(:transaction)
   end
 
+  test "shared expense checkbox creates both expenses and settlements and can be cleared" do
+    %w[outflow inflow].each do |nature|
+      get new_transaction_url(nature: nature)
+      assert_response :success
+      assert_select "input[type=checkbox][name='entry[entryable_attributes][shared_expense]']", 1
+      post transactions_url, params: { entry: { account_id: @entry.account_id, name: "Shared #{nature}",
+        date: Date.current, currency: "USD", amount: 101, nature: nature, entryable_type: "Transaction",
+        entryable_attributes: { shared_expense: "1" } } }
+      created = Entry.order(:created_at).last
+      assert_redirected_to account_url(created.account)
+      assert created.transaction.shared_expense?
+      assert_equal nature == "outflow" ? 101 : -101, created.amount
+      get transaction_url(created)
+      assert_select "input[type=checkbox][name='entry[entryable_attributes][shared_expense]'][checked]", 1
+      patch transaction_url(created), params: { entry: { entryable_attributes: { id: created.transaction.id, shared_expense: "0" } } }
+      assert_not created.transaction.reload.shared_expense?
+    end
+  end
+
+  test "annotation permission cannot change native shared expense classification" do
+    sign_in users(:family_member)
+    account_shares(:depository_shared_with_member).update!(permission: "read_write")
+    patch transaction_url(@entry), params: { entry: { notes: "Allowed note", entryable_attributes: { id: @entry.transaction.id, shared_expense: "1" } } }
+    assert_equal "Allowed note", @entry.reload.notes
+    assert_not @entry.transaction.shared_expense?
+  end
+
   test "legacy exceptional movement displays its effective forecast behavior" do
     @entry.entryable.update_columns(kind: "one_time", forecast_behavior: "normal")
 

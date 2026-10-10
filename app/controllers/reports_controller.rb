@@ -146,11 +146,10 @@ class ReportsController < ApplicationController
       # Flags for view rendering
       @has_accounts = accessible_accounts.any?
 
-      # TEMPORARY: Shared expenses data (see rollback_gc.md)
-      _calculator = SharedExpensesCalculator.new(Current.family)
-      @shared_expenses = _calculator.calculate_debt
-      @adjusted_expenses = _calculator.calculate_adjusted_expenses(@period)
-      @rent_income = _calculator.calculate_rent_income(@period)
+      calculator = SharedExpensesCalculator.new(Current.family, accounts: finance_accounts)
+      @shared_expenses = calculator.calculate_debt
+      @adjusted_expenses = calculator.calculate_adjusted_expenses(@period)
+      @rent_income = calculator.calculate_rent_income(@period)
     end
 
     def preferences_params

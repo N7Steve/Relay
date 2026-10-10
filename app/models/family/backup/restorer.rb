@@ -282,9 +282,26 @@ class Family::Backup::Restorer
       explicit[field] || field.to_s.delete_suffix("_ids").delete_suffix("_id").camelize.presence_in(Family::Backup::MODEL_NAMES)
     end
 
+    def legacy_shared_transaction_ids
+      @legacy_shared_transaction_ids ||= begin
+        tag_ids = @records.filter_map do |row|
+          data = row["data"]
+          data.dig("attributes", "id") if data["model"] == "Tag" && data.dig("attributes", "name") == "Gastos compartidos"
+        end.to_set
+        @records.filter_map do |row|
+          data = row["data"]
+          attrs = data["attributes"]
+          attrs["taggable_id"] if data["model"] == "Tagging" && attrs["taggable_type"] == "Transaction" && tag_ids.include?(attrs["tag_id"])
+        end.to_set
+      end
+    end
+
     def target_attributes(data)
       model = Family::Backup.models.fetch(data["model"])
       attrs = data["attributes"].deep_dup
+      if data["model"] == "Transaction" && !attrs.key?("shared_expense")
+        attrs["shared_expense"] = legacy_shared_transaction_ids.include?(attrs["id"])
+      end
       # Snapshots before the independent protection policy protected excluded
       # records implicitly. Preserve that promise when restoring old snapshots.
       if data["model"] == "Entry" && @manifest["version"] == 1

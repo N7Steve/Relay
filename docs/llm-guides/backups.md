@@ -143,3 +143,9 @@ relationships, histories, settings, import retries and rollback after late error
   Code reversal does not undo restored family data. A restoration is deliberately
   not revertible through transaction import controls; use a destination backup
   or a separately authorized reset when reversing an actual migration.
+
+`Transaction.shared_expense` se conserva en snapshots y NDJSON de intercambio,
+también en divisiones. Los backups históricos que no contienen el atributo
+traducen la etiqueta «Gastos compartidos» al restaurar, sin eliminarla. Los
+backups nuevos conservan el valor explícito, incluso `false` con esa etiqueta.
+Ver [gastos compartidos](financial-effects.md#gastos-compartidos).

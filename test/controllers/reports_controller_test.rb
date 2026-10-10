@@ -9,6 +9,25 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     @family = @user.family
   end
 
+  test "shared debt only includes accounts participating in the users finances" do
+    owned = create_transaction(amount: 100)
+    owned.transaction.update!(shared_expense: true)
+    account = @family.accounts.create!(name: "Partners private", owner: users(:family_member), balance: 0,
+      currency: "USD", accountable: Depository.new)
+    shared = create_transaction(account: account, amount: 900)
+    shared.transaction.update!(shared_expense: true)
+    share = account.account_shares.create!(user: @user, permission: "read_only", include_in_finances: false)
+
+    get reports_path
+    assert_response :success
+    assert_select "p.privacy-sensitive", text: "$50.00"
+
+    share.update!(include_in_finances: true)
+    get reports_path
+    assert_response :success
+    assert_select "p.privacy-sensitive", text: "$500.00"
+  end
+
   test "a missing foreign rate prevents a complete report and identifies the required conversion" do
     date = Date.current.beginning_of_month
     ExchangeRate.where(from_currency: "EUR", to_currency: @family.currency, date: date).delete_all

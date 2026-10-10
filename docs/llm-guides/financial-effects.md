@@ -203,3 +203,34 @@ real y las restricciones finales de integridad requieren una copia aislada.
 Consulta el [plan por etapas](../migration/financial-domain-stages.md).
 Las decisiones de política y persistencia están en el
 [formulario de decisiones](../research/financial-domain-decisions.md).
+
+## Gastos compartidos
+
+`Transaction.shared_expense` es una clasificación nativa independiente de `kind`,
+las etiquetas y la exclusión analítica. Siempre representa gastos con la pareja
+al 50/50; no existen participantes ni porcentajes configurables. La casilla
+«Gastos compartidos» se puede seleccionar al crear un gasto o ingreso y editar
+con los mismos permisos que el resto de los datos financieros.
+
+En el resumen de informes, la deuda pendiente usa todo el histórico autorizado:
+`max(gastos compartidos / 2 - ingresos compartidos, 0)`. Un ingreso marcado es
+una liquidación por su importe completo. El gasto ajustado del período cuenta
+solo la mitad de los gastos compartidos y el total de los demás gastos. Se
+mantienen las exclusiones por movimiento, cuenta y `budget_reportable`; los
+saldos, importes originales y otros informes no cambian. Las conversiones usan
+el tipo almacenado de la fecha del movimiento y fallan explícitamente si falta.
+
+La migración `20261010120000` añade el indicador y convierte automáticamente las
+transacciones de todas las familias que tenían la etiqueta exacta «Gastos
+compartidos», incluidos ingresos y movimientos excluidos. No modifica importes,
+fechas, notas, etiquetas ni marcas de tiempo. Es idempotente y no requiere IDs
+ni configuración por instalación. No se ejecuta durante la preparación del
+código. Su reversión es explícitamente irreversible para evitar perder la nueva
+clasificación o modificar las etiquetas conservadas.
+
+Los snapshots completos y el NDJSON de intercambio conservan el indicador,
+incluidas las líneas divididas. Los backups históricos sin el atributo lo
+infieren de su etiqueta al restaurar, después de validar su integridad; un
+`false` explícito en un backup nuevo prevalece sobre cualquier etiqueta antigua.
+Una vez restaurado o migrado, renombrar, añadir o quitar etiquetas no cambia
+la clasificación nativa.

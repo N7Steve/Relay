@@ -11,6 +11,37 @@ class Family::BackupTest < ActiveSupport::TestCase
     @tag = @source.tags.create!(name: "Household", color: "#4da568")
   end
 
+  test "round trips native shared expenses and explicit false despite a historical tag" do
+    tag = @source.tags.create!(name: "Gastos compartidos", color: "#123456")
+    shared = transaction(@account, "Shared expense", 100)
+    shared.transaction.update!(shared_expense: true)
+    settlement = transaction(@account, "Settlement", -20)
+    settlement.transaction.update!(shared_expense: true)
+    ordinary = transaction(@account, "Ordinary tagged", 60)
+    ordinary.transaction.tags << tag
+    restore!
+    assert @target.entries.find_by!(name: "Shared expense").transaction.shared_expense?
+    assert @target.entries.find_by!(name: "Settlement").transaction.shared_expense?
+    assert_not @target.entries.find_by!(name: "Ordinary tagged").transaction.shared_expense?
+    @target.reload.update!(currency: "EUR")
+    assert_equal 30, SharedExpensesCalculator.new(@target).calculate_debt[:pending_debt].amount
+  end
+
+  test "historical snapshots infer shared classification after checksum validation and preserve tags" do
+    tag = @source.tags.create!(name: "Gastos compartidos", color: "#123456")
+    [ 100, -20 ].each { |amount| transaction(@account, "Historical #{amount}", amount).transaction.tags << tag }
+    content = rewrite_backup do |records|
+      records.each do |row|
+        row["data"]["attributes"].delete("shared_expense") if row.dig("data", "model") == "Transaction"
+      end
+    end
+    Family::DataImporter.new(@target, content).import!
+    assert @target.transactions.all?(&:shared_expense?)
+    assert_equal 2, @target.tags.find_by!(name: tag.name).taggings.count
+    @target.reload.update!(currency: "EUR")
+    assert_equal 30, SharedExpensesCalculator.new(@target).calculate_debt[:pending_debt].amount
+  end
+
   test "round trips Agenda definitions, tags, rejected occurrences and both transfer entries" do
     payment = @source.scheduled_payments.create!(
       account: @account, target_account: @destination, title: "Savings transfer", amount: 100,

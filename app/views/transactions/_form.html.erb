@@ -61,6 +61,7 @@
     </div>
 
     <%= f.fields_for :entryable do |ef| %>
+      <%= render "transactions/shared_expense_field", form: ef %>
       <%= render DS::CategorySelect.new(
             form: ef,
             categories: categories,

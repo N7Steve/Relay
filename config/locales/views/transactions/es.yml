@@ -1,6 +1,9 @@
 ---
 es:
   transactions:
+    shared_expense_field:
+      label: Gastos compartidos
+      description: Con tu pareja al 50/50. Un gasto suma la mitad a la deuda pendiente; un ingreso la liquida por su importe completo.
     bulk_updates:
       new:
         cancel: Cancelar

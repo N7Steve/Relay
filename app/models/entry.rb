@@ -491,6 +491,7 @@ class Entry < ApplicationRecord
           category_id: split_attrs[:category_id],
           merchant_id: entryable.try(:merchant_id),
           kind: entryable.try(:kind),
+          shared_expense: entryable.try(:shared_expense) || false,
           forecast_behavior: Transaction.forecast_behavior_for_import(kind: entryable.try(:kind), behavior: entryable.try(:forecast_behavior))
         )
 
