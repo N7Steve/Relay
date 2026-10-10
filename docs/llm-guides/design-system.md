@@ -25,7 +25,9 @@ dark theme plus `data-palette="relay"` on `<html>`: it keeps `data-theme="dark"`
 so `theme-dark` variants and charts keep working, and
 [`theme-relay.css`](../../app/assets/tailwind/relay-design-system/theme-relay.css)
 swaps the neutral scale for blue-violet greys and adds the logo gradients and
-blur. Build UI with functional tokens and it follows every theme; do not style
+card sheen. Avoid filters on shared surfaces: they trap fixed menus and bulk
+action bars in a containing block and stacking context. Build UI with functional
+tokens and it follows every theme; do not style
 `data-palette` outside that file. Primary buttons carry the `button--primary`
 hook for the gradient.
 
