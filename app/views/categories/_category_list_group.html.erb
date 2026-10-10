@@ -15,7 +15,7 @@
     <p><%= categories.count %></p>
   </div>
 
-  <div class="shadow-border-xs rounded-lg bg-container">
+  <div class="shadow-border-xs rounded-lg bg-container bg-none">
     <div class="overflow-hidden rounded-lg">
       <% category_groups.each_with_index do |group, idx| %>
         <%= render "categories/category",
