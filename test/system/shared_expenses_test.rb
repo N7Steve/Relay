@@ -10,6 +10,7 @@ class SharedExpensesTest < ApplicationSystemTestCase
       visit new_transaction_url(account_id: accounts(:depository).id, nature: nature)
       fill_in "Description", with: "Shared #{nature}"
       fill_in "entry_amount", with: "100"
+      find("summary", text: /details/i).click
       check "Shared expenses"
       click_button "Add transaction"
       assert_text "Transaction created"
@@ -29,6 +30,27 @@ class SharedExpensesTest < ApplicationSystemTestCase
       uncheck "Shared expenses"
       assert_selector "form[data-test-saved='true']"
       assert_not entry.transaction.reload.shared_expense?
+    end
+  end
+
+  test "details offers both classifications immediately above notes and shared rows have an indicator" do
+    visit new_transaction_url(account_id: accounts(:depository).id)
+    fill_in "Description", with: "One-time shared purchase"
+    fill_in "entry_amount", with: "100"
+    assert_no_selector "input[type=checkbox][name='entry[entryable_attributes][shared_expense]']", visible: true
+    find("summary", text: /details/i).click
+    check "Shared expenses"
+    check "One-time expense"
+    fill_in "entry_notes", with: "Keep this note"
+    click_button "Add transaction"
+    assert_text "Transaction created"
+    entry = accounts(:depository).entries.find_by!(name: "One-time shared purchase")
+    assert entry.transaction.shared_expense?
+    assert entry.transaction.forecast_exceptional_once?
+    assert_equal "Keep this note", entry.notes
+    visit transactions_url
+    within "##{ActionView::RecordIdentifier.dom_id(entry)}" do
+      assert_selector "[role=img][aria-label='Shared expenses'][title='Shared expenses']"
     end
   end
 end

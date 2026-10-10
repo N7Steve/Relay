@@ -28,6 +28,40 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "creation keeps concise shared and one time checkboxes in details above notes" do
+    get new_transaction_url
+    assert_response :success
+    assert_select "details input[type=checkbox][name='entry[entryable_attributes][shared_expense]']", 1
+    assert_select "details input[type=checkbox][name='entry[entryable_attributes][forecast_behavior]'][value='exceptional_once']", 1
+    assert_select "details input[type=hidden][name='entry[entryable_attributes][forecast_behavior]'][value='normal']", 1
+    assert_not_includes response.body, "Shared with your partner 50/50."
+  end
+
+  test "creation uses the existing exceptional classification for one time expenses" do
+    %w[exceptional_once normal].each do |behavior|
+      post transactions_url, params: { entry: { account_id: @entry.account_id, name: "One time #{behavior}",
+        date: Date.current, currency: "USD", amount: 100, nature: "outflow", entryable_type: "Transaction",
+        entryable_attributes: { forecast_behavior: behavior } } }
+      created = Entry.order(:created_at).last
+      assert_redirected_to account_url(created.account)
+      assert_equal behavior, created.transaction.forecast_behavior
+      assert_equal behavior == "normal", Transaction.budget_reportable.exists?(created.transaction.id)
+    end
+  end
+
+  test "transaction rows identify native shared expenses and settlements beside the name" do
+    @entry.transaction.update!(shared_expense: true)
+    settlement = create_transaction(amount: -20)
+    settlement.transaction.update!(shared_expense: true)
+    ordinary = create_transaction(amount: 70)
+    get transactions_url
+    assert_response :success
+    [ @entry, settlement ].each do |entry|
+      assert_select "##{dom_id(entry)} [role=img][aria-label='Shared expenses'][title='Shared expenses']", 1
+    end
+    assert_select "##{dom_id(ordinary)} [role=img][aria-label='Shared expenses']", 0
+  end
+
   test "annotation permission cannot change native shared expense classification" do
     sign_in users(:family_member)
     account_shares(:depository_shared_with_member).update!(permission: "read_write")

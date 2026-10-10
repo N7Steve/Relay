@@ -61,7 +61,6 @@
     </div>
 
     <%= f.fields_for :entryable do |ef| %>
-      <%= render "transactions/shared_expense_field", form: ef %>
       <%= render DS::CategorySelect.new(
             form: ef,
             categories: categories,
@@ -126,7 +125,18 @@
   </section>
 
   <%= render DS::Disclosure.new(title: t(".details")) do %>
-    <section class="space-y-2">
+    <section class="space-y-3">
+      <%= f.fields_for :entryable do |ef| %>
+        <%= render "transactions/shared_expense_field", form: ef %>
+        <%= render DS::Checkbox.new(
+              form: ef,
+              method: :forecast_behavior,
+              label: t(".one_time_expense"),
+              checked: ef.object.exceptional_for_forecast?,
+              checked_value: "exceptional_once",
+              unchecked_value: "normal"
+            ) %>
+      <% end %>
       <%= f.text_area :notes,
                       label: t(".note_label"),
                       placeholder: t(".note_placeholder"),

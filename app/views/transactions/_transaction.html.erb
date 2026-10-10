@@ -94,6 +94,11 @@
                   </div>
 
                   <div class="flex items-center gap-1 flex-shrink-0">
+                    <% if transaction.shared_expense? %>
+                      <span role="img" aria-label="<%= t("transactions.shared_expense_field.label") %>" title="<%= t("transactions.shared_expense_field.label") %>">
+                        <%= icon "users", size: "sm", "aria-hidden": true %>
+                      </span>
+                    <% end %>
                     <% if transaction.exceptional_for_forecast? %>
                       <span class="text-warning" title="<%= t("transactions.show.forecast_behaviors.exceptional_once") %>">
                         <%= icon "asterisk", size: "sm", color: "current" %>
