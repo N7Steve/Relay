@@ -1,15 +1,13 @@
 class BalanceSheet::NetWorthBreakdownSeriesBuilder
-  # Monthly interval regardless of period length so the reports chart always
-  # shows one point per month in the selected range.
-  INTERVAL = "1 month"
-  CACHE_VERSION = "v2"
+  # Use the same resolution as the dashboard net worth chart.
+  CACHE_VERSION = "v3"
 
   def initialize(family, user: nil)
     @family = family
     @user = user
   end
 
-  # Returns a chart payload where each monthly point carries the net worth
+  # Returns a chart payload where each point carries the net worth
   # value plus a per-account-group breakdown (grouped by accountable type)
   # split into assets and liabilities, for rendering in chart tooltips.
   def breakdown_series(period:)
@@ -20,7 +18,7 @@ class BalanceSheet::NetWorthBreakdownSeriesBuilder
       {
         start_date: period.start_date,
         end_date: period.end_date,
-        interval: INTERVAL,
+        interval: period.interval,
         trend: net_series.trend,
         values: [ nil, *net_series.values ].each_cons(2).map do |previous, value|
           breakdown_value(value, previous, groups)
@@ -54,7 +52,7 @@ class BalanceSheet::NetWorthBreakdownSeriesBuilder
         date: value.date,
         date_formatted: value.date_formatted,
         value: current,
-        # Month-over-month change between chart points. The trend on the raw
+        # Change between consecutive chart points. The trend on the raw
         # series value compares the underlying balance row's own start/end,
         # which at a monthly interval reflects only the last balance update
         # before the sample date. The first point has no prior month, so it
@@ -112,7 +110,7 @@ class BalanceSheet::NetWorthBreakdownSeriesBuilder
         account_active_until_dates: disabled_account_active_until_dates(accounts),
         currency: family.currency,
         period: period,
-        interval: INTERVAL,
+        interval: period.interval,
         favorable_direction: favorable_direction
       ).balance_series
     end

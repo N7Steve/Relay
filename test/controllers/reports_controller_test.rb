@@ -35,7 +35,8 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
       data = JSON.parse(chart["data-net-worth-chart-data-value"])
       assert_equal 365.days.ago.to_date.iso8601, data.fetch("start_date")
       assert_equal Date.current.iso8601, data.fetch("end_date")
-      assert_operator data.fetch("values").size, :>=, 12
+      assert_equal "1 day", data.fetch("interval")
+      assert_equal 366, data.fetch("values").size
       assert_select "p", text: I18n.t("reports.net_worth.change_365_days")
     end
   end

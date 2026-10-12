@@ -11,20 +11,23 @@ class BalanceSheet::NetWorthBreakdownSeriesBuilderTest < ActiveSupport::TestCase
     @liability_account = accounts(:credit_card)
   end
 
-  test "builds monthly points with group breakdown that sums to net worth" do
+  test "builds daily points including changes within a month and group breakdown that sums to net worth" do
     period = Period.custom(start_date: Date.new(2026, 4, 15), end_date: Date.new(2026, 7, 15))
 
     create_balance(account: @asset_account, date: period.start_date, balance: 5000)
+    create_balance(account: @asset_account, date: period.start_date + 10.days, balance: 5500)
     create_balance(account: @asset_account, date: period.end_date, balance: 6000)
     create_balance(account: @liability_account, date: period.start_date, balance: 1000)
     create_balance(account: @liability_account, date: period.end_date, balance: 1500)
 
     series = builder.breakdown_series(period: period)
 
-    # One point per month in the period, end date included
-    assert_equal 4, series[:values].size
+    assert_equal "1 day", series[:interval]
+    assert_equal (period.end_date - period.start_date).to_i + 1, series[:values].size
     assert_equal period.start_date, series[:values].first[:date]
     assert_equal period.end_date, series[:values].last[:date]
+    intermediate_point = series[:values].find { |point| point[:date] == period.start_date + 10.days }
+    assert_equal 4500, intermediate_point[:value].amount
 
     last_point = series[:values].last
 
@@ -38,7 +41,7 @@ class BalanceSheet::NetWorthBreakdownSeriesBuilderTest < ActiveSupport::TestCase
       assert_equal point[:value].amount, point[:assets].amount - point[:liabilities].amount
     end
 
-    # Each point's trend is the month-over-month change from the previous
+    # Each point's trend is the daily change from the previous
     # point; the first point has no prior month so its trend is flat
     assert_equal 0, series[:values].first[:trend].value.amount
     series[:values].each_cons(2) do |previous, point|
