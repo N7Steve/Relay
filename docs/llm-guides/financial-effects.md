@@ -206,6 +206,15 @@ Las decisiones de política y persistencia están en el
 
 ## Rentabilidad nativa en informes
 
+La gráfica de una cuenta de cartera gestionada abre en «Rentabilidad» y permite
+cambiar a «Saldo», manteniendo el período. Rentabilidad representa ganancias o
+pérdidas monetarias acumuladas dentro del período disponible, con una base cero,
+no una tasa porcentual. Usa la misma descomposición diaria que los informes:
+índice histórico nativo y capital anterior cuando están disponibles; en su
+defecto, flujos de mercado, revaloraciones y movimientos de rendimiento locales.
+Excluye aportaciones y retiradas e incluye comisiones. No calcula rendimientos
+de mercado nuevos entre observaciones ni necesita proveedores externos.
+
 Los informes añaden una categoría calculada «Inversiones» con la
 rentabilidad monetaria del período de las carteras gestionadas, usando el mismo
 motor que su tarjeta de rentabilidad. Las ganancias suman ingresos y las pérdidas

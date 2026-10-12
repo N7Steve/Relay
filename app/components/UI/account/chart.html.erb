@@ -18,7 +18,18 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <% if account.supports_trades? %>
+      <% if account.managed_portfolio? %>
+        <% %w[performance balance].each do |chart_view| %>
+          <%= render DS::Link.new(
+            text: t("UI.account.chart.performance.views.#{chart_view}"),
+            href: account_path(account, request.query_parameters.merge(chart_view: chart_view)),
+            variant: view == chart_view ? :primary : :outline,
+            size: :sm,
+            data: { turbo_action: "advance" },
+            aria: { current: view == chart_view ? "true" : nil }
+          ) %>
+        <% end %>
+      <% elsif account.supports_trades? %>
         <%= form_with url: account_path(account), method: :get, data: { controller: "auto-submit-form" } do |form| %>
           <%= form.select :chart_view,
             [[t("UI.account.chart.views.total_value"), "balance"], [t("UI.account.chart.views.holdings"), "holdings_balance"], [t("UI.account.chart.views.cash"), "cash_balance"], [t("UI.account.chart.views.gains"), "gains"]],
@@ -32,7 +43,7 @@
       <%= render UI::PeriodPicker.new(
         selected: period_picker_selected,
         url: account_path(account),
-        extra_params: account.supports_trades? ? { chart_view: view } : {},
+        extra_params: (account.supports_trades? || account.managed_portfolio?) ? { chart_view: view } : {},
         options: period_picker_options
       ) %>
     </div>
@@ -40,7 +51,11 @@
 
   <%= turbo_frame_tag dom_id(@account, :chart_details) do %>
     <div class="px-4">
-      <%= render partial: "shared/trend_change", locals: { trend: trend, comparison_label: comparison_label } %>
+      <% if performance_view? %>
+        <p class="text-sm text-secondary"><%= t("UI.account.chart.performance.description") %></p>
+      <% else %>
+        <%= render partial: "shared/trend_change", locals: { trend: trend, comparison_label: comparison_label } %>
+      <% end %>
     </div>
 
     <% if loan_chart? %>
@@ -98,6 +113,7 @@
           class="w-full h-full privacy-sensitive"
           data-controller="time-series-chart"
           data-time-series-chart-selectable-value="true"
+          data-time-series-chart-show-change-value="<%= !performance_view? %>"
           data-time-series-chart-data-value="<%= series.to_json %>"></div>
         <% else %>
           <div class="w-full h-full flex items-center justify-center">

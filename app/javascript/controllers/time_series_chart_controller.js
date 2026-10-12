@@ -11,6 +11,7 @@ export default class extends Controller {
     useLabels: { type: Boolean, default: true },
     useTooltip: { type: Boolean, default: true },
     selectable: { type: Boolean, default: false },
+    showChange: { type: Boolean, default: true },
   };
 
   _d3SvgMemo = null;
@@ -539,6 +540,11 @@ export default class extends Controller {
   }
 
   _tooltipTemplate(datum) {
+    if (!this.showChangeValue) {
+      return `<div class="text-xs text-secondary mb-1">${datum.date_formatted}</div>
+        <div class="text-primary font-medium tabular-nums">${this._extractFormattedValue(datum.value)}</div>`;
+    }
+
     return `
       <div class="text-xs text-secondary mb-1">
         ${datum.date_formatted}

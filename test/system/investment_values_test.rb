@@ -39,4 +39,27 @@ class InvestmentValuesTest < ApplicationSystemTestCase
     assert_equal 950, @account.reload.balance
     assert_equal 1, @account.transactions.where(kind: "investment_value_adjustment").count
   end
+
+  test "switches between return and balance while keeping the selected period" do
+    assert Investment::ValueUpdate.new(account: @account, date: Date.current, amount: 1050).save
+
+    visit account_path(@account, period: "last_7_days")
+    within "##{dom_id(@account, :chart)}" do
+      assert_text "Cumulative return for the period"
+      assert_text "+$50.00"
+      assert_selector "#lineChart svg path[d]"
+      page.save_screenshot(Rails.root.join("tmp/screenshots/managed-portfolio-return.png"))
+      click_link "Balance", exact: true
+    end
+    assert_current_path account_path(@account, chart_view: "balance", period: "last_7_days")
+    within "##{dom_id(@account, :chart)}" do
+      assert_text "$1,050.00"
+      click_link "Return", exact: true
+    end
+    assert_current_path account_path(@account, chart_view: "performance", period: "last_7_days")
+    within "##{dom_id(@account, :chart)}" do
+      assert_text "+$50.00"
+      assert_selector "[data-time-series-chart-show-change-value='false'] svg path[d]"
+    end
+  end
 end

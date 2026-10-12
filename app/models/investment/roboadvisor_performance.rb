@@ -64,14 +64,33 @@ class Investment::RoboadvisorPerformance
     return_index.any? && !local_value_updates?
   end
 
+  # Cumulative monetary return within the selected window. Capital movements
+  # never enter these daily P&L amounts. Start at zero before the first day.
+  def profit_loss_series(period:)
+    daily = native_daily_profit_loss(period.date_range) || balance_daily_profit_loss(period.date_range)
+    return Series.new(start_date: nil, end_date: nil, interval: "1 day", values: []) if daily.empty?
+
+    total = 0.to_d
+    values = [ { date: daily.keys.min - 1.day, value: Money.new(total, account.currency) } ]
+    daily.sort.each do |date, amount|
+      total += amount
+      values << { date: date, value: Money.new(total, account.currency) }
+    end
+    Series.from_raw_values(values)
+  end
+
   private
 
     def native_profit_loss_for(date_range)
+      daily = native_daily_profit_loss(date_range)
+      daily.values.sum if daily.present?
+    end
+
+    def native_daily_profit_loss(date_range)
       return if local_value_updates?(date_range.end)
       return if return_index.empty? || portfolio_points.empty?
 
-      total = 0.to_d
-      observations = 0
+      daily = {}
       return_index.each_cons(2) do |previous, current|
         current_date, current_index = current
         next unless date_range.cover?(current_date)
@@ -82,30 +101,36 @@ class Investment::RoboadvisorPerformance
         capital = portfolio_points.select { |date, _amount| date <= previous_date }.max_by(&:first)&.last
         next unless capital
 
-        total += capital * (current_index / previous_index - 1)
-        observations += 1
+        daily[current_date] = capital * (current_index / previous_index - 1)
       end
 
-      total if observations.positive?
+      daily if daily.any?
     end
 
     def balance_profit_loss(date_range)
+      daily = balance_daily_profit_loss(date_range)
+      daily.values.sum if daily.any?
+    end
+
+    def balance_daily_profit_loss(date_range)
       rows = account.balances.order(:date)
       rows = rows.where(date: date_range) if date_range
       rows = rows.to_a
       transactions = performance_transactions(date_range)
-      return if rows.empty? && transactions.empty?
+      return {} if rows.empty? && transactions.empty?
 
       balance_only = !account.holdings.exists?
       first_balance_date = account.balances.minimum(:date)
-      market_profit_loss = rows.sum do |balance|
+      daily = Hash.new(0.to_d)
+      rows.each do |balance|
         pnl = balance.net_market_flows
         if balance_only && balance.date != first_balance_date
           pnl += balance.cash_adjustments + balance.non_cash_adjustments
         end
-        pnl
+        daily[balance.date] += pnl
       end
-      market_profit_loss + transactions.sum { |entry| transaction_profit_loss(entry) }
+      transactions.each { |entry| daily[entry.date] += transaction_profit_loss(entry) }
+      daily
     end
 
     def performance_transactions(date_range)

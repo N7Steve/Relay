@@ -14,6 +14,24 @@ class UI::Account::ChartTest < ViewComponent::TestCase
     assert_text "+$100.00"
   end
 
+  test "managed portfolios default to monetary return and preserve the period when switching" do
+    @account.accountable.update!(subtype: "roboadvisor", tracking_mode: "managed")
+    period = Period.last_30_days
+    @account.balances.create!(date: period.start_date, balance: 1000, currency: "USD", cash_adjustments: 1000)
+    @account.balances.create!(date: period.end_date, balance: 1050, currency: "USD", cash_adjustments: 50)
+
+    render_inline(UI::Account::Chart.new(account: @account, period: period))
+
+    assert_text "+$50.00"
+    assert_text I18n.t("UI.account.chart.performance.description")
+    assert_selector "a[aria-current='true'][href*='chart_view=performance']"
+    assert_selector "a[href*='chart_view=performance'][href*='period=']", visible: :all
+    assert_selector "[data-time-series-chart-show-change-value='false']"
+
+    component = UI::Account::Chart.new(account: @account, period: period, view: "balance")
+    assert_equal @account.balance_money.format, component.view_balance_display
+  end
+
   test "does not sign non-gains views" do
     component = UI::Account::Chart.new(account: @account, view: "balance")
 

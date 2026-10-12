@@ -60,6 +60,12 @@ en:
           start_principal: The principal balance at the beginning of this day
           start_value: The asset value at the beginning of this day
       chart:
+        performance:
+          title: Cumulative return for the period
+          description: Gain or loss in the account currency since the start of the available period. Excludes contributions and withdrawals; includes fees. Changes only when valuation or return data is available.
+          views:
+            performance: Return
+            balance: Balance
         loan:
           actual: Recorded balance
           scheduled: Original schedule

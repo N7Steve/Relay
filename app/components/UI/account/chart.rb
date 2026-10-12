@@ -96,7 +96,7 @@ class UI::Account::Chart < ApplicationComponent
       holdings_value_money
     when "cash_balance"
       account.cash_balance_money
-    when "gains"
+    when "gains", "performance"
       gains_money
     end
   end
@@ -115,6 +115,8 @@ class UI::Account::Chart < ApplicationComponent
 
   # Label displayed above the main indicator, based on account type and chart view.
   def title
+    return I18n.t("UI.account.chart.performance.title") if performance_view?
+
     case account.accountable_type
     when "Investment", "Crypto"
       case view
@@ -153,7 +155,7 @@ class UI::Account::Chart < ApplicationComponent
     return nil unless foreign_currency?
 
     begin
-      base_money = view == "gains" ? gains_money : account.balance_money
+      base_money = view_balance_money
       base_money.exchange_to(account.family.currency)
     rescue Money::ConversionError
       nil
@@ -161,12 +163,24 @@ class UI::Account::Chart < ApplicationComponent
   end
 
   def view
-    @view ||= "balance"
+    if account.managed_portfolio?
+      @view.presence_in(%w[balance performance]) || "performance"
+    else
+      @view.presence_in(%w[balance holdings_balance cash_balance gains]) || "balance"
+    end
+  end
+
+  def performance_view?
+    view == "performance"
   end
 
   # Read by the trend, its comparison label and the chart mount; built once.
   def series
-    @series ||= account.balance_series(period: period, view: view)
+    @series ||= if performance_view?
+      Investment::RoboadvisorPerformance.new(account).profit_loss_series(period: period)
+    else
+      account.balance_series(period: period, view: view)
+    end
   end
 
   # Current total unrealized gains, taken from the series so the main indicator
@@ -214,7 +228,7 @@ class UI::Account::Chart < ApplicationComponent
   private
     # Prefixes positive gains with "+"; other views keep plain Money formatting.
     def signed_format(money)
-      return money.format unless view == "gains" && money.amount.positive?
+      return money.format unless view.in?(%w[gains performance]) && money.amount.positive?
 
       "+#{money.format}"
     end

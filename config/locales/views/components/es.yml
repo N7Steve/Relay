@@ -60,6 +60,12 @@ es:
           start_principal: El saldo de capital al comienzo de este día
           start_value: El valor del activo al comienzo de este día
       chart:
+        performance:
+          title: Rentabilidad acumulada del período
+          description: Ganancia o pérdida en la moneda de la cuenta desde el inicio del período disponible. Excluye aportaciones y retiradas; incluye comisiones. Solo cambia cuando hay datos de valoración o rendimiento.
+          views:
+            performance: Rentabilidad
+            balance: Saldo
         no_data_available: No hay datos disponibles
         title:
           balance: Saldo
