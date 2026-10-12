@@ -9,6 +9,37 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     @family = @user.family
   end
 
+  test "reports omit investment performance while retaining managed portfolios and saved section order" do
+    @family.accounts.create!(name: "Managed portfolio", balance: 1000, currency: "USD",
+      accountable: Investment.new(subtype: "roboadvisor"))
+    @user.update!(preferences: { "reports_section_order" => %w[investment_performance roboadvisor_performance net_worth] })
+
+    get reports_path
+
+    assert_response :success
+    assert_select "section[data-section-key='investment_performance']", count: 0
+    assert_select "section[data-section-key='roboadvisor_performance']", count: 1
+    assert_select "section[data-section-key='net_worth']", count: 1
+  end
+
+  test "net worth chart and change always use the last 365 days regardless of report period" do
+    BalanceSheet.any_instance.expects(:net_worth_series).twice.with do |options|
+      period = options.fetch(:period)
+      period.start_date == 365.days.ago.to_date && period.end_date == Date.current
+    end.returns(nil)
+
+    [ { period_type: :monthly }, { period_type: :custom, start_date: Date.new(2025, 1, 1), end_date: Date.new(2025, 1, 1) } ].each do |options|
+      get reports_path(options)
+      assert_response :success
+      chart = css_select("#reportsNetWorthChart").sole
+      data = JSON.parse(chart["data-net-worth-chart-data-value"])
+      assert_equal 365.days.ago.to_date.iso8601, data.fetch("start_date")
+      assert_equal Date.current.iso8601, data.fetch("end_date")
+      assert_operator data.fetch("values").size, :>=, 12
+      assert_select "p", text: I18n.t("reports.net_worth.change_365_days")
+    end
+  end
+
   test "activity breakdown optionally halves shared expenses including subcategories and previews" do
     parent = @family.categories.create!(name: "Shared groceries")
     child = @family.categories.create!(name: "Supermarket", parent: parent)
@@ -91,80 +122,13 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, date.iso8601
   end
 
-  # The per-trade line under the realised-gains card rendered
-  # `Money.new(gain.value, Current.family.currency)` -- taking the number out of
-  # the Trend and re-labelling it as family currency with no conversion at all.
-  #
-  # The fixture has to be a FOREIGN ACCOUNT for that to show: a gain is carried
-  # in the currency its position is held in, so for a USD account under a USD
-  # family the re-labelling is accidentally correct and a test built on one
-  # passes either way.
-  #
-  # A USD family, a EUR account, a EUR-listed security: basis 100 EUR/share, 2
-  # sold at 150 EUR/share, EUR->USD 1.5 that day. The gain is 100 EUR, and the
-  # line must read $150.00. Re-labelled rather than converted it reads $100.00.
-  test "a foreign-account disposal is listed in family currency, not re-labelled" do
-    date = Date.current.beginning_of_month
-    account = @family.accounts.create!(name: "Brokerage EUR", balance: 10_000,
-                                       currency: "EUR", accountable: Investment.new)
-    security = Security.create!(ticker: "EUX#{SecureRandom.hex(3)}", name: "Euro Listed")
-
-    ExchangeRate.create!(from_currency: "EUR", to_currency: "USD", date: date, rate: 1.5)
-    ExchangeRate.find_or_initialize_by(from_currency: "EUR", to_currency: "USD", date: Date.current).update!(rate: 1.5)
-    account.holdings.create!(security: security, date: date, qty: 5, price: 150,
-                             amount: BigDecimal(750), currency: "EUR", cost_basis: 100)
-    create_trade(security, account: account, qty: -2, date: date, price: 150, currency: "EUR")
-
-    get reports_path
-    assert_response :ok
-
-    line = css_select("[data-testid='realized-gain-line']").map(&:text)
-                                                           .find { |text| text.include?(security.ticker) }
-
-    assert line, "the disposal must be listed at all, or this proves nothing"
-    assert_match "$150.00", line, "converted at the trade's own rate"
-    assert_no_match(/\$100\.00/, line, "$100.00 is the EUR figure printed with a dollar sign")
-  end
-
-  # A position carried in a THIRD currency -- not the disposal's, not the
-  # account's. 300 EUR of proceeds at 0.8 is 240 GBP, less 200 GBP of basis, so
-  # 40 GBP and $50.00 at 1.25. GBP is in neither currency set the card used to
-  # enumerate, and a currency it does not enumerate converts at the `|| 1`
-  # parity fallback: the line would read $40.00.
-  test "a disposal carried in a third currency is converted, not passed through at parity" do
-    date = Date.current.beginning_of_month
-    account = @family.accounts.create!(name: "Brokerage USD", balance: 10_000,
-                                       currency: "USD", accountable: Investment.new)
-    security = Security.create!(ticker: "EUX#{SecureRandom.hex(3)}", name: "Euro Listed")
-
-    # The fixtures already hold EUR->GBP for today and yesterday, so on the 1st
-    # and 2nd of a month a fresh row for its first day breaks uniqueness.
-    ExchangeRate.find_or_initialize_by(from_currency: "EUR", to_currency: "GBP", date: date).update!(rate: 0.8)
-    ExchangeRate.create!(from_currency: "GBP", to_currency: "USD", date: date, rate: 1.25)
-    ExchangeRate.find_or_initialize_by(from_currency: "EUR", to_currency: "USD", date: date).update!(rate: 1)
-    ExchangeRate.find_or_initialize_by(from_currency: "GBP", to_currency: "USD", date: Date.current).update!(rate: 1.25)
-    account.holdings.create!(security: security, date: date, qty: 5, price: 150,
-                             amount: BigDecimal(750), currency: "GBP", cost_basis: 100)
-    create_trade(security, account: account, qty: -2, date: date, price: 150, currency: "EUR")
-
-    get reports_path
-    assert_response :ok
-
-    line = css_select("[data-testid='realized-gain-line']").map(&:text)
-                                                           .find { |text| text.include?(security.ticker) }
-
-    assert line, "the disposal must be listed at all, or this proves nothing"
-    assert_match "$50.00", line
-    assert_no_match(/\$40\.00/, line, "$40.00 is the GBP figure converted at parity")
-  end
-
   # The rates a page of disposals needs come from one query, not one per
   # foreign disposal. The conversion itself is covered in TradeTest, which
   # counts the queries directly; what has to hold HERE is that the card asks
   # for the preload at all -- the page's own rate lookups share a SQL shape
   # with `ExchangeRate.find_rate`, so counting them measures the rest
   # of the page rather than this.
-  test "the card preloads the rates its disposals need" do
+  test "the printed investment report preloads the rates its disposals need" do
     account = @family.accounts.create!(name: "Brokerage USD", balance: 50_000,
                                        currency: "USD", accountable: Investment.new)
     seed_foreign_disposals(account, 3)
@@ -173,7 +137,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
       trades.any? { |trade| trade.currency == "EUR" }
     end
 
-    get reports_path
+    get print_reports_path
 
     assert_response :ok
   end
@@ -836,33 +800,6 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
 
     assert_select "button[disabled][aria-label=?]", I18n.t("reports.index.next_period")
-  end
-
-  test "a transfer out is not listed among the period's sales" do
-    account = @family.accounts.create!(name: "Wallet", balance: 100, currency: "USD",
-                                       accountable: Investment.new)
-    security = Security.find_or_create_by!(ticker: "MOVE") { |sec| sec.name = "Movable" }
-    Holding.create!(account: account, security: security, date: 10.days.ago.to_date,
-                    qty: 100, price: 2, amount: 200, currency: "USD", cost_basis: 1)
-
-    %w[Transfer Sell].each do |label|
-      account.entries.create!(
-        date: 3.days.ago.to_date, name: "out #{label}", amount: 0, currency: "USD",
-        entryable: Trade.new(security: security, qty: -40, price: 3, currency: "USD",
-                             investment_activity_label: label)
-      )
-    end
-
-    # `period_type`, not `period` — the controller reads the former, so the
-    # latter silently fell back to the current month and the trades dated
-    # three days ago dropped out of range on the 1st to the 3rd.
-    get reports_path(period_type: :custom, start_date: 30.days.ago.to_date, end_date: Date.current)
-    assert_response :success
-
-    # A transfer out carries the same negative quantity as a sale. Counting it
-    # as one both inflates the number of sales and books a gain nobody made.
-    assert_match I18n.t("reports.investment_performance.sells_count", count: 1), response.body
-    assert_no_match(/#{Regexp.escape(I18n.t("reports.investment_performance.sells_count", count: 2))}/, response.body)
   end
 
   private

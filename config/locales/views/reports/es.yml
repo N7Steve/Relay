@@ -137,6 +137,7 @@ es:
       title: Patrimonio neto
       current_net_worth: Patrimonio neto actual
       period_change: Variación del periodo
+      change_365_days: Variación en los últimos 365 días
       assets_vs_liabilities: Activos vs Pasivos
       total_assets: Activos
       total_liabilities: Pasivos

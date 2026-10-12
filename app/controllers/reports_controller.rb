@@ -136,7 +136,7 @@ class ReportsController < ApplicationController
       @transactions = build_transactions_breakdown
 
       # Investment metrics
-      @investment_metrics = build_investment_metrics
+      @investment_metrics = build_investment_metrics if action_name == "print"
 
       # Roboadvisor metrics
       @roboadvisor_metrics = build_roboadvisor_metrics
@@ -189,19 +189,11 @@ class ReportsController < ApplicationController
           collapsible: true
         },
         {
-          key: "investment_performance",
-          title: "reports.investment_performance.title",
-          partial: "reports/investment_performance",
-          locals: { investment_metrics: @investment_metrics },
-          visible: @investment_metrics[:has_investments],
-          collapsible: true
-        },
-        {
           key: "investment_flows",
           title: "reports.investment_flows.title",
           partial: "reports/investment_flows",
           locals: { investment_flows: @investment_flows },
-          visible: @investment_metrics[:has_investments] && (@investment_flows.contributions.amount > 0 || @investment_flows.withdrawals.amount > 0),
+          visible: @investment_flows.contributions.amount > 0 || @investment_flows.withdrawals.amount > 0,
           collapsible: true
         },
         {
@@ -787,6 +779,7 @@ class ReportsController < ApplicationController
     def build_net_worth_metrics
       balance_sheet = Current.family.balance_sheet
       currency = Current.family.currency
+      net_worth_period = Period.last_365_days
 
       # Current net worth
       current_net_worth = balance_sheet.net_worth
@@ -795,7 +788,7 @@ class ReportsController < ApplicationController
 
       # Get net worth series for the period to calculate change
       # The series.trend gives us the change from first to last value in the period
-      net_worth_series = balance_sheet.net_worth_series(period: @period)
+      net_worth_series = balance_sheet.net_worth_series(period: net_worth_period)
       trend = net_worth_series&.trend
 
       # Get asset and liability groups for breakdown
@@ -810,7 +803,7 @@ class ReportsController < ApplicationController
       # Monthly net worth series with per-account-group breakdown for the chart
       breakdown_series = BalanceSheet::NetWorthBreakdownSeriesBuilder
         .new(Current.family, user: Current.user)
-        .breakdown_series(period: @period)
+        .breakdown_series(period: net_worth_period)
 
       {
         current_net_worth: Money.new(current_net_worth, currency),
