@@ -12,6 +12,20 @@
       }.compact
     %>
 
+    <%= form_with url: reports_path, method: :get, class: "flex items-center gap-2 mr-auto", data: { controller: "auto-submit-form" } do %>
+      <% base_params.each do |key, value| %>
+        <%= hidden_field_tag key, value, id: nil %>
+      <% end %>
+      <%= render DS::Toggle.new(
+        id: "adjust_shared_expenses",
+        name: "adjust_shared_expenses",
+        checked: @adjust_shared_expenses,
+        aria: { label: t("reports.transactions_breakdown.adjust_shared_expenses") },
+        data: { action: "change->auto-submit-form#handleInput" }
+      ) %>
+      <%= label_tag :adjust_shared_expenses, t("reports.transactions_breakdown.adjust_shared_expenses"), class: "text-sm text-secondary cursor-pointer" %>
+    <% end %>
+
     <%# Export Options %>
     <div class="flex items-center gap-2">
       <%= link_to export_transactions_reports_path(base_params.merge(format: :csv)),
@@ -47,7 +61,7 @@
       next_sort_direction = (current_sort_by == "amount" && current_sort_direction == "desc") ? "asc" : "desc"
 
       # Build params for amount sort link
-      amount_sort_params = base_params.merge(sort_by: "amount", sort_direction: next_sort_direction)
+      amount_sort_params = base_params.merge(sort_by: "amount", sort_direction: next_sort_direction, adjust_shared_expenses: params[:adjust_shared_expenses])
     %>
 
     <div class="space-y-8">

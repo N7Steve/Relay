@@ -9,6 +9,56 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     @family = @user.family
   end
 
+  test "activity breakdown optionally halves shared expenses including subcategories and previews" do
+    parent = @family.categories.create!(name: "Shared groceries")
+    child = @family.categories.create!(name: "Supermarket", parent: parent)
+    shared = create_transaction(category: child, amount: 200)
+    shared.transaction.update!(shared_expense: true)
+    create_transaction(category: child, amount: 40)
+    settlement = create_transaction(category: parent, amount: -60)
+    settlement.transaction.update!(shared_expense: true)
+    options = { period_type: :custom, start_date: Date.current, end_date: Date.current }
+
+    get reports_path(options)
+    assert_response :success
+    assert_select "input[role=switch][name=adjust_shared_expenses]:not([checked])"
+    assert_select "tr[data-category='category-#{child.id}']" do
+      assert_select "summary .privacy-sensitive", text: "$240.00"
+      assert_select "[data-entry-id='#{shared.id}'] .privacy-sensitive", text: "$200.00"
+    end
+
+    get reports_path(options.merge(adjust_shared_expenses: "1"))
+    assert_response :success
+    assert_select "input[role=switch][name=adjust_shared_expenses][checked]"
+    assert_select "tr[data-category='category-#{child.id}']" do
+      assert_select "summary .privacy-sensitive", text: "$140.00"
+      assert_select "[data-entry-id='#{shared.id}'] .privacy-sensitive", text: "$100.00"
+    end
+    assert_select "tr[data-category='category-#{parent.id}'] .privacy-sensitive", text: "$140.00"
+    assert_select "tr[data-category='category-#{parent.id}'] .privacy-sensitive", text: "$60.00"
+    assert_select "a[href*='sort_by=amount'][href*='adjust_shared_expenses=1']"
+    assert_equal 200, shared.reload.amount
+
+    get reports_path(options.merge(adjust_shared_expenses: "0"))
+    assert_select "tr[data-category='category-#{child.id}'] summary .privacy-sensitive", text: "$240.00"
+  end
+
+  test "net savings card always includes adjusted savings for the selected period" do
+    options = { period_type: :custom, start_date: Date.current, end_date: Date.current }
+    period = Period.custom(start_date: Date.current, end_date: Date.current)
+    baseline = IncomeStatement.new(@family, user: @user).income_totals(period: period).total
+    adjusted_expenses = SharedExpensesCalculator.new(@family, accounts: @user.finance_accounts).calculate_adjusted_expenses(period)
+    shared = create_transaction(amount: 200)
+    shared.transaction.update!(shared_expense: true)
+
+    [ "0", "1" ].each do |value|
+      get reports_path(options.merge(adjust_shared_expenses: value))
+      assert_response :success
+      expected = Money.new(baseline, @family.currency) - adjusted_expenses - Money.new(100, @family.currency)
+      assert_select "p.privacy-sensitive", text: I18n.t("reports.summary.adjusted_savings", amount: expected.format)
+    end
+  end
+
   test "shared debt only includes accounts participating in the users finances" do
     owned = create_transaction(amount: 100)
     owned.transaction.update!(shared_expense: true)

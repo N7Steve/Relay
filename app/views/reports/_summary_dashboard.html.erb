@@ -92,8 +92,8 @@
         <%= metrics[:net_savings].format %>
       </p>
 
-      <p class="text-sm text-subdued">
-        <%= t("reports.summary.income_minus_expenses") %>
+      <p class="text-sm text-subdued privacy-sensitive">
+        <%= t("reports.summary.adjusted_savings", amount: metrics[:adjusted_savings].format) %>
       </p>
     </div>
   </div>

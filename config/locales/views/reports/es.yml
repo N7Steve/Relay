@@ -41,6 +41,7 @@ es:
       budget_performance: Rendimiento del presupuesto
       vs_previous: vs periodo anterior
       income_minus_expenses: Ingresos menos gastos
+      adjusted_savings: "Ahorro ajustado: %{amount}"
       of_budget_used: del presupuesto utilizado
       no_budget_data: No hay datos de presupuesto para este periodo
     budget_performance:
@@ -86,6 +87,7 @@ es:
       add_transaction: Añadir transacción
       add_account: Añadir cuenta
     transactions_breakdown:
+      adjust_shared_expenses: Ajustar a gastos compartidos
       title: Desglose de actividad
       no_transactions: No se ha encontrado actividad para el periodo y filtros seleccionados
       filters:

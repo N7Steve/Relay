@@ -30,6 +30,12 @@ class Transaction < ApplicationRecord
 
   after_save :clear_merchant_unlinked_association, if: :merchant_id_previously_changed?
 
+  # Accepts the original amount or its equivalent in the report currency.
+  # Shared inflows are settlements and keep their full amount.
+  def personal_expense_amount(amount = entry.amount)
+    shared_expense? && entry.amount.positive? ? amount / 2 : amount
+  end
+
   def investment_value_target
     value = extra&.dig("investment_value", "target")
     BigDecimal(value.to_s) if investment_value_adjustment? && value.present?

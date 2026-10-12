@@ -220,6 +220,13 @@ mantienen las exclusiones por movimiento, cuenta y `budget_reportable`; los
 saldos, importes originales y otros informes no cambian. Las conversiones usan
 el tipo almacenado de la fecha del movimiento y fallan explícitamente si falta.
 
+El desglose de actividad ofrece «Ajustar a gastos compartidos», desactivado por
+defecto y conservado en la URL al ordenar o cambiar de período. Reduce al 50 %
+solo los gastos marcados, incluidas categorías, subcategorías y sus movimientos
+desplegados; los ingresos compartidos mantienen su importe completo. La tarjeta
+de ahorro neto añade «Ahorro ajustado» (ingresos del período menos gastos
+ajustados), independientemente del estado del toggle.
+
 La migración `20261010120000` añade el indicador y convierte automáticamente las
 transacciones de todas las familias que tenían la etiqueta exacta «Gastos
 compartidos», incluidos ingresos y movimientos excluidos. No modifica importes,

@@ -42,6 +42,7 @@ en:
       budget_performance: Budget Performance
       vs_previous: vs previous period
       income_minus_expenses: Income minus expenses
+      adjusted_savings: "Adjusted savings: %{amount}"
       of_budget_used: of budget used
       no_budget_data: No budget data for this period
     budget_performance:
@@ -87,6 +88,7 @@ en:
       add_transaction: Add Transaction
       add_account: Add Account
     transactions_breakdown:
+      adjust_shared_expenses: Adjust for shared expenses
       title: Activity Breakdown
       no_transactions: No activity found for the selected period and filters
       filters:

@@ -101,6 +101,7 @@ class ReportsController < ApplicationController
 
   private
     def setup_report_data(show_flash: false)
+      @adjust_shared_expenses = params[:adjust_shared_expenses] == "1"
       @period_type = params[:period_type]&.to_sym || :monthly
       @start_date = parse_date_param(:start_date) || default_start_date
       @end_date = parse_date_param(:end_date) || default_end_date
@@ -149,6 +150,7 @@ class ReportsController < ApplicationController
       calculator = SharedExpensesCalculator.new(Current.family, accounts: finance_accounts)
       @shared_expenses = calculator.calculate_debt
       @adjusted_expenses = calculator.calculate_adjusted_expenses(@period)
+      @summary_metrics[:adjusted_savings] = @summary_metrics[:current_income] - @adjusted_expenses
       @rent_income = calculator.calculate_rent_income(@period)
     end
 
@@ -298,8 +300,8 @@ class ReportsController < ApplicationController
     def build_period_navigation
       return nil if @period_type == :custom
 
-      prev_params = { period_type: @period_type }
-      next_params = { period_type: @period_type }
+      prev_params = { period_type: @period_type, adjust_shared_expenses: params[:adjust_shared_expenses] }
+      next_params = { period_type: @period_type, adjust_shared_expenses: params[:adjust_shared_expenses] }
 
       case @period_type
       when :monthly
@@ -528,6 +530,9 @@ class ReportsController < ApplicationController
           converted_amount = Money.new(entry.amount.abs, entry.currency).exchange_to(family_currency).amount
         rescue Money::ConversionError
           converted_amount = entry.amount.abs
+        end
+        if @adjust_shared_expenses && !is_trade && type == "expense"
+          converted_amount = entryable.personal_expense_amount(converted_amount)
         end
 
         if kind.in?(%w[transfer_to_excluded transfer_from_excluded])

@@ -18,7 +18,7 @@
       <% end %>
 
       <%# Print Report Button %>
-        <%= link_to print_reports_path(period_type: @period_type, start_date: @start_date, end_date: @end_date),
+        <%= link_to print_reports_path(period_type: @period_type, start_date: @start_date, end_date: @end_date, adjust_shared_expenses: params[:adjust_shared_expenses]),
                   target: "_blank",
                   rel: "noopener",
                   aria: { label: t("reports.index.print_report") },
@@ -34,7 +34,7 @@
         <% %i[monthly quarterly ytd last_6_months custom].each do |ptype| %>
           <% sc.with_segment(t("reports.index.periods.#{ptype}"),
                active: @period_type == ptype,
-               href: reports_path(period_type: ptype),
+               href: reports_path(period_type: ptype, adjust_shared_expenses: params[:adjust_shared_expenses]),
                class: "whitespace-nowrap") %>
         <% end %>
       <% end %>
@@ -44,6 +44,7 @@
     <% if @period_type == :custom %>
       <%= form_with url: reports_path, method: :get, data: { controller: "auto-submit-form" }, class: "flex items-center gap-3 bg-surface-inset p-3 rounded-lg" do |f| %>
         <%= f.hidden_field :period_type, value: :custom %>
+        <%= f.hidden_field :adjust_shared_expenses, value: params[:adjust_shared_expenses] %>
 
         <div class="flex items-center gap-2">
           <label class="text-sm font-medium text-secondary"><%= t("reports.index.date_range.from") %></label>

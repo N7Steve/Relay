@@ -35,9 +35,7 @@ class SharedExpensesCalculator
   # Only the user's half of shared outflows belongs in adjusted spending.
   def calculate_adjusted_expenses(period)
     expenses = reportable_transactions.where(entries: { date: period.date_range }).where("entries.amount > 0")
-    all_total = sum_expenses(expenses, @family.currency)
-    shared_total = sum_expenses(expenses.where(shared_expense: true), @family.currency)
-    Money.new(all_total - shared_total / 2, @family.currency)
+    Money.new(sum_expenses(expenses, @family.currency, adjust_shared: true), @family.currency)
   end
 
   # Calculates income only from the "Rentas de trabajo" category for a given period
@@ -80,10 +78,11 @@ class SharedExpensesCalculator
         .budget_reportable
     end
 
-    def sum_expenses(scope, family_currency)
+    def sum_expenses(scope, family_currency, adjust_shared: false)
       total = 0
       scope.includes(:entry).find_each do |txn|
-        total += convert_amount(txn.entry, family_currency)
+        amount = convert_amount(txn.entry, family_currency)
+        total += adjust_shared ? txn.personal_expense_amount(amount) : amount
       end
       total
     end
