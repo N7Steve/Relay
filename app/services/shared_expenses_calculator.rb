@@ -1,9 +1,10 @@
 class SharedExpensesCalculator
   RENT_CATEGORY_NAME = "Rentas de Trabajo"
 
-  def initialize(family, accounts: family.accounts)
+  def initialize(family, accounts: family.accounts, transactions: nil)
     @family = family
     @accounts = accounts
+    @transactions = transactions
   end
 
   # Calculates pending debt from all-time shared expenses
@@ -70,12 +71,13 @@ class SharedExpensesCalculator
     end
 
     def reportable_transactions
-      Transaction
+      scope = Transaction
         .joins(entry: :account)
         .where(accounts: { family_id: @family.id, id: @accounts.select(:id) })
         .merge(Account.visible.included_in_reports)
         .where(entries: { entryable_type: "Transaction", excluded: false })
         .budget_reportable
+      @transactions ? scope.where(id: @transactions.select(:id)) : scope
     end
 
     def sum_expenses(scope, family_currency, adjust_shared: false)

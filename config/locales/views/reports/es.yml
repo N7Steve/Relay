@@ -87,6 +87,8 @@ es:
       add_transaction: Añadir transacción
       add_account: Añadir cuenta
     transactions_breakdown:
+      native_investments: Inversiones nativas
+      period_return: Rentabilidad del período
       adjust_shared_expenses: Ajustar a gastos compartidos
       title: Desglose de actividad
       no_transactions: No se ha encontrado actividad para el periodo y filtros seleccionados

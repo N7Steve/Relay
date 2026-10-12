@@ -88,6 +88,8 @@ en:
       add_transaction: Add Transaction
       add_account: Add Account
     transactions_breakdown:
+      native_investments: Native investments
+      period_return: Period return
       adjust_shared_expenses: Adjust for shared expenses
       title: Activity Breakdown
       no_transactions: No activity found for the selected period and filters

@@ -116,18 +116,14 @@ class ReportsController < ApplicationController
       @previous_period = build_previous_period
 
       # Get aggregated data
-      @income_statement = Current.family.income_statement(user: Current.user)
-      @current_income_totals = @income_statement.income_totals(period: @period)
-      @current_expense_totals = @income_statement.expense_totals(period: @period)
-
-      @previous_income_totals = @income_statement.income_totals(period: @previous_period)
-      @previous_expense_totals = @income_statement.expense_totals(period: @previous_period)
+      @current_report_totals = report_activity.totals(period: @period)
+      @previous_report_totals = report_activity.totals(period: @previous_period)
 
       # Calculate summary metrics
       @summary_metrics = build_summary_metrics
 
       # Build trend data (last 6 months)
-      @trends_data = build_trends_data(income_statement: @income_statement)
+      @trends_data = build_trends_data
 
       # Net worth metrics
       @net_worth_metrics = build_net_worth_metrics
@@ -147,11 +143,15 @@ class ReportsController < ApplicationController
       # Flags for view rendering
       @has_accounts = accessible_accounts.any?
 
-      calculator = SharedExpensesCalculator.new(Current.family, accounts: finance_accounts)
+      calculator = SharedExpensesCalculator.new(Current.family, accounts: finance_accounts, transactions: report_activity.cash_transactions)
       @shared_expenses = calculator.calculate_debt
       @adjusted_expenses = calculator.calculate_adjusted_expenses(@period)
       @summary_metrics[:adjusted_savings] = @summary_metrics[:current_income] - @adjusted_expenses
       @rent_income = calculator.calculate_rent_income(@period)
+    end
+
+    def report_activity
+      @report_activity ||= Reports::Activity.new(Current.family, user: Current.user)
     end
 
     def preferences_params
@@ -231,12 +231,6 @@ class ReportsController < ApplicationController
       # Swap the dates to maintain user's intended date range
       @start_date, @end_date = @end_date, @start_date
       flash.now[:alert] = t("reports.invalid_date_range") if show_flash
-    end
-
-    def ensure_money(value)
-      return value if value.is_a?(Money)
-      # Value is numeric (BigDecimal or Integer) in dollars - pass directly to Money.new
-      Money.new(value, Current.family.currency)
     end
 
     def parse_date_param(param_name)
@@ -350,12 +344,12 @@ class ReportsController < ApplicationController
 
     def build_summary_metrics
       # Ensure we always have Money objects
-      current_income = ensure_money(@current_income_totals.total)
-      current_expenses = ensure_money(@current_expense_totals.total)
+      current_income = @current_report_totals.income
+      current_expenses = @current_report_totals.expenses
       net_savings = current_income - current_expenses
 
-      previous_income = ensure_money(@previous_income_totals.total)
-      previous_expenses = ensure_money(@previous_expense_totals.total)
+      previous_income = @previous_report_totals.income
+      previous_expenses = @previous_report_totals.expenses
 
       # Calculate percentage changes
       income_change = calculate_percentage_change(previous_income, current_income)
@@ -393,7 +387,7 @@ class ReportsController < ApplicationController
       nil
     end
 
-    def build_trends_data(income_statement:)
+    def build_trends_data
       # Generate month-by-month data based on the current period filter
       trends = []
 
@@ -410,8 +404,9 @@ class ReportsController < ApplicationController
 
         period = Period.custom(start_date: month_start, end_date: month_end)
 
-        income = income_statement.income_totals(period: period).total
-        expenses = income_statement.expense_totals(period: period).total
+        totals = report_activity.totals(period: period)
+        income = totals.income.amount
+        expenses = totals.expenses.amount
 
         # Use a mid-month display date so e.g. Mar 25 - Apr 24 correctly identifies as "Apr"
         display_date = current_month_start + 15.days
@@ -446,6 +441,7 @@ class ReportsController < ApplicationController
 
       # Apply filters (includes finance account scoping)
       transactions = apply_transaction_filters(transactions)
+      transactions = transactions.where(id: report_activity.cash_transactions.select(:id))
 
       # Get trades in the period (matching income_statement logic)
       trades = Trade
@@ -459,6 +455,7 @@ class ReportsController < ApplicationController
       trades = exclude_tax_advantaged_accounts(trades)
 
       trades = apply_entry_filters(trades)
+      trades = trades.none if params[:filter_tag_id].present?
 
       # Get sort parameters
       sort_by = %w[amount count].include?(params[:sort_by]) ? params[:sort_by] : "amount"
@@ -607,8 +604,27 @@ class ReportsController < ApplicationController
         parent_data.merge(subcategories: subcategories)
       end
 
+      if (native_return = filtered_investment_return(@period)) && !native_return.zero?
+        result << init_category_group.call(:native_investments, t("reports.transactions_breakdown.native_investments"),
+          Category::OTHER_INVESTMENTS_COLOR, "trending-up", "income").merge(
+            total: native_return.amount, subcategories: [], native: true,
+            color_class: native_return.negative? ? "text-destructive" : "text-success"
+          )
+      end
+
       # Sort by the chosen key with the specified direction
       result.sort_by(&sort_logic)
+    end
+
+    def filtered_investment_return(period)
+      # Computed portfolio performance has no custom category, tag or entry amount.
+      return if %i[filter_category_id filter_tag_id filter_amount_min filter_amount_max].any? { |key| params[key].present? }
+
+      start_date = [ period.start_date, parse_date_param(:filter_date_start) ].compact.max
+      end_date = [ period.end_date, parse_date_param(:filter_date_end) ].compact.min
+      return if start_date > end_date
+
+      report_activity.investment_return(period: Period.custom(start_date: start_date, end_date: end_date), account_id: params[:filter_account_id])
     end
 
     def build_investment_metrics
@@ -834,7 +850,7 @@ class ReportsController < ApplicationController
       scope.where.not(accounts: { id: tax_advantaged_account_ids })
     end
 
-    # Filters applicable to both transactions and trades (entry-level + category)
+    # Entry filters are shared; only transactions have stored custom categories.
     def apply_entry_filters(scope)
       # Scope to user's finance accounts
       finance_account_ids = Current.user&.finance_accounts&.pluck(:id) || []
@@ -842,6 +858,8 @@ class ReportsController < ApplicationController
 
       # Filter by category (including subcategories)
       if params[:filter_category_id].present?
+        return scope.none if scope.klass == Trade
+
         category_id = params[:filter_category_id]
         # Scope to family's categories to prevent cross-family data access
         subcategory_ids = Current.family.categories.where(parent_id: category_id).pluck(:id)
@@ -933,6 +951,7 @@ class ReportsController < ApplicationController
       transactions = exclude_tax_advantaged_accounts(transactions)
 
       transactions = apply_transaction_filters(transactions)
+      transactions = transactions.where(id: report_activity.cash_transactions.select(:id))
 
       # Group by category, type, and month
       breakdown = {}
@@ -971,6 +990,16 @@ class ReportsController < ApplicationController
         breakdown[key][:months][month_key] ||= 0
         breakdown[key][:months][month_key] += converted_amount
         breakdown[key][:total] += converted_amount
+      end
+
+      native_months = months.to_h do |month|
+        period = Period.custom(start_date: [ month, @start_date ].max,
+          end_date: [ Current.family.custom_month_end_for(month), @end_date ].min)
+        [ month, filtered_investment_return(period)&.amount || 0.to_d ]
+      end
+      if native_months.values.any?(&:nonzero?)
+        breakdown[:native_investments] = { category: t("reports.transactions_breakdown.native_investments"),
+          type: "income", months: native_months, total: native_months.values.sum }
       end
 
       # Convert to array and sort by type and total (descending)

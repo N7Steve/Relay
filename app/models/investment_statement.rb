@@ -346,14 +346,16 @@ class InvestmentStatement
   # Provider-native or balance-derived market P&L. Roboadvisor returns are
   # valuation changes, not merely the non-transfer transactions in the account.
   def roboadvisor_period_return(period: Period.current_month)
-    total = roboadvisor_accounts.sum do |account|
-      performance = roboadvisor_performance(account)
-      profit_loss = performance.profit_loss_for(period.date_range)
-      if profit_loss.nil?
-        roboadvisor_transaction_return(account, period:)
-      else
-        convert_to_family_currency(profit_loss, account.currency)
-      end
+    total = roboadvisor_accounts.sum { |account| roboadvisor_account_period_return(account, period: period).amount }
+    Money.new(total, family.currency)
+  end
+
+  def roboadvisor_account_period_return(account, period: Period.current_month)
+    profit_loss = roboadvisor_performance(account).profit_loss_for(period.date_range)
+    total = if profit_loss.nil?
+      roboadvisor_transaction_return(account, period: period)
+    else
+      convert_to_family_currency(profit_loss, account.currency)
     end
     Money.new(total, family.currency)
   end

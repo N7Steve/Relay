@@ -204,6 +204,24 @@ Consulta el [plan por etapas](../migration/financial-domain-stages.md).
 Las decisiones de política y persistencia están en el
 [formulario de decisiones](../research/financial-domain-decisions.md).
 
+## Rentabilidad nativa en informes
+
+Los informes añaden una categoría calculada «Inversiones nativas» con la
+rentabilidad monetaria del período de las carteras gestionadas, usando el mismo
+motor que su tarjeta de rentabilidad. Las ganancias suman ingresos y las pérdidas
+los reducen. `Reports::Activity` aplica este criterio a resumen, ahorro,
+comparación con el período anterior, evolución mensual, desglose, impresión y
+exportación CSV/Google Sheets. Las categorías personalizadas conservan su
+identidad y sus movimientos; no se deduce rentabilidad de su nombre.
+
+Las aportaciones, retiradas y transferencias no son rentabilidad. Los dividendos,
+intereses, comisiones y ajustes nativos ya incluidos en la rentabilidad de una
+cartera se retiran del agregado de movimientos ordinarios para evitar duplicar
+su efecto. Se mantienen la familia, participación financiera, visibilidad,
+exclusión de informes y tratamiento fiscal de las cuentas. La clasificación
+calculada no crea categorías ni transacciones, ni modifica los presupuestos o
+previsiones que usan el IncomeStatement ordinario.
+
 ## Gastos compartidos
 
 `Transaction.shared_expense` es una clasificación nativa independiente de `kind`,

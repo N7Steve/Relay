@@ -9,6 +9,70 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     @family = @user.family
   end
 
+  test "native investment return reconciles income savings trends activity and exports without changing normal categories" do
+    sign_in @user = users(:empty)
+    @family = @user.family
+    bank = @family.accounts.create!(name: "Payroll", balance: 0, currency: "USD", accountable: Depository.new)
+    portfolio = @family.accounts.create!(name: "Managed", balance: 1000, currency: "USD",
+      accountable: Investment.new(subtype: "roboadvisor"))
+    portfolio.entries.create!(name: "Opening", amount: 1000, currency: "USD", date: Date.current - 10,
+      entryable: Valuation.new(kind: "opening_anchor"))
+    create_transaction(account: portfolio, amount: -200, kind: "investment_contribution")
+    update = Investment::ValueUpdate.new(account: portfolio, amount: "1490.47", date: Date.current)
+    assert update.save, update.errors.full_messages.to_sentence
+    salary = @family.categories.create!(name: SharedExpensesCalculator::RENT_CATEGORY_NAME)
+    ordinary_investments = @family.categories.create!(name: "Inversiones")
+    create_transaction(account: bank, amount: -3207.88, category: salary)
+    create_transaction(account: bank, amount: -0.08, category: ordinary_investments)
+    expense = create_transaction(account: bank, amount: 200)
+    expense.transaction.update!(shared_expense: true)
+    options = { period_type: :custom, start_date: Date.current, end_date: Date.current }
+
+    get reports_path(options)
+    assert_response :success
+    assert_select "p.privacy-sensitive", text: "$3,498.43"
+    assert_select "p.privacy-sensitive", text: "$3,298.43"
+    assert_select "p.privacy-sensitive", text: "$3,207.88"
+    assert_select "p", text: I18n.t("reports.summary.adjusted_savings", amount: "$3,398.43")
+    assert_select "tr[data-category='category-native_investments']" do
+      assert_select "span", text: I18n.t("reports.transactions_breakdown.native_investments")
+      assert_select ".privacy-sensitive", text: "$290.47"
+      assert_select "a", count: 0
+    end
+    assert_select "tr[data-category='category-#{ordinary_investments.id}'] .privacy-sensitive", text: "$0.08"
+    assert_select "section[data-section-key='trends_insights'] td", text: "$3,498.43"
+
+    get reports_path(options.merge(adjust_shared_expenses: "1"))
+    assert_select "tr[data-category='category-native_investments'] .privacy-sensitive", text: "$290.47"
+    assert_select "tr[data-category='category-uncategorized'] .privacy-sensitive", text: "$100.00"
+
+    get print_reports_path(options)
+    assert_response :success
+    assert_includes response.body, I18n.t("reports.transactions_breakdown.native_investments")
+    assert_includes response.body, "$3,498.43"
+
+    get export_transactions_reports_path(options.merge(format: :csv))
+    assert_response :success
+    row = CSV.parse(response.body).find { |record| record.first == I18n.t("reports.transactions_breakdown.native_investments") }
+    assert_equal [ I18n.t("reports.transactions_breakdown.native_investments"), "$290.47", "$290.47" ], row
+
+    get reports_path(options.merge(filter_account_id: bank.id))
+    assert_select "tr[data-category='category-native_investments']", count: 0
+
+    get reports_path(options.merge(filter_category_id: ordinary_investments.id))
+    assert_select "tr[data-category='category-native_investments']", count: 0
+
+    # A falling native value reduces income; it is not an ordinary expense.
+    update = Investment::ValueUpdate.new(account: portfolio, amount: "1150", date: Date.current)
+    assert update.save, update.errors.full_messages.to_sentence
+    get reports_path(options)
+    assert_select "p.privacy-sensitive", text: "$3,157.96"
+    assert_select "tr[data-category='category-native_investments'] .text-destructive", text: "-$50.00"
+    get export_transactions_reports_path(options.merge(format: :csv))
+    row = CSV.parse(response.body).find { |record| record.first == I18n.t("reports.transactions_breakdown.native_investments") }
+    assert_equal [ I18n.t("reports.transactions_breakdown.native_investments"), "-$50.00", "-$50.00" ], row
+  end
+
   test "reports omit investment performance while retaining managed portfolios and saved section order" do
     @family.accounts.create!(name: "Managed portfolio", balance: 1000, currency: "USD",
       accountable: Investment.new(subtype: "roboadvisor"))
@@ -78,15 +142,17 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
   test "net savings card always includes adjusted savings for the selected period" do
     options = { period_type: :custom, start_date: Date.current, end_date: Date.current }
     period = Period.custom(start_date: Date.current, end_date: Date.current)
-    baseline = IncomeStatement.new(@family, user: @user).income_totals(period: period).total
-    adjusted_expenses = SharedExpensesCalculator.new(@family, accounts: @user.finance_accounts).calculate_adjusted_expenses(period)
+    activity = Reports::Activity.new(@family, user: @user)
+    baseline = activity.totals(period: period).income
+    adjusted_expenses = SharedExpensesCalculator.new(@family, accounts: @user.finance_accounts,
+      transactions: activity.cash_transactions).calculate_adjusted_expenses(period)
     shared = create_transaction(amount: 200)
     shared.transaction.update!(shared_expense: true)
 
     [ "0", "1" ].each do |value|
       get reports_path(options.merge(adjust_shared_expenses: value))
       assert_response :success
-      expected = Money.new(baseline, @family.currency) - adjusted_expenses - Money.new(100, @family.currency)
+      expected = baseline - adjusted_expenses - Money.new(100, @family.currency)
       assert_select "p.privacy-sensitive", text: I18n.t("reports.summary.adjusted_savings", amount: expected.format)
     end
   end
