@@ -14,7 +14,7 @@ class Reports::Activity
 
   def totals(period:)
     @totals[[ period.start_date, period.end_date ]] ||= begin
-      cash = @income_statement.totals(transactions_scope: cash_transactions, date_range: period.date_range)
+      cash = @income_statement.totals(transactions_scope: cash_transactions.in_period(period), date_range: period.date_range)
       performance = investment_return(period: period)
       Totals.new(income: cash.income_money + performance, expenses: cash.expense_money, investment_return: performance)
     end

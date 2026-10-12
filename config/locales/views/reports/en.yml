@@ -88,7 +88,7 @@ en:
       add_transaction: Add Transaction
       add_account: Add Account
     transactions_breakdown:
-      native_investments: Native investments
+      native_investments: Investments
       period_return: Period return
       adjust_shared_expenses: Adjust for shared expenses
       title: Activity Breakdown

@@ -26,6 +26,11 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     create_transaction(account: bank, amount: -0.08, category: ordinary_investments)
     expense = create_transaction(account: bank, amount: 200)
     expense.transaction.update!(shared_expense: true)
+    # Historical cash movements must not inflate the selected report's cards.
+    create_transaction(account: bank, amount: -364978.83, date: Date.current - 1)
+    create_transaction(account: bank, amount: 318174.94, date: Date.current - 1)
+    create_transaction(account: bank, amount: -50000, date: Date.current + 1)
+    create_transaction(account: bank, amount: 40000, date: Date.current + 1)
     options = { period_type: :custom, start_date: Date.current, end_date: Date.current }
 
     get reports_path(options)

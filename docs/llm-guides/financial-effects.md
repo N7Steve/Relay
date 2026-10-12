@@ -206,7 +206,7 @@ Las decisiones de política y persistencia están en el
 
 ## Rentabilidad nativa en informes
 
-Los informes añaden una categoría calculada «Inversiones nativas» con la
+Los informes añaden una categoría calculada «Inversiones» con la
 rentabilidad monetaria del período de las carteras gestionadas, usando el mismo
 motor que su tarjeta de rentabilidad. Las ganancias suman ingresos y las pérdidas
 los reducen. `Reports::Activity` aplica este criterio a resumen, ahorro,

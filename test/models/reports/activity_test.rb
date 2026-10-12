@@ -42,6 +42,30 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     assert_equal 100, calculator.calculate_adjusted_expenses(@period).amount
   end
 
+  test "cash totals only include the selected period across repeated monthly comparisons" do
+    movement(@cash, -1000, date: @period.start_date)
+    movement(@cash, 200, date: @period.end_date)
+    movement(@cash, -300000, date: @period.start_date - 1)
+    movement(@cash, 250000, date: @period.start_date - 1)
+    movement(@cash, -40000, date: @period.end_date + 1)
+    movement(@cash, 30000, date: @period.end_date + 1)
+    movement(@portfolio, -50, kind: "investment_value_adjustment")
+    report = Reports::Activity.new(@family, user: @user)
+
+    totals = report.totals(period: @period)
+    assert_equal 1050, totals.income.amount
+    assert_equal 200, totals.expenses.amount
+    assert_equal 850, (totals.income - totals.expenses).amount
+
+    previous = report.totals(period: Period.custom(start_date: @period.start_date - 1.month, end_date: @period.start_date - 1))
+    assert_equal 300000, previous.income.amount
+    assert_equal 250000, previous.expenses.amount
+    following = report.totals(period: Period.custom(start_date: @period.end_date + 1, end_date: @period.end_date + 1.month))
+    assert_equal 40000, following.income.amount
+    assert_equal 30000, following.expenses.amount
+    assert_equal totals, report.totals(period: @period)
+  end
+
   test "uses the canonical balance-derived return and keeps periods separate" do
     @portfolio.balances.create!(date: @period.start_date - 1, balance: 1000, currency: "USD", cash_adjustments: 1000)
     @portfolio.balances.create!(date: @period.start_date, balance: 1075, currency: "USD", cash_adjustments: 75)
