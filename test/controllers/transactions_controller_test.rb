@@ -1397,59 +1397,37 @@ end
     Rails.cache = original_cache
   end
 
-  test "index with ai_status=current renders the AI filter badge" do
-    @entry.entryable.enrich_attribute(:category_id, categories(:income).id, source: "ai")
-
-    get transactions_url(q: { ai_status: [ "current" ] })
+  test "index filters shared expenses and renders a removable badge" do
+    @entry.transaction.update!(shared_expense: true)
+    get transactions_url(q: { shared_expense: "1" })
 
     assert_response :success
-    assert_select "#transaction-search-filters li p", text: "AI", count: 1
+    assert_select "#transaction-search-filters li p", text: "Shared expenses", count: 1
     assert_select "#entry_#{@entry.id}", count: 1
-  end
+    assert_select "input[name='q[shared_expense]'][checked]", count: 1
+    assert_select "input[name='q[ai_status][]']", count: 0
 
-  test "index with ai_status=history renders the AI history filter badge" do
-    @entry.entryable.enrich_attribute(:category_id, categories(:income).id, source: "ai")
-    @entry.entryable.update!(category: categories(:subcategory))
-
-    get transactions_url(q: { ai_status: [ "history" ] })
-
-    assert_response :success
-    assert_select "#transaction-search-filters li p", text: "AI history", count: 1
-    assert_select "#entry_#{@entry.id}", count: 1
-  end
-
-  test "index with ai_status=current excludes history-only transactions" do
-    @entry.entryable.enrich_attribute(:category_id, categories(:income).id, source: "ai")
-    @entry.entryable.update!(category: categories(:subcategory))
-
-    get transactions_url(q: { ai_status: [ "current" ] })
-
-    assert_response :success
-    assert_select "#transaction-search-filters li p", text: "AI", count: 1
+    @entry.transaction.update!(shared_expense: false)
+    get transactions_url(q: { shared_expense: "1" })
     assert_select "#entry_#{@entry.id}", count: 0
   end
 
-  test "index ignores unsupported ai_status values without rendering a badge" do
-    get transactions_url(q: { ai_status: [ "bogus" ] })
+  test "index ignores retired AI filters and inactive shared expense values" do
+    get transactions_url(q: { ai_status: [ "current" ], shared_expense: "0" })
 
     assert_response :success
     assert_select "#transaction-search-filters li", count: 0
-    assert_no_match(/translation missing/, response.body)
-
-    # The bogus value must be dropped entirely, not applied as a filter
     assert_select "#entry_#{@entry.id}", count: 1
   end
 
-  test "clear_filter removes an ai_status value and redirects" do
+  test "clear_filter removes the shared expense filter" do
     delete clear_filter_transactions_url(
-      param_key: "ai_status",
-      param_value: "current",
-      q: { ai_status: [ "current" ] }
+      param_key: "shared_expense", param_value: "1", q: { shared_expense: "1" }
     )
 
     assert_response :redirect
     assert_equal transactions_path, URI.parse(response.location).path
-    assert_no_match(/ai_status/, response.location)
+    assert_no_match(/shared_expense/, response.location)
   end
 
   private

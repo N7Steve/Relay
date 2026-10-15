@@ -247,6 +247,7 @@ es:
         category: Categoría
         tag: Etiqueta
         merchant: Comercio
+        shared_expense: Gastos compartidos
     convert_to_trade:
       title: Convertir en operación de valores
       description: Convierte esta transacción en una operación con detalles del valor

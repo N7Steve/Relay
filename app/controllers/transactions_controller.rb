@@ -693,9 +693,9 @@ class TransactionsController < ApplicationController
       cleaned_params = params.fetch(:q, {})
               .permit(
                 :start_date, :end_date, :search, :amount,
-                :amount_operator, :default_accounts_only,
+                :amount_operator, :default_accounts_only, :shared_expense,
                 account_ids: [],
-                categories: [], merchants: [], types: [], tags: [], status: [], ai_status: []
+                categories: [], merchants: [], types: [], tags: [], status: []
               )
               .to_h
               .compact_blank
@@ -703,10 +703,7 @@ class TransactionsController < ApplicationController
 
       cleaned_params.delete(:amount_operator) unless cleaned_params[:amount].present?
 
-      if cleaned_params[:ai_status]
-        cleaned_params[:ai_status] &= Transaction::Search::AI_STATUSES
-        cleaned_params.delete(:ai_status) if cleaned_params[:ai_status].empty?
-      end
+      cleaned_params.delete(:shared_expense) unless cleaned_params[:shared_expense] == "1"
 
       if cleaned_params[:account_ids].present?
         include_hidden = cleaned_params[:default_accounts_only].to_s == "false"

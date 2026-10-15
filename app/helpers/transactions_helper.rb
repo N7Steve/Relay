@@ -11,7 +11,7 @@ module TransactionsHelper
       { key: "category_filter", label: t("transactions.search.filters.category"), icon: "shapes" },
       { key: "tag_filter", label: t("transactions.search.filters.tag"), icon: "tags" },
       { key: "merchant_filter", label: t("transactions.search.filters.merchant"), icon: "store" },
-      { key: "ai_filter", label: t("transactions.search.filters.ai"), icon: "sparkles" }
+      { key: "shared_expense_filter", label: t("transactions.search.filters.shared_expense"), icon: "users" }
     ]
   end
 

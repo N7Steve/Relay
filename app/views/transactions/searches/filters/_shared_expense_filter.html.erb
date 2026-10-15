@@ -1,0 +1,11 @@
+<%# locals: (form:) %>
+
+<div class="p-2">
+  <%= render DS::Checkbox.new(
+    form: form,
+    method: :shared_expense,
+    label: t("transactions.search.filters.shared_expense"),
+    checked: @q[:shared_expense] == "1",
+    unchecked_value: nil
+  ) %>
+</div>
