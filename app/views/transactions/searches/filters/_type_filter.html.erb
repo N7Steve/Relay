@@ -34,4 +34,13 @@
                            nil %>
     <%= form.label :types, t(".transfer"), value: "transfer", class: "text-sm text-primary" %>
   </div>
+  <div class="border-t border-secondary pt-3">
+    <%= render DS::Checkbox.new(
+      form: form,
+      method: :shared_expense,
+      label: t("transactions.search.filters.shared_expense"),
+      checked: @q[:shared_expense] == "1",
+      unchecked_value: nil
+    ) %>
+  </div>
 </div>
