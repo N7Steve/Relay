@@ -3,6 +3,7 @@
 class Api::V1::ImportSessionsController < Api::V1::BaseController
   before_action :ensure_read_scope, only: [ :show ]
   before_action :ensure_write_scope, only: [ :create, :create_chunk, :publish ]
+  before_action :require_api_family_admin!
   before_action :set_import_session, only: [ :show, :create_chunk, :publish ]
 
   def create

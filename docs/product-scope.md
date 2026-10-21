@@ -57,7 +57,11 @@ basado en Sure. No existe modo SaaS, suscripción, telemetría ni servicio aloja
 | 12 | Familia demo, RentCast/Realie, escritorio macOS, apps iOS (SwiftUI y destino iOS/web de Flutter), notificaciones push, gems de profiling y restos sin uso (controladores, imágenes, 7.150 traducciones) | Suscripciones push, contadores de peticiones AVM, columnas AVM de inmuebles, ajustes y clave API demo eliminados; las valoraciones ya guardadas se conservan |
 
 Reintroducir cualquiera de estos módulos requiere una decisión de producto
-explícita; su código sigue recuperable en Git.
+explícita; su código sigue recuperable en Git. El 21 de octubre de 2026 se aprobó
+crear un MCP propio y ampliar la API: las fases 0–1 preparan inventario y permisos,
+con transporte MCP pendiente de fase 2. Véase el
+[roadmap actual](research/relay-api-mcp-roadmap.md). No restaura el asistente IA ni
+los módulos retirados.
 
 ## Pérdidas deliberadas y compatibilidad
 

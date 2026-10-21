@@ -3,6 +3,7 @@
 class Api::V1::SyncController < Api::V1::BaseController
   # Ensure proper scope authorization for write access
   before_action :ensure_write_scope, only: [ :create ]
+  before_action :require_api_family_admin!
 
   def create
     family = current_resource_owner.family

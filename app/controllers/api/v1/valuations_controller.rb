@@ -9,6 +9,8 @@ class Api::V1::ValuationsController < Api::V1::BaseController
   before_action :ensure_read_scope, only: [ :index, :show ]
   before_action :ensure_write_scope, only: [ :create, :update ]
   before_action :set_valuation, only: [ :show, :update ]
+  before_action -> { api_access.require_account!(@entry.account, :write) }, only: :update
+  before_action :validate_valuation_input!, only: [ :create, :update ]
 
   def index
     family = current_resource_owner.family
@@ -34,6 +36,7 @@ class Api::V1::ValuationsController < Api::V1::BaseController
       errors: [ e.message ]
     }, status: :unprocessable_entity
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "ValuationsController#index error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -46,6 +49,7 @@ class Api::V1::ValuationsController < Api::V1::BaseController
   def show
     render :show
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "ValuationsController#show error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -83,7 +87,8 @@ class Api::V1::ValuationsController < Api::V1::BaseController
       return
     end
 
-    account = current_resource_owner.family.accounts.find(valuation_account_id)
+    account = api_access.accounts.find(valuation_account_id)
+    api_access.require_account!(account, :write)
     requested_upsert = upsert_requested?
     existing_write = false
 
@@ -139,6 +144,7 @@ class Api::V1::ValuationsController < Api::V1::BaseController
       message: "Account or valuation entry not found"
     }, status: :not_found
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "ValuationsController#create error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -220,6 +226,7 @@ class Api::V1::ValuationsController < Api::V1::BaseController
     end
 
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "ValuationsController#update error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -232,9 +239,10 @@ class Api::V1::ValuationsController < Api::V1::BaseController
   private
 
     def set_valuation
+      raise ActiveRecord::RecordNotFound unless valid_uuid?(params[:id])
       @entry = current_resource_owner.family
                  .entries
-                 .where(entryable_type: "Valuation")
+                 .where(entryable_type: "Valuation", account_id: api_access.accounts.select(:id))
                  .find(params[:id])
       @valuation = @entry.entryable
     rescue ActiveRecord::RecordNotFound
@@ -246,6 +254,11 @@ class Api::V1::ValuationsController < Api::V1::BaseController
 
     def ensure_read_scope
       authorize_scope!(:read)
+    end
+
+    def validate_valuation_input!
+      Api::Input.date(valuation_params[:date], name: "date") if valuation_params[:date].present?
+      Api::Input.decimal(valuation_params[:amount], name: "amount") if valuation_params.key?(:amount)
     end
 
     def ensure_write_scope

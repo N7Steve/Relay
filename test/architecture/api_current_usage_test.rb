@@ -15,6 +15,10 @@ class ApiCurrentUsageTest < ActiveSupport::TestCase
   # for code paths that still derive Current.user from Current.session.user.
   # Add new entries only when they are part of that bridge and document why.
   ALLOWED_BASE_CONTROLLER_REFERENCES = [
+    # Clear any inherited browser identity before accepting API credentials.
+    # This is a write-only part of the same unsaved-session bridge, not a
+    # permission source; API authorization still uses current_resource_owner.
+    "Current.session = nil",
     "Current.session = @current_user.sessions.build(",
     "Current.session.active_impersonator_session = nil"
   ].freeze

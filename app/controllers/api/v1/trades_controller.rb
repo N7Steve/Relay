@@ -6,10 +6,14 @@ class Api::V1::TradesController < Api::V1::BaseController
   before_action :ensure_read_scope, only: [ :index, :show ]
   before_action :ensure_write_scope, only: [ :create, :update, :destroy ]
   before_action :set_trade, only: [ :show, :update, :destroy ]
+  before_action -> { api_access.require_account!(@entry.account, :write) }, only: [ :update, :destroy ]
+  before_action -> { validate_api_references!(trade_params) }, only: :create
+  before_action -> { validate_api_references!(trade_update_params) }, only: :update
+  before_action :validate_trade_input!, only: [ :create, :update ]
 
   def index
     family = current_resource_owner.family
-    trades_query = family.trades.visible
+    trades_query = family.trades.visible.where(entries: { account_id: api_access.accounts.select(:id) })
 
     trades_query = apply_filters(trades_query)
     trades_query = trades_query.includes({ entry: :account }, :security, :category).reverse_chronological
@@ -39,7 +43,8 @@ class Api::V1::TradesController < Api::V1::BaseController
       return render_validation_error("Account ID is required", [ "Account ID is required" ])
     end
 
-    account = current_resource_owner.family.accounts.visible.find(trade_params[:account_id])
+    account = api_access.accounts.visible.find(trade_params[:account_id])
+    api_access.require_account!(account, :write)
 
     unless account.supports_trades?
       return render_validation_error(
@@ -126,7 +131,8 @@ class Api::V1::TradesController < Api::V1::BaseController
 
     def set_trade
       family = current_resource_owner.family
-      @trade = family.trades.visible.find(params[:id])
+      raise ActiveRecord::RecordNotFound unless valid_uuid?(params[:id])
+      @trade = family.trades.visible.where(entries: { account_id: api_access.accounts.select(:id) }).find(params[:id])
       @entry = @trade.entry
     rescue ActiveRecord::RecordNotFound
       render json: { error: "not_found", message: "Trade not found" }, status: :not_found
@@ -134,6 +140,21 @@ class Api::V1::TradesController < Api::V1::BaseController
 
     def ensure_read_scope
       authorize_scope!(:read)
+    end
+
+    def validate_trade_input!
+      values = action_name == "create" ? trade_params : trade_update_params
+      Api::Input.date(values[:date], name: "date") if values[:date].present?
+      %i[amount qty price fee].each do |key|
+        next unless values.key?(key)
+
+        begin
+          Api::Input.decimal(values[key], name: key)
+        rescue Api::Input::Invalid
+          raise Api::Input::Invalid, "Amount must be a valid number" if key == :amount
+          raise
+        end
+      end
     end
 
     def ensure_write_scope
@@ -459,12 +480,11 @@ class Api::V1::TradesController < Api::V1::BaseController
     end
 
     def parse_date!(value, param_name)
-      Date.parse(value)
-    rescue Date::Error, ArgumentError, TypeError
-      raise ArgumentError, "Invalid #{param_name} format"
+      Api::Input.date(value, name: param_name)
     end
 
     def log_and_render_error(action, exception)
+      raise exception if api_client_error?(exception)
       Rails.logger.error "TradesController##{action} error: #{exception.message}"
       Rails.logger.error exception.backtrace.join("\n")
       render json: {

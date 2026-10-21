@@ -455,6 +455,7 @@ Rails.application.routes.draw do
         post :publish, on: :member
       end
       resource :usage, only: [ :show ], controller: :usage
+      resource :context, only: [ :show ], controller: :context
       resource :cash_flow, only: [ :show ], controller: :cash_flows
       resource :balance_sheet, only: [ :show ], controller: :balance_sheet
       resources :insights, only: [ :index ]

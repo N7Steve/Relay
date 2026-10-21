@@ -4,6 +4,20 @@ Este documento identifica la funcionalidad propia de este fork frente al reposit
 
 > Este inventario describe diferencias funcionales, no implica que debamos conservar ciegamente cada línea. Si `upstream` incorpora una solución equivalente, se debe comparar el comportamiento y retirar la duplicación de forma consciente.
 
+## Nuevo proyecto API/MCP — 21 de octubre de 2026
+
+Steve autoriza una API completa y un MCP propio, empezando por las fases 0–1 del
+[roadmap](docs/research/relay-api-mcp-roadmap.md). La
+[matriz de capacidades](docs/research/relay-api-capability-matrix.md) y el
+inventario regenerable describen el alcance vigente. Preservar contexto por
+credencial, scopes existentes, permisos diferenciados de lectura/anotación y
+escritura financiera, referencias familiares y ocultación de contrapartidas.
+Las operaciones familiares de importación/sync/conexiones requieren admin;
+el rol admin no concede acceso financiero directo a cuentas privadas. La API
+añade contexto/capacidades sin cambiar campos heredados. El transporte MCP sigue
+pendiente de fase 2. Esta decisión no restaura chat/LLM, Bills ni otros módulos;
+los apartados de poda siguientes son registros históricos.
+
 ## Inventario de uso para la poda — 4 de octubre de 2026
 
 Steve confirma uso de Google Drive y Brandfetch. Preservar exportaciones Drive

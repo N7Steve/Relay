@@ -176,6 +176,15 @@ MCP, external assistant transport and integrated AI were removed in phases 5–6
 OAuth, API keys and native authentication remain. Phase 10 drops conversations,
 tool calls, AI usage and preferences; retained documents, originals and import
 history remain part of the supported financial product.
+The new Relay MCP project (approved 21 October 2026) starts with an API capability
+inventory and shared `Api::Access`/`Api::Input` contracts; `/api/v1/context` exposes
+identity and effective capabilities without secrets. Its MCP transport is not yet
+implemented. See the [roadmap](../research/relay-api-mcp-roadmap.md) and
+[access matrix](../research/relay-api-capability-matrix.md). Account token scopes
+do not override ownership/share permissions. Family-wide API imports, provider
+metadata and sync initiation require a family administrator; direct account
+writes still require owner/full_control, regardless of admin role. Keep these
+boundaries when adding API or MCP operations.
 Phase 11 removed the consumers of serialized pre-pruning jobs. Insights use deterministic
 localized templates. Brandfetch logos are controlled by the instance preference;
 `RELAY_EXTERNAL_LOGOS_ENABLED` no longer overrides it. Other external capability

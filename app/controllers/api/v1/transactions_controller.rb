@@ -7,6 +7,10 @@ class Api::V1::TransactionsController < Api::V1::BaseController
   before_action :ensure_read_scope, only: [ :index, :show ]
   before_action :ensure_write_scope, only: [ :create, :update, :destroy ]
   before_action :set_transaction, only: [ :show, :update, :destroy ]
+  before_action :authorize_transaction_update!, only: :update
+  before_action -> { api_access.require_account!(@entry.account, :write) }, only: :destroy
+  before_action -> { validate_api_references!(transaction_params) }, only: [ :create, :update ]
+  before_action :authorize_transfer_write!, only: [ :update, :destroy ]
 
   def index
     family = current_resource_owner.family
@@ -45,6 +49,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     render :index
 
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "TransactionsController#index error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -59,6 +64,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     render :show
 
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "TransactionsController#show error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -91,6 +97,8 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     end
 
     account = family.accounts.writable_by(current_resource_owner).find(account_id_param)
+    validate_transaction_input!
+    return if performed?
 
     if idempotency_key_requested? && (existing_entry = existing_idempotent_entry(account))
       return render_existing_idempotent_entry(existing_entry)
@@ -121,6 +129,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
       raise
     end
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "TransactionsController#create error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -131,6 +140,8 @@ class Api::V1::TransactionsController < Api::V1::BaseController
   end
 
   def update
+    validate_transaction_input!
+    return if performed?
     if @entry.split_child?
       render json: { error: "validation_failed", message: "Split child transactions cannot be edited directly. Use the split editor." }, status: :unprocessable_entity
       return
@@ -153,7 +164,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
 
         @entry.sync_account_later
         @entry.lock_saved_attributes!
-        @entry.mark_user_modified! if user_modified_requested?
+        @entry.mark_user_modified! if user_modified_requested? && api_access.allowed?(@entry.account, :write)
 
         @transaction = @entry.transaction
         render :show
@@ -168,6 +179,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     end
 
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "TransactionsController#update error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -191,6 +203,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     }, status: :ok
 
   rescue => e
+    raise if api_client_error?(e)
     Rails.logger.error "TransactionsController#destroy error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
@@ -201,6 +214,33 @@ class Api::V1::TransactionsController < Api::V1::BaseController
   end
 
   private
+
+    def authorize_transfer_write!
+      return unless action_name == "destroy" || split_financial_fields_changed?
+      return unless (transfer = @transaction.transfer)
+
+      [ transfer.inflow_transaction, transfer.outflow_transaction ].each do |transaction|
+        api_access.require_account!(transaction.entry.account, :write)
+      end
+    end
+
+    def authorize_transaction_update!
+      api_access.require_account!(@entry.account, :annotate)
+      return if api_access.allowed?(@entry.account, :write)
+
+      supplied = params.require(:transaction).keys.map(&:to_s)
+      unless (supplied - %w[category_id merchant_id tag_ids notes]).empty?
+        raise Api::Access::Forbidden, "This account allows annotations only"
+      end
+    end
+
+    def validate_transaction_input!
+      Api::Input.date(transaction_params[:date], name: "date") if transaction_params[:date].present?
+      Api::Input.decimal(transaction_params[:amount], name: "amount") if transaction_params.key?(:amount)
+    rescue Api::Input::Invalid => e
+      verb = action_name == "create" ? "created" : "updated"
+      render json: { error: "validation_failed", message: "Transaction could not be #{verb}", errors: [ e.message.sub(/\Adate/, "Date") ] }, status: :unprocessable_entity
+    end
 
     def set_transaction
       raise ActiveRecord::RecordNotFound unless valid_uuid?(params[:id])
@@ -259,21 +299,21 @@ class Api::V1::TransactionsController < Api::V1::BaseController
 
       # Date range filtering
       if params[:start_date].present?
-        query = query.where("entries.date >= ?", Date.parse(params[:start_date]))
+        query = query.where("entries.date >= ?", Api::Input.date(params[:start_date], name: "start_date"))
       end
 
       if params[:end_date].present?
-        query = query.where("entries.date <= ?", Date.parse(params[:end_date]))
+        query = query.where("entries.date <= ?", Api::Input.date(params[:end_date], name: "end_date"))
       end
 
       # Amount filtering
       if params[:min_amount].present?
-        min_amount = params[:min_amount].to_f
+        min_amount = Api::Input.decimal(params[:min_amount], name: "min_amount")
         query = query.where("entries.amount >= ?", min_amount)
       end
 
       if params[:max_amount].present?
-        max_amount = params[:max_amount].to_f
+        max_amount = Api::Input.decimal(params[:max_amount], name: "max_amount")
         query = query.where("entries.amount <= ?", max_amount)
       end
 
@@ -430,7 +470,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     end
 
     def calculate_signed_amount
-      amount = transaction_params[:amount].to_f
+      amount = Api::Input.decimal(transaction_params[:amount], name: "amount")
       nature = transaction_params[:nature]
 
       case nature&.downcase

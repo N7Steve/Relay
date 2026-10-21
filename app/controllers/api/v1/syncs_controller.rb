@@ -41,6 +41,7 @@ class Api::V1::SyncsController < Api::V1::BaseController
     end
 
     def family_syncs_query
-      Sync.for_family(current_resource_owner.family, resource_owner: current_resource_owner)
+      query = Sync.for_family(current_resource_owner.family, resource_owner: current_resource_owner)
+      api_access.family_admin? ? query : query.where(syncable_type: "Account")
     end
 end

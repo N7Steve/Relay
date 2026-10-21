@@ -16,7 +16,8 @@ RSpec.describe 'API V1 Imports', type: :request do
     family.users.create!(
       email: 'api-user@example.com',
       password: 'password123',
-      password_confirmation: 'password123'
+      password_confirmation: 'password123',
+      role: 'admin'
     )
   end
 
@@ -84,7 +85,7 @@ RSpec.describe 'API V1 Imports', type: :request do
 
   path '/api/v1/imports' do
     get 'List imports' do
-      description 'List all imports for the user\'s family with pagination and filtering.'
+      description 'List all imports for the user\'s family with pagination and filtering. Family administrator required for all import endpoints: uploaded contents and asynchronous publishing can span private accounts. Existing read/read_write token scopes still apply.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -123,7 +124,7 @@ RSpec.describe 'API V1 Imports', type: :request do
     end
 
     post 'Create import' do
-      description 'Create an import from CSV or backup NDJSON content or a multipart backup ZIP/NDJSON file. Version 3 full backups include original file bytes and require a family administrator and a destination without financial data. Backup requests use RelayImport for storage, responses and queued jobs, including requests using the old SureImport name. CSV content is limited to 10MB.'
+      description 'Create an import from CSV or backup NDJSON content or a multipart backup ZIP/NDJSON file. Version 3 full backups include original file bytes and require a family administrator and a destination without financial data. Backup requests use RelayImport for storage, responses and queued jobs, including requests using the old SureImport name. CSV content is limited to 10MB. Family administrator required for all import endpoints: uploaded contents and asynchronous publishing can span private accounts. Existing read/read_write token scopes still apply.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -307,7 +308,7 @@ RSpec.describe 'API V1 Imports', type: :request do
     parameter name: :id, in: :path, type: :string, required: true, description: 'Import ID'
 
     get 'Retrieve an import' do
-      description 'Retrieve detailed information about an import, including configuration, row statistics and backup readback verification for both RelayImport and SureImport. The response type reflects the stored type.'
+      description 'Retrieve detailed information about an import, including configuration, row statistics and backup readback verification for both RelayImport and SureImport. The response type reflects the stored type. Family administrator required for all import endpoints: uploaded contents and asynchronous publishing can span private accounts. Existing read/read_write token scopes still apply.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -334,7 +335,7 @@ RSpec.describe 'API V1 Imports', type: :request do
     parameter name: :id, in: :path, type: :string, required: true, description: 'Import ID'
 
     get 'List import row diagnostics' do
-      description 'List sanitized import rows with validation errors and mapping resolution state.'
+      description 'List sanitized import rows with validation errors and mapping resolution state. Family administrator required for all import endpoints: uploaded contents and asynchronous publishing can span private accounts. Existing read/read_write token scopes still apply.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -389,7 +390,7 @@ RSpec.describe 'API V1 Imports', type: :request do
 
   path '/api/v1/imports/preflight' do
     post 'Validate import content without creating an import' do
-      description 'Validate CSV or backup ZIP/NDJSON without persisting an import or enqueueing jobs. Full backups verify the manifest, graph and original file checksums. Backup preflight returns type RelayImport, including requests using the old SureImport name. CSV content is limited to 10MB.'
+      description 'Validate CSV or backup ZIP/NDJSON without persisting an import or enqueueing jobs. Full backups verify the manifest, graph and original file checksums. Backup preflight returns type RelayImport, including requests using the old SureImport name. CSV content is limited to 10MB. Family administrator required for all import endpoints: uploaded contents and asynchronous publishing can span private accounts. Existing read/read_write token scopes still apply.'
       tags 'Imports'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'

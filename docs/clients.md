@@ -38,6 +38,13 @@ A new client (for example a Windows app or a separate web front end) should use
 the API v1 endpoints with an API key or an OAuth application, and read
 server-calculated figures instead of re-implementing financial rules.
 
+Use `GET /api/v1/context` and each account's `capabilities` to inspect the
+authenticated identity and effective authority. Token write scope does not
+override account sharing. Family-wide import/sync/connection operations require
+a family administrator. See the [access contract](api/access.md) and
+[new API/MCP roadmap](research/relay-api-mcp-roadmap.md); the new MCP transport
+is still pending phase 2.
+
 ## Native reporting and device continuity
 
 Read monthly server-calculated totals and the daily spending comparison using

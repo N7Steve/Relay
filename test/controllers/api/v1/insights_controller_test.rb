@@ -39,6 +39,13 @@ class Api::V1::InsightsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "does not expose retired Bills backed insights" do
+    retired = @user.family.insights.create!(insight_type: "cash_flow_warning", priority: "high", status: "active", title: "Retired", body: "Retired", generated_at: Time.current, dedup_key: "retired")
+    get api_v1_insights_url, headers: api_headers(@api_key)
+    assert_response :success
+    assert_not_includes response.body, retired.id
+  end
+
   test "does not expose insights when the API key owner opted out of preview features" do
     @user.update!(preferences: @user.preferences.merge("preview_features_enabled" => false))
 

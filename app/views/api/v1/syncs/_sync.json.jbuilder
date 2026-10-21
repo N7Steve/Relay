@@ -11,8 +11,8 @@ json.syncable do
   json.id sync.syncable_id
   json.name syncable&.try(:name)
 end
-json.parent_id sync.parent_id
-json.children_count sync.children.size
+json.parent_id(api_access.family_admin? ? sync.parent_id : nil)
+json.children_count(api_access.family_admin? ? sync.children.size : sync.children.where(syncable_type: "Account", syncable_id: api_access.accounts.select(:id)).count)
 json.window_start_date sync.window_start_date
 json.window_end_date sync.window_end_date
 json.pending_at sync.pending_at

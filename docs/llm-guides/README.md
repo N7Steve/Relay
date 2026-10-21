@@ -27,8 +27,9 @@ being changed. These guides hold the detailed conventions and procedures.
 
 ## External wealth integration
 
-[Financial assistant tools](wealth-agent-harness.md) describes the retained
-builtin tools and the archived external harness. MCP is retired in phase 5.
+[External financial access](wealth-agent-harness.md) links the new Relay API/MCP
+roadmap and capability inventory. The legacy MCP and builtin assistant are
+retired; the new MCP transport is scheduled for phase 2 of that roadmap.
 The [wealth blueprint](wealth-blueprint.md) is reference architecture for that
 separate system. Its working-memory files, private document vault and operating
 protocol apply to that external project, not to every change in this repository.

@@ -163,6 +163,19 @@ class Api::V1::BudgetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "household budget detail uses the authenticated viewer account scope" do
+    member = users(:family_member)
+    @api_key.update!(user: member)
+    private_account = @family.accounts.create!(owner: @user, name: "Private budget data", currency: "USD", balance: 100_000, accountable: Depository.new)
+    private_account.entries.create!(name: "Private spending", date: @budget.start_date + 2.days, amount: 9999, currency: "USD", entryable: Transaction.new(category: categories(:food_and_drink)))
+
+    get api_v1_budget_url(@budget.id), headers: api_headers(@api_key)
+    assert_response :success
+    expected = @budget.reload
+    expected.current_user = member
+    assert_equal (expected.actual_spending_money.amount * 100).round.to_i, response.parsed_body["actual_spending_cents"]
+  end
+
   test "requires read scope" do
     api_key_without_read = ApiKey.new(
       user: @user,

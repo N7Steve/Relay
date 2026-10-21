@@ -78,6 +78,7 @@ RSpec.describe 'API V1 Accounts', type: :request do
 
   path '/api/v1/accounts' do
     get 'List accounts' do
+      description "Effective read, annotate and write capabilities are included per account. Token write scope never grants account access."
       tags 'Accounts'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -110,6 +111,7 @@ RSpec.describe 'API V1 Accounts', type: :request do
               schema: { type: :string, format: :uuid }
 
     get 'Retrieve an account' do
+      description "Effective read, annotate and write capabilities are included per account. Token write scope never grants account access."
       tags 'Accounts'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'

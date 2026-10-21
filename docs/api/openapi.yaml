@@ -26,6 +26,99 @@ components:
             read: Read access
             read_write: Read and write access
   schemas:
+    AccountCapabilities:
+      type: object
+      required:
+      - read
+      - annotate
+      - write
+      properties:
+        read:
+          type: boolean
+        annotate:
+          type: boolean
+        write:
+          type: boolean
+    ApiContext:
+      type: object
+      required:
+      - api_version
+      - user
+      - family
+      - authentication
+      - capabilities
+      - contracts
+      properties:
+        api_version:
+          type: string
+          enum:
+          - v1
+        user:
+          type: object
+          required:
+          - id
+          - role
+          properties:
+            id:
+              type: string
+              format: uuid
+            role:
+              type: string
+        family:
+          type: object
+          required:
+          - id
+          - currency
+          - timezone
+          properties:
+            id:
+              type: string
+              format: uuid
+            currency:
+              type: string
+            timezone:
+              type: string
+        authentication:
+          type: object
+          required:
+          - method
+          - scopes
+          properties:
+            method:
+              type: string
+            scopes:
+              type: array
+              items:
+                type: string
+        capabilities:
+          type: object
+          required:
+          - read
+          - write
+          - manage_family
+          - read_family_operations
+          - read_family_insights
+          - preview_features
+          - mcp
+          properties:
+            read:
+              type: boolean
+            write:
+              type: boolean
+            manage_family:
+              type: boolean
+            read_family_operations:
+              type: boolean
+            read_family_insights:
+              type: boolean
+            preview_features:
+              type: boolean
+            mcp:
+              type: boolean
+        contracts:
+          type: object
+          additionalProperties:
+            type: string
     Pagination:
       type: object
       required:
@@ -267,6 +360,8 @@ components:
         subtype:
           type: string
           nullable: true
+        capabilities:
+          "$ref": "#/components/schemas/AccountCapabilities"
         status:
           type: string
           enum:
@@ -2455,6 +2550,29 @@ components:
             per_page:
               type: integer
               minimum: 1
+    SyncQueued:
+      type: object
+      required:
+      - id
+      - status
+      - syncable_type
+      - syncable_id
+      - message
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        syncable_type:
+          type: string
+          enum:
+          - Family
+        syncable_id:
+          type: string
+          format: uuid
+        message:
+          type: string
     SyncableSummary:
       type: object
       required:
@@ -3283,6 +3401,8 @@ paths:
   "/api/v1/accounts":
     get:
       summary: List accounts
+      description: Effective read, annotate and write capabilities are included per
+        account. Token write scope never grants account access.
       tags:
       - Accounts
       security:
@@ -3324,6 +3444,8 @@ paths:
         format: uuid
     get:
       summary: Retrieve an account
+      description: Effective read, annotate and write capabilities are included per
+        account. Token write scope never grants account access.
       tags:
       - Accounts
       security:
@@ -4006,6 +4128,9 @@ paths:
   "/api/v1/budget_categories":
     get:
       summary: List budget categories
+      description: Personal budget categories require ownership or BudgetShare. Household
+        derived amounts use the authenticated viewer account scope. GET may recompute
+        stored rollover for visible budget chains only.
       tags:
       - Budget Categories
       security:
@@ -4089,6 +4214,9 @@ paths:
         format: uuid
     get:
       summary: Retrieve a budget category
+      description: Personal budget categories require ownership or BudgetShare. Household
+        derived amounts use the authenticated viewer account scope. GET may recompute
+        stored rollover for visible budget chains only.
       tags:
       - Budget Categories
       security:
@@ -4121,6 +4249,8 @@ paths:
   "/api/v1/budgets":
     get:
       summary: List budgets
+      description: Personal budgets require ownership or BudgetShare. Household derived
+        amounts use the authenticated viewer account scope; allocations remain family-shared.
       tags:
       - Budgets
       security:
@@ -4188,6 +4318,8 @@ paths:
         format: uuid
     get:
       summary: Retrieve a budget
+      description: Personal budgets require ownership or BudgetShare. Household derived
+        amounts use the authenticated viewer account scope; allocations remain family-shared.
       tags:
       - Budgets
       security:
@@ -4399,6 +4531,28 @@ paths:
                 "$ref": "#/components/schemas/CategoryDetail"
         '404':
           description: category not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/v1/context":
+    get:
+      summary: Read the authenticated identity and effective capability contract
+      tags:
+      - Context
+      security:
+      - apiKeyAuth: []
+      description: No secrets are returned. A write token never expands account permissions.
+        MCP is unavailable until phase 2. Responses are private and not cacheable.
+      responses:
+        '200':
+          description: identity and capabilities
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiContext"
+        '401':
+          description: missing or revoked credential
           content:
             application/json:
               schema:
@@ -4707,7 +4861,9 @@ paths:
       description: Create or retrieve a backup session keyed by client_session_id.
         New sessions use RelayImport. Retries preserve the stored type and chunks
         of the original session, including existing SureImport sessions. Responses
-        expose the stored type.
+        expose the stored type. Family administrator required for all import-session
+        actions because chunks can span private accounts. Read/read_write scopes and
+        existing chunk idempotency still apply.
       tags:
       - Import Sessions
       security:
@@ -4780,7 +4936,9 @@ paths:
     get:
       summary: Retrieve import session
       description: Retrieve import session status, chunk status, per-entity summary
-        counts, and safe error details.
+        counts, and safe error details. Family administrator required for all import-session
+        actions because chunks can span private accounts. Read/read_write scopes and
+        existing chunk idempotency still apply.
       tags:
       - Import Sessions
       security:
@@ -4824,7 +4982,9 @@ paths:
         chunks use the stored session type. Existing chunks keep their type and are
         idempotent by sequence and client_chunk_id with content verification. Full
         backups require a family administrator and one self-contained ZIP or NDJSON
-        chunk.
+        chunk. Family administrator required for all import-session actions because
+        chunks can span private accounts. Read/read_write scopes and existing chunk
+        idempotency still apply.
       tags:
       - Import Sessions
       security:
@@ -4926,7 +5086,9 @@ paths:
       summary: Publish import session
       description: Queue ordered backup chunk processing for an import session. Later
         chunks can reference source IDs mapped by earlier chunks. Full snapshots require
-        a family administrator and a destination without financial data.
+        a family administrator and a destination without financial data. Family administrator
+        required for all import-session actions because chunks can span private accounts.
+        Read/read_write scopes and existing chunk idempotency still apply.
       tags:
       - Import Sessions
       security:
@@ -4977,7 +5139,10 @@ paths:
   "/api/v1/imports":
     get:
       summary: List imports
-      description: List all imports for the user's family with pagination and filtering.
+      description: 'List all imports for the user''s family with pagination and filtering.
+        Family administrator required for all import endpoints: uploaded contents
+        and asynchronous publishing can span private accounts. Existing read/read_write
+        token scopes still apply.'
       tags:
       - Imports
       security:
@@ -5038,11 +5203,14 @@ paths:
                 "$ref": "#/components/schemas/ImportCollection"
     post:
       summary: Create import
-      description: Create an import from CSV or backup NDJSON content or a multipart
+      description: 'Create an import from CSV or backup NDJSON content or a multipart
         backup ZIP/NDJSON file. Version 3 full backups include original file bytes
         and require a family administrator and a destination without financial data.
         Backup requests use RelayImport for storage, responses and queued jobs, including
-        requests using the old SureImport name. CSV content is limited to 10MB.
+        requests using the old SureImport name. CSV content is limited to 10MB. Family
+        administrator required for all import endpoints: uploaded contents and asynchronous
+        publishing can span private accounts. Existing read/read_write token scopes
+        still apply.'
       tags:
       - Imports
       security:
@@ -5311,9 +5479,11 @@ paths:
         type: string
     get:
       summary: Retrieve an import
-      description: Retrieve detailed information about an import, including configuration,
+      description: 'Retrieve detailed information about an import, including configuration,
         row statistics and backup readback verification for both RelayImport and SureImport.
-        The response type reflects the stored type.
+        The response type reflects the stored type. Family administrator required
+        for all import endpoints: uploaded contents and asynchronous publishing can
+        span private accounts. Existing read/read_write token scopes still apply.'
       tags:
       - Imports
       security:
@@ -5341,8 +5511,10 @@ paths:
         type: string
     get:
       summary: List import row diagnostics
-      description: List sanitized import rows with validation errors and mapping resolution
-        state.
+      description: 'List sanitized import rows with validation errors and mapping
+        resolution state. Family administrator required for all import endpoints:
+        uploaded contents and asynchronous publishing can span private accounts. Existing
+        read/read_write token scopes still apply.'
       tags:
       - Imports
       security:
@@ -5394,10 +5566,12 @@ paths:
   "/api/v1/imports/preflight":
     post:
       summary: Validate import content without creating an import
-      description: Validate CSV or backup ZIP/NDJSON without persisting an import
+      description: 'Validate CSV or backup ZIP/NDJSON without persisting an import
         or enqueueing jobs. Full backups verify the manifest, graph and original file
         checksums. Backup preflight returns type RelayImport, including requests using
-        the old SureImport name. CSV content is limited to 10MB.
+        the old SureImport name. CSV content is limited to 10MB. Family administrator
+        required for all import endpoints: uploaded contents and asynchronous publishing
+        can span private accounts. Existing read/read_write token scopes still apply.'
       tags:
       - Imports
       security:
@@ -5667,6 +5841,9 @@ paths:
   "/api/v1/insights":
     get:
       summary: List proactive insights
+      description: Preview features and access to every family account are required
+        because the stored feed is family-wide. Retired Bills-backed insights are
+        excluded.
       tags:
       - Insights
       security:
@@ -5771,7 +5948,8 @@ paths:
       summary: Lists provider connection status summaries
       description: List safe Enable Banking connection status metadata for the authenticated
         user's family without exposing credentials, raw provider payloads, or raw
-        sync errors.
+        sync errors. Family administrator required. Connection metadata summarizes
+        the entire family, not just accounts shared with the caller.
       tags:
       - Provider Connections
       security:
@@ -6356,11 +6534,43 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/api/v1/sync":
+    post:
+      summary: Queue a family synchronization
+      tags:
+      - Syncs
+      security:
+      - apiKeyAuth: []
+      description: Requires a family administrator with write scope. Reuses the existing
+        sync job, rules and ExternalAccess policy; it does not acquire external market
+        data. Poll the sync history endpoints for completion.
+      responses:
+        '202':
+          description: family synchronization queued
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SyncQueued"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: family administrator required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/api/v1/syncs":
     get:
       summary: Lists sync history
       description: List sanitized sync status history for the authenticated user's
-        family, accounts, and provider connections.
+        family, accounts, and provider connections. Family sync creation requires
+        an administrator with write scope. History for other members contains only
+        accessible account jobs; family/provider jobs, private children and parent
+        IDs are excluded.
       tags:
       - Syncs
       security:
@@ -6401,7 +6611,10 @@ paths:
     get:
       summary: Shows the latest sync
       description: 'Return the most recently created sanitized sync status for the
-        authenticated user''s family, or data: null when no sync exists.'
+        authenticated user''s family, or data: null when no sync exists. Family sync
+        creation requires an administrator with write scope. History for other members
+        contains only accessible account jobs; family/provider jobs, private children
+        and parent IDs are excluded.'
       tags:
       - Syncs
       security:
@@ -6436,6 +6649,9 @@ paths:
     get:
       summary: Shows a sync
       description: Return sanitized status metadata for a single family-scoped sync.
+        Family sync creation requires an administrator with write scope. History for
+        other members contains only accessible account jobs; family/provider jobs,
+        private children and parent IDs are excluded.
       tags:
       - Syncs
       security:
@@ -6595,6 +6811,10 @@ paths:
   "/api/v1/trades":
     get:
       summary: List trades
+      description: Only trades in accessible accounts are returned. All writes require
+        owner/full_control on the primary account and any transfer account; unavailable
+        references and malformed decimal/date input are rejected. Token scope never
+        overrides account sharing.
       tags:
       - Trades
       security:
@@ -6661,6 +6881,10 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
     post:
       summary: Create trade
+      description: Only trades in accessible accounts are returned. All writes require
+        owner/full_control on the primary account and any transfer account; unavailable
+        references and malformed decimal/date input are rejected. Token scope never
+        overrides account sharing.
       tags:
       - Trades
       security:
@@ -6785,6 +7009,10 @@ paths:
         type: string
     get:
       summary: Retrieve trade
+      description: Only trades in accessible accounts are returned. All writes require
+        owner/full_control on the primary account and any transfer account; unavailable
+        references and malformed decimal/date input are rejected. Token scope never
+        overrides account sharing.
       tags:
       - Trades
       security:
@@ -6810,6 +7038,10 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
     patch:
       summary: Update trade
+      description: Only trades in accessible accounts are returned. All writes require
+        owner/full_control on the primary account and any transfer account; unavailable
+        references and malformed decimal/date input are rejected. Token scope never
+        overrides account sharing.
       tags:
       - Trades
       security:
@@ -6883,6 +7115,10 @@ paths:
         required: true
     delete:
       summary: Delete trade
+      description: Only trades in accessible accounts are returned. All writes require
+        owner/full_control on the primary account and any transfer account; unavailable
+        references and malformed decimal/date input are rejected. Token scope never
+        overrides account sharing.
       tags:
       - Trades
       security:
@@ -6919,8 +7155,14 @@ paths:
       - Transactions
       security:
       - apiKeyAuth: []
-      description: Returns global ledger history for accessible accounts, including
-        disabled accounts but excluding accounts pending deletion.
+      description: 'Returns global ledger history for accessible accounts, including
+        disabled accounts but excluding accounts pending deletion. Account permissions
+        are enforced on every call: read_only cannot edit; account read_write permits
+        category, merchant, tags and notes only. Financial changes require owner/full_control,
+        including both transfer legs when applicable. Unavailable references are rejected
+        with 422; inaccessible resources return 404. Transfer details are omitted
+        when the other account is inaccessible. Dates use ISO 8601 and monetary input
+        must be finite decimals.'
       parameters:
       - name: page
         in: query
@@ -7034,6 +7276,12 @@ paths:
                 "$ref": "#/components/schemas/TransactionCollection"
     post:
       summary: Create transaction
+      description: 'Account permissions are enforced on every call: read_only cannot
+        edit; account read_write permits category, merchant, tags and notes only.
+        Financial changes require owner/full_control, including both transfer legs
+        when applicable. Unavailable references are rejected with 422; inaccessible
+        resources return 404. Transfer details are omitted when the other account
+        is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals.'
       tags:
       - Transactions
       security:
@@ -7143,6 +7391,12 @@ paths:
       description: Transaction ID
     get:
       summary: Retrieve a transaction
+      description: 'Account permissions are enforced on every call: read_only cannot
+        edit; account read_write permits category, merchant, tags and notes only.
+        Financial changes require owner/full_control, including both transfer legs
+        when applicable. Unavailable references are rejected with 422; inaccessible
+        resources return 404. Transfer details are omitted when the other account
+        is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals.'
       tags:
       - Transactions
       security:
@@ -7162,6 +7416,12 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
     patch:
       summary: Update a transaction
+      description: 'Account permissions are enforced on every call: read_only cannot
+        edit; account read_write permits category, merchant, tags and notes only.
+        Financial changes require owner/full_control, including both transfer legs
+        when applicable. Unavailable references are rejected with 422; inaccessible
+        resources return 404. Transfer details are omitted when the other account
+        is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals.'
       tags:
       - Transactions
       security:
@@ -7231,6 +7491,12 @@ paths:
         required: true
     delete:
       summary: Delete a transaction
+      description: 'Account permissions are enforced on every call: read_only cannot
+        edit; account read_write permits category, merchant, tags and notes only.
+        Financial changes require owner/full_control, including both transfer legs
+        when applicable. Unavailable references are rejected with 422; inaccessible
+        resources return 404. Transfer details are omitted when the other account
+        is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals.'
       tags:
       - Transactions
       security:
@@ -7457,6 +7723,9 @@ paths:
   "/api/v1/valuations":
     get:
       summary: List valuations
+      description: List and detail are scoped to accessible accounts. Create and update
+        require owner/full_control; invalid ISO dates and non-finite decimals return
+        422. A valuation is an absolute reconciliation, not a cash transaction.
       tags:
       - Valuations
       security:
@@ -7516,6 +7785,9 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
     post:
       summary: Create valuation
+      description: List and detail are scoped to accessible accounts. Create and update
+        require owner/full_control; invalid ISO dates and non-finite decimals return
+        422. A valuation is an absolute reconciliation, not a cash transaction.
       tags:
       - Valuations
       security:
@@ -7598,6 +7870,9 @@ paths:
         type: string
     get:
       summary: Retrieve a valuation
+      description: List and detail are scoped to accessible accounts. Create and update
+        require owner/full_control; invalid ISO dates and non-finite decimals return
+        422. A valuation is an absolute reconciliation, not a cash transaction.
       tags:
       - Valuations
       security:
@@ -7617,6 +7892,9 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
     patch:
       summary: Update a valuation
+      description: List and detail are scoped to accessible accounts. Create and update
+        require owner/full_control; invalid ISO dates and non-finite decimals return
+        422. A valuation is an absolute reconciliation, not a cash transaction.
       tags:
       - Valuations
       security:

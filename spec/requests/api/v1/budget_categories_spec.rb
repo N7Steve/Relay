@@ -65,6 +65,7 @@ RSpec.describe 'API V1 Budget Categories', type: :request do
 
   path '/api/v1/budget_categories' do
     get 'List budget categories' do
+      description "Personal budget categories require ownership or BudgetShare. Household derived amounts use the authenticated viewer account scope. GET may recompute stored rollover for visible budget chains only."
       tags 'Budget Categories'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -122,6 +123,7 @@ RSpec.describe 'API V1 Budget Categories', type: :request do
               schema: { type: :string, format: :uuid }
 
     get 'Retrieve a budget category' do
+      description "Personal budget categories require ownership or BudgetShare. Household derived amounts use the authenticated viewer account scope. GET may recompute stored rollover for visible budget chains only."
       tags 'Budget Categories'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'

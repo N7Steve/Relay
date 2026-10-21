@@ -47,6 +47,35 @@ RSpec.configure do |config|
           }
         },
         schemas: {
+          AccountCapabilities: {
+            type: :object,
+            required: %w[read annotate write],
+            properties: { read: { type: :boolean }, annotate: { type: :boolean }, write: { type: :boolean } }
+          },
+          ApiContext: {
+            type: :object,
+            required: %w[api_version user family authentication capabilities contracts],
+            properties: {
+              api_version: { type: :string, enum: [ 'v1' ] },
+              user: {
+                type: :object, required: %w[id role],
+                properties: { id: { type: :string, format: :uuid }, role: { type: :string } }
+              },
+              family: {
+                type: :object, required: %w[id currency timezone],
+                properties: { id: { type: :string, format: :uuid }, currency: { type: :string }, timezone: { type: :string } }
+              },
+              authentication: {
+                type: :object, required: %w[method scopes],
+                properties: { method: { type: :string }, scopes: { type: :array, items: { type: :string } } }
+              },
+              capabilities: {
+                type: :object, required: %w[read write manage_family read_family_operations read_family_insights preview_features mcp],
+                properties: %w[read write manage_family read_family_operations read_family_insights preview_features mcp].to_h { |key| [ key, { type: :boolean } ] }
+              },
+              contracts: { type: :object, additionalProperties: { type: :string } }
+            }
+          },
           Pagination: {
             type: :object,
             required: %w[page per_page total_count total_pages],
@@ -185,6 +214,7 @@ RSpec.configure do |config|
               classification: { type: :string },
               account_type: { type: :string, nullable: true },
               subtype: { type: :string, nullable: true },
+              capabilities: { '$ref' => '#/components/schemas/AccountCapabilities' },
               status: { type: :string, enum: %w[active draft disabled pending_deletion] },
               institution_name: { type: :string, nullable: true },
               institution_domain: { type: :string, nullable: true },
@@ -1347,6 +1377,17 @@ RSpec.configure do |config|
                   per_page: { type: :integer, minimum: 1 }
                 }
               }
+            }
+          },
+          SyncQueued: {
+            type: :object,
+            required: %w[id status syncable_type syncable_id message],
+            properties: {
+              id: { type: :string, format: :uuid },
+              status: { type: :string },
+              syncable_type: { type: :string, enum: [ 'Family' ] },
+              syncable_id: { type: :string, format: :uuid },
+              message: { type: :string }
             }
           },
           SyncableSummary: {

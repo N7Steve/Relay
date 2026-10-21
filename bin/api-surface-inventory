@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Regenerate with RAILS_ENV=test bundle exec ruby bin/api-surface-inventory.
+# Loads routes and source only; it does not query or prepare the database.
+require_relative "../config/environment"
+require "json"
+require "digest"
+
+root = Rails.root
+target = root.join("docs/research/relay-api-surface.json")
+ui_actions = %w[new edit picker sidebar dropdown connect_form confirm_entry_form select_existing_account]
+
+phase_for = lambda do |controller|
+  name = controller.delete_prefix("api/v1/")
+  case name
+  when "context" then 1
+  when "settings/guides" then "presentation"
+  when "account_sharings" then 8
+  when /\A(admin\/|settings\/|google_drive|enable_banking|oauth\/)/ then 8
+  when /\A(auth|users|sessions|cookie_sessions|passkey_sessions|mfa|registrations|onboardings|passwords|password_resets|email_confirmations|oidc_accounts|invitations|invite_codes|current_sessions|impersonation_sessions)\z/ then 8
+  when /\A(import\/|imports\z|import_sessions\z|family_exports\z|archived_exports\z|account_statements\z|transaction_attachments\z)/ then 7
+  when /\A(goals|goal_pledges|scheduled_payments|budgets|budget_categories|plans)\z/ then 5
+  when /\A(reports|cash_flows|balance_sheet|balances|accountable_sparklines|insights)\z/ then 4
+  when /\A(holdings|trades|valuations|investment_values|securities|security_prices|exchange_rates)\z/ then 6
+  when /\A(rules|rule_runs)\z/ then 7
+  when /\A(sync|syncs|provider_connections|family_settings|usage)\z/ then 8
+  when /\A(accounts|account_sharings|depositories|investments|cryptos|properties|vehicles|credit_cards|loans|other_assets|other_liabilities|transactions|transaction_categories|splits|transfer_matches|pending_duplicate_merges|transfers|rejected_transfers|categories|family_merchants|merchants|tags|category\/|tag\/|transactions\/)/ then 3
+  when /\A(pages|release_highlights|currencies|pwa|lookbooks)\z/ then "presentation"
+  else raise "Unclassified controller: #{controller}"
+  end
+end
+
+routes = Rails.application.routes.routes.filter_map do |route|
+  controller = route.defaults[:controller]
+  action = route.defaults[:action]
+  next unless controller && action
+  next if controller == "api/v1/test"
+
+  file = root.join("app/controllers/#{controller}_controller.rb")
+  next unless file.file? # Rails/ActiveStorage/Doorkeeper engine-owned routes.
+
+  {
+    verb: route.verb, path: route.path.spec.to_s, controller: controller, action: action,
+    source: file.relative_path_from(root).to_s.tr("\\", "/"),
+    surface: controller.start_with?("api/v1/") ? "api" : "web",
+    delivery_phase: phase_for.call(controller),
+    presentation_only: ui_actions.include?(action) || controller.match?(/\A(category|tag)\/dropdowns\z/)
+  }
+end.sort_by { |row| [ row[:controller], row[:action], row[:path], row[:verb] ] }
+
+sources = Dir[root.join("app/controllers/**/*.rb")].sort.to_h do |file|
+  text = File.read(file).gsub("\r\n", "\n")
+  relative = Pathname(file).relative_path_from(root).to_s.tr("\\", "/")
+  # Keep complete permit expressions, including constants and nested attributes,
+  # instead of claiming that a regex can resolve Rails strong parameters.
+  lines = text.lines
+  contracts = []
+  lines.each_with_index do |line, index|
+    next unless line.include?(".permit(")
+
+    expression = line.dup
+    cursor = index
+    while expression.count("(") > expression.count(")") && cursor + 1 < lines.length
+      cursor += 1
+      expression << lines[cursor]
+    end
+    contracts << { line: index + 1, expression: expression.strip }
+  end
+  [ relative, { sha256: Digest::SHA256.hexdigest(text.gsub("\r\n", "\n")), strong_parameters: contracts } ]
+end
+
+payload = JSON.pretty_generate({
+  format_version: 1,
+  description: "Application-owned routes and controller parameter contracts. Domain cases, authority and effects: relay-api-capability-matrix.md. Engine routes and test-only endpoints excluded.",
+  routes: routes, controller_sources: sources
+}) + "\n"
+
+if ARGV.include?("--check")
+  abort "API surface inventory is stale; regenerate it" unless target.file? && target.read == payload
+  puts "API surface inventory matches #{routes.length} routes and #{sources.length} controller sources"
+else
+  target.write(payload)
+  puts "Wrote #{routes.length} routes and #{sources.length} controller sources to #{target}"
+end

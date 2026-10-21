@@ -89,7 +89,7 @@ RSpec.describe 'API V1 Transactions', type: :request do
     get 'List transactions' do
       tags 'Transactions'
       security [ { apiKeyAuth: [] } ]
-      description 'Returns global ledger history for accessible accounts, including disabled accounts but excluding accounts pending deletion.'
+      description 'Returns global ledger history for accessible accounts, including disabled accounts but excluding accounts pending deletion. Account permissions are enforced on every call: read_only cannot edit; account read_write permits category, merchant, tags and notes only. Financial changes require owner/full_control, including both transfer legs when applicable. Unavailable references are rejected with 422; inaccessible resources return 404. Transfer details are omitted when the other account is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals.'
       produces 'application/json'
       parameter name: :page, in: :query, type: :integer, required: false,
                 description: 'Page number (default: 1)'
@@ -154,6 +154,7 @@ RSpec.describe 'API V1 Transactions', type: :request do
     end
 
     post 'Create transaction' do
+      description "Account permissions are enforced on every call: read_only cannot edit; account read_write permits category, merchant, tags and notes only. Financial changes require owner/full_control, including both transfer legs when applicable. Unavailable references are rejected with 422; inaccessible resources return 404. Transfer details are omitted when the other account is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals."
       tags 'Transactions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -273,6 +274,7 @@ RSpec.describe 'API V1 Transactions', type: :request do
     parameter name: :id, in: :path, schema: { type: :string, format: :uuid }, required: true, description: 'Transaction ID'
 
     get 'Retrieve a transaction' do
+      description "Account permissions are enforced on every call: read_only cannot edit; account read_write permits category, merchant, tags and notes only. Financial changes require owner/full_control, including both transfer legs when applicable. Unavailable references are rejected with 422; inaccessible resources return 404. Transfer details are omitted when the other account is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals."
       tags 'Transactions'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -295,6 +297,7 @@ RSpec.describe 'API V1 Transactions', type: :request do
     end
 
     patch 'Update a transaction' do
+      description "Account permissions are enforced on every call: read_only cannot edit; account read_write permits category, merchant, tags and notes only. Financial changes require owner/full_control, including both transfer legs when applicable. Unavailable references are rejected with 422; inaccessible resources return 404. Transfer details are omitted when the other account is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals."
       tags 'Transactions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -353,6 +356,7 @@ RSpec.describe 'API V1 Transactions', type: :request do
     end
 
     delete 'Delete a transaction' do
+      description "Account permissions are enforced on every call: read_only cannot edit; account read_write permits category, merchant, tags and notes only. Financial changes require owner/full_control, including both transfer legs when applicable. Unavailable references are rejected with 422; inaccessible resources return 404. Transfer details are omitted when the other account is inaccessible. Dates use ISO 8601 and monetary input must be finite decimals."
       tags 'Transactions'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'

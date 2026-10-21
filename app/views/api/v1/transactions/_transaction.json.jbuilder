@@ -60,7 +60,7 @@ end
 
 # Transfer information (if this transaction is part of a transfer)
 transfer = transaction.transfer
-if transfer.present?
+if transfer.present? && api_access.allowed?(transfer.inflow_transaction.entry.account, :read) && api_access.allowed?(transfer.outflow_transaction.entry.account, :read)
   json.transfer do
     json.id transfer.id
 

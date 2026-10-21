@@ -16,7 +16,8 @@ RSpec.describe "Api::V1::Syncs", type: :request do
     family.users.create!(
       email: "sync-api-user@example.com",
       password: "password123",
-      password_confirmation: "password123"
+      password_confirmation: "password123",
+      role: "admin"
     )
   end
 
@@ -48,7 +49,7 @@ RSpec.describe "Api::V1::Syncs", type: :request do
 
   path "/api/v1/syncs" do
     get "Lists sync history" do
-      description "List sanitized sync status history for the authenticated user's family, accounts, and provider connections."
+      description "List sanitized sync status history for the authenticated user's family, accounts, and provider connections. Family sync creation requires an administrator with write scope. History for other members contains only accessible account jobs; family/provider jobs, private children and parent IDs are excluded."
       tags "Syncs"
       security [ { apiKeyAuth: [] } ]
       produces "application/json"
@@ -78,7 +79,7 @@ RSpec.describe "Api::V1::Syncs", type: :request do
 
   path "/api/v1/syncs/latest" do
     get "Shows the latest sync" do
-      description "Return the most recently created sanitized sync status for the authenticated user's family, or data: null when no sync exists."
+      description "Return the most recently created sanitized sync status for the authenticated user's family, or data: null when no sync exists. Family sync creation requires an administrator with write scope. History for other members contains only accessible account jobs; family/provider jobs, private children and parent IDs are excluded."
       tags "Syncs"
       security [ { apiKeyAuth: [] } ]
       produces "application/json"
@@ -108,7 +109,7 @@ RSpec.describe "Api::V1::Syncs", type: :request do
     parameter name: :id, in: :path, type: :string, format: :uuid, required: true
 
     get "Shows a sync" do
-      description "Return sanitized status metadata for a single family-scoped sync."
+      description "Return sanitized status metadata for a single family-scoped sync. Family sync creation requires an administrator with write scope. History for other members contains only accessible account jobs; family/provider jobs, private children and parent IDs are excluded."
       tags "Syncs"
       security [ { apiKeyAuth: [] } ]
       produces "application/json"

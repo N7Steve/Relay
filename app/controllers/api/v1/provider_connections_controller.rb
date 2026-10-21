@@ -2,6 +2,7 @@
 
 class Api::V1::ProviderConnectionsController < Api::V1::BaseController
   before_action :ensure_read_scope
+  before_action :require_api_family_admin!
 
   def index
     @provider_connections = ProviderConnectionStatus.for_family(current_resource_owner.family)

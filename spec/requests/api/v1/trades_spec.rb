@@ -79,6 +79,7 @@ RSpec.describe 'API V1 Trades', type: :request do
 
   path '/api/v1/trades' do
     get 'List trades' do
+      description "Only trades in accessible accounts are returned. All writes require owner/full_control on the primary account and any transfer account; unavailable references and malformed decimal/date input are rejected. Token scope never overrides account sharing."
       tags 'Trades'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -148,6 +149,7 @@ RSpec.describe 'API V1 Trades', type: :request do
     end
 
     post 'Create trade' do
+      description "Only trades in accessible accounts are returned. All writes require owner/full_control on the primary account and any transfer account; unavailable references and malformed decimal/date input are rejected. Token scope never overrides account sharing."
       tags 'Trades'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -481,6 +483,7 @@ RSpec.describe 'API V1 Trades', type: :request do
     parameter name: :id, in: :path, type: :string, required: true, description: 'Trade ID'
 
     get 'Retrieve trade' do
+      description "Only trades in accessible accounts are returned. All writes require owner/full_control on the primary account and any transfer account; unavailable references and malformed decimal/date input are rejected. Token scope never overrides account sharing."
       tags 'Trades'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -512,6 +515,7 @@ RSpec.describe 'API V1 Trades', type: :request do
     end
 
     patch 'Update trade' do
+      description "Only trades in accessible accounts are returned. All writes require owner/full_control on the primary account and any transfer account; unavailable references and malformed decimal/date input are rejected. Token scope never overrides account sharing."
       tags 'Trades'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -593,6 +597,7 @@ RSpec.describe 'API V1 Trades', type: :request do
     end
 
     delete 'Delete trade' do
+      description "Only trades in accessible accounts are returned. All writes require owner/full_control on the primary account and any transfer account; unavailable references and malformed decimal/date input are rejected. Token scope never overrides account sharing."
       tags 'Trades'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'

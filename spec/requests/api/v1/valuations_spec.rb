@@ -60,6 +60,7 @@ RSpec.describe 'API V1 Valuations', type: :request do
 
   path '/api/v1/valuations' do
     get 'List valuations' do
+      description "List and detail are scoped to accessible accounts. Create and update require owner/full_control; invalid ISO dates and non-finite decimals return 422. A valuation is an absolute reconciliation, not a cash transaction."
       tags 'Valuations'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -108,6 +109,7 @@ RSpec.describe 'API V1 Valuations', type: :request do
     end
 
     post 'Create valuation' do
+      description "List and detail are scoped to accessible accounts. Create and update require owner/full_control; invalid ISO dates and non-finite decimals return 422. A valuation is an absolute reconciliation, not a cash transaction."
       tags 'Valuations'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -237,6 +239,7 @@ RSpec.describe 'API V1 Valuations', type: :request do
     parameter name: :id, in: :path, type: :string, required: true, description: 'Valuation ID (entry ID)'
 
     get 'Retrieve a valuation' do
+      description "List and detail are scoped to accessible accounts. Create and update require owner/full_control; invalid ISO dates and non-finite decimals return 422. A valuation is an absolute reconciliation, not a cash transaction."
       tags 'Valuations'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -259,6 +262,7 @@ RSpec.describe 'API V1 Valuations', type: :request do
     end
 
     patch 'Update a valuation' do
+      description "List and detail are scoped to accessible accounts. Create and update require owner/full_control; invalid ISO dates and non-finite decimals return 422. A valuation is an absolute reconciliation, not a cash transaction."
       tags 'Valuations'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'

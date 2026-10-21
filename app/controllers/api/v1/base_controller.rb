@@ -42,17 +42,23 @@ class Api::V1::BaseController < ApplicationController
   rescue_from Doorkeeper::Errors::DoorkeeperError, with: :handle_unauthorized
   rescue_from ActionController::ParameterMissing, with: :handle_bad_request
   rescue_from InvalidFilterError, with: :handle_invalid_filter
+  rescue_from Api::Input::Invalid, with: :handle_invalid_filter
+  rescue_from Api::Access::Forbidden, with: :handle_forbidden
+  rescue_from Money::ConversionError, with: :handle_missing_conversion
 
   private
 
     # Force JSON format for all API requests
     def force_json_format
       request.format = :json
+      response.headers["Cache-Control"] = "private, no-store"
     end
 
     # Authenticate using either OAuth or API key
     def authenticate_request!
+      Current.session = nil
       return if authenticate_oauth
+      return if performed?
       return if authenticate_api_key
       render_unauthorized unless performed?
     end
@@ -62,7 +68,7 @@ class Api::V1::BaseController < ApplicationController
       return false unless request.headers["Authorization"].present?
 
       # Manually verify the token (bypassing doorkeeper_authorize! which had scope issues)
-      token_string = request.authorization&.split(" ")&.last
+      token_string = request.authorization.to_s.match(/\ABearer ([^\s]+)\z/i)&.captures&.first
       access_token = Doorkeeper::AccessToken.by_token(token_string)
 
       # Check token validity and scope (read_write includes read access)
@@ -220,6 +226,33 @@ class Api::V1::BaseController < ApplicationController
       authorize_scope!(:read)
     end
 
+    def api_access
+      @api_access ||= Api::Access.new(user: current_resource_owner, scopes: current_scopes)
+    end
+    helper_method :api_access
+
+    def require_api_family_admin!
+      raise Api::Access::Forbidden, "This family-wide operation requires a family administrator" unless api_access.family_admin?
+    end
+
+    def validate_api_references!(attributes)
+      family = current_resource_owner.family
+      { category_id: family.categories, merchant_id: family.available_merchants_for(current_resource_owner), tag_ids: family.tags }.each do |key, scope|
+        next unless attributes.key?(key)
+
+        ids = Array(attributes[key]).compact_blank.map(&:to_s).uniq
+        unless ids.all? { |id| valid_uuid?(id) } && scope.where(id: ids).distinct.count == ids.length
+          raise Api::Input::Invalid, "#{key} contains an unavailable reference"
+        end
+      end
+    end
+
+    # Let Rails' common handlers keep client errors out of legacy broad rescues.
+    def api_client_error?(error)
+      error.is_a?(ActiveRecord::RecordNotFound) || error.is_a?(ActionController::ParameterMissing) ||
+        error.is_a?(Api::Input::Invalid) || error.is_a?(Api::Access::Forbidden) || error.is_a?(Money::ConversionError)
+    end
+
     # Consistent JSON response method
     def render_json(data, status: :ok)
       render json: data, status: status
@@ -268,7 +301,23 @@ class Api::V1::BaseController < ApplicationController
     end
 
     def handle_invalid_filter(exception)
-      render_validation_error(exception.message)
+      render_json({ error: "validation_failed", message: exception.message, errors: [ exception.message ] }, status: :unprocessable_entity)
+    end
+
+    def handle_forbidden(exception)
+      render_json({ error: "forbidden", message: exception.message }, status: :forbidden)
+    end
+
+    def handle_missing_conversion(exception)
+      render_insufficient_financial_data(exception)
+    end
+
+    def render_insufficient_financial_data(exception)
+      render_json({
+        error: I18n.t("external_access.insufficient_data", details: exception.message),
+        code: exception.is_a?(Money::ConversionError) ? "missing_conversion" : "missing_price",
+        message: exception.message
+      }, status: :unprocessable_entity)
     end
 
     def parse_date_param(key)

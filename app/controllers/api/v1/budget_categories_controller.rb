@@ -31,6 +31,7 @@ class Api::V1::BudgetCategoriesController < Api::V1::BaseController
       raise ActiveRecord::RecordNotFound unless valid_uuid?(params[:id])
 
       @budget_category = budget_categories_scope.find(params[:id])
+      @budget_category.budget.current_user = current_resource_owner
     end
 
     def ensure_read_scope

@@ -11,7 +11,10 @@ class ScheduledPayment::ForecastBacktestTest < ActiveSupport::TestCase
     before = Transaction.create!
     after = Transaction.create!
     account.entries.create!(
-      date: cutoff - 10.days, amount: 100, currency: account.currency,
+      # Forecast history uses completed family months, not the partial month
+      # containing the cutoff. Keep this observation inside that history on
+      # every calendar day, rather than accidentally testing an empty sample.
+      date: family.custom_month_start_for(cutoff) - 10.days, amount: 100, currency: account.currency,
       name: "Before cutoff", entryable: before
     )
     account.entries.create!(
@@ -23,6 +26,7 @@ class ScheduledPayment::ForecastBacktestTest < ActiveSupport::TestCase
       family:, user:, horizon_months: 3, as_of: cutoff, include_agenda: false
     )
 
+    assert_includes forecast.send(:historical_entries).map(&:id), before.entry.id
     assert_operator forecast.send(:historical_entries).map(&:date).max, :<=, cutoff
     assert_not_includes forecast.send(:historical_entries).map(&:id), after.entry.id
   end

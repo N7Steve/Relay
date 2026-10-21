@@ -6,6 +6,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
   # Ensure proper scope authorization
   before_action :ensure_read_scope, only: [ :index, :show, :rows, :preflight ]
   before_action :ensure_write_scope, only: [ :create ]
+  before_action :require_api_family_admin!
   before_action :set_import_with_rows, only: [ :show ]
   before_action :set_import, only: [ :rows ]
 

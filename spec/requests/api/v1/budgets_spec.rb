@@ -57,6 +57,7 @@ RSpec.describe 'API V1 Budgets', type: :request do
 
   path '/api/v1/budgets' do
     get 'List budgets' do
+      description "Personal budgets require ownership or BudgetShare. Household derived amounts use the authenticated viewer account scope; allocations remain family-shared."
       tags 'Budgets'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -108,6 +109,7 @@ RSpec.describe 'API V1 Budgets', type: :request do
               schema: { type: :string, format: :uuid }
 
     get 'Retrieve a budget' do
+      description "Personal budgets require ownership or BudgetShare. Household derived amounts use the authenticated viewer account scope; allocations remain family-shared."
       tags 'Budgets'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'

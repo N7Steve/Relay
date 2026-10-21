@@ -41,7 +41,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
 
   path '/api/v1/import_sessions' do
     post 'Create import session' do
-      description 'Create or retrieve a backup session keyed by client_session_id. New sessions use RelayImport. Retries preserve the stored type and chunks of the original session, including existing SureImport sessions. Responses expose the stored type.'
+      description 'Create or retrieve a backup session keyed by client_session_id. New sessions use RelayImport. Retries preserve the stored type and chunks of the original session, including existing SureImport sessions. Responses expose the stored type. Family administrator required for all import-session actions because chunks can span private accounts. Read/read_write scopes and existing chunk idempotency still apply.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -138,7 +138,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:import_session) { family.import_sessions.create!(expected_chunks: 1) }
 
     get 'Retrieve import session' do
-      description 'Retrieve import session status, chunk status, per-entity summary counts, and safe error details.'
+      description 'Retrieve import session status, chunk status, per-entity summary counts, and safe error details. Family administrator required for all import-session actions because chunks can span private accounts. Read/read_write scopes and existing chunk idempotency still apply.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -184,7 +184,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:id) { import_session.id }
 
     post 'Upload import session chunk' do
-      description 'Attach an ordered backup NDJSON chunk to an import session. New chunks use the stored session type. Existing chunks keep their type and are idempotent by sequence and client_chunk_id with content verification. Full backups require a family administrator and one self-contained ZIP or NDJSON chunk.'
+      description 'Attach an ordered backup NDJSON chunk to an import session. New chunks use the stored session type. Existing chunks keep their type and are idempotent by sequence and client_chunk_id with content verification. Full backups require a family administrator and one self-contained ZIP or NDJSON chunk. Family administrator required for all import-session actions because chunks can span private accounts. Read/read_write scopes and existing chunk idempotency still apply.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json', 'multipart/form-data'
@@ -324,7 +324,7 @@ RSpec.describe 'API V1 Import Sessions', type: :request do
     let(:id) { import_session.id }
 
     post 'Publish import session' do
-      description 'Queue ordered backup chunk processing for an import session. Later chunks can reference source IDs mapped by earlier chunks. Full snapshots require a family administrator and a destination without financial data.'
+      description 'Queue ordered backup chunk processing for an import session. Later chunks can reference source IDs mapped by earlier chunks. Full snapshots require a family administrator and a destination without financial data. Family administrator required for all import-session actions because chunks can span private accounts. Read/read_write scopes and existing chunk idempotency still apply.'
       tags 'Import Sessions'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'

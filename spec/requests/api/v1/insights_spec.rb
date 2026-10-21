@@ -20,6 +20,7 @@ RSpec.describe "API V1 Insights", type: :request do
 
   path "/api/v1/insights" do
     get "List proactive insights" do
+      description "Preview features and access to every family account are required because the stored feed is family-wide. Retired Bills-backed insights are excluded."
       tags "Insights"
       security [ { apiKeyAuth: [] } ]
       produces "application/json"
