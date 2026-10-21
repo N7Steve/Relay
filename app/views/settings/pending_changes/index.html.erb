@@ -13,7 +13,8 @@
       <p class="text-secondary text-sm"><%= change_set.credential_name %></p>
     <% end %>
     <% table.with_column(t(".summary")) do |change_set| %>
-      <%= t("settings.pending_changes.operation_count", count: change_set.operations.size) %>
+      <p class="text-primary"><%= pending_change_types(change_set) %></p>
+      <p class="text-secondary text-sm"><%= t("settings.pending_changes.operation_count", count: change_set.operations.size) %></p>
     <% end %>
     <% table.with_column(t(".status")) do |change_set| %>
       <%= t("settings.pending_changes.statuses.#{change_set.status}") %>

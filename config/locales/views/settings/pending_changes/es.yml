@@ -44,11 +44,11 @@
         "show": {
           "back": "Todas las propuestas",
           "progress": "%{applied} de %{total} operaciones aplicadas",
-          "summary": "Resumen de cambios por área",
+          "summary": "Resumen de la propuesta",
           "action": "Acción",
           "area": "Área",
           "operations": "Operaciones",
-          "approval_notice": "Aprueba cuando el asistente haya terminado. Los recuentos son de operaciones: una puede afectar a varios registros, ambos extremos de una transferencia o iniciar un proceso en segundo plano. Las operaciones aprobadas se ejecutan en orden. Si una falla, se detiene la ejecución; las anteriores completadas siguen aplicadas. No hay historial para deshacer.",
+          "approval_notice": "Aprueba cuando el asistente haya terminado. Los cambios se aplican en orden; si uno falla, los anteriores completados se conservan. Una operación puede afectar a varios registros. No hay deshacer.",
           "approve": "Aprobar cambios",
           "reject": "Descartar propuesta",
           "confirm": "¿Aplicar los cambios de esta propuesta? Puede añadir, modificar o eliminar datos de forma definitiva.",
@@ -61,11 +61,126 @@
         },
         "reject": {
           "success": "Cambios pendientes descartados. Las operaciones completadas anteriormente, si las hay, siguen aplicadas."
+        },
+        "types": {
+          "expenses": {
+            "one": "%{count} gasto",
+            "other": "%{count} gastos"
+          },
+          "income": {
+            "one": "%{count} ingreso",
+            "other": "%{count} ingresos"
+          },
+          "transfers": {
+            "one": "%{count} transferencia",
+            "other": "%{count} transferencias"
+          },
+          "transactions": {
+            "one": "%{count} movimiento",
+            "other": "%{count} movimientos"
+          },
+          "categories": {
+            "one": "%{count} categoría",
+            "other": "%{count} categorías"
+          },
+          "merchants": {
+            "one": "%{count} comercio",
+            "other": "%{count} comercios"
+          },
+          "tags": {
+            "one": "%{count} etiqueta",
+            "other": "%{count} etiquetas"
+          },
+          "rules": {
+            "one": "%{count} regla",
+            "other": "%{count} reglas"
+          },
+          "trades": {
+            "one": "%{count} operación de inversión",
+            "other": "%{count} operaciones de inversión"
+          },
+          "holdings": {
+            "one": "%{count} posición",
+            "other": "%{count} posiciones"
+          },
+          "valuations": {
+            "one": "%{count} valoración",
+            "other": "%{count} valoraciones"
+          },
+          "accounts": {
+            "one": "%{count} cuenta",
+            "other": "%{count} cuentas"
+          },
+          "budgets": {
+            "one": "%{count} cambio de presupuesto",
+            "other": "%{count} cambios de presupuesto"
+          },
+          "goals": {
+            "one": "%{count} cambio de objetivo",
+            "other": "%{count} cambios de objetivos"
+          },
+          "agenda": {
+            "one": "%{count} cambio de agenda",
+            "other": "%{count} cambios de agenda"
+          },
+          "files": {
+            "one": "%{count} importación o documento",
+            "other": "%{count} importaciones o documentos"
+          },
+          "integrations": {
+            "one": "%{count} conexión o sincronización",
+            "other": "%{count} conexiones o sincronizaciones"
+          },
+          "settings": {
+            "one": "%{count} cambio de perfil o ajustes",
+            "other": "%{count} cambios de perfil o ajustes"
+          },
+          "organization": {
+            "one": "%{count} cambio de organización",
+            "other": "%{count} cambios de organización"
+          },
+          "movements": {
+            "one": "%{count} cambio financiero",
+            "other": "%{count} cambios financieros"
+          }
+        },
+        "summary": {
+          "changes": "Cambios",
+          "context": "Cuentas o elementos",
+          "amount": "Importe propuesto",
+          "state": "Aplicación",
+          "account_unavailable": "Cuenta no disponible",
+          "proposed_account": "Cuenta propuesta: %{name}",
+          "no_context": "—",
+          "more_names": "%{names} y %{count} más",
+          "unspecified_amount": "—",
+          "amounts_notice": "Importes de nuevas operaciones, separados por cuenta y moneda. Las transferencias muestran la salida una sola vez, sin sumar ambos extremos ni comisiones. No es un total neto de saldo."
+        },
+        "execution_states": {
+          "pending": {
+            "one": "%{count} sin aplicar",
+            "other": "%{count} sin aplicar"
+          },
+          "applied": {
+            "one": "%{count} aplicada",
+            "other": "%{count} aplicadas"
+          },
+          "failed": {
+            "one": "%{count} fallida",
+            "other": "%{count} fallidas"
+          },
+          "rejected": {
+            "one": "%{count} descartada",
+            "other": "%{count} descartadas"
+          }
         }
       },
       "settings_nav": {
         "pending_changes_label": "Cambios pendientes"
       }
+    },
+    "breadcrumbs": {
+      "pending_changes": "Cambios pendientes"
     }
   }
 }

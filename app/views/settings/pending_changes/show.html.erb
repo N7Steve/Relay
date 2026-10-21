@@ -7,10 +7,19 @@
   <p class="text-secondary text-sm mt-2"><%= t(".progress", applied: @change_set.overview[:applied], total: @change_set.operations.size) %></p>
 <% end %>
 
-<%= render DS::Table.new(rows: @change_set.operation_groups, label: t(".summary")) do |table| %>
-  <% table.with_column(t(".action")) { |group| t("settings.pending_changes.actions.#{group[:action]}") } %>
-  <% table.with_column(t(".area")) { |group| t("settings.pending_changes.domains.#{group[:domain]}") } %>
-  <% table.with_column(t(".operations"), numeric: true) { |group| group[:count].to_s } %>
+<div class="space-y-2">
+  <h2 class="text-primary font-medium"><%= t(".summary") %></h2>
+  <p class="text-secondary text-sm"><%= t("settings.pending_changes.summary.amounts_notice") %></p>
+</div>
+
+<%= render DS::Table.new(rows: @summary.groups(@change_set), label: t(".summary")) do |table| %>
+  <% table.with_column(t("settings.pending_changes.summary.changes"), class: "min-w-40") do |group| %>
+    <p class="text-primary font-medium"><%= t("settings.pending_changes.types.#{group[:type]}", count: group[:count]) %></p>
+    <p class="text-secondary text-sm"><%= t("settings.pending_changes.actions.#{group[:action]}") %></p>
+  <% end %>
+  <% table.with_column(t("settings.pending_changes.summary.context"), class: "min-w-56 privacy-sensitive") { |group| pending_change_context(group) } %>
+  <% table.with_column(t("settings.pending_changes.summary.amount"), numeric: true, class: "privacy-sensitive") { |group| pending_change_amount(group) } %>
+  <% table.with_column(t("settings.pending_changes.summary.state")) { |group| pending_change_states(group) } %>
 <% end %>
 
 <% if @change_set.status == "pending" %>

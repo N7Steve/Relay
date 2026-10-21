@@ -6,9 +6,11 @@ class Settings::PendingChangesController < ApplicationController
 
   def index
     @change_sets = Mcp::ChangeSet.for_actor(Current.user).order(created_at: :desc).limit(50)
+    @summary = Mcp::ChangeSet::Summary.new(change_sets: @change_sets, actor: Current.user)
   end
 
   def show
+    @summary = Mcp::ChangeSet::Summary.new(change_sets: [ @change_set ], actor: Current.user)
   end
 
   def approve

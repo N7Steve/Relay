@@ -58,10 +58,20 @@ de una base de datos privada ni permite leer registros todavía no aprobados.
 
 ## Revisión y aplicación
 
-La web muestra el origen, fecha, estado y resumen agrupado: añadir, modificar/
-ejecutar o eliminar/desconectar, por área funcional. Los recuentos son de
-operaciones: un borrado masivo puede afectar a varios registros y una transferencia
-a ambas cuentas. No se presenta cada campo o cambio individual.
+La web muestra el origen, fecha, estado y un resumen agrupado por tipo y acción:
+gastos, ingresos, transferencias, categorías, etiquetas y otras áreas. Distingue
+las cuentas y el origen/destino de una transferencia, y muestra nombres de los
+elementos de organización propuestos. Los nombres de cuentas y movimientos
+existentes se consultan con los permisos actuales del usuario; una cuenta sin
+acceso aparece como no disponible. El listado también resume los tipos de cambio.
+
+Los importes explícitos de nuevas operaciones se suman por tipo, cuenta y moneda,
+sin netear gastos e ingresos ni sumar los dos extremos de una transferencia.
+No incluyen comisiones ni representan una variación neta de saldo; las ediciones,
+borrados o referencias pendientes no se presentan como importes conocidos.
+Cada grupo distingue las operaciones aplicadas, fallidas, descartadas o sin aplicar.
+Los recuentos son de operaciones: un borrado masivo puede afectar a varios
+registros y una transferencia a ambas cuentas. No se presenta cada campo individual.
 
 Solo el usuario propietario, con su familia actual y una sesión web autenticada,
 puede aprobar o descartar. Los formularios conservan CSRF. El token de revisión

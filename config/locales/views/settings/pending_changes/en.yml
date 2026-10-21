@@ -44,11 +44,11 @@
         "show": {
           "back": "All proposals",
           "progress": "%{applied} of %{total} operations applied",
-          "summary": "Proposed changes by area",
+          "summary": "Proposal summary",
           "action": "Action",
           "area": "Area",
           "operations": "Operations",
-          "approval_notice": "Approve only after the assistant has finished. Counts refer to operations: one operation can affect multiple records, both sides of a transfer, or launch a background process. Approved operations run in order. If one fails, execution stops; earlier completed operations stay applied. There is no undo history.",
+          "approval_notice": "Approve after the assistant has finished. Changes run in order; if one fails, earlier completed changes remain applied. An operation may affect several records. There is no undo.",
           "approve": "Approve changes",
           "reject": "Discard proposal",
           "confirm": "Apply the changes in this proposal? This can add, modify or permanently delete data.",
@@ -61,11 +61,126 @@
         },
         "reject": {
           "success": "Pending changes discarded. Previously completed operations, if any, stay applied."
+        },
+        "types": {
+          "expenses": {
+            "one": "%{count} expense",
+            "other": "%{count} expenses"
+          },
+          "income": {
+            "one": "%{count} income entry",
+            "other": "%{count} income entries"
+          },
+          "transfers": {
+            "one": "%{count} transfer",
+            "other": "%{count} transfers"
+          },
+          "transactions": {
+            "one": "%{count} transaction",
+            "other": "%{count} transactions"
+          },
+          "categories": {
+            "one": "%{count} category",
+            "other": "%{count} categories"
+          },
+          "merchants": {
+            "one": "%{count} merchant",
+            "other": "%{count} merchants"
+          },
+          "tags": {
+            "one": "%{count} tag",
+            "other": "%{count} tags"
+          },
+          "rules": {
+            "one": "%{count} rule",
+            "other": "%{count} rules"
+          },
+          "trades": {
+            "one": "%{count} trade",
+            "other": "%{count} trades"
+          },
+          "holdings": {
+            "one": "%{count} holding",
+            "other": "%{count} holdings"
+          },
+          "valuations": {
+            "one": "%{count} valuation",
+            "other": "%{count} valuations"
+          },
+          "accounts": {
+            "one": "%{count} account",
+            "other": "%{count} accounts"
+          },
+          "budgets": {
+            "one": "%{count} budget change",
+            "other": "%{count} budget changes"
+          },
+          "goals": {
+            "one": "%{count} goal change",
+            "other": "%{count} goal changes"
+          },
+          "agenda": {
+            "one": "%{count} scheduled payment change",
+            "other": "%{count} scheduled payment changes"
+          },
+          "files": {
+            "one": "%{count} import or document",
+            "other": "%{count} imports or documents"
+          },
+          "integrations": {
+            "one": "%{count} connection or sync",
+            "other": "%{count} connections or syncs"
+          },
+          "settings": {
+            "one": "%{count} profile or settings change",
+            "other": "%{count} profile or settings changes"
+          },
+          "organization": {
+            "one": "%{count} organization change",
+            "other": "%{count} organization changes"
+          },
+          "movements": {
+            "one": "%{count} financial change",
+            "other": "%{count} financial changes"
+          }
+        },
+        "summary": {
+          "changes": "Changes",
+          "context": "Accounts or items",
+          "amount": "Proposed amount",
+          "state": "Application",
+          "account_unavailable": "Account unavailable",
+          "proposed_account": "Proposed account: %{name}",
+          "no_context": "—",
+          "more_names": "%{names} and %{count} more",
+          "unspecified_amount": "—",
+          "amounts_notice": "Amounts for new operations, separated by account and currency. Transfers show the outgoing amount once, without adding both legs or fees. This is not a net balance total."
+        },
+        "execution_states": {
+          "pending": {
+            "one": "%{count} not applied",
+            "other": "%{count} not applied"
+          },
+          "applied": {
+            "one": "%{count} applied",
+            "other": "%{count} applied"
+          },
+          "failed": {
+            "one": "%{count} failed",
+            "other": "%{count} failed"
+          },
+          "rejected": {
+            "one": "%{count} discarded",
+            "other": "%{count} discarded"
+          }
         }
       },
       "settings_nav": {
         "pending_changes_label": "Pending changes"
       }
+    },
+    "breadcrumbs": {
+      "pending_changes": "Pending changes"
     }
   }
 }
