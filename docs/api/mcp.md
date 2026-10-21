@@ -39,6 +39,57 @@ claves individuales de usuario, sus scopes, caducidad, revocación y limitación
 existentes; es una alternativa explícita para clientes propios. No hay token
 global asociado a un correo. Habilitar MCP no habilita conexiones salientes.
 
+### App de escritorio de ChatGPT con API key y Cloudflare Access
+
+Para un MCP HTTP conectado localmente desde Ajustes → MCP servers, la app de
+escritorio admite cabeceras estáticas y comparte `~/.codex/config.toml` con Codex.
+Esta configuración no se aplica al conector alojado de ChatGPT web, cuya
+autenticación y transporte se configuran por separado.
+
+En la instalación de Relay, habilitar estas variables mediante su configuración
+persistente (o `environment` del YAML de despliegue):
+
+```env
+RELAY_MCP_ENABLED=true
+RELAY_MCP_URL=https://relay.n7core.com/mcp
+RELAY_MCP_API_KEYS_ENABLED=true
+```
+
+Crear una API key individual en `/settings/api_keys`, por ejemplo «ChatGPT MCP»,
+con scope `read` o `read_write` según las operaciones deseadas. Es un token
+estático ligado al usuario, con sus permisos, caducidad y revocación existentes;
+no hace falta introducir un secreto global en el YAML ni registrar un cliente
+OAuth para esta modalidad. `RELAY_MCP_CLIENT_IDS` se utiliza para OAuth.
+
+Crear también un Service Token de Cloudflare Access y autorizarlo mediante una
+política Service Auth que cubra las rutas necesarias. El token de Cloudflare
+permite atravesar Access; la API key de Relay sigue autorizando cada operación.
+El cliente envía ambas credenciales, sin sustituir una por otra.
+
+Ejemplo de configuración **local**, con valores que se deben sustituir:
+
+```toml
+[mcp_servers.relay]
+url = "https://relay.n7core.com/mcp"
+
+[mcp_servers.relay.http_headers]
+"X-Api-Key" = "API_KEY_DEL_USUARIO_EN_RELAY"
+"CF-Access-Client-Id" = "CLIENT_ID_DEL_SERVICE_TOKEN"
+"CF-Access-Client-Secret" = "CLIENT_SECRET_DEL_SERVICE_TOKEN"
+```
+
+Como alternativa a guardar valores en ese archivo, usar `env_http_headers`
+con nombres de variables de entorno disponibles para el proceso de la app.
+No enviar `Authorization: Bearer` con la API key: ese encabezado selecciona
+la validación OAuth de Relay. Guardar los secretos en la configuración local
+del cliente; no añadirlos al repositorio ni pegarlos en el chat. Tras configurar,
+reiniciar la conexión y probar primero `get_context`. La compatibilidad descrita
+en la documentación no sustituye una prueba con la app y el despliegue reales.
+
+Fuentes: [MCP en la app de escritorio](https://learn.chatgpt.com/docs/extend/mcp?surface=app),
+[referencia de cabeceras](https://learn.chatgpt.com/docs/config-file/config-reference) y
+[Service Tokens de Cloudflare](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/).
+
 La migración `20261021120000` prepara audiencia, PKCE y registro idempotente de
 operaciones. Debe aplicarse por el procedimiento de despliegue antes de utilizar
 este código con una base existente. No se ha ejecutado contra la instalación del
