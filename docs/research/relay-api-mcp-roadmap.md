@@ -3,7 +3,10 @@
 Fecha: 21 de octubre de 2026. Base inspeccionada: `main`, commit `b7834d24d`,
 sin divergencia respecto de `origin/main` tras fetch. Fases 0–1 implementadas y
 validadas el mismo día por autorización de Steve, incluido commit/push a `main`.
-Las fases 2–9 siguen planificadas. No se ha desplegado ni validado TrueNAS.
+Las fases 2–9 están preparadas en el árbol de trabajo por autorización de Steve,
+pendientes de confirmación para commit/push. La implementación y las verificaciones
+de repositorio están completas; queda la comprobación final de la instalación de
+fase 9 después del despliegue. No se ha desplegado ni modificado TrueNAS.
 
 ## Estado de ejecución — 21 de octubre de 2026
 
@@ -11,7 +14,173 @@ Las fases 2–9 siguen planificadas. No se ha desplegado ni validado TrueNAS.
 | --- | --- | --- |
 | 0 | Completada | [Matriz de capacidades y contratos](relay-api-capability-matrix.md), 539 rutas propias y 164 fuentes de controladores/concerns en [inventario regenerable](relay-api-surface.json); fuentes, campos permitidos, autoridad, efectos, jobs, fases y exclusiones de presentación documentados |
 | 1 | Completada | `Api::Access`/`Api::Input`, contexto API y capacidades por cuenta; ámbitos y permisos corregidos, referencias validadas, decimales/fechas y errores compatibles; OpenAPI y regresiones |
-| 2–9 | Pendientes | Transporte MCP, ampliación funcional por dominios y cierre de paridad |
+| 2 | Implementada y validada, sin publicar | MCP opt-in, catálogo acotado, transporte 2025-11-25/2026-07-28, OAuth con recurso y PKCE, cliente oficial por HTTP |
+| 3 | Implementada y validada, sin publicar | Operaciones compartidas API/MCP de cuentas, movimientos, lotes, divisiones, protección, transferencias y organización |
+| 4 | Implementada y validada, sin publicar | Informes nativos, comparativas, categorías, gastos compartidos, series, rentabilidad, previsiones y CSV filtrado |
+| 5 | Implementada y validada, sin publicar | Presupuestos y rollover; Agenda y ocurrencias; Goals, compromisos, conciliación y consumo |
+| 6 | Implementada y validada, sin publicar | Trades, holdings, coste base/remapeos, conciliación, valor gestionado y precios/FX locales con autoridad de instancia |
+| 7 | Implementada y validada, sin publicar | Reglas con previsualización, importación y bloques, originales, Vault/adjuntos y backups/restauración |
+| 8 | Implementada y validada, sin publicar | Integraciones bancarias/Drive, administración, acceso, seguridad y seguimiento de trabajos; presencia humana explícita para credenciales y consentimiento |
+| 9 | Código y paridad validados; instalación pendiente | Auditoría de 44 casos/244 herramientas, API/MCP compartidos, cliente oficial, límites y procedimiento de publicación; TLS/proxy MCP final pendiente del despliegue |
+
+### Entrega de fases 8–9
+
+El [contrato de integraciones y administración](../api/integrations-administration.md)
+añade **60 herramientas** y el cierre de paridad otras **8**, para un catálogo de
+**244 herramientas y rutas API fijas**. El [manifiesto de cobertura](relay-api-mcp-coverage.yml)
+relaciona los **44 casos originales** con operaciones, evidencia y **11 límites**
+de presencia humana, presentación o exclusión. La auditoría automática comprueba
+catálogo, rutas, implementación, esquemas OpenAPI y disposición de cada caso.
+
+Se conserva el aislamiento familiar y de cuentas; compartición, roles y ajustes
+sensibles requieren previsualizaciones firmadas. Los trabajos delegados vuelven
+a validar identidad, credencial y permisos. Banco y Drive conservan sus guardas
+de acceso externo; credenciales, MFA y consentimiento requieren el flujo humano
+nativo. No se expone como limpieza inocua el borrado global heredado de precios/FX.
+Los resultados de escritura mayores de 256 KiB revierten dominio y registro de
+idempotencia juntos. Hay cobertura de reintentos compartidos entre REST y MCP.
+
+Verificación de esta entrega (Docker Linux aislado):
+
+- Suite Rails completa: **5.634 pruebas, 25.756 aserciones, 0 fallos,
+  0 errores y 38 omisiones existentes**, 139,47 segundos, cuatro procesos.
+- RuboCop: **1.832 archivos sin infracciones**; ERB lint correcto; Biome:
+  131 archivos correctos; Brakeman: cero avisos activos, cinco exclusiones previas.
+- OpenAPI: **1.523 ejemplos documentales en dry-run**, sin fallos. Inventario:
+  **794 rutas y 171 fuentes**, comprobación de regeneración y cumplimiento API correctos.
+- Auditoría: **44 casos, 244 herramientas, 244 rutas y 11 límites**, sin huecos
+  de disposición; complementa las pruebas de comportamiento y no certifica producción.
+- Cliente oficial TypeScript **1.32.1**, HTTP/OAuth: catálogo de 244 herramientas,
+  validación de salidas y flujos previos más perfil, preferencias, seguridad,
+  integraciones, transferencias y Sankey. Probe local de discovery/PKCE/challenge/
+  Origin y handshake autenticado: **1 prueba, 6 aserciones, sin fallos, errores
+  ni omisiones**. El HTTP de loopback no certifica TLS público.
+- `git diff --check` correcto. Sin cambios de interfaz en estas fases.
+
+El [procedimiento de publicación](../api/mcp-release.md) incluye el probe de lectura,
+TLS/proxy, configuración, revocación y recuperación. Steve indica que el destino
+es `https://relay.n7core.com/mcp` y que esta versión aún no está desplegada.
+El 21 de octubre, Windows obtiene **HTTP 404 por HTTPS** en esa ruta; el probe
+desde Docker no puede resolver el dominio. Estos resultados no validan MCP en
+producción: la comprobación completa queda para después del despliegue autorizado.
+Sin nuevas migraciones en fases 8–9, dependencias del producto, commit/push o
+cambios de instalación. La migración aditiva de fase 2 sigue pendiente de despliegue.
+
+### Entrega de fases 6–7
+
+El [contrato de inversiones y procesos](../api/investment-processes.md) añade
+**24 operaciones de inversión y 54 de procesos**. El catálogo suma **176
+herramientas**, compartidas con rutas fijas API. Se conservan los motores nativos,
+signos, comisiones, rendimiento gestionado, tipos de inversión, tracking y fiscalidad.
+La escritura de precios/FX compartidos exige super_admin de instancia; la lectura
+de precios está limitada a valores vinculados a cuentas accesibles.
+
+La ejecución de reglas está acotada a 100 coincidencias y requiere una
+previsualización firmada con versiones. Importaciones y reversiones usan el lector,
+las filas/mappings, los jobs y la recuperación nativos, con previsualizaciones ligadas
+al estado del destino. La restauración exige snapshot íntegro y destino sin datos
+financieros. Los procesos familiares requieren administración y visibilidad completa;
+una credencial de escritura requiere también permisos financieros en todas las cuentas.
+
+El canal de bytes valida SHA-256, limita staging a 100 MiB y vincula referencias
+al actor durante una hora. Descargas siempre autenticadas; no se exponen enlaces
+portadores de almacenamiento. Se conservan originales y se limpian archivos sin
+adjuntar. Se resolvió la lectura anticipada de adjuntos NDJSON dentro de la
+transacción de idempotencia, con limpieza de bytes si hay rollback.
+Los trabajos delegados vuelven a comprobar usuario, credencial y permisos al
+ejecutarse; revocaciones o pérdida de acceso detienen trabajo aún pendiente sin
+convertir datos ya comprometidos en una importación repetible.
+
+Verificación de esta entrega (Docker Linux aislado):
+
+- Suite Rails completa: **5.607 pruebas, 25.453 aserciones, 0 fallos,
+  0 errores y 38 omisiones existentes**, 109,92 segundos, cuatro procesos.
+- RuboCop: **1.818 archivos sin infracciones**; ERB lint correcto, Biome:
+  131 archivos correctos, Brakeman: cero avisos activos y cinco exclusiones previas.
+- OpenAPI: **1.183 ejemplos documentales en dry-run**, sin fallos. Inventario:
+  **726 rutas y 171 fuentes**, con `--check` correcto. Cumplimiento API correcto:
+  specs con `X-Api-Key`, solo documentales y controllers con Minitest.
+- Cobertura de signos/comisiones, remapeos con colisión, FX/precios y autoridad
+  de instancia, valor gestionado, rollback, tokens de subida, originales,
+  previsualizaciones obsoletas, importación/reversión y restauración sintética.
+  Trabajos delegados: clave/token revocado, scope reducido, cuenta privada y
+  recuperación de una importación ya comprometida.
+- Cliente oficial TypeScript **1.32.1**, Streamable HTTP/OAuth: recorrido de
+  las **176 herramientas**, compra/borrado de trade, reglas, previsualización de
+  importación y subida/descarga de original por el canal MCP, además de los flujos
+  anteriores. **1 prueba, 3 aserciones, sin fallos, errores ni omisiones**;
+  validación de esquemas de salida y comparación de los bytes descargados.
+- `git diff --check` correcto. Sin cambios de UI ni pruebas de sistema nuevas.
+
+Estas fases no añaden migraciones ni dependencias del producto. No se ha hecho
+commit/push, ejecutado migraciones en la instalación del usuario ni modificado TrueNAS.
+
+### Entrega de fases 4–5
+
+El [contrato de informes y planificación](../api/reporting-planning.md) detalla
+11 consultas financieras y 39 operaciones de planificación nuevas, compartidas
+por API y MCP. El catálogo suma **98 herramientas**. Se reutilizan los motores
+de la web, sus importes, monedas, permisos y máquinas de estado. La selección de
+cuentas distingue visibilidad, participación financiera y tratamiento fiscal.
+
+Presupuestos conserva propiedad/compartición y el orden de bloqueos del rollover.
+Agenda comprueba ambos extremos e historial de transferencias y confirma sin
+duplicados. Goals mantiene preview, cuentas autorizadas, compromisos históricos,
+consumo y reclamación única de ingresos; manual_save conserva la conciliación
+por valoración. No se añaden migraciones ni dependencias del producto.
+
+Verificación de esta entrega (Docker Linux aislado):
+
+- Suite Rails completa: **5.578 pruebas, 25.164 aserciones, 0 fallos,
+  0 errores, 38 omisiones**, 126,40 segundos.
+- RuboCop: **1.802 archivos sin infracciones**; ERB lint correcto, Biome:
+  131 archivos correctos y Brakeman sin avisos activos.
+- OpenAPI: **784 ejemplos documentales en dry-run**, sin fallos. Inventario:
+  **644 rutas y 168 fuentes**, con `--check` correcto. Cumplimiento API correcto.
+- Cliente oficial TypeScript **1.32.1** por HTTP/OAuth: catálogo de 98
+  herramientas, informes, presupuestos, confirmación/retractación de Agenda y
+  Goals, además del recorrido anterior. **1 prueba, 3 aserciones, sin fallos,
+  errores ni omisiones**. El cliente valida los esquemas de salida MCP.
+
+Permanecen pendientes la confirmación de commit/push y el despliegue; no se ha
+modificado ni activado MCP en TrueNAS. La paridad global se cierra en fase 9.
+
+### Entrega de fases 2–3
+
+El [contrato MCP y de operativa cotidiana](../api/mcp.md) registra activación,
+audiencia OAuth, clientes permitidos, política de delegación y límites. Hay
+48 herramientas y rutas fijas `/api/v1/actions/<nombre>` sobre
+`Api::DailyOperations`; la API anterior conserva sus formatos e imports CSV.
+El registro `Api::Operation` hace atómicas las escrituras y sus resultados,
+con reintentos/fingerprint por actor. Borrados por lote requieren previsualización
+firmada y comprobación de versiones, y no incluyen restauraciones o borrado familiar.
+
+La migración `20261021120000` está preparada. PKCE ya estaba declarado en
+Doorkeeper, pero faltaban sus columnas: la migración las añade junto a audiencia
+y registro de operaciones. Solo se ha verificado en la prueba de actualización
+de esquema aislada. No se han ejecutado migraciones en la instalación del usuario.
+
+Verificación de esta entrega (Docker Linux aislado):
+
+- `bin/rails test`, cuatro procesos: **5.563 pruebas, 24.968 aserciones,
+  0 fallos, 0 errores, 38 omisiones existentes**, 101,60 segundos.
+- RuboCop: **1.796 archivos sin infracciones**. ERB lint correcto;
+  Biome: 131 archivos correctos; Brakeman sin avisos activos y las exclusiones previas.
+- OpenAPI regenerado: **534 ejemplos documentales en dry-run**, sin fallos;
+  inventario: **594 rutas y 168 fuentes**, con `--check` correcto; cumplimiento
+  API: claves `X-Api-Key`, specs sin aserciones y Minitest para todos los controllers.
+- Cliente objetivo: **SDK oficial TypeScript `@modelcontextprotocol/sdk` 1.32.1**,
+  Streamable HTTP `2025-11-25`, servidor temporal Capybara/Puma y base `relay_test`.
+  Token OAuth con audiencia MCP; recorrido de catálogo paginado, contexto, alta
+  con reintentos concurrentes, división y borrado. Prueba real: 1 prueba,
+  3 aserciones, sin fallos, errores ni omisiones.
+  El protocolo `2026-07-28` se verifica por integración, separado del handshake
+  anterior; no se atribuye esa versión al cliente oficial probado.
+- Consentimiento OAuth, S256, recurso, canje, renovación, revocación, Origin,
+  credenciales inválidas, aislamiento y denegación por permisos: Minitest.
+
+No se ha publicado, desplegado ni activado MCP en TrueNAS. La compatibilidad
+de otros clientes y el cierre de paridad global siguen en las fases de dominio/9.
 
 La fase 1 incorpora:
 

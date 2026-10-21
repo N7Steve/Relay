@@ -1,5 +1,12 @@
 # Complete family backups
 
+The [API/MCP process contract](../api/investment-processes.md) describes delegated
+export, authenticated downloads, upload staging, validation and restoration.
+New API-created imports retain their uploaded original separately from parsed
+content; a ZIP's original and its extracted NDJSON remain distinct attachments.
+NDJSON attachment helpers upload eagerly for preflight within an outer
+idempotent transaction and remove those bytes on rollback.
+
 The full export is version 3. `all.ndjson` contains a versioned relational
 snapshot and the actual file bytes, so it can be imported independently of the
 other ZIP entries. CSVs and the previous NDJSON records remain available for

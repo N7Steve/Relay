@@ -29,7 +29,11 @@ being changed. These guides hold the detailed conventions and procedures.
 
 [External financial access](wealth-agent-harness.md) links the new Relay API/MCP
 roadmap and capability inventory. The legacy MCP and builtin assistant are
-retired; the new MCP transport is scheduled for phase 2 of that roadmap.
+retired; the new opt-in MCP and daily operations are described in the
+[MCP contract](../api/mcp.md).
+The [integration/admin contract](../api/integrations-administration.md) and
+[release guide](../api/mcp-release.md) record delegated authority, native human
+flows, coverage auditing and the separate production verification gate.
 The [wealth blueprint](wealth-blueprint.md) is reference architecture for that
 separate system. Its working-memory files, private document vault and operating
 protocol apply to that external project, not to every change in this repository.

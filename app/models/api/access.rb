@@ -7,9 +7,30 @@ class Api::Access
 
   attr_reader :user, :scopes
 
-  def initialize(user:, scopes:)
+  def initialize(user:, scopes:, credential: nil)
     @user = user
     @scopes = scopes.map(&:to_s)
+    @credential = credential
+  end
+
+  def delegated_authority
+    { "user_id" => user.id, "family_id" => user.family_id,
+      "credential_type" => @credential&.class&.name, "credential_id" => @credential&.id }
+  end
+
+  def self.from_delegation!(authority, family:)
+    actor = User.find_by(id: authority.fetch("user_id"), family_id: family.id)
+    raise Forbidden, "Delegated actor is unavailable" unless actor && actor.family_id == authority["family_id"]
+    credential = case authority["credential_type"]
+    when "ApiKey" then actor.api_keys.active.find_by(id: authority["credential_id"])
+    when "Doorkeeper::AccessToken"
+      token = Doorkeeper::AccessToken.find_by(id: authority["credential_id"], resource_owner_id: actor.id)
+      token if token&.accessible? && (token.mcp_resource.blank? || (Mcp::Configuration.enabled? && token.mcp_resource == Mcp::Configuration.resource && Mcp::Configuration.client_allowed?(token.application&.uid)))
+    end
+    raise Forbidden, "Delegated credential was revoked or expired" unless credential
+    access = new(user: actor, scopes: credential.scopes.to_a, credential: credential)
+    raise Forbidden, "Delegated authority changed: write scope or actor activity" unless access.writable?
+    access
   end
 
   def readable?

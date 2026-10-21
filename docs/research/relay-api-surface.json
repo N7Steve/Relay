@@ -684,6 +684,2446 @@
     },
     {
       "verb": "POST",
+      "path": "/api/v1/actions/apply_import_template(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/apply_rule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/attach_transaction_file(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/bulk_delete_transactions(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/bulk_update_transactions(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/cancel_background_operation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/cancel_backup(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/cancel_goal_pledge(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/cancel_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/cancel_sync(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/configure_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/confirm_scheduled_date(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/confirm_scheduled_entry(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/convert_transaction_to_trade(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/copy_budget(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_budget(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_category(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_drive_schedule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_family_backup(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_goal(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_goal_pledge(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_import_session(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_invitation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_merchant(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_rule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_scheduled_payment(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_tag(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_trade(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/create_transfer(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_backup(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_budget(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_category(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_document(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_drive_schedule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_goal(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_holding(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_merchant(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_rule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_scheduled_payment(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_statement(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_tag(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_trade(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_transaction_attachment(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_transfer(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/delete_valuation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/disconnect_bank(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/disconnect_drive(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/dismiss_duplicate(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/duplicate_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/expire_goal_pledge(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/export_transactions(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_account_balance_series(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_account_forecast(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_account_sync(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_activity_report(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_agenda(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_background_status(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_backup(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_bank_connection(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_budget(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_capabilities(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_cash_flow(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_category_report(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_context(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_document(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_drive_connection(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_drive_schedule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_external_access(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_family_settings(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_file_transfer(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_goal(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_holding(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_human_flow(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_import_session(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_instance_status(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_investment_report(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_local_security(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_net_worth(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_net_worth_series(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_operation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_preferences(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_profile(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_report_accounts(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_rule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_rule_options(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_scheduled_payment(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_security_status(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_shared_expenses(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_statement(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_sync(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_trade(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_transfer(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_upload_channel(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/get_wealth_forecast(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 4,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/link_bank_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/link_statement(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_account_shares(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_accounts(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_api_keys(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_attachments(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_background_operations(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_backups(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_bank_accounts(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_bank_connections(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_budget_allocations(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_budget_shares(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_budgets(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_categories(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_diagnostics(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_documents(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_drive_runs(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_drive_schedules(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_exchange_rates(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_goal_pledges(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_goals(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_holdings(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_import_mappings(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_import_rows(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_imports(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_insights(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_invitations(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_local_prices(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_local_securities(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_members(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_merchants(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_oauth_grants(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_rejected_transfers(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_rule_runs(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_rules(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_scheduled_payments(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_sessions(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_statements(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_syncs(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_tags(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_trades(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_transfers(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/list_valuations(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/match_transfer(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/merge_categories(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/merge_duplicate(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/merge_merchants(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/merge_tags(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/move_budget_funds(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_access_change(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_bulk_delete_transactions(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_categorization(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_holding_deletion(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_import_session(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_instance_settings(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_reconciliation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_revert_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/preview_rule_run(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/protect_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/publish_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/publish_import_session(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/purge_pending_scheduled_entry(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/recalculate_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/recompute_budget_rollover(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/reconcile_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/reconcile_goal_pledge(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/record_goal_consumption(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/refresh_insights(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 9,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/reject_scheduled_entry(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/reject_statement(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/remap_holding_security(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/renew_goal_pledge(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/replace_category(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/replace_tag(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/reset_holding_security(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/restore_backup(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/restore_scheduled_entry(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/retract_scheduled_entry(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/revert_future_scheduled_entry(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/revert_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/revoke_api_key(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/revoke_invitation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/revoke_oauth_grant(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/revoke_session(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/run_drive_export(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/run_scheduled_payments(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/search_transactions(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/select_qif_categories(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_account_status(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_default_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_exchange_rate(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_finance_inclusion(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_insight_status(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_local_image(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_local_price(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/set_scheduled_payment_status(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/setup_bank_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/skip_scheduled_date(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/split_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/start_import(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/sync_bank(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/sync_family(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/transition_goal(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/unlink_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/unlink_statement(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/unlink_transfer(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/unlock_holding_cost_basis(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/unlock_trade(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/unlock_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/unsplit_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_account(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_account_share(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_bank_connection(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_budget(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_budget_allocation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_budget_share(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_category(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_drive_schedule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_family_settings(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_goal(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_holding_cost_basis(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_import_mapping(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_import_row(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_instance_settings(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_managed_portfolio_value(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_member_role(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_merchant(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_preferences(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_profile(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_rule(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_scheduled_payment(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 5,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_statement(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_tag(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_trade(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_transaction(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_transfer(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 3,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/update_valuation(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 6,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/upload_document(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/upload_import_chunk(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/upload_statement(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/actions/validate_backup(.:format)",
+      "controller": "api/v1/daily_operations",
+      "action": "create",
+      "source": "app/controllers/api/v1/daily_operations_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
       "path": "/api/v1/family_exports(.:format)",
       "controller": "api/v1/family_exports",
       "action": "create",
@@ -730,6 +3170,26 @@
       "source": "app/controllers/api/v1/family_settings_controller.rb",
       "surface": "api",
       "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "GET",
+      "path": "/api/v1/files/download(.:format)",
+      "controller": "api/v1/files",
+      "action": "download",
+      "source": "app/controllers/api/v1/files_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/api/v1/files(.:format)",
+      "controller": "api/v1/files",
+      "action": "upload",
+      "source": "app/controllers/api/v1/files_controller.rb",
+      "surface": "api",
+      "delivery_phase": 7,
       "presentation_only": false
     },
     {
@@ -3164,6 +5624,66 @@
     },
     {
       "verb": "POST",
+      "path": "/mcp(.:format)",
+      "controller": "mcp",
+      "action": "create",
+      "source": "app/controllers/mcp_controller.rb",
+      "surface": "mcp",
+      "delivery_phase": 2,
+      "presentation_only": false
+    },
+    {
+      "verb": "GET|DELETE",
+      "path": "/mcp(.:format)",
+      "controller": "mcp",
+      "action": "unsupported",
+      "source": "app/controllers/mcp_controller.rb",
+      "surface": "mcp",
+      "delivery_phase": 2,
+      "presentation_only": false
+    },
+    {
+      "verb": "GET",
+      "path": "/mcp/files/download(.:format)",
+      "controller": "mcp_files",
+      "action": "download",
+      "source": "app/controllers/mcp_files_controller.rb",
+      "surface": "mcp",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/mcp/files(.:format)",
+      "controller": "mcp_files",
+      "action": "upload",
+      "source": "app/controllers/mcp_files_controller.rb",
+      "surface": "mcp",
+      "delivery_phase": 7,
+      "presentation_only": false
+    },
+    {
+      "verb": "GET",
+      "path": "/.well-known/oauth-authorization-server(.:format)",
+      "controller": "mcp_metadata",
+      "action": "authorization_server",
+      "source": "app/controllers/mcp_metadata_controller.rb",
+      "surface": "mcp",
+      "delivery_phase": 2,
+      "presentation_only": false
+    },
+    {
+      "verb": "GET",
+      "path": "/.well-known/oauth-protected-resource/mcp(.:format)",
+      "controller": "mcp_metadata",
+      "action": "resource",
+      "source": "app/controllers/mcp_metadata_controller.rb",
+      "surface": "mcp",
+      "delivery_phase": 2,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
       "path": "/mfa(.:format)",
       "controller": "mfa",
       "action": "create",
@@ -3268,6 +5788,36 @@
       "controller": "oauth/authorizations",
       "action": "show",
       "source": "app/controllers/oauth/authorizations_controller.rb",
+      "surface": "web",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/oauth/token(.:format)",
+      "controller": "oauth/tokens",
+      "action": "create",
+      "source": "app/controllers/oauth/tokens_controller.rb",
+      "surface": "web",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/oauth/introspect(.:format)",
+      "controller": "oauth/tokens",
+      "action": "introspect",
+      "source": "app/controllers/oauth/tokens_controller.rb",
+      "surface": "web",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/oauth/revoke(.:format)",
+      "controller": "oauth/tokens",
+      "action": "revoke",
+      "source": "app/controllers/oauth/tokens_controller.rb",
       "surface": "web",
       "delivery_phase": 8,
       "presentation_only": false
@@ -5497,7 +8047,7 @@
       "strong_parameters": []
     },
     "app/controllers/api/v1/base_controller.rb": {
-      "sha256": "06a0d779972977346b54e58de9dd9afcd67d30a7e7c48c71d9f0369448dcc348",
+      "sha256": "3e02fd39b3b9559d7f53563691a6845c3caef95fa130fc630194a0acccc6bbf2",
       "strong_parameters": []
     },
     "app/controllers/api/v1/budget_categories_controller.rb": {
@@ -5522,7 +8072,11 @@
       ]
     },
     "app/controllers/api/v1/context_controller.rb": {
-      "sha256": "c2175332874013b46a0d2ae85b4e22e5f10c1a18b3deb501aa4e5dee9c9ffe74",
+      "sha256": "8da78ff2fbf245d342c735abb6aa4c709ef0355e02e1dc0e03642c4fbca4dacf",
+      "strong_parameters": []
+    },
+    "app/controllers/api/v1/daily_operations_controller.rb": {
+      "sha256": "8c35938298c7f9305411507885b7fc39a5c38994491c96e344a87913d06b80d4",
       "strong_parameters": []
     },
     "app/controllers/api/v1/family_exports_controller.rb": {
@@ -5531,6 +8085,10 @@
     },
     "app/controllers/api/v1/family_settings_controller.rb": {
       "sha256": "6f83721f9d3ff5322401d43493b3c4a287c430fb22493fa1268bf2671ffca973",
+      "strong_parameters": []
+    },
+    "app/controllers/api/v1/files_controller.rb": {
+      "sha256": "cfc26572a913c64b42c0dd039c3452c043ab565e532ab9fb1b935c9f252ce0b8",
       "strong_parameters": []
     },
     "app/controllers/api/v1/holdings_controller.rb": {
@@ -5727,6 +8285,15 @@
         {
           "line": 160,
           "expression": "params.require(:account).permit(\n        :name, :balance, :subtype, :currency, :accountable_type, :return_to,\n        :opening_balance_date,\n        :institution_name, :institution_domain, :notes,\n        :financial_treatment, :archived,\n        :enable_category_matcher,\n        :custom_logo, :delete_custom_logo,\n        accountable_attributes: self.class.permitted_accountable_attributes\n      )"
+        }
+      ]
+    },
+    "app/controllers/concerns/api/file_channel.rb": {
+      "sha256": "f31cbbc63abfc9a79858f777b47bd8cdbeaea8f717e986a0fde77bd7c8c26216",
+      "strong_parameters": [
+        {
+          "line": 19,
+          "expression": "args = params.permit(:kind, :id, :attachment_id).to_h"
         }
       ]
     },
@@ -6074,12 +8641,28 @@
       "sha256": "8564cf799c3bb9fb961689d66259b6a1bb464064cc05a1044bdf015a23b872df",
       "strong_parameters": []
     },
+    "app/controllers/mcp_controller.rb": {
+      "sha256": "151bce3baab8fcd3fbc38e7fd9a9715205a9820d33ddf094d7b297f473665495",
+      "strong_parameters": []
+    },
+    "app/controllers/mcp_files_controller.rb": {
+      "sha256": "699456b14b5472be0209d16d7d30c25729c1fd75a0a60082721456bf38b17081",
+      "strong_parameters": []
+    },
+    "app/controllers/mcp_metadata_controller.rb": {
+      "sha256": "6a12911eb5cefc409ed898a3e100fb7502785db63f97c3fa4f113f978d637158",
+      "strong_parameters": []
+    },
     "app/controllers/mfa_controller.rb": {
       "sha256": "95014f0e2f52a99f2bc39db819669953165343c25c38070d99ce40e116bea7f9",
       "strong_parameters": []
     },
     "app/controllers/oauth/authorizations_controller.rb": {
-      "sha256": "5fe02aa9025fabcbe89a1209efe8782d25b4bc2362d536fc12db18809ccbe7a5",
+      "sha256": "7a6c021d8c6edb713f1f97011159fb4b3fe14d3e8b69bfc9e290ca30e719bf72",
+      "strong_parameters": []
+    },
+    "app/controllers/oauth/tokens_controller.rb": {
+      "sha256": "4f2eca82d8795e23ed5c4a792fecc739c04d2095ba788ec47d3e6aaf33d98329",
       "strong_parameters": []
     },
     "app/controllers/oidc_accounts_controller.rb": {

@@ -12,6 +12,7 @@ data. The supported product scope is summarized in
 | Web app and PWA | Full everyday use and administration from any modern browser. | Primary client | Open the server URL. For local development see [Local Docker app](llm-guides/docker-local-app.md). |
 | Flutter Android app | Mobile access: login, balances and transactions. | Companion app; APK built locally or by Mobile CI | See [Relay Mobile](../mobile/README.md). |
 | Custom API clients | Scripts, services, importers, dashboards or a future dedicated front end. | HTTP API | See [docs/api/openapi.yaml](api/openapi.yaml) and the endpoint guides in [docs/api](api/). |
+| MCP clients | Delegated financial queries and daily operations. | Opt-in, registered OAuth clients or explicitly enabled individual API keys | See [MCP configuration and contract](api/mcp.md). |
 
 There is no public release channel, app store distribution or demo server. The
 macOS desktop app, the SwiftUI iOS/iPadOS app, the Flutter iOS and web targets
@@ -42,8 +43,15 @@ Use `GET /api/v1/context` and each account's `capabilities` to inspect the
 authenticated identity and effective authority. Token write scope does not
 override account sharing. Family-wide import/sync/connection operations require
 a family administrator. See the [access contract](api/access.md) and
-[new API/MCP roadmap](research/relay-api-mcp-roadmap.md); the new MCP transport
-is still pending phase 2.
+[new API/MCP roadmap](research/relay-api-mcp-roadmap.md). The new MCP transport
+and daily operation contracts are documented in [MCP](api/mcp.md), with
+[financial reports and planning](api/reporting-planning.md) for phases 4–5.
+[Investment, file transfer and processes](api/investment-processes.md) cover
+phases 6–7. Original files use authenticated binary channels instead of public
+storage URLs or inline tool payloads.
+[Integration/admin operations](api/integrations-administration.md) retain native
+human consent and credential issuance. The [release guide](api/mcp-release.md)
+states tested clients, explicit coverage boundaries and deployment checks.
 
 ## Native reporting and device continuity
 

@@ -1,0 +1,710 @@
+{
+  "format_version": 1,
+  "scope": "Maintained product capabilities; delegated operations and explicit human-presence boundaries",
+  "deployment_verification": "separate; real TLS/proxy and installation not asserted by code parity",
+  "cases": {
+    "ID-01": {
+      "title": "autenticarse, renovar, registrar y enlazar SSO",
+      "disposition": "mixed",
+      "tools": [
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/integration/mcp_oauth_test.rb"
+      ],
+      "human_flows": [
+        "password",
+        "sso"
+      ],
+      "limitation": "Authentication starts without a delegated credential through native login/signup/refresh or an authenticated browser. MCP never handles a password, SSO assertion or human-presence challenge."
+    },
+    "ID-02": {
+      "title": "consultar contexto y permiso efectivo",
+      "disposition": "implemented",
+      "tools": [
+        "get_capabilities",
+        "get_context",
+        "get_operation"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/context_controller_test.rb",
+        "test/controllers/mcp_controller_test.rb"
+      ]
+    },
+    "ID-03": {
+      "title": "perfil, preferencias, onboarding y sesión actual",
+      "disposition": "mixed",
+      "tools": [
+        "get_family_settings",
+        "get_preferences",
+        "get_profile",
+        "update_family_settings",
+        "update_preferences",
+        "update_profile",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/administration_operations_test.rb"
+      ],
+      "human_flows": [
+        "email"
+      ],
+      "limitation": "Email changes preserve native verification in the browser. Onboarding navigation is presentation; financial defaults and supported preferences use their domain operations."
+    },
+    "ID-04": {
+      "title": "sesiones, MFA, passkeys, contraseña y recuperación",
+      "disposition": "mixed",
+      "tools": [
+        "get_security_status",
+        "list_sessions",
+        "revoke_session",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/administration_operations_test.rb"
+      ],
+      "human_flows": [
+        "password",
+        "mfa",
+        "passkeys",
+        "sso"
+      ],
+      "limitation": "MFA, WebAuthn and identity linking require the native browser challenge. Tools only inspect non-secret state and revoke the actor sessions."
+    },
+    "ID-05": {
+      "title": "API keys y clientes OAuth",
+      "disposition": "mixed",
+      "tools": [
+        "list_api_keys",
+        "list_oauth_grants",
+        "revoke_api_key",
+        "revoke_oauth_grant",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/administration_operations_test.rb"
+      ],
+      "human_flows": [
+        "api_key",
+        "oauth_client"
+      ],
+      "limitation": "Issuance and client registration stay in the authenticated browser to avoid minting stronger credentials or storing returned secrets in the replay ledger. Existing grants can be listed and revoked."
+    },
+    "ID-06": {
+      "title": "invitaciones, miembros y roles",
+      "disposition": "mixed",
+      "tools": [
+        "create_invitation",
+        "list_invitations",
+        "list_members",
+        "preview_access_change",
+        "revoke_invitation",
+        "update_member_role",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/administration_operations_test.rb"
+      ],
+      "human_flows": [
+        "member_removal",
+        "family_reset",
+        "instance_users"
+      ],
+      "limitation": "Invitation tools prepare/revoke pending invites without sending or silently transferring an identity. Admin invitations, member deletion/deactivation, family transfer/reset and cross-family administration use the native browser. API role edits require instance authority and cannot target self or a super administrator."
+    },
+    "AC-01": {
+      "title": "listar y consultar cuentas",
+      "disposition": "implemented",
+      "tools": [
+        "get_account",
+        "list_accounts"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "AC-02": {
+      "title": "alta y edición por tipo",
+      "disposition": "implemented",
+      "tools": [
+        "create_account",
+        "update_account",
+        "set_local_image"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "AC-03": {
+      "title": "archivar, activar, predeterminar, desvincular y borrar",
+      "disposition": "mixed",
+      "tools": [
+        "delete_account",
+        "set_account_status",
+        "set_default_account",
+        "unlink_account",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ],
+      "human_flows": [
+        "account_lifecycle"
+      ],
+      "limitation": "Delegated deletion requires complete family financial authority because native cleanup touches transfers, Agenda and Goals across accounts. An ordinary owner can review the native account lifecycle in the authenticated browser; no financial scope is inferred from an instance role."
+    },
+    "AC-04": {
+      "title": "compartir y participación financiera",
+      "disposition": "implemented",
+      "tools": [
+        "list_account_shares",
+        "set_finance_inclusion",
+        "update_account_share"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "TX-01": {
+      "title": "buscar, consultar, crear, editar y borrar movimientos",
+      "disposition": "implemented",
+      "tools": [
+        "create_transaction",
+        "delete_transaction",
+        "get_transaction",
+        "search_transactions",
+        "update_transaction"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "TX-02": {
+      "title": "clasificación, gasto compartido, exclusión y previsión",
+      "disposition": "implemented",
+      "tools": [
+        "protect_transaction"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "TX-03": {
+      "title": "dividir/recomponer y operaciones masivas",
+      "disposition": "implemented",
+      "tools": [
+        "bulk_delete_transactions",
+        "bulk_update_transactions",
+        "preview_bulk_delete_transactions",
+        "preview_categorization",
+        "split_transaction",
+        "unsplit_transaction"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "TX-04": {
+      "title": "duplicados, conversión a trade y desbloqueo",
+      "disposition": "implemented",
+      "tools": [
+        "convert_transaction_to_trade",
+        "dismiss_duplicate",
+        "duplicate_transaction",
+        "merge_duplicate",
+        "unlock_transaction"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "TR-01": {
+      "title": "transferir y emparejar movimientos existentes",
+      "disposition": "implemented",
+      "tools": [
+        "create_transfer",
+        "delete_transfer",
+        "get_transfer",
+        "list_rejected_transfers",
+        "list_transfers",
+        "match_transfer",
+        "unlink_transfer",
+        "update_transfer"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/parity_operations_test.rb"
+      ]
+    },
+    "OR-01": {
+      "title": "categorías: alta/edición/fusión/borrado/reasignación",
+      "disposition": "implemented",
+      "tools": [
+        "create_category",
+        "delete_category",
+        "list_categories",
+        "merge_categories",
+        "replace_category",
+        "update_category"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "OR-02": {
+      "title": "comercios y logos propios",
+      "disposition": "implemented",
+      "tools": [
+        "create_merchant",
+        "delete_merchant",
+        "list_merchants",
+        "merge_merchants",
+        "set_local_image",
+        "update_merchant"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "OR-03": {
+      "title": "etiquetas y asignación",
+      "disposition": "implemented",
+      "tools": [
+        "create_tag",
+        "delete_tag",
+        "list_tags",
+        "merge_tags",
+        "replace_tag",
+        "update_tag"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/daily_operations_controller_test.rb"
+      ]
+    },
+    "BU-01": {
+      "title": "listar/consultar presupuesto doméstico y personal",
+      "disposition": "implemented",
+      "tools": [
+        "get_budget",
+        "list_budget_allocations",
+        "list_budgets"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/planning_operations_test.rb"
+      ]
+    },
+    "BU-02": {
+      "title": "asignar, mover fondos, copiar mes, borrar y rollover",
+      "disposition": "implemented",
+      "tools": [
+        "copy_budget",
+        "create_budget",
+        "delete_budget",
+        "move_budget_funds",
+        "recompute_budget_rollover",
+        "update_budget",
+        "update_budget_allocation"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/planning_operations_test.rb"
+      ]
+    },
+    "BU-03": {
+      "title": "compartir presupuesto y preferencias de hogar",
+      "disposition": "implemented",
+      "tools": [
+        "list_budget_shares",
+        "update_budget_share",
+        "update_family_settings"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/planning_operations_test.rb"
+      ]
+    },
+    "AG-01": {
+      "title": "reglas de pagos previstos",
+      "disposition": "implemented",
+      "tools": [
+        "create_scheduled_payment",
+        "delete_scheduled_payment",
+        "get_scheduled_payment",
+        "list_scheduled_payments",
+        "set_scheduled_payment_status",
+        "update_scheduled_payment"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/planning_operations_test.rb"
+      ]
+    },
+    "AG-02": {
+      "title": "ocurrencias y estados",
+      "disposition": "implemented",
+      "tools": [
+        "confirm_scheduled_date",
+        "confirm_scheduled_entry",
+        "get_agenda",
+        "purge_pending_scheduled_entry",
+        "reject_scheduled_entry",
+        "restore_scheduled_entry",
+        "retract_scheduled_entry",
+        "revert_future_scheduled_entry",
+        "run_scheduled_payments",
+        "skip_scheduled_date"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/planning_operations_test.rb"
+      ]
+    },
+    "GO-01": {
+      "title": "objetivos y cuentas vinculadas",
+      "disposition": "implemented",
+      "tools": [
+        "create_goal",
+        "delete_goal",
+        "get_goal",
+        "list_goals",
+        "record_goal_consumption",
+        "transition_goal",
+        "update_goal"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/planning_operations_test.rb"
+      ]
+    },
+    "GO-02": {
+      "title": "compromisos de ahorro",
+      "disposition": "implemented",
+      "tools": [
+        "cancel_goal_pledge",
+        "create_goal_pledge",
+        "expire_goal_pledge",
+        "list_goal_pledges",
+        "reconcile_goal_pledge",
+        "renew_goal_pledge"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/planning_operations_test.rb"
+      ]
+    },
+    "IN-01": {
+      "title": "operaciones de inversión",
+      "disposition": "implemented",
+      "tools": [
+        "create_trade",
+        "delete_trade",
+        "get_trade",
+        "list_trades",
+        "unlock_trade",
+        "update_trade"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/investment_operations_test.rb"
+      ]
+    },
+    "IN-02": {
+      "title": "posiciones y coste base",
+      "disposition": "implemented",
+      "tools": [
+        "delete_holding",
+        "get_holding",
+        "list_holdings",
+        "preview_holding_deletion",
+        "remap_holding_security",
+        "reset_holding_security",
+        "unlock_holding_cost_basis",
+        "update_holding_cost_basis"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/investment_operations_test.rb"
+      ]
+    },
+    "IN-03": {
+      "title": "valoraciones y conciliación",
+      "disposition": "implemented",
+      "tools": [
+        "delete_valuation",
+        "list_valuations",
+        "preview_reconciliation",
+        "reconcile_account",
+        "update_valuation"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/investment_operations_test.rb"
+      ]
+    },
+    "IN-04": {
+      "title": "valor de cartera gestionada y rendimiento",
+      "disposition": "implemented",
+      "tools": [
+        "get_investment_report",
+        "update_managed_portfolio_value"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/investment_operations_test.rb"
+      ]
+    },
+    "IN-05": {
+      "title": "valores, precios y FX guardados",
+      "disposition": "implemented",
+      "tools": [
+        "get_local_security",
+        "list_exchange_rates",
+        "list_local_prices",
+        "list_local_securities",
+        "set_exchange_rate",
+        "set_local_price"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/investment_operations_test.rb"
+      ]
+    },
+    "RE-01": {
+      "title": "patrimonio, cash flow y Sankey",
+      "disposition": "implemented",
+      "tools": [
+        "get_cash_flow",
+        "get_net_worth",
+        "get_net_worth_series"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/reporting_operations_test.rb"
+      ]
+    },
+    "RE-02": {
+      "title": "actividad, comparativas y gastos compartidos",
+      "disposition": "implemented",
+      "tools": [
+        "export_transactions",
+        "get_activity_report",
+        "get_category_report",
+        "get_report_accounts",
+        "get_shared_expenses"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/reporting_operations_test.rb"
+      ]
+    },
+    "RE-03": {
+      "title": "series, previsiones e insights",
+      "disposition": "implemented",
+      "tools": [
+        "get_account_balance_series",
+        "get_account_forecast",
+        "get_wealth_forecast",
+        "list_insights",
+        "refresh_insights",
+        "set_insight_status"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/reporting_operations_test.rb",
+        "test/controllers/api/v1/parity_operations_test.rb"
+      ]
+    },
+    "RU-01": {
+      "title": "reglas y ejecuciones",
+      "disposition": "implemented",
+      "tools": [
+        "apply_rule",
+        "create_rule",
+        "delete_rule",
+        "get_rule",
+        "get_rule_options",
+        "list_rule_runs",
+        "list_rules",
+        "preview_rule_run",
+        "update_rule"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/process_operations_test.rb"
+      ]
+    },
+    "IM-01": {
+      "title": "importación guiada por formato",
+      "disposition": "implemented",
+      "tools": [
+        "apply_import_template",
+        "cancel_import",
+        "configure_import",
+        "delete_import",
+        "get_import",
+        "list_import_mappings",
+        "list_import_rows",
+        "list_imports",
+        "preview_import",
+        "preview_revert_import",
+        "publish_import",
+        "revert_import",
+        "select_qif_categories",
+        "start_import",
+        "update_import_mapping",
+        "update_import_row"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/process_operations_test.rb"
+      ]
+    },
+    "IM-02": {
+      "title": "intercambio NDJSON y sesiones por bloques",
+      "disposition": "implemented",
+      "tools": [
+        "create_import_session",
+        "get_import_session",
+        "preview_import_session",
+        "publish_import_session",
+        "upload_import_chunk"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/process_operations_test.rb"
+      ]
+    },
+    "DO-01": {
+      "title": "Statement Vault y adjuntos",
+      "disposition": "implemented",
+      "tools": [
+        "attach_transaction_file",
+        "delete_document",
+        "delete_statement",
+        "delete_transaction_attachment",
+        "get_document",
+        "get_file_transfer",
+        "get_statement",
+        "get_upload_channel",
+        "link_statement",
+        "list_attachments",
+        "list_documents",
+        "list_statements",
+        "reject_statement",
+        "unlink_statement",
+        "update_statement",
+        "upload_document",
+        "upload_statement"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/process_operations_test.rb"
+      ]
+    },
+    "BA-01": {
+      "title": "exportación/restauración familiar",
+      "disposition": "implemented",
+      "tools": [
+        "cancel_backup",
+        "create_family_backup",
+        "delete_backup",
+        "get_backup",
+        "list_backups",
+        "restore_backup",
+        "validate_backup"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/process_operations_test.rb"
+      ]
+    },
+    "SY-01": {
+      "title": "sincronización y recálculo",
+      "disposition": "implemented",
+      "tools": [
+        "cancel_sync",
+        "get_account_sync",
+        "get_sync",
+        "list_syncs",
+        "recalculate_account",
+        "sync_family"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/integration_operations_test.rb"
+      ]
+    },
+    "EX-01": {
+      "title": "Enable Banking",
+      "disposition": "mixed",
+      "tools": [
+        "disconnect_bank",
+        "get_bank_connection",
+        "link_bank_account",
+        "list_bank_accounts",
+        "list_bank_connections",
+        "setup_bank_account",
+        "sync_bank",
+        "update_bank_connection",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/integration_operations_test.rb"
+      ],
+      "human_flows": [
+        "bank_credentials",
+        "bank_authorization"
+      ],
+      "limitation": "Bank credential entry, selection and SCA/consent remain in the authenticated browser. API tools inspect the cached state, set up/link explicit accounts and request sync; they never simulate bank consent or payment orders."
+    },
+    "EX-02": {
+      "title": "Drive y logos externos",
+      "disposition": "mixed",
+      "tools": [
+        "create_drive_schedule",
+        "delete_drive_schedule",
+        "disconnect_drive",
+        "get_drive_connection",
+        "get_drive_schedule",
+        "get_external_access",
+        "list_drive_runs",
+        "list_drive_schedules",
+        "run_drive_export",
+        "update_drive_schedule",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/integration_operations_test.rb"
+      ],
+      "human_flows": [
+        "drive_authorization",
+        "drive_credentials"
+      ],
+      "limitation": "Drive credential entry and OAuth consent require the browser. API tools own only the actor connection/schedules and never expose tokens. Logo flags and external access obey installation controls."
+    },
+    "AD-01": {
+      "title": "configuración, diagnóstico y trabajos",
+      "disposition": "mixed",
+      "tools": [
+        "cancel_background_operation",
+        "get_background_status",
+        "get_instance_status",
+        "list_background_operations",
+        "list_diagnostics",
+        "preview_instance_settings",
+        "update_instance_settings",
+        "get_human_flow"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/administration_operations_test.rb"
+      ],
+      "human_flows": [
+        "instance_users",
+        "instance_sso"
+      ],
+      "limitation": "Only named non-secret settings are delegated. Credential configuration, SSO policies, onboarding lockdown, cache-wide purges and cross-family recovery remain in the native instance console; no arbitrary settings, Redis job payloads or raw diagnostic messages are exposed. The legacy cache-clear action deletes globally stored local FX/security prices and family positions; it is not delegated as an innocuous cache flush."
+    },
+    "UI-01": {
+      "title": "navegación, preferencias de presentación y ayuda",
+      "disposition": "presentation_only",
+      "tools": [
+        "get_preferences",
+        "update_preferences"
+      ],
+      "evidence": [
+        "test/controllers/api/v1/administration_operations_test.rb"
+      ],
+      "human_flows": [],
+      "limitation": "Navigation, dialog forms, selection widgets, documentation and per-tab browser state are presentation-only. Actor preferences and domain queries expose their underlying useful state without automating HTML."
+    },
+    "CT-01": {
+      "title": "impersonación y operación del host",
+      "disposition": "excluded",
+      "tools": [],
+      "evidence": [
+        "test/controllers/mcp_controller_test.rb"
+      ],
+      "human_flows": [],
+      "limitation": "Impersonation, host shell, updater, server backups and deployment commands are explicitly excluded from delegated product access. These stay human-controlled; family backups are covered separately by BA-01."
+    }
+  }
+}

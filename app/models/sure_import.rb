@@ -167,7 +167,7 @@ class SureImport < Import
     raise
   end
 
-  def publish_later
+  def publish_later(authority: nil)
     raise MaxRowCountExceededError if row_count_exceeded?
 
     validate_sure_preflight!
@@ -177,7 +177,7 @@ class SureImport < Import
     update! status: :importing
 
     begin
-      ImportJob.perform_later(self)
+      authority ? ApiProcessJob.perform_later("publish", self, authority) : ImportJob.perform_later(self)
     rescue StandardError
       update! status: previous_status
       raise
@@ -240,6 +240,17 @@ class SureImport < Import
     return unless ndjson_file.attached?
 
     sync_ndjson_counts!
+  end
+
+  # Row counts/preflight read the attachment inside their caller's transaction.
+  # Upload bytes eagerly, then compensate object storage if that transaction rolls back.
+  def attach_ndjson_content!(content:, filename:, content_type:)
+    blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new(content), filename: filename, content_type: content_type)
+    ApplicationRecord.current_transaction.after_rollback { blob.service.delete(blob.key) }
+    ndjson_file.attach(blob)
+  rescue StandardError
+    blob&.purge
+    raise
   end
 
   def verification_payload

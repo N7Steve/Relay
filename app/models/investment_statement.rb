@@ -7,9 +7,10 @@ class InvestmentStatement
 
   attr_reader :family, :user
 
-  def initialize(family, user: nil)
+  def initialize(family, user: nil, accounts: nil)
     @family = family
     @user = user || Current.user
+    @accounts = accounts
   end
 
   # Get totals for a specific period
@@ -265,6 +266,7 @@ class InvestmentStatement
     @investment_accounts ||= begin
       scope = family.accounts.visible.included_in_reports.where(accountable_type: %w[Investment Crypto])
       scope = scope.included_in_finances_for(user) if user
+      scope = scope.where(id: @accounts.select(:id)) if @accounts
       scope
     end
   end

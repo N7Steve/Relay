@@ -1731,4 +1731,39 @@ RSpec.configure do |config|
   }
 
   config.openapi_format = :yaml
+  # OpenAPI 3.0 represents nullable fields differently from JSON Schema 2020.
+  normalize_daily_schema = lambda do |value|
+    case value
+    when Hash
+      result = value.to_h { |key, item| [ key.to_s, normalize_daily_schema.call(item) ] }
+      if result['type'].is_a?(Array)
+        result['nullable'] = result['type'].include?('null')
+        result['type'] = (result['type'] - [ 'null' ]).first
+      end
+      result
+    when Array then value.map { |item| normalize_daily_schema.call(item) }
+    else value
+    end
+  end
+  daily_schemas = config.openapi_specs['openapi.yaml'][:components][:schemas]
+  daily_schemas[:FileUploadRequest] = {
+    type: :object, required: %w[file sha256 idempotency_key], additionalProperties: false,
+    properties: {
+      file: { type: :string, format: :binary },
+      sha256: { type: :string, pattern: '^[0-9a-f]{64}$' },
+      idempotency_key: { type: :string, minLength: 1, maxLength: 128 }
+    }
+  }
+  daily_schemas[:FileUploadResult] = {
+    type: :object, required: %w[upload_token filename byte_size sha256 expires_in],
+    properties: {
+      upload_token: { type: :string }, filename: { type: :string },
+      byte_size: { type: :integer, minimum: 1, maximum: Api::FileTransfer::MAX_BYTES },
+      sha256: { type: :string, pattern: '^[0-9a-f]{64}$' }, expires_in: { type: :integer, minimum: 0, maximum: 3600 }
+    }
+  }
+  daily_schemas[:DailyOperationResult] = { type: :object, description: 'Structured domain result; collection operations include data and pagination with an explicit next_page.' }
+  Mcp::Catalog.all.each_value do |tool|
+    daily_schemas["DailyInput#{tool[:name].camelize}"] = normalize_daily_schema.call(tool[:inputSchema])
+  end
 end

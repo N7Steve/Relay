@@ -16,7 +16,7 @@ class Api::V1::ContextController < Api::V1::BaseController
         read_family_operations: api_access.family_admin?,
         read_family_insights: api_access.complete_account_visibility? && current_resource_owner.preview_features_enabled?,
         preview_features: current_resource_owner.preview_features_enabled?,
-        mcp: false
+        mcp: Mcp::Configuration.enabled?
       },
       contracts: {
         account_permissions: "Account read_write permits annotations only; financial writes require owner or full_control",

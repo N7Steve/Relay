@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Read-only probe: never invokes tools, changes settings or follows redirects.
+require "json"
+require "net/http"
+require "openssl"
+require "uri"
+
+begin
+  resource = ARGV.fetch(0) { ENV.fetch("RELAY_MCP_URL", "") }.delete_suffix("/")
+  uri = URI(resource)
+  loopback = %w[localhost 127.0.0.1 ::1].include?(uri.hostname)
+  raise "Use an HTTPS /mcp URL (HTTP is allowed only on loopback)" unless uri.path == "/mcp" && uri.userinfo.nil? && uri.query.nil? && uri.fragment.nil? && (uri.scheme == "https" || (uri.scheme == "http" && loopback))
+  base = resource.delete_suffix("/mcp")
+  request = lambda do |path, method: :get, body: nil, headers: {}|
+    target = URI("#{base}#{path}")
+    client = Net::HTTP.new(target.hostname, target.port, nil)
+    client.use_ssl = target.scheme == "https"
+    client.verify_mode = OpenSSL::SSL::VERIFY_PEER if client.use_ssl?
+    client.open_timeout = 5
+    client.read_timeout = 10
+    req = method == :post ? Net::HTTP::Post.new(target) : Net::HTTP::Get.new(target)
+    headers.each { |key, value| req[key] = value }
+    req.body = JSON.generate(body) if body
+    client.request(req)
+  end
+  protected_response = request.call("/.well-known/oauth-protected-resource/mcp")
+  raise "Protected-resource metadata unavailable (HTTP #{protected_response.code})" unless protected_response.code == "200"
+  metadata = JSON.parse(protected_response.body)
+  raise "Public MCP resource does not match configured URL" unless metadata["resource"] == resource
+  raise "Authorization issuer does not match public origin" unless metadata["authorization_servers"] == [ base ]
+  authorization_response = request.call("/.well-known/oauth-authorization-server")
+  raise "Authorization metadata unavailable" unless authorization_response.code == "200"
+  authorization = JSON.parse(authorization_response.body)
+  raise "PKCE S256 is not advertised" unless authorization.fetch("code_challenge_methods_supported", []).include?("S256")
+  %w[authorization_endpoint token_endpoint].each do |key|
+    raise "OAuth endpoint has an unexpected public origin" unless authorization.fetch(key).start_with?("#{base}/")
+  end
+  headers = { "Content-Type" => "application/json", "Accept" => "application/json, text/event-stream", "MCP-Protocol-Version" => "2025-11-25" }
+  message = { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "relay-deployment-check", version: "1" } } }
+  unauthorized = request.call("/mcp", method: :post, body: message, headers: headers)
+  raise "Anonymous MCP is not rejected with 401" unless unauthorized.code == "401"
+  raise "Proxy stripped or changed the OAuth metadata challenge" unless unauthorized["WWW-Authenticate"].to_s.include?("#{base}/.well-known/oauth-protected-resource/mcp")
+  rejected = request.call("/mcp", method: :post, body: message, headers: headers.merge("Origin" => "https://untrusted.invalid"))
+  raise "Untrusted Origin is not rejected" unless rejected.code == "403"
+  if ENV["MCP_CHECK_TOKEN"].to_s != ""
+    authenticated = request.call("/mcp", method: :post, body: message, headers: headers.merge("Authorization" => "Bearer #{ENV.fetch('MCP_CHECK_TOKEN')}"))
+    raise "Authenticated MCP handshake failed (HTTP #{authenticated.code})" unless authenticated.code == "200" && JSON.parse(authenticated.body).dig("result", "protocolVersion") == "2025-11-25"
+  end
+  puts "MCP deployment checks passed: discovery, issuer, PKCE, authorization challenge, Origin#{ENV['MCP_CHECK_TOKEN'].to_s.empty? ? '' : ', authenticated handshake'}"
+  puts(uri.scheme == "https" ? "TLS certificate and hostname verified" : "Loopback HTTP test only; deployed TLS has not been verified")
+rescue JSON::ParserError, URI::InvalidURIError
+  warn "MCP deployment check failed: invalid URL or non-JSON metadata/protocol response"
+  exit 1
+rescue StandardError => error
+  warn "MCP deployment check failed: #{error.class}: #{error.message}"
+  exit 1
+end

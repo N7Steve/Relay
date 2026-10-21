@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../config/environment"
+
+result = Mcp::CoverageAudit.check!
+puts "MCP parity audit passed: #{result[:cases]} capability cases, #{result[:tools]} tools, #{result[:routes]} fixed API routes; #{result[:boundaries]} explicit human/presentation/exclusion boundaries"
+puts "This verifies code and documentation traceability; it does not claim production TLS/proxy or deployment verification."

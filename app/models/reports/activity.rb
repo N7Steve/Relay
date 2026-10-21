@@ -3,11 +3,12 @@
 class Reports::Activity
   Totals = Data.define(:income, :expenses, :investment_return)
 
-  def initialize(family, user:)
+  def initialize(family, user:, accounts: nil)
     @family = family
     @user = user
-    @investment_statement = InvestmentStatement.new(family, user: user)
-    @income_statement = IncomeStatement.new(family, user: user)
+    @accounts = accounts
+    @investment_statement = InvestmentStatement.new(family, user: user, accounts: accounts)
+    @income_statement = IncomeStatement.new(family, user: user, accounts: accounts)
     @totals = {}
     @investment_returns = {}
   end
@@ -27,8 +28,10 @@ class Reports::Activity
   end
 
   def cash_transactions
-    @cash_transactions ||= @family.transactions.visible.excluding_pending
-      .where.not(id: performance_transactions.select(:id))
+    @cash_transactions ||= begin
+      scope = @family.transactions.visible.excluding_pending.where.not(id: performance_transactions.select(:id))
+      @accounts ? scope.where(entries: { account_id: @accounts.select(:id) }) : scope
+    end
   end
 
   private

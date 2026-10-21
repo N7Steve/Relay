@@ -75,13 +75,13 @@ class Rule < ApplicationRecord
     transaction_ids.size
   end
 
-  def apply(ignore_attribute_locks: false, rule_run: nil)
+  def apply(ignore_attribute_locks: false, rule_run: nil, resource_scope: nil)
     total_modified = 0
     total_async_jobs = 0
     has_async = false
 
     actions.each do |action|
-      result = action.apply(matching_resources_scope, ignore_attribute_locks: ignore_attribute_locks, rule_run: rule_run)
+      result = action.apply(resource_scope || matching_resources_scope, ignore_attribute_locks: ignore_attribute_locks, rule_run: rule_run)
 
       if result.is_a?(Hash) && result[:async]
         has_async = true

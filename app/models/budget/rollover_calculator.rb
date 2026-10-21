@@ -30,10 +30,18 @@ class Budget::RolloverCalculator
   def recompute!
     return if first_relevant_budget_date.nil?
 
-    BudgetCategory.transaction do
-      lock_chain!
+    with_chain_lock do
       from = first_relevant_budget_date
       recompute_chain!(from) if from
+    end
+  end
+
+  # External adapters must take the same lock BEFORE allocation row locks.
+  # This also lets an idempotent API transaction recompute without inversion.
+  def with_chain_lock
+    BudgetCategory.transaction do
+      lock_chain!
+      yield
     end
   end
 

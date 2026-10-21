@@ -1,4 +1,5 @@
 class Import < ApplicationRecord
+  has_one_attached :original_file, dependent: :purge_later
   MaxRowCountExceededError = Class.new(StandardError)
   MappingError = Class.new(StandardError)
 
@@ -241,13 +242,13 @@ class Import < ApplicationRecord
     end
   end
 
-  def publish_later
+  def publish_later(authority: nil)
     raise MaxRowCountExceededError if row_count_exceeded?
     raise "Import is not publishable" unless publishable?
 
     update! status: :importing
 
-    ImportJob.perform_later(self)
+    authority ? ApiProcessJob.perform_later("publish", self, authority) : ImportJob.perform_later(self)
   end
 
   # Whether import! already committed rows for this import. Distinguishes a
@@ -293,12 +294,12 @@ class Import < ApplicationRecord
     update! status: :failed, error: error.message
   end
 
-  def revert_later
+  def revert_later(authority: nil)
     raise "Import is not revertable" unless revertable?
 
     update! status: :reverting
 
-    RevertImportJob.perform_later(self)
+    authority ? ApiProcessJob.perform_later("revert", self, authority) : RevertImportJob.perform_later(self)
   end
 
   def presumed_lost?

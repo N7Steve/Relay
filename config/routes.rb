@@ -20,8 +20,14 @@ Rails.application.routes.draw do
     end
   end
   use_doorkeeper do |mapping|
-    mapping.controllers authorizations: "oauth/authorizations"
+    mapping.controllers authorizations: "oauth/authorizations", tokens: "oauth/tokens"
   end
+  post "/mcp", to: "mcp#create"
+  post "/mcp/files", to: "mcp_files#upload"
+  get "/mcp/files/download", to: "mcp_files#download"
+  match "/mcp", to: "mcp#unsupported", via: [ :get, :delete ]
+  get "/.well-known/oauth-protected-resource/mcp", to: "mcp_metadata#resource"
+  get "/.well-known/oauth-authorization-server", to: "mcp_metadata#authorization_server"
   # MFA routes
   resource :mfa, controller: "mfa", only: [ :new, :create ] do
     get :verify
@@ -416,6 +422,8 @@ Rails.application.routes.draw do
   # API routes
   namespace :api do
     namespace :v1 do
+      post "files", to: "files#upload"
+      get "files/download", to: "files#download"
       # Authentication endpoints
       post "auth/signup", to: "auth#signup"
       post "auth/login", to: "auth#login"
@@ -425,6 +433,10 @@ Rails.application.routes.draw do
       post "auth/sso_create_account", to: "auth#sso_create_account"
 
       # Production API endpoints
+      # Each action has a fixed contract; there is no caller-selected model/method.
+      Mcp::Catalog.all.each_key do |operation|
+        post "actions/#{operation}", to: "daily_operations#create", defaults: { operation: operation }
+      end
       resources :accounts, only: [ :index, :show ]
       resources :balances, only: [ :index, :show ]
       resources :budgets, only: [ :index, :show ]

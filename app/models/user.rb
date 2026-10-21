@@ -23,6 +23,7 @@ class User < ApplicationRecord
   belongs_to :default_account, class_name: "Account", optional: true
   has_many :sessions, dependent: :destroy
   has_many :api_keys, dependent: :destroy
+  has_many :api_operations, class_name: "Api::Operation", dependent: :destroy
   has_many :requested_family_exports, class_name: "FamilyExport", foreign_key: :requested_by_id, dependent: :nullify
   has_one :google_drive_oauth_configuration, dependent: :destroy
   has_one :google_drive_connection, dependent: :destroy

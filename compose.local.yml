@@ -19,6 +19,10 @@ services:
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY_BASE: local-development-only-stable-key-000000000000000000000000000000000000
       ACTIVE_STORAGE_SERVICE: local
+      RELAY_MCP_ENABLED: ${RELAY_MCP_ENABLED:-false}
+      RELAY_MCP_URL: ${RELAY_MCP_URL:-}
+      RELAY_MCP_CLIENT_IDS: ${RELAY_MCP_CLIENT_IDS:-}
+      RELAY_MCP_API_KEYS_ENABLED: ${RELAY_MCP_API_KEYS_ENABLED:-false}
       PORT: "3000"
     ports:
       - "127.0.0.1:3002:3000"

@@ -178,8 +178,21 @@ tool calls, AI usage and preferences; retained documents, originals and import
 history remain part of the supported financial product.
 The new Relay MCP project (approved 21 October 2026) starts with an API capability
 inventory and shared `Api::Access`/`Api::Input` contracts; `/api/v1/context` exposes
-identity and effective capabilities without secrets. Its MCP transport is not yet
-implemented. See the [roadmap](../research/relay-api-mcp-roadmap.md) and
+identity and effective capabilities without secrets. Phases 2–3 add opt-in MCP,
+resource-bound OAuth and shared `Api::DailyOperations` for everyday actions.
+Phases 4–5 extend those operations through `Api::ReportingOperations` and
+`Api::PlanningOperations`, reusing native reporting, budget, Agenda and Goals
+engines. See the [reporting and planning contract](../api/reporting-planning.md).
+Phases 6–7 add `Api::InvestmentOperations` and `Api::ProcessOperations` for
+native investment/reconciliation, typed rules, imports, originals and backups.
+Actor-bound uploads and authorized downloads use separate API/MCP binary
+channels. See the [investment and process contract](../api/investment-processes.md).
+Phases 8–9 add explicit actor/family/instance administration, native consent
+handoffs, delegated integration jobs with authority rechecks, and a checked
+coverage manifest. See [integration and administration](../api/integrations-administration.md)
+and [release/deployment verification](../api/mcp-release.md). Code parity does
+not certify a production proxy, TLS endpoint or a client's human-presence flow.
+See the [MCP contract](../api/mcp.md), [roadmap](../research/relay-api-mcp-roadmap.md) and
 [access matrix](../research/relay-api-capability-matrix.md). Account token scopes
 do not override ownership/share permissions. Family-wide API imports, provider
 metadata and sync initiation require a family administrator; direct account

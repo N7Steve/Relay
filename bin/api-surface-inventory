@@ -11,10 +11,28 @@ root = Rails.root
 target = root.join("docs/research/relay-api-surface.json")
 ui_actions = %w[new edit picker sidebar dropdown connect_form confirm_entry_form select_existing_account]
 
-phase_for = lambda do |controller|
+phase_for = lambda do |controller, operation = nil|
   name = controller.delete_prefix("api/v1/")
   case name
+  when "mcp", "mcp_metadata" then 2
+  when "daily_operations"
+    if Mcp::ReportingCatalog.definitions.any? { |tool| tool[:name] == operation }
+      4
+    elsif Mcp::PlanningCatalog.definitions.any? { |tool| tool[:name] == operation }
+      5
+    elsif Mcp::InvestmentCatalog.definitions.any? { |tool| tool[:name] == operation }
+      6
+    elsif Mcp::ProcessCatalog.definitions.any? { |tool| tool[:name] == operation }
+      7
+    elsif (Mcp::AdministrationCatalog.definitions + Mcp::IntegrationCatalog.definitions).any? { |tool| tool[:name] == operation }
+      8
+    elsif Mcp::ParityCatalog.definitions.any? { |tool| tool[:name] == operation }
+      9
+    else
+      3
+    end
   when "context" then 1
+  when "files", "mcp_files" then 7
   when "settings/guides" then "presentation"
   when "account_sharings" then 8
   when /\A(admin\/|settings\/|google_drive|enable_banking|oauth\/)/ then 8
@@ -43,8 +61,8 @@ routes = Rails.application.routes.routes.filter_map do |route|
   {
     verb: route.verb, path: route.path.spec.to_s, controller: controller, action: action,
     source: file.relative_path_from(root).to_s.tr("\\", "/"),
-    surface: controller.start_with?("api/v1/") ? "api" : "web",
-    delivery_phase: phase_for.call(controller),
+    surface: controller.start_with?("mcp") ? "mcp" : controller.start_with?("api/v1/") ? "api" : "web",
+    delivery_phase: phase_for.call(controller, route.defaults[:operation]),
     presentation_only: ui_actions.include?(action) || controller.match?(/\A(category|tag)\/dropdowns\z/)
   }
 end.sort_by { |row| [ row[:controller], row[:action], row[:path], row[:verb] ] }

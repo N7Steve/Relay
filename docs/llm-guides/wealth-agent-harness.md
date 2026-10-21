@@ -15,8 +15,9 @@ completa y un MCP propio. El [roadmap](../research/relay-api-mcp-roadmap.md) reg
 el estado, las pruebas y lo pendiente. El [inventario de capacidades y contrato
 de acceso](../research/relay-api-capability-matrix.md) y su
 [superficie regenerable](../research/relay-api-surface.json) sustituyen al antiguo
-catálogo como referencia de trabajo. El transporte nuevo pertenece a la fase 2;
-esta decisión no recupera chat integrado, proveedores IA ni funciones retiradas.
+catálogo como referencia de trabajo. Las fases 2–3 añaden el transporte nuevo y
+operativa diaria compartida con la API; consultar el [contrato MCP](../api/mcp.md).
+Esta decisión no recupera chat integrado, proveedores IA ni funciones retiradas.
 
 El [wealth blueprint](wealth-blueprint.md) sigue siendo arquitectura de referencia
 para un sistema externo separado; no prescribe operaciones en este repositorio.

@@ -14,7 +14,7 @@ RSpec.describe 'API V1 Context', type: :request do
       tags 'Context'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
-      description 'No secrets are returned. A write token never expands account permissions. MCP is unavailable until phase 2. Responses are private and not cacheable.'
+      description 'No secrets are returned. A write token never expands account permissions. MCP availability reflects instance configuration. Responses are private and not cacheable.'
 
       response '200', 'identity and capabilities' do
         schema '$ref' => '#/components/schemas/ApiContext'

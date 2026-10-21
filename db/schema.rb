@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -97,7 +97,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
   end
 
   create_table "accounts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "financial_treatment"
     t.integer "account_providers_count", default: 0, null: false
     t.uuid "accountable_id"
     t.string "accountable_type"
@@ -112,6 +111,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
     t.boolean "enable_category_matcher", default: true, null: false
     t.boolean "exclude_from_reports", default: false, null: false
     t.uuid "family_id", null: false
+    t.string "financial_treatment"
     t.datetime "holdings_snapshot_at"
     t.jsonb "holdings_snapshot_data"
     t.uuid "import_id"
@@ -201,6 +201,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
     t.index ["revoked_at"], name: "index_api_keys_on_revoked_at"
     t.index ["user_id", "source"], name: "index_api_keys_on_user_id_and_source"
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "api_operations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.string "request_digest", null: false
+    t.jsonb "result", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["user_id", "key"], name: "index_api_operations_on_user_id_and_key", unique: true
+    t.index ["user_id"], name: "index_api_operations_on_user_id"
   end
 
   create_table "archived_exports", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -429,7 +440,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
   end
 
   create_table "entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.boolean "import_protected"
     t.uuid "account_id", null: false
     t.decimal "amount", precision: 19, scale: 4, null: false
     t.datetime "created_at", null: false
@@ -442,6 +452,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
     t.string "idempotency_key"
     t.uuid "import_id"
     t.boolean "import_locked", default: false, null: false
+    t.boolean "import_protected"
     t.jsonb "locked_attributes", default: {}
     t.string "name", null: false
     t.text "notes"
@@ -918,11 +929,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
   end
 
   create_table "investments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "tax_treatment"
-    t.string "tracking_mode"
     t.datetime "created_at", null: false
     t.jsonb "locked_attributes", default: {}
     t.string "subtype"
+    t.string "tax_treatment"
+    t.string "tracking_mode"
     t.datetime "updated_at", null: false
   end
 
@@ -1027,8 +1038,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
 
   create_table "oauth_access_grants", force: :cascade do |t|
     t.bigint "application_id", null: false
+    t.string "code_challenge"
+    t.string "code_challenge_method"
     t.datetime "created_at", null: false
     t.integer "expires_in", null: false
+    t.string "mcp_resource"
     t.text "redirect_uri", null: false
     t.string "resource_owner_id", null: false
     t.datetime "revoked_at"
@@ -1043,6 +1057,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
     t.bigint "application_id", null: false
     t.datetime "created_at", null: false
     t.integer "expires_in"
+    t.string "mcp_resource"
     t.uuid "mobile_device_id"
     t.string "previous_refresh_token", default: "", null: false
     t.string "refresh_token"
@@ -1385,17 +1400,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
   end
 
   create_table "transactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "posting_status"
     t.uuid "category_id"
     t.datetime "created_at", null: false
     t.string "external_id"
     t.jsonb "extra", default: {}, null: false
-    t.boolean "shared_expense", default: false, null: false
     t.string "forecast_behavior", default: "normal", null: false
     t.string "investment_activity_label"
     t.string "kind", default: "standard", null: false
     t.jsonb "locked_attributes", default: {}
     t.uuid "merchant_id"
+    t.string "posting_status"
+    t.boolean "shared_expense", default: false, null: false
     t.uuid "transfer_id"
     t.datetime "updated_at", null: false
     t.index "(((extra -> 'goal'::text) ->> 'pledge_id'::text))", name: "ix_transactions_extra_goal_pledge_id", unique: true, where: "(((extra -> 'goal'::text) ->> 'pledge_id'::text) IS NOT NULL)"
@@ -1512,6 +1527,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_120000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
+  add_foreign_key "api_operations", "users"
   add_foreign_key "balances", "accounts", on_delete: :cascade
   add_foreign_key "budget_categories", "budgets", on_delete: :cascade
   add_foreign_key "budget_categories", "categories"

@@ -3,6 +3,7 @@ require Rails.root.join("db/migrate/20261005120000_remove_retired_product_persis
 require Rails.root.join("db/migrate/20261005180000_remove_demo_valuation_and_push_persistence")
 require Rails.root.join("db/migrate/20261007120000_add_independent_financial_attributes")
 require Rails.root.join("db/migrate/20261010120000_add_shared_expense_to_transactions")
+require Rails.root.join("db/migrate/20261021120000_bind_oauth_tokens_to_mcp_resource")
 
 class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
   self.use_transactional_tests = false
@@ -76,6 +77,7 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     assert_empty %w[avm_provider avm_last_synced_on] & connection.columns("properties").map(&:name)
     ActiveRecord::Migration.suppress_messages { AddIndependentFinancialAttributes.new.migrate(:up) }
     ActiveRecord::Migration.suppress_messages { AddSharedExpenseToTransactions.new.migrate(:up) }
+    ActiveRecord::Migration.suppress_messages { BindOauthTokensToMcpResource.new.migrate(:up) }
     actual_columns = connection.tables.excluding("schema_migrations", "ar_internal_metadata").to_h do |table|
       [ table, connection.columns(table).map { |column| [ column.name, column.sql_type, column.default, column.null ] }.sort_by(&:first) ]
     end

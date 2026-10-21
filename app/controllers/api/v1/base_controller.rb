@@ -74,7 +74,7 @@ class Api::V1::BaseController < ApplicationController
       # Check token validity and scope (read_write includes read access)
       has_sufficient_scope = access_token&.scopes&.include?("read") || access_token&.scopes&.include?("read_write")
 
-      unless access_token&.accessible? && has_sufficient_scope
+      unless access_token&.accessible? && has_sufficient_scope && access_token.mcp_resource.blank?
         render_json({ error: "unauthorized", message: "Access token is invalid, expired, or missing required scope" }, status: :unauthorized)
         return false
       end
@@ -227,7 +227,7 @@ class Api::V1::BaseController < ApplicationController
     end
 
     def api_access
-      @api_access ||= Api::Access.new(user: current_resource_owner, scopes: current_scopes)
+      @api_access ||= Api::Access.new(user: current_resource_owner, scopes: current_scopes, credential: @api_key || doorkeeper_token)
     end
     helper_method :api_access
 

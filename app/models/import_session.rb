@@ -215,8 +215,8 @@ class ImportSession < ApplicationRecord
       client_chunk_id: client_chunk_id,
       checksum: checksum
     ).tap do |import|
-      import.ndjson_file.attach(
-        io: StringIO.new(content),
+      import.attach_ndjson_content!(
+        content: content,
         filename: filename,
         content_type: content_type
       )
@@ -224,7 +224,7 @@ class ImportSession < ApplicationRecord
   end
   private :create_chunk!
 
-  def publish_later
+  def publish_later(authority: nil)
     previous_status = nil
     should_enqueue = false
 
@@ -243,7 +243,7 @@ class ImportSession < ApplicationRecord
     return unless should_enqueue
 
     begin
-      ImportSessionJob.perform_later(self)
+      authority ? ApiProcessJob.perform_later("session", self, authority) : ImportSessionJob.perform_later(self)
     rescue => error
       with_lock do
         reload
@@ -351,8 +351,8 @@ class ImportSession < ApplicationRecord
       return false if chunk_ready_for_retry?(chunk, checksum)
       return true if chunk.ndjson_file.attached? && chunk_content_checksum(chunk) == checksum
 
-      chunk.ndjson_file.attach(
-        io: StringIO.new(content),
+      chunk.attach_ndjson_content!(
+        content: content,
         filename: filename,
         content_type: content_type
       )

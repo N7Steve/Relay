@@ -11,8 +11,8 @@ no se cambia silenciosamente de identidad.
 
 `GET /api/v1/context` devuelve actor, familia, zona horaria, método de
 autenticación, scopes y capacidades generales. No devuelve claves ni secretos.
-`capabilities.mcp` es false: las fases 0–1 preparan la base, el transporte
-pertenece a la fase 2. Las respuestas API llevan `Cache-Control: private, no-store`.
+`capabilities.mcp` refleja la habilitación de la instancia según el
+[contrato MCP](mcp.md). Las respuestas API llevan `Cache-Control: private, no-store`.
 
 Los objetos de cuenta añaden:
 
