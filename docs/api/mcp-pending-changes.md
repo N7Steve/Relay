@@ -76,6 +76,12 @@ familia, permisos y validaciones nativas. Se usa un contexto nuevo del actor sin
 suplantación. Las ejecuciones aprobadas tienen un namespace de idempotencia propio,
 separado de las llamadas REST anteriores.
 
+Un deadlock de PostgreSQL revierte la operación en curso y permite hasta cinco
+intentos del job, separados por la espera de Active Job. Cada intento continúa
+desde la primera operación pendiente y vuelve a comprobar la autoridad; no
+repite las operaciones completadas. Si se agotan los intentos, la propuesta
+se marca como fallida con el resto sin aplicar.
+
 **La propuesta no es una transacción global.** Se aplica en orden; ante un fallo,
 se detiene. Las operaciones ya completadas quedan canónicas y se muestra cuántas
 se aplicaron, el fallo y las restantes. Un job de importación/sync aprobado puede

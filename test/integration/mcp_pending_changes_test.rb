@@ -47,6 +47,58 @@ class McpPendingChangesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a deadlocked transfer is retried without duplicating preceding expenses" do
+    destination = @user.family.accounts.create!(name: "Mortgage test", balance: 0, currency: @account.currency,
+      accountable: Depository.new, owner: @user)
+    first = propose("create_transaction", account_id: @account.id, name: "Source test expense", amount: "1", date: Date.current.iso8601, idempotency_key: "deadlock-expense-source")
+    propose("create_transaction", account_id: destination.id, name: "Destination test expense", amount: "1", date: Date.current.iso8601, idempotency_key: "deadlock-expense-destination")
+    propose("create_transfer", source_account_id: @account.id, destination_account_id: destination.id,
+      amount: "1", date: Date.current.iso8601, name: "Retried transfer", idempotency_key: "deadlock-transfer")
+    set = Mcp::ChangeSet.find(first.fetch("change_set_id"))
+    set.approve!(actor: @user, token: set.review_token)
+    clear_enqueued_jobs
+    Api::DailyOperations.any_instance.expects(:create_transfer).raises(ActiveRecord::Deadlocked).once
+
+    assert_difference "Transaction.count", 2 do
+      assert_enqueued_with(job: Mcp::ApplyChangeSetJob) do
+        Mcp::ApplyChangeSetJob.perform_now(set)
+      end
+    end
+    assert_equal "applying", set.reload.status
+    assert_equal %w[applied applied pending], set.operations.pluck("status")
+    Api::DailyOperations.any_instance.unstub(:create_transfer)
+
+    assert_difference "Transfer.count", 1 do
+      assert_difference "Transaction.count", 2 do
+        perform_enqueued_jobs(only: Mcp::ApplyChangeSetJob)
+      end
+    end
+    assert_equal "applied", set.reload.status
+    assert_equal 3, set.overview[:applied]
+    assert_equal 1, @account.entries.where(name: "Source test expense").count
+    assert_equal 1, destination.entries.where(name: "Destination test expense").count
+    assert_no_difference [ "Transfer.count", "Transaction.count" ] do
+      Mcp::ApplyChangeSetJob.perform_now(set)
+    end
+  end
+
+  test "persistent deadlocks stop the proposal after the final job attempt" do
+    receipt = propose("create_tag", name: "Not applied", idempotency_key: "persistent-deadlock")
+    set = Mcp::ChangeSet.find(receipt.fetch("change_set_id"))
+    set.approve!(actor: @user, token: set.review_token)
+    clear_enqueued_jobs
+    Api::DailyOperations.any_instance.expects(:create_tag).raises(ActiveRecord::Deadlocked).times(5)
+
+    assert_no_difference "Tag.count" do
+      assert_performed_jobs 5, only: Mcp::ApplyChangeSetJob do
+        perform_enqueued_jobs(only: Mcp::ApplyChangeSetJob) { Mcp::ApplyChangeSetJob.perform_later(set) }
+      end
+    end
+    assert_equal "failed", set.reload.status
+    assert_equal "ActiveRecord::Deadlocked", set.overview.dig(:failure, "error")
+    assert_equal 0, set.overview[:applied]
+  end
+
   test "deletion remains canonical until approval and discarding has no effects" do
     entry = @account.entries.create!(name: "Keep until approval", date: Date.current, amount: 5, currency: "USD", entryable: Transaction.new)
     receipt = propose("delete_transaction", transaction_id: entry.entryable_id, idempotency_key: "pending-delete")

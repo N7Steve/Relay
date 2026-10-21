@@ -125,7 +125,15 @@ class Mcp::ChangeSet < ApplicationRecord
       end
       break unless continue
     end
+  rescue ActiveRecord::Deadlocked
+    # PostgreSQL rolled back this operation. Let Active Job retry it, keeping
+    # completed operations intact and rechecking authority on the next attempt.
+    raise
   rescue StandardError => error
+    fail_application!(error)
+  end
+
+  def fail_application!(error)
     with_lock do
       if status.in?(%w[approved applying])
         rows = operations.deep_dup
