@@ -5,6 +5,9 @@ class Mcp::ProposalCatalog
   def self.definitions
     Mcp::Catalog.all.values.map do |definition|
       tool = definition.deep_dup
+      if tool[:name] == "get_context"
+        tool[:description] += " Call before preparing changes. Returns this installation's operating_instructions: follow its normalization, Agenda exclusions and reconciliation rules."
+      end
       tool[:inputSchema] = with_references(tool[:inputSchema], root: true)
       receipt = { type: "object", required: %w[status change_set_id change_id], properties: {
         status: { type: "string" }, change_set_id: Mcp::Catalog::ID, change_id: Mcp::Catalog::ID,

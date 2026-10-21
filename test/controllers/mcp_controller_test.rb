@@ -20,16 +20,22 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     rpc("initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "Test", version: "1" } })
     assert_response :success, response.body
     assert_equal "2025-11-25", response.parsed_body.dig("result", "protocolVersion")
+    instructions = response.parsed_body.dig("result", "instructions")
+    assert_includes instructions, "All MCP writes create pending proposals."
+    assert_includes instructions, "## 3. Exclusión de la agenda"
     rpc("tools/list")
     assert_response :success
     first = response.parsed_body.fetch("result")
     assert_equal 25, first.fetch("tools").length
+    context_tool = first.fetch("tools").find { |tool| tool.fetch("name") == "get_context" }
+    assert_includes context_tool.fetch("description"), "Call before preparing changes."
     rpc("tools/list", { cursor: first.fetch("nextCursor") })
     assert_response :success
     assert response.parsed_body.dig("result", "tools").any?
     rpc("tools/call", { name: "get_context", arguments: {} })
     assert_response :success
     assert_equal @user.id, response.parsed_body.dig("result", "structuredContent", "user", "id")
+    assert_equal instructions, response.parsed_body.dig("result", "structuredContent", "operating_instructions")
     post "/mcp", params: { jsonrpc: "2.0", method: "notifications/initialized" }.to_json, headers: rpc_headers
     assert_response :accepted
     assert_empty response.body
@@ -44,6 +50,9 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     rpc("tools/call", params, headers: { "MCP-Protocol-Version" => "2026-07-28", "Mcp-Method" => "tools/call", "Mcp-Name" => "get_context" })
     assert_response :success, response.body
     assert_equal "complete", response.parsed_body.dig("result", "resultType")
+    instructions = response.parsed_body.dig("result", "structuredContent", "operating_instructions")
+    assert_includes instructions, "## 9. Conciliación antes y después de aplicar"
+    assert_includes instructions, "shared_expense: false"
     rpc("server/discover", params.except(:name, :arguments), headers: { "MCP-Protocol-Version" => "2026-07-28", "Mcp-Method" => "server/discover" })
     assert_response :success, response.body
     assert_includes response.parsed_body.dig("result", "supportedVersions"), "2026-07-28"
@@ -92,6 +101,21 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     rpc("tools/call", { name: "create_tag", arguments: { name: "Denied", idempotency_key: "denied" } })
     assert_response :success
     assert_equal "forbidden", response.parsed_body.dig("result", "structuredContent", "error")
+  end
+
+  test "operating instructions are readable without staging changes and stay outside REST context" do
+    @key.update!(scopes: %w[read])
+    assert_no_difference "Mcp::ChangeSet.count" do
+      rpc("tools/call", { name: "get_context", arguments: {} })
+    end
+    assert_response :success
+    result = response.parsed_body.fetch("result")
+    assert_includes result.dig("structuredContent", "operating_instructions"), "Reembolso de gastos — María"
+    assert_equal result.fetch("structuredContent"), JSON.parse(result.fetch("content").first.fetch("text"))
+
+    get "/api/v1/context", headers: { "X-Api-Key" => @key.display_key }
+    assert_response :success
+    refute response.parsed_body.key?("operating_instructions")
   end
 
   test "OAuth token audience expiry revocation and per request identity" do

@@ -8,6 +8,26 @@ recupera el asistente integrado o proveedores retirados.
 sin modificar el dominio hasta aprobarlas en **Ajustes → Cambios pendientes**.
 El MCP no puede aprobarlas. Ver [contrato de propuestas y aprobación](mcp-pending-changes.md).
 
+## Instrucciones operativas de esta instalación
+
+Las [instrucciones MCP](../../config/mcp/instructions.md) contienen el flujo
+personal aprobado de normalización y conciliación: exclusión de Agenda,
+compras ambiguas pendientes de describir, cobros de María, devoluciones,
+transferencias y comprobación del saldo por cuenta. Son reglas de esta
+instalación y se entregan a todos sus usuarios MCP autenticados; no contienen
+extractos, saldos ni identificadores bancarios.
+
+`initialize` las entrega en `instructions`. Para ambos protocolos, la herramienta
+`get_context` también las devuelve en `operating_instructions`; su descripción
+MCP indica consultarlas antes de preparar cambios. Esto cubre los clientes
+`2026-07-28`, que no usan la inicialización clásica. La API REST conserva su
+contexto original y su catálogo compartido, sin estas instrucciones personales.
+
+Son instrucciones para el agente, no validaciones financieras nuevas del
+servidor ni una conciliación ya ejecutada. Se mantienen los permisos, las
+validaciones nativas y la aprobación web obligatoria. Después de desplegar esta
+versión, reconectar el cliente MCP y consultar `get_context` para obtenerlas.
+
 ## Activación y autenticación
 
 Desactivado por defecto. Variables de instancia:

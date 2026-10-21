@@ -122,7 +122,7 @@ class McpController < Api::V1::BaseController
 
     def server_info
       { serverInfo: { name: "Relay", version: "1.1.0" }, capabilities: { tools: { listChanged: false } },
-        instructions: "All MCP writes create pending proposals. They do not change canonical data or run jobs until the user approves in Relay Settings > Pending changes. Never report proposals as completed. Read tools see canonical data. Use get_pending_changes for status and pending:<change_id>:<result_field> to reference an earlier proposal result. Only the web UI can approve or reject." }
+        instructions: Mcp::Instructions.text }
     end
 
     def list_tools(args)
@@ -161,6 +161,7 @@ class McpController < Api::V1::BaseController
           Mcp::ChangeSet.stage!(access: api_access, name: name, arguments: arguments, deferred_read: deferred)
         end
       end
+      result = result.merge(operating_instructions: Mcp::Instructions.text) if name == "get_context"
       encoded = JSON.generate(result)
       if encoded.bytesize > MAX_BYTES
         return tool_error("response_too_large", "Narrow the query or reduce per_page; no records were silently removed")
