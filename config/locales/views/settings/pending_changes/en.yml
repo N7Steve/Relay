@@ -1,0 +1,71 @@
+{
+  "en": {
+    "settings": {
+      "pending_changes": {
+        "title": "Pending changes",
+        "description": "MCP changes are saved here as proposals. Your accounts and transactions stay unchanged until you approve. Each credential has one open proposal; reject it to discard the changes.",
+        "operation_count": {
+          "one": "1 proposed operation",
+          "other": "%{count} proposed operations"
+        },
+        "review_failed": "Could not approve or discard this proposal: %{reason}",
+        "statuses": {
+          "pending": "Pending approval",
+          "approved": "Approved, waiting to apply",
+          "applying": "Applying approved changes",
+          "applied": "Applied",
+          "failed": "Stopped with an error",
+          "rejected": "Discarded"
+        },
+        "actions": {
+          "create": "Add",
+          "update": "Modify or run",
+          "delete": "Delete or disconnect",
+          "prepare": "Prepare or preview"
+        },
+        "domains": {
+          "movements": "Transactions, transfers and investments",
+          "accounts": "Accounts",
+          "budgets": "Budgets",
+          "goals": "Goals",
+          "agenda": "Agenda",
+          "organization": "Categories, merchants, tags and rules",
+          "files": "Imports, documents and backups",
+          "integrations": "Connections and synchronization",
+          "settings": "Profile, access and settings"
+        },
+        "index": {
+          "empty_title": "No proposals yet",
+          "empty_description": "When an assistant proposes changes through MCP, you can review and approve them here.",
+          "proposal": "Proposal",
+          "summary": "Summary",
+          "status": "Status"
+        },
+        "show": {
+          "back": "All proposals",
+          "progress": "%{applied} of %{total} operations applied",
+          "summary": "Proposed changes by area",
+          "action": "Action",
+          "area": "Area",
+          "operations": "Operations",
+          "approval_notice": "Approve only after the assistant has finished. Counts refer to operations: one operation can affect multiple records, both sides of a transfer, or launch a background process. Approved operations run in order. If one fails, execution stops; earlier completed operations stay applied. There is no undo history.",
+          "approve": "Approve changes",
+          "reject": "Discard proposal",
+          "confirm": "Apply the changes in this proposal? This can add, modify or permanently delete data.",
+          "failure_notice": "Execution stopped. Completed operations remain applied; the failed operation and remaining operations were not completed. Permissions, expired previews/uploads, invalid inputs or changes in the underlying records may prevent execution. Ask the assistant to propose a corrected change set.",
+          "discard_remaining": "Discard remaining changes",
+          "processing_notice": "Approved changes are being processed. Reload this page to see progress."
+        },
+        "approve": {
+          "success": "Proposal approved. Changes will be applied in the background."
+        },
+        "reject": {
+          "success": "Pending changes discarded. Previously completed operations, if any, stay applied."
+        }
+      },
+      "settings_nav": {
+        "pending_changes_label": "Pending changes"
+      }
+    }
+  }
+}

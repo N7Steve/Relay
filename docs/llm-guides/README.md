@@ -34,6 +34,8 @@ retired; the new opt-in MCP and daily operations are described in the
 The [integration/admin contract](../api/integrations-administration.md) and
 [release guide](../api/mcp-release.md) record delegated authority, native human
 flows, coverage auditing and the separate production verification gate.
+The [pending change contract](../api/mcp-pending-changes.md) describes mandatory
+web approval of MCP writes and the Settings review section.
 The [wealth blueprint](wealth-blueprint.md) is reference architecture for that
 separate system. Its working-memory files, private document vault and operating
 protocol apply to that external project, not to every change in this repository.

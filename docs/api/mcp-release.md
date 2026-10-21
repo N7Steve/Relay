@@ -5,6 +5,27 @@ distintos. Las pruebas locales no certifican el TLS, proxy, clientes configurado
 o exposición de red de TrueNAS. Esta entrega prepara el código y el procedimiento;
 no publica cambios, aplica migraciones a la instalación ni abre puertos.
 
+## Aprobación obligatoria de escrituras MCP
+
+El [contrato de propuestas](mcp-pending-changes.md) sustituye la ejecución inmediata
+de escrituras MCP documentada en las primeras entregas. Las 244 herramientas de
+dominio conservan rutas REST; el catálogo MCP añade `get_pending_changes` y adapta
+las escrituras para devolver propuestas. La aprobación existe solo en la web.
+Desplegar la migración `20261021160000` y web/worker juntos. Los recuentos históricos
+y recorridos SDK de fases 2–9 que siguen se refieren al contrato anterior; la nueva
+prueba SDK verifica propuestas, reintentos, referencias y aplicación aprobada.
+
+Validación de esta entrega del 21 de octubre de 2026: suite completa Rails con
+**5.648 pruebas, 26.299 aserciones, cero fallos y errores**, y 38 omisiones
+existentes. Las dos pruebas de navegador de revisión, confirmación y descarte
+pasan con 12 aserciones; se ha revisado visualmente la captura del resumen.
+El cliente oficial MCP verifica propuestas y aplicación autorizada con una
+prueba y 12 aserciones. RuboCop, ERB lint y Biome pasan; Brakeman informa de
+cero errores y cero avisos de seguridad activos. Los assets compilan en test.
+La suite incluye la equivalencia del esquema actualizado y nuevo, y la
+exclusión de propuestas de los backups financieros. Esta validación no ejecuta
+migraciones ni publica cambios en la instalación del usuario.
+
 ## Evidencia de conformidad
 
 El [manifiesto](../research/relay-api-mcp-coverage.yml) relaciona **44 casos de uso**

@@ -192,6 +192,11 @@ handoffs, delegated integration jobs with authority rechecks, and a checked
 coverage manifest. See [integration and administration](../api/integrations-administration.md)
 and [release/deployment verification](../api/mcp-release.md). Code parity does
 not certify a production proxy, TLS endpoint or a client's human-presence flow.
+MCP writes now stage `Mcp::ChangeSet` proposals. Only authenticated web approval
+in Settings → Pending changes queues `Mcp::ApplyChangeSetJob`; no MCP operation
+can approve itself. Domain operations run later with fresh credential and account
+authorization. REST keeps immediate writes. See [pending change contract](../api/mcp-pending-changes.md)
+for dependent references, review digests, per-operation commits and stopped batches.
 See the [MCP contract](../api/mcp.md), [roadmap](../research/relay-api-mcp-roadmap.md) and
 [access matrix](../research/relay-api-capability-matrix.md). Account token scopes
 do not override ownership/share permissions. Family-wide API imports, provider

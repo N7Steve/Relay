@@ -69,6 +69,10 @@ duplicate records on retry. Automatic post-import sync is suppressed to preserve
 the imported snapshot; normal sync can be requested afterwards. Full restoration
 cannot be undone through the transaction-import revert action.
 
+MCP proposals and their approval/execution records are excluded: they are operational
+state bound to credentials of the source installation, not canonical financial
+data. Restoring a financial backup must not recreate pending or approved jobs.
+
 This is a family-data migration, not an image of the whole server. Environment
 variables, global instance settings, running jobs, sessions, API keys, passkeys,
 SSO registrations, user passwords/MFA and pending login/invitation tokens are not

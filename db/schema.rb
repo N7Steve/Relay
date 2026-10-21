@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -984,6 +984,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_120000) do
     t.check_constraint "insurance_rate_type IS NULL OR (insurance_rate_type::text = ANY (ARRAY['level_term'::character varying::text, 'decreasing_life'::character varying::text]))", name: "chk_loans_insurance_rate_type"
   end
 
+  create_table "mcp_change_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "approved_at"
+    t.jsonb "authority", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.string "credential_name", null: false
+    t.uuid "family_id", null: false
+    t.datetime "finished_at"
+    t.jsonb "operations", default: [], null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["family_id"], name: "index_mcp_change_sets_on_family_id"
+    t.index ["user_id", "status", "created_at"], name: "index_mcp_change_sets_on_user_id_and_status_and_created_at"
+    t.index ["user_id"], name: "index_mcp_change_sets_on_user_id"
+  end
+
   create_table "merchant_customizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.uuid "family_id", null: false
@@ -1584,6 +1600,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_120000) do
   add_foreign_key "insights", "families"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "mcp_change_sets", "families"
+  add_foreign_key "mcp_change_sets", "users"
   add_foreign_key "merchant_customizations", "families"
   add_foreign_key "merchant_customizations", "merchants"
   add_foreign_key "merchants", "families"

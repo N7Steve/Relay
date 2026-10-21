@@ -65,7 +65,7 @@ class McpController < Api::V1::BaseController
     when "ping" then {}
     when "tools/list" then list_tools(arguments)
     when "tools/call"
-      return rpc_error(-32602, "Unknown tool", :bad_request) unless Mcp::Catalog.all.key?(arguments["name"])
+      return rpc_error(-32602, "Unknown tool", :bad_request) unless Mcp::Catalog.all.key?(arguments["name"]) || arguments["name"] == "get_pending_changes"
       call_tool(arguments)
     else return rpc_error(-32601, "Method not found", :not_found)
     end
@@ -121,11 +121,12 @@ class McpController < Api::V1::BaseController
     end
 
     def server_info
-      { serverInfo: { name: "Relay", version: "1.0.0" }, capabilities: { tools: { listChanged: false } } }
+      { serverInfo: { name: "Relay", version: "1.1.0" }, capabilities: { tools: { listChanged: false } },
+        instructions: "All MCP writes create pending proposals. They do not change canonical data or run jobs until the user approves in Relay Settings > Pending changes. Never report proposals as completed. Read tools see canonical data. Use get_pending_changes for status and pending:<change_id>:<result_field> to reference an earlier proposal result. Only the web UI can approve or reject." }
     end
 
     def list_tools(args)
-      tools = Mcp::Catalog.all.values.select { |tool| api_access.writable? || tool[:annotations][:readOnlyHint] }
+      tools = Mcp::ProposalCatalog.definitions.select { |tool| api_access.writable? || tool[:annotations][:readOnlyHint] }
       cursor = args["cursor"] || "0"
       raise Api::Input::Invalid, "Invalid catalog cursor" unless cursor.is_a?(String) && cursor.match?(/\A\d+\z/) && cursor.to_i <= tools.length
       offset = cursor.to_i
@@ -135,9 +136,31 @@ class McpController < Api::V1::BaseController
     end
 
     def call_tool(args)
-      raise Api::Input::Invalid, "Unknown tool" unless Mcp::Catalog.all.key?(args["name"])
+      raise Api::Input::Invalid, "Unknown tool" unless Mcp::Catalog.all.key?(args["name"]) || args["name"] == "get_pending_changes"
       raise Api::Input::Invalid, "arguments must be an object" unless args.fetch("arguments", {}).is_a?(Hash)
-      result = Api::DailyOperations.new(access: api_access).call(args["name"], args.fetch("arguments", {}))
+      name, arguments = args["name"], args.fetch("arguments", {})
+      result = if name == "get_pending_changes"
+        pending_changes(arguments)
+      else
+        definition = Mcp::Catalog.fetch(name)
+        read = definition.dig(:annotations, :readOnlyHint)
+        defer_preview = false
+        if read && name.start_with?("preview_")
+          Mcp::Catalog.validate!({ type: "boolean" }, arguments["defer_until_approval"]) if arguments.key?("defer_until_approval")
+          Mcp::Catalog.validate!(Mcp::Catalog::KEY, arguments["idempotency_key"]) if arguments.key?("idempotency_key")
+          defer_preview = arguments["defer_until_approval"] == true
+          arguments = arguments.except("defer_until_approval")
+        end
+        deferred = read && (Mcp::ProposalCatalog.references?(arguments) || defer_preview)
+        if read && !deferred
+          Api::DailyOperations.new(access: api_access).call(name, name.start_with?("preview_") ? arguments.except("idempotency_key") : arguments)
+        else
+          if deferred
+            arguments = arguments.merge("idempotency_key" => arguments.fetch("idempotency_key", SecureRandom.uuid))
+          end
+          Mcp::ChangeSet.stage!(access: api_access, name: name, arguments: arguments, deferred_read: deferred)
+        end
+      end
       encoded = JSON.generate(result)
       if encoded.bytesize > MAX_BYTES
         return tool_error("response_too_large", "Narrow the query or reduce per_page; no records were silently removed")
@@ -149,6 +172,15 @@ class McpController < Api::V1::BaseController
       tool_error("not_found", "Resource not found")
     rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotDestroyed, Api::Input::Invalid, Money::ConversionError => error
       tool_error("validation_failed", error.message)
+    end
+
+    def pending_changes(arguments)
+      Mcp::Catalog.validate!({ type: "object", properties: Mcp::Catalog::PAGE, additionalProperties: false }, arguments.deep_stringify_keys)
+      page, limit = arguments.fetch("page", 1), arguments.fetch("per_page", 25)
+      scope = Mcp::ChangeSet.for_actor(current_resource_owner).order(created_at: :desc)
+      count = scope.count
+      { data: scope.offset((page - 1) * limit).limit(limit).map(&:overview),
+        pagination: { page: page, per_page: limit, total_count: count, next_page: page * limit < count ? page + 1 : nil } }
     end
 
     def tool_error(code, message)

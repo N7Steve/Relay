@@ -1,0 +1,31 @@
+<% content_for :page_title, t("settings.pending_changes.title") %>
+
+<%= render DS::Link.new(text: t(".back"), href: settings_pending_changes_path, icon: "arrow-left", variant: "ghost") %>
+
+<%= settings_section(title: @change_set.credential_name, subtitle: l(@change_set.created_at, format: :long)) do %>
+  <p class="text-primary font-medium"><%= t("settings.pending_changes.statuses.#{@change_set.status}") %></p>
+  <p class="text-secondary text-sm mt-2"><%= t(".progress", applied: @change_set.overview[:applied], total: @change_set.operations.size) %></p>
+<% end %>
+
+<%= render DS::Table.new(rows: @change_set.operation_groups, label: t(".summary")) do |table| %>
+  <% table.with_column(t(".action")) { |group| t("settings.pending_changes.actions.#{group[:action]}") } %>
+  <% table.with_column(t(".area")) { |group| t("settings.pending_changes.domains.#{group[:domain]}") } %>
+  <% table.with_column(t(".operations"), numeric: true) { |group| group[:count].to_s } %>
+<% end %>
+
+<% if @change_set.status == "pending" %>
+  <%= render DS::Alert.new(variant: :warning, message: t(".approval_notice")) %>
+  <div class="flex flex-wrap gap-3">
+    <%= render DS::Button.new(text: t(".approve"), href: approve_settings_pending_change_path(@change_set), method: :post,
+          variant: "primary", params: { review_token: @change_set.review_token }, data: { turbo_confirm: t(".confirm") }) %>
+    <%= render DS::Button.new(text: t(".reject"), href: reject_settings_pending_change_path(@change_set), method: :post,
+          variant: "secondary", params: { review_token: @change_set.review_token }) %>
+  </div>
+<% elsif @change_set.status == "failed" %>
+  <%= render DS::Alert.new(variant: :warning, message: t(".failure_notice")) %>
+  <p class="text-secondary text-sm"><%= @change_set.overview.dig(:failure, "error_message") %></p>
+  <%= render DS::Button.new(text: t(".discard_remaining"), href: reject_settings_pending_change_path(@change_set), method: :post,
+        variant: "secondary", params: { review_token: @change_set.review_token }) %>
+<% elsif @change_set.status.in?(%w[approved applying]) %>
+  <%= render DS::Alert.new(message: t(".processing_notice")) %>
+<% end %>

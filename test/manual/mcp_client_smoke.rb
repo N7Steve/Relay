@@ -9,7 +9,7 @@ require "open3"
 class McpClientSmoke < ActiveSupport::TestCase
   self.use_transactional_tests = false
 
-  test "official TypeScript client connects paginates reads and writes over HTTP" do
+  test "official TypeScript client connects paginates and proposes writes without canonical changes" do
     saved = ENV.to_h.slice("RELAY_MCP_ENABLED", "RELAY_MCP_URL", "RELAY_MCP_API_KEYS_ENABLED", "RELAY_MCP_CLIENT_IDS")
     ENV["RELAY_MCP_ENABLED"] = "true"
     ENV["RELAY_MCP_API_KEYS_ENABLED"] = "true"
@@ -26,10 +26,20 @@ class McpClientSmoke < ActiveSupport::TestCase
       "node", Rails.root.join("test/manual/mcp_client_smoke.mjs").to_s)
     assert status.success?, output
     assert_includes output, "MCP SDK smoke passed"
+    change_set = Mcp::ChangeSet.find(output.match(/CHANGE_SET_ID=([0-9a-f-]+)/)[1])
+    assert_equal "pending", change_set.status
+    assert_equal 3, change_set.operations.size
+    assert_not account.entries.exists?(name: "Official SDK pending approval")
+    change_set.approve!(actor: user, token: change_set.review_token)
+    change_set.apply!
+    assert_equal "applied", change_set.reload.status
+    assert_equal 3, change_set.overview[:applied]
+    assert_not account.entries.exists?(name: "Official SDK approved name")
     probe, probe_status = Open3.capture2e({ "MCP_CHECK_TOKEN" => token.plaintext_token }, "ruby", Rails.root.join("bin/mcp-deployment-check").to_s, ENV["RELAY_MCP_URL"])
     assert probe_status.success?, probe
     assert_includes probe, "MCP deployment checks passed"
   ensure
+    user&.mcp_change_sets&.destroy_all
     key&.destroy!
     application&.destroy!
     %w[RELAY_MCP_ENABLED RELAY_MCP_URL RELAY_MCP_API_KEYS_ENABLED RELAY_MCP_CLIENT_IDS].each { |name| ENV[name] = saved[name] }

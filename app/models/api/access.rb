@@ -18,6 +18,10 @@ class Api::Access
       "credential_type" => @credential&.class&.name, "credential_id" => @credential&.id }
   end
 
+  def credential_label
+    @credential.is_a?(ApiKey) ? @credential.name : @credential&.application&.name || "MCP"
+  end
+
   def self.from_delegation!(authority, family:)
     actor = User.find_by(id: authority.fetch("user_id"), family_id: family.id)
     raise Forbidden, "Delegated actor is unavailable" unless actor && actor.family_id == authority["family_id"]

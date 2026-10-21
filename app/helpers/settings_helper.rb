@@ -32,7 +32,8 @@ module SettingsHelper
       {
         header: t("settings.settings_nav.integrations_section_title"),
         items: [
-          settings_nav_item(:api_keys_label, :settings_api_keys_path, "key", visible: admin_user?)
+          settings_nav_item(:api_keys_label, :settings_api_keys_path, "key", visible: admin_user?),
+          settings_nav_item(:pending_changes_label, :settings_pending_changes_path, "list-checks")
         ]
       },
       {

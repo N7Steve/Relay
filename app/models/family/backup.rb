@@ -27,6 +27,7 @@ class Family::Backup
   ] + PROVIDERS.flat_map { |prefix| [ "#{prefix}Item", "#{prefix}Account" ] }).freeze
 
   EXCLUDED_FAMILY_TABLES = {
+    "mcp_change_sets" => "MCP proposals and approvals are operational state bound to source-instance credentials, not canonical financial data",
     "family_exports" => "Previously generated backups are output artifacts, not live family data",
     "invitations" => "Pending authentication links must be issued by the destination instance",
     "debug_log_entries" => "Operational diagnostics are instance history"

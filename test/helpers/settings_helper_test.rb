@@ -40,7 +40,9 @@ class SettingsHelperTest < ActionView::TestCase
     sections = settings_nav_sections
     labels = sections.flat_map { |section| section[:items].pluck(:label) }
 
-    assert_not_includes sections.pluck(:header), "Integrations"
+    assert_includes sections.pluck(:header), "Integrations"
+    assert_includes labels, "Pending changes"
+    assert_not_includes labels, "API keys"
     assert_not_includes sections.pluck(:header), "System"
     assert_not_includes labels, "Bank sync"
     assert_not_includes labels, "Imports"

@@ -6953,6 +6953,46 @@
       "presentation_only": false
     },
     {
+      "verb": "POST",
+      "path": "/settings/pending_changes/:id/approve(.:format)",
+      "controller": "settings/pending_changes",
+      "action": "approve",
+      "source": "app/controllers/settings/pending_changes_controller.rb",
+      "surface": "web",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "GET",
+      "path": "/settings/pending_changes(.:format)",
+      "controller": "settings/pending_changes",
+      "action": "index",
+      "source": "app/controllers/settings/pending_changes_controller.rb",
+      "surface": "web",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "POST",
+      "path": "/settings/pending_changes/:id/reject(.:format)",
+      "controller": "settings/pending_changes",
+      "action": "reject",
+      "source": "app/controllers/settings/pending_changes_controller.rb",
+      "surface": "web",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
+      "verb": "GET",
+      "path": "/settings/pending_changes/:id(.:format)",
+      "controller": "settings/pending_changes",
+      "action": "show",
+      "source": "app/controllers/settings/pending_changes_controller.rb",
+      "surface": "web",
+      "delivery_phase": 8,
+      "presentation_only": false
+    },
+    {
       "verb": "GET",
       "path": "/settings/preferences(.:format)",
       "controller": "settings/preferences",
@@ -8642,7 +8682,7 @@
       "strong_parameters": []
     },
     "app/controllers/mcp_controller.rb": {
-      "sha256": "151bce3baab8fcd3fbc38e7fd9a9715205a9820d33ddf094d7b297f473665495",
+      "sha256": "3c0475c34435bd7cb0f6205c7d1e7a585d08e92304e60a563eb2629f581b1789",
       "strong_parameters": []
     },
     "app/controllers/mcp_files_controller.rb": {
@@ -8842,6 +8882,10 @@
           "expression": "permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time)"
         }
       ]
+    },
+    "app/controllers/settings/pending_changes_controller.rb": {
+      "sha256": "4ffdf4d7d5d573ea79e548304ec648bffd05fb8e1c40d00c9df59c2f6b74727b",
+      "strong_parameters": []
     },
     "app/controllers/settings/preferences_controller.rb": {
       "sha256": "d52c25f719bb6358a5a936aa44d4a66160bfb7d8e58ddca1588c2dcda05a95aa",

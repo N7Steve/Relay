@@ -1,0 +1,71 @@
+{
+  "es": {
+    "settings": {
+      "pending_changes": {
+        "title": "Cambios pendientes",
+        "description": "Los cambios del MCP se guardan aquí como propuestas. Tus cuentas y movimientos no cambian hasta que los apruebes. Cada credencial tiene una propuesta abierta; recházala para descartarla.",
+        "operation_count": {
+          "one": "1 operación propuesta",
+          "other": "%{count} operaciones propuestas"
+        },
+        "review_failed": "No se pudo aprobar o descartar la propuesta: %{reason}",
+        "statuses": {
+          "pending": "Pendiente de aprobación",
+          "approved": "Aprobada, esperando ejecución",
+          "applying": "Aplicando cambios aprobados",
+          "applied": "Aplicada",
+          "failed": "Detenida por un error",
+          "rejected": "Descartada"
+        },
+        "actions": {
+          "create": "Añadir",
+          "update": "Modificar o ejecutar",
+          "delete": "Eliminar o desconectar",
+          "prepare": "Preparar o previsualizar"
+        },
+        "domains": {
+          "movements": "Movimientos, transferencias e inversiones",
+          "accounts": "Cuentas",
+          "budgets": "Presupuestos",
+          "goals": "Objetivos",
+          "agenda": "Agenda",
+          "organization": "Categorías, comercios, etiquetas y reglas",
+          "files": "Importaciones, documentos y copias",
+          "integrations": "Conexiones y sincronización",
+          "settings": "Perfil, acceso y ajustes"
+        },
+        "index": {
+          "empty_title": "Todavía no hay propuestas",
+          "empty_description": "Cuando un asistente proponga cambios mediante MCP, podrás revisarlos y aprobarlos aquí.",
+          "proposal": "Propuesta",
+          "summary": "Resumen",
+          "status": "Estado"
+        },
+        "show": {
+          "back": "Todas las propuestas",
+          "progress": "%{applied} de %{total} operaciones aplicadas",
+          "summary": "Resumen de cambios por área",
+          "action": "Acción",
+          "area": "Área",
+          "operations": "Operaciones",
+          "approval_notice": "Aprueba cuando el asistente haya terminado. Los recuentos son de operaciones: una puede afectar a varios registros, ambos extremos de una transferencia o iniciar un proceso en segundo plano. Las operaciones aprobadas se ejecutan en orden. Si una falla, se detiene la ejecución; las anteriores completadas siguen aplicadas. No hay historial para deshacer.",
+          "approve": "Aprobar cambios",
+          "reject": "Descartar propuesta",
+          "confirm": "¿Aplicar los cambios de esta propuesta? Puede añadir, modificar o eliminar datos de forma definitiva.",
+          "failure_notice": "La ejecución se ha detenido. Las operaciones completadas siguen aplicadas; la operación fallida y las restantes no se han completado. Los permisos, las previsualizaciones o subidas caducadas, los datos no válidos o los cambios en los registros pueden impedir la ejecución. Pide al asistente una propuesta corregida.",
+          "discard_remaining": "Descartar cambios restantes",
+          "processing_notice": "Se están procesando los cambios aprobados. Recarga esta página para ver el progreso."
+        },
+        "approve": {
+          "success": "Propuesta aprobada. Los cambios se aplicarán en segundo plano."
+        },
+        "reject": {
+          "success": "Cambios pendientes descartados. Las operaciones completadas anteriormente, si las hay, siguen aplicadas."
+        }
+      },
+      "settings_nav": {
+        "pending_changes_label": "Cambios pendientes"
+      }
+    }
+  }
+}

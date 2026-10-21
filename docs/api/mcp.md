@@ -4,6 +4,10 @@ Preparado en fases 2–3 del roadmap. Comparte `Api::DailyOperations`, permisos
 `Api::Access` y operaciones nativas con la API; no llama por HTTP a Relay ni
 recupera el asistente integrado o proveedores retirados.
 
+**Escrituras pendientes:** todas las escrituras MCP se guardan como propuestas,
+sin modificar el dominio hasta aprobarlas en **Ajustes → Cambios pendientes**.
+El MCP no puede aprobarlas. Ver [contrato de propuestas y aprobación](mcp-pending-changes.md).
+
 ## Activación y autenticación
 
 Desactivado por defecto. Variables de instancia:
@@ -127,7 +131,7 @@ la autoridad efectiva. Texto financiero se devuelve como datos, nunca se ejecuta
 
 ## Operaciones compartidas con API
 
-Cada herramienta tiene una ruta fija `POST /api/v1/actions/<nombre>` con cuerpo
+Cada herramienta de dominio tiene una ruta fija `POST /api/v1/actions/<nombre>` con cuerpo
 `{"arguments": {...}}`. Son extensiones compatibles de v1; las rutas anteriores
 conservan su contrato (incluidos los imports CSV de categorías y comercios).
 OpenAPI enumera cada ruta y esquema; no hay endpoint de ejecución arbitraria de
@@ -147,7 +151,9 @@ modelos, SQL o métodos.
 | Integraciones y administración | 60 operaciones de perfil, familia, seguridad, banco, Drive, acceso externo y trabajos; [autoridad y presencia humana](integrations-administration.md) |
 | Cierre de cobertura | 8 consultas/operaciones adicionales de contexto, movimientos, transferencias, valores locales e insights; [auditoría y release](mcp-release.md) |
 
-El catálogo completo contiene 244 herramientas. Los informes reutilizan los
+El catálogo de dominio contiene 244 herramientas. El transporte MCP añade
+`get_pending_changes` para seguimiento, sin ruta REST de aprobación.
+Los informes reutilizan los
 motores financieros de la web; la planificación conserva propiedad, permisos,
 máquinas de estado y gate de preview de Goals.
 Los originales se transfieren por un canal autenticado aparte; el catálogo
@@ -162,11 +168,12 @@ y falla si falta; no inventa paridad. Archivo y activación son valores deseados
 no toggles. Omitir/account_id null en `set_default_account` limpia la preferencia.
 
 Toda escritura exige `idempotency_key` (1–128 caracteres), única para el usuario.
-Reintentos idénticos devuelven el resultado original; payload distinto con la
-misma clave devuelve 422. Resultado y escritura se guardan en una transacción,
-serializada por actor. Las claves se comparten entre API y MCP. Los permisos se
-revisan antes del replay; operaciones sobre un registro ya eliminado pueden
-devolver 404. `get_operation` devuelve únicamente finalización de escritura,
+En MCP, los reintentos idénticos devuelven la misma propuesta; cambiar el payload
+o la credencial con esa clave se rechaza. La ejecución solo empieza tras aprobación
+web y tiene un namespace de idempotencia propio. En REST, resultado y escritura
+siguen guardándose juntos y los reintentos devuelven el resultado original.
+Los permisos se revisan al ejecutar; operaciones sobre un registro eliminado pueden
+fallar. `get_operation` devuelve únicamente finalización de escritura REST,
 sin recuperar datos históricos de cuentas cuyo acceso haya cambiado.
 `get_account_sync` consulta por separado la recalculación asíncrona: completar
 la escritura no implica que haya terminado el job.

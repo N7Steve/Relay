@@ -146,6 +146,10 @@ Rails.application.routes.draw do
     end
     resources :sso_identities, only: :destroy
     resources :api_keys, only: [ :index, :show, :new, :create, :destroy ]
+    resources :pending_changes, only: [ :index, :show ] do
+      post :approve, on: :member
+      post :reject, on: :member
+    end
     resource :guides, only: :show
     get "bank_sync", to: redirect("/settings/providers", status: 301)
     resource :providers, only: %i[show update] do
