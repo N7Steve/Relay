@@ -214,6 +214,30 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "a foreign-account disposal is converted to family currency in the printed report" do
+    travel_to Time.zone.local(2026, 3, 31, 12) do
+      date = Date.new(2026, 3, 1)
+      account = @family.accounts.create!(name: "Brokerage EUR", balance: 10_000,
+        currency: "EUR", accountable: Investment.new)
+      security = Security.create!(ticker: "REPORTFX", name: "Euro Listed")
+      [ date, Date.current ].each do |rate_date|
+        ExchangeRate.create!(from_currency: "EUR", to_currency: "USD", date: rate_date, rate: 1.5)
+      end
+      account.holdings.create!(security: security, date: date, qty: 5, price: 150,
+        amount: 750, currency: "EUR", cost_basis: 100)
+      trade = create_trade(security, account: account, qty: -2, date: date, price: 150, currency: "EUR")
+
+      get print_reports_path
+
+      assert_response :ok
+      gain = controller.view_assigns.fetch("investment_metrics")
+        .fetch(:gains_by_tax_treatment).fetch(:taxable).fetch(:realized_gain_by_trade).fetch(trade.entryable_id)
+      assert_equal "USD", gain.currency.iso_code
+      assert_equal BigDecimal("150"), gain.amount
+      assert_not_equal BigDecimal("100"), gain.amount
+    end
+  end
+
   test "index renders successfully" do
     get reports_path
     assert_response :ok

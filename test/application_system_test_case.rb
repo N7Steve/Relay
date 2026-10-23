@@ -55,6 +55,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
         end
       else
         Selenium::WebDriver::Chrome::Options.new.tap do |chrome_options|
+          chrome_options.binary = ENV["CHROME_BIN"] if ENV["CHROME_BIN"].present?
           chrome_options.add_argument("--window-size=1400,1400")
           chrome_options.add_argument("--headless=new") if headless
           chrome_options.add_argument("--no-sandbox")

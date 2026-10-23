@@ -37,3 +37,21 @@ model/controller tests for real fixtures and API setup.
 
 Use the commands and full [pre-PR checklist](development.md#before-opening-a-pull-request).
 API changes also require the [post-commit consistency checklist](api-endpoint-consistency.md).
+
+## Testing dependency compatibility
+
+The supported runner is Minitest 5.x, currently locked to 5.27.0. Its major-version
+bound is declared directly in `Gemfile`. Keep this bound during unrelated gem
+updates. Minitest 6 extracts `minitest/mock` into another gem and changes runner
+APIs and assertions; installing that extracted gem alone does not establish
+compatibility with Rails parallelization and the rest of the suite. Migrate the
+runner, mocks, assertions and integrations together, then validate the full
+behavioral and system suites before lifting the bound. Mocha remains the
+preferred mocking library; existing Minitest mocks must continue working.
+
+For calendar-sensitive tests, provide an explicit `as_of` or use `travel_to`
+inside the test, create dated FX rows for every conversion the request performs,
+and include month boundaries and the empty-history case. Forecast training uses
+completed family months; an entry before a cutoff can still be in its incomplete
+month. Do not freeze the whole suite globally: relative fixtures and tests with
+their own time travel have different contracts.

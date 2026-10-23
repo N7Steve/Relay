@@ -2,16 +2,32 @@ name: CI
 
 on:
   workflow_call:
-    inputs:
-      require_js_dependency_audit:
-        description: "Fail the workflow when the importmap JavaScript dependency audit cannot complete"
-        required: false
-        type: boolean
-        default: false
+
+permissions:
+  contents: read
+
+env:
+  BUNDLE_FROZEN: "true"
+  TZ: UTC
 
 jobs:
+  lint_workflows:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate workflows and shell scripts
+        run: >-
+          docker run --rm --volume "$GITHUB_WORKSPACE:/repo:ro" --workdir /repo
+          rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9
+          -color
+
   scan_ruby:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -25,11 +41,14 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
-      - name: Scan for security vulnerabilities in Ruby dependencies
+      - name: Scan Rails source for security vulnerabilities
         run: bin/brakeman --no-pager
 
+      - name: Audit locked Ruby dependencies
+        run: bundle exec bundler-audit check --update
+
   scan_js:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -44,28 +63,10 @@ jobs:
           bundler-cache: true
 
       - name: Scan for security vulnerabilities in JavaScript dependencies
-        continue-on-error: ${{ !inputs.require_js_dependency_audit }}
-        env:
-          REQUIRE_JS_DEPENDENCY_AUDIT: ${{ inputs.require_js_dependency_audit }}
-        run: |
-          attempts=3
-          if [ "$REQUIRE_JS_DEPENDENCY_AUDIT" != "true" ]; then
-            attempts=1
-          fi
-
-          for attempt in $(seq 1 "$attempts"); do
-            echo "Running importmap audit, attempt ${attempt}/${attempts}"
-            bin/importmap audit && exit 0
-
-            if [ "$attempt" = "$attempts" ]; then
-              exit 1
-            fi
-
-            sleep $((attempt * 10))
-          done
+        run: bin/importmap audit
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -82,8 +83,11 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+      - name: Lint ERB templates
+        run: bundle exec erb_lint --lint-all
+
   lint_js:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -98,7 +102,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci --no-fund
         shell: bash
 
       - name: Lint/Format js code
@@ -107,8 +111,14 @@ jobs:
       - name: Verify generated web and mobile design tokens
         run: npm run tokens:check
 
+      - name: Test JavaScript utilities
+        run: node --test test/javascript/*.mjs test/javascript/utils/*.mjs
+
+      - name: Audit npm dependencies
+        run: npm audit
+
   test_unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     env:
@@ -120,7 +130,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: postgres:16-bookworm
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -129,7 +139,7 @@ jobs:
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
       redis:
-        image: redis
+        image: redis:7.4-bookworm
         ports:
           - 6379:6379
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -155,14 +165,22 @@ jobs:
           bin/rails db:schema:load
           bin/rails db:seed
 
+      - name: Compile assets
+        run: bin/rails assets:precompile
+
       - name: Unit and integration tests
         run: bin/rails test
 
   test_system:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     env:
+      # Chrome for Testing and its matching driver, independent of runner updates.
+      SE_BROWSER_VERSION: "156.0.8078.47"
+      SE_FORCE_BROWSER_DOWNLOAD: "true"
+      SE_SKIP_DRIVER_IN_PATH: "true"
+      SE_AVOID_STATS: "true"
       PLAID_CLIENT_ID: foo
       PLAID_SECRET: bar
       DATABASE_URL: postgres://postgres:postgres@localhost:5432 # pipelock:ignore
@@ -171,7 +189,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: postgres:16-bookworm
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -180,7 +198,7 @@ jobs:
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
       redis:
-        image: redis
+        image: redis:7.4-bookworm
         ports:
           - 6379:6379
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -189,12 +207,7 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y \
-            google-chrome-stable curl libvips postgresql-client libpq-dev
-          # The runner image ships a chromedriver that lags google-chrome-stable.
-          # Drop it so Selenium Manager resolves a driver matching the Chrome we
-          # just installed, instead of the stale one in PATH.
-          sudo rm -f /usr/bin/chromedriver
+          sudo apt-get install --no-install-recommends -y curl libvips postgresql-client libpq-dev
 
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -213,6 +226,12 @@ jobs:
           bin/rails db:schema:load
           bin/rails db:seed
 
+      - name: Compile assets
+        run: bin/rails assets:precompile
+
+      - name: Prepare matching Chrome and ChromeDriver
+        run: bundle exec ruby bin/prepare-test-browser
+
       - name: System tests
         run: DISABLE_PARALLELIZATION=true bin/rails test:system
 
@@ -223,3 +242,16 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+          retention-days: 7
+
+  build_container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build production image without publishing
+        run: docker build --build-arg BUILD_COMMIT_SHA="$GITHUB_SHA" --tag relay:ci .

@@ -110,6 +110,9 @@ GEM
     brakeman (7.1.2)
       racc
     builder (3.3.0)
+    bundler-audit (0.9.3)
+      bundler (>= 1.2.0)
+      thor (~> 1.0)
     capybara (3.40.0)
       addressable
       matrix
@@ -138,8 +141,9 @@ GEM
     cronex (0.15.0)
       tzinfo
       unicode (>= 0.4.4.5)
-    css_parser (3.0.0)
+    css_parser (3.3.0)
       addressable
+      base64
       ssrf_filter (~> 1.5)
     csv (3.3.5)
     date (3.5.1)
@@ -720,6 +724,7 @@ DEPENDENCIES
   bcrypt (~> 3.1)
   bootsnap
   brakeman
+  bundler-audit (~> 0.9.3)
   capybara
   climate_control
   connection_pool (~> 2.5)
@@ -746,6 +751,7 @@ DEPENDENCIES
   letter_opener
   lookbook (= 2.3.11)
   lucide-rails
+  minitest (~> 5.27)
   mocha
   octokit
   omniauth (~> 2.1)

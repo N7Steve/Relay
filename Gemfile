@@ -86,6 +86,7 @@ gem "after_commit_everywhere", "~> 1.0"
 group :development, :test do
   gem "debug", platforms: %i[mri mswin mswin64 mingw x64_mingw]
   gem "brakeman", require: false
+  gem "bundler-audit", "~> 0.9.3", require: false
   gem "rubocop-rails-omakase", require: false
   gem "i18n-tasks"
   gem "erb_lint"
@@ -113,6 +114,9 @@ group :development, :test do
 end
 
 group :test do
+  # Minitest 6 removes mock and changes the Rails runner API. Upgrade the
+  # runner and mocking integrations together after validating the full suite.
+  gem "minitest", "~> 5.27"
   gem "capybara"
   gem "selenium-webdriver"
   gem "mocha"

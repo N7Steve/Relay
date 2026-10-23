@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+require "bundler/setup"
+require "selenium-webdriver"
+
+environment_file = ENV.fetch("GITHUB_ENV")
+paths = Selenium::WebDriver::SeleniumManager.binary_paths("--browser", "chrome")
+browser = paths.fetch("browser_path")
+driver = paths.fetch("driver_path")
+
+system(browser, "--version", exception: true)
+system(driver, "--version", exception: true)
+
+# Resolve downloads before running tests. Explicit paths keep subsequent
+# sessions independent of network availability and of browsers in PATH.
+File.open(environment_file, "a") do |file|
+  file.puts "CHROME_BIN=#{browser}"
+  file.puts "SE_CHROMEDRIVER=#{driver}"
+end

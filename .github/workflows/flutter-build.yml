@@ -14,7 +14,7 @@ permissions:
 jobs:
   build-android:
     name: Build Android APK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
       has_app_release_aab: ${{ steps.check_secrets.outputs.has_keystore }}
@@ -40,7 +40,7 @@ jobs:
 
       - name: Get dependencies
         working-directory: mobile
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Copy Relay icons from public/
         run: cp public/android-chrome-512x512.png mobile/assets/icon/app_icon.png
@@ -59,12 +59,21 @@ jobs:
 
       - name: Check if keystore secrets exist
         id: check_secrets
+        env:
+          # Signing is restricted to a manual run of the trusted main branch.
+          KEYSTORE_BASE64: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && secrets.KEYSTORE_BASE64 || '' }}
+          KEY_STORE_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && secrets.KEY_STORE_PASSWORD || '' }}
+          KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && secrets.KEY_PASSWORD || '' }}
+          KEY_ALIAS: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && secrets.KEY_ALIAS || '' }}
         run: |
-          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "has_keystore=true" >> $GITHUB_OUTPUT
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            test -n "$KEY_STORE_PASSWORD"
+            test -n "$KEY_PASSWORD"
+            test -n "$KEY_ALIAS"
+            echo "has_keystore=true" >> "$GITHUB_OUTPUT"
             echo "✓ Keystore secrets found, will build signed APK"
           else
-            echo "has_keystore=false" >> $GITHUB_OUTPUT
+            echo "has_keystore=false" >> "$GITHUB_OUTPUT"
             echo "⚠ No keystore secrets, will build unsigned debug APK"
           fi
 
@@ -77,10 +86,12 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           echo "$KEYSTORE_BASE64" | base64 -d > mobile/android/app/upload-keystore.jks
-          echo "storePassword=$KEY_STORE_PASSWORD" > mobile/android/key.properties
-          echo "keyPassword=$KEY_PASSWORD" >> mobile/android/key.properties
-          echo "keyAlias=$KEY_ALIAS" >> mobile/android/key.properties
-          echo "storeFile=upload-keystore.jks" >> mobile/android/key.properties
+          {
+            echo "storePassword=$KEY_STORE_PASSWORD"
+            echo "keyPassword=$KEY_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "storeFile=upload-keystore.jks"
+          } > mobile/android/key.properties
           echo "✓ Keystore configured successfully"
 
       - name: Build APK (Release)
@@ -102,7 +113,7 @@ jobs:
             mobile/build/app/outputs/flutter-apk/app-release.apk
             mobile/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 30
-          if-no-files-found: ignore
+          if-no-files-found: error
 
       - name: Build App Bundle (Release)
         if: steps.check_secrets.outputs.has_keystore == 'true'
@@ -116,3 +127,8 @@ jobs:
           name: app-release-aab
           path: mobile/build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
+          if-no-files-found: error
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f mobile/android/key.properties mobile/android/app/upload-keystore.jks

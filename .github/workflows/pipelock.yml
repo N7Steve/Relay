@@ -1,15 +1,23 @@
 name: Pipelock Security Scan
 
 on:
+  push:
+    branches: [main]
+  workflow_dispatch:
   pull_request:
     branches: [main]
 
 permissions:
   contents: read
 
+concurrency:
+  group: pipelock-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   security-scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -19,7 +27,7 @@ jobs:
       - name: Pipelock Scan
         uses: luckyPipewrench/pipelock@3e868ac5d5b62d3a2790958542171143af8a0e38 # v3.6.0
         with:
-          version: '3.4.0'
+          version: '3.6.0'
           scan-diff: 'true'
           fail-on-findings: 'true'
           test-vectors: 'false'

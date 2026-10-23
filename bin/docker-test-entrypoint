@@ -53,6 +53,7 @@ when "checks"
     [ "bundle", "exec", "ruby", "bin/rubocop" ],
     [ "bundle", "exec", "erb_lint", "--lint-all" ],
     [ "bundle", "exec", "ruby", "bin/brakeman", "--no-pager" ],
+    [ "bundle", "exec", "bundler-audit", "check", "--update" ],
     [ "npm", "run", "lint" ]
   ]
   failed = commands.filter_map do |command|

@@ -60,6 +60,8 @@ PR creation; the full suite is also required to be green before pushing.
 5. `npm run lint` — keep Biome clean. Use `npm run format:check` for formatting
    changes and `npm run format` when corrections are needed.
 6. `bin/brakeman --no-pager` — security analysis for every PR.
+7. `bundle exec bundler-audit check --update` — audit the locked Ruby dependencies
+   against current advisories; an update or scan failure must fail the check.
 
 Inspect autocorrections before committing; keep the diff focused. Record checks
 and any failures accurately. Focused tests help during development but do not

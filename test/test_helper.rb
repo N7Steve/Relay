@@ -5,9 +5,9 @@ if ENV["COVERAGE"] == "true"
   end
 end
 
-require_relative "../config/environment"
-
 ENV["RAILS_ENV"] ||= "test"
+
+require_relative "../config/environment"
 
 # Set Plaid to sandbox mode for tests
 ENV["PLAID_ENV"] = "sandbox"

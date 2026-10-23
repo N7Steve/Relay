@@ -10,7 +10,7 @@ class ImportsTest < ApplicationSystemTestCase
   test "Relay backup import" do
     visit new_import_path(type: "RelayImport")
     assert_selector "input[name='import[type]'][value='RelayImport']", visible: :all
-    attach_file "import[import_file]", file_fixture("imports/relay.ndjson"), make_visible: true
+    attach_backup_file file_fixture("imports/relay.ndjson")
 
     assert_selector "h1", text: "Confirm your import data"
     click_on "Publish import"
@@ -29,7 +29,7 @@ class ImportsTest < ApplicationSystemTestCase
       file.write("\n" + { type: "RecurringTransaction", data: { id: "discarded-series" } }.to_json)
       file.flush
       visit new_import_path(type: "RelayImport")
-      attach_file "import[import_file]", file.path, make_visible: true
+      attach_backup_file file.path
       assert_text "Data from retired features will be discarded"
       page.save_screenshot(Rails.root.join("tmp/screenshots/phase10-discard-warning.png"))
       click_on "Publish import"
@@ -54,7 +54,7 @@ class ImportsTest < ApplicationSystemTestCase
       file.flush
 
       visit new_import_path(type: "RelayImport")
-      attach_file "import[import_file]", file.path, make_visible: true
+      attach_backup_file file.path
       assert_text "Full backup restoration"
       assert_text "This cannot be undone from Imports."
       page.save_screenshot(Rails.root.join("tmp/screenshots/complete-backup-confirmation.png"))
@@ -321,4 +321,15 @@ class ImportsTest < ApplicationSystemTestCase
 
     click_on "Back to dashboard"
   end
+
+  private
+    def attach_backup_file(path)
+      # make_visible changes the input only. It cannot open an ancestor dialog
+      # before Stimulus connects or reveal an inactive tab panel.
+      within "dialog[open]" do
+        within "[role='tabpanel'][data-id='financial_tools']" do
+          attach_file "import[import_file]", path, make_visible: true
+        end
+      end
+    end
 end
