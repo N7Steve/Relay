@@ -1,4 +1,10 @@
 EnableDefaultLinters: true
+# Bundler installs inside the checkout on GitHub Actions, but outside it in
+# Docker. Lint maintained templates in both environments, not dependencies.
+exclude:
+  - vendor/**/*
+  - node_modules/**/*
+  - tmp/**/*
 linters:
   Rubocop:
     enabled: true
