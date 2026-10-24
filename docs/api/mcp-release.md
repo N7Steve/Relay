@@ -1,5 +1,7 @@
 # MCP de Relay: cierre de código y verificación de despliegue
 
+Para el proveedor opcional Authentik, seguir además la [guía y checklist OAuth](mcp-authentik.md).
+
 La cobertura de código/API/MCP y la verificación de una instalación son resultados
 distintos. Las pruebas locales no certifican el TLS, proxy, clientes configurados
 o exposición de red de TrueNAS. Esta entrega prepara el código y el procedimiento;

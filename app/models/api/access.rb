@@ -14,8 +14,10 @@ class Api::Access
   end
 
   def delegated_authority
-    { "user_id" => user.id, "family_id" => user.family_id,
+    authority = { "user_id" => user.id, "family_id" => user.family_id,
       "credential_type" => @credential&.class&.name, "credential_id" => @credential&.id }
+    authority["authentik"] = @credential.claims if @credential.is_a?(Mcp::AuthentikCredential)
+    authority
   end
 
   def credential_label
@@ -26,6 +28,12 @@ class Api::Access
     actor = User.find_by(id: authority.fetch("user_id"), family_id: family.id)
     raise Forbidden, "Delegated actor is unavailable" unless actor && actor.family_id == authority["family_id"]
     credential = case authority["credential_type"]
+    when "Mcp::AuthentikCredential"
+      begin
+        Mcp::AuthentikCredential.from_delegation!(authority, actor: actor)
+      rescue Mcp::Authentik::Invalid
+        nil
+      end
     when "ApiKey" then actor.api_keys.active.find_by(id: authority["credential_id"])
     when "Doorkeeper::AccessToken"
       token = Doorkeeper::AccessToken.find_by(id: authority["credential_id"], resource_owner_id: actor.id)

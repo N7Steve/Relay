@@ -197,6 +197,11 @@ in Settings → Pending changes queues `Mcp::ApplyChangeSetJob`; no MCP operatio
 can approve itself. Domain operations run later with fresh credential and account
 authorization. REST keeps immediate writes. See [pending change contract](../api/mcp-pending-changes.md)
 for dependent references, review digests, per-operation commits and stopped batches.
+MCP optionally accepts Authentik JWTs through an explicit issuer/subject-to-user
+binding and a local scope ceiling, without web SSO/JIT or role mappings. Delegated
+proposals retain verified authority and recheck its expiry and current binding.
+See [Authentik OAuth](../api/mcp-authentik.md) for the opt-in configuration and
+the explicit Client-ID-audience compatibility profile's RFC 8707 limitation.
 See the [MCP contract](../api/mcp.md), [roadmap](../research/relay-api-mcp-roadmap.md) and
 [access matrix](../research/relay-api-capability-matrix.md). Account token scopes
 do not override ownership/share permissions. Family-wide API imports, provider

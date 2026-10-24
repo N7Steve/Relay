@@ -1,5 +1,8 @@
 # Propuestas MCP y aprobación humana
 
+La [opción Authentik](mcp-authentik.md) conserva este flujo y revalida el vínculo
+local, scopes y expiración de la autoridad original al aprobar y aplicar.
+
 Las escrituras del MCP de Relay son **propuestas pendientes**. No se ejecuta el
 dominio, no se modifica el registro de idempotencia de ejecución y no se lanzan
 jobs financieros o externos hasta que la persona aprueba desde **Ajustes →

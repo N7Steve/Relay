@@ -92,6 +92,7 @@ class McpController < Api::V1::BaseController
       return false if request.authorization.blank?
       raw = request.authorization.match(/\ABearer ([^\s]+)\z/i)&.captures&.first
       token = Doorkeeper::AccessToken.by_token(raw)
+      return authenticate_authentik(raw) if token.nil? && raw&.include?(".")
       unless token&.accessible? && token.mcp_resource == Mcp::Configuration.resource &&
           Mcp::Configuration.client_allowed?(token.application&.uid) &&
           (token.scopes.to_a & %w[read read_write]).any?
@@ -107,6 +108,27 @@ class McpController < Api::V1::BaseController
       @authentication_method = :oauth
       setup_current_context_for_api
       true
+    end
+
+    def authenticate_authentik(raw)
+      raise Mcp::Authentik::Invalid unless Mcp::Authentik.enabled?
+      @authentik_credential = Mcp::AuthentikVerifier.instance.verify(raw)
+      @current_user = @authentik_credential.user
+      @authentication_method = :authentik
+      setup_current_context_for_api
+      true
+    rescue Mcp::Authentik::Invalid
+      render_unauthorized
+      false
+    end
+
+    def current_scopes
+      @authentication_method == :authentik ? @authentik_credential.scopes : super
+    end
+
+    def api_access
+      return super unless @authentication_method == :authentik
+      @api_access ||= Api::Access.new(user: current_resource_owner, scopes: current_scopes, credential: @authentik_credential)
     end
 
     def authenticate_api_key

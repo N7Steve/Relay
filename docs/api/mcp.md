@@ -1,5 +1,8 @@
 # Relay MCP y operaciones cotidianas
 
+La autenticación MCP adicional con Authentik (desactivada por defecto), su
+vinculación local y el despliegue manual se describen en [OAuth Authentik](mcp-authentik.md).
+
 Preparado en fases 2–3 del roadmap. Comparte `Api::DailyOperations`, permisos
 `Api::Access` y operaciones nativas con la API; no llama por HTTP a Relay ni
 recupera el asistente integrado o proveedores retirados.
