@@ -10,7 +10,7 @@ class McpAuthentikTest < ActionDispatch::IntegrationTest
 
   test "MCP HTTP discovery initialization notification catalog and authorized account reads" do
     get "/.well-known/oauth-protected-resource/mcp"
-    assert_equal [ Mcp::Authentik.issuer, "https://relay.example" ], response.parsed_body["authorization_servers"]
+    assert_equal [ Mcp::Authentik.issuer ], response.parsed_body["authorization_servers"]
     get "/.well-known/oauth-authorization-server"
     assert_equal "https://relay.example", response.parsed_body["issuer"]
     rpc("initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "OAuth MCP", version: "1" } })

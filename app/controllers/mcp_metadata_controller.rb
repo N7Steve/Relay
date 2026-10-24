@@ -7,7 +7,7 @@ class McpMetadataController < ActionController::Base
     Mcp::Authentik.validate! if Mcp::Authentik.enabled?
     render json: {
       resource: Mcp::Configuration.resource,
-      authorization_servers: Mcp::Authentik.enabled? ? [ Mcp::Authentik.issuer, issuer ] : [ issuer ],
+      authorization_servers: Mcp::Authentik.enabled? ? [ Mcp::Authentik.issuer ] : [ issuer ],
       scopes_supported: %w[read read_write],
       bearer_methods_supported: [ "header" ]
     }

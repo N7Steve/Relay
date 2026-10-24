@@ -175,11 +175,23 @@ modificado producción. Sigue aplicando el [runbook TrueNAS](../hosting/truenas.
 ## Discovery y conexión ChatGPT
 
 El recurso `/.well-known/oauth-protected-resource/mcp` anuncia la URL canónica y,
-cuando se activa Authentik, los issuers `[Authentik, Relay]`. Authentik va primero
-para conexiones nuevas; Relay conserva clientes nativos. El discovery
+cuando se activa Authentik, únicamente su issuer en `authorization_servers`.
+Anunciar también Relay permitía a ChatGPT elegir `/oauth/authorize` con las
+credenciales Authentik y recibir `invalid_target`. Con la opción desactivada o
+sin configurar se anuncia únicamente el issuer Relay, como antes. El discovery
 `/.well-known/oauth-authorization-server` de Relay sigue describiendo Doorkeeper.
 ChatGPT debe obtener el discovery OIDC del issuer Authentik, sin proxy OAuth.
 Los 401 incluyen `WWW-Authenticate: Bearer resource_metadata="https://relay.n7core.com/.well-known/oauth-protected-resource/mcp"`.
+
+Este cambio selecciona el emisor anunciado, no los tokens admitidos: los tokens
+MCP Doorkeeper existentes siguen siendo válidos y sus endpoints de autorización,
+canje, renovación y revocación permanecen disponibles. REST y Android conservan
+el OAuth nativo. Un cliente MCP que vuelva a descubrir el emisor mientras Authentik
+esté activado encontrará solo Authentik y puede necesitar una nueva vinculación
+con sus credenciales dedicadas. Los clientes MCP nativos deben conservar su
+configuración explícita del issuer Relay si necesitan seguir iniciando el flujo
+Doorkeeper. Tras actualizar, revisar la configuración OAuth guardada en ChatGPT y,
+si conserva el issuer anterior, volver a vincular la conexión usando Authentik.
 
 1. ChatGPT web → Plugins/Apps/conexiones MCP, según versión → **Add custom MCP
    server**. URL `https://relay.n7core.com/mcp`, autenticación OAuth.
@@ -194,8 +206,8 @@ Los 401 incluyen `WWW-Authenticate: Bearer resource_metadata="https://relay.n7co
    y consultas pequeñas. Esperar al vencimiento y verificar refresh real sin
    contraseña, conservando cliente, issuer, subject y scopes. Sin `offline_access`
    puede requerirse una nueva autorización.
-5. Si selecciona issuer incorrecto, exige resource binding que el proveedor no
-   garantiza o rechaza dos issuers, registrar incompatibilidad y detener la
+5. Si selecciona issuer incorrecto o exige resource binding que el proveedor no
+   garantiza, registrar incompatibilidad y detener la
    aceptación. No hacer fallback de audiencia, reescribir claims, eliminar OAuth
    ni redirigir los endpoints nativos de Relay hacia Authentik.
 
@@ -259,9 +271,10 @@ temporal y JWT sintético. No realiza login OAuth real ni certifica producción.
 
 | Comprobación | Resultado |
 | --- | --- |
-| Suite Rails completa sobre el código final | 5.680 pruebas, 26.564 aserciones, 0 fallos, 0 errores, 38 omisiones condicionadas por el entorno; ninguna omisión nueva en estos tests. |
-| Tests Authentik y smoke HTTP con SDK oficial 1.32.2 | 18 pruebas, 167 aserciones, 0 fallos, 0 errores, 0 omisiones. Incluye smoke nativo Doorkeeper y Authentik con propuestas/aprobación. |
-| RuboCop | 1.849 archivos sin infracciones; comprobación adicional de los últimos ajustes del verificador/tests también correcta. |
+| Suite Rails completa tras la corrección del discovery | 5.683 pruebas, 26.589 aserciones, 0 fallos, 0 errores, 38 omisiones condicionadas por el entorno; ninguna omisión nueva en estos tests. |
+| Regresiones específicas de discovery, OAuth y propuestas | 35 pruebas, 744 aserciones, 0 fallos, 0 errores, 0 omisiones. |
+| Tests Authentik y smoke HTTP con SDK oficial 1.32.2 (validación inicial) | 18 pruebas, 167 aserciones, 0 fallos, 0 errores, 0 omisiones. Incluye smoke nativo Doorkeeper y Authentik con propuestas/aprobación. |
+| RuboCop | Los 3 archivos Ruby modificados por la corrección del discovery, sin infracciones. La revisión completa anterior de 1.849 archivos también fue correcta. |
 | Brakeman | 0 errores, 0 avisos activos; se conservan las 5 exclusiones existentes. |
 | Assets | Compilación correcta dentro de las ejecuciones de pruebas. |
 | Diff | `git diff --check` correcto. |
