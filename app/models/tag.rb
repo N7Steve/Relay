@@ -12,11 +12,14 @@ class Tag < ApplicationRecord
   UNTAGGED_FILTER_VALUE = "__untagged__"
 
   belongs_to :family
+  belongs_to :user, optional: true
+
+  validate :owner_belongs_to_family
   has_many :taggings, dependent: :destroy
   has_many :transactions, through: :taggings, source: :taggable, source_type: "Transaction"
   has_many :import_mappings, as: :mappable, dependent: :destroy, class_name: "Import::Mapping"
 
-  validates :name, presence: true, uniqueness: { scope: :family }
+  validates :name, presence: true, uniqueness: { scope: [ :family_id, :user_id ] }
   validates :name, exclusion: { in: [ UNTAGGED_FILTER_VALUE ] }
   validates :color, format: { with: /\A#[0-9A-Fa-f]{6}\z/ }, allow_nil: true
 
@@ -40,9 +43,17 @@ class Tag < ApplicationRecord
     persisted? ? name : UNTAGGED_FILTER_VALUE
   end
 
+  def owner_belongs_to_family
+    errors.add(:user, :invalid) if user && user.family_id != family_id
+  end
+
   def replace_and_destroy!(replacement)
     transaction do
       raise ActiveRecord::RecordInvalid, "Replacement tag cannot be the same as the tag being destroyed" if replacement == self
+
+      if replacement && (replacement.family_id != family_id || (replacement.user_id || family.personal_tag_owner&.id) != (user_id || family.personal_tag_owner&.id))
+        raise ActiveRecord::RecordInvalid, self
+      end
 
       if replacement
         taggings.update_all tag_id: replacement.id

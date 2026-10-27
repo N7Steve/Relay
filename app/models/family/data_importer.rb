@@ -458,7 +458,9 @@ class Family::DataImporter
         require_source_id!("Tag", old_id)
 
         tag = mapped_record(:tags, old_id, @family.tags, record_type: "Tag")
-        tag ||= @family.tags.find_by(name: data["name"])
+        owner = @import&.tag_owner || @family.personal_tag_owner
+        tag_scope = owner ? @family.personal_tags_for(owner) : @family.tags.where(user_id: nil)
+        tag ||= tag_scope.find_by(name: data["name"])
         created = tag.blank?
         tag ||= @family.tags.build
         color = data["color"] || tag.color
@@ -467,6 +469,7 @@ class Family::DataImporter
 
         tag.assign_attributes(
           name: data["name"],
+          user: owner,
           color: color
         )
         tag.save!
@@ -1201,8 +1204,13 @@ class Family::DataImporter
       @rule_merchants_by_name ||= @family.merchants.index_by(&:name)
     end
 
+    def legacy_import_tags
+      owner = @import&.tag_owner || @family.personal_tag_owner
+      owner ? @family.personal_tags_for(owner) : @family.tags.where(user_id: nil)
+    end
+
     def rule_tags_by_name
-      @rule_tags_by_name ||= @family.tags.index_by(&:name)
+      @rule_tags_by_name ||= legacy_import_tags.index_by(&:name)
     end
 
     def find_or_create_rule_category(name)
@@ -1219,7 +1227,7 @@ class Family::DataImporter
     end
 
     def find_or_create_rule_tag(name)
-      rule_tags_by_name[name] ||= @family.tags.create!(name: name)
+      rule_tags_by_name[name] ||= legacy_import_tags.create!(name: name, user: @import&.tag_owner || @family.personal_tag_owner)
     end
 
     def rule_operand_value(data)

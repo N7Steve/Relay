@@ -17,11 +17,12 @@ class Transaction::Search
   # Archived and outside-finances accounts are opt-in on the transaction list.
   attribute :default_accounts_only, :boolean, default: true
 
-  attr_reader :family, :accessible_account_ids
+  attr_reader :family, :accessible_account_ids, :user
 
   # Initialize a transaction search with optional filters and accessible accounts
-  def initialize(family, filters: {}, accessible_account_ids: nil)
+  def initialize(family, filters: {}, accessible_account_ids: nil, user: nil)
     @family = family
+    @user = user
     @accessible_account_ids = accessible_account_ids
     super(filters)
   end
@@ -108,6 +109,7 @@ class Transaction::Search
   def cache_key_base
     [
       family.id,
+      user&.id,
       Digest::SHA256.hexdigest(attributes.sort.to_h.to_json), # cached by filters
       family.entries_cache_version,
       family.currency, ExchangeRate.maximum(:updated_at)&.to_f, ExchangeRate.count,
@@ -229,6 +231,8 @@ class Transaction::Search
 
       include_untagged = tags.include?(Tag::UNTAGGED_FILTER_VALUE)
       real_tags = tags - [ Tag::UNTAGGED_FILTER_VALUE ]
+      catalog = user ? family.personal_tags_for(user) : family.tags
+      matching_tag_ids = catalog.where(name: real_tags).select(:id)
 
       # Use a subquery instead of an INNER/LEFT JOIN: `.joins(:tags)` fans out to
       # one row per matching tag, so a transaction tagged with two of the
@@ -241,9 +245,9 @@ class Transaction::Search
       # inherits that scoping too.
       # See https://github.com/we-promise/sure/issues/3174
       matching_ids = if include_untagged
-        query.left_joins(:tags).where("tags.name IN (?) OR tags.id IS NULL", real_tags).distinct.select(:id)
+        query.left_joins(:tags).where("tags.id IN (?) OR tags.id IS NULL", matching_tag_ids).distinct.select(:id)
       else
-        query.joins(:tags).where(tags: { name: real_tags }).distinct.select(:id)
+        query.joins(:tags).where(tags: { id: matching_tag_ids }).distinct.select(:id)
       end
       query.where(id: matching_ids)
     end

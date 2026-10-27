@@ -34,19 +34,20 @@ RSpec.describe 'API V1 Tags', type: :request do
   let(:'X-Api-Key') { api_key.plain_key }
 
   let!(:essential_tag) do
-    family.tags.create!(name: 'Essential', color: '#22c55e')
+    family.tags.create!(user: user, name: 'Essential', color: '#22c55e')
   end
 
   let!(:discretionary_tag) do
-    family.tags.create!(name: 'Discretionary', color: '#f97316')
+    family.tags.create!(user: user, name: 'Discretionary', color: '#f97316')
   end
 
   let!(:recurring_tag) do
-    family.tags.create!(name: 'Recurring', color: '#3b82f6')
+    family.tags.create!(user: user, name: 'Recurring', color: '#3b82f6')
   end
 
   path '/api/v1/tags' do
-    get 'List tags' do
+    get 'List personal tags' do
+      description 'Lists only the authenticated user\'s personal tag catalog. Tags attached by others remain visible on shared transactions.'
       tags 'Tags'
       security [ { apiKeyAuth: [] } ]
       produces 'application/json'
@@ -59,6 +60,7 @@ RSpec.describe 'API V1 Tags', type: :request do
     end
 
     post 'Create tag' do
+      description 'Creates a personal tag. Names are unique per user within the family.'
       tags 'Tags'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'

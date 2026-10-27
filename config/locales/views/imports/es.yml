@@ -420,6 +420,12 @@ es:
       publish_import: Publicar importación
       back_to_imports: Volver a importaciones
     errors:
+      actor_unavailable: "El usuario que inició esta importación ya no está disponible."
+      member_type_unavailable: "Este tipo de importación no está disponible para los miembros."
+      tag_unavailable: "Una etiqueta de la importación no está disponible para este usuario."
+      account_not_owned: "Los miembros solo pueden importar en cuentas de su propiedad."
+      member_global_creation: "Los miembros no pueden crear categorías ni cuentas mediante importaciones."
+      member_category_creation: "Los miembros no pueden crear categorías globales."
       custom_column_requires_inflow: Las importaciones de columnas personalizadas requieren que se seleccione una columna de entrada de fondos (inflow)
     document_types:
       bank_statement: Extracto bancario

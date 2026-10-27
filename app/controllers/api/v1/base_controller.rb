@@ -237,7 +237,7 @@ class Api::V1::BaseController < ApplicationController
 
     def validate_api_references!(attributes)
       family = current_resource_owner.family
-      { category_id: family.categories, merchant_id: family.available_merchants_for(current_resource_owner), tag_ids: family.tags }.each do |key, scope|
+      { category_id: family.categories, merchant_id: family.available_merchants_for(current_resource_owner), tag_ids: family.personal_tags_for(current_resource_owner) }.each do |key, scope|
         next unless attributes.key?(key)
 
         ids = Array(attributes[key]).compact_blank.map(&:to_s).uniq

@@ -5,6 +5,17 @@ class TransactionCategorySelectTest < ApplicationSystemTestCase
     sign_in @user = users(:family_admin)
   end
 
+  test "members can choose global categories but cannot create one inline" do
+    sign_in users(:family_member)
+    visit new_transaction_url
+    within "[data-controller='category-select']" do
+      find("button", match: :first).click
+      assert_text categories(:food_and_drink).name
+      fill_in "Search categories", with: "Member cannot create this category"
+      assert_no_selector "[data-category-select-target='createForm']", visible: true
+    end
+  end
+
   test "can create a category from the transaction form" do
     visit new_transaction_url
 

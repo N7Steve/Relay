@@ -1,11 +1,14 @@
 one:
   name: Trips
   family: dylan_family
+  user: family_admin
 
 two:
   name: Emergency fund
   family: dylan_family
+  user: family_admin
 
 three:
   name: Test
   family: dylan_family
+  user: family_admin

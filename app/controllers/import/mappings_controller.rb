@@ -18,26 +18,25 @@ class Import::MappingsController < ApplicationController
     end
 
     def set_import
-      @import = Current.family.imports.find(params[:import_id])
+      @import = Import.accessible_to(Current.user).find(params[:import_id])
     end
 
     def mappable
-      return nil unless mappable_class.present?
-
-      @mappable ||= mappable_class.find_by(id: mapping_params[:mappable_id], family: Current.family)
+      mapping = @import.mappings.find(params[:id])
+      scope = case mapping
+      when Import::AccountMapping then @import.target_accounts
+      when Import::TagMapping then @import.personal_tags
+      when Import::CategoryMapping then Current.family.categories
+      end
+      scope&.find(mapping_params[:mappable_id]) if mapping_params[:mappable_id].present? && !create_when_empty
     end
 
     def create_when_empty
-      return false unless mapping_class.present?
-
-      mapping_params[:mappable_id] == mapping_class::CREATE_NEW_KEY
-    end
-
-    def mappable_class
-      mapping_params[:mappable_type]&.constantize
-    end
-
-    def mapping_class
-      mapping_params[:type]&.constantize
+      mapping = @import.mappings.find(params[:id])
+      creating = mapping_params[:mappable_id] == Import::Mapping::CREATE_NEW_KEY
+      if creating && !Current.user.admin? && !mapping.is_a?(Import::TagMapping)
+        raise ActiveRecord::RecordNotFound
+      end
+      creating
     end
 end

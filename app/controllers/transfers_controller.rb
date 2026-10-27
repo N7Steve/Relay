@@ -16,7 +16,7 @@ class TransfersController < ApplicationController
 
   def show
     @categories = Current.family.categories.alphabetically_by_hierarchy
-    @tags = Current.family.tags.alphabetically
+    @tags = Current.family.personal_tags_for(Current.user).alphabetically
   end
 
   def create
@@ -67,7 +67,7 @@ class TransfersController < ApplicationController
     @transfer.errors.add(:date, t(".date_invalid"))
     @from_account_id = transfer_params[:from_account_id]
     set_accounts
-    @tags = Current.family.tags.alphabetically
+    @tags = Current.family.personal_tags_for(Current.user).alphabetically
     render :new, status: :unprocessable_entity
   rescue Transfer::Creator::StaleIdempotencyKeyError
     @transfer ||= Transfer.new
@@ -75,7 +75,7 @@ class TransfersController < ApplicationController
     @transfer.errors.add(:base, t(".stale_form"))
     @from_account_id = transfer_params[:from_account_id]
     set_accounts
-    @tags = Current.family.tags.alphabetically
+    @tags = Current.family.personal_tags_for(Current.user).alphabetically
     render :new, status: :unprocessable_entity
   end
 
@@ -105,7 +105,7 @@ class TransfersController < ApplicationController
     return unless require_account_permission!(outflow_account, :annotate, redirect_path: transactions_url)
     return unless require_account_permission!(inflow_account, :annotate, redirect_path: transactions_url)
 
-    resolved_ids = Current.family.tags.where(id: Array(params[:tag_ids]).reject(&:blank?)).pluck(:id)
+    resolved_ids = Current.family.personal_tags_for(Current.user).where(id: Array(params[:tag_ids]).reject(&:blank?)).pluck(:id)
 
     Transfer.transaction do
       [ @transfer.outflow_transaction, @transfer.inflow_transaction ].each do |transaction|
@@ -191,7 +191,7 @@ class TransfersController < ApplicationController
 
     def set_new_transfer_form_options
       @categories = Current.family.categories.alphabetically_by_hierarchy.to_a
-      @tags = Current.family.tags.alphabetically.to_a
+      @tags = Current.family.personal_tags_for(Current.user).alphabetically.to_a
     end
 
     def duplicate_source

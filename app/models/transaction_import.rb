@@ -45,7 +45,10 @@ class TransactionImport < Import
         if duplicate_entry
           # Update existing transaction instead of creating a new one
           duplicate_entry.transaction.category = category if category.present?
-          duplicate_entry.transaction.tags = tags if tags.any?
+          if tags.any?
+            foreign_tags = user ? duplicate_entry.transaction.tags.where.not(id: personal_tags.select(:id)).to_a : []
+            duplicate_entry.transaction.tags = (tags + foreign_tags).uniq
+          end
           duplicate_entry.notes = row.notes if row.notes.present?
           duplicate_entry.import = self
           duplicate_entry.import_locked = true  # Protect from provider sync overwrites

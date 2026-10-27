@@ -184,7 +184,7 @@
                   ) %>
               <%= render DS::TagSelect.new(
                     form: ef,
-                    tags: Current.family.tags.alphabetically,
+                    tags: Current.family.personal_tags_for(Current.user).alphabetically,
                     selected_ids: ef.object.tag_ids,
                     disabled: @annotate_locked,
                     auto_submit: true,

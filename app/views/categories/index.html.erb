@@ -1,5 +1,6 @@
 <%= content_for :page_title, t(".categories") %>
 <%= content_for :page_actions do %>
+  <% if Current.user.admin? %>
   <%= render DS::Menu.new do |menu| %>
     <% menu.with_item(
         variant: "link",
@@ -23,6 +24,7 @@
     href: new_category_path,
     frame: :modal
   ) %>
+  <% end %>
 <% end %>
 
 <div class="bg-container rounded-xl shadow-border-xs p-4">
@@ -39,6 +41,7 @@
     <div class="flex justify-center items-center py-20">
       <div class="text-center flex flex-col items-center max-w-[500px]">
         <p class="text-sm text-secondary mb-4"><%= t(".empty") %></p>
+        <% if Current.user.admin? %>
         <div class="flex items-center gap-2">
           <%= render DS::Button.new(
             text: t(".bootstrap"),
@@ -53,6 +56,7 @@
             frame: :modal
           ) %>
         </div>
+        <% end %>
       </div>
     </div>
   <% end %>

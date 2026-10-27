@@ -243,8 +243,11 @@ class Family::Backup::Restorer
         @admin_mapped = true if user&.admin?
         fail_backup("User #{attrs['email']} already belongs to another family") if !user && User.where(email: attrs["email"]).exists?
         user
-      when "Category", "Tag"
+      when "Category"
         model.where(family_id: @family.id).find_by(name: attrs["name"])
+      when "Tag"
+        owner_id = @id_map[source_key("User", attrs["user_id"])] if attrs["user_id"]
+        model.where(family_id: @family.id, user_id: owner_id).find_by(name: attrs["name"])
       when "Merchant"
         if attrs["type"] == "ProviderMerchant"
           ProviderMerchant.find_by(source: attrs["source"], name: attrs["name"])

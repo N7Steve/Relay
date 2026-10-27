@@ -7,14 +7,14 @@ class Import::TagMapping < Import::Mapping
         import.rows.map(&:tags_list).flatten.uniq
       end
 
-      tags = import.family.tags.where(name: unique_values).index_by(&:name)
+      tags = import.personal_tags.where(name: unique_values).index_by(&:name)
 
       unique_values.index_with { |value| tags[value] }
     end
   end
 
   def selectable_values
-    family_tags = import.family.tags.alphabetically.map { |tag| [ tag.name, tag.id ] }
+    family_tags = import.personal_tags.alphabetically.map { |tag| [ tag.name, tag.id ] }
 
     unless key.blank?
       family_tags.unshift [ "Add as new tag", CREATE_NEW_KEY ]
@@ -38,7 +38,7 @@ class Import::TagMapping < Import::Mapping
   def create_mappable!
     return unless creatable?
 
-    self.mappable = import.family.tags.find_or_create_by!(name: key)
+    self.mappable = import.personal_tags.find_by(name: key) || import.personal_tags.create!(name: key, user: import.tag_owner)
     save!
   end
 end

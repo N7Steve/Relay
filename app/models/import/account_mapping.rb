@@ -4,16 +4,16 @@ class Import::AccountMapping < Import::Mapping
   class << self
     def mappables_by_key(import)
       unique_values = import.rows.map(&:account).uniq
-      accounts = import.family.accounts.where(name: unique_values).index_by(&:name)
+      accounts = import.target_accounts.where(name: unique_values).index_by(&:name)
 
       unique_values.index_with { |value| accounts[value] }
     end
   end
 
   def selectable_values
-    family_accounts = import.family.accounts.manual.alphabetically.map { |account| [ account.name, account.id ] }
+    family_accounts = import.target_accounts.manual.alphabetically.map { |account| [ account.name, account.id ] }
 
-    unless key.blank?
+    unless key.blank? || (import.user && !import.user.admin?)
       family_accounts.unshift [ "Add as new account", CREATE_NEW_KEY ]
     end
 
@@ -34,8 +34,9 @@ class Import::AccountMapping < Import::Mapping
 
   def create_mappable!
     return unless creatable?
+    import.authorize_member_import!
 
-    account = import.family.accounts.create_or_find_by!(name: key) do |new_account|
+    account = import.target_accounts.create_or_find_by!(name: key) do |new_account|
       new_account.balance = 0
       new_account.import = import
       new_account.currency = import.family.currency

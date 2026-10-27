@@ -29,7 +29,7 @@ class TransactionsController < ApplicationController
 
     @q = search_params
     @accessible_account_ids = Current.user.accessible_accounts.pluck(:id)
-    @search = Transaction::Search.new(Current.family, filters: @q, accessible_account_ids: @accessible_account_ids)
+    @search = Transaction::Search.new(Current.family, filters: @q, accessible_account_ids: @accessible_account_ids, user: Current.user)
 
     base_scope = @search.transactions_scope
                        .reverse_chronological
@@ -246,10 +246,10 @@ class TransactionsController < ApplicationController
     # The transaction-row tag picker toggles one tag at a time; the drawer's
     # multiselect sends the full set.
     if params[:toggle_tag_id].present?
-      @toggled_tag = Current.family.tags.find(params[:toggle_tag_id])
+      @toggled_tag = Current.family.personal_tags_for(Current.user).find(params[:toggle_tag_id])
       @entry.transaction.toggle_tag!(@toggled_tag)
     else
-      @entry.transaction.tag_ids = Current.family.tags.where(id: tag_ids_param).pluck(:id)
+      @entry.transaction.tag_ids = Current.family.personal_tags_for(Current.user).where(id: tag_ids_param).pluck(:id)
     end
 
     @entry.lock_saved_attributes!
@@ -526,7 +526,7 @@ class TransactionsController < ApplicationController
         merchant_id: duplicate_source.entryable.merchant_id,
         shared_expense: duplicate_source.entryable.shared_expense
       )
-      @entry.entryable.tag_ids = duplicate_source.entryable.tag_ids
+      @entry.entryable.tag_ids = Current.family.personal_tags_for(Current.user).where(id: duplicate_source.entryable.tag_ids).pluck(:id)
     end
 
     def set_entry_for_unlock
@@ -667,7 +667,7 @@ class TransactionsController < ApplicationController
         .to_a.reject(&:managed_portfolio?)
       @categories = Current.family.categories.alphabetically_by_hierarchy.to_a
       @merchants = Current.family.available_merchants_for(Current.user).alphabetically.to_a
-      @tags = Current.family.tags.alphabetically.to_a
+      @tags = Current.family.personal_tags_for(Current.user).alphabetically.to_a
     end
 
     # Filters entry_params based on the user's permission on the account.

@@ -2,7 +2,7 @@
   <% dialog.with_header(title: t(".title"), subtitle: t(".description")) %>
 
   <% dialog.with_body do %>
-    <% has_accounts = accessible_accounts.any? %>
+    <% has_accounts = importable_accounts.any? %>
     <% requires_account_message = t(".requires_account") %>
 
     <% if @pending_import.present? && params[:type].nil? %>
@@ -63,7 +63,7 @@
               </li>
             <% end %>
 
-            <% if params[:type].nil? || params[:type].in?(Import::BACKUP_TYPES) %>
+            <% if Current.user.admin? && (params[:type].nil? || params[:type].in?(Import::BACKUP_TYPES)) %>
               <li>
                 <%= styled_form_with url: imports_path, scope: :import, multipart: true, class: "w-full", data: { turbo: false } do |form| %>
                   <%= form.hidden_field :type, value: "RelayImport" %>
@@ -110,7 +110,7 @@
                 enabled: true %>
             <% end %>
 
-            <% if params[:type].nil? || params[:type] == "QifImport" %>
+            <% if Current.user.admin? && (params[:type].nil? || params[:type] == "QifImport") %>
               <%= render "imports/import_option",
                 type: "QifImport",
                 icon_name: "file-clock",
@@ -205,7 +205,7 @@
                 disabled_message: requires_account_message %>
             <% end %>
 
-            <% if params[:type].nil? || params[:type] == "AccountImport" %>
+            <% if Current.user.admin? && (params[:type].nil? || params[:type] == "AccountImport") %>
               <%= render "imports/import_option",
                 type: "AccountImport",
                 icon_name: "building",
@@ -215,7 +215,7 @@
                 enabled: true %>
             <% end %>
 
-            <% if params[:type].nil? || params[:type] == "CategoryImport" %>
+            <% if Current.user.admin? && (params[:type].nil? || params[:type] == "CategoryImport") %>
               <%= render "imports/import_option",
                 type: "CategoryImport",
                 icon_name: "shapes",
@@ -225,7 +225,7 @@
                 enabled: true %>
             <% end %>
 
-            <% if params[:type].nil? || params[:type] == "MerchantImport" %>
+            <% if Current.user.admin? && (params[:type].nil? || params[:type] == "MerchantImport") %>
               <%= render "imports/import_option",
                 type: "MerchantImport",
                 icon_name: "store",
@@ -235,7 +235,7 @@
                 enabled: true %>
             <% end %>
 
-            <% if params[:type].nil? || params[:type] == "RuleImport" %>
+            <% if Current.user.admin? && (params[:type].nil? || params[:type] == "RuleImport") %>
               <%= render "imports/import_option",
                 type: "RuleImport",
                 icon_name: "workflow",

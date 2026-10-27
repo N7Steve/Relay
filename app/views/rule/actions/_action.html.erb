@@ -21,7 +21,7 @@
       <% elsif action.executor.type == "multi_select" %>
         <%= render DS::TagSelect.new(
               form: form,
-              tags: rule.family.tags.alphabetically,
+              tags: rule.family.personal_tags_for(Current.user).alphabetically,
               selected_ids: action.value.to_s.split(","),
               attribute: :value,
               show_label: false
@@ -48,7 +48,7 @@
     <span class="font-medium text-primary uppercase text-xs"><%= t("rules.actions.to_label") %></span>
     <%= render DS::TagSelect.new(
           form: form,
-          tags: rule.family.tags.alphabetically,
+          tags: rule.family.personal_tags_for(Current.user).alphabetically,
           selected_ids: [],
           attribute: :value,
           show_label: false

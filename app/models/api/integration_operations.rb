@@ -187,7 +187,7 @@ module Api::IntegrationOperations
         filters = attrs["filters"]
         ids = filters.fetch("account_ids")
         invalid!("Unavailable export accounts") unless access.accounts.where(id: ids).count == ids.size
-        { "excluded_category_ids" => family.categories, "excluded_tag_ids" => family.tags }.each do |key, scope|
+        { "excluded_category_ids" => family.categories, "excluded_tag_ids" => family.personal_tags_for(user) }.each do |key, scope|
           values = filters.fetch(key, [])
           invalid!("Unavailable export filters") unless scope.where(id: values).count == values.size
         end

@@ -22,7 +22,7 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_no_enqueued_jobs do
       post publish_import_url(import)
     end
-    assert_response :forbidden
+    assert_response :not_found
   end
 
   test "gets index" do
@@ -499,6 +499,7 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
   test "PDF import account select does not leak unshared family accounts (#1803)" do
     sign_in users(:family_member)
     pdf_import = imports(:pdf_with_rows)
+    pdf_import.update!(account: accounts(:depository))
     # The fixture has no attached pdf_file and no statement, so
     # ImportsController#show would redirect to the upload page. The
     # partial under test only renders for an uploaded PDF — stub the

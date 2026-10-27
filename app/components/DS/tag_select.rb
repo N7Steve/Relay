@@ -19,6 +19,12 @@ class DS::TagSelect < DesignSystemComponent
     @offset = offset
   end
 
+  def shared_tags
+    return [] unless Current.user && form.object.respond_to?(:tags) && form.object.persisted?
+
+    @shared_tags ||= form.object.tags.where.not(id: Current.family.personal_tags_for(Current.user).select(:id)).alphabetically.to_a
+  end
+
   def field_name
     "#{form.object_name}[#{attribute}][]"
   end

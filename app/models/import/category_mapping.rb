@@ -31,7 +31,7 @@ class Import::CategoryMapping < Import::Mapping
   def selectable_values
     family_categories = Category::Group.select_options(import.family.categories)
 
-    unless key.blank?
+    unless key.blank? || !import.categories_mutable?
       family_categories.unshift [ "Add as new category", CREATE_NEW_KEY ]
     end
 
@@ -52,6 +52,7 @@ class Import::CategoryMapping < Import::Mapping
 
   def create_mappable!
     return unless creatable?
+    raise Import::MappingError, I18n.t("imports.errors.member_category_creation") unless import.categories_mutable?
 
     parts = key.split(":", 2)
 

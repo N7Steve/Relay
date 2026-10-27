@@ -4,8 +4,11 @@ class Transactions::BulkUpdatesController < ApplicationController
 
   def create
     # Skip split parents from bulk update - update children instead
+    financial = bulk_update_params.slice(:date, :name).values.any?(&:present?)
+    accounts = financial ? Current.family.accounts.writable_by(Current.user) : Current.family.accounts.annotatable_by(Current.user)
     updated = Current.family
                      .entries
+                     .where(account_id: accounts.select(:id))
                      .excluding_split_parents
                      .excluding_transfer_transactions
                      .where(id: bulk_update_params[:entry_ids])

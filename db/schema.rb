@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_21_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_26_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -845,6 +845,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_160000) do
   end
 
   create_table "imports", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "actor_bound", default: false, null: false
     t.string "account_col_label"
     t.uuid "account_id"
     t.uuid "account_statement_id"
@@ -888,6 +889,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_160000) do
     t.string "tags_col_label"
     t.string "ticker_col_label"
     t.string "type", null: false
+    t.uuid "user_id"
     t.datetime "updated_at", null: false
     t.index ["account_statement_id"], name: "index_imports_on_account_statement_id"
     t.index ["family_id"], name: "index_imports_on_family_id"
@@ -901,6 +903,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_160000) do
     t.check_constraint "jsonb_typeof(error_details) = 'object'::text", name: "chk_imports_error_details_object"
     t.check_constraint "jsonb_typeof(summary) = 'object'::text", name: "chk_imports_summary_object"
     t.check_constraint "sequence IS NULL OR sequence > 0", name: "chk_imports_session_sequence_positive"
+    t.index ["user_id"], name: "index_imports_on_user_id"
   end
 
   create_table "insights", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1394,9 +1397,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_160000) do
     t.datetime "created_at", null: false
     t.uuid "family_id", null: false
     t.string "name"
+    t.uuid "user_id"
     t.datetime "updated_at", null: false
-    t.index ["family_id", "name"], name: "index_tags_on_family_id_and_name", unique: true
+    t.index ["family_id", "user_id", "name"], name: "index_tags_on_family_id_and_user_id_and_name", unique: true
     t.index ["family_id"], name: "index_tags_on_family_id"
+    t.index ["user_id"], name: "index_tags_on_user_id"
   end
 
   create_table "trades", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1632,6 +1637,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_21_160000) do
   add_foreign_key "sso_audit_logs", "users"
   add_foreign_key "syncs", "syncs", column: "parent_id"
   add_foreign_key "taggings", "tags"
+  add_foreign_key "tags", "users"
+  add_foreign_key "imports", "users"
   add_foreign_key "tags", "families"
   add_foreign_key "trades", "securities"
   add_foreign_key "transactions", "categories", on_delete: :nullify

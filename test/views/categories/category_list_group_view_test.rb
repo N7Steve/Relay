@@ -2,6 +2,7 @@ require "test_helper"
 
 class CategoryListGroupViewTest < ActionView::TestCase
   test "loads transaction lookup in one query when no lookup is provided" do
+    Current.session = users(:family_admin).sessions.create!
     category = categories(:food_and_drink)
     transaction = Transaction.create!(category: category)
     Entry.create!(

@@ -4,7 +4,7 @@ class Rule::ConditionFilter::TransactionTag < Rule::ConditionFilter
   end
 
   def options
-    family.tags.alphabetically.pluck(:name, :id)
+    (Current.user ? family.personal_tags_for(Current.user) : family.tags).alphabetically.pluck(:name, :id)
   end
 
   # Tag membership is matched with a correlated EXISTS subquery rather than a

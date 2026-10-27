@@ -25,7 +25,7 @@ class Api::V1::TagsControllerTest < ActionDispatch::IntegrationTest
       scopes: "read_write"
     )
 
-    @tag = @user.family.tags.create!(name: "Test Tag #{SecureRandom.hex(4)}", color: "#3b82f6")
+    @tag = @user.family.tags.create!(user: @user, name: "Test Tag #{SecureRandom.hex(4)}", color: "#3b82f6")
   end
 
   # Index action tests
@@ -225,7 +225,7 @@ class Api::V1::TagsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroy tag successfully" do
-    tag_to_delete = @user.family.tags.create!(name: "Delete Me #{SecureRandom.hex(4)}", color: "#c44fe9")
+    tag_to_delete = @user.family.tags.create!(user: @user, name: "Delete Me #{SecureRandom.hex(4)}", color: "#c44fe9")
 
     assert_difference -> { @user.family.tags.count }, -1 do
       delete api_v1_tag_url(tag_to_delete), headers: read_write_headers

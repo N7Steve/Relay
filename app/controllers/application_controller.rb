@@ -19,7 +19,13 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_sidekiq_health, :ai_features_enabled?
 
+  helper_method :importable_accounts
+
   private
+    def importable_accounts
+      Current.user.admin? ? accessible_accounts : Current.family.accounts.where(owner_id: Current.user.id)
+    end
+
     def accept_pending_invitation_for(user)
       return false if user.blank?
 

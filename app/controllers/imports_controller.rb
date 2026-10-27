@@ -9,7 +9,8 @@ class ImportsController < ApplicationController
     account_id = params.dig(:pdf_import, :account_id) || params.dig(:import, :account_id)
 
     if account_id.present?
-      account = accessible_accounts.find_by(id: account_id)
+      accounts = @import.is_a?(PdfImport) ? accessible_accounts : importable_accounts
+      account = accounts.find_by(id: account_id)
       unless account
         redirect_back_or_to import_path(@import), alert: t("imports.update.invalid_account", default: "Account not found.")
         return
@@ -59,7 +60,7 @@ class ImportsController < ApplicationController
   end
 
   def index
-    @pagy, @imports = pagy(Current.family.imports.where(type: Import::TYPES).ordered, limit: safe_per_page)
+    @pagy, @imports = pagy(Import.accessible_to(Current.user).where(type: Import::TYPES).ordered, limit: safe_per_page)
     @breadcrumbs = [
       [ t("breadcrumbs.home"), root_path ],
       [ t("breadcrumbs.imports"), imports_path ]
@@ -70,11 +71,14 @@ class ImportsController < ApplicationController
   end
 
   def new
-    @pending_import = Current.family.imports.ordered.pending.first
+    @pending_import = Import.accessible_to(Current.user).ordered.pending.first
     @document_upload_extensions = document_upload_supported_extensions
   end
 
   def create
+    type = params.dig(:import, :type).presence || "TransactionImport"
+    return head(:forbidden) unless Current.user.admin? || (Current.user.member? && type.in?(Import::MEMBER_TYPES))
+
     file = import_params[:import_file]
 
     if document_upload_request? || params.dig(:import, :type) == "PdfImport" || (file.present? && Import::ALLOWED_PDF_MIME_TYPES.include?(file.content_type))
@@ -91,9 +95,11 @@ class ImportsController < ApplicationController
     type = "RelayImport" if type.in?(Import::BACKUP_TYPES)
     type = "TransactionImport" unless Import::TYPES.include?(type)
 
-    account = accessible_accounts.find_by(id: params.dig(:import, :account_id))
+    account_id = params.dig(:import, :account_id)
+    account = importable_accounts.find(account_id) if account_id.present?
     import = Current.family.imports.create!(
       type: type,
+      user: Current.user,
       account: account,
       date_format: Current.family.date_format,
     )
@@ -157,7 +163,7 @@ class ImportsController < ApplicationController
 
   private
     def set_import
-      @import = Current.family.imports.includes(:account, :account_statement).find(params[:id])
+      @import = Import.accessible_to(Current.user).includes(:account, :account_statement).find(params[:id])
       raise ActiveRecord::RecordNotFound if @import.account_statement.present? && !@import.account_statement.viewable_by?(Current.user)
     end
 
@@ -193,7 +199,7 @@ class ImportsController < ApplicationController
         return
       end
 
-      import = Current.family.imports.create!(type: "RelayImport")
+      import = Current.family.imports.create!(type: "RelayImport", user: Current.user)
       import.ndjson_file.attach(
         io: StringIO.new(content),
         filename: filename,

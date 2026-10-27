@@ -71,7 +71,7 @@ class GoogleDriveExportSchedulesController < ApplicationController
     def prepare_options
       @accounts = Current.user.accessible_accounts.visible.alphabetically
       @categories = Current.family.categories.includes(:parent).order(:name)
-      @tags = Current.family.tags.alphabetically
+      @tags = Current.family.personal_tags_for(Current.user).alphabetically
     end
 
     def schedule_params

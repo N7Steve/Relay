@@ -75,7 +75,7 @@ module Api::ProcessOperations
     blob = upload_blob(args)
     content = Api::FileTransfer.content!(blob)
     attrs = args.slice(*Import::Preflight::CONFIG_PARAM_KEYS.map(&:to_s), "account_id", "qif_date_format", "type")
-    row = family.imports.new(attrs)
+    row = family.imports.new(attrs.merge(user: user))
     row.original_file.attach(blob)
     if row.is_a?(SureImport)
       content, filename, content_type = SureImport::Upload.read(uploaded_file(blob, content))
@@ -147,7 +147,8 @@ module Api::ProcessOperations
     target = row.mappable_class
     if args["mappable_id"]
       invalid!("This mapping has no record target") unless target && [ Account, Category, Tag, Merchant ].include?(target)
-      record = target.where(family_id: family.id).find(args["mappable_id"])
+      scope = target == Tag ? family.personal_tags_for(user) : target.where(family_id: family.id)
+      record = scope.find(args["mappable_id"])
       access.require_account!(record, :write) if record.is_a?(Account)
     end
     row.update!(mappable: record, create_when_empty: args.fetch("create_when_empty", false), value: args["value"])

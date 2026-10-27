@@ -520,6 +520,12 @@ en:
         provider_merchant_id: Provider ID
       provider_merchant_diff_row: "%{field}: keeping %{kept}, file has %{imported}"
     errors:
+      actor_unavailable: "The user who started this import is no longer available."
+      member_type_unavailable: "This import type is not available to members."
+      tag_unavailable: "An import tag is not available to this user."
+      account_not_owned: "Imports can only target accounts owned by the importing member."
+      member_global_creation: "Members cannot create categories or accounts through imports."
+      member_category_creation: "Members cannot create global categories."
       custom_column_requires_inflow: "Custom column imports require an inflow column to be selected"
       interrupted: "The background worker was interrupted before this finished. Imported data was rolled back — you can safely try again."
       presumed_lost: "Marked as failed after the background job was presumed lost. The imported data was rolled back — you can safely try again."

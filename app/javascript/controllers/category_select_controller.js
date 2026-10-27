@@ -71,13 +71,19 @@ export default class extends Controller {
       if (name === query) exactMatch = true;
     });
 
-    const canCreate = rawQuery.length > 0 && !exactMatch;
+    const canCreate =
+      this.hasCreateUrlValue &&
+      this.createUrlValue.length > 0 &&
+      rawQuery.length > 0 &&
+      !exactMatch;
 
     this.createFormTarget.classList.toggle("hidden", !canCreate);
     this.createFormTarget.classList.toggle("flex", canCreate);
 
-    this.createLabelTarget.textContent =
-      this.createLabelValue.replace("__CATEGORY_NAME__", rawQuery);
+    this.createLabelTarget.textContent = this.createLabelValue.replace(
+      "__CATEGORY_NAME__",
+      rawQuery,
+    );
   }
 
   handleSearchKeydown(event) {
@@ -114,10 +120,7 @@ export default class extends Controller {
     this.optionTargets.forEach((candidate) => {
       const selected = candidate === option;
 
-      candidate.setAttribute(
-        "aria-selected",
-        selected ? "true" : "false",
-      );
+      candidate.setAttribute("aria-selected", selected ? "true" : "false");
 
       candidate.classList.toggle("bg-container-inset", selected);
 
@@ -168,20 +171,14 @@ export default class extends Controller {
       const category = await response.json();
 
       if (!response.ok) {
-        this.showCreateError(
-          category.errors?.join(", ") || category.error,
-        );
+        this.showCreateError(category.errors?.join(", ") || category.error);
         return;
       }
 
-      this.createFormTarget.insertAdjacentHTML(
-        "beforebegin",
-        category.html,
-      );
+      this.createFormTarget.insertAdjacentHTML("beforebegin", category.html);
 
       const newOption = this.optionTargets.find(
-        (option) =>
-        option.dataset.categoryId === String(category.id),
+        (option) => option.dataset.categoryId === String(category.id),
       );
 
       if (newOption) this.selectOption(newOption);

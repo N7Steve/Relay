@@ -22,7 +22,7 @@ module Api
       # @return [Array<Hash>] JSON array of tag objects sorted alphabetically
       def index
         family = current_resource_owner.family
-        @tags = family.tags.alphabetically
+        @tags = family.personal_tags_for(current_resource_owner).alphabetically
 
         render json: @tags.map { |t| tag_json(t) }
       rescue StandardError => e
@@ -48,7 +48,7 @@ module Api
       # @return [Hash] JSON tag object with status 201
       def create
         family = current_resource_owner.family
-        @tag = family.tags.new(tag_params)
+        @tag = family.personal_tags_for(current_resource_owner).new(tag_params.merge(user: current_resource_owner))
 
         # Assign random color if not provided
         @tag.color ||= Tag::COLORS.sample
@@ -100,7 +100,7 @@ module Api
         # @return [Tag] The found tag
         def set_tag
           family = current_resource_owner.family
-          @tag = family.tags.find(params[:id])
+          @tag = family.personal_tags_for(current_resource_owner).find(params[:id])
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Tag not found" }, status: :not_found
         end

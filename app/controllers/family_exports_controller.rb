@@ -155,6 +155,6 @@ class FamilyExportsController < ApplicationController
     def prepare_transaction_export_options
       @accounts = Current.user.accessible_accounts.visible.included_in_reports.alphabetically
       @categories = Current.family.categories.includes(:parent).order(:name)
-      @tags = Current.family.tags.alphabetically
+      @tags = Current.family.personal_tags_for(Current.user).alphabetically
     end
 end

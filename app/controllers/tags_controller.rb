@@ -2,17 +2,17 @@ class TagsController < ApplicationController
   before_action :set_tag, only: %i[edit update destroy]
 
   def index
-    @tags = Current.family.tags.alphabetically
+    @tags = Current.family.personal_tags_for(Current.user).alphabetically
 
     render layout: "settings"
   end
 
   def new
-    @tag = Current.family.tags.new color: Tag::COLORS.sample
+    @tag = Current.family.personal_tags_for(Current.user).new user: Current.user, color: Tag::COLORS.sample
   end
 
   def create
-    @tag = Current.family.tags.new(tag_params)
+    @tag = Current.family.personal_tags_for(Current.user).new(tag_params.merge(user: Current.user))
 
     if @tag.save
       respond_to do |format|
@@ -41,14 +41,14 @@ class TagsController < ApplicationController
   end
 
   def destroy_all
-    Current.family.tags.destroy_all
+    Current.family.personal_tags_for(Current.user).destroy_all
     redirect_back_or_to tags_path, notice: t(".all_deleted")
   end
 
   private
 
     def set_tag
-      @tag = Current.family.tags.find(params[:id])
+      @tag = Current.family.personal_tags_for(Current.user).find(params[:id])
     end
 
     def tag_params

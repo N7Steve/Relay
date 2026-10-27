@@ -21,6 +21,8 @@ class User < ApplicationRecord
 
   belongs_to :family
   belongs_to :default_account, class_name: "Account", optional: true
+  has_many :tags, dependent: :destroy
+  has_many :imports, dependent: :nullify
   has_many :sessions, dependent: :destroy
   has_many :api_keys, dependent: :destroy
   has_many :api_operations, class_name: "Api::Operation", dependent: :destroy

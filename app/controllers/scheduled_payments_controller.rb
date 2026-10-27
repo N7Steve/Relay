@@ -42,7 +42,7 @@ class ScheduledPaymentsController < ApplicationController
 
       # Pre-select tags
       if transaction.respond_to?(:tags)
-        @scheduled_payment.tag_ids = transaction.tag_ids
+        @scheduled_payment.tag_ids = Current.family.personal_tags_for(Current.user).where(id: transaction.tag_ids).pluck(:id)
       end
 
       @from_entry_id = source_entry.id
@@ -310,7 +310,7 @@ class ScheduledPaymentsController < ApplicationController
       Current.family.accounts.writable_by(Current.user).find(attributes[:target_account_id]) if attributes[:target_account_id].present?
       Current.family.categories.find(attributes[:category_id]) if attributes[:category_id].present?
       Current.family.available_merchants_for(Current.user).find(attributes[:merchant_id]) if attributes[:merchant_id].present?
-      Current.family.tags.find(attributes[:tag_ids].reject(&:blank?)) if attributes[:tag_ids].present?
+      Current.family.personal_tags_for(Current.user).find(attributes[:tag_ids].reject(&:blank?)) if attributes[:tag_ids].present?
       attributes
     end
 

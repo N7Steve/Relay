@@ -73,7 +73,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
     return create_sure_import(family) if type == "RelayImport"
 
     # 2. Build the import object with permitted config attributes
-    @import = family.imports.build(import_config_params.merge(type: type))
+    @import = family.imports.build(import_config_params.merge(type: type, user: current_resource_owner))
     @import.account_id = params[:account_id] if params[:account_id].present?
 
     # 3. Attach the uploaded file if present (with validation)
@@ -288,7 +288,7 @@ class Api::V1::ImportsController < Api::V1::BaseController
 
     def persist_sure_import!(family, content, filename, content_type)
       import = nil
-      import = family.imports.create!(type: "RelayImport")
+      import = family.imports.create!(type: "RelayImport", user: current_resource_owner)
       import.ndjson_file.attach(
         io: StringIO.new(content),
         filename: filename,

@@ -1,4 +1,5 @@
 class Transaction < ApplicationRecord
+  include PersonallyTaggable
   include Entryable, Transferable, Ruleable, Splittable
 
   belongs_to :category, optional: true

@@ -104,9 +104,9 @@ class Transactions::TagSummaryViewTest < ActionView::TestCase
   end
 
   test "read-only shares get a focusable summary instead of the picker" do
-    sign_in_as_family_member
     entry = entries(:transfer_in) # credit card, shared read-only
     entry.transaction.update!(tag_ids: [ tags(:one).id, tags(:two).id ])
+    sign_in_as_family_member
 
     html = Nokogiri::HTML.fragment(render(partial: "transactions/transaction", locals: { entry: entry.reload, balance_trend: nil, view_ctx: "global" }))
     summary = html.at_css("##{dom_id(entry.transaction, "tag_summary_desktop")}")

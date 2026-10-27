@@ -209,6 +209,7 @@ class ImportSession < ApplicationRecord
 
   def create_chunk!(sequence:, client_chunk_id:, checksum:, content:, filename:, content_type:)
     imports.create!(
+      user: Current.user,
       family: family,
       type: import_type,
       sequence: sequence,

@@ -15,6 +15,7 @@ RSpec.describe 'API V1 Categories', type: :request do
   let(:user) do
     family.users.create!(
       email: 'api-user@example.com',
+      role: 'admin',
       password: 'password123',
       password_confirmation: 'password123'
     )
@@ -98,6 +99,7 @@ RSpec.describe 'API V1 Categories', type: :request do
     end
 
     post 'Create category' do
+      description 'Requires a family administrator. Members may read and select existing global categories.'
       tags 'Categories'
       security [ { apiKeyAuth: [] } ]
       consumes 'application/json'
@@ -105,6 +107,13 @@ RSpec.describe 'API V1 Categories', type: :request do
       parameter name: :body, in: :body, required: true, schema: {
         '$ref' => '#/components/schemas/CategoryCreateRequest'
       }
+
+      response '403', 'family administrator required' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+        let(:body) { { category: { name: 'Member category' } } }
+        before { user.update!(role: 'member') }
+        run_test!
+      end
 
       response '201', 'category created' do
         schema '$ref' => '#/components/schemas/CategoryDetail'
@@ -147,7 +156,7 @@ RSpec.describe 'API V1 Categories', type: :request do
         run_test!
       end
 
-      response '403', 'forbidden - api key missing read_write scope' do
+      response '403', 'forbidden - requires a family administrator and read_write scope' do
         schema '$ref' => '#/components/schemas/ErrorResponse'
 
         let(:read_only_api_key) do

@@ -2,6 +2,7 @@ class Rule::Action < ApplicationRecord
   belongs_to :rule, touch: true
 
   validates :action_type, presence: true
+  validate :personal_tag_references, if: -> { action_type == "set_transaction_tags" && (new_record? || will_save_change_to_value? || will_save_change_to_action_type?) }
 
   # Pre-seed (watermark): when a send_email_notification action is created — on a
   # new rule OR added to an existing one — record all currently-matching
@@ -67,6 +68,15 @@ class Rule::Action < ApplicationRecord
   end
 
   private
+    def personal_tag_references
+      return unless Current.user && rule
+
+      selected = value.to_s.split(",").compact_blank
+      previous = persisted? && action_type_in_database == "set_transaction_tags" ? value_in_database.to_s.split(",") : []
+      available = rule.family.personal_tags_for(Current.user).where(id: selected).pluck(:id)
+      errors.add(:value, :invalid) if (selected - previous - available).any?
+    end
+
     def execution_value
       executor.type == "multi_select" ? value.to_s.split(",") : value
     end

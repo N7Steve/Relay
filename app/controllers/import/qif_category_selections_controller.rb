@@ -63,7 +63,7 @@ class Import::QifCategorySelectionsController < ApplicationController
   private
 
     def set_import
-      @import = Current.family.imports.find(params[:import_id])
+      @import = Import.accessible_to(Current.user).find(params[:import_id])
 
       unless @import.is_a?(QifImport)
         redirect_to imports_path and return

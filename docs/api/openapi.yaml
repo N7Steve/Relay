@@ -9981,12 +9981,21 @@ paths:
                 "$ref": "#/components/schemas/CategoryCollection"
     post:
       summary: Create category
+      description: Requires a family administrator. Members may read and select existing
+        global categories.
       tags:
       - Categories
       security:
       - apiKeyAuth: []
       parameters: []
       responses:
+        '403':
+          description: forbidden - requires a family administrator and read_write
+            scope
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
         '201':
           description: subcategory created with parent
           content:
@@ -9995,12 +10004,6 @@ paths:
                 "$ref": "#/components/schemas/CategoryDetail"
         '422':
           description: validation error - duplicate name
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
-        '403':
-          description: forbidden - api key missing read_write scope
           content:
             application/json:
               schema:
@@ -25941,7 +25944,9 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
   "/api/v1/tags":
     get:
-      summary: List tags
+      summary: List personal tags
+      description: Lists only the authenticated user's personal tag catalog. Tags
+        attached by others remain visible on shared transactions.
       tags:
       - Tags
       security:
@@ -25955,6 +25960,7 @@ paths:
                 "$ref": "#/components/schemas/TagCollection"
     post:
       summary: Create tag
+      description: Creates a personal tag. Names are unique per user within the family.
       tags:
       - Tags
       security:

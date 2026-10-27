@@ -45,7 +45,7 @@ class SettingsHelperTest < ActionView::TestCase
     assert_not_includes labels, "API keys"
     assert_not_includes sections.pluck(:header), "System"
     assert_not_includes labels, "Bank sync"
-    assert_not_includes labels, "Imports"
+    assert_includes labels, "Imports"
     assert_not_includes labels, "Statement Vault"
     assert_includes labels, "Exports"
   end

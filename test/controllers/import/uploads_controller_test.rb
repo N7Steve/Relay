@@ -52,7 +52,10 @@ class Import::UploadsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "account select does not leak unshared family accounts (#1803)" do
-    sign_in users(:family_member)
+    member = users(:family_member)
+    @import.update!(user: member)
+    accounts(:depository).update!(owner: member)
+    sign_in member
 
     get import_upload_url(@import)
 

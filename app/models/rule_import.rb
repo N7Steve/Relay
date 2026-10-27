@@ -278,7 +278,7 @@ class RuleImport < Import
     end
 
     def tags_by_name
-      @tags_by_name ||= family.tags.index_by(&:name)
+      @tags_by_name ||= personal_tags.index_by(&:name)
     end
 
     def find_or_create_category(name)
@@ -294,7 +294,7 @@ class RuleImport < Import
     end
 
     def find_or_create_tag(name)
-      tags_by_name[name] ||= family.tags.create!(name: name)
+      tags_by_name[name] ||= personal_tags.create!(name: name, user: tag_owner)
     end
 
     def parse_boolean(value)

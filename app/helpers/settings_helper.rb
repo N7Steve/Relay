@@ -15,7 +15,7 @@ module SettingsHelper
         items: [
           settings_nav_item(:accounts_label, :accounts_path, "layers"),
           settings_nav_item(:bank_sync_label, :settings_providers_path, "banknote", visible: admin_user?),
-          settings_nav_item(:imports_label, :imports_path, "download", visible: admin_user?),
+          settings_nav_item(:imports_label, :imports_path, "download", visible: Current.user&.member? || admin_user?),
           settings_nav_item(:statement_vault_label, :account_statements_path, "archive", visible: admin_user?),
           settings_nav_item(:exports_label, :family_exports_path, "upload")
         ]

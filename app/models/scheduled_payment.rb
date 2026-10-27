@@ -1,4 +1,5 @@
 class ScheduledPayment < ApplicationRecord
+  include PersonallyTaggable
   include Monetizable
 
   attr_accessor :from_entry_id

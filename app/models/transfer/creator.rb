@@ -156,7 +156,7 @@ class Transfer::Creator
     end
 
     def apply_tags!(transfer)
-      resolved_ids = family.tags.where(id: tag_ids).pluck(:id)
+      resolved_ids = (Current.user ? family.personal_tags_for(Current.user) : family.tags).where(id: tag_ids).pluck(:id)
       return if resolved_ids.empty?
 
       [ transfer.outflow_transaction, transfer.inflow_transaction ].each do |transaction|

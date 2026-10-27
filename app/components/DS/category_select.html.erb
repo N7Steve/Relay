@@ -1,6 +1,6 @@
 <div class="relative"
      data-controller="category-select"
-     data-category-select-create-url-value="<%= helpers.categories_path(format: :json) %>"
+     data-category-select-create-url-value="<%= helpers.categories_path(format: :json) if Current.user&.admin? %>"
      data-category-select-default-color-value="<%= Category::COLORS.first %>"
      data-category-select-disabled-value="<%= disabled %>"
      data-category-select-auto-submit-value="<%= auto_submit %>"

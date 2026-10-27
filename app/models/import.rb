@@ -77,10 +77,24 @@ class Import < ApplicationRecord
 
   AMOUNT_TYPE_STRATEGIES = %w[signed_amount custom_column].freeze
 
+  MEMBER_TYPES = %w[TransactionImport TradeImport MintImport ActualImport YnabImport].freeze
+
+  belongs_to :user, optional: true
   belongs_to :family
   belongs_to :account, optional: true
   belongs_to :account_statement, optional: true
   belongs_to :import_session, optional: true
+
+  before_validation :bind_actor, on: :create
+  validate :actor_belongs_to_family
+
+  def bind_actor
+    self.actor_bound = true if user.present?
+  end
+
+  def actor_belongs_to_family
+    errors.add(:user, :invalid) if user && user.family_id != family_id
+  end
 
   before_validation :set_default_number_format
   before_validation :ensure_utf8_encoding
@@ -242,7 +256,48 @@ class Import < ApplicationRecord
     end
   end
 
+  def self.accessible_to(user)
+    scope = where(family_id: user.family_id)
+    return scope if user.admin?
+
+    personal = scope.where(user_id: user.id, type: MEMBER_TYPES)
+    statements = scope.where(type: "PdfImport", account_id: user.accessible_accounts.select(:id))
+    unmatched = scope.where(type: "PdfImport", account_id: nil).where.not(account_statement_id: nil)
+    personal.or(statements).or(unmatched)
+  end
+
+  def target_accounts
+    user && !user.admin? ? family.accounts.where(owner_id: user.id) : family.accounts
+  end
+
+  def tag_owner
+    user || family.personal_tag_owner
+  end
+
+  def personal_tags
+    tag_owner ? family.personal_tags_for(tag_owner) : family.tags.where(user_id: nil)
+  end
+
+  def categories_mutable?
+    user.nil? || user.admin?
+  end
+
+  def authorize_member_import!
+    raise MappingError, I18n.t("imports.errors.actor_unavailable") if actor_bound? && (user.nil? || !user.active?)
+    return if user.nil? || user.admin?
+
+    raise MappingError, I18n.t("imports.errors.member_type_unavailable") unless type.in?(MEMBER_TYPES) && user.member?
+    tag_ids = mappings.tags.where(mappable_type: "Tag").pluck(:mappable_id).compact
+    raise MappingError, I18n.t("imports.errors.tag_unavailable") unless (tag_ids - personal_tags.pluck(:id)).empty?
+    ids = mappings.accounts.where(mappable_type: "Account").pluck(:mappable_id)
+    ids << account_id if account_id
+    ids += entries.distinct.pluck(:account_id) if persisted?
+    raise MappingError, I18n.t("imports.errors.account_not_owned") unless (ids.compact.uniq - target_accounts.pluck(:id)).empty?
+    raise MappingError, I18n.t("imports.errors.member_global_creation") if mappings.where(type: %w[Import::CategoryMapping Import::AccountMapping], create_when_empty: true).exists?
+  end
+
   def publish_later(authority: nil)
+    authorize_member_import!
     raise MaxRowCountExceededError if row_count_exceeded?
     raise "Import is not publishable" unless publishable?
 
@@ -285,6 +340,7 @@ class Import < ApplicationRecord
 
     raise MaxRowCountExceededError if row_count_exceeded?
 
+    authorize_member_import!
     import!
 
     family.sync_later
@@ -295,6 +351,7 @@ class Import < ApplicationRecord
   end
 
   def revert_later(authority: nil)
+    authorize_member_import!
     raise "Import is not revertable" unless revertable?
 
     update! status: :reverting
@@ -327,6 +384,7 @@ class Import < ApplicationRecord
 
   def revert
     Import.transaction do
+      authorize_member_import!
       accounts.destroy_all
       entries.destroy_all
       revert_derived_state!
@@ -415,12 +473,12 @@ class Import < ApplicationRecord
         updated_mappings = mappables_by_key.map do |key, mappable|
           mapping = mappings.find_or_initialize_by(key: key, import: self, type: mapping_class.name)
           mapping.mappable = mappable
-          mapping.create_when_empty = key.present? && mappable.nil?
+          mapping.create_when_empty = key.present? && mappable.nil? && (categories_mutable? || mapping.is_a?(Import::TagMapping))
           mapping
         end
 
         updated_mappings.each { |m| m.save(validate: false) }
-        mapping_class.where.not(id: updated_mappings.map(&:id)).destroy_all
+        mapping_class.where(import: self).where.not(id: updated_mappings.map(&:id)).destroy_all
       end
     end
   end
@@ -484,8 +542,10 @@ class Import < ApplicationRecord
 
   # Used to optionally pre-fill the configuration for the current import
   def suggested_template
-    family.imports
-          .complete
+    return if actor_bound? && user.nil?
+
+    scope = user ? Import.accessible_to(user) : family.imports
+    scope.complete
           .where(account: account, type: type)
           .order(created_at: :desc)
           .first

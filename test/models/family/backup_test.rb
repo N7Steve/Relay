@@ -11,6 +11,19 @@ class Family::BackupTest < ActiveSupport::TestCase
     @tag = @source.tags.create!(name: "Household", color: "#4da568")
   end
 
+  test "round trips personal tags with identical names without merging their owners" do
+    first = @source.users.create!(email: "tag-owner-one@example.com", password: "Password123!", role: "admin")
+    second = @source.users.create!(email: "tag-owner-two@example.com", password: "Password123!", role: "member")
+    @source.tags.create!(user: first, name: "Personal")
+    @source.tags.create!(user: second, name: "Personal")
+    content = Family::Backup.new(@source).generate_ndjson
+    @source.users.each { |user| user.update_column(:email, "source-#{user.id}@example.com") }
+    Family::DataImporter.new(@target, content).import!
+    tags = @target.tags.where(name: "Personal")
+    assert_equal 2, tags.count
+    assert_equal 2, tags.pluck(:user_id).uniq.compact.size
+  end
+
   test "round trips native shared expenses and explicit false despite a historical tag" do
     tag = @source.tags.create!(name: "Gastos compartidos", color: "#123456")
     shared = transaction(@account, "Shared expense", 100)

@@ -4,7 +4,7 @@ class Rule::ActionExecutor::SetTransactionTags < Rule::ActionExecutor
   end
 
   def options
-    family.tags.alphabetically.pluck(:name, :id)
+    (Current.user ? family.personal_tags_for(Current.user) : family.tags).alphabetically.pluck(:name, :id)
   end
 
   def execute(transaction_scope, value: nil, ignore_attribute_locks: false, rule_run: nil)

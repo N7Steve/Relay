@@ -391,7 +391,7 @@ class Api::DailyOperations
       record = case kind
       when "category" then family.categories.create!(attrs.reverse_merge("color" => Category::COLORS.first, "lucide_icon" => "shapes"))
       when "merchant" then family.merchants.create!(attrs)
-      when "tag" then family.tags.create!(attrs.reverse_merge("color" => Tag::COLORS.first))
+      when "tag" then family.personal_tags_for(user).create!(attrs.reverse_merge("color" => Tag::COLORS.first).merge("user" => user))
       end
       organization_json(record)
     end
@@ -448,7 +448,7 @@ class Api::DailyOperations
         invalid!("Unknown currency")
       end
       # Re-evaluated before replaying an idempotent response as well as executing.
-      if name.match?(/\A(?:create|update|delete|merge|replace)_(?:category|categories|merchant|merchants|tag|tags)\z/)
+      if name.match?(/\A(?:create|update|delete|merge|replace)_(?:category|categories|merchant|merchants)\z/)
         raise Api::Access::Forbidden, "Family-wide organization requires an administrator with complete account access" unless access.family_admin? && access.complete_account_visibility?
       end
       references!(args)
@@ -560,7 +560,7 @@ class Api::DailyOperations
 
     def references!(args)
       { "category_id" => family.categories, "parent_id" => family.categories,
-        "merchant_id" => family.available_merchants_for(user), "tag_ids" => family.tags }.each do |key, scope|
+        "merchant_id" => family.available_merchants_for(user), "tag_ids" => family.personal_tags_for(user) }.each do |key, scope|
         next unless args[key]
         ids = Array(args[key]).uniq
         invalid!("#{key} contains unavailable references") unless ids.all? { |id| UuidFormat.valid?(id) } && scope.where(id: ids).count == ids.length
@@ -576,7 +576,7 @@ class Api::DailyOperations
     def organization_scope(kind)
       case kind
       when "category" then family.categories
-      when "tag" then family.tags
+      when "tag" then family.personal_tags_for(user)
       when "merchant" then family.available_merchants_for(user)
       end
     end

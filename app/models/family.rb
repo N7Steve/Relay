@@ -305,6 +305,15 @@ class Family < ApplicationRecord
     Merchant.where(id: merchant_ids)
   end
 
+  def personal_tag_owner
+    users.order(Arel.sql("CASE WHEN role IN ('admin', 'super_admin') THEN 0 ELSE 1 END"), :created_at, :id).first
+  end
+
+  def personal_tags_for(user)
+    scope = tags.where(user_id: user.id)
+    user == personal_tag_owner ? scope.or(tags.where(user_id: nil)) : scope
+  end
+
   def available_merchants
     assigned_ids = transactions.where.not(merchant_id: nil).pluck(:merchant_id).uniq
     recently_unlinked_ids = FamilyMerchantAssociation

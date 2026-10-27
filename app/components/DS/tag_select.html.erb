@@ -33,6 +33,14 @@
     </div>
   </div>
 
+  <% if shared_tags.any? %>
+    <div class="flex flex-wrap gap-1 mt-2">
+      <% shared_tags.each do |tag| %>
+        <%= render DS::Pill.new(label: tag.name, custom_color: tag.color, marker: false) %>
+      <% end %>
+    </div>
+  <% end %>
+
   <div data-tag-select-hidden-inputs>
     <input type="hidden" name="<%= field_name %>" value="" <%= "disabled" if disabled %>>
   </div>

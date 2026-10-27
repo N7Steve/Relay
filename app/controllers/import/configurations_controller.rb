@@ -27,7 +27,7 @@ class Import::ConfigurationsController < ApplicationController
 
   private
     def set_import
-      @import = Current.family.imports.find(params[:import_id])
+      @import = Import.accessible_to(Current.user).find(params[:import_id])
     end
 
     def import_params
