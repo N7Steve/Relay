@@ -18,12 +18,13 @@
   <% if series.any? %>
     <div
     id="netWorthChart"
-    class="w-full min-h-64 privacy-sensitive"
+    class="mt-4 w-full min-h-64 privacy-sensitive"
     style="height: calc(var(--dash-widget-h, 13rem) + 6rem);"
     data-controller="time-series-chart"
     data-time-series-chart-data-value="<%= series.to_json %>"
     data-time-series-chart-selectable-value="true"
     data-time-series-chart-show-axes-value="true"
+    data-time-series-chart-show-area-value="false"
     data-time-series-chart-currency-value="<%= Current.family.currency %>"
     draggable="false"></div>
   <% else %>

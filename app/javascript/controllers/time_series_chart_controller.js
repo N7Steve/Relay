@@ -13,6 +13,7 @@ export default class extends Controller {
     selectable: { type: Boolean, default: false },
     showChange: { type: Boolean, default: true },
     showAxes: { type: Boolean, default: false },
+    showArea: { type: Boolean, default: true },
     currency: { type: String, default: "EUR" },
   };
 
@@ -134,7 +135,7 @@ export default class extends Controller {
 
     if (this.useLabelsValue) {
       if (!this.showAxesValue) this._drawXAxisLabels();
-      this._drawGradientBelowTrendline();
+      if (this.showAreaValue) this._drawGradientBelowTrendline();
     }
 
     if (this.useTooltipValue) {
@@ -718,7 +719,7 @@ export default class extends Controller {
 
   get _margin() {
     if (this.showAxesValue) {
-      return { top: 16, right: 24, bottom: 40, left: 88 };
+      return { top: 16, right: 24, bottom: 40, left: 64 };
     }
     if (this.useLabelsValue) {
       return { top: 20, right: 0, bottom: 10, left: 0 };
