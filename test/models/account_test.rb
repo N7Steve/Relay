@@ -956,7 +956,7 @@ class AccountTest < ActiveSupport::TestCase
     assert_equal ten_years_ago, account.history_start_date
   end
 
-  test "history_start_date ignores pending transactions" do
+  test "history_start_date includes historical pending transactions" do
     account = @family.accounts.create!(
       owner: @admin,
       name: "Pending Account",
@@ -984,7 +984,7 @@ class AccountTest < ActiveSupport::TestCase
       entryable: Transaction.new(extra: { "plaid" => { "pending" => true } })
     )
 
-    assert_equal posted_date, account.history_start_date
+    assert_equal 10.days.ago.to_date, account.history_start_date
   end
 
   test "history_start_date on linked investment account resolves to provider activity ignoring default anchor" do

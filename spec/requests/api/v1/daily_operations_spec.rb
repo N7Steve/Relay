@@ -2,6 +2,8 @@
 
 require 'swagger_helper'
 
+# Transaction posting_status is retired; schemas come from the shared MCP catalog.
+
 RSpec.describe 'API V1 Daily Operations', type: :request do
   let(:user) { users(:family_admin) }
   let(:api_key) do

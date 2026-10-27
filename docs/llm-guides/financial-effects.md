@@ -9,8 +9,9 @@ La investigación original está en
 
 ## Selección de movimientos
 
-`Entry.eligible_for_balance` reúne `excluding_pending` y
-`excluding_split_parents`. Conserva movimientos excluidos de analítica, trades
+`Entry.eligible_for_balance` aplica `excluding_split_parents`. Las marcas
+bancarias históricas de pendiente no filtran movimientos. Conserva movimientos
+excluidos de analítica, trades
 y valoraciones. `Balance::SyncCache` consume esta selección: las valoraciones
 son valores absolutos; no se suman como ingresos.
 
@@ -28,7 +29,7 @@ familias, cuentas, fechas o monedas. El llamador debe mantener esos filtros.
 | Excepcional (`forecast_behavior = exceptional_once` o `one_time` histórico) | Conserva efecto económico | Excluido por la política común `budget_reportable` | Incluido en base; retirado del residual ordinario |
 | Irregular recurrente | Conserva efecto económico | Incluido si no hay otra exclusión | Incluido en base; reserva separada |
 | `excluded = true` | Conserva efecto económico | Excluido | Excluido |
-| Pendiente de proveedor actual o histórico | Excluido hasta contabilización | Excluido en el scope predeterminado de IncomeStatement | Excluido |
+| Marca bancaria histórica de pendiente | Conserva efecto económico | Según clasificación y exclusiones analíticas | Incluido según las reglas ordinarias |
 | Padre de división | Excluido para evitar duplicación | `split!` lo marca excluido | Excluido |
 | Hijos de división 60/40 | Total 100, aunque el hijo de 40 esté excluido | Solo 60 si el hijo de 40 está excluido | Solo el hijo de 60 en ese caso |
 | Valoración | Ancla absoluta de valor/deuda | No es Transaction | Excluida |
@@ -38,7 +39,7 @@ familias, cuentas, fechas o monedas. El llamador debe mantener esos filtros.
 Los informes tienen filtros adicionales por estado de cuenta, tratamiento,
 participación personal, fiscalidad y actividad de inversión. Un scope de
 transacciones suministrado expresamente a `IncomeStatement#totals` sustituye al
-predeterminado; no se debe asumir que excluye pendientes automáticamente.
+predeterminado; las marcas bancarias históricas no excluyen movimientos.
 
 ## Transferencias y patrimonio
 
@@ -268,3 +269,14 @@ infieren de su etiqueta al restaurar, después de validar su integridad; un
 `false` explícito en un backup nuevo prevalece sobre cualquier etiqueta antigua.
 Una vez restaurado o migrado, renombrar, añadir o quitar etiquetas no cambia
 la clasificación nativa.
+
+## Estado bancario de movimientos retirado (28 octubre 2026)
+
+Relay no ofrece estado bancario pendiente. Todos los movimientos existentes
+participan en saldos, informes y previsiones con sus exclusiones habituales,
+aunque conserven `posting_status` o flags históricos en `extra`. El MCP y la
+API compartida rechazan `posting_status`; se retira `syncs_include_pending`.
+Enable Banking solicita solo BOOK y descarta autorizaciones PDNG. Los metadatos
+históricos se conservan para restauraciones
+y reconciliación de duplicados, sin excluir movimientos por estado bancario.
+No se altera la confirmación de Agenda, transferencias ni propuestas MCP.

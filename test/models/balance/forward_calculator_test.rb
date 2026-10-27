@@ -66,7 +66,7 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
     )
   end
 
-  test "pending transactions do not affect materialized balances" do
+  test "historical pending transactions participate in materialized balances" do
     account = create_account_with_ledger(
       account: { type: Depository, currency: "USD" },
       entries: [
@@ -81,12 +81,12 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
 
     calculated = Balance::ForwardCalculator.new(account).calculate
 
-    assert_equal 1200, calculated.last.balance
-    assert_equal 200, calculated.sum(&:cash_inflows)
-    assert_not_includes calculated.map(&:date), 1.day.ago.to_date
+    assert_equal 1700, calculated.last.balance
+    assert_equal 700, calculated.sum(&:cash_inflows)
+    assert_includes calculated.map(&:date), 1.day.ago.to_date
   end
 
-  test "calculation start date ignores a pending entry before the opening anchor" do
+  test "calculation start date includes historical pending entries before the opening anchor" do
     account = create_account_with_ledger(
       account: { type: Depository, currency: "USD" },
       entries: [
@@ -101,7 +101,7 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
 
     calculator = Balance::ForwardCalculator.new(account)
 
-    assert_equal 3.days.ago.to_date, calculator.calculation_start_date
+    assert_equal 5.days.ago.to_date, calculator.calculation_start_date
   end
 
   test "reconciliation valuation sets absolute balance before applying subsequent transactions" do
@@ -846,7 +846,7 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
     assert_not calculator.incremental?, "Should not be incremental for foreign currency accounts"
   end
 
-  test "pending foreign-currency entries do not force a full recalculation" do
+  test "historical pending foreign currency entries require full recalculation" do
     account = create_account_with_ledger(
       account: { type: Depository, currency: "USD" },
       entries: [
@@ -863,8 +863,8 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
     calculator = Balance::ForwardCalculator.new(account, window_start_date: 2.days.ago.to_date)
     result = calculator.calculate
 
-    assert calculator.incremental?, "Pending foreign-currency entries should be ignored by the guard"
-    assert_equal [ 2.days.ago.to_date ], result.map(&:date)
+    assert_not calculator.incremental?, "Historical flags do not bypass the foreign currency guard"
+    assert_includes result.map(&:date), 1.day.ago.to_date
   end
 
   # Regression: a reconciliation (or any entry) backfilled with a date EARLIER

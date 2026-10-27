@@ -695,7 +695,7 @@ class TransactionsController < ApplicationController
                 :start_date, :end_date, :search, :amount,
                 :amount_operator, :default_accounts_only, :shared_expense,
                 account_ids: [],
-                categories: [], merchants: [], types: [], tags: [], status: []
+                categories: [], merchants: [], types: [], tags: []
               )
               .to_h
               .compact_blank

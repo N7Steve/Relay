@@ -52,7 +52,7 @@ class LegacyIncomeStatementCategoryStats
     end
 
     def pending_providers_sql
-      Transaction.pending_providers_sql("t")
+      ""
     end
 
     def exclude_tax_advantaged_sql

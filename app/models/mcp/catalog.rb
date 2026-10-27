@@ -12,7 +12,7 @@ class Mcp::Catalog
   TRANSACTION = {
     name: STRING, date: DATE, amount: MONEY, currency: { type: "string", pattern: "^[A-Z]{3}$" }, notes: STRING,
     category_id: { type: [ "string", "null" ] }, merchant_id: { type: [ "string", "null" ] }, tag_ids: IDS,
-    excluded: BOOLEAN, import_protected: BOOLEAN, shared_expense: BOOLEAN, posting_status: { type: "string", enum: %w[pending posted] },
+    excluded: BOOLEAN, import_protected: BOOLEAN, shared_expense: BOOLEAN,
     kind: { type: "string", enum: %w[standard funds_movement cc_payment loan_payment investment_contribution transfer_to_excluded transfer_from_excluded] },
     forecast_behavior: { type: "string", enum: %w[normal exceptional_once irregular_recurring] }
   }.freeze
@@ -136,7 +136,7 @@ class Mcp::Catalog
   end
 
   def self.transaction_search_properties
-    PAGE.merge(TRANSACTION.slice(:excluded, :import_protected, :category_id, :merchant_id, :tag_ids, :kind, :forecast_behavior, :shared_expense, :posting_status)).merge(
+    PAGE.merge(TRANSACTION.slice(:excluded, :import_protected, :category_id, :merchant_id, :tag_ids, :kind, :forecast_behavior, :shared_expense)).merge(
       account_ids: IDS, start_date: DATE, end_date: DATE, min_amount: MONEY, max_amount: MONEY, search: STRING,
       include_split_parents: BOOLEAN, exclude_split_children: BOOLEAN, uncategorized: BOOLEAN, untagged: BOOLEAN,
       type: { type: "string", enum: %w[income expense] })

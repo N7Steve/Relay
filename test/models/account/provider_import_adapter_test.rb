@@ -915,7 +915,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       extra: { "simplefin" => { "pending" => true } }
     )
 
-    assert pending_entry.transaction.pending?, "Entry should be marked pending"
+    assert pending_entry.transaction.legacy_pending?, "Entry should be marked pending"
     original_id = pending_entry.id
 
     # Now import the posted version with a DIFFERENT external_id
@@ -934,7 +934,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       # Should be the same entry, now with updated external_id
       assert_equal original_id, posted_entry.id
       assert_equal "simplefin_posted_xyz", posted_entry.external_id
-      assert_not posted_entry.transaction.pending?, "Entry should no longer be pending"
+      assert_not posted_entry.transaction.legacy_pending?, "Entry should no longer be pending"
     end
   end
 
@@ -952,7 +952,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       extra: { "enable_banking" => { "pending" => true } }
     )
 
-    assert pending_entry.transaction.pending?, "should be pending before claim"
+    assert pending_entry.transaction.legacy_pending?, "should be pending before claim"
 
     assert_no_difference "@account.entries.count" do
       posted_entry = @adapter.import_transaction(
@@ -971,7 +971,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       posted_entry.reload
 
       # Pending flag must be cleared so the entry no longer shows a pending badge
-      assert_not posted_entry.transaction.pending?, "pending flag should be cleared after claim"
+      assert_not posted_entry.transaction.legacy_pending?, "pending flag should be cleared after claim"
 
       # Date must be the original pending date, not the later booked date
       assert_equal pending_date, posted_entry.date, "pending date should be preserved, not overwritten with booked date"
@@ -1055,7 +1055,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       )
 
       assert_equal pending_entry.id, posted_entry.id
-      assert_not posted_entry.transaction.pending?
+      assert_not posted_entry.transaction.legacy_pending?
     end
   end
 
@@ -1361,7 +1361,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
 
       # Should be a DIFFERENT entry - not matched to the earlier posted one
       assert_not_equal posted_entry.id, pending_entry.id
-      assert pending_entry.transaction.pending?
+      assert pending_entry.transaction.legacy_pending?
     end
   end
 
@@ -1445,7 +1445,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       # Should claim the pending entry
       assert_equal pending_entry.id, posted_entry.id
       assert_equal "plaid_posted_xyz", posted_entry.external_id
-      assert_not posted_entry.transaction.pending?
+      assert_not posted_entry.transaction.legacy_pending?
     end
   end
 
@@ -1545,7 +1545,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       source: "enable_banking",
       extra: { "enable_banking" => { "pending" => true } }
     )
-    assert pending_entry.transaction.pending?, "entry should start as pending"
+    assert pending_entry.transaction.legacy_pending?, "entry should start as pending"
 
     # Booked version arrives with the SAME external_id (Revolut Italy behaviour).
     # extra is nil (no FX, no MCC) so the deep-merge block would normally be skipped.
@@ -1561,7 +1561,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       )
 
       assert_equal pending_entry.id, booked_entry.id, "should update the same entry"
-      assert_not booked_entry.transaction.pending?,
+      assert_not booked_entry.transaction.legacy_pending?,
         "pending flag should be cleared even when extra is nil"
     end
   end
@@ -1576,7 +1576,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
       source: "enable_banking",
       extra: { "enable_banking" => { "pending" => true } }
     )
-    assert pending_entry.transaction.pending?, "entry should start as pending"
+    assert pending_entry.transaction.legacy_pending?, "entry should start as pending"
 
     # User categorises the pending entry — sets user_modified = true
     pending_entry.mark_user_modified!
@@ -1597,7 +1597,7 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
 
       assert_equal pending_entry.id, booked_entry.id, "should reference the same entry"
       booked_entry.reload
-      assert_not booked_entry.transaction.pending?,
+      assert_not booked_entry.transaction.legacy_pending?,
         "pending flag must be cleared even for user-modified entries"
     end
   end

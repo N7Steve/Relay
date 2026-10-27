@@ -111,7 +111,7 @@ class IncomeStatement::ScopedTransactionsQueryEquivalenceTest < ActiveSupport::T
 
     # Same production scope used by the dashboard for both implementations.
     def transactions_scope
-      @family.transactions.visible.excluding_pending.in_period(@period)
+      @family.transactions.visible.in_period(@period)
     end
 
     def assert_equal_rows(legacy_rows, refactored_rows, label)

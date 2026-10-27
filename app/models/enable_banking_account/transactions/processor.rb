@@ -79,6 +79,11 @@ class EnableBankingAccount::Transactions::Processor
 
     enable_banking_account.raw_transactions_payload.each_with_index do |transaction_data, index|
       begin
+        data = transaction_data.with_indifferent_access
+        if data[:status] == "PDNG" || data[:_pending] || data.dig(:extra, :enable_banking, :pending)
+          skipped_count += 1
+          next
+        end
         ext_id = EnableBankingEntry::Processor.compute_external_id(transaction_data)
 
         if ext_id && excluded_ids.include?(ext_id)

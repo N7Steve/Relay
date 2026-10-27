@@ -67,14 +67,14 @@ class Investment::ValueUpdate
   def self.refresh_adjustments!(account)
     return unless account.managed_portfolio?
 
-    updates = account.transactions.excluding_pending.where(kind: "investment_value_adjustment")
+    updates = account.transactions.where(kind: "investment_value_adjustment")
       .where("transactions.extra ? 'investment_value'").includes(:entry).to_a
     return if updates.empty?
 
     first = updates.min_by { |transaction| [ transaction.entry.date, transaction.entry.created_at, transaction.entry.id ] }
     value = BigDecimal(first.extra.fetch("investment_value").fetch("opening_value"))
     latest_date = updates.map { |transaction| transaction.entry.date }.max
-    entries = account.entries.excluding_pending.excluding_split_parents.includes(:entryable).chronological.to_a
+    entries = account.entries.excluding_split_parents.includes(:entryable).chronological.to_a
     observations = Account::ImportedBalanceHistory.new(account).closing_values_before(first.entry.date)
     entries_by_date = entries.group_by(&:date)
     (entries_by_date.keys | observations.keys).sort.each do |date|
@@ -109,7 +109,7 @@ class Investment::ValueUpdate
     end
 
     def opening_value
-      first = account.transactions.excluding_pending.where(kind: "investment_value_adjustment")
+      first = account.transactions.where(kind: "investment_value_adjustment")
         .where("transactions.extra ? 'investment_value'").joins(:entry).order("entries.date", "entries.created_at").first
       return BigDecimal(first.extra.fetch("investment_value").fetch("opening_value")) if first
       return account.opening_anchor_balance if account.has_opening_anchor?

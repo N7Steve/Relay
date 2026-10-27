@@ -10,7 +10,7 @@ class Mcp::AdministrationCatalog
     family_attrs = { name: c::STRING, currency: c::STRING, country: c::STRING, date_format: c::STRING, timezone: c::STRING, locale: c::STRING,
       month_start_day: { type: "integer", minimum: 1, maximum: 28 }, personal_budgets: c::BOOLEAN, household_budget_enabled: c::BOOLEAN,
       moniker: { type: "string", enum: Family::MONIKERS }, default_account_sharing: { type: "string", enum: Family::SHARING_DEFAULTS }, enabled_currencies: { type: "array", maxItems: 100, items: c::STRING } }
-    settings = %i[external_bank_sync_enabled external_google_drive_enabled external_logos_enabled syncs_include_pending require_email_confirmation auto_sync_enabled].to_h { |key| [ key, c::BOOLEAN ] }.merge(auto_sync_time: c::STRING, auto_sync_timezone: c::STRING)
+    settings = %i[external_bank_sync_enabled external_google_drive_enabled external_logos_enabled require_email_confirmation auto_sync_enabled].to_h { |key| [ key, c::BOOLEAN ] }.merge(auto_sync_time: c::STRING, auto_sync_timezone: c::STRING)
     tools = [
       c.definition("get_profile", {}, read: true),
       c.definition("update_profile", { first_name: c::STRING, last_name: c::STRING, locale: c::STRING }),

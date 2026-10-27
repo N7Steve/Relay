@@ -1,7 +1,7 @@
 require "test_helper"
 
 class Balance::LinkedInvestmentSeriesNormalizerTest < ActiveSupport::TestCase
-  test "pending transactions do not establish supported balance history" do
+  test "historical pending transactions establish supported balance history" do
     account = families(:empty).accounts.create!(
       name: "Linked Investment",
       balance: 0,
@@ -31,7 +31,7 @@ class Balance::LinkedInvestmentSeriesNormalizerTest < ActiveSupport::TestCase
     start_date = Balance::LinkedInvestmentSeriesNormalizer
       .send(:common_supported_history_start_date, [ account.id ])
 
-    assert_equal posted_date, start_date
+    assert_equal pending_date, start_date
   end
 
   test "common_supported_history_start_date ignores unlinked manual accounts in mixed portfolio" do

@@ -82,7 +82,7 @@ class EntryTest < ActiveSupport::TestCase
     assert_includes account.entries.search(uncategorized: false).pluck(:id), categorized.id
   end
 
-  test "status filter matches pending transactions for every supported provider via EntrySearch" do
+  test "retired entry status filters include all historical provider rows" do
     family = families(:empty)
     account = family.accounts.create! name: "Test", balance: 0, currency: "USD", accountable: Depository.new
 
@@ -99,11 +99,11 @@ class EntryTest < ActiveSupport::TestCase
 
     pending_by_provider.each do |provider, entry_id|
       assert_includes pending_ids, entry_id, "#{provider} pending entry should match the pending filter"
-      assert_not_includes confirmed_ids, entry_id, "#{provider} pending entry should be excluded from the confirmed filter"
+      assert_includes confirmed_ids, entry_id, "Historical flags do not exclude movements"
     end
 
     assert_includes confirmed_ids, confirmed.id
-    assert_not_includes pending_ids, confirmed.id
+    assert_includes pending_ids, confirmed.id
   end
 
   test "visible scope only returns entries from visible accounts" do

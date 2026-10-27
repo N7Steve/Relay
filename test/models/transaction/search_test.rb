@@ -960,7 +960,7 @@ class Transaction::SearchTest < ActiveSupport::TestCase
     assert_equal Money.new(0, @family.currency), totals.transfer_outflow_money
   end
 
-  test "status filter matches pending transactions for every supported provider" do
+  test "retired status filters include all transactions for every historical provider" do
     confirmed = create_transaction(account: @checking_account, amount: 100, kind: "standard")
 
     # One pending transaction per provider in PENDING_PROVIDERS. Regression for the
@@ -977,11 +977,11 @@ class Transaction::SearchTest < ActiveSupport::TestCase
 
     pending_by_provider.each do |provider, txn_id|
       assert_includes pending_ids, txn_id, "#{provider} pending txn should match the pending filter"
-      assert_not_includes confirmed_ids, txn_id, "#{provider} pending txn should be excluded from the confirmed filter"
+      assert_includes confirmed_ids, txn_id, "Historical flags do not exclude movements"
     end
 
     assert_includes confirmed_ids, confirmed.entryable.id
-    assert_not_includes pending_ids, confirmed.entryable.id
+    assert_includes pending_ids, confirmed.entryable.id
   end
 
   # Regression for https://github.com/we-promise/sure/issues/3174

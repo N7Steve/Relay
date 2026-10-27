@@ -20,7 +20,7 @@ class IncomeStatement
   def totals(transactions_scope: nil, date_range:)
     # Default to excluding pending transactions from budget/analytics calculations
     # Pending transactions shouldn't affect budget totals until they post
-    transactions_scope ||= family.transactions.visible.excluding_pending
+    transactions_scope ||= family.transactions.visible
 
     result = totals_query(transactions_scope: transactions_scope, date_range: date_range)
 
@@ -121,13 +121,13 @@ class IncomeStatement
   # dashboard's cumulative spending chart. Same scoping as `expense_totals`.
   def daily_expense_series(period:)
     Rails.cache.fetch([
-      "income_statement", "daily_expense_series", "v7", family.id, user&.id,
+      "income_statement", "daily_expense_series", "v8", family.id, user&.id,
       included_account_ids_hash, period.start_date, period.end_date,
       *cache_freshness_key
     ]) do
       DailyExpenseTotals.new(
         family,
-        transactions_scope: family.transactions.visible.excluding_pending.in_period(period),
+        transactions_scope: family.transactions.visible.in_period(period),
         date_range: period.date_range,
         included_account_ids: included_account_ids
       ).call
@@ -135,7 +135,7 @@ class IncomeStatement
   end
 
   def totals_for(period, account_ids: nil)
-    scope = family.transactions.visible.excluding_pending.in_period(period)
+    scope = family.transactions.visible.in_period(period)
     scope = scope.where(entries: { account_id: account_ids }) if account_ids.present?
 
     totals(transactions_scope: scope, date_range: period.date_range)
@@ -249,7 +249,7 @@ class IncomeStatement
       @totals_for_period ||= {}
       @totals_for_period[period_cache_key(period)] ||=
         totals_query(
-          transactions_scope: family.transactions.visible.excluding_pending.in_period(period),
+          transactions_scope: family.transactions.visible.in_period(period),
           date_range: period.date_range
         )
     end
@@ -257,7 +257,7 @@ class IncomeStatement
     def family_stats(interval: "month")
       @family_stats ||= {}
       @family_stats[interval] ||= Rails.cache.fetch([
-        "income_statement", "family_stats", "v7", family.id, user&.id, interval, included_account_ids_hash,
+        "income_statement", "family_stats", "v8", family.id, user&.id, interval, included_account_ids_hash,
         *cache_freshness_key
       ]) { FamilyStats.new(family, interval:, account_ids: included_account_ids).call }
     end
@@ -265,7 +265,7 @@ class IncomeStatement
     def category_stats(interval: "month")
       @category_stats ||= {}
       @category_stats[interval] ||= Rails.cache.fetch([
-        "income_statement", "category_stats", "v7", family.id, user&.id, interval, included_account_ids_hash,
+        "income_statement", "category_stats", "v8", family.id, user&.id, interval, included_account_ids_hash,
         *cache_freshness_key
       ]) { CategoryStats.new(family, interval:, account_ids: included_account_ids).call }
     end
@@ -296,7 +296,7 @@ class IncomeStatement
       sql_hash = Digest::MD5.hexdigest(transactions_scope.to_sql)
 
       Rails.cache.fetch([
-      "income_statement", "totals_query", "v7", family.id, user&.id,
+      "income_statement", "totals_query", "v8", family.id, user&.id,
       included_account_ids_hash, sql_hash, date_range.begin, date_range.end,
       *cache_freshness_key
       ]) { Totals.new(family, transactions_scope: transactions_scope, date_range: date_range, included_account_ids: included_account_ids).call }

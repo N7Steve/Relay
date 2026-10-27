@@ -22,7 +22,7 @@ class IncomeStatement::DailyExpenseTotalsTest < ActiveSupport::TestCase
     assert_equal 25, by_date[Date.current].total
   end
 
-  test "excludes income, budget-excluded kinds, and pending transactions" do
+  test "excludes income and budget excluded kinds but includes historical pending rows" do
     create_transaction(account: @checking, amount: -500, date: Date.current) # income
     create_transaction(account: @checking, amount: 40, date: Date.current, kind: "funds_movement")
     create_transaction(account: @checking, amount: 30, date: Date.current, kind: "cc_payment")
@@ -33,7 +33,7 @@ class IncomeStatement::DailyExpenseTotalsTest < ActiveSupport::TestCase
     series = daily_series
 
     assert_equal 1, series.size
-    assert_equal 10, series.first.total
+    assert_equal 30, series.first.total
   end
 
   test "excludes entries marked as excluded" do

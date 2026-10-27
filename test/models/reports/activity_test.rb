@@ -88,7 +88,7 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     assert_equal 260, report.totals(period: @period).income.amount
   end
 
-  test "respects family finance access exclusions pending status and account filters" do
+  test "respects family finance access and exclusions while including historical pending rows" do
     movement(@portfolio, -50, kind: "investment_value_adjustment")
     movement(@portfolio, -500, kind: "investment_value_adjustment", excluded: true)
     movement(@portfolio, -500, kind: "investment_value_adjustment", posting_status: "pending")
@@ -101,9 +101,9 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     movement(other, -500, kind: "investment_value_adjustment")
 
     report = Reports::Activity.new(@family, user: @user)
-    assert_equal 50, report.investment_return(period: @period).amount
+    assert_equal 550, report.investment_return(period: @period).amount
     assert_equal 0, report.investment_return(period: @period, account_id: partner.id).amount
-    assert_equal 50, report.investment_return(period: @period, account_id: @portfolio.id).amount
+    assert_equal 550, report.investment_return(period: @period, account_id: @portfolio.id).amount
 
     @portfolio.update!(exclude_from_reports: true)
     assert_equal 0, Reports::Activity.new(@family, user: @user).totals(period: @period).income.amount

@@ -98,42 +98,6 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
     assert_equal 1, result.count
   end
 
-  # --- PDNG transaction tagging ---
-
-  test "tags PDNG transactions with pending: true in extra" do
-    pdng_tx = {
-      entry_reference: "pdng_ref",
-      transaction_id: "pdng_txn",
-      booking_date: Date.current.to_s,
-      transaction_amount: { amount: "20.00", currency: "EUR" },
-      credit_debit_indicator: "DBIT",
-      status: "PDNG"
-    }
-
-    result = @importer.send(:tag_as_pending, [ pdng_tx ])
-
-    assert_equal true, result.first[:_pending]
-  end
-
-  test "tags all passed transactions regardless of status (caller is responsible for filtering)" do
-    # tag_as_pending blindly marks everything passed to it.
-    # The caller (fetch_and_store_transactions) is responsible for only passing PDNG transactions.
-    any_tx = {
-      entry_reference: "any_ref",
-      transaction_id: "any_txn",
-      booking_date: Date.current.to_s,
-      transaction_amount: { amount: "20.00", currency: "EUR" },
-      credit_debit_indicator: "DBIT",
-      status: "BOOK"
-    }
-
-    result = @importer.send(:tag_as_pending, [ any_tx ])
-
-    assert_equal true, result.first[:_pending]
-  end
-
-  # --- identification_hashes matching ---
-
   test "find_enable_banking_account_by_hash uses identification_hashes for matching" do
     # Account already exists with uid = identification_hash
     @enable_banking_account.update!(identification_hashes: [ "hash_abc123", "hash_old_xyz" ])
@@ -146,10 +110,8 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
 
   # --- fetch_and_store_transactions behavior ---
 
-  test "fetch_and_store_transactions tags PDNG transaction as pending when include_pending is true" do
-    @importer.stubs(:include_pending?).returns(true)
-
-    # Some ASPSPs ignore transaction_status=BOOK and return PDNG transactions anyway.
+  test "fetch_and_store_transactions requests only booked transactions and discards unsolicited authorizations" do
+    # A bank may ignore the BOOK filter; its authorizations must still be discarded.
     tx = {
       entry_reference: "tx_ref",
       transaction_id: "tx_id",
@@ -158,30 +120,7 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
       status: "PDNG"
     }
 
-    @importer.stubs(:fetch_paginated_transactions).with(@enable_banking_account, has_entries(transaction_status: "BOOK")).returns([ tx ])
-    @importer.stubs(:fetch_paginated_transactions).with(@enable_banking_account, has_entries(transaction_status: "PDNG")).returns([ tx ])
-
-    result = @importer.send(:fetch_and_store_transactions, @enable_banking_account)
-
-    assert result[:success]
-    stored = @enable_banking_account.raw_transactions_payload
-    assert_equal 1, stored.size
-    assert_equal true, stored.first.with_indifferent_access[:_pending]
-  end
-
-  test "fetch_and_store_transactions filters out PDNG transaction when include_pending is false" do
-    @importer.stubs(:include_pending?).returns(false)
-
-    # If include_pending is false, we must reject any PDNG transactions returned in the BOOK fetch.
-    tx = {
-      entry_reference: "tx_ref",
-      transaction_id: "tx_id",
-      booking_date: "2026-03-05",
-      transaction_amount: { amount: "10.00", currency: "EUR" },
-      status: "PDNG"
-    }
-
-    @importer.stubs(:fetch_paginated_transactions).with(@enable_banking_account, has_entries(transaction_status: "BOOK")).returns([ tx ])
+    @importer.expects(:fetch_paginated_transactions).with(@enable_banking_account, has_entries(transaction_status: "BOOK")).once.returns([ tx ])
 
     result = @importer.send(:fetch_and_store_transactions, @enable_banking_account)
 

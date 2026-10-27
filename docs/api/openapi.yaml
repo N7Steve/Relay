@@ -3516,11 +3516,6 @@ components:
           - irregular_recurring
         shared_expense:
           type: boolean
-        posting_status:
-          type: string
-          enum:
-          - pending
-          - posted
         account_ids:
           type: array
           items:
@@ -4020,11 +4015,6 @@ components:
           type: boolean
         shared_expense:
           type: boolean
-        posting_status:
-          type: string
-          enum:
-          - pending
-          - posted
         kind:
           type: string
           enum:
@@ -4093,11 +4083,6 @@ components:
           type: boolean
         shared_expense:
           type: boolean
-        posting_status:
-          type: string
-          enum:
-          - pending
-          - posted
         kind:
           type: string
           enum:
@@ -5034,11 +5019,6 @@ components:
           - irregular_recurring
         shared_expense:
           type: boolean
-        posting_status:
-          type: string
-          enum:
-          - pending
-          - posted
         account_ids:
           type: array
           items:
@@ -8068,8 +8048,6 @@ components:
           type: boolean
         external_logos_enabled:
           type: boolean
-        syncs_include_pending:
-          type: boolean
         require_email_confirmation:
           type: boolean
         auto_sync_enabled:
@@ -8090,8 +8068,6 @@ components:
         external_google_drive_enabled:
           type: boolean
         external_logos_enabled:
-          type: boolean
-        syncs_include_pending:
           type: boolean
         require_email_confirmation:
           type: boolean

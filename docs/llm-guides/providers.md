@@ -57,22 +57,17 @@ so operators can inspect it in the super-admin `/settings/debug` UI.
 - Reserve raw Rails logging for low-value local noise; incidents operators need
   to investigate belong in the debug log.
 
-## Pending transactions and FX metadata
+## Provider metadata and import protection
 
-Enable Banking's importer reads `Setting.syncs_include_pending` (default true).
-It fetches BOOK and, when enabled, PDNG transactions, handles unsupported PDNG
-as a partial response, and reconciles pending-to-booked records without losing
-protected user edits. Keep its namespaced metadata and settlement tests.
-Retired connector environment flags no longer influence this preference.
-
-Canonical `posting_status` is normalized on validated writes without removing
-source metadata. NULL rows use every retained historical pending namespace;
-scopes, searches and settlement lookups agree. `Entry.import_protected` governs
+Enable Banking fetches BOOK only and discards PDNG authorizations. Historical
+provider flags remain available solely for settlement matching and backups.
+There is no bank posting status in financial reports or transaction inputs.
+`Entry.import_protected` governs
 independent import protection; analytical `excluded` is no longer its source for
 new records. Historical NULL protection retains the previous promise until an
 explicit unlock. Split structure, field locks and importer priorities remain.
 
-`Transaction#extra`, pending scopes, FX metadata, transaction-name rule matching
+`Transaction#extra`, FX metadata, transaction-name rule matching
 and import reconciliation still read historical namespaces. Preserve those local
 readers: removing a transport does not authorize changing existing amounts,
 currencies, pending flags, locked fields or names. Cached IBKR historical balance
@@ -101,3 +96,14 @@ register additional providers. Serialized retired connector jobs remain
 compatibility consumers that finish without connector effects; shared queues
 are never purged. See the phase 10 record and the complete backup guide for the
 current persistence contract.
+
+## Estado bancario de movimientos retirado (28 octubre 2026)
+
+Relay no ofrece estado bancario pendiente. Todos los movimientos existentes
+participan en saldos, informes y previsiones con sus exclusiones habituales,
+aunque conserven `posting_status` o flags históricos en `extra`. El MCP y la
+API compartida rechazan `posting_status`; se retira `syncs_include_pending`.
+Enable Banking solicita solo BOOK y descarta autorizaciones PDNG. Los metadatos
+históricos se conservan para restauraciones
+y reconciliación de duplicados, sin excluir movimientos por estado bancario.
+No se altera la confirmación de Agenda, transferencias ni propuestas MCP.

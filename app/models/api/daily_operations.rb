@@ -78,7 +78,6 @@ class Api::DailyOperations
     scope = scope.where(parent_entry_id: nil) if args["exclude_split_children"]
     scope = scope.excluding_split_parents unless args["include_split_parents"]
     scope = scope.joins("INNER JOIN transactions ON transactions.id = entries.entryable_id")
-    scope = scope.merge(args["posting_status"] == "pending" ? Transaction.pending : Transaction.excluding_pending) if args["posting_status"]
     scope = scope.where("entries.amount < 0") if args["type"] == "income"
     scope = scope.where("entries.amount > 0") if args["type"] == "expense"
     scope = scope.where(transactions: { category_id: nil }) if args["uncategorized"]
@@ -508,7 +507,7 @@ class Api::DailyOperations
     end
 
     def transaction_fields(args)
-      args.slice("category_id", "merchant_id", "tag_ids", "kind", "forecast_behavior", "shared_expense", "posting_status").symbolize_keys
+      args.slice("category_id", "merchant_id", "tag_ids", "kind", "forecast_behavior", "shared_expense").symbolize_keys
     end
 
     def validate_accountable_attributes!(type, attributes)

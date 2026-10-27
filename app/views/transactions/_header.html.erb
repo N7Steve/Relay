@@ -21,15 +21,6 @@
       <span class="text-sm text-secondary">
         <%= entry.date ? I18n.l(entry.date, format: :long) : "—" %>
       </span>
-      <% if entry.transaction.pending? %>
-        <%= render DS::Pill.new(
-          label: t("transactions.transaction.pending"),
-          tone: :neutral,
-          marker: false,
-          icon: "clock",
-          title: t("transactions.transaction.pending_tooltip")
-        ) %>
-      <% end %>
     </div>
   </div>
 </div>

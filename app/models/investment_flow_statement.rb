@@ -22,7 +22,6 @@ class InvestmentFlowStatement
   def period_totals(period: Period.current_month)
     scope = family.transactions
       .visible
-      .excluding_pending
       .where(entries: { date: period.date_range })
       .where(kind: %w[standard investment_contribution])
       .where(investment_activity_label: %w[Contribution Withdrawal])

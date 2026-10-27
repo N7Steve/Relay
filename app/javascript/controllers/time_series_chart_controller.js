@@ -12,6 +12,8 @@ export default class extends Controller {
     useTooltip: { type: Boolean, default: true },
     selectable: { type: Boolean, default: false },
     showChange: { type: Boolean, default: true },
+    showAxes: { type: Boolean, default: false },
+    currency: { type: String, default: "EUR" },
   };
 
   _d3SvgMemo = null;
@@ -127,10 +129,11 @@ export default class extends Controller {
   }
 
   _drawChart() {
+    if (this.showAxesValue) this._drawAxes();
     this._drawTrendline();
 
     if (this.useLabelsValue) {
-      this._drawXAxisLabels();
+      if (!this.showAxesValue) this._drawXAxisLabels();
       this._drawGradientBelowTrendline();
     }
 
@@ -255,6 +258,77 @@ export default class extends Controller {
         return i === 0 ? "5em" : "-5em";
       })
       .attr("dy", "0em");
+  }
+
+  _drawAxes() {
+    const locale = document.documentElement.lang || "en";
+    const moneyFormat = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: this.currencyValue,
+      notation: "compact",
+      maximumFractionDigits: 1,
+    });
+    const y = this._d3YScale;
+    const yAxis = this._d3Group.append("g").attr("class", "value-axis");
+    yAxis.call(
+      d3
+        .axisLeft(y)
+        .ticks(4)
+        .tickSize(-this._d3ContainerWidth)
+        .tickPadding(8)
+        .tickFormat((value) => moneyFormat.format(value)),
+    );
+    yAxis.select(".domain").remove();
+    yAxis
+      .selectAll("line")
+      .attr("class", "text-subdued")
+      .attr("stroke", "currentColor")
+      .attr("stroke-opacity", (value) => (value === 0 ? 0.7 : 0.25))
+      .attr("stroke-dasharray", (value) => (value === 0 ? null : "3,4"));
+
+    const dateFormat = new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+    // Use actual series dates and compact localized labels, including on mobile.
+    const count = Math.max(
+      2,
+      Math.min(6, Math.floor(this._d3ContainerWidth / 150)),
+    );
+    const points = Array.from(
+      { length: count },
+      (_, index) =>
+        this._normalDataPoints[
+          Math.round(
+            (index * (this._normalDataPoints.length - 1)) / (count - 1),
+          )
+        ],
+    );
+    const labels = new Map(
+      points.map((point) => [+point.date, dateFormat.format(point.date)]),
+    );
+    const xAxis = this._d3Group
+      .append("g")
+      .attr("class", "date-axis")
+      .attr("transform", `translate(0,${this._d3ContainerHeight})`);
+    xAxis.call(
+      d3
+        .axisBottom(this._d3XScale)
+        .tickValues(points.map((point) => point.date))
+        .tickSize(0)
+        .tickPadding(12)
+        .tickFormat((date) => labels.get(+date)),
+    );
+    xAxis.select(".domain").remove();
+    xAxis
+      .selectAll("text")
+      .attr("text-anchor", (_, index) =>
+        index === 0 ? "start" : index === points.length - 1 ? "end" : "middle",
+      );
+    this._d3Group
+      .selectAll(".value-axis text, .date-axis text")
+      .attr("class", "text-secondary fill-current text-xs tabular-nums");
   }
 
   _drawGradientBelowTrendline() {
@@ -643,6 +717,9 @@ export default class extends Controller {
   }
 
   get _margin() {
+    if (this.showAxesValue) {
+      return { top: 16, right: 24, bottom: 40, left: 88 };
+    }
     if (this.useLabelsValue) {
       return { top: 20, right: 0, bottom: 10, left: 0 };
     }
@@ -686,6 +763,20 @@ export default class extends Controller {
   get _d3YScale() {
     const dataMin = d3.min(this._normalDataPoints, this._getDatumValue);
     const dataMax = d3.max(this._normalDataPoints, this._getDatumValue);
+
+    // The dashboard has visible value references, so fit the observed range
+    // with modest breathing room rather than flattening it with hidden padding.
+    if (this.showAxesValue) {
+      const padding =
+        dataMin === dataMax
+          ? Math.max(Math.abs(dataMax) * 0.05, 1)
+          : (dataMax - dataMin) * 0.05;
+      return d3
+        .scaleLinear()
+        .rangeRound([this._d3ContainerHeight, 0])
+        .domain([dataMin - padding, dataMax + padding])
+        .nice(4);
+    }
 
     // Handle edge case where all values are the same
     if (dataMin === dataMax) {

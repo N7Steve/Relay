@@ -19,14 +19,14 @@ class Entry::FinancialEligibilityTest < ActiveSupport::TestCase
     assert_not excluded.protected_from_sync?
   end
 
-  test "pending flags from current and historical providers do not enter either history" do
-    posted = create_transaction(account: @account)
+  test "historical pending flags no longer exclude either history" do
+    create_transaction(account: @account)
     Transaction::PENDING_PROVIDERS.each do |provider|
       create_transaction(account: @account, entryable: Transaction.new(extra: { provider => { "pending" => true } }))
     end
 
-    assert_equal [ posted.id ], @account.entries.eligible_for_balance.pluck(:id)
-    assert_equal [ posted.id ], @account.entries.eligible_for_forecast_history.pluck(:id)
+    assert_equal @account.entries.order(:id).pluck(:id), @account.entries.eligible_for_balance.order(:id).pluck(:id)
+    assert_equal @account.entries.order(:id).pluck(:id), @account.entries.eligible_for_forecast_history.order(:id).pluck(:id)
   end
 
   test "split counts children once for balances and omits analytically excluded children from forecasts" do

@@ -112,8 +112,6 @@ class Transaction < ApplicationRecord
   }, prefix: :forecast, validate: true
 
   before_validation :normalize_legacy_one_time_kind
-  before_validation :normalize_posting_status
-  validates :posting_status, inclusion: { in: %w[pending posted] }, allow_nil: true
   after_save :clear_forecast_behavior_assignment
 
   # Explicitly selecting normal must also override a historical one_time row
@@ -199,27 +197,6 @@ class Transaction < ApplicationRecord
     .map { |p| "(t.extra -> '#{p}' ->> 'pending')::boolean = true" }
     .join(" OR ")
     .freeze
-  CANONICAL_PENDING_CHECK_SQL = "COALESCE(t.posting_status = 'pending', (#{PENDING_CHECK_SQL}), false)".freeze
-
-  # Pending transaction scopes - filter based on provider pending flags in extra JSONB
-  # Works with any provider that stores pending status in extra["provider_name"]["pending"]
-  scope :pending, -> {
-    where(pending_sql("transactions"))
-  }
-
-  scope :excluding_pending, -> {
-    where.not(pending_sql("transactions"))
-  }
-
-  # SQL snippet for raw queries that must exclude pending transactions.
-  # Use in income statements, balance sheets, and raw analytics.
-  def self.pending_providers_sql(table_alias = "t")
-    "AND NOT (#{pending_sql(table_alias)})"
-  end
-
-  def self.pending_sql(table_alias = "t")
-    CANONICAL_PENDING_CHECK_SQL.gsub(/\bt\./, "#{table_alias}.")
-  end
 
   # Overarching grouping method for all transfer-type transactions
   def transfer?
@@ -255,12 +232,6 @@ class Transaction < ApplicationRecord
   # pick. See Category.recently_used_for.
   def record_category_usage!
     category.touch(:last_used_at) if saved_change_to_category_id? && category.present?
-  end
-
-  def pending?
-    return posting_status == "pending" if posting_status.present? && !will_save_change_to_extra?
-
-    legacy_pending?
   end
 
   def legacy_pending?
@@ -326,7 +297,7 @@ class Transaction < ApplicationRecord
   # The pending entry is destroyed; the posted entry survives with attributes inherited from both sides.
   # Attribute inheritance: Date + Category from pending, Name + Merchant from posted (booked).
   def merge_with_duplicate!
-    return false unless pending?
+    return false unless legacy_pending?
     return false unless has_potential_duplicate?
 
     posted_entry = potential_duplicate_entry
@@ -450,7 +421,7 @@ class Transaction < ApplicationRecord
   # Returns entries (not transactions) for UI consistency with transfer matcher
   # Lists recent posted transactions from the same account for manual merging
   def pending_duplicate_candidates(limit: 20, offset: 0)
-    return Entry.none unless pending? && entry.present?
+    return Entry.none unless legacy_pending? && entry.present?
 
     account = entry.account
     currency = entry.currency
@@ -469,13 +440,6 @@ class Transaction < ApplicationRecord
   end
 
   private
-    def normalize_posting_status
-      return if will_save_change_to_posting_status? && posting_status.present?
-      return unless posting_status.nil? || will_save_change_to_extra?
-
-      self.posting_status = legacy_pending? ? "pending" : "posted"
-    end
-
 
     def normalize_legacy_one_time_kind
       return unless kind == "one_time"

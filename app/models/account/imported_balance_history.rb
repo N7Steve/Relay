@@ -11,7 +11,7 @@ class Account::ImportedBalanceHistory
 
     rows = balance_rows
     # Local absolute updates supersede the retained, disconnected observations.
-    first_update = account.transactions.excluding_pending.where(kind: "investment_value_adjustment")
+    first_update = account.transactions.where(kind: "investment_value_adjustment")
       .where("transactions.extra ? 'investment_value'").joins(:entry).minimum("entries.date")
     rows = rows.select { |row| row[:date] < first_update } if first_update
     return if rows.empty?

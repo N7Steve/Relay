@@ -134,7 +134,7 @@ class Investment::RoboadvisorPerformance
     end
 
     def performance_transactions(date_range)
-      entries = account.entries.excluding_pending.excluding_split_parents
+      entries = account.entries.excluding_split_parents
         .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
         .where(excluded: false)
         .where.not(transactions: { kind: Transaction::TRANSFER_KINDS })

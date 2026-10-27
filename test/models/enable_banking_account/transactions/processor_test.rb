@@ -73,15 +73,16 @@ class EnableBankingAccount::Transactions::ProcessorTest < ActiveSupport::TestCas
     end
   end
 
-  test "imports a pending transaction that has NOT been merged" do
+  test "ignores unbooked authorizations in old provider snapshots" do
     @enable_banking_account.update!(
       raw_transactions_payload: [
         raw_pending_transaction(transaction_id: "PDNG_NEW_UNMERGED")
       ]
     )
 
-    assert_difference "@account.entries.count", 1 do
-      EnableBankingAccount::Transactions::Processor.new(@enable_banking_account).process
+    assert_no_difference "@account.entries.count" do
+      result = EnableBankingAccount::Transactions::Processor.new(@enable_banking_account).process
+      assert_equal 1, result[:skipped]
     end
   end
 
@@ -110,7 +111,7 @@ class EnableBankingAccount::Transactions::ProcessorTest < ActiveSupport::TestCas
     @enable_banking_account.update!(
       raw_transactions_payload: [
         raw_pending_transaction(transaction_id: "PDNG_SKIP_ME"),          # excluded
-        raw_pending_transaction(transaction_id: "PDNG_BRAND_NEW_12345")   # should be imported
+        raw_pending_transaction(transaction_id: "PDNG_BRAND_NEW_12345").merge(_pending: false, status: "BOOK")   # should be imported
       ]
     )
 
@@ -145,7 +146,7 @@ class EnableBankingAccount::Transactions::ProcessorTest < ActiveSupport::TestCas
       raw_transactions_payload: [
         raw_pending_transaction(transaction_id: "PDNG_MULTI_1"),  # excluded
         raw_pending_transaction(transaction_id: "PDNG_MULTI_2"),  # excluded
-        raw_pending_transaction(transaction_id: "PDNG_MULTI_NEW") # new — should import
+        raw_pending_transaction(transaction_id: "PDNG_MULTI_NEW").merge(_pending: false, status: "BOOK") # new — should import
       ]
     )
 
@@ -260,7 +261,7 @@ class EnableBankingAccount::Transactions::ProcessorTest < ActiveSupport::TestCas
       raw_transactions_payload: [
         raw_pending_transaction(transaction_id: "PDNG_MANUAL"),         # excluded via manual_merge
         raw_pending_transaction(transaction_id: "PDNG_AUTO"),           # excluded via auto_claimed_pending_ids
-        raw_pending_transaction(transaction_id: "PDNG_BRAND_NEW_XXXX")  # new — should import
+        raw_pending_transaction(transaction_id: "PDNG_BRAND_NEW_XXXX").merge(_pending: false, status: "BOOK")  # new — should import
       ]
     )
 

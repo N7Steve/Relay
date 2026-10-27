@@ -85,7 +85,7 @@ class Balance::SyncCacheTest < ActiveSupport::TestCase
     assert_equal 150.0, converted_entry.amount
   end
 
-  test "excludes pending transactions while retaining posted transactions and non-transaction entries" do
+  test "includes historical pending transactions and non-transaction entries" do
     pending = @account.entries.create!(
       date: Date.current,
       name: "Pending Transaction",
@@ -111,7 +111,7 @@ class Balance::SyncCacheTest < ActiveSupport::TestCase
 
     entry_names = Balance::SyncCache.new(@account).send(:converted_entries).map(&:name)
 
-    assert_not_includes entry_names, pending.name
+    assert_includes entry_names, pending.name
     assert_includes entry_names, posted.name
     assert_includes entry_names, trade.name
   end

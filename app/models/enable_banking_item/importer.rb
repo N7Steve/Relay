@@ -389,29 +389,6 @@ class EnableBankingItem::Importer
       )
     end
 
-    # Surfaces "ASPSP doesn't support PDNG" as a support-visible diagnostic, same
-    # rationale as capture_pagination_truncation_debug_log: this is a partial
-    # degradation (booked transactions still sync, pending transactions are
-    # silently skipped) that was previously only visible via Rails.logger.
-    def capture_pdng_unsupported_debug_log(enable_banking_account, error:)
-      DebugLogEntry.capture(
-        category: "provider_sync_error",
-        level: "warn",
-        message: "ASPSP does not support the PDNG transaction status; skipping pending transactions and continuing with booked transactions only",
-        source: self.class.name,
-        provider_key: "enable_banking",
-        family: enable_banking_item.family,
-        account_provider: enable_banking_account.account_provider,
-        metadata: {
-          enable_banking_item_id: enable_banking_item.id,
-          enable_banking_account_id: enable_banking_account.id,
-          uid: enable_banking_account.uid,
-          error_type: error.error_type.to_s,
-          provider_error: sanitized_provider_error(error)
-        }
-      )
-    end
-
     def sanitized_error_message(error)
       return error.message unless error.is_a?(Provider::EnableBanking::EnableBankingError)
 
@@ -450,13 +427,8 @@ class EnableBankingItem::Importer
       existing
     end
 
-    def include_pending?
-      Setting.syncs_include_pending
-    end
-
     def fetch_and_store_transactions(enable_banking_account)
       start_date = determine_sync_start_date(enable_banking_account)
-      include_pending = include_pending?
 
       all_transactions = fetch_paginated_transactions(
         enable_banking_account,
@@ -465,67 +437,10 @@ class EnableBankingItem::Importer
         psu_headers: enable_banking_item.build_psu_headers
       )
 
-      if include_pending
-        # Tag any transaction in all_transactions (fetched as BOOK but actually PDNG) with _pending: true
-        all_transactions = all_transactions.map do |tx|
-          tx_ia = tx.with_indifferent_access
-          tx_ia[:status] == "PDNG" ? tx_ia.merge(_pending: true) : tx_ia
-        end
-      else
-        # If include_pending is false, we must filter out any pending transactions
-        # that were returned (e.g. if the bank ignores transaction_status="BOOK").
-        all_transactions = all_transactions.reject do |tx|
-          tx.with_indifferent_access[:status] == "PDNG"
-        end
+      # Some banks return authorizations even for a BOOK request.
+      all_transactions = all_transactions.reject do |tx|
+        tx.with_indifferent_access[:status] == "PDNG"
       end
-
-      pending_transactions = []
-      if include_pending
-        # Also fetch pending transactions (visible for 1-3 days before they become BOOK) if setting is enabled.
-        # The BOOK fetch above used the same date_from/date_to and succeeded, so any 422 raised here is
-        # necessarily about the transaction_status param. Different ASPSPs reject it with different bodies
-        # (e.g. ImaginV2 returns WRONG_REQUEST_PARAMETERS; others mention "transactionStatus" verbatim),
-        # so we treat every validation_error on PDNG as "ASPSP doesn't support pending" and continue with
-        # the booked transactions only. (Issue #1805)
-        # Trade Republic rejects the same request with a 400 (:bad_request) instead of a
-        # 422 (:validation_error), so both error types are treated as "PDNG unsupported". (Issue #392)
-        begin
-          pending_transactions = fetch_paginated_transactions(
-            enable_banking_account,
-            start_date: start_date,
-            transaction_status: "PDNG",
-            psu_headers: enable_banking_item.build_psu_headers
-          )
-        rescue Provider::EnableBanking::EnableBankingError => e
-          raise unless [ :validation_error, :bad_request ].include?(e.error_type)
-          api_error = e.response_data.is_a?(Hash) ? (e.response_data[:error] || e.response_data["error"]) : nil
-          Rails.logger.warn "EnableBankingItem::Importer - ASPSP does not support PDNG transaction status for account #{enable_banking_account.uid}, skipping pending transactions. API error: #{api_error || e.message}"
-          capture_pdng_unsupported_debug_log(enable_banking_account, error: e)
-        end
-      end
-
-      booked_transactions = all_transactions.reject { |tx| tx.with_indifferent_access[:_pending] }
-
-      book_fingerprints = booked_transactions
-        .map { |tx| EnableBankingEntry::Processor.compute_external_id(tx) }
-        .compact.to_set
-
-      # Also index all booked entry_references so a pending row that lacks
-      # transaction_id can still be matched when the settled BOOK row adds one
-      # (fingerprints differ; entry_reference stays the same across settlement).
-      book_entry_refs = booked_transactions
-        .map { |tx| tx.with_indifferent_access[:entry_reference].presence }
-        .compact.to_set
-
-      pending_transactions.reject! do |tx|
-        tx_ia = tx.with_indifferent_access
-        fp = EnableBankingEntry::Processor.compute_external_id(tx_ia)
-        entry_ref = tx_ia[:entry_reference].presence
-        (fp.present? && book_fingerprints.include?(fp)) ||
-          (entry_ref.present? && book_entry_refs.include?(entry_ref))
-      end
-
-      all_transactions = all_transactions + tag_as_pending(pending_transactions)
 
       # Deduplicate API response: Enable Banking sometimes returns the same logical
       # transaction with different entry_reference IDs in the same response.
@@ -539,46 +454,12 @@ class EnableBankingItem::Importer
 
       existing_transactions = enable_banking_account.raw_transactions_payload.to_a
 
-      removed_pending = false
-
-      unless include_pending
-        removed_pending = existing_transactions.reject! do |tx|
-          tx = tx.with_indifferent_access
-          tx.dig(:extra, :enable_banking, :pending) || tx[:_pending]
-        end
+      removed_pending = existing_transactions.reject! do |tx|
+        tx = tx.with_indifferent_access
+        tx[:status] == "PDNG" || tx.dig(:extra, :enable_banking, :pending) || tx[:_pending]
       end
 
       if all_transactions.any?
-
-        # C4: Remove stored PDNG entries that have now settled as BOOK.
-        # Two match strategies run in parallel:
-        # 1. Fingerprint: covers same-ID rows and ID-less rows matched by content.
-        # 2. Entry-reference cross-match: covers the case where a pending row had
-        #    no transaction_id but the settled BOOK row gained one — fingerprints
-        #    diverge (enable_banking_<ref> vs enable_banking_<txn_id>) but the
-        #    shared entry_reference is a reliable settlement signal.
-        booked_transactions_for_settlement = all_transactions.reject { |tx| tx.with_indifferent_access[:_pending] }
-
-        book_fingerprints = booked_transactions_for_settlement
-          .map { |tx| EnableBankingEntry::Processor.compute_external_id(tx) }
-          .compact.to_set
-
-        book_entry_refs = booked_transactions_for_settlement
-          .map { |tx| tx.with_indifferent_access[:entry_reference].presence }
-          .compact.to_set
-
-        if include_pending
-          removed_pending ||= existing_transactions.reject! do |tx|
-            tx = tx.with_indifferent_access
-            pending_flag = tx.dig(:extra, :enable_banking, :pending) || tx[:_pending]
-            next false unless pending_flag
-
-            fp = EnableBankingEntry::Processor.compute_external_id(tx)
-            entry_ref = tx[:entry_reference].presence
-            (fp.present? && book_fingerprints.include?(fp)) ||
-              (entry_ref.present? && book_entry_refs.include?(entry_ref))
-          end
-        end
 
         existing_ids = existing_transactions.map { |tx|
           EnableBankingEntry::Processor.compute_external_id(tx)
@@ -705,9 +586,8 @@ class EnableBankingItem::Importer
           # Trade Republic's PDNG fetch specifically surfaces the same underlying issue as
           # a plain 400/:bad_request instead). Failing outright would discard every page
           # already fetched, so once at least one page has succeeded, treat either error
-          # type as "pagination exhausted" and keep the partial result — symmetric with the
-          # PDNG-unsupported handling below, which already tolerates both types for the same
-          # reason. A validation error on the very first page has no prior data to fall back
+          # type as "pagination exhausted" and keep the partial result.
+          # A validation error on the very first page has no prior data to fall back
           # on and is a real failure, so it still propagates.
           # WRONG_TRANSACTIONS_PERIOD is excluded even mid-pagination: it means the
           # date range itself is invalid (already retried once with a corrected
@@ -768,9 +648,6 @@ class EnableBankingItem::Importer
       end
     end
 
-    def tag_as_pending(transactions)
-      transactions.map { |tx| tx.merge(_pending: true) }
-    end
 
     def find_enable_banking_account_by_hash(hash_value)
       return nil if hash_value.blank?

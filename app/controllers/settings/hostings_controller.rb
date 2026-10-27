@@ -40,9 +40,6 @@ class Settings::HostingsController < ApplicationController
       Setting.brand_fetch_high_res_logos = hosting_params[:brand_fetch_high_res_logos] == "1"
     end
 
-    if hosting_params.key?(:syncs_include_pending)
-      Setting.syncs_include_pending = hosting_params[:syncs_include_pending] == "1"
-    end
 
     sync_settings_changed = false
 
@@ -83,7 +80,7 @@ class Settings::HostingsController < ApplicationController
     # Strong parameters for the self-hosting settings form.
     def hosting_params
       return ActionController::Parameters.new unless params.key?(:setting)
-      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :syncs_include_pending, :auto_sync_enabled, :auto_sync_time)
+      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :auto_sync_enabled, :auto_sync_time)
       permitted
     end
 

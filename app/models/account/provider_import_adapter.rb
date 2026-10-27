@@ -4,7 +4,7 @@ class Account::ProviderImportAdapter
   # than spelled out, so a newly supported provider cannot silently drop out of
   # pending→posted reconciliation. Frozen constant built from a frozen provider list:
   # no user input reaches the SQL (same reasoning as Transaction::PENDING_CHECK_SQL).
-  PENDING_LOOKUP_SQL = Transaction::CANONICAL_PENDING_CHECK_SQL.gsub(/\bt\./, "transactions.").freeze
+  PENDING_LOOKUP_SQL = Transaction::PENDING_CHECK_SQL.gsub(/\bt\./, "transactions.").freeze
 
   attr_reader :account, :skipped_entries
 
@@ -979,7 +979,7 @@ class Account::ProviderImportAdapter
     # Don't suggest if the posted entry is also still pending (pending→pending match)
     # Suggestions are only for pending→posted reconciliation
     posted_transaction = posted_entry.entryable
-    return if posted_transaction.is_a?(Transaction) && posted_transaction.pending?
+    return if posted_transaction.is_a?(Transaction) && posted_transaction.legacy_pending?
 
     pending_transaction.update!(
       extra: existing_extra.merge(

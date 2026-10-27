@@ -101,7 +101,6 @@ class Family < ApplicationRecord
       .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
       .where(account_id: ids, date: range)
       .where(excluded: false)
-      .merge(Transaction.excluding_pending)
       .sum(:amount)
 
     -net.to_d

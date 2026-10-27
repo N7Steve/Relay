@@ -270,7 +270,6 @@ class Goal < ApplicationRecord
       .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
       .where(account_id: account_ids, date: 90.days.ago.to_date..Date.current)
       .where(excluded: false)
-      .merge(Transaction.excluding_pending)
       .group(:account_id)
       .sum(:amount)
   end

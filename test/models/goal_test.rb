@@ -293,7 +293,7 @@ class GoalTest < ActiveSupport::TestCase
     assert_equal 0, fresh.pace.to_d
   end
 
-  test "pace averages 90-day net inflow, excluding pending and excluded entries" do
+  test "pace includes historical pending inflows and excludes analytical exclusions" do
     account = Account.create!(
       family: @family,
       accountable: Depository.new,
@@ -313,8 +313,8 @@ class GoalTest < ActiveSupport::TestCase
     create_transaction(account: account, amount: -300, date: 40.days.ago.to_date)
     create_transaction(account: account, amount: -300, date: 5.days.ago.to_date)
 
-    # Pending inflow that must be excluded by `Transaction.excluding_pending`.
-    pending_entry = create_transaction(account: account, amount: -1_000, date: 10.days.ago.to_date)
+    # Historical provider flags must not hide this inflow.
+    pending_entry = create_transaction(account: account, amount: -900, date: 10.days.ago.to_date)
     pending_entry.transaction.update!(extra: { "plaid" => { "pending" => true } })
 
     # User-excluded outflow that must be excluded by `entries.excluded = false`.
@@ -324,7 +324,7 @@ class GoalTest < ActiveSupport::TestCase
     # Entry outside the 90-day window — must be ignored.
     create_transaction(account: account, amount: -10_000, date: 200.days.ago.to_date)
 
-    assert_equal 300, goal.pace.to_d
+    assert_equal 600, goal.pace.to_d
   end
 
   test "months_of_runway is nil when goal has a target date" do

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Api::AdministrationOperations
-  INSTANCE_FIELDS = %w[external_bank_sync_enabled external_google_drive_enabled external_logos_enabled syncs_include_pending require_email_confirmation auto_sync_enabled auto_sync_time auto_sync_timezone].freeze
+  INSTANCE_FIELDS = %w[external_bank_sync_enabled external_google_drive_enabled external_logos_enabled require_email_confirmation auto_sync_enabled auto_sync_time auto_sync_timezone].freeze
 
   def get_profile(_args)
     user.attributes.slice("id", "first_name", "last_name", "locale", "role", "active")

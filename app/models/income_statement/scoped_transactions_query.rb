@@ -69,10 +69,6 @@ module IncomeStatement::ScopedTransactionsQuery
       Transaction.budget_inclusion_sql(t)
     end
 
-    def pending_providers_sql(t = "t")
-      Transaction.pending_providers_sql(t)
-    end
-
     # Tax-advantaged accounts (401k, IRA, HSA, etc.) are retirement savings,
     # not daily expenses, so they're excluded from budget calculations.
     def exclude_tax_advantaged_sql

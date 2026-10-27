@@ -257,7 +257,7 @@ module Api::PlanningOperations
   def reconcile_goal_pledge(args)
     pledge = planning_goal(args.fetch("goal_id"), write: true).goal_pledges.find(args.fetch("pledge_id"))
     entry = transaction_entry(args.fetch("transaction_id"), :write)
-    invalid!("A pledge can only match an eligible posted inflow inside its match window") unless pledge.kind_transfer? && pledge.expires_at >= Time.current && pledge.matches?(entry) && !entry.excluded? && !entry.transaction.pending?
+    invalid!("A pledge can only match an eligible inflow inside its match window") unless pledge.kind_transfer? && pledge.expires_at >= Time.current && pledge.matches?(entry) && !entry.excluded?
     pledge.resolve_with!(entry.transaction)
     pledge_json(pledge)
   end

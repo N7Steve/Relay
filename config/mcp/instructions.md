@@ -67,7 +67,7 @@ Para Amazon y otros comercios con compras ambiguas:
 - Cuenta, fecha, moneda e importe: los comprobados.
 - Categoría: deja sin asignar si no se conoce.
 
-«PENDIENTE» describe la información que falta. No significa que el cargo siga pendiente de contabilización bancaria. Un cargo contabilizado debe conservar `posting_status: posted` aunque falte su descripción.
+«PENDIENTE» describe la información que falta. No significa que el cargo siga pendiente de contabilización bancaria. Relay no utiliza estado bancario pendiente; no envíes `posting_status`.
 
 Para compras inequívocas de supermercado:
 

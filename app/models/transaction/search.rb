@@ -39,7 +39,6 @@ class Transaction::Search
       query = apply_default_accounts_filter(query, default_accounts_only)
       query = apply_category_filter(query, categories)
       query = apply_type_filter(query, types)
-      query = apply_status_filter(query, status)
       query = apply_merchant_filter(query, merchants)
       query = apply_tag_filter(query, tags)
       query = query.where(shared_expense: true) if shared_expense
@@ -250,32 +249,5 @@ class Transaction::Search
         query.joins(:tags).where(tags: { id: matching_tag_ids }).distinct.select(:id)
       end
       query.where(id: matching_ids)
-    end
-
-    # Filter transactions by status (pending or confirmed)
-    def apply_status_filter(query, statuses)
-      return query unless statuses.present?
-
-      normalized_statuses = statuses.reject(&:blank?).uniq
-      return query if normalized_statuses.blank?
-
-      allowed = %w[confirmed pending]
-      invalid = normalized_statuses - allowed
-      return query.none if invalid.any?
-
-      valid_statuses = normalized_statuses & allowed
-      return query if valid_statuses.sort == allowed.sort # Both selected = no filter
-
-      # Delegate to the model scopes so the provider list stays sourced from
-      # Transaction::PENDING_PROVIDERS. Previously this method hardcoded only
-      # simplefin/plaid/lunchflow, silently dropping enable_banking transactions.
-      case valid_statuses.sort
-      when [ "pending" ]
-        query.pending
-      when [ "confirmed" ]
-        query.excluding_pending
-      else
-        query
-      end
     end
 end

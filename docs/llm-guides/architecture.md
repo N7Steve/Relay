@@ -120,9 +120,9 @@ protect a row. Explicit unlock clears import/user/field protections while split
 structure remains protected in the provider adapter. Complete snapshots v2
 preserve these attributes and restore v1 exclusion protection compatibly.
 
-Posting status and account financial treatment have canonical nullable columns;
-validated writes normalize them while historical readers preserve all pending
-namespaces and account flags. See [persistence stages](../migration/financial-domain-stages.md)
+Account financial treatment has canonical nullable columns. Historical bank
+posting status and provider flags are retained for backups and settlement
+matching only; they never exclude entries from financial calculations. See [persistence stages](../migration/financial-domain-stages.md)
 for the prepared additive migration, isolated inventory and deferred integrity.
 
 ## Ingestion and background work
@@ -249,3 +249,14 @@ Preserve the existing authentication, scope and strong-parameter behavior. Follo
 the [API consistency guide](api-endpoint-consistency.md) for behavioral tests and
 documentation-only rswag specs; its API-key convention does not remove runtime
 OAuth support.
+
+## Estado bancario de movimientos retirado (28 octubre 2026)
+
+Relay no ofrece estado bancario pendiente. Todos los movimientos existentes
+participan en saldos, informes y previsiones con sus exclusiones habituales,
+aunque conserven `posting_status` o flags históricos en `extra`. El MCP y la
+API compartida rechazan `posting_status`; se retira `syncs_include_pending`.
+Enable Banking solicita solo BOOK y descarta autorizaciones PDNG. Los metadatos
+históricos se conservan para restauraciones
+y reconciliación de duplicados, sin excluir movimientos por estado bancario.
+No se altera la confirmación de Agenda, transferencias ni propuestas MCP.

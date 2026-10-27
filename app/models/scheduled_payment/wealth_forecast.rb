@@ -346,7 +346,7 @@ class ScheduledPayment::WealthForecast
       @native_investment_adjustments ||= begin
         accounts = historical_investment_accounts.index_by(&:id)
         Entry.where(account_id: accounts.keys, excluded: false)
-          .excluding_pending.excluding_split_parents
+          .excluding_split_parents
           .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id AND entries.entryable_type = 'Transaction'")
           .where(transactions: { kind: "investment_value_adjustment" })
           .each_with_object(Hash.new(0.to_d)) do |entry, result|

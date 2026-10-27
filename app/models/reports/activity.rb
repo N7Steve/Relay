@@ -29,7 +29,7 @@ class Reports::Activity
 
   def cash_transactions
     @cash_transactions ||= begin
-      scope = @family.transactions.visible.excluding_pending.where.not(id: performance_transactions.select(:id))
+      scope = @family.transactions.visible.where.not(id: performance_transactions.select(:id))
       @accounts ? scope.where(entries: { account_id: @accounts.select(:id) }) : scope
     end
   end

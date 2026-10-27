@@ -85,41 +85,6 @@ class EntrySearch
 
       scope.where(id: Entry.uncategorized_transactions.select(:id))
     end
-
-    def apply_status_filter(scope, statuses)
-      return scope unless statuses.present?
-      return scope if statuses.uniq.sort == %w[confirmed pending] # Both selected = no filter
-
-      # Source the pending check from Transaction::PENDING_CHECK_SQL (aliased to
-      # "t") so every provider in PENDING_PROVIDERS is covered. Previously this
-      # hardcoded only simplefin/plaid/lunchflow, dropping enable_banking.
-      pending_condition = <<~SQL.squish
-        entries.entryable_type = 'Transaction'
-        AND EXISTS (
-          SELECT 1 FROM transactions t
-          WHERE t.id = entries.entryable_id
-          AND (#{Transaction::CANONICAL_PENDING_CHECK_SQL})
-        )
-      SQL
-
-      confirmed_condition = <<~SQL.squish
-        entries.entryable_type != 'Transaction'
-        OR NOT EXISTS (
-          SELECT 1 FROM transactions t
-          WHERE t.id = entries.entryable_id
-          AND (#{Transaction::CANONICAL_PENDING_CHECK_SQL})
-        )
-      SQL
-
-      case statuses.sort
-      when [ "pending" ]
-        scope.where(pending_condition)
-      when [ "confirmed" ]
-        scope.where(confirmed_condition)
-      else
-        scope
-      end
-    end
   end
 
   def build_query(scope)
@@ -128,7 +93,6 @@ class EntrySearch
     query = self.class.apply_date_filters(query, start_date, end_date)
     query = self.class.apply_amount_filter(query, amount, amount_operator)
     query = self.class.apply_accounts_filter(query, accounts, account_ids)
-    query = self.class.apply_status_filter(query, status)
     query = self.class.apply_uncategorized_filter(query, uncategorized)
     query
   end

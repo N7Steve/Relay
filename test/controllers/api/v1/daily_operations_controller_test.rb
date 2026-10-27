@@ -222,12 +222,13 @@ class Api::V1::DailyOperationsControllerTest < ActionDispatch::IntegrationTest
 
   test "duplicate decisions use the suggested same account pair" do
     posted = @account.entries.create!(name: "Posted", amount: "8", currency: "USD", date: Date.current, entryable: Transaction.new)
-    pending = @account.entries.create!(name: "Pending", amount: "8", currency: "USD", date: Date.current, entryable: Transaction.new(posting_status: "pending", extra: {
+    pending = @account.entries.create!(name: "Pending", amount: "8", currency: "USD", date: Date.current, entryable: Transaction.new(extra: {
+      "enable_banking" => { "pending" => true },
       "potential_posted_match" => { "entry_id" => posted.id, "reason" => "amount" }
     }))
     invoke("dismiss_duplicate", transaction_id: pending.entryable_id, idempotency_key: "dismiss")
     assert_response :success, response.body
-    pending.transaction.update_columns(extra: { "potential_posted_match" => { "entry_id" => posted.id } }, posting_status: "pending")
+    pending.transaction.update_columns(extra: pending.transaction.extra.merge("potential_posted_match" => { "entry_id" => posted.id }), posting_status: "pending")
     invoke("merge_duplicate", transaction_id: pending.entryable_id, idempotency_key: "merge-duplicate")
     assert_response :success, response.body
     refute Entry.exists?(pending.id)
@@ -291,6 +292,16 @@ class Api::V1::DailyOperationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success, response.body
     assert response.parsed_body.key?("training_ready")
     assert_equal before, entry.transaction.reload.category_id
+  end
+
+  test "rejects retired posting status for writes and transaction searches" do
+    assert_no_difference "Transaction.count" do
+      invoke("create_transaction", { account_id: @account.id, name: "No pending state", amount: "10",
+        date: Date.current.iso8601, posting_status: "pending", idempotency_key: "retired-posting" })
+      assert_response :unprocessable_entity
+    end
+    invoke("search_transactions", { posting_status: "pending" })
+    assert_response :unprocessable_entity
   end
 
   private

@@ -3,42 +3,6 @@ require "test_helper"
 class TransactionTest < ActiveSupport::TestCase
   include EntriesTestHelper
 
-  test "pending? is true when extra.simplefin.pending is truthy" do
-    transaction = Transaction.new(extra: { "simplefin" => { "pending" => true } })
-
-    assert transaction.pending?
-  end
-
-  test "pending? is true when extra.plaid.pending is truthy" do
-    transaction = Transaction.new(extra: { "plaid" => { "pending" => "true" } })
-
-    assert transaction.pending?
-  end
-
-  test "pending? is true when extra.lunchflow.pending is truthy" do
-    transaction = Transaction.new(extra: { "lunchflow" => { "pending" => true } })
-
-    assert transaction.pending?
-  end
-
-  test "pending? is false when no provider pending metadata is present" do
-    transaction = Transaction.new(extra: { "plaid" => { "pending" => false } })
-
-    assert_not transaction.pending?
-  end
-
-  test "pending? returns true for enable_banking pending transactions" do
-    transaction = Transaction.new(extra: { "enable_banking" => { "pending" => true } })
-
-    assert transaction.pending?
-  end
-
-  test "pending? returns false for enable_banking non-pending transactions" do
-    transaction = Transaction.new(extra: { "enable_banking" => { "pending" => false } })
-
-    assert_not transaction.pending?
-  end
-
   test "investment_contribution is a valid kind" do
     transaction = Transaction.new(kind: "investment_contribution")
 

@@ -109,14 +109,12 @@ class Goal::WithdrawalDetectorTest < ActiveSupport::TestCase
     assert_empty detect
   end
 
-  # A provisional charge can still be reversed, or replaced by its posted form.
-  # Attributing one leaves the goal consumed for a transaction that no longer
-  # exists, while the posted twin arrives unstamped and is offered all over.
-  test "ignores an outflow the provider has not posted yet" do
+  # Historical provider flags no longer hide eligible outflows.
+  test "includes historical outflows flagged pending by a provider" do
     entry = outflow(1_200)
     entry.entryable.update!(extra: { "simplefin" => { "pending" => true } })
 
-    assert_empty detect
+    assert_equal [ entry.id ], detect.map(&:id)
   end
 
   test "still surfaces an outflow the provider has posted" do

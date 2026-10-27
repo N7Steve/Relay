@@ -33,7 +33,7 @@ module Account::Anchorable
     else
       [
         (opening_anchor_date if has_opening_anchor?),
-        entries.excluding_pending.minimum(:date),
+        entries.minimum(:date),
         balances.minimum(:date)
       ].compact.min
     end

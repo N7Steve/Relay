@@ -9,6 +9,17 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     @entry = entries(:transaction)
   end
 
+  test "historical pending metadata has no status badge or search picker" do
+    @entry = accounts(:depository).entries.create!(name: "Historical authorization", amount: 12,
+      currency: "USD", date: Date.current, entryable: Transaction.new(posting_status: "pending",
+        extra: { "enable_banking" => { "pending" => true } }))
+    get transactions_url
+    assert_response :success
+    assert_select "[title=?]", I18n.t("transactions.transaction.pending_tooltip"), count: 0
+    assert_select "input[name='q[status][]']", count: 0
+    assert_includes response.body, "Historical authorization"
+  end
+
   test "shared expense checkbox creates both expenses and settlements and can be cleared" do
     %w[outflow inflow].each do |nature|
       get new_transaction_url(nature: nature)
