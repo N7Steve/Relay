@@ -93,6 +93,31 @@ class Mcp::ChangeSet::SummaryTest < ActiveSupport::TestCase
     assert_equal({ "applied" => 1, "rejected" => 2 }, summary(set).first[:states])
   end
 
+  test "bulk edits show every authorized transaction with current and proposed fields" do
+    entries = [ "First bulk expense", "Second bulk expense" ].map do |name|
+      @account.entries.create!(name: name, date: Date.current, amount: 7, currency: "USD", entryable: Transaction.new)
+    end
+    set = proposal([ operation("bulk_update_transactions", transaction_ids: entries.map(&:entryable_id), attributes: { "name" => "Updated in bulk" }) ])
+    group = summary(set).first
+    assert_equal 2, group[:count]
+    details = group[:details]
+    assert_equal entries.map(&:name), details.pluck(:name)
+    assert_equal [ "Updated in bulk", "Updated in bulk" ], details.map { |row| row[:changes].first[:after] }
+    assert_equal entries.map(&:name), details.map { |row| row[:changes].first[:before] }
+  end
+
+  test "review details never expose canonical fields of inaccessible transactions or administrative secrets" do
+    entry = @account.entries.create!(name: "Private current name", date: Date.current, amount: 7, currency: "USD", entryable: Transaction.new)
+    @account.update!(owner: users(:family_member))
+    @account.account_shares.where(user: @user).delete_all
+    set = proposal([ operation("update_transaction", transaction_id: entry.entryable_id, name: "Proposed edit"),
+      operation("update_profile", password: "secret-password", preview_token: "secret-token") ])
+    details = summary(set).flat_map { |group| group[:details] }.to_json
+    assert_not_includes details, "Private current name"
+    assert_not_includes details, "secret-password"
+    assert_not_includes details, "secret-token"
+  end
+
   private
     def operation(name, **arguments)
       { "id" => SecureRandom.uuid, "name" => name, "arguments" => arguments.stringify_keys, "status" => "pending" }

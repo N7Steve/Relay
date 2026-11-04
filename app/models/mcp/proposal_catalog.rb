@@ -21,13 +21,30 @@ class Mcp::ProposalCatalog
           tool[:description] += " For a preview needed by a pending write, set defer_until_approval=true and an idempotency_key, then reference its preview_token in the write."
         end
       else
-        tool[:description] = "Propose only: #{definition[:description]} Saved in Settings > Pending changes; a human must approve in Relay before it runs. Use pending:<change_id>:<result_field> for results of earlier proposed operations."
+        tool[:description] = "Propose only: #{definition[:description]} Joins the open proposal for this connection. Prefer propose_changes for independent writes and ask for ONE review at the end of the session in Settings > Pending changes; a human must approve in Relay before it runs. Use pending:<change_id>:<result_field> for results of earlier proposed operations."
         tool[:outputSchema] = receipt
       end
       tool
-    end + [ { name: "get_pending_changes", description: "List your MCP proposals and their approval/execution status. Canonical reads do not include proposals. Approval is available only in Relay's web UI.",
+    end + [ batch_definition, { name: "get_pending_changes", description: "List your MCP proposals and their approval/execution status. Canonical reads do not include proposals. Approval is available only in Relay's web UI.",
       inputSchema: { type: "object", properties: Mcp::Catalog::PAGE, additionalProperties: false }, outputSchema: { type: "object" },
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } } ]
+  end
+
+  def self.batch_schema
+    { type: "object", additionalProperties: false, required: %w[operations], properties: {
+      operations: { type: "array", minItems: 1, maxItems: Mcp::ChangeSet::MAX_OPERATIONS, items: {
+        type: "object", additionalProperties: false, required: %w[name arguments], properties: {
+          name: { type: "string", enum: Mcp::Catalog.all.values.reject { |tool| tool.dig(:annotations, :readOnlyHint) }.pluck(:name) },
+          arguments: { type: "object" }
+        }
+      } }
+    } }
+  end
+
+  def self.batch_definition
+    { name: "propose_changes", description: "Prefer this tool for a session's independent writes: stage up to 100 operations together for ONE human approval. Each item has name and arguments (including its own stable idempotency_key). All items are staged or none are. For dependencies, stage creators first and use their pending references in a subsequent batch. Finish the session before asking the user to review the single approval_path.",
+      inputSchema: batch_schema, outputSchema: { type: "object" },
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false } }
   end
 
   def self.references?(value)

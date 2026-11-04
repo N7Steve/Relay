@@ -3,7 +3,7 @@
     "settings": {
       "pending_changes": {
         "title": "Cambios pendientes",
-        "description": "Los cambios del MCP se guardan aquí como propuestas. Tus cuentas y movimientos no cambian hasta que los apruebes. Cada credencial tiene una propuesta abierta; recházala para descartarla.",
+        "description": "Los cambios de una misma conexión MCP se agrupan en una propuesta abierta. Revisa el resumen y las comparativas y aprueba todo al terminar la sesión con el asistente. Tus datos no cambian hasta que los apruebes.",
         "operation_count": {
           "one": "1 operación propuesta",
           "other": "%{count} operaciones propuestas"
@@ -173,7 +173,44 @@
             "one": "%{count} descartada",
             "other": "%{count} descartadas"
           }
-        }
+        },
+        "details": {
+          "title": "Detalle de los cambios",
+          "item": "Elemento",
+          "before": "Valor actual",
+          "after": "Valor propuesto",
+          "empty": "—",
+          "yes": "Sí",
+          "no": "No",
+          "proposed": "Propuesto: %{name}",
+          "dependent": "Resultado de un paso anterior",
+          "unnamed": "Operación propuesta",
+          "unavailable": "Esta operación no dispone de comparativa por campos. Revisa su alcance en el resumen antes de aprobar.",
+          "notice": "Los valores actuales se consultan al abrir esta página. No son un historial ni garantizan el resultado de la ejecución. Los importes conservan su signo y moneda; solo se muestran los campos propuestos.",
+          "fields": {
+            "name": "Nombre",
+            "date": "Fecha",
+            "amount": "Importe",
+            "currency": "Moneda",
+            "notes": "Notas",
+            "category_id": "Categoría",
+            "merchant_id": "Comercio",
+            "tag_ids": "Etiquetas",
+            "excluded": "Excluida",
+            "import_protected": "Protección de importación",
+            "shared_expense": "Gasto compartido",
+            "kind": "Tipo",
+            "forecast_behavior": "Comportamiento de previsión",
+            "account_id": "Cuenta",
+            "source_account_id": "Cuenta de origen",
+            "destination_account_id": "Cuenta de destino",
+            "title": "Título",
+            "color": "Color",
+            "icon": "Icono"
+          },
+          "unknown": "No disponible"
+        },
+        "credential_expired": "La conexión que preparó esta propuesta ha caducado o se ha revocado. Reconecta el asistente y pídele que consulte los cambios pendientes. Una renovación de la misma conexión actualizará la propuesta. Puedes descartarla sin reconectar."
       },
       "settings_nav": {
         "pending_changes_label": "Cambios pendientes"

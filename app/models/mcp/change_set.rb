@@ -29,13 +29,15 @@ class Mcp::ChangeSet < ApplicationRecord
       previous = sets.where("operations @> ?::jsonb", [ { arguments: { idempotency_key: args["idempotency_key"] } } ].to_json).first if args["idempotency_key"].is_a?(String)
       if previous
         operation = previous.operations.find { |row| row.dig("arguments", "idempotency_key") == args["idempotency_key"] }
-        unless previous.authority == authority && operation["name"] == name && operation["arguments"] == args
+        unless same_connection?(previous.authority, authority) && operation["name"] == name && operation["arguments"] == args
           raise Api::Input::Invalid, "idempotency_key was already used with different arguments or a different credential"
         end
+        previous.update!(authority: authority) if previous.status == "pending" && previous.authority != authority
         return previous.receipt(operation)
       end
-      set = sets.where(status: "pending", authority: authority).order(:created_at).first || new(user: access.user, family: access.user.family, authority: authority,
+      set = sets.where(status: "pending").order(:created_at).detect { |candidate| same_connection?(candidate.authority, authority) } || new(user: access.user, family: access.user.family, authority: authority,
         credential_name: access.credential_label)
+      set.authority = authority
       schema = definition.fetch(:inputSchema)
       if deferred_read
         schema = schema.merge(properties: schema.fetch(:properties).merge(idempotency_key: Mcp::Catalog::KEY))
@@ -47,6 +49,48 @@ class Mcp::ChangeSet < ApplicationRecord
       raise Api::Input::Invalid, "This proposal exceeds 2 MiB; review it in Relay first" if set.operations.to_json.bytesize > MAX_BYTES
       set.save!
       set.receipt(operation)
+    end
+  end
+
+  # One request stages the whole batch or nothing. Domain execution remains ordered.
+  def self.stage_batch!(access:, arguments:)
+    Mcp::Catalog.validate!(Mcp::ProposalCatalog.batch_schema, arguments)
+    access.user.with_lock do
+      receipts = arguments.fetch("operations").map do |row|
+        stage!(access: access, name: row.fetch("name"), arguments: row.fetch("arguments"))
+      end
+      unless receipts.pluck(:change_set_id).uniq.one?
+        raise Api::Input::Invalid, "Batch mixes different proposals; retry the original batch separately"
+      end
+      { status: receipts.first.fetch(:status), change_set_id: receipts.first.fetch(:change_set_id), changes: receipts,
+        approval_path: receipts.first.fetch(:approval_path) }
+    end
+  end
+
+  # Token rotation is the same connection, not a new proposal. Different API
+  # keys, clients, resources, actors or effective scopes must never be combined.
+  def self.same_connection?(left, right)
+    return true if left == right
+    return false unless left.except("credential_id", "authentik") == right.except("credential_id", "authentik")
+    case left["credential_type"]
+    when "Mcp::AuthentikCredential"
+      left["credential_id"] == right["credential_id"] &&
+        left.fetch("authentik").except("exp") == right.fetch("authentik").except("exp")
+    when "Doorkeeper::AccessToken"
+      tokens = Doorkeeper::AccessToken.where(id: [ left["credential_id"], right["credential_id"] ]).to_a
+      tokens.size == 2 && tokens.first.application_id.present? &&
+        tokens.map { |token| [ token.application_id, token.resource_owner_id, token.mcp_resource, token.scopes.to_a.sort ] }.uniq.one?
+    else false
+    end
+  end
+
+  def self.refresh_pending_authority!(access:)
+    return unless access.writable?
+    authority = access.delegated_authority
+    access.user.with_lock do
+      for_actor(access.user).where(status: "pending").each do |set|
+        set.update!(authority: authority) if set.authority != authority && same_connection?(set.authority, authority)
+      end
     end
   end
 
@@ -197,7 +241,7 @@ class Mcp::ChangeSet < ApplicationRecord
     end
 
     def review_digest
-      Digest::SHA256.hexdigest(operations.to_json)
+      Digest::SHA256.hexdigest([ operations, authority ].to_json)
     end
 
     def verify_review!(actor, token)

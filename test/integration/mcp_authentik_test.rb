@@ -79,6 +79,25 @@ class McpAuthentikTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "renewed connection refreshes expired pending proposals and keeps subsequent writes together" do
+    propose_tag
+    set = Mcp::ChangeSet.find(result.fetch("change_set_id"))
+    stale_review = set.review_token
+    travel 11.minutes do
+      @claims["exp"] = 10.minutes.from_now.to_i
+      rpc("tools/call", { name: "get_pending_changes", arguments: {} })
+      assert_not response.parsed_body.dig("result", "isError"), response.body
+      assert_equal @claims["exp"], set.reload.authority.dig("authentik", "exp")
+      assert_raises(Api::Input::Invalid) { set.approve!(actor: @user, token: stale_review) }
+      rpc("tools/call", { name: "create_tag", arguments: { name: "Second renewed tag", idempotency_key: "renewed-second" } })
+      assert_equal set.id, result.fetch("change_set_id")
+      assert_equal 2, set.reload.operations.size
+      set.approve!(actor: @user, token: set.review_token)
+      set.apply!
+      assert_equal "applied", set.reload.status
+    end
+  end
+
   test "proposal authority rechecks binding scope user activity enablement and expiry" do
     propose_tag
     set = Mcp::ChangeSet.find(result.fetch("change_set_id"))

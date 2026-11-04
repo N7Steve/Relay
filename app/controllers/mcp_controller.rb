@@ -65,7 +65,7 @@ class McpController < Api::V1::BaseController
     when "ping" then {}
     when "tools/list" then list_tools(arguments)
     when "tools/call"
-      return rpc_error(-32602, "Unknown tool", :bad_request) unless Mcp::Catalog.all.key?(arguments["name"]) || arguments["name"] == "get_pending_changes"
+      return rpc_error(-32602, "Unknown tool", :bad_request) unless Mcp::Catalog.all.key?(arguments["name"]) || arguments["name"].in?(%w[get_pending_changes propose_changes])
       call_tool(arguments)
     else return rpc_error(-32601, "Method not found", :not_found)
     end
@@ -158,10 +158,12 @@ class McpController < Api::V1::BaseController
     end
 
     def call_tool(args)
-      raise Api::Input::Invalid, "Unknown tool" unless Mcp::Catalog.all.key?(args["name"]) || args["name"] == "get_pending_changes"
+      raise Api::Input::Invalid, "Unknown tool" unless Mcp::Catalog.all.key?(args["name"]) || args["name"].in?(%w[get_pending_changes propose_changes])
       raise Api::Input::Invalid, "arguments must be an object" unless args.fetch("arguments", {}).is_a?(Hash)
       name, arguments = args["name"], args.fetch("arguments", {})
-      result = if name == "get_pending_changes"
+      result = if name == "propose_changes"
+        Mcp::ChangeSet.stage_batch!(access: api_access, arguments: arguments)
+      elsif name == "get_pending_changes"
         pending_changes(arguments)
       else
         definition = Mcp::Catalog.fetch(name)
@@ -199,6 +201,7 @@ class McpController < Api::V1::BaseController
 
     def pending_changes(arguments)
       Mcp::Catalog.validate!({ type: "object", properties: Mcp::Catalog::PAGE, additionalProperties: false }, arguments.deep_stringify_keys)
+      Mcp::ChangeSet.refresh_pending_authority!(access: api_access)
       page, limit = arguments.fetch("page", 1), arguments.fetch("per_page", 25)
       scope = Mcp::ChangeSet.for_actor(current_resource_owner).order(created_at: :desc)
       count = scope.count

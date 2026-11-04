@@ -1,7 +1,7 @@
 # Propuestas MCP y aprobación humana
 
 La [opción Authentik](mcp-authentik.md) conserva este flujo y revalida el vínculo
-local, scopes y expiración de la autoridad original al aprobar y aplicar.
+local, scopes y expiración de la autoridad vigente al aprobar y aplicar.
 
 Las escrituras del MCP de Relay son **propuestas pendientes**. No se ejecuta el
 dominio, no se modifica el registro de idempotencia de ejecución y no se lanzan
@@ -16,10 +16,10 @@ El catálogo conserva los nombres de las operaciones de dominio; las escrituras
 anuncian un resultado de propuesta en lugar de un resultado de ejecución. Se añade
 la consulta `get_pending_changes`, que muestra estados, recuentos y fallos propios,
 sin exponer argumentos o resultados financieros almacenados de otras operaciones.
-Hay 244 herramientas de dominio más esta herramienta de seguimiento; una clave
+Además del dominio, se ofrecen el lote `propose_changes` y esta consulta; una clave
 read solo recibe herramientas de lectura. El asistente no puede aprobar o rechazar.
 
-Cada usuario y credencial tiene una propuesta abierta. Las nuevas operaciones se
+Cada usuario y conexión tiene una propuesta abierta. Las nuevas operaciones se
 añaden en orden hasta 100 operaciones y 2 MiB por propuesta. Cada llamada conserva
 su `idempotency_key`: repetirla devuelve la misma propuesta, incluso si ya se
 aplicó o descartó; cambiar argumentos o credencial con la misma clave se rechaza.
@@ -73,8 +73,10 @@ sin netear gastos e ingresos ni sumar los dos extremos de una transferencia.
 No incluyen comisiones ni representan una variación neta de saldo; las ediciones,
 borrados o referencias pendientes no se presentan como importes conocidos.
 Cada grupo distingue las operaciones aplicadas, fallidas, descartadas o sin aplicar.
-Los recuentos son de operaciones: un borrado masivo puede afectar a varios
-registros y una transferencia a ambas cuentas. No se presenta cada campo individual.
+El progreso y el total de la propuesta cuentan operaciones. En los grupos de
+revisión, una edición o eliminación masiva de transacciones cuenta y desglosa
+los movimientos afectados; las demás operaciones cuentan como un elemento.
+Una transferencia sigue siendo un elemento aunque afecte a dos cuentas.
 
 Solo el usuario propietario, con su familia actual y una sesión web autenticada,
 puede aprobar o descartar. Los formularios conservan CSRF. El token de revisión
@@ -120,3 +122,29 @@ en el entorno aislado; no se ejecuta contra la instalación del usuario. Despleg
 web y worker juntos. No se incluye papelera, versiones ni deshacer; los exports
 y backups siguen siendo la recuperación externa. Los datos pendientes no se
 mezclan con los informes ni con las exportaciones financieras canónicas.
+
+## Revisión conjunta y renovación de conexión
+
+`propose_changes` recibe `operations: [{ name, arguments }]` (1–100 escrituras).
+Cada operación conserva su propia `idempotency_key`. La preparación del lote es
+transaccional: si alguna operación es inválida, no se añade ninguna. No cambia
+la aplicación posterior, que sigue siendo ordenada y puede fallar parcialmente.
+Los lotes dependientes se añaden a la misma propuesta utilizando referencias
+`pending` devueltas al preparar sus creadores. No se admiten lecturas en el lote;
+las previsualizaciones diferidas siguen usando sus herramientas individuales.
+
+La conexión mantiene una propuesta abierta. La renovación de un token Authentik
+con la misma identidad, recurso y scopes, o de OAuth local con el mismo cliente,
+usuario, recurso y scopes, conserva esa agrupación. `get_pending_changes` con una
+credencial vigente actualiza la autoridad de las propuestas pendientes de esa
+conexión. No se sustituyen API keys diferentes ni se renuevan propuestas aprobadas.
+Actualizar autoridad invalida formularios de revisión anteriores: hay que recargar.
+La aprobación y cada operación siguen comprobando vigencia y permisos actuales.
+Descartar nunca necesita que la credencial MCP siga vigente.
+
+La revisión incluye tablas por grupo con valores actuales y propuestos de campos
+financieros y de organización admitidos. Las referencias muestran etiquetas de
+los registros propuestos y las etiquetas actuales se resuelven bajo los permisos
+del revisor. No se muestran claves, tokens ni argumentos administrativos secretos.
+Los valores actuales se leen al revisar: no son instantáneas históricas. Las
+operaciones sin comparativa disponible se indican explícitamente.

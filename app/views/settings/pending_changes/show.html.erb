@@ -22,6 +22,29 @@
   <% table.with_column(t("settings.pending_changes.summary.state")) { |group| pending_change_states(group) } %>
 <% end %>
 
+<p class="text-secondary text-sm"><%= t("settings.pending_changes.details.notice") %></p>
+<% @summary.groups(@change_set).each do |group| %>
+  <%= render DS::Disclosure.new(title: "#{t("settings.pending_changes.actions.#{group[:action]}")} · #{t("settings.pending_changes.types.#{group[:type]}", count: group[:count])}", open: true) do %>
+    <%= render DS::Table.new(rows: group[:details], label: t("settings.pending_changes.details.title")) do |table| %>
+      <% table.with_column(t("settings.pending_changes.details.item"), class: "min-w-40 privacy-sensitive") do |detail| %>
+        <p class="text-primary font-medium"><%= detail[:name] || t("settings.pending_changes.details.unnamed") %></p>
+        <p class="text-secondary text-sm"><%= detail[:context].map { |value| pending_change_value(value) }.join(" · ") %></p>
+        <% if detail[:changes].empty? %>
+          <p class="text-secondary text-sm"><%= t("settings.pending_changes.details.unavailable") %></p>
+        <% end %>
+      <% end %>
+      <% table.with_column(t("settings.pending_changes.details.before"), class: "min-w-56 privacy-sensitive") { |detail| pending_change_comparison(detail, :before) } %>
+      <% table.with_column(t("settings.pending_changes.details.after"), class: "min-w-56 privacy-sensitive") { |detail| pending_change_comparison(detail, :after) } %>
+      <% table.with_column(t("settings.pending_changes.summary.state")) do |detail| %>
+        <%= t("settings.pending_changes.execution_states.#{detail[:state]}", count: 1) %>
+        <% if detail[:error].present? %>
+          <p class="text-destructive text-sm"><%= detail[:error] %></p>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+
 <% if @change_set.status == "pending" %>
   <%= render DS::Alert.new(variant: :warning, message: t(".approval_notice")) %>
   <div class="flex flex-wrap gap-3">

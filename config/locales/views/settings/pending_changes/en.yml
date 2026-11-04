@@ -3,7 +3,7 @@
     "settings": {
       "pending_changes": {
         "title": "Pending changes",
-        "description": "MCP changes are saved here as proposals. Your accounts and transactions stay unchanged until you approve. Each credential has one open proposal; reject it to discard the changes.",
+        "description": "Changes from the same MCP connection are grouped into one open proposal. Review the summary and comparisons, then approve together when your assistant session is finished. Your data stays unchanged until approval.",
         "operation_count": {
           "one": "1 proposed operation",
           "other": "%{count} proposed operations"
@@ -173,7 +173,44 @@
             "one": "%{count} discarded",
             "other": "%{count} discarded"
           }
-        }
+        },
+        "details": {
+          "title": "Change details",
+          "item": "Item",
+          "before": "Current value",
+          "after": "Proposed value",
+          "empty": "—",
+          "yes": "Yes",
+          "no": "No",
+          "proposed": "Proposed: %{name}",
+          "dependent": "Result of an earlier step",
+          "unnamed": "Proposed operation",
+          "unavailable": "A field comparison is unavailable. Review its scope in the summary before approval.",
+          "notice": "Current values are read when opening this page. They are not historical snapshots or a guarantee of execution results. Amounts retain their sign and currency; only proposed fields are shown.",
+          "fields": {
+            "name": "Name",
+            "date": "Date",
+            "amount": "Amount",
+            "currency": "Currency",
+            "notes": "Notes",
+            "category_id": "Category",
+            "merchant_id": "Merchant",
+            "tag_ids": "Tags",
+            "excluded": "Excluded",
+            "import_protected": "Import protected",
+            "shared_expense": "Shared expense",
+            "kind": "Kind",
+            "forecast_behavior": "Forecast behavior",
+            "account_id": "Account",
+            "source_account_id": "Source account",
+            "destination_account_id": "Destination account",
+            "title": "Title",
+            "color": "Color",
+            "icon": "Icon"
+          },
+          "unknown": "Unavailable"
+        },
+        "credential_expired": "The connection that prepared this proposal expired or was revoked. Reconnect the assistant and ask it to list pending changes. A renewal of the same connection will refresh the proposal. You can discard it without reconnecting."
       },
       "settings_nav": {
         "pending_changes_label": "Pending changes"

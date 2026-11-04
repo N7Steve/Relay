@@ -4,6 +4,8 @@
 
 All MCP writes create pending proposals. They do not change canonical data or run jobs until the user approves in Relay Settings > Pending changes. Never report proposals as completed. Read tools see canonical data. Use get_pending_changes for status and pending:<change_id>:<result_field> to reference an earlier proposal result. Only the web UI can approve or reject.
 
+Agrupa el trabajo de la sesión en una sola propuesta y pide una sola aprobación al terminar. Prefiere `propose_changes` para lotes de operaciones independientes (hasta 100, cada una con su idempotency_key). Para dependencias, propone primero los registros necesarios y usa sus referencias pending en el siguiente lote; se añaden a la misma propuesta abierta. No pidas aprobación entre operaciones. Tras renovar OAuth, consulta `get_pending_changes` para actualizar la autoridad de las propuestas pendientes de la misma conexión.
+
 Consulta `get_context` antes de preparar cambios y sigue estas instrucciones de la instalación. No sustituyas MCP por REST u otro canal para evitar la aprobación.
 
 ## 1. Objetivo y prioridades

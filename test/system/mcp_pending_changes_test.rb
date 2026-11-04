@@ -38,6 +38,20 @@ class McpPendingChangesSystemTest < ApplicationSystemTestCase
     assert_not_equal "Proposed name", @user.reload.first_name
   end
 
+  test "review shows current and proposed transaction values together" do
+    entry = accounts(:depository).entries.create!(name: "Original review expense", date: Date.current, amount: 7, currency: "USD", entryable: Transaction.new)
+    Mcp::ChangeSet.stage!(access: @access, name: "update_transaction", arguments: {
+      transaction_id: entry.entryable_id, name: "Proposed review expense", amount: "12", idempotency_key: "system-comparison"
+    })
+    visit settings_pending_change_path(@change_set)
+    assert_text "Original review expense"
+    assert_text "Proposed review expense"
+    assert_selector "th", text: /#{Regexp.escape(I18n.t("settings.pending_changes.details.before"))}/i
+    assert_selector "th", text: /#{Regexp.escape(I18n.t("settings.pending_changes.details.after"))}/i
+    assert_no_text "Translation missing"
+    page.save_screenshot(Rails.root.join("tmp/screenshots/mcp-pending-comparison.png"))
+  end
+
   test "review distinguishes expenses income transfers and categories in Spanish on desktop and mobile" do
     @user.update!(locale: "es", theme: "relay")
     source = accounts(:depository)

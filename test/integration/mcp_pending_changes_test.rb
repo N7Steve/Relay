@@ -277,6 +277,52 @@ class McpPendingChangesTest < ActionDispatch::IntegrationTest
     assert_equal "Pending read", set.operations.last.dig("result", "name")
   end
 
+  test "one batch stages all writes in one proposal and invalid items roll back the batch" do
+    first = propose("propose_changes", operations: [
+      { name: "create_merchant", arguments: { name: "Bulk shop", idempotency_key: "batch-shop" } },
+      { name: "create_transaction", arguments: { account_id: @account.id, name: "Bulk expense", amount: "12", date: Date.current.iso8601, idempotency_key: "batch-expense" } }
+    ])
+    set = Mcp::ChangeSet.find(first.fetch("change_set_id"))
+    assert_equal 2, set.operations.size
+    assert_equal 1, first.fetch("changes").pluck("change_set_id").uniq.size
+    assert_not @account.entries.exists?(name: "Bulk expense")
+    rpc("propose_changes", operations: [
+      { name: "create_tag", arguments: { name: "Rolled back", idempotency_key: "batch-rollback" } },
+      { name: "create_transaction", arguments: { name: "Missing required fields", idempotency_key: "batch-invalid" } }
+    ])
+    assert response.parsed_body.dig("result", "isError")
+    assert_equal 2, set.reload.operations.size
+    assert_equal 1, Mcp::ChangeSet.for_actor(@user).count
+    set.approve!(actor: @user, token: set.review_token)
+    set.apply!
+    assert_equal "applied", set.reload.status
+    assert @account.entries.exists?(name: "Bulk expense")
+  end
+
+  test "review renders transaction comparisons and proposed merchant labels without tokens" do
+    entry = @account.entries.create!(name: "Original expense", date: Date.current, amount: 7, currency: "USD", entryable: Transaction.new)
+    merchant = propose("create_merchant", name: "New shop", idempotency_key: "review-shop")
+    propose("update_transaction", transaction_id: entry.entryable_id, name: "Renamed expense", amount: "12",
+      merchant_id: "pending:#{merchant.fetch('change_id')}:id", idempotency_key: "review-expense")
+    sign_in @user
+    get settings_pending_change_path(merchant.fetch("change_set_id"))
+    assert_response :success
+    assert_select "td", text: /Original expense/
+    assert_select "td", text: /Renamed expense/
+    assert_select "td", text: /New shop/
+    assert_not_includes response.body, "review-expense"
+    assert_not_includes response.body, "pending:#{merchant.fetch('change_id')}"
+  end
+
+  test "revoked proposals can always be discarded with a fresh web review" do
+    receipt = propose("create_tag", name: "Discard revoked", idempotency_key: "discard-revoked")
+    set = Mcp::ChangeSet.find(receipt.fetch("change_set_id"))
+    @key.revoke!
+    sign_in @user
+    post reject_settings_pending_change_path(set), params: { review_token: set.review_token }
+    assert_equal "rejected", set.reload.status
+  end
+
   private
     def propose(name, arguments)
       rpc(name, arguments)
