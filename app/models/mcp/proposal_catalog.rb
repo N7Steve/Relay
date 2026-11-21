@@ -6,7 +6,7 @@ class Mcp::ProposalCatalog
     Mcp::Catalog.all.values.map do |definition|
       tool = definition.deep_dup
       if tool[:name] == "get_context"
-        tool[:description] += " Call before preparing changes. Returns this installation's operating_instructions: follow its normalization, Agenda exclusions and reconciliation rules."
+        tool[:description] += " Call before preparing changes. Returns operating_instructions with this installation's rules and the authenticated user's custom instructions when configured."
       end
       tool[:inputSchema] = with_references(tool[:inputSchema], root: true)
       receipt = { type: "object", required: %w[status change_set_id change_id], properties: {

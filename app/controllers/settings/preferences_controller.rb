@@ -3,27 +3,34 @@ class Settings::PreferencesController < ApplicationController
 
   def show
     @user = Current.user
-    @family_members = Current.family.users.where.not(id: @user.id).where(active: true)
-    @budget_shares = @user.budget_shares_given.index_by(&:viewer_id)
+    load_budget_sharing
   end
 
-  # Writes per-user boolean preferences stored in the JSONB `users.preferences`
-  # column. Mirrors Settings::AppearancesController#update so the toggle card on
-  # the Preferences page can submit directly without going through the broader
-  # UsersController#update flow (which expects a full user form payload).
   def update
     @user = Current.user
-    user_params = params.permit(user: [ :preview_features_enabled ]).fetch(:user, {})
+    user_params = params.permit(user: [ :preview_features_enabled, :mcp_custom_instructions ]).fetch(:user, {})
 
-    @user.transaction do
-      @user.lock!
-      updated_prefs = (@user.preferences || {}).deep_dup
+    saved = @user.with_lock do
       if user_params.key?(:preview_features_enabled)
-        updated_prefs["preview_features_enabled"] =
-          ActiveModel::Type::Boolean.new.cast(user_params[:preview_features_enabled])
+        enabled = ActiveModel::Type::Boolean.new.cast(user_params[:preview_features_enabled])
+        @user.preferences = @user.preferences.to_h.merge("preview_features_enabled" => enabled)
       end
-      @user.update!(preferences: updated_prefs)
+      @user.update(user_params.slice(:mcp_custom_instructions))
     end
-    redirect_to settings_preferences_path
+
+    if saved
+      flash[:notice] = t(".mcp_instructions_saved") if user_params.key?(:mcp_custom_instructions)
+      redirect_to settings_preferences_path
+    else
+      load_budget_sharing
+      render :show, status: :unprocessable_entity
+    end
   end
+
+  private
+
+    def load_budget_sharing
+      @family_members = Current.family.users.where.not(id: @user.id).where(active: true)
+      @budget_shares = @user.budget_shares_given.index_by(&:viewer_id)
+    end
 end

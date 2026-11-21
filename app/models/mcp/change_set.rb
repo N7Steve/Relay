@@ -110,11 +110,18 @@ class Mcp::ChangeSet < ApplicationRecord
       with_lock do
         verify_review!(actor, token)
         raise Api::Input::Invalid, "Only pending proposals can be approved" unless status == "pending"
-        Api::Access.from_delegation!(authority, family: family)
+        raise Api::Access::Forbidden, "MCP is no longer enabled" unless Mcp::Configuration.enabled?
         update!(status: "approved", approved_at: Time.current)
         Mcp::ApplyChangeSetJob.perform_later(self)
       end
     end
+  end
+
+  def connection_unavailable?
+    Api::Access.from_delegation!(authority, family: family)
+    false
+  rescue Api::Access::Forbidden
+    true
   end
 
   def reject!(actor:, token:)
@@ -140,11 +147,7 @@ class Mcp::ChangeSet < ApplicationRecord
             next false
           end
           operation = operations.fetch(index)
-          access = Api::Access.from_delegation!(authority, family: family)
-          raise Api::Access::Forbidden, "MCP is no longer enabled" unless Mcp::Configuration.enabled?
-          if authority["credential_type"] == "ApiKey" && ENV["RELAY_MCP_API_KEYS_ENABLED"] != "true"
-            raise Api::Access::Forbidden, "MCP API keys are no longer enabled"
-          end
+          access = Api::Access.for_mcp_approval!(self, actor: user)
           args = resolve_references(operation.fetch("arguments"))
           # A separate replay namespace prevents pre-existing REST operations
           # from being mistaken for execution of this approved proposal.

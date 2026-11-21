@@ -84,17 +84,15 @@ Ser admin no concede escritura sobre cuentas ajenas sin permiso nativo.
 
 Las escrituras crean `Mcp::ChangeSet` sin cambios financieros inmediatos. La autoridad
 conserva claims mínimos verificados y expiración; el identificador deriva de identidad,
-usuario, cliente, modo y recurso. Nunca se guarda el JWT. La aprobación web y cada
-operación posterior revalidan vínculo, usuario, familia, scopes originales, techo
-actual, configuración y caducidad. Desactivar o reducir permisos impide aplicar.
-Cambiar issuer, cliente, modo, recurso o usuario vinculado invalida propuestas antiguas.
-Se conservan digest de revisión, referencias pendientes, idempotencia y ausencia
-de aprobación MCP.
+usuario, cliente, modo y recurso. Nunca se guarda el JWT. El propietario puede
+aprobar o descartar en la web si la conexión ha caducado o ha dejado de estar
+disponible. La ejecución usa la aprobación registrada y los permisos actuales
+del usuario. Se conservan digest de revisión, referencias pendientes,
+idempotencia y ausencia de aprobación MCP.
 
-Renovar el token no prolonga la autoridad de una propuesta antigua: si venció,
-rechazarla y prepararla otra vez con nuevas claves de idempotencia. Un reintento
-con token/argumentos idénticos conserva la propuesta; cambiar credencial/claims
-con la misma clave puede producir conflicto, como otras credenciales Relay.
+Un token vigente de la misma conexión permite seguir trabajando en su
+propuesta abierta. Un reintento con la misma clave conserva la propuesta si
+coinciden la conexión y los argumentos.
 
 Validación local significa que revocar una sesión/refresh token en Authentik no
 revoca inmediatamente el JWT emitido. Usar tokens cortos, por ejemplo 10 minutos.

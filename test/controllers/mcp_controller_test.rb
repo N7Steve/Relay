@@ -17,12 +17,14 @@ class McpControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "legacy initialize catalog pagination tool execution and notification" do
+    @user.update!(mcp_custom_instructions: "Pregunta antes de clasificar gastos ambiguos.")
     rpc("initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "Test", version: "1" } })
     assert_response :success, response.body
     assert_equal "2025-11-25", response.parsed_body.dig("result", "protocolVersion")
     instructions = response.parsed_body.dig("result", "instructions")
     assert_includes instructions, "All MCP writes create pending proposals."
     assert_includes instructions, "## 3. Exclusión de la agenda"
+    assert_includes instructions, @user.mcp_custom_instructions
     rpc("tools/list")
     assert_response :success
     first = response.parsed_body.fetch("result")
@@ -42,6 +44,7 @@ class McpControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "modern requests need no initialization and enforce header body consistency" do
+    @user.update!(mcp_custom_instructions: "Identifica la cuenta por su alias.")
     params = { name: "get_context", arguments: {}, _meta: {
       "io.modelcontextprotocol/protocolVersion" => "2026-07-28",
       "io.modelcontextprotocol/clientInfo" => { name: "Modern", version: "1" },
@@ -53,6 +56,7 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     instructions = response.parsed_body.dig("result", "structuredContent", "operating_instructions")
     assert_includes instructions, "## 9. Conciliación antes y después de aplicar"
     assert_includes instructions, "shared_expense: false"
+    assert_includes instructions, @user.mcp_custom_instructions
     rpc("server/discover", params.except(:name, :arguments), headers: { "MCP-Protocol-Version" => "2026-07-28", "Mcp-Method" => "server/discover" })
     assert_response :success, response.body
     assert_includes response.parsed_body.dig("result", "supportedVersions"), "2026-07-28"
@@ -105,17 +109,41 @@ class McpControllerTest < ActionDispatch::IntegrationTest
 
   test "operating instructions are readable without staging changes and stay outside REST context" do
     @key.update!(scopes: %w[read])
+    @user.update!(mcp_custom_instructions: "Match the reimbursement to the shared expense.")
     assert_no_difference "Mcp::ChangeSet.count" do
       rpc("tools/call", { name: "get_context", arguments: {} })
     end
     assert_response :success
     result = response.parsed_body.fetch("result")
     assert_includes result.dig("structuredContent", "operating_instructions"), "Reembolso de gastos — María"
+    assert_includes result.dig("structuredContent", "operating_instructions"), @user.mcp_custom_instructions
     assert_equal result.fetch("structuredContent"), JSON.parse(result.fetch("content").first.fetch("text"))
 
     get "/api/v1/context", headers: { "X-Api-Key" => @key.display_key }
     assert_response :success
     refute response.parsed_body.key?("operating_instructions")
+    refute_includes response.body, @user.mcp_custom_instructions
+  end
+
+  test "MCP context reads current instructions only for the credential owner" do
+    @user.update!(mcp_custom_instructions: "Instructions for the admin")
+    member = users(:family_member)
+    member.update!(mcp_custom_instructions: "Instructions for the member")
+    member_key = member.api_keys.create!(name: "MCP", scopes: %w[read], source: "web", display_key: "mcp_#{SecureRandom.hex(12)}")
+
+    rpc("tools/call", { name: "get_context", arguments: {} }, headers: { "X-Api-Key" => member_key.display_key })
+
+    assert_response :success
+    instructions = response.parsed_body.dig("result", "structuredContent", "operating_instructions")
+    assert_includes instructions, member.mcp_custom_instructions
+    refute_includes instructions, @user.mcp_custom_instructions
+
+    member.update!(mcp_custom_instructions: nil)
+    rpc("tools/call", { name: "get_context", arguments: {} }, headers: { "X-Api-Key" => member_key.display_key })
+
+    assert_response :success
+    assert_equal File.read(Rails.root.join("config/mcp/instructions.md"), encoding: "UTF-8"),
+      response.parsed_body.dig("result", "structuredContent", "operating_instructions")
   end
 
   test "OAuth token audience expiry revocation and per request identity" do

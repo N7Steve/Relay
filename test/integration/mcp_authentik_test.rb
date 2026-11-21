@@ -98,20 +98,37 @@ class McpAuthentikTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "proposal authority rechecks binding scope user activity enablement and expiry" do
+  test "expired Authentik connection cannot stage changes but the web owner can approve" do
     propose_tag
     set = Mcp::ChangeSet.find(result.fetch("change_set_id"))
-    bind_identity(scopes: %w[read])
-    assert_raises(Api::Access::Forbidden) { set.approve!(actor: @user, token: set.review_token) }
-    bind_identity
-    set.approve!(actor: @user, token: set.review_token)
-    ENV["RELAY_MCP_AUTHENTIK_ENABLED"] = "false"
-    assert_no_difference "Tag.count" do
-      Mcp::ApplyChangeSetJob.perform_now(set)
+
+    travel 11.minutes do
+      rpc("tools/call", { name: "get_context", arguments: {} })
+      assert_response :unauthorized
+      sign_in @user
+      get settings_pending_change_path(set)
+      assert_response :success
+      assert_includes response.body, I18n.t("settings.pending_changes.show.connection_unavailable")
+      post approve_settings_pending_change_path(set), params: { review_token: set.review_token }
+
+      assert_redirected_to settings_pending_change_path(set)
+      assert_difference "Tag.count", 1 do
+        Mcp::ApplyChangeSetJob.perform_now(set)
+      end
+      assert_equal "applied", set.reload.status
     end
-    assert_equal "failed", set.reload.status
-    ENV["RELAY_MCP_AUTHENTIK_ENABLED"] = "true"
+  end
+
+  test "connection authority still rechecks binding scope user activity enablement and expiry" do
+    propose_tag
+    set = Mcp::ChangeSet.find(result.fetch("change_set_id"))
     authority = set.authority
+    bind_identity(scopes: %w[read])
+    assert_raises(Api::Access::Forbidden) { Api::Access.from_delegation!(authority, family: @user.family) }
+    bind_identity
+    ENV["RELAY_MCP_AUTHENTIK_ENABLED"] = "false"
+    assert_raises(Api::Access::Forbidden) { Api::Access.from_delegation!(authority, family: @user.family) }
+    ENV["RELAY_MCP_AUTHENTIK_ENABLED"] = "true"
     bind_identity(user: users(:family_member))
     assert_raises(Api::Access::Forbidden) { Api::Access.from_delegation!(authority, family: @user.family) }
     bind_identity

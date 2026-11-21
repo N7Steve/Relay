@@ -1,7 +1,7 @@
 # Propuestas MCP y aprobación humana
 
-La [opción Authentik](mcp-authentik.md) conserva este flujo y revalida el vínculo
-local, scopes y expiración de la autoridad vigente al aprobar y aplicar.
+La [opción Authentik](mcp-authentik.md) conserva este flujo y valida el vínculo,
+los scopes y la caducidad de la conexión al recibir peticiones del agente.
 
 Las escrituras del MCP de Relay son **propuestas pendientes**. No se ejecuta el
 dominio, no se modifica el registro de idempotencia de ejecución y no se lanzan
@@ -91,12 +91,14 @@ firma el contenido exacto y caduca en una hora: si el asistente añade operacion
 mientras se revisa, hay que recargar antes de aprobar. Una API key o token MCP
 no autentica la aprobación web. La decisión no está expuesta en MCP ni REST.
 
-La aprobación pone en cola un job persistente. Cada operación y su estado de
-finalización se guardan juntos; los reintentos reanudan sin duplicar cambios.
-Se vuelve a comprobar actividad del usuario, credencial, scope, configuración MCP,
-familia, permisos y validaciones nativas. Se usa un contexto nuevo del actor sin
-suplantación. Las ejecuciones aprobadas tienen un namespace de idempotencia propio,
-separado de las llamadas REST anteriores.
+Si la conexión original ha caducado o se ha revocado, la revisión muestra un
+aviso. El propietario puede aprobar o descartar desde Relay sin reconectar.
+La aprobación pone en cola un job persistente. Para cada operación y sus jobs
+derivados se comprueba la aprobación registrada, la actividad del usuario, su
+familia, la configuración MCP y los permisos y validaciones nativas.
+Cada operación y su estado de finalización se guardan juntos; los reintentos
+reanudan sin duplicar cambios. Las ejecuciones aprobadas tienen un namespace
+de idempotencia propio, separado de las llamadas REST anteriores.
 
 Un deadlock de PostgreSQL revierte la operación en curso y permite hasta cinco
 intentos del job, separados por la espera de Active Job. Cada intento continúa
@@ -145,9 +147,8 @@ con la misma identidad, recurso y scopes, o de OAuth local con el mismo cliente,
 usuario, recurso y scopes, conserva esa agrupación. `get_pending_changes` con una
 credencial vigente actualiza la autoridad de las propuestas pendientes de esa
 conexión. No se sustituyen API keys diferentes ni se renuevan propuestas aprobadas.
-Actualizar autoridad invalida formularios de revisión anteriores: hay que recargar.
-La aprobación y cada operación siguen comprobando vigencia y permisos actuales.
-Descartar nunca necesita que la credencial MCP siga vigente.
+Actualizar los datos de la conexión invalida formularios de revisión anteriores:
+hay que recargar. La renovación sirve para seguir trabajando desde el agente.
 
 La revisión incluye tablas por grupo con valores actuales y propuestos de campos
 financieros y de organización admitidos. Las referencias muestran etiquetas de

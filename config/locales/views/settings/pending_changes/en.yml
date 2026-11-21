@@ -52,6 +52,7 @@
           "approve": "Approve changes",
           "reject": "Discard proposal",
           "confirm": "Apply the changes in this proposal? This can add, modify or permanently delete data.",
+          "connection_unavailable": "The connection that prepared this proposal is no longer available. You can approve it with your current permissions or discard it here.",
           "failure_notice": "Execution stopped. Completed operations remain applied; the failed operation and remaining operations were not completed. Permissions, expired previews/uploads, invalid inputs or changes in the underlying records may prevent execution. Ask the assistant to propose a corrected change set.",
           "discard_remaining": "Discard remaining changes",
           "processing_notice": "Approved changes are being processed. Reload this page to see progress."
@@ -220,7 +221,6 @@
           },
           "unknown": "Unavailable"
         },
-        "credential_expired": "The connection that prepared this proposal expired or was revoked. Reconnect the assistant and ask it to list pending changes. A renewal of the same connection will refresh the proposal. You can discard it without reconnecting.",
         "operations": {
           "create_scheduled_payment": "New scheduled payment",
           "update_scheduled_payment": "Edit scheduled payment",

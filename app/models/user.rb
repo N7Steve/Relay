@@ -46,6 +46,7 @@ class User < ApplicationRecord
   accepts_nested_attributes_for :family, update_only: true
 
   MFA_BACKUP_CODE_COUNT = 8
+  MCP_CUSTOM_INSTRUCTIONS_MAX_LENGTH = 8_000
   # "relay" is the dark theme with the Relay logo palette layered on top.
   THEMES = %w[light dark system relay].freeze
 
@@ -55,6 +56,7 @@ class User < ApplicationRecord
   validates :default_account_order, inclusion: { in: AccountOrder::ORDERS.keys }
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_nil: true
   validates :theme, inclusion: { in: THEMES }, allow_nil: true
+  validates :mcp_custom_instructions, length: { maximum: MCP_CUSTOM_INSTRUCTIONS_MAX_LENGTH }, allow_nil: true
 
   # Password is required on create unless the user is being created via SSO JIT.
   # SSO JIT users have password_digest = nil and authenticate via OIDC only.
@@ -63,6 +65,7 @@ class User < ApplicationRecord
   normalizes :email, with: ->(email) { email.strip.downcase }
   normalizes :unconfirmed_email, with: ->(email) { email&.strip&.downcase }
   normalizes :locale, with: ->(locale) { locale.presence }
+  normalizes :mcp_custom_instructions, with: ->(text) { text.delete("\0").strip.presence }
 
   normalizes :first_name, :last_name, with: ->(value) { value.strip.presence }
 

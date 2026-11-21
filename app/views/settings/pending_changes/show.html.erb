@@ -50,6 +50,9 @@
 
 <% if @change_set.status == "pending" %>
   <%= render DS::Alert.new(variant: :warning, message: t(".approval_notice")) %>
+  <% if @connection_unavailable %>
+    <%= render DS::Alert.new(variant: :warning, message: t(".connection_unavailable")) %>
+  <% end %>
   <div class="flex flex-wrap gap-3">
     <%= render DS::Button.new(text: t(".approve"), href: approve_settings_pending_change_path(@change_set), method: :post,
           variant: "primary", params: { review_token: @change_set.review_token }, data: { turbo_confirm: t(".confirm") }) %>

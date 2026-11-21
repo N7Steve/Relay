@@ -7,15 +7,17 @@ class Api::Access
 
   attr_reader :user, :scopes
 
-  def initialize(user:, scopes:, credential: nil)
+  def initialize(user:, scopes:, credential: nil, approved_change_set_id: nil)
     @user = user
     @scopes = scopes.map(&:to_s)
     @credential = credential
+    @approved_change_set_id = approved_change_set_id
   end
 
   def delegated_authority
     authority = { "user_id" => user.id, "family_id" => user.family_id,
       "credential_type" => @credential&.class&.name, "credential_id" => @credential&.id }
+    authority["approved_change_set_id"] = @approved_change_set_id if @approved_change_set_id
     authority["authentik"] = @credential.claims if @credential.is_a?(Mcp::AuthentikCredential)
     authority
   end
@@ -27,6 +29,11 @@ class Api::Access
   def self.from_delegation!(authority, family:)
     actor = User.find_by(id: authority.fetch("user_id"), family_id: family.id)
     raise Forbidden, "Delegated actor is unavailable" unless actor && actor.family_id == authority["family_id"]
+    if authority["approved_change_set_id"]
+      change_set = Mcp::ChangeSet.for_actor(actor).find_by(id: authority["approved_change_set_id"])
+      return for_mcp_approval!(change_set, actor: actor)
+    end
+
     credential = case authority["credential_type"]
     when "Mcp::AuthentikCredential"
       begin
@@ -43,6 +50,17 @@ class Api::Access
     access = new(user: actor, scopes: credential.scopes.to_a, credential: credential)
     raise Forbidden, "Delegated authority changed: write scope or actor activity" unless access.writable?
     access
+  end
+
+  # Web approval authorizes this proposal and the jobs launched by its
+  # operations. The originating MCP connection only authorized staging.
+  def self.for_mcp_approval!(change_set, actor:)
+    unless actor.active? && change_set&.approved_at? && change_set.user_id == actor.id && change_set.family_id == actor.family_id
+      raise Forbidden, "Proposal approval or actor is unavailable"
+    end
+    raise Forbidden, "MCP is no longer enabled" unless Mcp::Configuration.enabled?
+
+    new(user: actor, scopes: %w[read_write], approved_change_set_id: change_set.id)
   end
 
   def readable?

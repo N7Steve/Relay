@@ -156,17 +156,19 @@ class McpPendingChangesTest < ActionDispatch::IntegrationTest
     assert_equal 1, Mcp::ChangeSet.find(first.fetch("change_set_id")).operations.size
   end
 
-  test "credential revocation after approval prevents execution" do
-    receipt = propose("create_tag", name: "Revoked", idempotency_key: "revocation")
+  test "credential revocation after approval allows the approved operation and its queued job" do
+    receipt = propose("recalculate_account", account_id: @account.id, idempotency_key: "revocation")
     set = Mcp::ChangeSet.find(receipt.fetch("change_set_id"))
     set.approve!(actor: @user, token: set.review_token)
     @key.revoke!
-    assert_no_difference "Tag.count" do
-      Mcp::ApplyChangeSetJob.perform_now(set)
+    perform_enqueued_jobs(only: ApiIntegrationJob) do
+      assert_performed_jobs 1, only: ApiIntegrationJob do
+        Mcp::ApplyChangeSetJob.perform_now(set)
+      end
     end
-    assert_equal "failed", set.reload.status
-    assert_equal 0, set.overview[:applied]
-    assert_equal "Api::Access::Forbidden", set.operations.first.fetch("error")
+    assert_equal "applied", set.reload.status
+    sync = @account.syncs.find(set.operations.first.dig("result", "id"))
+    assert sync.completed?
   end
 
   test "changed account permissions stop application and failure never rolls back already completed work" do
@@ -236,7 +238,7 @@ class McpPendingChangesTest < ActionDispatch::IntegrationTest
     assert_equal [ "Pending label" ], @account.entries.find_by!(name: "Tagged proposal").transaction.tags.pluck(:name)
   end
 
-  test "revocation before approval refuses to enqueue and pending inspection reveals no arguments" do
+  test "revocation before approval shows a warning and the owner can still approve" do
     receipt = propose("update_profile", first_name: "Hidden proposal text", idempotency_key: "pre-approval-revoke")
     rpc("get_pending_changes", {})
     assert_equal 1, response.parsed_body.dig("result", "structuredContent", "data").size
@@ -244,10 +246,16 @@ class McpPendingChangesTest < ActionDispatch::IntegrationTest
     set = Mcp::ChangeSet.find(receipt.fetch("change_set_id"))
     @key.revoke!
     sign_in @user
-    assert_no_enqueued_jobs do
+    get settings_pending_change_path(set)
+    assert_response :success
+    assert_includes response.body, I18n.t("settings.pending_changes.show.connection_unavailable")
+    assert_enqueued_with(job: Mcp::ApplyChangeSetJob) do
       post approve_settings_pending_change_path(set), params: { review_token: set.review_token }
     end
-    assert_equal "pending", set.reload.status
+    assert_equal "approved", set.reload.status
+    Mcp::ApplyChangeSetJob.perform_now(set)
+    assert_equal "applied", set.reload.status
+    assert_equal "Hidden proposal text", @user.reload.first_name
   end
 
   test "a deferred destructive preview is evaluated after approval and can feed its signed token to a later write" do

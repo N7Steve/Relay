@@ -65,7 +65,16 @@ es:
         split_grouped_title: Agrupar transacciones divididas
         split_grouped_description: Muestra las transacciones divididas agrupadas bajo su transacción principal en la lista. Si está desactivado, las divisiones aparecen como filas individuales.
     preferences:
+      update:
+        mcp_instructions_saved: Se han guardado tus instrucciones de MCP.
       show:
+        mcp:
+          title: MCP
+          description: Explica a los agentes conectados a tu usuario cómo gestionas tus cuentas y cómo concilias los movimientos.
+          instructions: Instrucciones personalizadas
+          example: Si una transferencia indica «Parte del alquiler», comprueba si es un reembolso de un gasto compartido antes de clasificarla como ingreso.
+          hint: "Hasta %{count} caracteres. Deja el campo vacío para eliminar tus instrucciones."
+          save: Guardar instrucciones
         country: País
         currency: Moneda
         date_format: Formato de fecha

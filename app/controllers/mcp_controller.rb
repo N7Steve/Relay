@@ -57,7 +57,7 @@ class McpController < Api::V1::BaseController
     result = case method
     when "initialize"
       return rpc_error(-32601, "Use server/discover with 2026-07-28", :not_found) unless version == "2025-11-25"
-      server_info.merge(protocolVersion: version)
+      server_info.merge(protocolVersion: version, instructions: Mcp::Instructions.text(user: Current.user))
     when "server/discover"
       return rpc_error(-32601, "Method not found", :not_found) unless version == "2026-07-28"
       { supportedVersions: VERSIONS, capabilities: server_info[:capabilities],
@@ -143,8 +143,7 @@ class McpController < Api::V1::BaseController
     end
 
     def server_info
-      { serverInfo: { name: "Relay", version: "1.1.0" }, capabilities: { tools: { listChanged: false } },
-        instructions: Mcp::Instructions.text }
+      { serverInfo: { name: "Relay", version: "1.1.0" }, capabilities: { tools: { listChanged: false } } }
     end
 
     def list_tools(args)
@@ -185,7 +184,7 @@ class McpController < Api::V1::BaseController
           Mcp::ChangeSet.stage!(access: api_access, name: name, arguments: arguments, deferred_read: deferred)
         end
       end
-      result = result.merge(operating_instructions: Mcp::Instructions.text) if name == "get_context"
+      result = result.merge(operating_instructions: Mcp::Instructions.text(user: Current.user)) if name == "get_context"
       encoded = JSON.generate(result)
       if encoded.bytesize > MAX_BYTES
         return tool_error("response_too_large", "Narrow the query or reduce per_page; no records were silently removed")

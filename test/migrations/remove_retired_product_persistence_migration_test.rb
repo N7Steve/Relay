@@ -6,6 +6,7 @@ require Rails.root.join("db/migrate/20261010120000_add_shared_expense_to_transac
 require Rails.root.join("db/migrate/20261021120000_bind_oauth_tokens_to_mcp_resource")
 require Rails.root.join("db/migrate/20261021160000_create_mcp_change_sets")
 require Rails.root.join("db/migrate/20261026190000_personalize_tags_and_imports")
+require Rails.root.join("db/migrate/20261121120000_add_mcp_custom_instructions_to_users")
 
 class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
   self.use_transactional_tests = false
@@ -84,6 +85,8 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     tag_id = insert_row(connection, "tags", family_id: family_id, name: "Preserved tag")
     ActiveRecord::Migration.suppress_messages { PersonalizeTagsAndImports.new.migrate(:up) }
     assert_equal user_id, connection.select_value("SELECT user_id FROM tags WHERE id = '#{tag_id}'")
+    ActiveRecord::Migration.suppress_messages { AddMcpCustomInstructionsToUsers.new.migrate(:up) }
+    assert_nil connection.select_value("SELECT mcp_custom_instructions FROM users WHERE id = '#{user_id}'")
     actual_columns = connection.tables.excluding("schema_migrations", "ar_internal_metadata").to_h do |table|
       [ table, connection.columns(table).map { |column| [ column.name, column.sql_type, column.default, column.null ] }.sort_by(&:first) ]
     end

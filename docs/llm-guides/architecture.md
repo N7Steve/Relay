@@ -194,12 +194,12 @@ and [release/deployment verification](../api/mcp-release.md). Code parity does
 not certify a production proxy, TLS endpoint or a client's human-presence flow.
 MCP writes now stage `Mcp::ChangeSet` proposals. Only authenticated web approval
 in Settings → Pending changes queues `Mcp::ApplyChangeSetJob`; no MCP operation
-can approve itself. Domain operations run later with fresh credential and account
-authorization. REST keeps immediate writes. See [pending change contract](../api/mcp-pending-changes.md)
+can approve itself. The worker uses recorded web approval and fresh actor and
+account authorization. REST keeps immediate writes. See [pending change contract](../api/mcp-pending-changes.md)
 for dependent references, review digests, per-operation commits and stopped batches.
 MCP optionally accepts Authentik JWTs through an explicit issuer/subject-to-user
-binding and a local scope ceiling, without web SSO/JIT or role mappings. Delegated
-proposals retain verified authority and recheck its expiry and current binding.
+binding and a local scope ceiling, without web SSO/JIT or role mappings. Proposals
+retain verified connection metadata for review notices and connection renewal.
 See [Authentik OAuth](../api/mcp-authentik.md) for the opt-in configuration and
 the explicit Client-ID-audience compatibility profile's RFC 8707 limitation.
 See the [MCP contract](../api/mcp.md), [roadmap](../research/relay-api-mcp-roadmap.md) and

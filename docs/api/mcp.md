@@ -24,12 +24,17 @@ extractos, saldos ni identificadores bancarios.
 `get_context` también las devuelve en `operating_instructions`; su descripción
 MCP indica consultarlas antes de preparar cambios. Esto cubre los clientes
 `2026-07-28`, que no usan la inicialización clásica. La API REST conserva su
-contexto original y su catálogo compartido, sin estas instrucciones personales.
+contexto original y su catálogo compartido, sin las instrucciones MCP.
 
-Son instrucciones para el agente, no validaciones financieras nuevas del
-servidor ni una conciliación ya ejecutada. Se mantienen los permisos, las
-validaciones nativas y la aprobación web obligatoria. Después de desplegar esta
-versión, reconectar el cliente MCP y consultar `get_context` para obtenerlas.
+Cada usuario puede añadir o borrar sus **Instrucciones personalizadas** en
+**Ajustes → Preferencias → MCP**. Relay añade ese texto a las instrucciones
+de la instalación en `initialize` y `get_context` para los clientes MCP
+autenticados como ese usuario. `get_context` devuelve la versión guardada en
+cada consulta. Si el cliente usa solo `initialize`, debe reconectarse para
+recibir los cambios.
+
+Las propuestas que prepare el agente siguen sujetas a los permisos, las
+validaciones nativas y la aprobación web obligatoria.
 
 ## Activación y autenticación
 

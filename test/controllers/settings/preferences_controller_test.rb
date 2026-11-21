@@ -51,6 +51,42 @@ class Settings::PreferencesControllerTest < ActionDispatch::IntegrationTest
     assert_not user.reload.preview_features_enabled?
   end
 
+  test "members can save and clear their own custom MCP instructions" do
+    admin = users(:family_admin)
+    admin.update!(mcp_custom_instructions: "Keep the admin's instructions")
+    member = users(:family_member)
+    sign_in member
+    instructions = "Consulta la cuenta conjunta.\nAclara transferencias ambiguas."
+
+    patch settings_preferences_url, params: { user: { id: admin.id, mcp_custom_instructions: instructions } }
+
+    assert_redirected_to settings_preferences_url
+    assert_equal instructions, member.reload.mcp_custom_instructions
+    assert_equal "Keep the admin's instructions", admin.reload.mcp_custom_instructions
+    follow_redirect!
+    assert_select "textarea[name='user[mcp_custom_instructions]']", text: instructions
+
+    patch settings_preferences_url, params: { user: { preview_features_enabled: "1" } }
+    assert_equal instructions, member.reload.mcp_custom_instructions
+
+    patch settings_preferences_url, params: { user: { mcp_custom_instructions: " \n " } }
+    assert_redirected_to settings_preferences_url
+    assert_nil member.reload.mcp_custom_instructions
+    assert member.preview_features_enabled?
+  end
+
+  test "rejects oversized MCP instructions and keeps the saved instructions" do
+    user = users(:family_admin)
+    user.update!(mcp_custom_instructions: "Saved")
+    too_long = "a" * (User::MCP_CUSTOM_INSTRUCTIONS_MAX_LENGTH + 1)
+
+    patch settings_preferences_url, params: { user: { mcp_custom_instructions: too_long } }
+
+    assert_response :unprocessable_entity
+    assert_select "textarea[name='user[mcp_custom_instructions]']", text: too_long
+    assert_equal "Saved", user.reload.mcp_custom_instructions
+  end
+
   test "household budget toggle and sharing card only render once personal_budgets is on" do
     user = users(:family_admin)
     user.update!(preferences: (user.preferences || {}).merge("preview_features_enabled" => true))

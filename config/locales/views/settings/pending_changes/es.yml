@@ -52,6 +52,7 @@
           "approve": "Aprobar cambios",
           "reject": "Descartar propuesta",
           "confirm": "¿Aplicar los cambios de esta propuesta? Puede añadir, modificar o eliminar datos de forma definitiva.",
+          "connection_unavailable": "La conexión que preparó esta propuesta ya no está disponible. Puedes aprobarla con tus permisos actuales o descartarla desde aquí.",
           "failure_notice": "La ejecución se ha detenido. Las operaciones completadas siguen aplicadas; la operación fallida y las restantes no se han completado. Los permisos, las previsualizaciones o subidas caducadas, los datos no válidos o los cambios en los registros pueden impedir la ejecución. Pide al asistente una propuesta corregida.",
           "discard_remaining": "Descartar cambios restantes",
           "processing_notice": "Se están procesando los cambios aprobados. Recarga esta página para ver el progreso."
@@ -220,7 +221,6 @@
           },
           "unknown": "No disponible"
         },
-        "credential_expired": "La conexión que preparó esta propuesta ha caducado o se ha revocado. Reconecta el asistente y pídele que consulte los cambios pendientes. Una renovación de la misma conexión actualizará la propuesta. Puedes descartarla sin reconectar.",
         "operations": {
           "create_scheduled_payment": "Nuevo pago programado",
           "update_scheduled_payment": "Editar pago programado",

@@ -118,7 +118,16 @@ en:
         split_grouped_description: Show split transactions grouped under their parent
           in the transaction list. When off, split children appear as individual rows.
     preferences:
+      update:
+        mcp_instructions_saved: Your MCP instructions were saved.
       show:
+        mcp:
+          title: MCP
+          description: Give agents connected to your user account context about your accounts and how you reconcile transactions.
+          instructions: Custom instructions
+          example: When a transfer says «Rent split», check whether it reimburses a shared expense before classifying it as income.
+          hint: "Up to %{count} characters. Leave blank to remove your custom instructions."
+          save: Save instructions
         country: Country
         currency: Currency
         date_format: Date format
