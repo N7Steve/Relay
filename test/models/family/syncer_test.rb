@@ -44,6 +44,8 @@ class Family::SyncerTest < ActiveSupport::TestCase
 
 
   test "only applies active rules during sync" do
+    Family::AutoTransferMatchable.stubs(:enabled?).returns(false)
+    @family.expects(:auto_match_transfers!).never
     family_sync = syncs(:family)
 
     # Create an active rule
@@ -77,6 +79,13 @@ class Family::SyncerTest < ActiveSupport::TestCase
 
     syncer.perform_sync(family_sync)
     syncer.perform_post_sync
+  end
+
+  test "post-sync runs automatic matching when the installation enables it" do
+    Family::AutoTransferMatchable.stubs(:enabled?).returns(true)
+    @family.expects(:auto_match_transfers!).once
+
+    Family::Syncer.new(@family).perform_post_sync
   end
 
   private

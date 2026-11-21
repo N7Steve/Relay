@@ -15,6 +15,10 @@ module Family::AutoTransferMatchable
   # date_window: 30 vs. 4 widening that dialog already applies.
   MANUAL_MATCH_EXCHANGE_RATE_TOLERANCE = 0.1
 
+  def self.enabled?
+    %w[1 true].include?(ENV["RELAY_AUTO_TRANSFER_MATCH_ENABLED"].to_s.strip.downcase)
+  end
+
   # Read at call time rather than frozen into a constant at boot, so a bad value falls back
   # instead of raising inside every sync: Family::Syncer and Account::Syncer both call
   # auto_match_transfers! without a tolerance of their own.
@@ -72,10 +76,21 @@ module Family::AutoTransferMatchable
       exchange_rate_tolerance:,
       restrict_cross_currency_to_linked_accounts: true
     )
+    return if candidates_scope.empty?
+
     transaction_ids = candidates_scope.flat_map do |match|
       [ match.inflow_transaction_id, match.outflow_transaction_id ]
     end.uniq
     transactions_by_id = Transaction.includes(entry: :account).where(id: transaction_ids).index_by(&:id)
+
+    # Only propose pairs someone can confirm, and honor the setting on both accounts.
+    accounts_by_transaction = transactions_by_id.transform_values { |transaction| transaction.entry.account }
+    writers = transfer_match_writers(accounts_by_transaction.values.uniq)
+    candidates_scope.select! do |match|
+      inflow_writers = writers[accounts_by_transaction[match.inflow_transaction_id]&.id]
+      outflow_writers = writers[accounts_by_transaction[match.outflow_transaction_id]&.id]
+      inflow_writers && outflow_writers && inflow_writers.intersect?(outflow_writers)
+    end
 
     # A candidate must be the unique best choice for BOTH legs. Never resolve a
     # tie by database ordering or by consuming a competing candidate first.
@@ -135,6 +150,17 @@ module Family::AutoTransferMatchable
   end
 
   private
+    def transfer_match_writers(accounts)
+      active_users = users.where(active: true).ids.to_set
+      writers = accounts.select(&:enable_transfer_matcher?).to_h do |account|
+        [ account.id, active_users.include?(account.owner_id) ? Set[account.owner_id] : Set.new ]
+      end
+      AccountShare.where(account_id: writers.keys, user_id: active_users.to_a, permission: "full_control").pluck(:account_id, :user_id).each do |account_id, user_id|
+        writers.fetch(account_id).add(user_id)
+      end
+      writers
+    end
+
     # Create the transfer for a matched candidate, tolerating a concurrent sync
     # that already inserted the same pair.
     #

@@ -17,7 +17,9 @@ class Family::Syncer
   end
 
   def perform_post_sync
-    ExternalAccess.locally { family.auto_match_transfers! }
+    if Family::AutoTransferMatchable.enabled?
+      ExternalAccess.locally { family.auto_match_transfers! }
+    end
 
     Rails.logger.info("Applying rules for family #{family.id}")
     family.rules.where(active: true).each do |rule|

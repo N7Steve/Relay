@@ -6,6 +6,7 @@
       <%= icon "link-2", size: "sm", class: "text-secondary" %>
     </span>
   <% elsif transaction.transfer.pending? %>
+    <% writable_sides = writable_transfer_sides(transaction.transfer) %>
     <span class="hidden lg:inline">
       <%= render DS::Pill.new(
         label: t("transactions.transfer_match.auto_matched"),
@@ -23,19 +24,25 @@
       ) %>
     </span>
 
-    <%= button_to transfer_path(transaction.transfer, transfer: { status: "confirmed" }),
-                    method: :patch,
-                    class: "text-secondary flex items-center justify-center cursor-pointer",
-                    title: t("transactions.transfer_match.confirm_match") do %>
-      <%= icon "check", size: "sm", class: "text-secondary hover:text-primary" %>
+    <% if writable_sides == 2 %>
+      <%= button_to transfer_path(transaction.transfer, transfer: { status: "confirmed" }),
+                      method: :patch,
+                      class: "text-secondary flex items-center justify-center cursor-pointer",
+                      title: t("transactions.transfer_match.confirm_match") do %>
+        <%= icon "check", size: "sm", class: "text-secondary hover:text-primary" %>
+      <% end %>
     <% end %>
 
-    <%= button_to transfer_path(transaction.transfer, transfer: { status: "rejected" }),
-                    method: :patch,
-                    data: { turbo: false },
-                    class: "text-secondary hover:text-primary flex items-center justify-center cursor-pointer",
-                    title: t("transactions.transfer_match.reject_match") do %>
-      <%= icon "x", size: "sm", class: "text-subdued hover:text-primary" %>
+    <% dismissible_match = writable_sides.positive? && transaction.transfer.dismissible_match? %>
+    <% if dismissible_match || writable_sides == 2 %>
+      <% reject_path = dismissible_match ? reject_match_transfer_path(transaction.transfer) : transfer_path(transaction.transfer, transfer: { status: "rejected" }) %>
+      <%= button_to reject_path,
+                      method: :patch,
+                      data: { turbo: false },
+                      class: "text-secondary hover:text-primary flex items-center justify-center cursor-pointer",
+                      title: t("transactions.transfer_match.reject_match") do %>
+        <%= icon "x", size: "sm", class: "text-subdued hover:text-primary" %>
+      <% end %>
     <% end %>
   <% end %>
 </div>

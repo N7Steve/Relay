@@ -45,6 +45,20 @@
       </div>
     <% end %>
 
+    <% if account.persisted? %>
+      <div class="space-y-1">
+        <%= render DS::Checkbox.new(
+              form: form,
+              method: :enable_transfer_matcher,
+              label: t(".enable_transfer_matcher_label"),
+              aria: { describedby: "account-transfer-matcher-hint" }
+            ) %>
+        <p id="account-transfer-matcher-hint" class="text-secondary text-sm">
+          <%= t(Family::AutoTransferMatchable.enabled? ? ".enable_transfer_matcher_hint" : ".transfer_matcher_disabled_globally") %>
+        </p>
+      </div>
+    <% end %>
+
     <details class="group">
       <summary class="cursor-pointer text-sm text-secondary hover:text-primary flex items-center gap-1 py-2">
         <%= icon "chevron-right", size: "sm", class: "group-open:rotate-90 transition-transform" %>

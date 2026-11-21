@@ -3,9 +3,18 @@ require "ostruct"
 
 class Account::SyncerTest < ActiveSupport::TestCase
   test "post-sync auto matches only transfers touching the synced account" do
+    Family::AutoTransferMatchable.stubs(:enabled?).returns(true)
     account = accounts(:depository)
 
     account.family.expects(:auto_match_transfers!).with(account: account).once
+
+    Account::Syncer.new(account).perform_post_sync
+  end
+
+  test "post-sync skips automatic matching when the installation leaves it off" do
+    ENV.stubs(:[]).with("RELAY_AUTO_TRANSFER_MATCH_ENABLED").returns(nil)
+    account = accounts(:depository)
+    account.family.expects(:auto_match_transfers!).never
 
     Account::Syncer.new(account).perform_post_sync
   end

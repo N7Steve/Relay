@@ -43,6 +43,16 @@ module TransactionsHelper
     @annotatable_account_ids.include?(account.id)
   end
 
+  def can_view_transfer?(transfer)
+    @accessible_account_ids ||= Current.user.accessible_accounts.ids.to_set
+    [ transfer.from_account.id, transfer.to_account.id ].all? { |id| @accessible_account_ids.include?(id) }
+  end
+
+  def writable_transfer_sides(transfer)
+    @writable_transfer_account_ids ||= Current.family.accounts.writable_by(Current.user).ids.to_set
+    [ transfer.from_account.id, transfer.to_account.id ].count { |id| @writable_transfer_account_ids.include?(id) }
+  end
+
   # ---- Transaction extra details helpers ----
   # Returns a structured hash describing extra details for a transaction.
   # Input can be a Transaction or an Entry (responds_to :transaction).

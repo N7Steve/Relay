@@ -238,6 +238,7 @@ Rails.application.routes.draw do
   resources :transfers, only: %i[new create destroy show update] do
     member do
       patch :tags, action: :update_tags
+      patch :reject_match
     end
   end
 

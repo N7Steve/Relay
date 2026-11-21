@@ -31,6 +31,42 @@ class Family::AutoTransferMatchableTest < ActiveSupport::TestCase
     assert_nil outflow.entryable.paired_transfer
   end
 
+  test "automatic matching requires a common writer but manual candidates remain available" do
+    member = users(:family_member)
+    @credit_card.account_shares.where(user: member).destroy_all
+    @credit_card.update!(owner: member)
+    @credit_card.share_with!(users(:family_admin), permission: "read_write")
+    depository_share = @depository.account_shares.find_by!(user: member)
+    depository_share.update!(permission: "read_write")
+    outflow = create_transaction(account: @depository, amount: 583, date: Date.current)
+    inflow = create_transaction(account: @credit_card, amount: -583, date: Date.current)
+
+    assert_no_difference "Transfer.count" do
+      @family.auto_match_transfers!
+    end
+    assert_includes outflow.transaction.transfer_match_candidates.map { |match| match.inflow_transaction.id }, inflow.entryable_id
+
+    depository_share.update!(permission: "full_control")
+    assert_difference "Transfer.count", 1 do
+      @family.auto_match_transfers!
+    end
+    assert_equal inflow.entryable_id, outflow.transaction.reload.paired_transfer.inflow_transaction_id
+  end
+
+  test "automatic matching honors the setting on either account" do
+    outflow = create_transaction(account: @depository, amount: 584, date: Date.current)
+    inflow = create_transaction(account: @credit_card, amount: -584, date: Date.current)
+    @credit_card.update!(enable_transfer_matcher: false)
+
+    assert_no_difference "Transfer.count" do
+      @family.auto_match_transfers!(account: @depository)
+      @credit_card.update!(enable_transfer_matcher: true)
+      @depository.update!(enable_transfer_matcher: false)
+      @family.auto_match_transfers!(account: @credit_card)
+    end
+    assert_includes outflow.transaction.transfer_match_candidates.map { |match| match.inflow_transaction.id }, inflow.entryable_id
+  end
+
   test "unique closer counterpart wins regardless of a more distant alternative" do
     outflow = create_transaction(account: @depository, amount: 813, date: Date.current)
     closer = create_transaction(account: @credit_card, amount: -813, date: Date.current)

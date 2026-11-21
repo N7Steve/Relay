@@ -127,9 +127,18 @@ preferencias están enumerados en `preview_instance_settings` /
 Un override puede mantener una capacidad apagada aunque se cambie su preferencia.
 
 `set_local_image` usa el canal de subida de la fase 7 para avatar, icono de cuenta
-y logo personalizado de comercio. Solo JPEG/PNG/WebP hasta 5 MiB; null elimina
-la selección. Cuenta exige W; comercio exige autoridad familiar completa y usa
-su personalización familiar, sin modificar un logo global de proveedor.
+y logo personalizado de comercio. Acepta JPEG, PNG o WebP hasta 5 MiB. Un
+`upload_token` nulo quita el logo personalizado. Cambiar el icono de una cuenta
+requiere escritura en esa cuenta. Para un comercio basta un administrador de
+familia con alcance de escritura y acceso al comercio. El cambio se guarda en
+la personalización de esa familia.
+
+Para varios comercios, sube las imágenes y agrupa las operaciones
+`set_local_image` en `propose_changes` (hasta 100 por propuesta). Cada operación
+lleva su `merchant_id`, su `upload_token` y una clave de idempotencia propia.
+Si el cliente solo expone `set_local_image`, las llamadas de la misma conexión
+se añaden a la propuesta abierta.
+Aprueba el lote en Cambios pendientes antes de que caduquen los tokens de subida.
 
 ## Instancia, trabajos e insights
 

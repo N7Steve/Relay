@@ -307,6 +307,43 @@ class McpPendingChangesTest < ActionDispatch::IntegrationTest
     assert @account.entries.exists?(name: "Bulk expense")
   end
 
+  test "family administrator with a private account outside their scope can approve a batch of merchant logos" do
+    private_account = accounts(:investment)
+    private_account.update!(owner: users(:family_member))
+    private_account.account_shares.where(user: @user).destroy_all
+    refute Api::Access.new(user: @user, scopes: %w[read_write]).complete_account_visibility?
+
+    file = StringIO.new(Base64.decode64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jZ3sAAAAASUVORK5CYII="))
+    file.define_singleton_method(:original_filename) { "logo.png" }
+    file.define_singleton_method(:content_type) { "image/png" }
+    upload = Api::FileTransfer.store!(user: @user, file: file, key: "bulk-logo", sha256: Digest::SHA256.hexdigest(file.string))
+    merchants = [ merchants(:netflix), merchants(:amazon) ]
+    operations = merchants.map do |merchant|
+      { name: "set_local_image", arguments: { kind: "merchant", merchant_id: merchant.id,
+        upload_token: upload.fetch(:upload_token), idempotency_key: "logo-#{merchant.id}" } }
+    end
+
+    batch = propose("propose_changes", operations: operations)
+    set = Mcp::ChangeSet.find(batch.fetch("change_set_id"))
+    assert_equal "pending_approval", batch.fetch("status")
+    assert_equal 2, set.operations.size
+    refute @user.family.merchant_customizations.where(merchant: merchants).exists?
+
+    sign_in @user
+    get settings_pending_change_path(set)
+    assert_response :success
+    merchants.each { |merchant| assert_includes response.body, merchant.name }
+    assert_not_includes response.body, upload.fetch(:upload_token)
+    post approve_settings_pending_change_path(set), params: { review_token: set.review_token }
+    assert_redirected_to settings_pending_change_path(set)
+    Mcp::ApplyChangeSetJob.perform_now(set)
+
+    assert_equal "applied", set.reload.status
+    merchants.each do |merchant|
+      assert @user.family.merchant_customizations.find_by!(merchant: merchant).custom_logo.attached?
+    end
+  end
+
   test "review renders transaction comparisons and proposed merchant labels without tokens" do
     entry = @account.entries.create!(name: "Original expense", date: Date.current, amount: 7, currency: "USD", entryable: Transaction.new)
     merchant = propose("create_merchant", name: "New shop", idempotency_key: "review-shop")

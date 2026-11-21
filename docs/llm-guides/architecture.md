@@ -85,6 +85,13 @@ using dated exchange rates and a tolerance. Confirmed transfers permit a
 thirty-day date difference; do not assume every transfer is a same-currency,
 four-day match.
 
+Automatic transfer matching after account or family sync is off by default.
+Set `RELAY_AUTO_TRANSFER_MATCH_ENABLED=1` to enable it for the installation.
+Both accounts must have matching enabled and share an active user with write access to both.
+Manual matching remains available. A user with write access to either account
+can dismiss a pending match without fees. Confirming a match requires write
+access to both accounts.
+
 The destination determines the outflow's kind: loan payment, credit-card payment,
 investment contribution or ordinary funds movement. In [Transaction's budget
 classification](../../app/models/transaction.rb), funds movement and credit-card

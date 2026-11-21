@@ -77,6 +77,21 @@ class DepositoriesControllerTest < ActionDispatch::IntegrationTest
     assert_select "details select[name='account[financial_treatment]']", 0
   end
 
+  test "a family member can turn off automatic transfer matching for their account" do
+    member = users(:family_member)
+    @account.account_shares.where(user: member).destroy_all
+    @account.update!(owner: member)
+    sign_in member
+
+    get edit_account_url(@account)
+    assert_response :success
+    assert_select 'input[type=checkbox][name="account[enable_transfer_matcher]"][checked]'
+
+    patch depository_path(@account), params: { account: { enable_transfer_matcher: "0" } }
+    assert_redirected_to account_path(@account)
+    refute_predicate @account.reload, :enable_transfer_matcher?
+  end
+
   test "an invalid account update preserves its balance and custom logo" do
     @account.custom_logo.attach(fixture_file_upload("profile_image.png", "image/png", :binary))
     balance = @account.balance

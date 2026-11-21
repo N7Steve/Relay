@@ -162,7 +162,7 @@ module AccountableResource
         :opening_balance_date,
         :institution_name, :institution_domain, :notes,
         :financial_treatment, :archived,
-        :enable_category_matcher,
+        :enable_category_matcher, :enable_transfer_matcher,
         :custom_logo, :delete_custom_logo,
         accountable_attributes: self.class.permitted_accountable_attributes
       )

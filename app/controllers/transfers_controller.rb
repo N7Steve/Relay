@@ -86,16 +86,32 @@ class TransfersController < ApplicationController
     return unless require_account_permission!(outflow_account, redirect_path: transactions_url)
     return unless require_account_permission!(inflow_account, redirect_path: transactions_url)
 
-    Transfer.transaction do
+    @transfer.with_lock do
       update_transfer_status
-      update_transfer_fees_and_amount
-      update_transfer_details unless transfer_update_params[:status] == "rejected"
+      unless @transfer.destroyed?
+        update_transfer_fees_and_amount
+        update_transfer_details
+      end
     end
 
     respond_to do |format|
       format.html { redirect_back_or_to transactions_url, notice: t(".success") }
       format.turbo_stream
     end
+  end
+
+  def reject_match
+    writable_ids = transfer_transaction_ids(Current.family.accounts.writable_by(Current.user))
+    matches = Transfer.pending.where(id: params[:id])
+    transfer = matches.where(inflow_transaction_id: writable_ids)
+      .or(matches.where(outflow_transaction_id: writable_ids)).first!
+
+    transfer.with_lock do
+      raise ActiveRecord::RecordNotFound unless transfer.dismissible_match?
+
+      transfer.reject!
+    end
+    redirect_back_or_to transactions_url, notice: t("transfers.update.success")
   end
 
   def update_tags
@@ -140,16 +156,12 @@ class TransfersController < ApplicationController
 
   private
     def set_transfer
-      # Finds the transfer and ensures the user has access to it
-      accessible_transaction_ids = Current.family.transactions
-        .joins(entry: :account)
-        .merge(Account.accessible_by(Current.user))
-        .select(:id)
+      accessible_ids = transfer_transaction_ids(Current.user.accessible_accounts)
+      @transfer = Transfer.where(inflow_transaction_id: accessible_ids, outflow_transaction_id: accessible_ids).find(params[:id])
+    end
 
-      @transfer = Transfer
-                    .where(id: params[:id])
-                    .where(inflow_transaction_id: accessible_transaction_ids)
-                    .first!
+    def transfer_transaction_ids(accounts)
+      Current.family.entries.where(account_id: accounts.select(:id), entryable_type: "Transaction").select(:entryable_id)
     end
 
     def transfer_params
@@ -242,7 +254,7 @@ class TransfersController < ApplicationController
         @transfer.outflow_transaction.update!(category_id: transfer_update_params[:category_id])
         @transfer.inflow_transaction.update!(category_id: transfer_update_params[:category_id])
       end
-      @transfer.update!(notes: transfer_update_params[:notes])
+      @transfer.update!(notes: transfer_update_params[:notes]) if transfer_update_params.key?(:notes)
 
       if @transfer.categorizable? && transfer_update_params.key?(:name)
         new_name = transfer_update_params[:name].presence

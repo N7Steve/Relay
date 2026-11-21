@@ -43,6 +43,9 @@ es:
       balance: Saldo actual
       opening_balance_date_label: Fecha del saldo inicial
       name_label: Nombre de la cuenta
+      enable_transfer_matcher_label: Emparejar traspasos automáticamente
+      enable_transfer_matcher_hint: Desactívalo para dejar de recibir nuevas sugerencias en esta cuenta. Podrás seguir emparejando traspasos manualmente.
+      transfer_matcher_disabled_globally: El emparejamiento automático está desactivado en toda la instalación. Esta preferencia se aplicará si vuelve a activarse.
       name_placeholder: Ejemplo de nombre de cuenta
       financial_treatment_label: Tratamiento financiero
       financial_treatment_description: Define si la cuenta forma parte de tus finanzas y cómo se tratan las transferencias con ella.

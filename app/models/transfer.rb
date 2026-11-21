@@ -174,6 +174,10 @@ class Transfer < ApplicationRecord
     end
   end
 
+  def dismissible_match?
+    pending? && !fee_transactions.exists?
+  end
+
   def reject!
     Transfer.transaction do
       RejectedTransfer.find_or_create_by!(inflow_transaction_id: inflow_transaction_id, outflow_transaction_id: outflow_transaction_id)
@@ -205,7 +209,7 @@ class Transfer < ApplicationRecord
   end
 
   def confirm!
-    update!(status: "confirmed")
+    with_lock { update!(status: "confirmed") }
   end
 
   # Reuse the same financial classification after linking or boundary changes.

@@ -44,7 +44,8 @@ class Mcp::AdministrationCatalog
       c.definition("cancel_background_operation", { kind: { type: "string", enum: %w[import session backup] }, record_id: c::ID }, required: %w[kind record_id]),
       c.definition("list_insights", c::PAGE, read: true),
       c.definition("set_insight_status", { insight_id: c::ID, status: { type: "string", enum: %w[read acknowledged unacknowledged] } }, required: %w[insight_id status]),
-      c.definition("set_local_image", { kind: { type: "string", enum: %w[profile account merchant] }, account_id: c::ID, merchant_id: c::ID, upload_token: { type: [ "string", "null" ], maxLength: 4000 } }, required: %w[kind upload_token])
+      c.definition("set_local_image", { kind: { type: "string", enum: %w[profile account merchant] }, account_id: c::ID, merchant_id: c::ID, upload_token: { type: [ "string", "null" ], maxLength: 4000 } }, required: %w[kind upload_token],
+        description: "Set or remove a local profile, account, or merchant image. Merchant logos require a family administrator with write scope and a visible merchant; changes apply to that family.")
     ]
     actions.each do |operation|
       keys = case operation

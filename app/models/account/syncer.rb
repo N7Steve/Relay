@@ -11,6 +11,8 @@ class Account::Syncer
   end
 
   def perform_post_sync
+    return unless Family::AutoTransferMatchable.enabled?
+
     ExternalAccess.locally { account.family.auto_match_transfers!(account: account) }
   end
 end

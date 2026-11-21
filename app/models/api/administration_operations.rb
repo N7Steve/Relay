@@ -284,7 +284,7 @@ module Api::AdministrationOperations
       invalid!("account_id required") unless args["account_id"]
       account(args.fetch("account_id"), :write)
     when "merchant"
-      require_process_admin!
+      require_family_admin!
       invalid!("merchant_id required") unless args["merchant_id"]
       merchant = family.available_merchants_for(user).find(args["merchant_id"])
       family.merchant_customizations.find_or_initialize_by(merchant: merchant)
@@ -309,7 +309,7 @@ module Api::AdministrationOperations
       require_instance_admin! if name.in?(%w[get_instance_status preview_instance_settings update_instance_settings list_diagnostics update_member_role get_background_status list_background_operations cancel_background_operation])
       require_process_admin! if name.in?(%w[list_background_operations cancel_background_operation])
       require_family_admin! if name.in?(%w[update_family_settings list_invitations create_invitation revoke_invitation])
-      require_process_admin! if name == "set_local_image" && args["kind"] == "merchant"
+      require_family_admin! if name == "set_local_image" && args["kind"] == "merchant"
       if name.in?(%w[list_insights set_insight_status])
         raise Api::Access::Forbidden, "Preview and complete account visibility required" unless user.preview_features_enabled? && access.complete_account_visibility?
       end

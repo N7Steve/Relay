@@ -692,6 +692,54 @@ class TransfersControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Test notes", transfer.reload.notes
   end
 
+  test "a writer on one side can reject a pending match without access to the other account" do
+    member = users(:family_member)
+    source = accounts(:depository)
+    destination = accounts(:credit_card)
+    destination.account_shares.where(user: member).destroy_all
+    outflow = source.entries.create!(name: "Pending shared account charge", date: Date.current, amount: 345,
+      currency: source.currency, entryable: Transaction.new)
+    inflow = destination.entries.create!(name: "Private account charge", date: Date.current, amount: -345,
+      currency: destination.currency, entryable: Transaction.new)
+    transfer = Transfer.create!(outflow_transaction: outflow.transaction, inflow_transaction: inflow.transaction, status: "pending")
+    transfer.reclassify_transactions!
+    sign_in member
+
+    get account_path(source, tab: "activity")
+    assert_response :success
+    assert_select "form[action=?]", reject_match_transfer_path(transfer)
+    assert_select "button[title=?]", I18n.t("transactions.transfer_match.confirm_match"), count: 0
+    assert_not_includes response.body, inflow.name
+
+    get transfer_url(transfer)
+    assert_response :not_found
+
+    patch transfer_url(transfer), params: { transfer: { status: "confirmed" } }
+    assert_response :not_found
+    assert_predicate transfer.reload, :pending?
+
+    assert_no_difference "Entry.count" do
+      assert_difference "RejectedTransfer.count", 1 do
+        patch reject_match_transfer_url(transfer)
+      end
+    end
+    assert_redirected_to transactions_url
+    refute Transfer.exists?(transfer.id)
+    assert_equal [ 345, -345 ], [ outflow.reload.amount, inflow.reload.amount ]
+    assert_equal %w[standard standard], [ outflow.transaction.kind, inflow.transaction.kind ]
+  end
+
+  test "the pending-match rejection cannot remove a confirmed transfer" do
+    transfer = transfers(:one)
+    transfer.confirm!
+
+    assert_no_difference "Transfer.count" do
+      patch reject_match_transfer_url(transfer)
+    end
+    assert_response :not_found
+    assert_predicate transfer.reload, :confirmed?
+  end
+
   test "handles rejection without FrozenError" do
     transfer = transfers(:one)
 

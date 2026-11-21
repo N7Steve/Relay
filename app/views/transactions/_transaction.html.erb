@@ -5,16 +5,18 @@
 <% else %>
 
 <% transaction = entry.entryable %>
+<% transfer = transaction.transfer %>
+<% visible_transfer = transfer && can_view_transfer?(transfer) %>
 <% transaction_security_logo_url = transaction.activity_security&.display_logo_url %>
 <% transaction_merchant_logo_url = transaction.merchant&.display_logo_url(family: Current.family) %>
-<% open_path = if transaction.transfer?
-     transaction.transfer.present? ? transfer_path(transaction.transfer) : entry_path(entry)
+<% open_path = if visible_transfer
+     transfer_path(transfer)
    else
      in_split_group ? entry_path(entry, grouped: true) : entry_path(entry)
    end %>
-<% duplicate_path = if transaction.transfer.present?
-     new_transfer_path(duplicate_transfer_id: transaction.transfer.id)
-   else
+<% duplicate_path = if visible_transfer
+     new_transfer_path(duplicate_transfer_id: transfer.id)
+   elsif transfer.nil?
      new_transaction_path(duplicate_entry_id: entry.id)
    end %>
 

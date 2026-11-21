@@ -21706,8 +21706,9 @@ paths:
         required: true
   "/api/v1/actions/set_local_image":
     post:
-      summary: Set local image. Uses authenticated account permissions and Relay financial
-        rules.
+      summary: Set or remove a local profile, account, or merchant image. Merchant
+        logos require a family administrator with write scope and a visible merchant;
+        changes apply to that family.
       tags:
       - Daily operations
       security:

@@ -181,6 +181,33 @@ class Api::V1::AdministrationOperationsTest < ActionDispatch::IntegrationTest
     assert_not accounts(:depository).reload.custom_logo.attached?
   end
 
+  test "merchant logo changes require family administration, write scope, and merchant visibility" do
+    merchant = merchants(:netflix)
+    args = { kind: "merchant", merchant_id: merchant.id, upload_token: nil, idempotency_key: "remove-merchant-logo" }
+
+    @key.update!(user: users(:family_member))
+    invoke("set_local_image", args)
+    assert_response :forbidden
+
+    @key.update!(user: @user, scopes: %w[read])
+    invoke("set_local_image", args)
+    assert_response :forbidden
+
+    private_account = accounts(:investment)
+    private_account.update!(owner: users(:family_member))
+    private_account.account_shares.where(user: @user).destroy_all
+    private_merchant = ProviderMerchant.create!(name: "Private merchant", source: "enable_banking")
+    private_account.entries.create!(name: "Private charge", date: Date.current, amount: 10,
+      currency: private_account.currency, entryable: Transaction.new(merchant: private_merchant))
+
+    @key.update!(scopes: %w[read_write])
+    invoke("set_local_image", args.merge(merchant_id: private_merchant.id))
+    assert_response :unprocessable_entity
+
+    invoke("set_local_image", args)
+    assert_response :success, response.body
+  end
+
   private
     def invoke(name, args)
       post "/api/v1/actions/#{name}", params: { arguments: args }, headers: { "X-Api-Key" => @key.display_key }, as: :json

@@ -63,6 +63,9 @@ en:
       notes_placeholder: Store additional information like account numbers, sort codes, IBAN, routing numbers, etc.
       enable_category_matcher_label: Enable category matcher
       enable_category_matcher_hint: When enabled, the provider's suggested category is applied to imported transactions. Disable to leave new transactions uncategorized.
+      enable_transfer_matcher_label: Match transfers automatically
+      enable_transfer_matcher_hint: Turn off to stop new transfer suggestions for this account. You can still match transfers manually.
+      transfer_matcher_disabled_globally: Automatic matching is off for this installation. This preference applies if it is turned on again.
     index:
       accounts: Accounts
       cancel_sync: Cancel sync
