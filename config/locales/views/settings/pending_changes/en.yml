@@ -206,11 +206,36 @@
             "destination_account_id": "Destination account",
             "title": "Title",
             "color": "Color",
-            "icon": "Icon"
+            "icon": "Icon",
+            "frequency": "Frequency",
+            "start_date": "Start date",
+            "end_date": "End date",
+            "target_account_id": "Target account",
+            "payment_type": "Payment type",
+            "auto_confirm": "Automatic confirmation",
+            "amount_estimated": "Estimated amount",
+            "status": "Status",
+            "confirm_date": "Confirmation date",
+            "reason": "Reason"
           },
           "unknown": "Unavailable"
         },
-        "credential_expired": "The connection that prepared this proposal expired or was revoked. Reconnect the assistant and ask it to list pending changes. A renewal of the same connection will refresh the proposal. You can discard it without reconnecting."
+        "credential_expired": "The connection that prepared this proposal expired or was revoked. Reconnect the assistant and ask it to list pending changes. A renewal of the same connection will refresh the proposal. You can discard it without reconnecting.",
+        "operations": {
+          "create_scheduled_payment": "New scheduled payment",
+          "update_scheduled_payment": "Edit scheduled payment",
+          "set_scheduled_payment_status": "Pause or resume scheduled payment",
+          "delete_scheduled_payment": "Delete scheduled payment and its agenda",
+          "confirm_scheduled_date": "Confirm scheduled date",
+          "skip_scheduled_date": "Skip scheduled date",
+          "run_scheduled_payments": "Generate due occurrences",
+          "confirm_scheduled_entry": "Confirm occurrence",
+          "reject_scheduled_entry": "Reject occurrence",
+          "retract_scheduled_entry": "Undo confirmation and delete its movement",
+          "restore_scheduled_entry": "Restore occurrence",
+          "revert_future_scheduled_entry": "Return occurrence to scheduled",
+          "purge_pending_scheduled_entry": "Delete pending occurrence"
+        }
       },
       "settings_nav": {
         "pending_changes_label": "Pending changes"

@@ -78,6 +78,13 @@ revisión, una edición o eliminación masiva de transacciones cuenta y desglosa
 los movimientos afectados; las demás operaciones cuentan como un elemento.
 Una transferencia sigue siendo un elemento aunque afecte a dos cuentas.
 
+Los cambios de agenda (series de pagos programados y sus ocurrencias) se agrupan
+como «agenda». La revisión identifica la serie por su título y cuenta, muestra sus
+valores actuales frente a los propuestos (importe, frecuencia, fechas, tipo,
+estado…), la fecha programada afectada y una etiqueta legible de la operación.
+Retraer una confirmación o purgar una ocurrencia pendiente se presentan como
+eliminaciones. Una serie cuyas cuentas ya no son accesibles no revela sus datos.
+
 Solo el usuario propietario, con su familia actual y una sesión web autenticada,
 puede aprobar o descartar. Los formularios conservan CSRF. El token de revisión
 firma el contenido exacto y caduca en una hora: si el asistente añade operaciones

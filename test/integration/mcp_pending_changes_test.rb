@@ -314,6 +314,39 @@ class McpPendingChangesTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "pending:#{merchant.fetch('change_id')}"
   end
 
+  test "agenda changes are proposed through MCP, reviewed by schedule and applied only after approval" do
+    payment = @user.family.scheduled_payments.create!(account: @account, title: "Gym membership", amount: 25, currency: @account.currency,
+      frequency: "monthly", start_date: Date.current, next_run_date: Date.current, status: "active", payment_type: "expense")
+    skipped_date = Date.current.next_month
+    batch = nil
+    assert_no_difference [ "ScheduledPaymentEntry.count", "Api::Operation.count" ] do
+      rpc("propose_changes", operations: [
+        { name: "skip_scheduled_date", arguments: { scheduled_payment_id: payment.id, scheduled_date: skipped_date.iso8601, idempotency_key: "agenda-skip" } },
+        { name: "update_scheduled_payment", arguments: { scheduled_payment_id: payment.id, amount: "30", frequency: "yearly", idempotency_key: "agenda-edit" } }
+      ])
+      batch = response.parsed_body.dig("result", "structuredContent")
+    end
+    assert_equal "pending_approval", batch.fetch("status")
+    assert_equal BigDecimal("25"), payment.reload.amount
+
+    sign_in @user
+    get settings_pending_change_path(batch.fetch("change_set_id"))
+    assert_response :success
+    assert_select "td", text: /Gym membership/
+    assert_select "td", text: /#{I18n.t("settings.pending_changes.operations.update_scheduled_payment")}/
+    assert_select "td", text: /#{I18n.t("settings.pending_changes.operations.skip_scheduled_date")}/
+    assert_select "td", text: /#{I18n.t("scheduled_payments.form.frequencies.yearly")}/
+    assert_select "td", text: /#{skipped_date.iso8601}/
+
+    set = Mcp::ChangeSet.find(batch.fetch("change_set_id"))
+    set.approve!(actor: @user, token: set.review_token)
+    set.apply!
+    assert_equal "applied", set.reload.status
+    assert_equal BigDecimal("30"), payment.reload.amount
+    assert payment.yearly?
+    assert payment.scheduled_payment_entries.exists?(scheduled_date: skipped_date, status: "skipped")
+  end
+
   test "revoked proposals can always be discarded with a fresh web review" do
     receipt = propose("create_tag", name: "Discard revoked", idempotency_key: "discard-revoked")
     set = Mcp::ChangeSet.find(receipt.fetch("change_set_id"))

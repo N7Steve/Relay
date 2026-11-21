@@ -3,6 +3,9 @@
 # A review summary, not a domain preview. Resolve labels only through the
 # reviewer's current account permissions, never by trusting proposed IDs.
 class Mcp::ChangeSet::Summary
+  SCHEDULE_FIELDS = %w[title amount currency frequency start_date end_date account_id target_account_id category_id merchant_id
+    payment_type auto_confirm amount_estimated tag_ids status].freeze
+
   def initialize(change_sets:, actor:)
     @change_sets = change_sets.to_a
     access = Api::Access.new(user: actor, scopes: %w[read])
@@ -18,6 +21,7 @@ class Mcp::ChangeSet::Summary
             entry.transaction.attributes.slice(*Mcp::Catalog::TRANSACTION.keys.map(&:to_s)),
             "tag_ids" => entry.transaction.tag_ids, "account_id" => entry.account_id) } ]
       end
+    @schedules = load_schedules(actor)
     @labels = {
       "account_id" => @accounts.transform_values { |account| account[:name] },
       "category_id" => actor.family.categories.pluck(:id, :name).to_h,
@@ -46,10 +50,11 @@ class Mcp::ChangeSet::Summary
       name = operation.fetch("name")
       args = operation.fetch("arguments")
       transaction = @transactions[args["transaction_id"]]
-      account_id = args["account_id"] || transaction&.fetch(:account_id)
+      schedule = @schedules[args["scheduled_payment_id"]]
+      account_id = args["account_id"] || transaction&.fetch(:account_id) || schedule&.dig(:snapshot, "account_id")
       type = type_for(name, args, transaction)
       account_ids = name.include?("transfer") ? [ args["source_account_id"], args["destination_account_id"] ].compact : Array(account_id)
-      currency = args["currency"] || @accounts[account_ids.first]&.fetch(:currency) || transaction&.fetch(:currency)
+      currency = args["currency"] || schedule&.dig(:snapshot, "currency") || @accounts[account_ids.first]&.fetch(:currency) || transaction&.fetch(:currency)
       # Only sum new, explicit amounts. Edits, deletions and dependent amounts
       # must not be presented as a known financial delta.
       amount = decimal(args["amount"]) if name.in?(%w[create_transaction create_transfer])
@@ -58,7 +63,7 @@ class Mcp::ChangeSet::Summary
       {
         type: type, action: Mcp::ChangeSet.action_for(name), currency: currency,
         accounts: account_ids.map { |id| account_label(id, change_set) },
-        names: type.in?(%w[categories merchants tags rules accounts goals agenda]) ? Array(args["name"] || args["title"]).reject { |value| value.start_with?("pending:") } : [],
+        names: type.in?(%w[categories merchants tags rules accounts goals agenda]) ? Array(args["name"] || args["title"] || schedule&.dig(:snapshot, "title")).reject { |value| value.start_with?("pending:") } : [],
         amount: currency.present? ? amount&.abs : nil, state: state,
         details: details_for(operation, change_set, transaction, state)
       }
@@ -66,7 +71,8 @@ class Mcp::ChangeSet::Summary
 
     # Explicit display fields avoid exposing upload tokens, passwords or other
     # secrets from the much wider administration/process tool arguments.
-    REVIEW_FIELDS = (Mcp::Catalog::TRANSACTION.keys.map(&:to_s) + %w[account_id source_account_id destination_account_id title color icon]).freeze
+    REVIEW_FIELDS = (Mcp::Catalog::TRANSACTION.keys.map(&:to_s) + %w[account_id source_account_id destination_account_id title color icon] +
+      SCHEDULE_FIELDS + %w[confirm_date reason]).uniq.freeze
 
     def details_for(operation, change_set, transaction, state)
       args = operation.fetch("arguments")
@@ -81,7 +87,8 @@ class Mcp::ChangeSet::Summary
 
     def detail(operation, change_set, transaction, state)
       args = operation.fetch("arguments")
-      before = transaction&.fetch(:snapshot)
+      schedule = @schedules[args["scheduled_payment_id"]]
+      before = transaction&.fetch(:snapshot) || schedule_snapshot(schedule, args)
       organization_field = { "merchant_id" => "merchant_id", "category_id" => "category_id", "tag_id" => "tag_ids" }.find { |key, _| args.key?(key) }
       if !before && organization_field && operation["name"].match?(/\A(update|delete)_(merchant|category|tag)\z/)
         key, label_key = organization_field
@@ -89,17 +96,21 @@ class Mcp::ChangeSet::Summary
         before = { "name" => label } if label
       end
       fields = args.slice(*REVIEW_FIELDS)
-      fields["currency"] ||= transaction&.fetch(:currency) || args["currency"] || @accounts[args["account_id"]]&.fetch(:currency) if fields.key?("amount")
-      if operation["name"].in?(%w[delete_transaction bulk_delete_transactions])
+      fields["currency"] ||= transaction&.fetch(:currency) || schedule&.dig(:snapshot, "currency") || args["currency"] || @accounts[args["account_id"]]&.fetch(:currency) if fields.key?("amount")
+      if operation["name"].in?(%w[delete_transaction bulk_delete_transactions delete_scheduled_payment])
         fields = before || {}
       end
+      # A schedule snapshot is complete: fields it lacks (confirmation date,
+      # reason) have no current value rather than an unknown one.
+      missing = before && schedule && !transaction ? nil : { unavailable: true }
       changes = fields.map do |field, value|
-        { field: field, before: before && before.key?(field) ? display_value(field, before[field], change_set) : (operation["name"].start_with?("create_") ? nil : { unavailable: true }),
-          after: operation["name"].in?(%w[delete_transaction bulk_delete_transactions]) ? nil : display_value(field, value, change_set) }
+        { field: field, before: before && before.key?(field) ? display_value(field, before[field], change_set) : (operation["name"].start_with?("create_") ? nil : missing),
+          after: operation["name"].in?(%w[delete_transaction bulk_delete_transactions delete_scheduled_payment]) ? nil : display_value(field, value, change_set) }
       end
-      { name: before&.fetch("name", nil) || args["name"] || args["title"],
+      { name: before&.fetch("name", nil) || before&.fetch("title", nil) || args["name"] || args["title"],
         operation: operation.fetch("name"), state: state, changes: changes,
-        context: (before || args).slice("date", "amount", "currency", "account_id").map { |field, value| display_value(field, value, change_set) },
+        context: (before ? before.merge(args.slice("scheduled_date")) : args).slice("date", "scheduled_date", "amount", "currency", "account_id")
+          .map { |field, value| display_value(field, value, change_set) },
         error: operation["error_message"] }
     end
 
@@ -111,7 +122,7 @@ class Mcp::ChangeSet::Summary
         source = change_set.operations.find { |row| row["id"] == reference[1] }
         return { proposed: source&.dig("arguments", "name") || source&.dig("arguments", "title") }
       end
-      label_field = field.in?(%w[source_account_id destination_account_id]) ? "account_id" : field
+      label_field = field.in?(%w[source_account_id destination_account_id target_account_id]) ? "account_id" : field
       return { label: @labels[label_field][value] } if @labels.key?(label_field)
       value
     end
@@ -136,6 +147,34 @@ class Mcp::ChangeSet::Summary
       when /valuation/ then "valuations"
       else Mcp::ChangeSet.domain_for(name)
       end
+    end
+
+    # Agenda operations name a schedule, not a transaction. Only schedules whose
+    # accounts the reviewer can currently read are described.
+    def load_schedules(actor)
+      ids = @change_sets.flat_map { |set| set.operations.map { |row| row.dig("arguments", "scheduled_payment_id") } }
+        .select { |id| id.is_a?(String) && !id.start_with?("pending:") }.uniq
+      return {} if ids.empty?
+
+      schedules = actor.family.scheduled_payments.accessible_by(actor).where(id: ids)
+        .select { |record| @accounts.key?(record.account_id) && (record.target_account_id.nil? || @accounts.key?(record.target_account_id)) }
+      occurrence_ids = @change_sets.flat_map { |set| set.operations.map { |row| row.dig("arguments", "occurrence_id") } }.select { |id| id.is_a?(String) }
+      occurrences = ScheduledPaymentEntry.where(scheduled_payment_id: schedules.map(&:id), id: occurrence_ids).to_h { |row| [ row.id, row ] }
+      schedules.to_h do |record|
+        amount = record.amount&.to_d&.to_s("F")
+        [ record.id, { snapshot: record.attributes.slice(*SCHEDULE_FIELDS).merge("amount" => amount, "tag_ids" => record.tag_ids,
+          "start_date" => record.start_date&.iso8601, "end_date" => record.end_date&.iso8601),
+          occurrences: occurrences.values.select { |row| row.scheduled_payment_id == record.id } } ]
+      end
+    end
+
+    def schedule_snapshot(schedule, args)
+      return unless schedule
+
+      snapshot = schedule.fetch(:snapshot)
+      occurrence = schedule.fetch(:occurrences).find { |row| row.id == args["occurrence_id"] }
+      snapshot = snapshot.merge("scheduled_date" => occurrence.scheduled_date.iso8601, "status" => occurrence.status) if occurrence
+      snapshot
     end
 
     def account_label(id, change_set)

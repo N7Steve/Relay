@@ -28,6 +28,9 @@
     <%= render DS::Table.new(rows: group[:details], label: t("settings.pending_changes.details.title")) do |table| %>
       <% table.with_column(t("settings.pending_changes.details.item"), class: "min-w-40 privacy-sensitive") do |detail| %>
         <p class="text-primary font-medium"><%= detail[:name] || t("settings.pending_changes.details.unnamed") %></p>
+        <% if (operation = pending_change_operation(detail)) %>
+          <p class="text-secondary text-sm"><%= operation %></p>
+        <% end %>
         <p class="text-secondary text-sm"><%= detail[:context].map { |value| pending_change_value(value) }.join(" · ") %></p>
         <% if detail[:changes].empty? %>
           <p class="text-secondary text-sm"><%= t("settings.pending_changes.details.unavailable") %></p>

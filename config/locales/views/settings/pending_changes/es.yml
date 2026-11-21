@@ -206,11 +206,36 @@
             "destination_account_id": "Cuenta de destino",
             "title": "Título",
             "color": "Color",
-            "icon": "Icono"
+            "icon": "Icono",
+            "frequency": "Frecuencia",
+            "start_date": "Fecha de inicio",
+            "end_date": "Fecha de fin",
+            "target_account_id": "Cuenta destino",
+            "payment_type": "Tipo de pago",
+            "auto_confirm": "Confirmación automática",
+            "amount_estimated": "Importe estimado",
+            "status": "Estado",
+            "confirm_date": "Fecha de confirmación",
+            "reason": "Motivo"
           },
           "unknown": "No disponible"
         },
-        "credential_expired": "La conexión que preparó esta propuesta ha caducado o se ha revocado. Reconecta el asistente y pídele que consulte los cambios pendientes. Una renovación de la misma conexión actualizará la propuesta. Puedes descartarla sin reconectar."
+        "credential_expired": "La conexión que preparó esta propuesta ha caducado o se ha revocado. Reconecta el asistente y pídele que consulte los cambios pendientes. Una renovación de la misma conexión actualizará la propuesta. Puedes descartarla sin reconectar.",
+        "operations": {
+          "create_scheduled_payment": "Nuevo pago programado",
+          "update_scheduled_payment": "Editar pago programado",
+          "set_scheduled_payment_status": "Pausar o reanudar pago programado",
+          "delete_scheduled_payment": "Eliminar pago programado y su agenda",
+          "confirm_scheduled_date": "Confirmar fecha programada",
+          "skip_scheduled_date": "Omitir fecha programada",
+          "run_scheduled_payments": "Generar ocurrencias vencidas",
+          "confirm_scheduled_entry": "Confirmar ocurrencia",
+          "reject_scheduled_entry": "Rechazar ocurrencia",
+          "retract_scheduled_entry": "Deshacer confirmación y eliminar su movimiento",
+          "restore_scheduled_entry": "Restaurar ocurrencia",
+          "revert_future_scheduled_entry": "Devolver ocurrencia a programada",
+          "purge_pending_scheduled_entry": "Eliminar ocurrencia pendiente"
+        }
       },
       "settings_nav": {
         "pending_changes_label": "Cambios pendientes"

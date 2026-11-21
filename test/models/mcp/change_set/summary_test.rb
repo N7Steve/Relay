@@ -118,7 +118,56 @@ class Mcp::ChangeSet::SummaryTest < ActiveSupport::TestCase
     assert_not_includes details, "secret-token"
   end
 
+  test "agenda changes identify the schedule, its account and current values" do
+    payment = schedule("Gym")
+    occurrence = payment.scheduled_payment_entries.create!(scheduled_date: Date.current, status: "pending")
+    set = proposal([
+      operation("update_scheduled_payment", scheduled_payment_id: payment.id, amount: "30", frequency: "yearly"),
+      operation("skip_scheduled_date", scheduled_payment_id: payment.id, scheduled_date: Date.current.next_month.iso8601),
+      operation("confirm_scheduled_entry", scheduled_payment_id: payment.id, occurrence_id: occurrence.id, amount: "28"),
+      operation("delete_scheduled_payment", scheduled_payment_id: payment.id)
+    ])
+    groups = summary(set)
+    assert groups.all? { |group| group[:type] == "agenda" }
+    assert groups.all? { |group| group[:accounts].pluck(:name) == [ @account.name ] }
+    assert groups.all? { |group| group[:names] == [ "Gym" ] }
+    details = groups.flat_map { |group| group[:details] }
+    assert details.all? { |detail| detail[:name] == "Gym" }
+
+    update = details.find { |detail| detail[:operation] == "update_scheduled_payment" }
+    assert_equal({ "amount" => [ "25.0", "30" ], "frequency" => [ "monthly", "yearly" ] },
+      update[:changes].reject { |change| change[:field] == "currency" }.to_h { |change| [ change[:field], [ change[:before], change[:after] ] ] })
+
+    skip = details.find { |detail| detail[:operation] == "skip_scheduled_date" }
+    assert_includes skip[:context], Date.current.next_month.iso8601
+
+    confirm = details.find { |detail| detail[:operation] == "confirm_scheduled_entry" }
+    assert_includes confirm[:context], Date.current.iso8601
+    assert_equal [ "25.0", "28" ], confirm[:changes].find { |change| change[:field] == "amount" }.values_at(:before, :after)
+
+    delete = details.find { |detail| detail[:operation] == "delete_scheduled_payment" }
+    assert_equal "Gym", delete[:changes].find { |change| change[:field] == "title" }[:before]
+    assert delete[:changes].all? { |change| change[:after].nil? }
+    assert_equal "delete", groups.find { |group| group[:details].include?(delete) }[:action]
+  end
+
+  test "agenda changes on inaccessible schedules never disclose their current values" do
+    payment = schedule("Private subscription")
+    @account.update!(owner: users(:family_member))
+    @account.account_shares.where(user: @user).delete_all
+    set = proposal([ operation("update_scheduled_payment", scheduled_payment_id: payment.id, amount: "30") ])
+    group = summary(set).first
+    assert_equal "agenda", group[:type]
+    assert_not_includes group.to_json, "Private subscription"
+    assert_equal({ unavailable: true }, group[:details].first[:changes].first[:before])
+  end
+
   private
+    def schedule(title)
+      @user.family.scheduled_payments.create!(account: @account, title: title, amount: 25, currency: @account.currency,
+        frequency: "monthly", start_date: Date.current, next_run_date: Date.current, status: "active", payment_type: "expense")
+    end
+
     def operation(name, **arguments)
       { "id" => SecureRandom.uuid, "name" => name, "arguments" => arguments.stringify_keys, "status" => "pending" }
     end

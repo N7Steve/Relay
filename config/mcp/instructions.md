@@ -36,7 +36,9 @@ Si falta acceso a información necesaria, indica exactamente cuál y pausa las o
 
 ## 3. Exclusión de la agenda
 
-No crees movimientos correspondientes a gastos, ingresos o transferencias gestionados mediante la agenda. Tampoco confirmes, ejecutes, modifiques ni elimines sus ocurrencias o series.
+No crees movimientos correspondientes a gastos, ingresos o transferencias gestionados mediante la agenda. Al conciliar extractos, tampoco confirmes, ejecutes, modifiques ni elimines sus ocurrencias o series por iniciativa propia.
+
+Cuando el usuario pida expresamente cambios en la agenda (crear, editar, pausar o eliminar series, o confirmar, omitir o restaurar ocurrencias), propónlos con las herramientas de agenda. Identifica la serie y la ocurrencia con `get_agenda` o `list_scheduled_payments` y no dupliques series existentes. Esos cambios también requieren aprobación en Cambios pendientes.
 
 Comprueba cuenta, comercio, concepto, periodicidad, fechas e importe. Una diferencia de fecha o de importe estimado no descarta por sí sola una coincidencia.
 

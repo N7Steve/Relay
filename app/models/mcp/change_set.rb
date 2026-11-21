@@ -210,7 +210,7 @@ class Mcp::ChangeSet < ApplicationRecord
 
   def self.action_for(name)
     return "prepare" if Mcp::Catalog.fetch(name).dig(:annotations, :readOnlyHint)
-    return "delete" if name.match?(/\A(delete|remove|revoke|disconnect|unlink|bulk_delete|reject|cancel)_/)
+    return "delete" if name.match?(/\A(delete|remove|revoke|disconnect|unlink|bulk_delete|reject|cancel|retract|purge_pending)_/)
     return "create" if name.match?(/\A(create|duplicate|upload|start_import|start_import_session|restore_backup)_/)
     "update"
   end
@@ -219,10 +219,10 @@ class Mcp::ChangeSet < ApplicationRecord
     case name
     when /profile|preferences/ then "settings"
     when /import|statement|attachment|backup|file/ then "files"
+    when /goal|pledge/ then "goals"
     when /transaction|transfer|trade|holding|valuation|security|price|exchange|reconcil|portfolio/ then "movements"
     when /account/ then "accounts"
     when /budget|rollover/ then "budgets"
-    when /goal|pledge/ then "goals"
     when /scheduled|occurrence/ then "agenda"
     when /category|merchant|tag|rule/ then "organization"
     when /bank|drive|sync/ then "integrations"

@@ -19,11 +19,25 @@ module Settings::PendingChangesHelper
     end
   end
 
+  # Agenda enums reuse the labels shown on the Agenda page.
+  ENUM_LABELS = { "frequency" => "scheduled_payments.form.frequencies", "payment_type" => "scheduled_payments.form.payment_types",
+    "status" => "scheduled_payments.status" }.freeze
+
+  def pending_change_field_value(field, value)
+    scope = ENUM_LABELS[field]
+    return pending_change_value(value) unless scope && value.is_a?(String)
+    t("#{scope}.#{value}", default: value)
+  end
+
+  def pending_change_operation(detail)
+    t("settings.pending_changes.operations.#{detail[:operation]}", default: "").presence
+  end
+
   def pending_change_comparison(detail, side)
     safe_join(detail[:changes].map do |change|
       tag.p do
         safe_join([ tag.span(t("settings.pending_changes.details.fields.#{change[:field]}"), class: "text-secondary"),
-          ": ", pending_change_value(change[side]) ])
+          ": ", pending_change_field_value(change[:field], change[side]) ])
       end
     end)
   end
