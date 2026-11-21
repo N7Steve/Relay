@@ -37,6 +37,7 @@ class ScheduledPaymentsController < ApplicationController
         start_date: source_entry.date,
         frequency: "monthly",
         payment_type: is_transfer ? "transfer" : (source_entry.amount.positive? ? "expense" : "income"),
+        shared_expense: !is_transfer && source_entry.amount.positive? && transaction.shared_expense?,
         target_account_id: is_transfer ? transaction.transfer.to_account&.id : nil
       )
 
@@ -301,7 +302,7 @@ class ScheduledPaymentsController < ApplicationController
         :title, :amount, :currency, :frequency,
         :start_date, :end_date, :category_id,
         :merchant_id, :target_account_id, :payment_type, :auto_confirm, :amount_estimated,
-        :from_entry_id, tag_ids: []
+        :shared_expense, :from_entry_id, tag_ids: []
       )
       if params[:scheduled_payment].key?(:account_id)
         account_id = params[:scheduled_payment][:account_id]

@@ -212,6 +212,10 @@ transferencias. La organización global requiere administrador con acceso a toda
 las cuentas, porque sustituciones/fusiones afectan también movimientos existentes.
 Las referencias siempre pertenecen a la familia y al conjunto disponible del actor.
 
+`get_transfer` devuelve las notas de la transferencia en `notes` (o `null`
+si no tiene notas). Cada movimiento conserva sus propias notas en
+`outflow.notes` e `inflow.notes`.
+
 Dividir reemplaza atómicamente una división anterior; revertir recupera el padre.
 Los hijos no admiten edición/borrado directo ni cambios por lote. Desbloquear
 limpia protecciones de importación/usuario/campos, conservando la protección

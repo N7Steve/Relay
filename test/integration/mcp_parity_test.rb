@@ -31,6 +31,22 @@ class McpParityTest < ActionDispatch::IntegrationTest
     assert_equal 1, Api::Operation.where(user: @user, key: "transport-replay").count
   end
 
+  test "transfer details return notes stored on the transfer itself" do
+    source, destination = accounts(:depository), accounts(:investment)
+    transfer = Transfer::Creator.new(family: @user.family, source_account_id: source.id, destination_account_id: destination.id, date: Date.current, amount: 20).create
+    transfer.update!(notes: "First repayment recorded\nSecond repayment recorded")
+
+    rpc("get_transfer", transfer_id: transfer.id)
+
+    assert_response :success
+    result = response.parsed_body.fetch("result")
+    assert_equal false, result.fetch("isError")
+    details = result.fetch("structuredContent")
+    assert_equal transfer.notes, details.fetch("notes")
+    assert_nil details.fetch("outflow").fetch("notes")
+    assert_nil details.fetch("inflow").fetch("notes")
+  end
+
   test "permission changes are checked before a cross transport replay" do
     args = { first_name: "Before downgrade", idempotency_key: "profile-downgrade" }
     post "/api/v1/actions/update_profile", params: { arguments: args }, headers: api_headers, as: :json

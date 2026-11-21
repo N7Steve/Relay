@@ -102,7 +102,7 @@
             ScheduledPayment.payment_types.keys.map { |k| [t("scheduled_payments.form.payment_types.#{k}", default: k.humanize), k] },
             { label: t("scheduled_payments.form.payment_type_label", default: "Payment type") },
             { data: { scheduled_payment_form_target: "paymentType",
-                      action: "change->scheduled-payment-form#toggleTransferFields" } } %>
+                      action: "change->scheduled-payment-form#togglePaymentTypeFields" } } %>
       </div>
 
       <%# Target account (only visible for transfers) %>
@@ -114,6 +114,19 @@
             { prompt: t("scheduled_payments.form.select_target_account", default: "Select target account"),
               label: t("scheduled_payments.form.target_account_label", default: "Target account"),
               variant: :logo } %>
+      </div>
+
+      <div data-scheduled-payment-form-target="sharedExpenseFields"
+           class="md:col-span-2 <%= "hidden" unless scheduled_payment.expense? %>">
+        <%= render DS::Checkbox.new(
+              form: f,
+              method: :shared_expense,
+              label: t("transactions.shared_expense_field.label"),
+              aria: { describedby: "scheduled-payment-shared-expense-hint" }
+            ) %>
+        <p id="scheduled-payment-shared-expense-hint" class="text-xs text-secondary">
+          <%= t("scheduled_payments.form.shared_expense_hint") %>
+        </p>
       </div>
 
       <%# Frequency %>

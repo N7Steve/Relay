@@ -212,5 +212,6 @@ es:
       amount_estimated_hint: Usa este importe para planificar y sustitúyelo por el real al confirmar.
       auto_confirm_label: Confirmación automática
       auto_confirm_hint: Crear automáticamente la transacción sin confirmación manual
+      shared_expense_hint: Se aplica a los cargos nuevos y actualiza los cargos vinculados cuando cambias esta opción.
     retracted: Transacción programada omitida
     retract_error: Esta transacción no está vinculada a un pago programado

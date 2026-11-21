@@ -319,7 +319,7 @@ module Api::PlanningOperations
     end
 
     def schedule_attributes(args)
-      attrs = args.slice("title", "amount", "currency", "frequency", "start_date", "end_date", "account_id", "target_account_id", "category_id", "merchant_id", "payment_type", "auto_confirm", "amount_estimated", "tag_ids")
+      attrs = args.slice("title", "amount", "currency", "frequency", "start_date", "end_date", "account_id", "target_account_id", "category_id", "merchant_id", "payment_type", "auto_confirm", "amount_estimated", "shared_expense", "tag_ids")
       attrs["amount"] = decimal(attrs["amount"]) if attrs["amount"]
       %w[start_date end_date].each { |key| attrs[key] = date(attrs[key]) if attrs[key] }
       account(attrs["account_id"], :write) if attrs["account_id"]
@@ -334,7 +334,7 @@ module Api::PlanningOperations
     end
 
     def schedule_json(record)
-      financial_json(record.attributes.slice("id", "title", "account_id", "target_account_id", "category_id", "merchant_id", "frequency", "frequency_day", "payment_type", "start_date", "end_date", "next_run_date", "amount", "currency", "status", "auto_confirm", "amount_estimated")).merge("tag_ids" => record.tag_ids)
+      financial_json(record.attributes.slice("id", "title", "account_id", "target_account_id", "category_id", "merchant_id", "frequency", "frequency_day", "payment_type", "start_date", "end_date", "next_run_date", "amount", "currency", "status", "auto_confirm", "amount_estimated", "shared_expense")).merge("tag_ids" => record.tag_ids)
     end
 
     def occurrence_json(record)

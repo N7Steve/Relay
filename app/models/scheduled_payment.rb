@@ -43,6 +43,7 @@ class ScheduledPayment < ApplicationRecord
   before_validation :set_frequency_day_from_start_date, if: -> { start_date.present? }
   before_validation :sync_next_run_date_with_start_date, if: :reset_next_run_date?
   before_validation :clear_end_date_for_once, if: :once?
+  before_validation :clear_shared_expense_for_non_expense
   validates :target_account, presence: true, if: :transfer?
   validate :target_account_different_from_source, if: :transfer?
   validate :frequency_day_within_range
@@ -140,21 +141,27 @@ class ScheduledPayment < ApplicationRecord
 
     return if confirmed_spes.empty?
 
+    sync_shared_expense = expense? && saved_change_to_shared_expense?
     ActiveRecord::Base.transaction do
       confirmed_spes.each do |spe|
         if spe.entry.present?
           # Solo sincronizar nombre (no importe, no currency, no fecha)
           spe.entry.update_columns(name: title, updated_at: Time.current)
 
-          if spe.entry.entryable.is_a?(Transaction)
-            spe.entry.entryable.update_columns(
+          transaction = spe.entry.entryable
+          if transaction.is_a?(Transaction)
+            attributes = {
               category_id: category_id,
               merchant_id: merchant_id,
               updated_at: Time.current
-            )
+            }
+            if sync_shared_expense && spe.entry.amount >= 0 && !transaction.transfer?
+              attributes[:shared_expense] = shared_expense?
+            end
+            transaction.update_columns(attributes)
             # Sync tags
-            spe.entry.entryable.tags = tags
-            spe.entry.entryable.save!
+            transaction.tags = tags
+            transaction.save!
           end
         end
 
@@ -267,6 +274,10 @@ class ScheduledPayment < ApplicationRecord
   end
 
   private
+
+    def clear_shared_expense_for_non_expense
+      self.shared_expense = false unless expense?
+    end
 
     def link_historical_entries!(source_entry: nil)
       # A future start date controls generation, but must not prevent linking the

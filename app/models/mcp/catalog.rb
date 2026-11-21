@@ -76,8 +76,10 @@ class Mcp::Catalog
     return account if %w[get_account create_account update_account set_account_status].include?(name)
     return entry if %w[create_transaction update_transaction duplicate_transaction unsplit_transaction protect_transaction unlock_transaction].include?(name)
     return { type: "object", required: %w[parent children], properties: { parent: entry, children: { type: "array", items: entry } } } if name == "split_transaction"
-    if %w[create_transfer match_transfer].include?(name)
-      return { type: "object", required: %w[id status outflow inflow], properties: { id: ID, status: STRING, outflow: entry, inflow: entry } }
+    if %w[create_transfer match_transfer get_transfer].include?(name)
+      properties = { id: ID, status: STRING, outflow: entry, inflow: entry }
+      properties[:notes] = { type: [ "string", "null" ] } if name == "get_transfer"
+      return { type: "object", required: properties.keys.map(&:to_s), properties: properties }
     end
     return organization if name.match?(/\A(?:create|update|merge|replace)_(?:category|categories|merchant|merchants|tag|tags)\z/)
     { type: "object" }

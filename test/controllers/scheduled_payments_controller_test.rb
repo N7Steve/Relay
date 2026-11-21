@@ -302,6 +302,40 @@ class ScheduledPaymentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Gym Membership", sp.reload.title
   end
 
+  test "editing the shared expense checkbox updates linked charges and future confirmations" do
+    payment = create_payment(title: "YouTube Premium", auto_confirm: true)
+    charge = payment.generate_pending_entry!.entry
+    refute_predicate charge.transaction, :shared_expense?
+
+    get edit_scheduled_payment_url(payment)
+    assert_response :success
+    assert_select 'input[type=checkbox][name="scheduled_payment[shared_expense]"]:not([checked])'
+
+    patch scheduled_payment_url(payment), params: { scheduled_payment: { shared_expense: "1" } }
+    assert_redirected_to scheduled_payments_url
+    assert_predicate payment.reload, :shared_expense?
+    assert_predicate charge.transaction.reload, :shared_expense?
+
+    get edit_scheduled_payment_url(payment)
+    assert_select 'input[type=checkbox][name="scheduled_payment[shared_expense]"][checked]'
+
+    future_charge = payment.generate_pending_entry!.entry
+    assert_predicate future_charge.transaction, :shared_expense?
+    assert_equal payment.amount, future_charge.amount
+    zero_charge = payment.confirm_on!(payment.next_run_date, amount_override: 0.to_d).entry
+    assert_predicate zero_charge.transaction, :shared_expense?
+
+    charge.transaction.update!(shared_expense: false)
+    patch scheduled_payment_url(payment), params: { scheduled_payment: { title: "YouTube", shared_expense: "1" } }
+    refute_predicate charge.transaction.reload, :shared_expense?
+
+    patch scheduled_payment_url(payment), params: { scheduled_payment: { shared_expense: "0" } }
+    assert_redirected_to scheduled_payments_url
+    refute_predicate payment.reload, :shared_expense?
+    refute_predicate future_charge.transaction.reload, :shared_expense?
+    refute_predicate zero_charge.transaction.reload, :shared_expense?
+  end
+
   test "destroy scheduled payment" do
     sp = ScheduledPayment.create!(
       family: @family,

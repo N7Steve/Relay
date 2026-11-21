@@ -11,7 +11,7 @@ class Mcp::PlanningCatalog
     schedule_attrs = { title: c::STRING, amount: c::MONEY, currency: { type: "string", pattern: "^[A-Z]{3}$" },
       frequency: { type: "string", enum: ScheduledPayment.frequencies.keys }, start_date: c::DATE, end_date: nullable_date,
       account_id: c::ID, target_account_id: nullable_id, category_id: nullable_id, merchant_id: nullable_id,
-      payment_type: { type: "string", enum: ScheduledPayment.payment_types.keys }, auto_confirm: c::BOOLEAN, amount_estimated: c::BOOLEAN, tag_ids: c::IDS }
+      payment_type: { type: "string", enum: ScheduledPayment.payment_types.keys }, auto_confirm: c::BOOLEAN, amount_estimated: c::BOOLEAN, shared_expense: c::BOOLEAN, tag_ids: c::IDS }
     goal_attrs = { name: c::STRING, target_amount: c::MONEY, target_date: nullable_date, color: c::STRING, icon: { type: [ "string", "null" ] }, notes: c::STRING,
       kind: { type: "string", enum: Goal::KINDS }, target_mode: { type: "string", enum: Goal::TARGET_MODES }, target_months: { type: "integer", minimum: 1 },
       accounts: { type: "array", minItems: 1, maxItems: 100, items: { type: "object", additionalProperties: false, required: [ "account_id" ], properties: {

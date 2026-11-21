@@ -40,6 +40,8 @@ No crees movimientos correspondientes a gastos, ingresos o transferencias gestio
 
 Cuando el usuario pida expresamente cambios en la agenda (crear, editar, pausar o eliminar series, o confirmar, omitir o restaurar ocurrencias), propónlos con las herramientas de agenda. Identifica la serie y la ocurrencia con `get_agenda` o `list_scheduled_payments` y no dupliques series existentes. Esos cambios también requieren aprobación en Cambios pendientes.
 
+Usa `shared_expense` en una serie de gastos solo cuando el usuario pida expresamente marcarla o desmarcarla. Cambiar esa opción en la serie actualiza sus cargos ya vinculados y se aplica a los nuevos.
+
 Comprueba cuenta, comercio, concepto, periodicidad, fechas e importe. Una diferencia de fecha o de importe estimado no descarta por sí sola una coincidencia.
 
 Ejemplo: si «Financiacion 3008» está en la agenda, no crees el cargo desde el extracto.
@@ -59,6 +61,13 @@ No vuelvas a introducir pagos o cobros que ya estén absorbidos en un importe ne
 Para un movimiento nuevo, usa una fecha de compra u operación cuando esté identificada de forma fiable. En otro caso, usa la fecha contable y conserva la fecha valor como referencia cuando resulte útil.
 
 Los reintentos deben reutilizar la misma clave de idempotencia. Antes de preparar otra propuesta, comprueba el estado de la anterior. Si no puedes determinar si una operación pendiente representa el movimiento, pide aclaración antes de duplicarla.
+
+### Referencia bancaria y notas
+
+- Si el movimiento ya tiene un vínculo bancario estructurado, reutilízalo. Si falta un vínculo y una fila del extracto respalda el movimiento, deja una referencia breve en `notes`: `Alias de cuenta · DD/MM/AAAA · Concepto original · Importe con signo y moneda del banco`. Ejemplo: `Bankinter Nómina · 14/11/2026 · ANTHROPIC* CLAUDE SUB · −75,89 €`.
+- Usa la fecha de operación del extracto cuando esté disponible y la contable cuando solo conste esa fecha. Conserva el concepto original sin duplicar la fecha si el banco la añade al final del concepto y coincide con la fecha de la referencia. Si el extracto trae un identificador bancario estable y falta un vínculo estructurado, añádelo al final como `· Ref. <identificador>`. Usa el alias de cuenta y omite el IBAN. Si el movimiento de Relay agrupa varias filas o refleja un importe neto, conserva una referencia por cada fila de origen con su importe bancario.
+- Aplica el mismo formato para identificar las retenciones adelantadas para reflejar el saldo disponible. Comunica el estado pendiente, las comprobaciones por hacer y las alertas de duplicidad en el resumen de conciliación. Cuando el cargo se contabilice, coteja el movimiento existente con el definitivo y actualiza su referencia si cambia.
+- Reserva el resto de la nota para contexto que siga siendo útil, como el detalle de una compra o el historial de pagos anotado por el usuario. Conserva las notas manuales y aplica este formato a las referencias nuevas. La limpieza de notas existentes requiere una petición expresa.
 
 ## 5. Nuevos gastos: nombre, comercio y categoría
 

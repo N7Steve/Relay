@@ -84,6 +84,8 @@ El calendario conserva las ocurrencias calculadas y las persistidas, sus
 estados, importes estimados y monedas separadas. Crear puede enlazar historial
 mediante un `from_transaction_id` autorizado de la misma cuenta. Actualizar
 reutiliza `sync_confirmed_entries!`, sin reinterpretar importes ya confirmados.
+Las series de gastos aceptan `shared_expense`. Al cambiarlo se actualiza la
+marca de los cargos vinculados y se aplica el valor a los cargos nuevos.
 La activación solicita un estado deseado y no reactiva series completadas.
 
 Confirmar fecha/ocurrencia usa los bloqueos y la unicidad del modelo y no crea

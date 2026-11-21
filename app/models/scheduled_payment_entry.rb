@@ -135,7 +135,8 @@ class ScheduledPaymentEntry < ApplicationRecord
 
       transaction = Transaction.create!(
         category: sp.category,
-        merchant: sp.merchant
+        merchant: sp.merchant,
+        shared_expense: sp.expense? && sp.shared_expense?
       )
 
       created_entry = sp.account.entries.create!(

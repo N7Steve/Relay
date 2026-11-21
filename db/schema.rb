@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_21_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_21_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -1236,6 +1236,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_120000) do
     t.date "next_run_date", null: false
     t.integer "occurrences_count", default: 0
     t.string "payment_type", default: "expense", null: false
+    t.boolean "shared_expense", default: false, null: false
     t.date "start_date", null: false
     t.string "status", default: "active", null: false
     t.uuid "target_account_id"

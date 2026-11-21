@@ -5353,6 +5353,8 @@ components:
           type: boolean
         amount_estimated:
           type: boolean
+        shared_expense:
+          type: boolean
         tag_ids:
           type: array
           items:
@@ -5431,6 +5433,8 @@ components:
         auto_confirm:
           type: boolean
         amount_estimated:
+          type: boolean
+        shared_expense:
           type: boolean
         tag_ids:
           type: array

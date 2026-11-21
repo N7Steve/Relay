@@ -18,7 +18,8 @@ module Api::ParityOperations
   end
 
   def get_transfer(args)
-    transfer_json(readable_transfers.find(args.fetch("transfer_id")))
+    transfer = readable_transfers.find(args.fetch("transfer_id"))
+    transfer_json(transfer).merge(notes: transfer.notes)
   end
 
   def list_rejected_transfers(args)

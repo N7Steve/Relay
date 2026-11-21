@@ -84,10 +84,11 @@ class Api::V1::PlanningOperationsTest < ActionDispatch::IntegrationTest
   end
 
   test "Agenda create confirm reject restore retract skip and deletion preserve native effects" do
-    args = schedule_args.merge(idempotency_key: "schedule")
+    args = schedule_args.merge(shared_expense: true, idempotency_key: "schedule")
     invoke("create_scheduled_payment", args)
     assert_response :success, response.body
     id = response.parsed_body.fetch("id")
+    assert_equal true, response.parsed_body.fetch("shared_expense")
     invoke("create_scheduled_payment", args)
     assert_response :success
     assert_equal id, response.parsed_body.fetch("id")
@@ -96,6 +97,7 @@ class Api::V1::PlanningOperationsTest < ActionDispatch::IntegrationTest
       invoke("confirm_scheduled_date", confirm)
       assert_response :success, response.body
       @occurrence_id = response.parsed_body.fetch("id")
+      assert_predicate ScheduledPaymentEntry.find(@occurrence_id).entry.transaction, :shared_expense?
       invoke("confirm_scheduled_date", confirm)
       assert_response :success
     end
@@ -108,7 +110,7 @@ class Api::V1::PlanningOperationsTest < ActionDispatch::IntegrationTest
     assert_equal "confirmed", response.parsed_body.fetch("status")
     invoke("get_agenda", month: Date.current.beginning_of_month.iso8601)
     assert_response :success
-    invoke("update_scheduled_payment", scheduled_payment_id: id, title: "Renamed schedule", idempotency_key: "update-schedule")
+    invoke("update_scheduled_payment", scheduled_payment_id: id, title: "Renamed schedule", shared_expense: false, idempotency_key: "update-schedule")
     assert_response :success, response.body
     invoke("skip_scheduled_date", scheduled_payment_id: id, scheduled_date: 1.month.from_now.to_date.iso8601, idempotency_key: "skip")
     assert_response :success, response.body
@@ -116,6 +118,7 @@ class Api::V1::PlanningOperationsTest < ActionDispatch::IntegrationTest
     assert_response :success
     invoke("get_scheduled_payment", scheduled_payment_id: id)
     assert_response :success
+    assert_equal false, response.parsed_body.fetch("shared_expense")
     invoke("list_scheduled_payments", {})
     assert_response :success
     invoke("delete_scheduled_payment", scheduled_payment_id: id, idempotency_key: "delete-schedule")

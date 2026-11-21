@@ -5,6 +5,7 @@ export default class extends Controller {
   static targets = [
     "paymentType",
     "transferFields",
+    "sharedExpenseFields",
     "frequency",
     "endDateFields",
     "amountEstimated",
@@ -12,16 +13,27 @@ export default class extends Controller {
   ];
 
   connect() {
-    this.toggleTransferFields();
+    this.togglePaymentTypeFields();
     this.toggleFrequencyFields();
     this.toggleEstimatedAmountFields();
   }
 
-  toggleTransferFields() {
-    if (!this.hasPaymentTypeTarget || !this.hasTransferFieldsTarget) return;
+  togglePaymentTypeFields() {
+    if (!this.hasPaymentTypeTarget) return;
 
-    const isTransfer = this.paymentTypeTarget.value === "transfer";
-    this.transferFieldsTarget.classList.toggle("hidden", !isTransfer);
+    const paymentType = this.paymentTypeTarget.value;
+    if (this.hasTransferFieldsTarget) {
+      this.transferFieldsTarget.classList.toggle(
+        "hidden",
+        paymentType !== "transfer",
+      );
+    }
+    if (this.hasSharedExpenseFieldsTarget) {
+      this.sharedExpenseFieldsTarget.classList.toggle(
+        "hidden",
+        paymentType !== "expense",
+      );
+    }
   }
 
   toggleFrequencyFields() {

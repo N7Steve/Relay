@@ -208,6 +208,7 @@ en:
       amount_estimated_hint: Use this amount for planning and replace it with the actual amount when confirming.
       auto_confirm_label: Auto confirm
       auto_confirm_hint: Automatically create the transaction without manual confirmation
+      shared_expense_hint: Applies to new charges and updates linked charges when you change this setting.
     retracted: Scheduled transaction omitted
     retract_error: This transaction is not linked to a scheduled payment
     invalid_operation: "The payment could not be updated. Check the date, amount, and exchange rate and try again."
