@@ -134,8 +134,13 @@ automatically; delete old ones when they are no longer needed. They contain
 private keys and credentials and are separate from Relay's family ZIP export.
 
 If backup fails before `app.update`, the script restarts the services it stopped
-and leaves the original image in place. Once the update has started, it keeps the
-backup and does not roll back code against a potentially migrated database.
+and leaves the original image in place. If TrueNAS rejects `app.update` (no job
+running and the stored configuration unchanged), nothing was applied: the script
+resumes the previous version and keeps the full error in the backup folder as
+`update-error.txt` (only a short excerpt reaches the terminal). If it cannot tell
+whether the change was applied, it resumes nothing and keeps the backup; check
+the app in TrueNAS and `logs/`. Once an update has been applied, it does not roll
+back code against a potentially migrated database.
 To return to the previous release, restore database, keys, storage and Redis
 together and set the previous digest from `app-before.json`.
 

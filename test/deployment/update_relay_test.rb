@@ -54,11 +54,23 @@ class UpdateRelayTest < Minitest::Test
           if fail_at == "config_changed" && File.exist?("#{dir}/config-read")
             config["services"]["web"]["ports"] = ["3003:3000"]
           end
+          # TrueNAS stored the new configuration although the client failed.
+          config = JSON.parse(File.read("#{dir}/payload.json")).fetch("custom_compose_config") if fail_at == "update_applied" && File.exist?("#{dir}/payload.json")
           File.write("#{dir}/config-read", "true")
           print JSON.generate(config)
+        when "core.get_jobs"
+          puts(fail_at == "update_running" ? "[{}]" : "[]")
         when "-j"
+          if fail_at == "update" || fail_at == "update_running"
+            # Rejected before anything was stored; the error is huge and noisy.
+            warn "ValidationError: " + ("expected {config}, got {config} " * 200)
+            exit 137
+          end
           File.write("#{dir}/payload.json", args.last)
-          exit 1 if fail_at == "update"
+          if fail_at == "update_applied"
+            warn "connection lost"
+            exit 1
+          end
           puts "{}"
         else
           abort "Unexpected midclt command: #{args.inspect}"
@@ -173,11 +185,30 @@ class UpdateRelayTest < Minitest::Test
     assert_empty Dir.glob("#{@root}/backups/*/BACKUP_COMPLETE")
   end
 
-  def test_update_failure_keeps_complete_backup_and_does_not_restart_old_code
+  def test_rejected_update_resumes_the_previous_version_and_keeps_the_error_in_the_backup
     output, status = run_script(fail_at: "update")
     refute status.success?, output
     assert_equal 1, Dir.glob("#{@root}/backups/*/BACKUP_COMPLETE").length
     assert_empty Dir.glob("#{@root}/backups/*/UPDATE_COMPLETE")
+    assert_includes calls, [ "docker", "start", "redis", "worker", "web" ]
+    assert_includes output, "no modificó la app"
+    # The terminal gets a short excerpt; the full message goes to the backup folder.
+    assert_operator output.length, :<, 5_000
+    assert_operator File.size(Dir.glob("#{@root}/backups/*/update-error.txt").first), :>, 5_000
+  end
+
+  def test_update_that_may_have_been_applied_does_not_resume_old_code
+    output, status = run_script(fail_at: "update_applied")
+    refute status.success?, output
+    assert_includes output, "No está claro"
+    refute calls.any? { |c| c[0] == "docker" && c[1] == "start" }
+    assert_empty Dir.glob("#{@root}/backups/*/UPDATE_COMPLETE")
+  end
+
+  def test_update_job_still_running_does_not_resume_old_code
+    output, status = run_script(fail_at: "update_running")
+    refute status.success?, output
+    assert_includes output, "trabajos activos: 1"
     refute calls.any? { |c| c[0] == "docker" && c[1] == "start" }
   end
 

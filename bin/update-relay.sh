@@ -224,8 +224,29 @@ PY
 
 echo "Aplicando el cambio a través de TrueNAS; web preparará la base de datos al arrancar..."
 UPDATE_STARTED=true
-# Keep middleware output private: an app response can contain configuration.
-midclt call -j app.update "$APP" "$(cat "$WORK/payload.json")" > "$BACKUP/update-result.json"
+# Keep middleware output private and out of the terminal: an error can echo the
+# whole configuration many times. It stays in the backup folder for diagnosis.
+if ! midclt call -j app.update "$APP" "$(cat "$WORK/payload.json")" > "$BACKUP/update-result.json" 2> "$BACKUP/update-error.txt"; then
+  echo "TrueNAS no ha completado app.update. Primeras líneas del error (completo en $BACKUP/update-error.txt):" >&2
+  head -c 800 "$BACKUP/update-error.txt" >&2 || true
+  echo >&2
+  running=$(midclt call core.get_jobs '[["method","=","app.update"],["state","in",["RUNNING","WAITING"]]]' 2>/dev/null |
+    python3 -I -c 'import json,sys; print(len(json.load(sys.stdin)))' 2>/dev/null || echo unknown)
+  midclt call app.config "$APP" > "$WORK/after-failure.json" 2>/dev/null || true
+  if [[ $running == 0 ]] && python3 -I - "$WORK/before.json" "$WORK/after-failure.json" <<'PY'
+import json
+import sys
+with open(sys.argv[1]) as before, open(sys.argv[2]) as current:
+    sys.exit(0 if json.load(before) == json.load(current) else 1)
+PY
+  then
+    # The stored configuration is unchanged and no job is running: nothing was
+    # applied, so the previous code and the unmigrated database can resume.
+    UPDATE_STARTED=false
+    die "TrueNAS rechazó el cambio y no modificó la app. Se reanuda la versión anterior; no se ha perdido nada."
+  fi
+  die "No está claro si TrueNAS aplicó el cambio (trabajos activos: $running). Revisa la app y logs/; no se reanuda nada automáticamente."
+fi
 echo "Esperando a web y worker (hasta 5 minutos)..."
 deadline=$((SECONDS + 300))
 ready=false
