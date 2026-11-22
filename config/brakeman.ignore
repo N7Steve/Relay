@@ -149,6 +149,52 @@
         22
       ],
       "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "75b51d2630e5e6e1ec66d81e58f03cacdaf9e4431e6056c7117cc0537a986971",
+      "check_name": "SendFile",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/android_apps_controller.rb",
+      "line": 9,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(AndroidRelease.current.apk_path, :type => \"application/vnd.android.package-archive\", :filename => (\"relay-#{AndroidRelease.current.version_name}.apk\"), :disposition => \"attachment\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "AndroidAppsController",
+        "method": "show"
+      },
+      "user_input": "AndroidRelease.current.apk_path",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "The APK path comes from the server's own android-release directory and the manifest is validated by AndroidRelease (fixed file name, version_name restricted to [0-9A-Za-z.-+]). No request input reaches the path."
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "dec594af84d7454f15bfa1b6ecce4cc362fc6649f6166d0a3694255560fdab2c",
+      "check_name": "SendFile",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/api/v1/android_updates_controller.rb",
+      "line": 25,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(AndroidRelease.current.apk_path, :type => \"application/vnd.android.package-archive\", :filename => (\"relay-#{AndroidRelease.current.version_name}.apk\"), :disposition => \"attachment\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::V1::AndroidUpdatesController",
+        "method": "apk"
+      },
+      "user_input": "AndroidRelease.current.apk_path",
+      "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
+      "note": "The APK path comes from the server's own android-release directory and the manifest is validated by AndroidRelease (fixed file name, version_name restricted to [0-9A-Za-z.-+]). No request input reaches the path."
     }
   ],
   "brakeman_version": "7.1.0"

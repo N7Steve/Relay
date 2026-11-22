@@ -26,6 +26,46 @@ components:
             read: Read access
             read_write: Read and write access
   schemas:
+    AndroidRelease:
+      type: object
+      required:
+      - version_code
+      - version_name
+      - application_id
+      - min_sdk
+      - size
+      - sha256
+      - commit
+      properties:
+        version_code:
+          type: integer
+        version_name:
+          type: string
+        application_id:
+          type: string
+        min_sdk:
+          type: integer
+        size:
+          type: integer
+          description: APK size in bytes
+        sha256:
+          type: string
+          description: Lowercase hexadecimal SHA-256 of the APK
+        commit:
+          type: string
+          description: Commit the APK was built from
+    AndroidUpdate:
+      type: object
+      required:
+      - enabled
+      - release
+      properties:
+        enabled:
+          type: boolean
+          description: Whether this server bundles an Android build
+        release:
+          "$ref": "#/components/schemas/AndroidRelease"
+          nullable: true
     AccountCapabilities:
       type: object
       required:
@@ -8977,6 +9017,63 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/api/v1/android/updates/latest":
+    get:
+      summary: Show the bundled Android release
+      tags:
+      - Android Updates
+      description: Returns the signed Android build bundled with this server image,
+        or enabled false when none is bundled.
+      security:
+      - apiKeyAuth: []
+      responses:
+        '200':
+          description: Android update channel returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AndroidUpdate"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/v1/android/updates/{version_code}/apk":
+    parameters:
+    - name: version_code
+      in: path
+      required: true
+      description: Version code from the latest release
+      schema:
+        type: integer
+    get:
+      summary: Download the bundled Android APK
+      tags:
+      - Android Updates
+      description: Streams the APK described by the latest release. Clients must verify
+        size, SHA-256 and signing certificate.
+      security:
+      - apiKeyAuth: []
+      responses:
+        '404':
+          description: no bundled release with this version code
+          content:
+            application/vnd.android.package-archive:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '401':
+          description: unauthorized
+          content:
+            application/vnd.android.package-archive:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/api/v1/auth/signup":
     post:
       summary: Sign up a new user
@@ -9296,6 +9393,35 @@ paths:
               required:
               - refresh_token
               - device
+        required: true
+  "/api/v1/auth/logout":
+    post:
+      summary: Sign a mobile device out
+      tags:
+      - Auth
+      description: Revokes the tokens of the device that owns the refresh token. Unknown
+        tokens also return 204.
+      parameters: []
+      responses:
+        '204':
+          description: device signed out
+        '400':
+          description: missing refresh token
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: The refresh token held by the device
+              required:
+              - refresh_token
         required: true
   "/api/v1/auth/sso_link":
     post:

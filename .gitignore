@@ -134,3 +134,6 @@ logs/security/
 # Ignore Playwright artifacts
 playwright-report/
 .playwright-mcp
+
+# Python bytecode from local release scripts
+__pycache__/

@@ -371,6 +371,27 @@ module Api
         }
       end
 
+      # Signs a mobile device out by revoking every live token it holds. Answers
+      # 204 for unknown or already revoked tokens so the response does not
+      # reveal whether a refresh token exists.
+      def logout
+        refresh_token = params[:refresh_token]
+
+        unless refresh_token.present?
+          render json: { error: "Refresh token is required" }, status: :bad_request
+          return
+        end
+
+        access_token = Doorkeeper::AccessToken.by_refresh_token(refresh_token)
+        if access_token && !access_token.revoked?
+          # An expired access token can still be refreshed, so revoke it explicitly.
+          access_token.revoke
+          MobileDevice.find_by(id: access_token.mobile_device_id, user_id: access_token.resource_owner_id)&.revoke_all_tokens!
+        end
+
+        head :no_content
+      end
+
       private
 
         def user_signup_params

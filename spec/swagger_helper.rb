@@ -47,6 +47,27 @@ RSpec.configure do |config|
           }
         },
         schemas: {
+          AndroidRelease: {
+            type: :object,
+            required: %w[version_code version_name application_id min_sdk size sha256 commit],
+            properties: {
+              version_code: { type: :integer },
+              version_name: { type: :string },
+              application_id: { type: :string },
+              min_sdk: { type: :integer },
+              size: { type: :integer, description: 'APK size in bytes' },
+              sha256: { type: :string, description: 'Lowercase hexadecimal SHA-256 of the APK' },
+              commit: { type: :string, description: 'Commit the APK was built from' }
+            }
+          },
+          AndroidUpdate: {
+            type: :object,
+            required: %w[enabled release],
+            properties: {
+              enabled: { type: :boolean, description: 'Whether this server bundles an Android build' },
+              release: { '$ref' => '#/components/schemas/AndroidRelease', nullable: true }
+            }
+          },
           AccountCapabilities: {
             type: :object,
             required: %w[read annotate write],

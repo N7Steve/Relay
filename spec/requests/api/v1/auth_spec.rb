@@ -218,6 +218,33 @@ RSpec.describe 'API V1 Auth', type: :request do
     end
   end
 
+  path '/api/v1/auth/logout' do
+    post 'Sign a mobile device out' do
+      tags 'Auth'
+      description 'Revokes the tokens of the device that owns the refresh token. Unknown tokens also return 204.'
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :body, in: :body, required: true, schema: {
+        type: :object,
+        properties: {
+          refresh_token: { type: :string, description: 'The refresh token held by the device' }
+        },
+        required: %w[refresh_token]
+      }
+
+      response '204', 'device signed out' do
+        let(:body) { { refresh_token: 'unknown' } }
+        run_test!
+      end
+
+      response '400', 'missing refresh token' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+        let(:body) { {} }
+        run_test!
+      end
+    end
+  end
+
   path '/api/v1/auth/sso_link' do
     post 'Link an existing account via SSO' do
       tags 'Auth'

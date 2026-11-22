@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.Relay" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/relay_background</item>
+        <item name="android:colorAccent">#8A5CFF</item>
+    </style>
+    <color name="relay_background">#080A1A</color>
+    <color name="ic_launcher_background">#080A1A</color>
+</resources>

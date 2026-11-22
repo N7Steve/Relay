@@ -1,34 +1,51 @@
 #!/usr/bin/env bash
-# Update the existing TrueNAS YAML app named relay. Run on the TrueNAS host.
+# Update the existing TrueNAS YAML app named relay to the published image.
+# Run on the TrueNAS host, by hand or from a TrueNAS cron job with --cron.
 set -Eeuo pipefail
 umask 077
 
 usage() {
-  echo "Uso: sudo bash /mnt/AppsPool/relay/update-relay.sh [--check]"
-  echo "Actualiza la app relay al último commit publicado en main."
-  echo "--check consulta main y valida la instalación sin construir, parar ni actualizar."
+  echo "Uso: sudo bash /mnt/AppsPool/relay/update-relay.sh [--check|--cron]"
+  echo "Actualiza la app relay a la imagen publicada ghcr.io/n7steve/relay:stable."
+  echo "--check descarga la referencia y valida la instalación sin parar ni actualizar."
+  echo "--cron  igual que sin argumentos, pero no conserva registro si no hay cambios."
 }
 die() { echo "ERROR: $*" >&2; exit 1; }
-[[ $# == 0 || ( $# == 1 && $1 == --check ) ]] || { usage; exit 1; }
+MODE=apply
+case "$#:${1:-}" in
+  0:) ;;
+  1:--check) MODE=check ;;
+  1:--cron) MODE=cron ;;
+  *) usage; exit 1 ;;
+esac
 [[ $EUID == 0 ]] || die "Ejecuta con sudo en TrueNAS."
-for tool in docker midclt python3 curl gzip tar sha256sum flock mountpoint; do
+for tool in docker midclt python3 gzip tar sha256sum flock mountpoint; do
   command -v "$tool" >/dev/null || die "Falta $tool."
 done
 ROOT=/mnt/AppsPool/relay
 APP=relay
 PROJECT=ix-relay
-REPO=https://github.com/N7Steve/Relay
+REGISTRY_IMAGE=ghcr.io/n7steve/relay
+CHANNEL=stable
 mountpoint -q /mnt/AppsPool || die "El pool AppsPool no está montado."
 [[ -d $ROOT/config && -d $ROOT/postgres && -d $ROOT/storage && -d $ROOT/redis ]] || die "Instala primero compose.truenas.folder.yml con nombre relay."
-mkdir -p "$ROOT/backups" "$ROOT/logs" "$ROOT/releases" "$ROOT/deployment" "$ROOT/.work"
+mkdir -p "$ROOT/backups" "$ROOT/logs" "$ROOT/deployment" "$ROOT/.work"
+# Optional credentials for a private package, kept with the app instead of /root.
+if [[ -f $ROOT/registry/config.json ]]; then
+  export DOCKER_CONFIG=$ROOT/registry
+fi
 BACKUP_ROOT="$ROOT/backups"
 exec 9>"$ROOT/.update.lock"
-flock -n 9 || die "Ya hay otra actualización de Relay en curso."
+if ! flock -n 9; then
+  [[ $MODE == cron ]] && exit 0
+  die "Ya hay otra actualización de Relay en curso."
+fi
 LOG="$ROOT/logs/update-$(date -u +%Y%m%dT%H%M%SZ)-$$.log"
 exec > >(tee -a "$LOG") 2>&1
 WORK=$(mktemp -d "$ROOT/.work/update-XXXXXXXX")
 BACKUP=
 UPDATE_STARTED=false
+KEEP_LOG=true
 STOPPED=()
 cleanup() {
   local status=$?
@@ -43,29 +60,47 @@ cleanup() {
     fi
   fi
   rm -rf -- "$WORK"
+  [[ $KEEP_LOG == true ]] || rm -f -- "$LOG"
   exit "$status"
 }
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-echo "Consultando el último commit de main..."
-curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 60 \
-  https://api.github.com/repos/N7Steve/Relay/commits/main > "$WORK/main.json"
-SHA=$(python3 -I -c 'import json,sys; print(json.load(sys.stdin)["sha"])' < "$WORK/main.json")
-[[ $SHA =~ ^[0-9a-f]{40}$ ]] || die "GitHub no devolvió un SHA válido."
-IMAGE="relay-local:sha-$SHA"
-CONTEXT="$REPO.git#$SHA"
+echo "Consultando $REGISTRY_IMAGE:$CHANNEL..."
+docker pull --quiet "$REGISTRY_IMAGE:$CHANNEL" >/dev/null ||
+  die "No se pudo descargar $REGISTRY_IMAGE:$CHANNEL. Revisa la red o las credenciales de ghcr.io."
+docker image inspect "$REGISTRY_IMAGE:$CHANNEL" > "$WORK/image.json"
+read -r IMAGE_ID IMAGE SHA < <(python3 -I - "$WORK/image.json" "$REGISTRY_IMAGE" <<'PY'
+import json
+import re
+import sys
+
+(image,) = json.load(open(sys.argv[1]))
+repository = sys.argv[2]
+digests = [d for d in image.get("RepoDigests") or [] if re.fullmatch(re.escape(repository) + r"@sha256:[0-9a-f]{64}", d)]
+env = dict(item.split("=", 1) for item in image.get("Config", {}).get("Env") or [] if "=" in item)
+sha = env.get("BUILD_COMMIT_SHA", "")
+if not re.fullmatch(r"sha256:[0-9a-f]{64}", image.get("Id", "")) or len(digests) != 1:
+    sys.exit("La imagen publicada no tiene un digest único del registro")
+if image.get("Os") != "linux" or image.get("Architecture") != "amd64":
+    sys.exit("La imagen publicada no es linux/amd64")
+if not re.fullmatch(r"[0-9a-f]{40}", sha):
+    sys.exit("La imagen publicada no identifica su commit")
+print(image["Id"], digests[0], sha)
+PY
+)
+[[ -n ${SHA:-} ]] || die "No se pudo identificar la imagen publicada."
 echo "Leyendo la configuración guardada de la app Relay..."
 midclt call app.get_instance "$APP" > "$WORK/app.json"
 midclt call app.config "$APP" > "$WORK/before.json"
-python3 -I - "$WORK" "$SHA" "$IMAGE" "$CONTEXT" "$ROOT" <<'PY'
+python3 -I - "$WORK" "$IMAGE" "$ROOT" "$REGISTRY_IMAGE" <<'PY'
 import copy
 import json
 import pathlib
 import sys
 
-work, sha, image, context, root = sys.argv[1:]
+work, image, root, repository = sys.argv[1:]
 work = pathlib.Path(work)
 app = json.loads((work / "app.json").read_text())
 
@@ -103,25 +138,25 @@ for name, expected in expected_mounts.items():
     require(len(entries) == len(expected) and mounts == expected, f"{name}: los datos deben estar en {root}; no se migran otras instalaciones")
 for name in ("init", "web", "worker"):
     service = services[name]
-    build = service.get("build", {})
-    require(isinstance(build, dict), f"{name}: falta el build de Relay")
-    old_context = build.get("context", "")
-    require(old_context.startswith("https://github.com/N7Steve/Relay.git#"), f"{name}: el origen no es N7Steve/Relay")
-    require(service.get("image", "").startswith("relay-local:"), f"{name}: la imagen no es local")
-    build["context"] = context
-    build.setdefault("args", {})["BUILD_COMMIT_SHA"] = sha
+    current = service.get("image", "")
+    published = current.startswith(repository + ":") or current.startswith(repository + "@sha256:")
+    # Installations from the earlier updater build the GitHub source locally.
+    legacy = current.startswith("relay-local:") and isinstance(service.get("build"), dict) and \
+        service["build"].get("context", "").startswith("https://github.com/N7Steve/Relay.git#")
+    require(published or legacy, f"{name}: la imagen no es de N7Steve/Relay")
+    service.pop("build", None)
     service["image"] = image
-    # Build once before downtime; the middleware must reuse that exact image.
-    service["pull_policy"] = "never"
+    # The updater pulls before downtime; the middleware reuses that exact image.
+    service["pull_policy"] = "missing"
 require(services["db"].get("environment", {}).get("POSTGRES_DB") == "relay_production", "Base de datos inesperada")
 require(services["db"].get("environment", {}).get("POSTGRES_USER") == "relay_user", "Usuario PostgreSQL inesperado")
 if "x-relay-image" in config:
-    config["x-relay-image"].update(copy.deepcopy({k: services["web"][k] for k in ("image", "build", "pull_policy")}))
+    config["x-relay-image"] = {"image": image, "pull_policy": "missing"}
 (work / "after.json").write_text(json.dumps(config))
 (work / "payload.json").write_text(json.dumps({"custom_compose_config": config}))
-print(f"Commit destino: {sha}")
-print(f"Imagen destino: {image}")
 PY
+echo "Imagen publicada: $IMAGE"
+echo "Commit: $SHA"
 
 container() {
   local service=$1 ids
@@ -136,35 +171,18 @@ WORKER=$(container worker)
 docker exec "$WEB" test -s /config/relay.env
 docker exec "$DB" sh -ec 'test "$POSTGRES_DB" = relay_production; test "$POSTGRES_USER" = relay_user; pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null
 docker exec "$REDIS" redis-cli ping | grep -qx PONG
-if [[ ${1:-} == --check ]]; then
+if [[ $MODE == check ]]; then
   echo "Validación correcta. No se ha cambiado ni detenido la app."
   exit 0
 fi
 
-CURRENT_WEB=$(docker exec "$WEB" ruby -e 'puts ENV.fetch("BUILD_COMMIT_SHA", "unset")')
-CURRENT_WORKER=$(docker exec "$WORKER" ruby -e 'puts ENV.fetch("BUILD_COMMIT_SHA", "unset")')
-if [[ $CURRENT_WEB == "$SHA" && $CURRENT_WORKER == "$SHA" ]] &&
+if [[ $(docker inspect --format '{{.Image}}' "$WEB") == "$IMAGE_ID" && $(docker inspect --format '{{.Image}}' "$WORKER") == "$IMAGE_ID" ]] &&
    [[ $(docker inspect --format '{{.State.Health.Status}}' "$WEB") == healthy ]]; then
-  echo "Relay ya está actualizado al último commit de main: $SHA."
+  echo "Relay ya ejecuta la imagen publicada: $SHA."
+  [[ $MODE == cron ]] && KEEP_LOG=false
   exit 0
 fi
-
-echo "Descargando el código de $SHA en $ROOT/releases..."
-SOURCE="$ROOT/releases/$SHA"
-if [[ ! -f $SOURCE/.relay-source-sha ]] || [[ $(cat "$SOURCE/.relay-source-sha") != "$SHA" ]]; then
-  [[ ! -e $SOURCE ]] || die "La carpeta de la versión existe pero está incompleta: $SOURCE. Consérvala y revisa su contenido."
-  mkdir "$WORK/source"
-  curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 300 \
-    "https://api.github.com/repos/N7Steve/Relay/tarball/$SHA" > "$WORK/source.tar.gz"
-  tar -xzf "$WORK/source.tar.gz" --strip-components=1 -C "$WORK/source"
-  [[ -f $WORK/source/Dockerfile ]] || die "El commit no incluye el Dockerfile de Relay."
-  printf '%s\n' "$SHA" > "$WORK/source/.relay-source-sha"
-  mv "$WORK/source" "$SOURCE"
-fi
-echo "Construyendo el commit antes de detener Relay (puede tardar varios minutos)..."
-docker build --pull --build-arg "BUILD_COMMIT_SHA=$SHA" --tag "$IMAGE" "$SOURCE"
-BUILT_SHA=$(docker run --rm --network none --entrypoint ruby "$IMAGE" -e 'puts ENV.fetch("BUILD_COMMIT_SHA")')
-[[ $BUILT_SHA == "$SHA" ]] || die "La imagen construida no identifica el commit solicitado."
+PREVIOUS_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$WEB")
 
 mkdir -p -- "$BACKUP_ROOT"
 BACKUP=$(mktemp -d "$BACKUP_ROOT/relay-$(date -u +%Y%m%dT%H%M%SZ)-XXXXXXXX")
@@ -194,7 +212,7 @@ done
 (cd "$BACKUP" && sha256sum -- app-*.json database.dump database-contents.txt ./*.tar.gz > SHA256SUMS)
 touch "$BACKUP/BACKUP_COMPLETE"
 
-# Do not overwrite a configuration edited in the UI while the image was building.
+# Do not overwrite a configuration edited in the UI while the backup was running.
 midclt call app.config "$APP" > "$WORK/current.json"
 python3 -I - "$WORK/before.json" "$WORK/current.json" <<'PY'
 import json
@@ -224,6 +242,7 @@ while (( SECONDS < deadline )); do
 done
 [[ $ready == true ]] || die "Relay no ha arrancado correctamente. Revisa los logs en TrueNAS."
 for id in "$web" "$worker"; do
+  [[ $(docker inspect --format '{{.Image}}' "$id") == "$IMAGE_ID" ]] || die "Un servicio no está ejecutando la imagen publicada."
   actual=$(docker exec "$id" ruby -e 'puts ENV.fetch("BUILD_COMMIT_SHA", "unset")')
   [[ $actual == "$SHA" ]] || die "Un servicio no está ejecutando el commit solicitado."
 done
@@ -232,8 +251,15 @@ docker exec "$web" ruby -v
 docker ps --filter "label=com.docker.compose.project=$PROJECT" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 cp "$WORK/after.json" "$ROOT/deployment/app-current.json"
 printf '%s\n' "$SHA" > "$ROOT/deployment/deployed-sha"
+printf '%s\n' "$IMAGE" > "$ROOT/deployment/deployed-image"
 # init installs the updater shipped with the new image on every successful startup.
 touch "$BACKUP/UPDATE_COMPLETE"
+# Keep the running and previous images for a manual rollback; Docker refuses to
+# remove an image that a container still uses.
+docker image ls --no-trunc --format '{{.Repository}} {{.ID}}' | sort -u | while read -r repository old; do
+  [[ $repository == "$REGISTRY_IMAGE" && $old != "$IMAGE_ID" && $old != "$PREVIOUS_IMAGE_ID" ]] || continue
+  docker image rm "$old" >/dev/null 2>&1 || true
+done
 echo "Actualización terminada correctamente. Commit: $SHA"
 echo "Backup privado conservado en: $BACKUP"
 echo "Registro: $LOG"

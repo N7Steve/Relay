@@ -218,6 +218,15 @@ cambian nombres de base/carpetas; la pérdida de configuración con una base
 existente detiene la inicialización. La variante histórica con volúmenes
 nombrados `compose.truenas.yml` se retiró en fase 11.
 Ver [instalación y actualización TrueNAS](docs/hosting/truenas.md).
+Desde noviembre de 2026 Relay se compila y verifica en local
+(`script/release_local.py`) y se publica en `ghcr.io/n7steve/relay`. El cron de
+TrueNAS (`update-relay.sh --cron`) sigue `stable`, fija el digest y conserva
+backup previo y comprobaciones. La imagen incluye la APK nativa firmada
+(`android/`, `app.relay.android`), servida por `/api/v1/android/updates` y
+`/android/relay.apk`. Conservar la identidad de firma de
+`android/release-signing.sha256` y el `versionCode` monotónico.
+Ver [publicaciones locales](docs/hosting/local-releases.md) y
+[Relay para Android](android/README.md).
 Lectores históricos STI/GlobalID, identificadores Sophtron/asistente externos y
 contratos nativos se distinguen de aliases de tareas/variables ya retirados.
 Los identificadores externos pendientes requieren inventariar primero las

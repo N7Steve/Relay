@@ -44,6 +44,11 @@
 !/app/assets/builds/.keep
 /public/assets
 
+# Native Android sources and local release artifacts; the signed APK enters
+# the image only through the android-release build context.
+/android/
+/android-release/
+
 # Ignore CI service files.
 /.github
 

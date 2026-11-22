@@ -567,6 +567,48 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Refresh token is required", response_data["error"]
   end
 
+  test "logout revokes every live token of the device" do
+    user = users(:family_admin)
+    device = user.mobile_devices.create!(@device_info)
+    token = device.issue_token!
+    access_token = Doorkeeper::AccessToken.by_refresh_token(token[:refresh_token])
+    other = Doorkeeper::AccessToken.create!(application: @shared_app, resource_owner_id: user.id,
+      mobile_device_id: device.id, expires_in: 30.days.to_i, scopes: "read_write", use_refresh_token: true)
+
+    post "/api/v1/auth/logout", params: { refresh_token: token[:refresh_token] }
+
+    assert_response :no_content
+    assert access_token.reload.revoked?
+    assert other.reload.revoked?
+
+    post "/api/v1/auth/refresh", params: { refresh_token: token[:refresh_token], device: @device_info }
+    assert_response :unauthorized
+  end
+
+  test "logout revokes an expired access token so it cannot be refreshed" do
+    user = users(:family_admin)
+    device = user.mobile_devices.create!(@device_info)
+    expired = Doorkeeper::AccessToken.create!(application: @shared_app, resource_owner_id: user.id,
+      mobile_device_id: device.id, expires_in: 30.days.to_i, scopes: "read_write", use_refresh_token: true)
+    expired.update_column(:created_at, 31.days.ago)
+
+    post "/api/v1/auth/logout", params: { refresh_token: expired.refresh_token }
+
+    assert_response :no_content
+    assert expired.reload.revoked?
+  end
+
+  test "logout does not reveal unknown refresh tokens" do
+    post "/api/v1/auth/logout", params: { refresh_token: "unknown" }
+    assert_response :no_content
+  end
+
+  test "logout requires a refresh token" do
+    post "/api/v1/auth/logout"
+    assert_response :bad_request
+    assert_equal "Refresh token is required", JSON.parse(response.body)["error"]
+  end
+
   # SSO Link tests
   test "should link existing account via SSO and return tokens" do
     user = users(:family_admin)

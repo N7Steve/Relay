@@ -1,106 +1,123 @@
 # Relay on TrueNAS 25.10: installation in AppsPool/relay
 
+Relay is built and verified on the development computer and published to GHCR as
+`ghcr.io/n7steve/relay`. TrueNAS never compiles Relay: a cron job runs the
+updater, which pulls the `stable` channel and applies it with a backup. The
+image also bundles the signed Android APK, so the native app updates itself from
+Relay once the server is updated. See [local releases](local-releases.md).
+
+## Registry access
+
+The NAS must be able to pull `ghcr.io/n7steve/relay`.
+
+- **Public package** (GitHub → Packages → relay → Package settings → Change
+  visibility): no credentials on the NAS.
+- **Private package**: create a GitHub classic token with only `read:packages`
+  (the read-only token already used for Ilos works) and store it with the app,
+  not in `/root`, so it survives TrueNAS upgrades:
+
+  ```bash
+  sudo mkdir -p /mnt/AppsPool/relay/registry
+  sudo chmod 700 /mnt/AppsPool/relay/registry
+  sudo DOCKER_CONFIG=/mnt/AppsPool/relay/registry docker login ghcr.io -u N7Steve
+  ```
+
+  The updater uses `/mnt/AppsPool/relay/registry/config.json` automatically when
+  it exists. For a first installation also run
+  `sudo DOCKER_CONFIG=/mnt/AppsPool/relay/registry docker pull ghcr.io/n7steve/relay:stable`
+  so TrueNAS finds the image locally.
+
+## Fresh installation
+
 Use [`compose.truenas.folder.yml`](../../compose.truenas.folder.yml) in **Apps →
-Discover Apps → ⋮ → Install via YAML**, with app name **relay**. This is a fresh
-installation. Import your complete family backup through Relay after startup;
-there is no transfer from the previous Docker volumes.
-
-The YAML is self-contained: it includes the bootstrap updater, so you can paste
-it directly without first publishing deployment files. Initial installation
-builds the complete-backup revision `d7452d794` and later updates follow `main`.
-The Apps pool must already be configured,
-`/mnt/AppsPool` must exist on the NAS, outbound GitHub/Docker/registry access must
-work, and host port 3002 must be free. Paste the entire YAML, including its `x-*`
-anchors. No `.env`, manually supplied passwords, checkout or SHA is required.
-
-The app publishes **http://TRUENAS-IP:3002**. Its first build can take several
-minutes. Create your account, then import the ZIP using the complete-backup import option.
+Discover Apps → ⋮ → Install via YAML**, with app name **relay**. Paste the entire
+YAML, including its `x-*` anchors. No `.env`, manually supplied passwords,
+checkout or SHA is required. The Apps pool must already be configured,
+`/mnt/AppsPool` must exist and host port 3002 must be free. The app publishes
+**http://TRUENAS-IP:3002**. Create your account, then import the complete family
+backup ZIP through Relay.
 
 ## Folder layout
-
-The init service creates the directory scaffold and uses explicit host bind
-mounts instead of Docker named volumes:
 
 ```text
 /mnt/AppsPool/relay/
 ├── update-relay.sh             # installed automatically, root-owned
 ├── config/                    # relay.env and postgres-password
+├── registry/                  # optional docker login for a private package
 ├── postgres/                  # PostgreSQL 16 data
 ├── redis/                     # persistent Redis queue/AOF
 ├── storage/                   # attachment binaries
 ├── backups/                   # separate complete server backups per update
-├── logs/                      # updater/build logs
-├── releases/<commit>/         # source code downloaded by the updater
-├── deployment/                # installation template, active config and SHA
-├── .work/                     # temporary downloads/configuration; removed on exit
+├── logs/                      # updater logs
+├── deployment/                # installation template, active config, SHA and image
+├── .work/                     # temporary files; removed on exit
 └── .update.lock                # prevents concurrent updater runs
 ```
 
-Application data and management files live here. TrueNAS still manages its own
-app metadata, Docker images/build cache and container stdout logs inside its
-Apps infrastructure; a per-app YAML cannot relocate that shared Docker engine.
-Container stdout logs are capped at three 10 MB files per service. Updater logs
-and downloaded releases are kept under the folder shown above.
+`releases/` is only used by the former source-build updater and can be deleted
+after the first registry update.
 
 The parent directory and management directories are private to root. The Rails
 config file is mode 0600 and belongs to UID 1000; storage also belongs to UID 1000.
-PostgreSQL and Redis entrypoints manage ownership of their own data directories.
-Init preserves existing encryption keys and refuses to generate replacements if
-a database already exists. Do not recursively change ownership/permissions to a
+PostgreSQL and Redis manage ownership of their own data directories. Init
+preserves existing encryption keys and refuses to generate replacements if a
+database already exists. Do not recursively change ownership/permissions to a
 single user, or replace `config` when reinstalling.
 
 Web loads `/config/relay.env` and uses the Docker entrypoint's `db:prepare`.
-Worker starts after web becomes healthy. PostgreSQL reads its password from the
-same config directory. Database/user remain `relay_production`/`relay_user`,
-PostgreSQL stays on major version 16, and HTTP remains on host port 3002.
+Worker starts after web becomes healthy. Database/user remain
+`relay_production`/`relay_user`, PostgreSQL stays on major version 16 and HTTP
+remains on host port 3002. Container stdout logs are capped at three 10 MB files
+per service.
 
-## Automatic update with one command
+## Automatic updates (cron)
 
-Run **on the TrueNAS host** (Shell or SSH):
+In **System → Advanced Settings → Cron Jobs → Add**:
+
+| Field       | Value                                               |
+| ----------- | --------------------------------------------------- |
+| Description | Relay updater                                       |
+| Command     | `bash /mnt/AppsPool/relay/update-relay.sh --cron`   |
+| Run As User | `root`                                              |
+| Schedule    | Every 15 minutes (`*/15 * * * *`) or a nightly time |
+| Hide stdout | enabled; Hide stderr disabled                       |
+
+Each run:
+
+1. Checks AppsPool, takes the lock (a concurrent cron run exits quietly) and pulls
+   `ghcr.io/n7steve/relay:stable`. Registry errors stop before touching Relay.
+2. Requires a `linux/amd64` image with one registry digest and a
+   `BUILD_COMMIT_SHA`.
+3. Validates the running `relay` app and its mounts. Other app names, foreign
+   images, other storage locations and named-volume layouts are rejected.
+4. Exits if web and worker already run that image and web is healthy. With
+   `--cron` such a run leaves no log file.
+5. Stops web/worker gracefully and saves PostgreSQL, config/keys, attachments,
+   Redis and the before/after app configuration to a private backup directory.
+6. Pins the image **by digest** through TrueNAS `app.update`, preserving
+   environment, ports and mounts. Web prepares/migrates the database on startup.
+7. Waits for web health and worker startup, verifies the running image and commit,
+   checks that no migrations are pending and records the SHA and digest.
+8. Removes older Relay images, keeping the running and previous one.
+
+Run it by hand with `sudo bash /mnt/AppsPool/relay/update-relay.sh`, or validate
+without stopping anything with `--check` (it still pulls the channel image).
+Do not edit the app in TrueNAS while an update runs; the updater refuses to
+overwrite a configuration changed during the backup.
+
+### Moving an existing source-build installation
+
+Installations created with the earlier YAML build `main` on the NAS. Configure
+registry access, then run the installed updater **once by hand**:
 
 ```bash
 sudo bash /mnt/AppsPool/relay/update-relay.sh
 ```
 
-There are no required arguments. Each invocation:
-
-1. Checks that AppsPool is mounted and locks the updater.
-2. Resolves the current `N7Steve/Relay` **main** branch to a full SHA through the
-   GitHub API. Network/rate-limit errors stop the operation before touching Relay.
-3. Validates the running `relay` app and its mounts. Other app names, source
-   repositories, storage locations and legacy named-volume layouts are rejected.
-4. Returns immediately if healthy web and running worker already report that SHA.
-5. Downloads that exact commit to `releases/<SHA>` and builds it locally before
-   downtime, preserving Docker's build cache. Later movement of `main` does not
-   change the chosen source revision during this run.
-6. Stops web/worker gracefully and saves PostgreSQL, config/keys, attachments,
-   Redis and the before/after app configuration to a private backup directory.
-7. Applies the pinned image through TrueNAS `app.update`, preserving installed
-   environment, ports and mounts. Web prepares/migrates the database on startup.
-8. Waits for web health and worker startup, verifies both running commit IDs and
-   checks that no migrations are pending. Saves the active configuration and SHA.
-
-For a read-only app check, optionally use:
-
-```bash
-sudo bash /mnt/AppsPool/relay/update-relay.sh --check
-```
-
-This still queries GitHub and writes a local run log, but does not download/build
-source, back up, stop or update the app. It does not prove the target code builds.
-Run the normal command to apply the latest main commit. Automatic selection of
-`main` is intentional; this updater does not wait for a GitHub release or CI.
-It updates when invoked, not on a recurring schedule. Do not edit the app in
-TrueNAS while it is running; it also checks for intervening configuration changes.
-
-The bootstrap image uses a pinned Git commit and `pull_policy: missing` to build
-only when that image is absent. The first updater run replaces it with an image tagged for an exact SHA
-and `pull_policy: never`. Subsequent restarts reuse that image. Init atomically
-installs the updater shipped with each new image, falling back to the embedded
-bootstrap script for releases that do not include it. Publishing future updater
-changes in `main` therefore updates the installed script on the next upgrade.
-When present in the image, `installation-template.yml` is copied as a reference,
-not the active config: re-pasting it would reset the pinned bootstrap settings.
+That run still uses the old updater: it builds the current `main`, whose init
+installs the new registry updater. From the next run (by hand or cron) the app
+switches to the published digest and stops building locally. The data folders
+are reused unchanged.
 
 ## Backups and failures
 
@@ -112,37 +129,22 @@ Each update writes `backups/relay-<UTC timestamp>-<unique suffix>/` with:
 - `BACKUP_COMPLETE` once all backup validation passes; `UPDATE_COMPLETE` only
   after the updated app passes its startup checks.
 
-The dump catalog, compressed streams and tar structure are checked; this is not
-a full restore rehearsal. Incomplete directories without `BACKUP_COMPLETE` must
-not be treated as complete backups. These server backups contain private keys
-and credentials and are separate from Relay's family ZIP export/import.
+Backups are only created when an update is applied and are never pruned
+automatically; delete old ones when they are no longer needed. They contain
+private keys and credentials and are separate from Relay's family ZIP export.
 
-If download/build/backup fails before `app.update`, the script leaves the original
-code in place and attempts to restart any services it stopped. If the update has
-started, it keeps the matching backup and does not automatically roll back code
-against a potentially migrated database. Review the Relay app/update job and
-`logs/` on the NAS; recover database, keys, storage and Redis together if needed.
-Startup checks do not exercise every feature. Backups, source releases and old
-images are retained; the updater does not prune other apps' Docker images.
-
-## Native TrueNAS update detection
-
-TrueNAS monitors registry images and can offer an update action for custom apps.
-This deployment builds Relay locally, so a new Git commit is handled by the
-script above. A native update badge could refer to PostgreSQL or Redis instead.
-Native detection for Relay itself would require publishing images to a registry
-and following a maintained tag such as `stable`; that is not this deployment.
-
-The earlier named-volume template `compose.truenas.yml` was removed in pruning
-phase 11; it was not compatible with this folder updater. It remains in Git
-history. Removing the template does not migrate or delete any installed data.
+If backup fails before `app.update`, the script restarts the services it stopped
+and leaves the original image in place. Once the update has started, it keeps the
+backup and does not roll back code against a potentially migrated database.
+To return to the previous release, restore database, keys, storage and Redis
+together and set the previous digest from `app-before.json`.
 
 References: [TrueNAS custom apps](https://apps.truenas.com/managing-apps/installing-custom-apps/),
-[TrueNAS custom app updates](https://apps.truenas.com/managing-apps/managing-installed-apps/#managing-custom-apps),
+[TrueNAS cron jobs](https://www.truenas.com/docs/scale/scaletutorials/systemsettings/advanced/managecronjobsscale/),
 [app.update API](https://api.truenas.com/v25.10/api_methods_app.update.html),
 [Docker bind mounts](https://docs.docker.com/reference/compose-file/services/#volumes).
 
 For maintainers: after editing `bin/update-relay.sh`, run
-`ruby bin/render-relay-yaml.rb` in the Linux development environment to refresh
-the YAML's embedded bootstrap copy. It escapes dollars for Compose interpolation;
-the deployment tests verify the copies match.
+`ruby bin/render-relay-yaml.rb` in Linux (the release script does it in a Ruby
+container) to refresh the YAML's embedded bootstrap copy. It escapes dollars for
+Compose interpolation; the deployment tests verify the copies match.

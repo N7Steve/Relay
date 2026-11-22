@@ -13,7 +13,10 @@
 		"format:check": "biome format",
 		"format": "biome format --write",
 		"tokens:build": "node bin/tokens.mjs && node mobile/tool/generate_relay_tokens.mjs",
-		"tokens:check": "node bin/tokens.mjs --check && node mobile/tool/generate_relay_tokens.mjs --check"
+		"tokens:check": "node bin/tokens.mjs --check && node mobile/tool/generate_relay_tokens.mjs --check",
+		"release:check": "python script/release_local.py check",
+		"release:prepare": "python script/release_local.py prepare",
+		"release:publish": "python script/release_local.py publish"
 	},
 	"author": "",
 	"license": "ISC"

@@ -7,6 +7,8 @@ require Rails.root.join("db/migrate/20261021120000_bind_oauth_tokens_to_mcp_reso
 require Rails.root.join("db/migrate/20261021160000_create_mcp_change_sets")
 require Rails.root.join("db/migrate/20261026190000_personalize_tags_and_imports")
 require Rails.root.join("db/migrate/20261121120000_add_mcp_custom_instructions_to_users")
+require Rails.root.join("db/migrate/20261121130000_add_shared_expense_to_scheduled_payments")
+require Rails.root.join("db/migrate/20261121140000_add_enable_transfer_matcher_to_accounts")
 
 class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
   self.use_transactional_tests = false
@@ -87,6 +89,8 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     assert_equal user_id, connection.select_value("SELECT user_id FROM tags WHERE id = '#{tag_id}'")
     ActiveRecord::Migration.suppress_messages { AddMcpCustomInstructionsToUsers.new.migrate(:up) }
     assert_nil connection.select_value("SELECT mcp_custom_instructions FROM users WHERE id = '#{user_id}'")
+    ActiveRecord::Migration.suppress_messages { AddSharedExpenseToScheduledPayments.new.migrate(:up) }
+    ActiveRecord::Migration.suppress_messages { AddEnableTransferMatcherToAccounts.new.migrate(:up) }
     actual_columns = connection.tables.excluding("schema_migrations", "ar_internal_metadata").to_h do |table|
       [ table, connection.columns(table).map { |column| [ column.name, column.sql_type, column.default, column.null ] }.sort_by(&:first) ]
     end

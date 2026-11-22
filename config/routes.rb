@@ -436,6 +436,11 @@ Rails.application.routes.draw do
       post "auth/sso_exchange", to: "auth#sso_exchange"
       post "auth/sso_link", to: "auth#sso_link"
       post "auth/sso_create_account", to: "auth#sso_create_account"
+      post "auth/logout", to: "auth#logout"
+
+      # Android build bundled with this server image
+      get "android/updates/latest", to: "android_updates#latest"
+      get "android/updates/:version_code/apk", to: "android_updates#apk", constraints: { version_code: /\d{1,10}/ }
 
       # Production API endpoints
       # Each action has a fixed contract; there is no caller-selected model/method.
@@ -510,6 +515,8 @@ Rails.application.routes.draw do
       put :complete
     end
   end
+
+  get "android/relay.apk", to: "android_apps#show", as: :android_app
 
   get "redis-configuration-error", to: "pages#redis_configuration_error"
 

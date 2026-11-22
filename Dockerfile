@@ -47,6 +47,12 @@ RUN bundle exec bootsnap precompile -j 0 app/ lib/
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
+# Optional signed Android build served by /api/v1/android/updates. The local
+# release replaces this empty stage with
+# --build-context android-release=<folder containing relay-android/>.
+FROM base AS android-release
+RUN mkdir -p /relay-android
+
 # Final stage for app image
 FROM base
 
@@ -58,6 +64,7 @@ USER 1000:1000
 # Copy built artifacts: gems, application
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
+COPY --chown=rails:rails --from=android-release /relay-android/ /rails/android-release/
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]

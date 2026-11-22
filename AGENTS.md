@@ -25,6 +25,13 @@
 - PRs explain the problem, resulting behavior and validation; link issues and include screenshots for UI changes and migration notes when applicable. Ensure CI passes and the branch is up to date before requesting review; see [CONTRIBUTING.md](CONTRIBUTING.md).
 - PR-specific requirements apply only when the user explicitly requests a PR. Dependency update proposals from Dependabot require review and validation before integration; do not merge or close them automatically.
 
+## Local builds and publication
+
+- Server images and the native Android APK (`android/`) are built and verified on this computer with `script/release_local.py` (`npm run release:check|release:prepare|release:publish`); see [local releases](docs/hosting/local-releases.md). Do not restore builds on the NAS or in CI after a push.
+- TrueNAS follows `ghcr.io/n7steve/relay:stable` through its cron updater; publishing needs no YAML change. The APK is bundled in the image.
+- A request to publish authorizes pushing the validated image. Code-only commit/push requests do not by themselves request a release. Never publish a preview.
+- Preserve the Android signing identity in `%USERPROFILE%\.android\relay` and its fingerprint in `android/release-signing.sha256`. Never generate a replacement key or distribute debug-signed builds.
+
 ## UI changes
 
 When touching ERB, view components or CSS, follow the [design system guide](docs/llm-guides/design-system.md):
