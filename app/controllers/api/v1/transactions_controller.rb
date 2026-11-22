@@ -44,6 +44,8 @@ class Api::V1::TransactionsController < Api::V1::BaseController
 
     # Make per_page available to the template
     @per_page = safe_per_page_param
+    @split_parent_ids = Entry.where(parent_entry_id: @transactions.map { |transaction| transaction.entry.id })
+      .distinct.pluck(:parent_entry_id).to_set
 
     # Rails will automatically use app/views/api/v1/transactions/index.json.jbuilder
     render :index
@@ -216,11 +218,15 @@ class Api::V1::TransactionsController < Api::V1::BaseController
   private
 
     def authorize_transfer_write!
-      return unless action_name == "destroy" || split_financial_fields_changed?
+      financial_change = action_name == "destroy" || split_financial_fields_changed?
+      category_change = !financial_change && transaction_params.key?(:category_id) &&
+        transaction_params[:category_id] != @transaction.category_id &&
+        (transaction_params[:category_id].nil? || transaction_params[:category_id].present?)
+      return unless financial_change || category_change
       return unless (transfer = @transaction.transfer)
 
       [ transfer.inflow_transaction, transfer.outflow_transaction ].each do |transaction|
-        api_access.require_account!(transaction.entry.account, :write)
+        api_access.require_account!(transaction.entry.account, financial_change ? :write : :annotate)
       end
     end
 
@@ -393,17 +399,12 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     end
 
     def entry_params_for_update
+      references = transaction_params.slice(:category_id, :merchant_id).select { |_, value| value.nil? || value.present? }
       entry_params = {
         name: transaction_params[:name] || transaction_params[:description],
         date: transaction_params[:date],
         notes: transaction_params[:notes],
-        entryable_attributes: {
-          id: @entry.entryable_id,
-          category_id: transaction_params[:category_id],
-          merchant_id: transaction_params[:merchant_id]
-          # Note: tag_ids handled separately in update action to distinguish
-          # "not provided" from "explicitly set to empty"
-        }.compact_blank
+        entryable_attributes: references.merge(id: @entry.entryable_id)
       }
 
       # Only update amount if provided

@@ -22,11 +22,27 @@ json.source transaction.entry.source
 json.user_modified transaction.entry.user_modified
 json.classification transaction.entry.classification
 
+account = transaction.entry.account
+transfer = transaction.transfer
+editable_fields = []
+if !transaction.entry.split_child? && api_access.allowed?(account, :annotate)
+  editable_fields << "merchant_id"
+  if !transfer || [ transfer.from_account, transfer.to_account ].all? { |leg| api_access.allowed?(leg, :annotate) }
+    editable_fields << "category_id"
+  end
+  if api_access.allowed?(account, :write)
+    editable_fields << "name"
+    split_parent = @split_parent_ids ? @split_parent_ids.include?(transaction.entry.id) : transaction.entry.split_parent?
+    editable_fields += %w[date amount] unless split_parent || transfer
+  end
+end
+json.editable_fields editable_fields
+
 # Account information
 json.account do
-  json.id transaction.entry.account.id
-  json.name transaction.entry.account.name
-  json.account_type transaction.entry.account.accountable_type.underscore
+  json.id account.id
+  json.name account.name
+  json.account_type account.accountable_type.underscore
 end
 
 # Category information
@@ -46,6 +62,7 @@ if transaction.merchant.present?
   json.merchant do
     json.id transaction.merchant.id
     json.name transaction.merchant.name
+    json.logo_url transaction.merchant.display_logo_url(family: Current.family, proxy: true)
   end
 else
   json.merchant nil
@@ -59,7 +76,6 @@ json.tags transaction.tags do |tag|
 end
 
 # Transfer information (if this transaction is part of a transfer)
-transfer = transaction.transfer
 if transfer.present? && api_access.allowed?(transfer.inflow_transaction.entry.account, :read) && api_access.allowed?(transfer.outflow_transaction.entry.account, :read)
   json.transfer do
     json.id transfer.id

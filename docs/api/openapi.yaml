@@ -412,6 +412,10 @@ components:
         institution_name:
           type: string
           nullable: true
+        logo_url:
+          type: string
+          nullable: true
+          description: HTTPS logo URL or same-origin storage path
         institution_domain:
           type: string
           nullable: true
@@ -1022,6 +1026,10 @@ components:
           format: uuid
         name:
           type: string
+        logo_url:
+          type: string
+          nullable: true
+          description: HTTPS URL or a same-origin path for a custom merchant logo
     MerchantDetail:
       type: object
       required:
@@ -1408,6 +1416,18 @@ components:
           nullable: true
         user_modified:
           type: boolean
+        editable_fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - name
+            - date
+            - amount
+            - category_id
+            - merchant_id
+          description: Basic fields available for individual editing, considering
+            account access, splits and paired transfers
         classification:
           type: string
         account:
@@ -8937,7 +8957,8 @@ paths:
     get:
       summary: List accounts
       description: Effective read, annotate and write capabilities are included per
-        account. Token write scope never grants account access.
+        account. Token write scope never grants account access. The logo URL is included
+        when the account has an available bank or custom logo.
       tags:
       - Accounts
       security:
@@ -26838,9 +26859,15 @@ paths:
                     category_id:
                       type: string
                       format: uuid
+                      nullable: true
+                      description: Omit to keep the category or send null to clear
+                        it.
                     merchant_id:
                       type: string
                       format: uuid
+                      nullable: true
+                      description: Omit to keep the merchant or send null to clear
+                        it.
                     nature:
                       type: string
                       enum:

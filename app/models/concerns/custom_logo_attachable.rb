@@ -16,15 +16,14 @@ module CustomLogoAttachable
     validate :custom_logo_has_valid_size
   end
 
-  def custom_logo_url
+  def custom_logo_url(proxy: false)
     return unless custom_logo.attached?
     return unless custom_logo.blob&.persisted?
     return unless custom_logo.content_type.in?(ALLOWED_CUSTOM_LOGO_CONTENT_TYPES)
 
-    Rails.application.routes.url_helpers.rails_representation_path(
-      custom_logo.variant(:small),
-      only_path: true
-    )
+    routes = Rails.application.routes.url_helpers
+    variant = custom_logo.variant(:small)
+    proxy ? routes.rails_storage_proxy_path(variant, only_path: true) : routes.rails_representation_path(variant, only_path: true)
   end
 
   private

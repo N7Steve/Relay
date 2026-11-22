@@ -238,6 +238,7 @@ RSpec.configure do |config|
               capabilities: { '$ref' => '#/components/schemas/AccountCapabilities' },
               status: { type: :string, enum: %w[active draft disabled pending_deletion] },
               institution_name: { type: :string, nullable: true },
+              logo_url: { type: :string, nullable: true, description: 'HTTPS logo URL or same-origin storage path' },
               institution_domain: { type: :string, nullable: true },
               created_at: { type: :string, format: :'date-time' },
               updated_at: { type: :string, format: :'date-time' }
@@ -540,7 +541,8 @@ RSpec.configure do |config|
             required: %w[id name],
             properties: {
               id: { type: :string, format: :uuid },
-              name: { type: :string }
+              name: { type: :string },
+              logo_url: { type: :string, nullable: true, description: 'HTTPS URL or a same-origin path for a custom merchant logo' }
             }
           },
           MerchantDetail: {
@@ -746,6 +748,8 @@ RSpec.configure do |config|
               external_id: { type: :string, nullable: true },
               source: { type: :string, nullable: true },
               user_modified: { type: :boolean },
+              editable_fields: { type: :array, items: { type: :string, enum: %w[name date amount category_id merchant_id] },
+                                 description: 'Basic fields available for individual editing, considering account access, splits and paired transfers' },
               classification: { type: :string },
               account: { '$ref' => '#/components/schemas/Account' },
               category: { '$ref' => '#/components/schemas/Category', nullable: true },

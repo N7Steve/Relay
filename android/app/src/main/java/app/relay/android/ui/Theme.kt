@@ -3,10 +3,12 @@ package app.relay.android.ui
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -27,7 +29,7 @@ object Relay {
     val text = Color(0xFFEFF0F8)
     val secondary = Color(0xFFB0B4D4)
     val muted = Color(0xFF8D92B8)
-    val subtle = Color(0xFF6A6F98)
+    val subtle = Color(0xFF9296BC)
 
     val cyan = Color(0xFF3FD0F5)
     val blue = Color(0xFF4C78FF)
@@ -76,7 +78,7 @@ private val type = Typography(
 @Composable fun RelayTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = darkColorScheme(
-            primary = Relay.violet, onPrimary = Color.White,
+            primary = Color(0xFFBBA4FF), onPrimary = Relay.bg,
             secondary = Relay.blue, onSecondary = Color.White,
             tertiary = Relay.cyan, onTertiary = Relay.bg,
             background = Relay.bg, onBackground = Relay.text,
@@ -94,6 +96,7 @@ private val type = Typography(
             small = RoundedCornerShape(10.dp), medium = RoundedCornerShape(14.dp), large = RoundedCornerShape(20.dp),
             extraLarge = RoundedCornerShape(28.dp),
         ),
-        content = content,
-    )
+    ) {
+        CompositionLocalProvider(LocalContentColor provides Relay.text, content = content)
+    }
 }

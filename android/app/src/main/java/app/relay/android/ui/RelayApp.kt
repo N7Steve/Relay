@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,8 +67,11 @@ enum class Tab(val label: String, val icon: ImageVector) {
             val state = session
             when {
                 current == 0 || state == null -> Splash()
-                current == 1 -> LoginScreen(vm, state)
-                else -> Shell(vm, state)
+                current == 1 || !state.signedIn -> LoginScreen(vm, state)
+                else -> {
+                    val logos = remember(state.server, state.user?.id, state.cloudflareAccess) { LogoLoader(state) }
+                    CompositionLocalProvider(LocalLogos provides logos) { Shell(vm, state) }
+                }
             }
         }
     }
@@ -82,6 +86,7 @@ enum class Tab(val label: String, val icon: ImageVector) {
     var accountId by rememberSaveable { mutableStateOf<String?>(null) }
     var detail by remember { mutableStateOf<Transaction?>(null) }
     val notice by vm.notice.collectAsStateWithLifecycle()
+    val editor by vm.editor.collectAsStateWithLifecycle()
     val account = accountId?.let { id -> session.summary?.accounts?.find { it.id == id } }
     LaunchedEffect(Unit) { vm.onForeground() }
 
@@ -105,7 +110,7 @@ enum class Tab(val label: String, val icon: ImageVector) {
             ) { key ->
                 when {
                     account != null && key == account.id -> AccountScreen(account, vm.accountMovements, onBack = { accountId = null }, onTransaction = { detail = it })
-                    key == Tab.Movements.name -> MovementsScreen(vm.movements) { detail = it }
+                    key == Tab.Movements.name -> MovementsScreen(vm.movements, session.summary?.accounts) { detail = it }
                     key == Tab.Settings.name -> SettingsScreen(vm, session)
                     else -> HomeScreen(vm, session, onAccount = { accountId = it.id }, onSeeAll = { tab = Tab.Movements }, onTransaction = { detail = it })
                 }
@@ -114,7 +119,10 @@ enum class Tab(val label: String, val icon: ImageVector) {
         if (account == null) BottomBar(tab) { tab = it }
     }
 
-    detail?.let { TransactionSheet(it) { detail = null } }
+    detail?.let { selected ->
+        TransactionSheet(selected, onEdit = { detail = null; vm.editTransaction(selected) }, onDismiss = { detail = null })
+    }
+    editor.transaction?.let { transaction -> TransactionEditor(transaction, editor, vm) }
     UpdatePrompt(vm.updates)
     notice?.let { message ->
         AlertDialog(

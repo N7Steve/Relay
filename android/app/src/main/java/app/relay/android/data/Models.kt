@@ -52,7 +52,34 @@ import kotlinx.serialization.json.JsonPrimitive
     val balanceSheet: BalanceSheet? = null,
     val balanceSheetError: String? = null,
     val fetchedAt: Long,
+    val cashFlow: CashFlow? = null,
+    val netWorthHistory: NetWorthHistory? = null,
 )
+
+@Serializable data class CashFlow(
+    val month: String,
+    @SerialName("as_of") val asOf: String,
+    val currency: String,
+    val income: String,
+    val spending: String,
+    @SerialName("net_savings") val netSavings: String,
+    val sankey: CashFlowBreakdown,
+)
+
+@Serializable data class CashFlowBreakdown(val nodes: List<CashFlowNode>, val links: List<CashFlowLink>) {
+    fun expenseCategories(): List<CashFlowNode> {
+        val center = nodes.indexOfFirst { it.kind == "cash_flow" }
+        if (center < 0) return emptyList()
+        return links.filter { it.source == center }
+            .mapNotNull { nodes.getOrNull(it.target)?.takeIf { node -> node.kind == "expense" } }
+            .sortedByDescending { it.value.toBigDecimal() }
+    }
+}
+
+@Serializable data class CashFlowNode(val name: String, val kind: String, val value: String)
+@Serializable data class CashFlowLink(val source: Int, val target: Int)
+@Serializable data class NetWorthHistory(val currency: String, val points: List<NetWorthPoint>)
+@Serializable data class NetWorthPoint(val date: String, val value: Money)
 
 @Serializable data class TokenResponse(
     @SerialName("access_token") val accessToken: String,
@@ -96,6 +123,7 @@ import kotlinx.serialization.json.JsonPrimitive
     val subtype: String? = null,
     val status: String? = null,
     @SerialName("institution_name") val institutionName: String? = null,
+    @SerialName("logo_url") val logoUrl: String? = null,
 ) {
     val isLiability get() = classification == "liability"
 }
@@ -104,7 +132,15 @@ import kotlinx.serialization.json.JsonPrimitive
 
 @Serializable data class AccountRef(val id: String, val name: String, @SerialName("account_type") val accountType: String? = null)
 @Serializable data class CategoryRef(val id: String, val name: String, val color: String? = null, val icon: String? = null)
-@Serializable data class NamedRef(val id: String, val name: String)
+@Serializable data class CategoriesPage(val categories: List<NamedRef>, val pagination: Pagination = Pagination())
+@Serializable data class NamedRef(
+    val id: String,
+    val name: String,
+    @SerialName("logo_url") val logoUrl: String? = null,
+    val parent: NamedRef? = null,
+) {
+    val label get() = parent?.let { "${it.name} / $name" } ?: name
+}
 @Serializable data class TransferRef(val id: String, @SerialName("other_account") val otherAccount: AccountRef? = null)
 @Serializable data class TagRef(val id: String, val name: String, val color: String? = null)
 
@@ -122,6 +158,7 @@ import kotlinx.serialization.json.JsonPrimitive
     val merchant: NamedRef? = null,
     val transfer: TransferRef? = null,
     val tags: List<TagRef> = emptyList(),
+    @SerialName("editable_fields") val editableFields: List<String> = emptyList(),
 ) {
     val isIncome get() = signedAmountCents > 0
 }
@@ -130,9 +167,14 @@ import kotlinx.serialization.json.JsonPrimitive
 
 /** Minor units → localized currency text, e.g. 123456 EUR → "1.234,56 €". */
 fun formatMoney(minor: Long, currency: String, locale: Locale = Locale.getDefault(), signed: Boolean = false): String {
+    return formatMoney(minorToDecimal(minor, currency), currency, locale, signed)
+}
+
+fun minorToDecimal(minor: Long, currency: String): BigDecimal = BigDecimal.valueOf(minor, currencyDigits(currency))
+
+fun currencyDigits(currency: String): Int {
     val unit = runCatching { Currency.getInstance(currency) }.getOrNull()
-    val digits = (unit?.defaultFractionDigits ?: 2).coerceAtLeast(0)
-    return formatMoney(BigDecimal.valueOf(minor, digits), currency, locale, signed)
+    return (unit?.defaultFractionDigits ?: 2).coerceAtLeast(0)
 }
 
 fun formatMoney(amount: BigDecimal, currency: String, locale: Locale = Locale.getDefault(), signed: Boolean = false): String {

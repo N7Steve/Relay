@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Category
@@ -40,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import app.relay.android.data.Transaction
 import app.relay.android.data.formatMoney
 import java.time.LocalDate
@@ -61,14 +64,11 @@ fun dayLabel(date: String, today: LocalDate = LocalDate.now()): String {
 }
 
 @Composable fun TransactionRow(transaction: Transaction, onClick: () -> Unit, showAccount: Boolean = true) {
-    val tone = transactionTone(transaction)
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val icon = transactionIcon(transaction)
-        if (icon != null) IconBadge(icon, tone, size = 40.dp)
-        else InitialBadge(transaction.category?.name ?: transaction.merchant?.name ?: transaction.name, tone)
+        TransactionBadge(transaction, 40.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(transaction.name.ifBlank { "Sin descripción" }, style = MaterialTheme.typography.bodyLarge, color = Relay.text,
@@ -85,6 +85,18 @@ fun dayLabel(date: String, today: LocalDate = LocalDate.now()): String {
             style = MaterialTheme.typography.bodyLarge.merge(tabular).copy(fontWeight = FontWeight.Medium),
             color = if (transaction.isIncome) Relay.income else Relay.text,
         )
+    }
+}
+
+@Composable private fun TransactionBadge(transaction: Transaction, size: Dp) {
+    val tone = transactionTone(transaction)
+    LogoBadge(transaction.merchant?.logoUrl, size) {
+        val icon = transactionIcon(transaction)
+        when {
+            transaction.merchant != null -> InitialBadge(transaction.merchant.name, tone, size = size)
+            icon != null -> IconBadge(icon, tone, size = size)
+            else -> InitialBadge(transaction.category?.name ?: transaction.name, tone, size = size)
+        }
     }
 }
 
@@ -125,14 +137,11 @@ fun LazyListScope.feedFooter(state: FeedState, onRetry: () -> Unit, emptyTitle: 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun TransactionSheet(transaction: Transaction, onDismiss: () -> Unit) {
+@Composable fun TransactionSheet(transaction: Transaction, onEdit: () -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Relay.surface, contentColor = Relay.text) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp).navigationBarsPadding()) {
-            val tone = transactionTone(transaction)
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 24.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val icon = transactionIcon(transaction)
-                if (icon != null) IconBadge(icon, tone, size = 48.dp)
-                else InitialBadge(transaction.category?.name ?: transaction.name, tone, size = 48.dp)
+                TransactionBadge(transaction, 48.dp)
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Text(transaction.name.ifBlank { "Sin descripción" }, style = MaterialTheme.typography.titleLarge)
@@ -162,6 +171,10 @@ fun LazyListScope.feedFooter(state: FeedState, onRetry: () -> Unit, emptyTitle: 
                 }
             }
             transaction.notes?.takeIf { it.isNotBlank() }?.let { Detail(Icons.Outlined.Notes, "Notas", it) }
+            if (transaction.editableFields.isNotEmpty()) {
+                Spacer(Modifier.height(20.dp))
+                GradientButton(onClick = onEdit, modifier = Modifier.fillMaxWidth()) { Text("Editar movimiento", color = androidx.compose.ui.graphics.Color.White) }
+            }
         }
     }
 }

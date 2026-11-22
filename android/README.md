@@ -6,19 +6,19 @@ progresivamente al cliente Flutter de [`mobile/`](../mobile/README.md), que se
 conserva durante la transición; ambas apps pueden convivir (`app.relay.android`
 y `am.sure.mobile`).
 
-## Funciones de la primera versión
+## Funciones
 
 - **Acceso** con email y contraseña, código de verificación si la cuenta tiene
   MFA y Service Token opcional de Cloudflare Access.
-- **Resumen:** patrimonio neto, activos y pasivos, cuentas agrupadas por tipo y
-  últimos movimientos. Se puede actualizar deslizando hacia abajo.
-- **Movimientos:** lista agrupada por día con búsqueda y paginación continua, y
-  detalle de cada movimiento.
-- **Cuenta:** saldo y movimientos de una cuenta.
+- **Resumen:** patrimonio neto y su evolución en 30 días, ingresos, gastos y
+  saldo del mes en curso, gastos netos por categoría y últimos movimientos.
+  Se puede actualizar deslizando hacia abajo.
+- **Movimientos:** selector de cuentas, búsqueda, paginación y logos de
+  comercios. Abre un movimiento para editar el nombre, el importe, la fecha,
+  la categoría o el comercio según los permisos de la cuenta.
+- **Cuenta:** logo bancario o personalizado, saldo y movimientos de una cuenta.
 - **Ajustes:** servidor, versión, búsqueda de actualizaciones, cierre de sesión
   (revoca los tokens en el servidor) y olvido local.
-
-Por ahora es de solo lectura; la edición se hace en Relay web.
 
 ## Conexión y seguridad
 

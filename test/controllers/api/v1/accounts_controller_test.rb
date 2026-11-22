@@ -132,6 +132,18 @@ class Api::V1::AccountsControllerTest < ActionDispatch::IntegrationTest
     assert_equal account.updated_at.iso8601, response_body["updated_at"]
   end
 
+  test "shows the custom bank logo from Relay storage" do
+    account = accounts(:depository)
+    file_fixture("profile_image.png").open("rb") do |image|
+      account.custom_logo.attach(io: image, filename: "bank.png", content_type: "image/png")
+    end
+
+    get "/api/v1/accounts/#{account.id}", headers: api_headers(@api_key)
+
+    assert_response :success
+    assert_match %r{\A/rails/active_storage/representations/proxy/}, response.parsed_body["logo_url"]
+  end
+
   test "should return 404 for unknown account on show" do
     get "/api/v1/accounts/#{SecureRandom.uuid}", headers: api_headers(@api_key)
 

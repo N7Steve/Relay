@@ -77,11 +77,18 @@ import java.util.Locale
                 }
             }
 
+            summary?.let {
+                item(key = "net-worth-history") { NetWorthWidget(it.netWorthHistory) }
+                item(key = "monthly-flow") { CashFlowWidget(it.cashFlow) }
+                item(key = "spending-categories") { ExpensesWidget(it.cashFlow) }
+            }
+
             if (summary != null) {
-                val (liabilities, assets) = summary.accounts.partition { it.isLiability }
+                val visible = summary.accounts.filterNot { it.status == "disabled" }
+                val (liabilities, assets) = visible.partition { it.isLiability }
                 accountSection("Activos", assets, onAccount)
                 accountSection("Pasivos", liabilities, onAccount)
-                if (summary.accounts.isEmpty()) item(key = "no-accounts") {
+                if (visible.isEmpty()) item(key = "no-accounts") {
                     EmptyState("Aún no hay cuentas", "Crea o conecta tus cuentas desde Relay en la web.")
                 }
             } else {
@@ -196,12 +203,11 @@ private fun typeOrder(type: String?) = listOf("depository", "investment", "crypt
     "credit_card", "loan", "other_liability").indexOf(type).let { if (it < 0) 99 else it }
 
 @Composable fun AccountRow(account: Account, onClick: () -> Unit) {
-    val tone = accountTone(account.accountType)
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconBadge(accountIcon(account.accountType), tone)
+        AccountBadge(account)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(account.name, style = MaterialTheme.typography.bodyLarge, color = Relay.text, maxLines = 1, overflow = TextOverflow.Ellipsis)

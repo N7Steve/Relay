@@ -317,8 +317,8 @@ RSpec.describe 'API V1 Transactions', type: :request do
               description: { type: :string, description: 'Alternative to name field' },
               notes: { type: :string },
               currency: { type: :string, description: 'Currency code' },
-              category_id: { type: :string, format: :uuid },
-              merchant_id: { type: :string, format: :uuid },
+              category_id: { type: :string, format: :uuid, nullable: true, description: 'Omit to keep the category or send null to clear it.' },
+              merchant_id: { type: :string, format: :uuid, nullable: true, description: 'Omit to keep the merchant or send null to clear it.' },
               nature: { type: :string, enum: %w[income expense inflow outflow] },
               tag_ids: {
                 type: :array,

@@ -34,9 +34,9 @@ class Merchant < ApplicationRecord
     persisted? ? name : NO_MERCHANT_FILTER_VALUE
   end
 
-  def display_logo_url(family:)
+  def display_logo_url(family:, proxy: false)
     customization = family&.merchant_customization_for(self)
-    return customization.custom_logo_url if customization&.custom_logo&.attached?
+    return customization.custom_logo_url(proxy: proxy) if customization&.custom_logo&.attached?
     return if logo_url.blank?
 
     Setting.transform_brand_fetch_url(logo_url)

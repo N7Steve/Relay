@@ -666,6 +666,61 @@ class Api::V1::TransactionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Updated Transaction Name", response_data["name"]
   end
 
+  test "update clears explicit null references and preserves omitted references" do
+    merchant = @family.merchants.create!(name: "Mobile merchant")
+    category = @family.categories.first
+    @transaction.update!(category: category, merchant: merchant)
+
+    patch api_v1_transaction_url(@transaction), params: { transaction: { category_id: nil } },
+      headers: api_headers(@api_key), as: :json
+    assert_response :success
+    assert_nil @transaction.reload.category
+    assert_equal merchant, @transaction.merchant
+
+    patch api_v1_transaction_url(@transaction), params: { transaction: { merchant_id: nil } },
+      headers: api_headers(@api_key), as: :json
+    assert_response :success
+    assert_nil @transaction.reload.merchant
+  end
+
+  test "show supplies the family custom merchant logo and basic editable fields" do
+    merchant = @family.merchants.create!(name: "Mobile logo")
+    @transaction.update!(merchant: merchant)
+    customization = @family.merchant_customizations.create!(merchant: merchant)
+    file_fixture("profile_image.png").open("rb") do |image|
+      customization.custom_logo.attach(io: image, filename: "logo.png", content_type: "image/png")
+    end
+
+    get api_v1_transaction_url(@transaction), headers: api_headers(@api_key)
+    assert_response :success
+    assert_match %r{\A/rails/active_storage/representations/proxy/}, response.parsed_body.dig("merchant", "logo_url")
+    assert_includes response.parsed_body["editable_fields"], "name"
+
+    get api_v1_transaction_url(@transaction), headers: api_headers(@read_only_api_key)
+    assert_response :success
+    assert_empty response.parsed_body["editable_fields"]
+  end
+
+  test "updating a transfer category requires annotation access to both accounts" do
+    source = accounts(:depository)
+    destination = accounts(:credit_card)
+    destination.update!(owner: users(:family_member))
+    transfer = create_transfer(from_account: source, to_account: destination, amount: 10)
+    transaction = transfer.outflow_transaction
+    category = @family.categories.first
+    transaction.update!(category: category)
+
+    get api_v1_transaction_url(transaction), headers: api_headers(@api_key)
+    assert_response :success
+    assert_not_includes response.parsed_body["editable_fields"], "category_id"
+
+    patch api_v1_transaction_url(transaction), params: { transaction: { category_id: nil } },
+      headers: api_headers(@api_key), as: :json
+    assert_response :forbidden
+    assert_equal category, transaction.reload.category
+    assert_equal category, transfer.inflow_transaction.reload.category
+  end
+
   test "should protect transaction from provider sync when updated with user_modified true" do
     update_params = {
       transaction: {

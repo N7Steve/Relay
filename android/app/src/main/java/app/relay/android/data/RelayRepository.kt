@@ -1,7 +1,9 @@
 package app.relay.android.data
 
 import android.os.Build
+import java.time.LocalDate
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,15 +101,20 @@ class RelayRepository(
     }
 
     /** Authenticated request that refreshes once when the access token is rejected. */
-    suspend fun authorized(path: String, query: List<Pair<String, String>> = emptyList()): String {
+    suspend fun authorized(
+        path: String,
+        query: List<Pair<String, String>> = emptyList(),
+        method: String = "GET",
+        body: JsonObject? = null,
+    ): String {
         val state = fresh()
         return try {
-            api.request(state, path, query = query, bearer = state.tokens!!.accessToken)
+            api.request(state, path, method, body, query, bearer = state.tokens!!.accessToken)
         } catch (error: ApiException) {
             if (error.status != 401 || error is SessionExpiredException) throw error
             val renewed = refresh(state.tokens!!.accessToken)
             try {
-                api.request(renewed, path, query = query, bearer = renewed.tokens!!.accessToken)
+                api.request(renewed, path, method, body, query, bearer = renewed.tokens!!.accessToken)
             } catch (again: ApiException) {
                 if (again.status == 401) { expire(); throw SessionExpiredException() }
                 throw again
@@ -120,23 +127,52 @@ class RelayRepository(
         val sheet = async {
             runCatching { api.json.decodeFromString<BalanceSheet>(authorized("/balance_sheet")) }
         }
+        val cashFlow = async {
+            optionalReport { api.json.decodeFromString<CashFlow>(authorized("/cash_flow", listOf("include" to "sankey"))) }
+        }
+        val history = async {
+            val end = cashFlow.await()?.asOf?.let(LocalDate::parse) ?: LocalDate.now()
+            optionalReport {
+                api.json.decodeFromString<NetWorthHistory>(authorized(
+                    "/actions/get_net_worth_series", method = "POST",
+                    body = fields("arguments" to fields(
+                        "start_date" to value(end.minusDays(29).toString()),
+                        "end_date" to value(end.toString()),
+                    )),
+                ))
+            }
+        }
         val sheetResult = sheet.await()
         sheetResult.exceptionOrNull()?.let { if (it is SessionExpiredException || (it is ApiException && it.status != 422)) throw it }
         // 422: Relay refuses to total amounts it cannot convert to the family currency.
         val sheetError = sheetResult.exceptionOrNull()?.let { "Faltan tipos de cambio para calcular el patrimonio en tu moneda principal." }
-        val summary = Summary(accounts.await(), sheetResult.getOrNull(), sheetError, clock())
+        val summary = Summary(accounts.await(), sheetResult.getOrNull(), sheetError, clock(), cashFlow.await(), history.await())
         save { if (it.signedIn) it.copy(summary = summary) else it }
         summary
+    }
+
+    private suspend fun <T> optionalReport(load: suspend () -> T): T? = try {
+        load()
+    } catch (error: CancellationException) {
+        throw error
+    } catch (error: SessionExpiredException) {
+        throw error
+    } catch (_: java.io.IOException) {
+        null
+    } catch (_: kotlinx.serialization.SerializationException) {
+        null
     }
 
     private suspend fun allAccounts(): List<Account> {
         val accounts = mutableListOf<Account>()
         var page = 1
         do {
-            val result = api.json.decodeFromString<AccountsPage>(authorized("/accounts", listOf("page" to "$page", "per_page" to "100")))
-            accounts += result.accounts
+            val result = api.json.decodeFromString<AccountsPage>(authorized(
+                "/accounts", listOf("page" to "$page", "per_page" to "100", "include_disabled" to "true"),
+            ))
+            accounts += result.accounts.filterNot { it.status == "pending_deletion" }
             page++
-        } while (page <= result.pagination.totalPages && page <= 20)
+        } while (page <= result.pagination.totalPages)
         return accounts
     }
 
@@ -148,6 +184,24 @@ class RelayRepository(
         }
         return api.json.decodeFromString(authorized("/transactions", query))
     }
+
+    suspend fun categories(): List<NamedRef> {
+        val categories = mutableListOf<NamedRef>()
+        var page = 1
+        do {
+            val result = api.json.decodeFromString<CategoriesPage>(
+                authorized("/categories", listOf("page" to "$page", "per_page" to "100")),
+            )
+            categories += result.categories
+            page++
+        } while (page <= result.pagination.totalPages)
+        return categories
+    }
+
+    suspend fun merchants(): List<NamedRef> = api.json.decodeFromString(authorized("/merchants"))
+
+    suspend fun updateTransaction(id: String, changes: JsonObject): Transaction =
+        api.json.decodeFromString(authorized("/transactions/$id", method = "PATCH", body = fields("transaction" to changes)))
 
     /** Revokes the device tokens on the server, then forgets them locally. */
     suspend fun logout() {

@@ -418,24 +418,25 @@ class Account < ApplicationRecord
     balance.to_d - goal_earmarked_total
   end
 
-  def logo_url
-    (custom_logo_url if custom_logo_available?) || automatic_logo_url
+  def logo_url(proxy: false)
+    (custom_logo_url(proxy: proxy) if custom_logo_available?) || automatic_logo_url(proxy: proxy)
   end
 
-  def automatic_logo_url
-    unless ExternalAccess.enabled?(:logos)
-      return Rails.application.routes.url_helpers.rails_blob_path(logo, only_path: true) if logo.attached?
-      return nil
-    end
-    if institution_domain.present? && Setting.brand_fetch_client_id.present?
-      logo_size = Setting.brand_fetch_logo_size
+  def automatic_logo_url(proxy: false)
+    if ExternalAccess.enabled?(:logos)
+      if institution_domain.present? && Setting.brand_fetch_client_id.present?
+        logo_size = Setting.brand_fetch_logo_size
+        return "https://cdn.brandfetch.io/#{institution_domain}/icon/fallback/lettermark/w/#{logo_size}/h/#{logo_size}?c=#{Setting.brand_fetch_client_id}"
+      end
 
-      "https://cdn.brandfetch.io/#{institution_domain}/icon/fallback/lettermark/w/#{logo_size}/h/#{logo_size}?c=#{Setting.brand_fetch_client_id}"
-    elsif provider&.logo_url.present?
-      provider.logo_url
-    elsif logo.attached?
-      Rails.application.routes.url_helpers.rails_blob_path(logo, only_path: true)
+      institution_logo = provider&.logo_url
+      return institution_logo if institution_logo.present?
     end
+
+    return unless logo.attached?
+
+    routes = Rails.application.routes.url_helpers
+    proxy ? routes.rails_storage_proxy_path(logo.blob, only_path: true) : routes.rails_blob_path(logo, only_path: true)
   end
 
   def destroy_later

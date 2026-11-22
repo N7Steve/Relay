@@ -8,6 +8,7 @@ import app.relay.android.data.ApiException
 import app.relay.android.data.DiskState
 import app.relay.android.data.SessionExpiredException
 import app.relay.android.data.Transaction
+import kotlinx.serialization.json.JsonObject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 data class LoginState(val busy: Boolean = false, val mfaRequired: Boolean = false, val error: String? = null)
 
 data class SummaryState(val loading: Boolean = false, val error: String? = null)
+data class TransactionEditState(val transaction: Transaction? = null, val saving: Boolean = false, val error: String? = null)
 
 data class FeedState(
     val accountId: String? = null,
@@ -41,18 +43,20 @@ class Feed(private val scope: kotlinx.coroutines.CoroutineScope, private val loa
     private val mutable = MutableStateFlow(FeedState())
     val state: StateFlow<FeedState> = mutable.asStateFlow()
     private var job: Job? = null
+    private var failedPage = 1
 
     fun open(accountId: String?) {
-        if (mutable.value.accountId == accountId && mutable.value.page > 0) return
+        val state = mutable.value
+        if (state.accountId == accountId && (state.page > 0 || job?.isActive == true)) return
         job?.cancel()
-        mutable.value = FeedState(accountId = accountId)
+        mutable.value = FeedState(accountId = accountId, query = state.query)
         loadPage(1, replace = true)
     }
 
     fun search(query: String) {
         if (query == mutable.value.query) return
         job?.cancel()
-        mutable.update { it.copy(query = query, error = null) }
+        mutable.value = FeedState(accountId = mutable.value.accountId, query = query, loading = true)
         job = scope.launch {
             delay(350)
             fetch(1, replace = true, refreshing = false)
@@ -73,10 +77,18 @@ class Feed(private val scope: kotlinx.coroutines.CoroutineScope, private val loa
 
     fun retry() {
         mutable.update { it.copy(error = null) }
-        loadPage(if (mutable.value.items.isEmpty()) 1 else mutable.value.page + 1, replace = mutable.value.items.isEmpty())
+        loadPage(failedPage, replace = failedPage == 1)
     }
 
     fun clear() { job?.cancel(); mutable.value = FeedState() }
+
+    fun transactionChanged(transaction: Transaction) {
+        if (mutable.value.page == 0 && job?.isActive != true) return
+        mutable.update { state ->
+            state.copy(items = state.items.map { if (it.id == transaction.id) transaction else it })
+        }
+        refresh()
+    }
 
     private fun loadPage(page: Int, replace: Boolean) {
         job = scope.launch { fetch(page, replace, refreshing = false) }
@@ -98,6 +110,7 @@ class Feed(private val scope: kotlinx.coroutines.CoroutineScope, private val loa
         } catch (error: CancellationException) {
             throw error
         } catch (error: Throwable) {
+            failedPage = page
             mutable.update { it.copy(loading = false, refreshing = false, error = onError(error)) }
         }
     }
@@ -117,6 +130,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val notice = noticeState.asStateFlow()
     private val signingOut = MutableStateFlow(false)
     val busySigningOut = signingOut.asStateFlow()
+    private val editState = MutableStateFlow(TransactionEditState())
+    val editor = editState.asStateFlow()
 
     val movements = Feed(viewModelScope, { page, query, account -> repository.transactions(page, query, account) }, ::describe)
     val accountMovements = Feed(viewModelScope, { page, query, account -> repository.transactions(page, query, account) }, ::describe)
@@ -149,8 +164,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 repository.login(server, email, password, otp, clientId, clientSecret)
-                loginState.value = LoginState()
-                movements.clear(); accountMovements.clear(); recent.clear()
+                resetScreens()
                 refreshSummary()
                 updates.check()
             } catch (error: CancellationException) {
@@ -205,13 +219,45 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun dismissNotice() { noticeState.value = null }
     fun checkUpdates() = updates.check(manual = true)
 
+    fun editTransaction(transaction: Transaction) { editState.value = TransactionEditState(transaction) }
+
+    fun cancelEdit() {
+        if (!editState.value.saving) editState.value = TransactionEditState()
+    }
+
+    suspend fun categories() = repository.categories()
+    suspend fun merchants() = repository.merchants()
+
+    fun saveTransaction(changes: JsonObject) {
+        val edit = editState.value
+        val transaction = edit.transaction ?: return
+        if (edit.saving || changes.isEmpty()) return
+        editState.value = edit.copy(saving = true, error = null)
+        viewModelScope.launch {
+            try {
+                val updated = repository.updateTransaction(transaction.id, changes)
+                if (editState.value.transaction != transaction) return@launch
+                editState.value = TransactionEditState()
+                movements.transactionChanged(updated)
+                accountMovements.transactionChanged(updated)
+                recent.transactionChanged(updated)
+                refreshSummary()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                if (editState.value.transaction == transaction) editState.value = edit.copy(error = describe(error))
+            }
+        }
+    }
+
     private fun resetScreens() {
         loginState.value = LoginState()
         summaryState.value = SummaryState()
+        editState.value = TransactionEditState()
         movements.clear(); accountMovements.clear(); recent.clear()
     }
 
-    private fun describe(error: Throwable): String = when (error) {
+    internal fun describe(error: Throwable): String = when (error) {
         is SessionExpiredException -> error.message!!
         is ApiException -> error.message ?: "Error del servidor."
         // SerializationException is an IllegalArgumentException: keep it first.
