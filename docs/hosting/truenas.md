@@ -95,7 +95,8 @@ Each run:
 5. Stops web/worker gracefully and saves PostgreSQL, config/keys, attachments,
    Redis and the before/after app configuration to a private backup directory.
 6. Pins the image **by digest** through TrueNAS `app.update`, preserving
-   environment, ports and mounts. Web prepares/migrates the database on startup.
+   environment, ports and mounts. It polls the state of that job by ID. Web
+   prepares/migrates the database on startup.
 7. Waits for web health and worker startup, verifies the running image and commit,
    checks that no migrations are pending and records the SHA and digest.
 8. Removes older Relay images, keeping the running and previous one.
@@ -104,6 +105,11 @@ Run it by hand with `sudo bash /mnt/AppsPool/relay/update-relay.sh`, or validate
 without stopping anything with `--check` (it still pulls the channel image).
 Do not edit the app in TrueNAS while an update runs; the updater refuses to
 overwrite a configuration changed during the backup.
+
+If an attempt fails, cron skips that digest to avoid repeatedly stopping Relay.
+Review the log and the TrueNAS job before retrying by hand. Cron can still apply
+a new digest. The updater checks for active TrueNAS update jobs before stopping
+any services.
 
 ### Moving an existing source-build installation
 
@@ -136,8 +142,9 @@ private keys and credentials and are separate from Relay's family ZIP export.
 If backup fails before `app.update`, the script restarts the services it stopped
 and leaves the original image in place. If TrueNAS rejects `app.update` (no job
 running and the stored configuration unchanged), nothing was applied: the script
-resumes the previous version and keeps the full error in the backup folder as
-`update-error.txt` (only a short excerpt reaches the terminal). If it cannot tell
+resumes the previous version and keeps the client error or job status in the
+backup folder as `update-error.txt`. Use the job ID from the updater log to
+inspect failed jobs in TrueNAS. If it cannot tell
 whether the change was applied, it resumes nothing and keeps the backup; check
 the app in TrueNAS and `logs/`. Once an update has been applied, it does not roll
 back code against a potentially migrated database.

@@ -59,19 +59,28 @@ class UpdateRelayTest < Minitest::Test
           File.write("#{dir}/config-read", "true")
           print JSON.generate(config)
         when "core.get_jobs"
-          puts(fail_at == "update_running" ? "[{}]" : "[]")
-        when "-j"
+          options = JSON.parse(args.last)
+          if options["count"]
+            active = %w[update_running update_pending].include?(fail_at)
+            puts(active && (fail_at == "update_pending" || File.exist?("#{dir}/submitted")) ? 1 : 0)
+          else
+            abort "Unexpected job lookup: #{args.inspect}" unless options["select"] == ["state"] && JSON.parse(args[2]) == [["id", "=", 123]]
+            puts JSON.generate([{state: fail_at == "job_failed" ? "FAILED" : "SUCCESS"}])
+          end
+        when "app.update"
+          File.write("#{dir}/submitted", "true")
+          Process.kill("KILL", Process.pid) if fail_at == "update_killed"
           if fail_at == "update" || fail_at == "update_running"
             # Rejected before anything was stored; the error is huge and noisy.
             warn "ValidationError: " + ("expected {config}, got {config} " * 200)
             exit 137
           end
-          File.write("#{dir}/payload.json", args.last)
+          File.write("#{dir}/payload.json", args.last) unless fail_at == "job_failed"
           if fail_at == "update_applied"
             warn "connection lost"
             exit 1
           end
-          puts "{}"
+          puts "123"
         else
           abort "Unexpected midclt command: #{args.inspect}"
         end
@@ -192,8 +201,7 @@ class UpdateRelayTest < Minitest::Test
     assert_empty Dir.glob("#{@root}/backups/*/UPDATE_COMPLETE")
     assert_includes calls, [ "docker", "start", "redis", "worker", "web" ]
     assert_includes output, "no modificó la app"
-    # The terminal gets a short excerpt; the full message goes to the backup folder.
-    assert_operator output.length, :<, 5_000
+    refute_includes output, "ValidationError"
     assert_operator File.size(Dir.glob("#{@root}/backups/*/update-error.txt").first), :>, 5_000
   end
 
@@ -210,6 +218,43 @@ class UpdateRelayTest < Minitest::Test
     refute status.success?, output
     assert_includes output, "trabajos activos: 1"
     refute calls.any? { |c| c[0] == "docker" && c[1] == "start" }
+  end
+
+  def test_failed_job_resumes_the_previous_version
+    output, status = run_script(fail_at: "job_failed")
+    refute status.success?, output
+    assert_includes calls, [ "docker", "start", "redis", "worker", "web" ]
+    assert_includes File.read(Dir.glob("#{@root}/backups/*/update-error.txt").first), "Trabajo 123: FAILED"
+  end
+
+  def test_killed_client_resumes_relay_when_no_job_or_config_change_exists
+    output, status = run_script(fail_at: "update_killed")
+    refute status.success?, output
+    assert_includes calls, [ "docker", "start", "redis", "worker", "web" ]
+    assert_equal 1, Dir.glob("#{@root}/backups/*/BACKUP_COMPLETE").length
+    assert_empty Dir.glob("#{@root}/backups/*/UPDATE_COMPLETE")
+  end
+
+  def test_existing_update_blocks_downtime
+    output, status = run_script(fail_at: "update_pending")
+    refute status.success?, output
+    refute calls.any? { |c| c[0] == "docker" && c[1] == "stop" }
+    refute calls.any? { |c| c.include?("app.update") }
+  end
+
+  def test_cron_does_not_stop_relay_again_for_a_failed_digest
+    _, status = run_script("--cron", fail_at: "update")
+    refute status.success?
+    stops = calls.count { |c| c[0] == "docker" && c[1] == "stop" }
+
+    output, status = run_script("--cron")
+    assert status.success?, output
+    assert_equal stops, calls.count { |c| c[0] == "docker" && c[1] == "stop" }
+
+    output, status = run_script
+    assert status.success?, output
+    assert_equal 1, Dir.glob("#{@root}/backups/*/UPDATE_COMPLETE").length
+    refute File.exist?("#{@root}/deployment/update-attempted-image")
   end
 
   def test_configuration_changed_during_backup_is_not_overwritten

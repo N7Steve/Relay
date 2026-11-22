@@ -35,6 +35,7 @@ if [[ -f $ROOT/registry/config.json ]]; then
   export DOCKER_CONFIG=$ROOT/registry
 fi
 BACKUP_ROOT="$ROOT/backups"
+ATTEMPT="$ROOT/deployment/update-attempted-image"
 exec 9>"$ROOT/.update.lock"
 if ! flock -n 9; then
   [[ $MODE == cron ]] && exit 0
@@ -91,6 +92,11 @@ print(image["Id"], digests[0], sha)
 PY
 )
 [[ -n ${SHA:-} ]] || die "No se pudo identificar la imagen publicada."
+if [[ $MODE == cron && -f $ATTEMPT && $(<"$ATTEMPT") == "$IMAGE" ]]; then
+  echo "Ya se intentó desplegar esta imagen. Revisa el registro anterior y usa el actualizador manual para reintentar."
+  KEEP_LOG=false
+  exit 0
+fi
 echo "Leyendo la configuración guardada de la app Relay..."
 midclt call app.get_instance "$APP" > "$WORK/app.json"
 midclt call app.config "$APP" > "$WORK/before.json"
@@ -184,6 +190,13 @@ if [[ $(docker inspect --format '{{.Image}}' "$WEB") == "$IMAGE_ID" && $(docker 
 fi
 PREVIOUS_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$WEB")
 
+active_updates() {
+  midclt call core.get_jobs '[["method","=","app.update"],["state","in",["RUNNING","WAITING"]]]' '{"count":true}'
+}
+running=$(active_updates) && [[ $running == 0 ]] ||
+  die "TrueNAS tiene una actualización activa o no se pudo comprobar su estado."
+printf '%s\n' "$IMAGE" > "$ATTEMPT"
+
 mkdir -p -- "$BACKUP_ROOT"
 BACKUP=$(mktemp -d "$BACKUP_ROOT/relay-$(date -u +%Y%m%dT%H%M%SZ)-XXXXXXXX")
 cp "$WORK/before.json" "$BACKUP/app-before.json"
@@ -224,14 +237,29 @@ PY
 
 echo "Aplicando el cambio a través de TrueNAS; web preparará la base de datos al arrancar..."
 UPDATE_STARTED=true
-# Keep middleware output private and out of the terminal: an error can echo the
-# whole configuration many times. It stays in the backup folder for diagnosis.
-if ! midclt call -j app.update "$APP" "$(cat "$WORK/payload.json")" > "$BACKUP/update-result.json" 2> "$BACKUP/update-error.txt"; then
-  echo "TrueNAS no ha completado app.update. Primeras líneas del error (completo en $BACKUP/update-error.txt):" >&2
-  head -c 800 "$BACKUP/update-error.txt" >&2 || true
-  echo >&2
-  running=$(midclt call core.get_jobs '[["method","=","app.update"],["state","in",["RUNNING","WAITING"]]]' 2>/dev/null |
-    python3 -I -c 'import json,sys; print(len(json.load(sys.stdin)))' 2>/dev/null || echo unknown)
+update_job_succeeded() {
+  local job_id state deadline
+  # Submit the job without streaming progress or downloading the job's full result.
+  midclt call app.update "$APP" "$(cat "$WORK/payload.json")" > "$BACKUP/update-result.json" 2> "$BACKUP/update-error.txt" || return 1
+  job_id=$(<"$BACKUP/update-result.json")
+  [[ $job_id =~ ^[0-9]+$ ]] || return 1
+  echo "Trabajo TrueNAS: $job_id"
+  deadline=$((SECONDS + 600))
+  while (( SECONDS < deadline )); do
+    state=$(midclt call core.get_jobs "[[\"id\",\"=\",$job_id]]" '{"select":["state"]}' 2>> "$BACKUP/update-error.txt" |
+      python3 -I -c 'import json,sys; jobs=json.load(sys.stdin); print(jobs[0]["state"] if jobs else "")') || return 1
+    case "$state" in
+      SUCCESS) return 0 ;;
+      RUNNING|WAITING) sleep 5 ;;
+      *) printf 'Trabajo %s: %s\n' "$job_id" "${state:-no encontrado}" >> "$BACKUP/update-error.txt"; return 1 ;;
+    esac
+  done
+  echo "Trabajo $job_id: tiempo de espera agotado" >> "$BACKUP/update-error.txt"
+  return 1
+}
+if ! update_job_succeeded; then
+  echo "TrueNAS no ha confirmado app.update. Diagnóstico privado en $BACKUP/update-error.txt." >&2
+  running=$(active_updates 2>/dev/null || echo unknown)
   midclt call app.config "$APP" > "$WORK/after-failure.json" 2>/dev/null || true
   if [[ $running == 0 ]] && python3 -I - "$WORK/before.json" "$WORK/after-failure.json" <<'PY'
 import json
@@ -275,6 +303,7 @@ printf '%s\n' "$SHA" > "$ROOT/deployment/deployed-sha"
 printf '%s\n' "$IMAGE" > "$ROOT/deployment/deployed-image"
 # init installs the updater shipped with the new image on every successful startup.
 touch "$BACKUP/UPDATE_COMPLETE"
+rm -f -- "$ATTEMPT"
 # Keep the running and previous images for a manual rollback; Docker refuses to
 # remove an image that a container still uses.
 docker image ls --no-trunc --format '{{.Repository}} {{.ID}}' | sort -u | while read -r repository old; do
