@@ -447,6 +447,9 @@ Rails.application.routes.draw do
       Mcp::Catalog.all.each_key do |operation|
         post "actions/#{operation}", to: "daily_operations#create", defaults: { operation: operation }
       end
+      # Stored logos that Active Storage reserves for web sessions
+      get "accounts/:id/logo", to: "logos#account", as: :account_logo
+      get "merchants/:id/logo", to: "logos#merchant", as: :merchant_logo
       resources :accounts, only: [ :index, :show ]
       resources :balances, only: [ :index, :show ]
       resources :budgets, only: [ :index, :show ]

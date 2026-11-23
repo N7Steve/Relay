@@ -695,6 +695,7 @@ class Api::V1::TransactionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match %r{\A/rails/active_storage/representations/proxy/}, response.parsed_body.dig("merchant", "logo_url")
     assert_includes response.parsed_body["editable_fields"], "name"
+    assert_includes response.parsed_body["editable_fields"], "tag_ids"
 
     get api_v1_transaction_url(@transaction), headers: api_headers(@read_only_api_key)
     assert_response :success

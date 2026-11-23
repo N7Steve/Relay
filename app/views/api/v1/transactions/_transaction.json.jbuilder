@@ -26,7 +26,7 @@ account = transaction.entry.account
 transfer = transaction.transfer
 editable_fields = []
 if !transaction.entry.split_child? && api_access.allowed?(account, :annotate)
-  editable_fields << "merchant_id"
+  editable_fields += %w[merchant_id tag_ids]
   if !transfer || [ transfer.from_account, transfer.to_account ].all? { |leg| api_access.allowed?(leg, :annotate) }
     editable_fields << "category_id"
   end

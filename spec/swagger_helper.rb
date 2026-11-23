@@ -748,7 +748,7 @@ RSpec.configure do |config|
               external_id: { type: :string, nullable: true },
               source: { type: :string, nullable: true },
               user_modified: { type: :boolean },
-              editable_fields: { type: :array, items: { type: :string, enum: %w[name date amount category_id merchant_id] },
+              editable_fields: { type: :array, items: { type: :string, enum: %w[name date amount category_id merchant_id tag_ids] },
                                  description: 'Basic fields available for individual editing, considering account access, splits and paired transfers' },
               classification: { type: :string },
               account: { '$ref' => '#/components/schemas/Account' },

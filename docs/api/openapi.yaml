@@ -1426,6 +1426,7 @@ components:
             - amount
             - category_id
             - merchant_id
+            - tag_ids
           description: Basic fields available for individual editing, considering
             account access, splits and paired transfers
         classification:
@@ -25247,6 +25248,91 @@ paths:
         '403':
           description: preview features disabled
           content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/v1/accounts/{id}/logo":
+    parameters:
+    - name: id
+      in: path
+      format: uuid
+      required: true
+      description: Account ID
+      schema:
+        type: string
+    get:
+      summary: Download a stored account logo
+      tags:
+      - Logos
+      description: Streams the custom bank logo (128 px WebP) or the stored provider
+        logo of an accessible account. External logo URLs are not proxied; clients
+        load those directly.
+      security:
+      - apiKeyAuth: []
+      responses:
+        '404':
+          description: account not accessible or without a stored logo
+          content:
+            image/webp:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            image/png:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            image/jpeg:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '401':
+          description: unauthorized
+          content:
+            image/webp:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            image/png:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            image/jpeg:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/v1/merchants/{id}/logo":
+    parameters:
+    - name: id
+      in: path
+      format: uuid
+      required: true
+      description: Merchant ID
+      schema:
+        type: string
+    get:
+      summary: Download a custom merchant logo
+      tags:
+      - Logos
+      description: Streams the family's custom logo for a merchant as a 128 px WebP
+        image.
+      security:
+      - apiKeyAuth: []
+      responses:
+        '404':
+          description: merchant without a custom logo for this family
+          content:
+            image/webp:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '401':
+          description: unauthorized
+          content:
+            image/webp:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
