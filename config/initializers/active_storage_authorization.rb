@@ -63,7 +63,8 @@ Rails.application.config.to_prepare do
         account = attachment.record
         return false if account.nil? || Current.user.nil?
 
-        Current.user.accessible_accounts.exists?(id: account.id)
+        # Family-managed accounts are outside finances but still viewable by super admins.
+        Current.user.reachable_accounts.exists?(id: account.id)
       rescue ActiveRecord::RecordNotFound
         false
       end

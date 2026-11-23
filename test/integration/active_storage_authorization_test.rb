@@ -107,6 +107,38 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "a super admin can see the custom logo of a family-managed account" do
+    manager = users(:family_member)
+    manager.update!(role: :super_admin)
+    account = accounts(:investment)
+    account.custom_logo.attach(
+      io: file_fixture("profile_image.png").open,
+      filename: "partner.png",
+      content_type: "image/png"
+    )
+    assert account.family_managed_by?(manager)
+
+    sign_in manager
+    get rails_representation_path(account.custom_logo.variant(:small))
+
+    assert_response :redirect
+  end
+
+  test "a member cannot see the custom logo of an account that is not shared with them" do
+    member = users(:family_member)
+    account = accounts(:investment)
+    account.custom_logo.attach(
+      io: file_fixture("profile_image.png").open,
+      filename: "private.png",
+      content_type: "image/png"
+    )
+
+    sign_in member
+    get rails_representation_path(account.custom_logo.variant(:small))
+
+    assert_response :not_found
+  end
+
   test "user cannot access another family's merchant customization" do
     customization = MerchantCustomization.create!(family: @user_a.family, merchant: merchants(:netflix))
     customization.custom_logo.attach(
