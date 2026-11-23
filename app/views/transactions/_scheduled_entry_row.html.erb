@@ -8,7 +8,7 @@
       <%= image_tag merchant_logo_url,
           class: "w-9 h-9 rounded-full", loading: "lazy" %>
     <% else %>
-      <%= render DS::FilledIcon.new(variant: :text, text: sp.title, size: "lg", rounded: true) %>
+      <%= render "categories/avatar", category: sp.category %>
     <% end %>
     <div class="truncate">
       <div class="flex items-center gap-1 min-w-0">

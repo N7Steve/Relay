@@ -7,8 +7,6 @@ import android.util.LruCache
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -126,7 +124,7 @@ internal class LogoLoader(state: DiskState, context: Context, private val downlo
 }
 
 /** A logo filling its shape edge to edge; [fallback] shows while it loads or when there is none. */
-@Composable internal fun LogoBadge(source: LogoSource?, size: Dp, shape: Shape = CircleShape, fallback: @Composable () -> Unit) {
+@Composable internal fun LogoBadge(source: LogoSource?, size: Dp, shape: Shape = badgeShape(size), fallback: @Composable () -> Unit) {
     val loader = LocalLogos.current
     val bitmap by key(loader, source) {
         produceState(loader?.cached(source)) { value = source?.let { loader?.load(it) } }
@@ -141,7 +139,7 @@ internal class LogoLoader(state: DiskState, context: Context, private val downlo
 }
 
 @Composable internal fun AccountBadge(account: Account, size: Dp = 40.dp) {
-    LogoBadge(logoSource(account.logoUrl, "/accounts/${account.id}/logo"), size, RoundedCornerShape(size * 0.32f)) {
+    LogoBadge(logoSource(account.logoUrl, "/accounts/${account.id}/logo"), size) {
         IconBadge(accountIcon(account.accountType), accountTone(account.accountType), size = size)
     }
 }

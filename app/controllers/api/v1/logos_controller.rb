@@ -21,6 +21,12 @@ class Api::V1::LogosController < Api::V1::BaseController
     serve_small(customization.custom_logo)
   end
 
+  # Profile pictures of the family's members, shown next to their transfers.
+  def user
+    member = current_resource_owner.family.users.find(params[:id])
+    serve_small(member.profile_image)
+  end
+
   private
     def serve_small(attachment)
       raise ActiveRecord::RecordNotFound unless attachment.attached? && attachment.content_type.in?(CONTENT_TYPES)

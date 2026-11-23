@@ -235,6 +235,20 @@ class RelayRepositoryTest {
         assertEquals(listOf("Nómina"), breakdown.categories("income").map { it.node.name })
     }
 
+    @Test fun transfersOutsideTheFinancesStayApartFromSpendingAndIncome() {
+        val breakdown = api.json.decodeFromString<CashFlowBreakdown>("""{"nodes":[
+            {"id":"income_c-in","name":"Nómina","kind":"income","value":"2000","category_id":"c-in"},
+            {"id":"income_transfer_from_excluded","name":"Dinero que entra en mis finanzas","kind":"income","value":"50"},
+            {"id":"cash_flow_node","name":"Cash Flow","kind":"cash_flow","value":"2050"},
+            {"id":"expense_c-home","name":"Hogar","kind":"expense","value":"900","category_id":"c-home"},
+            {"id":"expense_transfer_to_excluded","name":"Dinero que sale de mis finanzas","kind":"expense","value":"300"}
+          ],"links":[{"source":0,"target":2},{"source":1,"target":2},{"source":2,"target":3},{"source":2,"target":4}]}""")
+        assertEquals(listOf("Hogar"), breakdown.categories("expense").map { it.node.name })
+        assertEquals(listOf("Nómina"), breakdown.categories("income").map { it.node.name })
+        assertEquals(listOf("Hogar"), breakdown.expenseCategories().map { it.name })
+        assertEquals(listOf("expense", "income"), breakdown.boundaryTransfers().map { it.node.kind })
+    }
+
     @Test fun activityReportAndCategoryMovementsUseTheReportPeriod() = runBlocking {
         signIn()
         route(

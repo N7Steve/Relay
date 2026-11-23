@@ -38,7 +38,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,11 +49,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material.icons.outlined.TrendingDown
 import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +71,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -83,6 +88,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -106,6 +112,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 private val spanish = Locale.forLanguageTag("es-ES")
 private val monthTitle = DateTimeFormatter.ofPattern("MMMM yyyy", spanish)
@@ -159,7 +166,7 @@ private data class CategorySelection(val name: String, val color: Color, val ico
             Spacer(Modifier.height(14.dp))
             MonthSwitcher(state, startDay, reports::previous, reports::next)
             state.month?.let { month ->
-                ReportBody(state, month, startDay, icons, currency, reports::select, reports::retry) { opened = it }
+                ReportBody(state, month, startDay, icons, currency, reports::select, reports::extendTrend, reports::retry) { opened = it }
             }
         }
     }
@@ -255,6 +262,7 @@ private class LastShown<T> { var value: T? = null }
     icons: Map<String, String?>,
     currency: String,
     onSelect: (LocalDate) -> Unit,
+    onOlder: () -> Unit,
     onRetry: () -> Unit,
     onCategory: (CategorySelection) -> Unit,
 ) {
@@ -269,9 +277,10 @@ private class LastShown<T> { var value: T? = null }
             activity != null -> Box(Modifier.stale(state.activity[month] == null)) { SavingsHero(activity) }
             else -> HeroSkeleton()
         }
-        TrendCard(state, month, startDay, currency, onSelect)
+        TrendCard(state, month, startDay, currency, onSelect, onOlder)
         Box(Modifier.stale(spending != null && state.spending[month] == null)) { SpendingCard(spending, pending, month, startDay) }
         Box(Modifier.stale(flow != null && state.flows[month] == null)) { CategoriesCard(flow, pending, month, icons, onCategory) }
+        Box(Modifier.stale(flow != null && state.flows[month] == null)) { TransfersCard(flow, activity) }
     }
 }
 
@@ -379,56 +388,115 @@ private fun change(previous: BigDecimal, percentText: String?, higherIsBetter: B
 
 @Composable private fun CardMessage(text: String) = Text(text, color = Relay.muted, style = MaterialTheme.typography.bodyMedium)
 
-/** Income and spending of the last six months; tapping a month opens it. */
-@Composable private fun TrendCard(state: ReportState, month: LocalDate, startDay: Int, currency: String, onSelect: (LocalDate) -> Unit) {
-    val months = state.copy(month = month).trendMonths
-    val rows = months.map { it to state.activity[it] }
-    val max = rows.mapNotNull { it.second }.flatMap { listOf(it.current.income.decimal, it.current.expenses.decimal) }
+private val trendTop = 8.dp
+private val trendBars = 120.dp
+
+/**
+ * Income and spending per month, the latest on the right. The months sit close together and the row scrolls
+ * like any list: dragging to the left edge loads earlier months. Tapping a month opens it.
+ */
+@Composable private fun TrendCard(
+    state: ReportState,
+    month: LocalDate,
+    startDay: Int,
+    currency: String,
+    onSelect: (LocalDate) -> Unit,
+    onOlder: () -> Unit,
+) {
+    val months = state.trendMonths
+    val max = months.mapNotNull { state.activity[it] }.flatMap { listOf(it.current.income.decimal, it.current.expenses.decimal) }
         .maxOrNull()?.takeIf { it.signum() > 0 }
-    ReportCard("Tendencia", "Últimos 6 meses") {
-        Row(Modifier.fillMaxWidth().height(150.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            rows.forEach { (start, report) ->
-                val selected = start == month
-                Column(
-                    Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(12.dp))
-                        .then(if (selected) Modifier.background(Relay.surface2) else Modifier)
-                        .clickable(enabled = !selected && report != null) { onSelect(start) }
-                        .padding(vertical = 6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.Bottom) {
-                        val alpha = if (selected) 1f else 0.55f
-                        TrendBar(report?.current?.income?.decimal, max, Relay.income.copy(alpha = alpha))
-                        TrendBar(report?.current?.expenses?.decimal, max, Relay.magenta.copy(alpha = alpha))
-                    }
-                    Spacer(Modifier.height(6.dp))
-                    Text(reportingMonthName(start, startDay).format(monthShort).trimEnd('.'),
-                        style = MaterialTheme.typography.labelSmall, color = if (selected) Relay.text else Relay.muted, maxLines = 1)
+    val older by rememberUpdatedState(onOlder)
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = months.indexOf(month).coerceAtLeast(0))
+    // Keep the selected month in view when it changes from the arrows or a swipe.
+    LaunchedEffect(month) {
+        val index = state.trendMonths.indexOf(month)
+        if (index < 0) return@LaunchedEffect
+        val layout = list.layoutInfo
+        val item = layout.visibleItemsInfo.firstOrNull { it.index == index }
+        if (item == null || item.offset < 0 || item.offset + item.size > layout.viewportEndOffset) {
+            list.animateScrollToItem((index - 2).coerceAtLeast(0))
+        }
+    }
+    LaunchedEffect(list) {
+        snapshotFlow { list.layoutInfo.visibleItemsInfo.firstOrNull()?.index == 0 }
+            .distinctUntilChanged()
+            .collect { atStart -> if (atStart) older() }
+    }
+    val selected = state.activity[month]
+    ReportCard("Tendencia", "Ingresos y gastos por mes · desliza para ver meses anteriores") {
+        val grid = Relay.border.copy(alpha = 0.6f)
+        LazyRow(
+            state = list,
+            modifier = Modifier.fillMaxWidth().drawBehind {
+                // A light grid behind the bars: the scale stays readable while the months scroll.
+                listOf(0f, 0.5f, 1f).forEach { fraction ->
+                    val y = (trendTop + trendBars * fraction).toPx()
+                    drawLine(grid, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx(),
+                        pathEffect = if (fraction < 1f) PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx())) else null)
                 }
+            },
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            items(months, key = { it.toString() }) { start ->
+                TrendMonth(start, state.activity[start], max, start == month, startDay,
+                    showYear = start == months.first() || reportingMonthName(start, startDay).monthValue == 1) { onSelect(start) }
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Legend("Ingresos", Relay.income)
-            Legend("Gastos", Relay.magenta)
+            Legend(selected?.let { "Ingresos ${formatMoney(it.current.income.decimal, currency)}" } ?: "Ingresos", Relay.income)
+            Legend(selected?.let { "Gastos ${formatMoney(it.current.expenses.decimal, currency)}" } ?: "Gastos", Relay.magenta)
         }
-        val loaded = rows.mapNotNull { it.second }
-        if (loaded.size > 1) {
-            val count = BigDecimal(loaded.size)
-            val spending = loaded.sumOf { it.current.expenses.decimal }.divide(count, 2, RoundingMode.HALF_UP)
-            val savings = loaded.sumOf { it.netSavings.decimal }.divide(count, 2, RoundingMode.HALF_UP)
+        // Averages of the selected month and the five before it.
+        val window = (5 downTo 0).mapNotNull { state.activity[month.minusMonths(it.toLong())] }
+        if (window.size > 1) {
+            val count = BigDecimal(window.size)
+            val spending = window.sumOf { it.current.expenses.decimal }.divide(count, 2, RoundingMode.HALF_UP)
+            val savings = window.sumOf { it.netSavings.decimal }.divide(count, 2, RoundingMode.HALF_UP)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Average("Gasto medio", formatMoney(spending, currency), Relay.text, Modifier.weight(1f))
-                Average("Ahorro medio", formatMoney(savings, currency, signed = true),
+                Average("Gasto medio · 6 meses", formatMoney(spending, currency), Relay.text, Modifier.weight(1f))
+                Average("Ahorro medio · 6 meses", formatMoney(savings, currency, signed = true),
                     if (savings.signum() < 0) Relay.danger else Relay.income, Modifier.weight(1f))
             }
         }
     }
 }
 
+/** One month of the trend: its two bars side by side, the month underneath and the year when it changes. */
+@Composable private fun TrendMonth(
+    start: LocalDate,
+    report: ActivityReport?,
+    max: BigDecimal?,
+    selected: Boolean,
+    startDay: Int,
+    showYear: Boolean,
+    onClick: () -> Unit,
+) {
+    val name = reportingMonthName(start, startDay)
+    Column(
+        Modifier.width(46.dp).clip(RoundedCornerShape(12.dp))
+            .then(if (selected) Modifier.background(Relay.surface2.copy(alpha = 0.8f)) else Modifier)
+            .clickable(enabled = !selected && report != null, onClick = onClick)
+            .padding(top = trendTop, bottom = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(Modifier.height(trendBars), horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.Bottom) {
+            val alpha = if (selected) 1f else 0.5f
+            TrendBar(report?.current?.income?.decimal, max, Relay.income.copy(alpha = alpha))
+            TrendBar(report?.current?.expenses?.decimal, max, Relay.magenta.copy(alpha = alpha))
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(name.format(monthShort).trimEnd('.'), style = MaterialTheme.typography.labelSmall,
+            color = if (selected) Relay.text else Relay.muted, fontWeight = if (selected) FontWeight.SemiBold else null, maxLines = 1)
+        Text(if (showYear) name.year.toString() else " ", style = MaterialTheme.typography.labelSmall.merge(tabular),
+            color = Relay.subtle, maxLines = 1)
+    }
+}
+
 @Composable private fun TrendBar(value: BigDecimal?, max: BigDecimal?, color: Color) {
     val target = if (value == null || max == null) 0f else (value.toDouble() / max.toDouble()).toFloat().coerceIn(0f, 1f)
     val fraction by animateFloatAsState(target, tween(600, easing = Relay.easeOut), label = "bar")
-    Box(Modifier.width(9.dp).fillMaxHeight(fraction.coerceAtLeast(0.015f))
+    Box(Modifier.width(14.dp).fillMaxHeight(fraction.coerceAtLeast(0.015f))
         .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)).background(if (value == null) Relay.surface3 else color))
 }
 
@@ -562,6 +630,47 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
                 }
             }
         }
+    }
+}
+
+/**
+ * Money that is neither income nor spending, kept apart as on the web report: transfers to or from accounts outside
+ * the finances (mortgage or robo-advisor contributions, for example) and the market movement of managed portfolios.
+ */
+@Composable private fun TransfersCard(flow: CashFlow?, activity: ActivityReport?) {
+    val transfers = remember(flow) { flow?.sankey?.boundaryTransfers().orEmpty() }
+    val valuation = activity?.current?.investmentReturn?.decimal?.takeIf { it.signum() != 0 }
+    if (flow == null || (transfers.isEmpty() && valuation == null)) return
+    ReportCard("Transferencias y valoraciones", "No cuentan como ingresos ni como gastos") {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            transfers.forEach { transfer ->
+                val outflow = transfer.node.kind == "expense"
+                val amount = transfer.node.value.toBigDecimal()
+                MoneyFlowRow(Icons.Outlined.SwapHoriz, Relay.cyan, transfer.node.name,
+                    if (outflow) "Salida hacia cuentas fuera de tus finanzas" else "Entrada desde cuentas fuera de tus finanzas",
+                    formatMoney(if (outflow) amount.negate() else amount, flow.currency, signed = true), Relay.text)
+            }
+            valuation?.let {
+                val up = it.signum() > 0
+                MoneyFlowRow(if (up) Icons.Outlined.TrendingUp else Icons.Outlined.TrendingDown, if (up) Relay.income else Relay.danger,
+                    "Valoraciones", "Rendimiento de carteras gestionadas", formatMoney(it, activity.currency, signed = true),
+                    if (up) Relay.income else Relay.danger)
+            }
+        }
+    }
+}
+
+@Composable private fun MoneyFlowRow(icon: ImageVector, tone: Color, title: String, detail: String, amount: String, amountTone: Color) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        IconBadge(icon, tone, size = 40.dp)
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = Relay.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(detail, style = MaterialTheme.typography.bodySmall, color = Relay.muted, maxLines = 2)
+        }
+        Spacer(Modifier.width(12.dp))
+        Text(amount, style = MaterialTheme.typography.bodyLarge.merge(tabular).copy(fontWeight = FontWeight.Medium), color = amountTone,
+            maxLines = 1)
     }
 }
 
@@ -736,22 +845,33 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
         }
     }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Relay.surface, contentColor = Relay.text) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp).padding(bottom = 16.dp)) {
-            Row(Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconBadge(categoryIcon(selection.icon), selection.color, size = 44.dp)
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(selection.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(monthName(selection.start, startDay), style = MaterialTheme.typography.labelMedium, color = Relay.muted)
-                }
-                Text(formatMoney(selection.total, currency), style = MaterialTheme.typography.titleMedium.merge(tabular))
+        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 16.dp)) {
+            // A heading for the sheet, centred and set apart, so it never reads as the first movement.
+            Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                IconBadge(categoryIcon(selection.icon), selection.color, size = 48.dp)
+                Spacer(Modifier.height(10.dp))
+                Text(selection.name, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center, maxLines = 2,
+                    overflow = TextOverflow.Ellipsis)
+                Text(monthName(selection.start, startDay), style = MaterialTheme.typography.labelMedium, color = Relay.muted)
+                Spacer(Modifier.height(6.dp))
+                Text(formatMoney(selection.total, currency), style = MaterialTheme.typography.headlineSmall.merge(tabular), color = Relay.text)
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider(color = Relay.border, modifier = Modifier.padding(horizontal = 16.dp))
             val movements = result?.getOrNull().orEmpty()
-            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 520.dp)) {
-                items(movements, key = { it.id }) { movement ->
+            // Only what adds up to the category's total is listed as such; the rest comes after, set apart.
+            val (counted, apart) = movements.partition { it.countsInCategoryTotals }
+            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 520.dp).padding(horizontal = 16.dp)) {
+                if (counted.isNotEmpty()) item(key = "counted") { SheetSection("Movimientos", counted.size) }
+                items(counted, key = { it.id }) { movement ->
                     TransactionRow(movement, { onTransaction(movement) }, showDate = true,
                         showCategory = selection.categoryId == null || movement.category?.id != selection.categoryId)
+                }
+                if (apart.isNotEmpty()) item(key = "apart") {
+                    SheetSection("No cuentan en el total", apart.size, "Transferencias, aportaciones y movimientos excluidos de informes.")
+                }
+                items(apart, key = { it.id }) { movement ->
+                    TransactionRow(movement, { onTransaction(movement) }, showDate = true)
                 }
                 item(key = "status") {
                     when {
@@ -760,11 +880,18 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
                         }
                         result?.isFailure == true -> ErrorBanner(vm.describe(result!!.exceptionOrNull()!!), Modifier.padding(vertical = 8.dp)) { attempt++ }
                         movements.isEmpty() -> CardMessage("No hay movimientos en esta categoría este mes.")
-                        else -> Text("${movements.size} movimientos", style = MaterialTheme.typography.labelMedium, color = Relay.subtle,
-                            textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(16.dp))
+                        else -> Spacer(Modifier.height(8.dp))
                     }
                 }
             }
         }
+    }
+}
+
+/** A labelled group inside the category sheet, e.g. "MOVIMIENTOS · 12". */
+@Composable private fun SheetSection(title: String, count: Int, note: String? = null) {
+    Column(Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top = 16.dp, bottom = 4.dp)) {
+        Text("${title.uppercase(spanish)} · $count", style = eyebrow, color = Relay.muted)
+        note?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Relay.subtle) }
     }
 }

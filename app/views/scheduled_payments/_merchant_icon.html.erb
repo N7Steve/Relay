@@ -7,5 +7,5 @@
         class: class_names("rounded-full shrink-0 object-cover", size.to_s == "sm" ? "w-6 h-6" : "w-9 h-9"),
         loading: "lazy", alt: "" %>
 <% else %>
-  <%= render DS::FilledIcon.new(variant: :text, text: payment.merchant&.name || payment.title, size: size, rounded: true) %>
+  <%= render "categories/avatar", category: payment.category, size: size %>
 <% end %>

@@ -1,0 +1,11 @@
+<%# locals: (category:, size: "lg", rounded: true) %>
+<%# Stands in for a missing merchant logo: the category's own icon and colour,
+    or the uncategorized mark when the movement has no category. %>
+<% category ||= Category.uncategorized %>
+<%= render DS::FilledIcon.new(
+      icon: category.lucide_icon.presence || "shapes",
+      hex_color: category.color.presence || Category::UNCATEGORIZED_COLOR,
+      size: size,
+      rounded: rounded,
+      description: category.display_name
+    ) %>

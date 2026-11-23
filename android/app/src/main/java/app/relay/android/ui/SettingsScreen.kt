@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -55,7 +56,7 @@ import app.relay.android.data.DiskState
 
         Panel(Modifier.fillMaxWidth().enter(1), padding = 20.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                InitialBadge(user?.displayName ?: "?", Relay.violet, size = 52.dp)
+                InitialBadge(user?.displayName ?: "?", Relay.violet, size = 52.dp, shape = CircleShape)
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Text(user?.displayName.orEmpty(), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)

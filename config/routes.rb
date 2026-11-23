@@ -452,6 +452,7 @@ Rails.application.routes.draw do
       # Stored logos that Active Storage reserves for web sessions
       get "accounts/:id/logo", to: "logos#account", as: :account_logo
       get "merchants/:id/logo", to: "logos#merchant", as: :merchant_logo
+      get "users/:id/avatar", to: "logos#user", as: :user_avatar
       resources :accounts, only: [ :index, :show ]
       resources :balances, only: [ :index, :show ]
       resources :budgets, only: [ :index, :show ]

@@ -17,12 +17,7 @@
                 loading: "lazy" %>
           <% else %>
             <div class="hidden lg:flex shrink-0">
-              <%= render DS::FilledIcon.new(
-                variant: :text,
-                text: entry.name,
-                size: "lg",
-                rounded: true
-              ) %>
+              <%= render "categories/avatar", category: transaction.category %>
             </div>
           <% end %>
         </div>

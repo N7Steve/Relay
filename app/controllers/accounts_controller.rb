@@ -93,8 +93,8 @@ class AccountsController < ApplicationController
     ActiveRecord::Associations::Preloader.new(
       records: txn_entryables,
       associations: {
-        transfer_as_outflow: { inflow_transaction: { entry: :account } },
-        transfer_as_inflow: { outflow_transaction: { entry: :account } }
+        transfer_as_outflow: { inflow_transaction: { entry: { account: { owner: { profile_image_attachment: :blob } } } } },
+        transfer_as_inflow: { outflow_transaction: { entry: { account: { owner: { profile_image_attachment: :blob } } } } }
       }
     ).call
 

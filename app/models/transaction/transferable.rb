@@ -22,6 +22,16 @@ module Transaction::Transferable
     paired_transfer
   end
 
+  # The member who owns the account on the other side of a paired transfer.
+  # Lets clients tell a partner's transfers into a shared account from one's own.
+  def transfer_counterparty_owner
+    xfer = paired_transfer
+    return unless xfer
+
+    sibling = xfer.inflow_transaction_id == id ? xfer.outflow_transaction : xfer.inflow_transaction
+    sibling&.entry&.account&.owner
+  end
+
   def transfer_match_candidates(
     date_window: 30,
     exchange_rate_tolerance: Family::AutoTransferMatchable.manual_match_exchange_rate_tolerance

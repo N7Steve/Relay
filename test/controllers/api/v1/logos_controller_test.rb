@@ -75,6 +75,28 @@ class Api::V1::LogosControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "serves family members' profile pictures only within the family" do
+    attach_logo(@user.profile_image)
+
+    get api_v1_user_avatar_url(@user), headers: api_headers(@api_key)
+    assert_response :success
+    assert_equal "image/webp", response.media_type
+
+    get api_v1_user_avatar_url(@user), headers: api_headers(@outsider_key)
+    assert_response :not_found
+
+    get api_v1_user_avatar_url(id: "not-a-uuid"), headers: api_headers(@api_key)
+    assert_response :not_found
+  end
+
+  test "returns not found for members without a profile picture" do
+    @user.profile_image.purge if @user.profile_image.attached?
+
+    get api_v1_user_avatar_url(@user), headers: api_headers(@api_key)
+
+    assert_response :not_found
+  end
+
   private
     def attach_logo(attachment)
       file_fixture("profile_image.png").open("rb") do |image|

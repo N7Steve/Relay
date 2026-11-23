@@ -1471,12 +1471,37 @@ components:
         transfer:
           "$ref": "#/components/schemas/Transfer"
           nullable: true
+        counterparty_owner:
+          "$ref": "#/components/schemas/TransferCounterpartyOwner"
+          nullable: true
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
+    TransferCounterpartyOwner:
+      type: object
+      description: Another family member who owns the other side of a paired transfer,
+        e.g. a partner paying into a shared account. Present even when that account
+        is not accessible; null for the user's own transfers and ordinary movements.
+      required:
+      - id
+      - name
+      - initials
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        initials:
+          type: string
+        avatar_key:
+          type: string
+          nullable: true
+          description: Changes when the profile picture does; download it from /api/v1/users/{id}/avatar.
+            Null without one.
     TransactionCollection:
       type: object
       required:
@@ -25422,6 +25447,42 @@ paths:
       responses:
         '404':
           description: merchant without a custom logo for this family
+          content:
+            image/webp:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '401':
+          description: unauthorized
+          content:
+            image/webp:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/v1/users/{id}/avatar":
+    parameters:
+    - name: id
+      in: path
+      format: uuid
+      required: true
+      description: Family member ID
+      schema:
+        type: string
+    get:
+      summary: Download a family member's profile picture
+      tags:
+      - Logos
+      description: Streams a member's profile picture as a small WebP image, e.g.
+        to show who made a transfer into a shared account.
+      security:
+      - apiKeyAuth: []
+      responses:
+        '404':
+          description: member outside the family or without a profile picture
           content:
             image/webp:
               schema:

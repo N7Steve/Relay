@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -172,15 +173,24 @@ fun Modifier.relayBackdrop(strength: Float = 1f): Modifier = drawBehind {
     }
 }
 
+/** The one avatar shape of the app: logos, initials and category icons all share it. */
+fun badgeShape(size: Dp): Shape = RoundedCornerShape(size * 0.32f)
+
 /** Rounded tinted square holding an icon, as in the web account and category avatars. */
 @Composable fun IconBadge(icon: ImageVector, tint: Color, modifier: Modifier = Modifier, size: Dp = 40.dp) {
-    Box(modifier.size(size).clip(RoundedCornerShape(size * 0.32f)).background(tint.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) {
+    Box(modifier.size(size).clip(badgeShape(size)).background(tint.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) {
         Icon(icon, null, tint = tint, modifier = Modifier.size(size * 0.5f))
     }
 }
 
-@Composable fun InitialBadge(text: String, tint: Color, modifier: Modifier = Modifier, size: Dp = 40.dp) {
-    Box(modifier.size(size).clip(CircleShape).background(tint.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
+@Composable fun InitialBadge(
+    text: String,
+    tint: Color,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
+    shape: Shape = badgeShape(size),
+) {
+    Box(modifier.size(size).clip(shape).background(tint.copy(alpha = 0.18f)), contentAlignment = Alignment.Center) {
         Text(text.trim().take(1).uppercase().ifEmpty { "·" }, color = tint, fontWeight = FontWeight.SemiBold, fontSize = (size.value * 0.4f).sp)
     }
 }

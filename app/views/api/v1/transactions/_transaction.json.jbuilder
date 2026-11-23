@@ -117,6 +117,22 @@ else
   json.transfer nil
 end
 
+# Another member's side of a transfer (e.g. a partner paying into a shared
+# account). Only the member is exposed, never their account.
+counterparty_owner = transaction.transfer_counterparty_owner
+if counterparty_owner && counterparty_owner != api_access.user
+  avatar = counterparty_owner.profile_image
+  json.counterparty_owner do
+    json.id counterparty_owner.id
+    json.name counterparty_owner.display_name
+    json.initials counterparty_owner.initials
+    # Changes when the picture does, so clients can cache it; nil without one.
+    json.avatar_key(avatar.attached? ? avatar.blob.checksum : nil)
+  end
+else
+  json.counterparty_owner nil
+end
+
 # Additional metadata
 json.created_at transaction.created_at.iso8601
 json.updated_at transaction.updated_at.iso8601

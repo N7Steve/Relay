@@ -31,8 +31,8 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     transactions_query = transactions_query.includes(
       { entry: :account },
       :category, :merchant, :tags,
-      transfer_as_outflow: { inflow_transaction: { entry: :account } },
-      transfer_as_inflow: { outflow_transaction: { entry: :account } }
+      transfer_as_outflow: { inflow_transaction: { entry: { account: { owner: { profile_image_attachment: :blob } } } } },
+      transfer_as_inflow: { outflow_transaction: { entry: { account: { owner: { profile_image_attachment: :blob } } } } }
     ).reverse_chronological
 
     # Handle pagination with Pagy

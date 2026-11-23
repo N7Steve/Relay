@@ -42,15 +42,16 @@ class TransactionsController < ApplicationController
                          # - inflow rows need outflow_transaction (from_account) for
                          #   counterpart display, and inflow_transaction (to_account)
                          #   for the category menu on the same row
+                         # - the counterpart's owner tells another member's transfers apart
                          {
                            transfer_as_outflow: {
-                             inflow_transaction: { entry: :account }
+                             inflow_transaction: { entry: { account: { owner: { profile_image_attachment: :blob } } } }
                            }
                          },
                          {
                            transfer_as_inflow: {
                              inflow_transaction: { entry: :account },
-                             outflow_transaction: { entry: :account }
+                             outflow_transaction: { entry: { account: { owner: { profile_image_attachment: :blob } } } }
                            }
                          }
                        )

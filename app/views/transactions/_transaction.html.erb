@@ -9,6 +9,8 @@
 <% visible_transfer = transfer && can_view_transfer?(transfer) %>
 <% transaction_security_logo_url = transaction.activity_security&.display_logo_url %>
 <% transaction_merchant_logo_url = transaction.merchant&.display_logo_url(family: Current.family) %>
+<% counterparty_owner = transaction.transfer_counterparty_owner if transaction.transfer? %>
+<% counterparty_owner = nil if counterparty_owner == Current.user %>
 <% open_path = if visible_transfer
      transfer_path(transfer)
    else
@@ -52,7 +54,15 @@
         <div class="flex-1 max-w-full min-w-0 <%= "opacity-50 text-secondary" if entry.excluded %>">
           <%= content_tag :div, class: ["flex items-center gap-3 lg:gap-4"] do %>
             <div class="hidden lg:flex shrink-0">
-              <% if transaction.transfer? %>
+              <% if counterparty_owner %>
+                <%# Another member's transfer (e.g. into a shared account) shows who made it. %>
+                <div class="w-9 h-9" title="<%= counterparty_owner.display_name %>" data-testid="transaction-member-avatar">
+                  <%= render "settings/user_avatar",
+                        avatar_url: counterparty_owner.profile_image.attached? ? counterparty_owner.profile_image.variant(:small).url : nil,
+                        initials: counterparty_owner.initial,
+                        lazy: true %>
+                </div>
+              <% elsif transaction.transfer? %>
                 <%= render DS::FilledIcon.new(
                   icon: "arrow-right-left",
                   hex_color: Category::TRANSFER_COLOR,
@@ -68,13 +78,8 @@
                     class: "w-9 h-9 rounded-full border border-secondary",
                     loading: "lazy" %>
               <% else %>
-                <div class="hidden lg:flex">
-                  <%= render DS::FilledIcon.new(
-                    variant: :text,
-                    text: entry.name,
-                    size: "lg",
-                    rounded: true
-                  ) %>
+                <div class="hidden lg:flex" data-testid="transaction-category-avatar">
+                  <%= render "categories/avatar", category: transaction.category %>
                 </div>
               <% end %>
             </div>

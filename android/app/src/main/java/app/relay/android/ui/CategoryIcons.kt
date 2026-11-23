@@ -65,6 +65,9 @@ private val lucide: Map<String, ImageVector> by lazy {
     }
 }
 
+/** Relay's mark for movements without a category. */
+const val UNCATEGORIZED_ICON = "circle-dashed"
+
 fun categoryIcon(name: String?): ImageVector = name?.let(lucide::get) ?: Icons.Outlined.Category
 
 /** Relay's own colours (#rrggbb), or a neutral tone. */

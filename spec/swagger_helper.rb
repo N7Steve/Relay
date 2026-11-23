@@ -765,8 +765,22 @@ RSpec.configure do |config|
                 items: { '$ref' => '#/components/schemas/Tag' }
               },
               transfer: { '$ref' => '#/components/schemas/Transfer', nullable: true },
+              counterparty_owner: { '$ref' => '#/components/schemas/TransferCounterpartyOwner', nullable: true },
               created_at: { type: :string, format: :'date-time' },
               updated_at: { type: :string, format: :'date-time' }
+            }
+          },
+          TransferCounterpartyOwner: {
+            type: :object,
+            description: "Another family member who owns the other side of a paired transfer, e.g. a partner paying into a shared account. " \
+                         "Present even when that account is not accessible; null for the user's own transfers and ordinary movements.",
+            required: %w[id name initials],
+            properties: {
+              id: { type: :string, format: :uuid },
+              name: { type: :string },
+              initials: { type: :string },
+              avatar_key: { type: :string, nullable: true,
+                            description: 'Changes when the profile picture does; download it from /api/v1/users/{id}/avatar. Null without one.' }
             }
           },
           TransactionCollection: {

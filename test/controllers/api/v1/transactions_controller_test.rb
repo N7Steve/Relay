@@ -968,6 +968,39 @@ end
     assert transaction_data["transfer"].key?("other_account")
   end
 
+  test "a transfer from another member's account names that member" do
+    member = users(:family_member)
+    partner_account = @family.accounts.create!(name: "Partner Account", balance: 1000, currency: "USD",
+      accountable: Depository.new, owner: member)
+    shared_account = @family.accounts.create!(name: "Shared Account", balance: 0, currency: "USD",
+      accountable: Depository.new, owner: @user)
+    transfer = Transfer::Creator.new(family: @family, source_account_id: partner_account.id,
+      destination_account_id: shared_account.id, date: Date.current, amount: 50).create
+
+    get api_v1_transaction_url(transfer.inflow_transaction), headers: api_headers(@api_key)
+    assert_response :success
+
+    owner = JSON.parse(response.body)["counterparty_owner"]
+    assert_equal member.id, owner["id"]
+    assert_equal member.display_name, owner["name"]
+    assert_equal member.initials, owner["initials"]
+    assert_nil owner["avatar_key"]
+
+    member.profile_image.attach(io: file_fixture("profile_image.png").open, filename: "avatar.png", content_type: "image/png")
+    get api_v1_transaction_url(transfer.inflow_transaction), headers: api_headers(@api_key)
+    assert_equal member.profile_image.blob.checksum, JSON.parse(response.body).dig("counterparty_owner", "avatar_key")
+  end
+
+  test "the user's own transfers and ordinary movements have no counterparty owner" do
+    transfer = create_transfer_between_accounts
+
+    get api_v1_transaction_url(transfer.inflow_transaction), headers: api_headers(@api_key)
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert body.key?("counterparty_owner")
+    assert_nil body["counterparty_owner"]
+  end
+
   test "index renders transfer rows without per-transfer transaction lookups" do
     transfer = create_transfer_between_accounts
 

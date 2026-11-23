@@ -67,6 +67,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import app.relay.android.data.AccountRef
+import app.relay.android.data.MemberRef
 import app.relay.android.data.MovementType
 import app.relay.android.data.NamedRef
 import app.relay.android.data.TagRef
@@ -172,19 +173,19 @@ private fun amountTone(transaction: Transaction): Color = when {
     Icon(Icons.Outlined.Group, "Gasto compartido", tint = Relay.secondary, modifier = modifier.size(size))
 }
 
+/**
+ * The merchant's logo when there is one; otherwise the category's icon in its colour, as on the web.
+ * Portfolio operations and transfers show what they are, never a merchant.
+ */
 @Composable internal fun TransactionBadge(transaction: Transaction, size: Dp) {
     val tone = transactionTone(transaction)
-    val merchant = transaction.merchant
-    // Portfolio operations and transfers show what they are, never a merchant.
+    // Another member's transfer (e.g. into a shared account) shows who made it, apart from the user's own.
+    transaction.counterpartyOwner?.takeIf { !transaction.type.ordinary }?.let { return MemberBadge(it, size) }
     transactionIcon(transaction)?.takeIf { !transaction.type.ordinary }?.let { return IconBadge(it, tone, size = size) }
+    val merchant = transaction.merchant
     LogoBadge(merchant?.let { logoSource(it.logoUrl, "/merchants/${it.id}/logo") }, size) {
-        val icon = transactionIcon(transaction)
-        when {
-            merchant != null -> InitialBadge(merchant.name, tone, size = size)
-            icon != null -> IconBadge(icon, tone, size = size)
-            transaction.category != null -> IconBadge(categoryIcon(transaction.category.icon), tone, size = size)
-            else -> InitialBadge(transaction.name, tone, size = size)
-        }
+        val category = transaction.category
+        IconBadge(categoryIcon(category?.icon ?: UNCATEGORIZED_ICON), if (category == null) Relay.muted else tone, size = size)
     }
 }
 
@@ -350,10 +351,14 @@ private fun typeTone(transaction: Transaction): Color = when (transaction.type) 
     val outflow = transaction.signedAmountCents < 0
     val from = if (outflow) transaction.account else other
     val to = if (outflow) other else transaction.account
+    // Another member's account the user cannot open still says whose it is.
+    val member = transaction.counterpartyOwner?.takeIf { other == null }
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
-        AccountTile("Desde", from, Modifier.weight(1f).fillMaxHeight())
+        if (outflow) AccountTile("Desde", from, Modifier.weight(1f).fillMaxHeight())
+        else MemberAccountTile("Desde", from, member, Modifier.weight(1f).fillMaxHeight())
         Icon(Icons.AutoMirrored.Outlined.ArrowForward, null, tint = Relay.cyan, modifier = Modifier.padding(horizontal = 6.dp).size(18.dp))
-        AccountTile("Hacia", to, Modifier.weight(1f).fillMaxHeight())
+        if (outflow) MemberAccountTile("Hacia", to, member, Modifier.weight(1f).fillMaxHeight())
+        else AccountTile("Hacia", to, Modifier.weight(1f).fillMaxHeight())
     }
     val category = transaction.category
     if (transaction.nativeOperation == null && (category != null || "category_id" in transaction.editableFields)) {
@@ -457,6 +462,11 @@ private fun stamp(value: String?): String? = value?.let {
     }
 }
 
+@Composable private fun MemberAccountTile(label: String, account: AccountRef?, member: MemberRef?, modifier: Modifier) {
+    if (member == null) return AccountTile(label, account, modifier)
+    InfoTile(label, "Cuenta de ${member.name}", modifier) { MemberBadge(member, 24.dp) }
+}
+
 @Composable private fun Note(text: String) {
     Row(Modifier.fillMaxWidth().clip(tileShape).background(Relay.cyan.copy(alpha = 0.08f)).padding(12.dp), verticalAlignment = Alignment.Top) {
         Icon(Icons.Outlined.Info, null, tint = Relay.cyan, modifier = Modifier.size(16.dp))
@@ -504,6 +514,15 @@ private fun Modifier.tile() = clip(tileShape).background(Relay.surface2.copy(alp
 @Composable internal fun MerchantBadge(merchant: NamedRef, size: Dp) {
     LogoBadge(logoSource(merchant.logoUrl, "/merchants/${merchant.id}/logo"), size) {
         InitialBadge(merchant.name, chartPalette[Math.floorMod(merchant.name.lowercase().hashCode(), chartPalette.size)], size = size)
+    }
+}
+
+/** A member's profile picture, or their initials in a stable tone while there is none. */
+@Composable internal fun MemberBadge(member: MemberRef, size: Dp) {
+    val source = member.avatarKey?.let { LogoSource("member:${member.id}:$it", "/users/${member.id}/avatar") }
+    LogoBadge(source, size) {
+        InitialBadge(member.initials?.takeIf { it.isNotBlank() }?.take(1) ?: member.name, chartPalette[Math.floorMod(member.id.hashCode(), chartPalette.size)],
+            size = size)
     }
 }
 

@@ -136,12 +136,20 @@ fun reportingMonthName(start: LocalDate, startDay: Int): LocalDate =
         val center = nodes.indexOfFirst { it.kind == "cash_flow" }
         if (center < 0) return emptyList()
         return links.filter { it.source == center }
-            .mapNotNull { nodes.getOrNull(it.target)?.takeIf { node -> node.kind == "expense" } }
+            .mapNotNull { nodes.getOrNull(it.target)?.takeIf { node -> node.kind == "expense" && !node.boundaryTransfer } }
             .sortedByDescending { it.value.toBigDecimal() }
     }
 
-    /** [kind] is "expense" or "income"; expense flows leave the centre node, income flows enter it. */
-    fun categories(kind: String): List<FlowCategory> {
+    /**
+     * [kind] is "expense" or "income"; expense flows leave the centre node, income flows enter it.
+     * Money crossing the boundary of the family's finances is left out, as in the web report's tables.
+     */
+    fun categories(kind: String): List<FlowCategory> = sides(kind).filterNot { it.node.boundaryTransfer }
+
+    /** Transfers to or from accounts outside the family's finances: outflows first, as the web's transfer table. */
+    fun boundaryTransfers(): List<FlowCategory> = (sides("expense") + sides("income")).filter { it.node.boundaryTransfer }
+
+    private fun sides(kind: String): List<FlowCategory> {
         val center = nodes.indexOfFirst { it.kind == "cash_flow" }
         if (center < 0) return emptyList()
         val outward = kind == "expense"
@@ -193,7 +201,16 @@ fun reportingMonthName(start: LocalDate, startDay: Int): LocalDate =
     val value: String,
     val color: String? = null,
     @SerialName("category_id") val categoryId: String? = null,
-)
+    /** Relay's node key, e.g. "expense_<category id>" or "expense_transfer_to_excluded". */
+    val id: String? = null,
+) {
+    /** Relay's synthetic category for transfers to or from accounts outside the family's finances. */
+    val boundaryTransfer: Boolean get() = id != null && BOUNDARY_KEYS.any(id::endsWith)
+
+    private companion object {
+        val BOUNDARY_KEYS = listOf("_transfer_to_excluded", "_transfer_from_excluded")
+    }
+}
 
 /** A top-level category of one side of the cash flow, with its subcategories. */
 data class FlowCategory(val node: CashFlowNode, val children: List<CashFlowNode>)
@@ -276,6 +293,15 @@ data class FlowCategory(val node: CashFlowNode, val children: List<CashFlowNode>
 @Serializable data class TransferRef(val id: String, @SerialName("other_account") val otherAccount: AccountRef? = null)
 @Serializable data class TagRef(val id: String, val name: String, val color: String? = null)
 
+/** Another family member, e.g. who owns the other side of a transfer into a shared account. */
+@Serializable data class MemberRef(
+    val id: String,
+    val name: String,
+    val initials: String? = null,
+    /** Changes with the profile picture; null when the member has none. */
+    @SerialName("avatar_key") val avatarKey: String? = null,
+)
+
 @Serializable data class Transaction(
     val id: String,
     val date: String,
@@ -297,6 +323,8 @@ data class FlowCategory(val node: CashFlowNode, val children: List<CashFlowNode>
     val excluded: Boolean = false,
     val source: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
+    /** Set when the other side of the transfer belongs to another member. */
+    @SerialName("counterparty_owner") val counterpartyOwner: MemberRef? = null,
 ) {
     val isIncome get() = signedAmountCents > 0
 
@@ -310,8 +338,16 @@ data class FlowCategory(val node: CashFlowNode, val children: List<CashFlowNode>
         else -> MovementType.Expense
     }
 
+    /**
+     * Whether Relay adds this movement to its category's income or spending, as the report totals do: loan payments
+     * count, while transfers, contributions, valuations, managed portfolio operations and excluded movements do not.
+     */
+    val countsInCategoryTotals: Boolean get() = !excluded && nativeOperation == null && kind !in UNCOUNTED_KINDS
+
     companion object {
         val TRANSFER_KINDS = setOf("funds_movement", "cc_payment", "loan_payment", "investment_contribution", "transfer_to_excluded", "transfer_from_excluded")
+        private val UNCOUNTED_KINDS = setOf("funds_movement", "one_time", "cc_payment", "investment_contribution", "investment_value_adjustment",
+            "transfer_to_excluded", "transfer_from_excluded")
     }
 }
 

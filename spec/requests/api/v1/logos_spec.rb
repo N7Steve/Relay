@@ -84,4 +84,29 @@ RSpec.describe 'API V1 Logos', type: :request do
       end
     end
   end
+
+  path '/api/v1/users/{id}/avatar' do
+    parameter name: :id, in: :path, type: :string, format: :uuid, required: true, description: 'Family member ID'
+
+    get "Download a family member's profile picture" do
+      tags 'Logos'
+      description "Streams a member's profile picture as a small WebP image, e.g. to show who made a transfer into a shared account."
+      security [ { apiKeyAuth: [] } ]
+      produces 'image/webp', 'application/json'
+
+      response '404', 'member outside the family or without a profile picture' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        run_test!
+      end
+
+      response '401', 'unauthorized' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        let(:'X-Api-Key') { 'invalid-key' }
+
+        run_test!
+      end
+    end
+  end
 end
