@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import app.relay.android.RelayApplication
 import app.relay.android.data.ApiException
 import app.relay.android.data.DiskState
+import app.relay.android.data.NetWorthRange
 import app.relay.android.data.SessionExpiredException
 import app.relay.android.data.Transaction
 import kotlinx.serialization.json.JsonObject
@@ -132,10 +133,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val busySigningOut = signingOut.asStateFlow()
     private val editState = MutableStateFlow(TransactionEditState())
     val editor = editState.asStateFlow()
+    private val worthLoading = MutableStateFlow(false)
+    val netWorthLoading = worthLoading.asStateFlow()
+    private var worthJob: Job? = null
 
     val movements = Feed(viewModelScope, { page, query, account -> repository.transactions(page, query, account) }, ::describe)
     val accountMovements = Feed(viewModelScope, { page, query, account -> repository.transactions(page, query, account) }, ::describe)
     val recent = Feed(viewModelScope, { page, _, _ -> repository.transactions(page, perPage = 6) }, ::describe)
+    val reports = Reports(viewModelScope, repository, ::describe)
 
     init {
         viewModelScope.launch {
@@ -195,6 +200,29 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun selectNetWorthRange(range: NetWorthRange) {
+        worthJob?.cancel()
+        worthLoading.value = true
+        worthJob = viewModelScope.launch {
+            try {
+                repository.loadNetWorth(range)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                noticeState.value = "No se pudo cargar la evolución del patrimonio: ${describe(error)}"
+            } finally {
+                worthLoading.value = false
+            }
+        }
+    }
+
+    fun setDefaultAccount(accountId: String?) {
+        viewModelScope.launch { repository.setDefaultAccount(accountId) }
+    }
+
+    /** Raw bytes of a logo stored in Relay, fetched with the session token. */
+    suspend fun logo(path: String): ByteArray? = repository.download(path, maxBytes = 1024L * 1024)
+
     fun signOut() {
         if (signingOut.value) return
         signingOut.value = true
@@ -202,6 +230,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 repository.logout()
                 resetScreens()
+                LogoLoader.clear(app)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Throwable) {
@@ -213,7 +242,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun forget() {
-        viewModelScope.launch { repository.forget(); resetScreens() }
+        viewModelScope.launch { repository.forget(); resetScreens(); LogoLoader.clear(app) }
     }
 
     fun dismissNotice() { noticeState.value = null }
@@ -227,6 +256,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun categories() = repository.categories()
     suspend fun merchants() = repository.merchants()
+    suspend fun tags() = repository.tags()
+    suspend fun categoryTransactions(categoryIds: List<String>, start: java.time.LocalDate, end: java.time.LocalDate) =
+        repository.categoryTransactions(categoryIds, start, end)
 
     fun saveTransaction(changes: JsonObject) {
         val edit = editState.value
@@ -241,6 +273,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 movements.transactionChanged(updated)
                 accountMovements.transactionChanged(updated)
                 recent.transactionChanged(updated)
+                reports.invalidate()
                 refreshSummary()
             } catch (error: CancellationException) {
                 throw error
@@ -254,7 +287,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         loginState.value = LoginState()
         summaryState.value = SummaryState()
         editState.value = TransactionEditState()
-        movements.clear(); accountMovements.clear(); recent.clear()
+        movements.clear(); accountMovements.clear(); recent.clear(); reports.clear()
     }
 
     internal fun describe(error: Throwable): String = when (error) {

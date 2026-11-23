@@ -36,6 +36,7 @@ class RelayRepository(
     private val store: StateStore,
     private val device: DeviceInfo,
     private val api: RelayApi = RelayApi(),
+    private val today: () -> LocalDate = LocalDate::now,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     private val mutable = MutableStateFlow<DiskState?>(null)
@@ -106,15 +107,20 @@ class RelayRepository(
         query: List<Pair<String, String>> = emptyList(),
         method: String = "GET",
         body: JsonObject? = null,
-    ): String {
+    ): String = withAuth { state, token -> api.request(state, path, method, body, query, bearer = token) }
+
+    /** Stored image behind the API; null when the server has none (or predates the endpoint). */
+    suspend fun download(path: String, maxBytes: Long): ByteArray? = withAuth { state, token -> api.download(state, path, token, maxBytes) }
+
+    private suspend fun <T> withAuth(call: suspend (DiskState, String) -> T): T {
         val state = fresh()
         return try {
-            api.request(state, path, method, body, query, bearer = state.tokens!!.accessToken)
+            call(state, state.tokens!!.accessToken)
         } catch (error: ApiException) {
             if (error.status != 401 || error is SessionExpiredException) throw error
             val renewed = refresh(state.tokens!!.accessToken)
             try {
-                api.request(renewed, path, method, body, query, bearer = renewed.tokens!!.accessToken)
+                call(renewed, renewed.tokens!!.accessToken)
             } catch (again: ApiException) {
                 if (again.status == 401) { expire(); throw SessionExpiredException() }
                 throw again
@@ -123,32 +129,70 @@ class RelayRepository(
     }
 
     suspend fun loadSummary(): Summary = coroutineScope {
+        val range = mutable.value?.preferences?.netWorthRange ?: NetWorthRange.Month
+        val end = today()
         val accounts = async { allAccounts() }
         val sheet = async {
             runCatching { api.json.decodeFromString<BalanceSheet>(authorized("/balance_sheet")) }
         }
-        val cashFlow = async {
-            optionalReport { api.json.decodeFromString<CashFlow>(authorized("/cash_flow", listOf("include" to "sankey"))) }
+        val startDay = async {
+            optionalReport { api.json.decodeFromString<FamilySettings>(authorized("/family_settings")).monthStartDay }
+                ?: mutable.value?.summary?.monthStartDay ?: 1
         }
-        val history = async {
-            val end = cashFlow.await()?.asOf?.let(LocalDate::parse) ?: LocalDate.now()
-            optionalReport {
-                api.json.decodeFromString<NetWorthHistory>(authorized(
-                    "/actions/get_net_worth_series", method = "POST",
-                    body = fields("arguments" to fields(
-                        "start_date" to value(end.minusDays(29).toString()),
-                        "end_date" to value(end.toString()),
-                    )),
-                ))
-            }
-        }
+        val cashFlow = async { optionalReport { this@RelayRepository.cashFlow(reportingMonthStart(end, startDay.await()), end) } }
+        val history = async { optionalReport { netWorthSeries(range, end) } }
         val sheetResult = sheet.await()
         sheetResult.exceptionOrNull()?.let { if (it is SessionExpiredException || (it is ApiException && it.status != 422)) throw it }
         // 422: Relay refuses to total amounts it cannot convert to the family currency.
         val sheetError = sheetResult.exceptionOrNull()?.let { "Faltan tipos de cambio para calcular el patrimonio en tu moneda principal." }
-        val summary = Summary(accounts.await(), sheetResult.getOrNull(), sheetError, clock(), cashFlow.await(), history.await())
+        val summary = Summary(accounts.await(), sheetResult.getOrNull(), sheetError, clock(), cashFlow.await(), history.await(),
+            range, startDay.await())
         save { if (it.signedIn) it.copy(summary = summary) else it }
         summary
+    }
+
+    /** Remembers the range and replaces only the cached net worth series. */
+    suspend fun loadNetWorth(range: NetWorthRange): NetWorthHistory {
+        save { it.copy(preferences = it.preferences.copy(netWorthRange = range)) }
+        val history = netWorthSeries(range, today())
+        save { state -> state.copy(summary = state.summary?.copy(netWorthHistory = history, netWorthRange = range)) }
+        return history
+    }
+
+    private suspend fun netWorthSeries(range: NetWorthRange, end: LocalDate): NetWorthHistory =
+        netWorthBetween(end.minusDays(range.days - 1), end)
+
+    suspend fun netWorthBetween(start: LocalDate, end: LocalDate): NetWorthHistory =
+        api.json.decodeFromString(authorized("/actions/get_net_worth_series", method = "POST", body = period(start, end)))
+
+    /** Category flows (sankey) for any period, e.g. a past month of the report. */
+    suspend fun cashFlow(start: LocalDate, end: LocalDate): CashFlow =
+        api.json.decodeFromString<CashFlowGraph>(authorized("/cash_flow", listOf(
+            "view" to "sankey", "start_date" to start.toString(), "end_date" to end.toString(),
+        ))).cashFlow()
+
+    suspend fun activityReport(start: LocalDate, end: LocalDate): ActivityReport =
+        api.json.decodeFromString(authorized("/actions/get_activity_report", method = "POST", body = period(start, end)))
+
+    private fun period(start: LocalDate, end: LocalDate) = fields("arguments" to fields(
+        "start_date" to value(start.toString()),
+        "end_date" to value(end.toString()),
+    ))
+
+    /** Movements of some categories in a period, newest first (at most 100 per category). */
+    suspend fun categoryTransactions(categoryIds: List<String>, start: LocalDate, end: LocalDate): List<Transaction> = coroutineScope {
+        categoryIds.distinct().map { id ->
+            async {
+                api.json.decodeFromString<TransactionsPage>(authorized("/transactions", listOf(
+                    "page" to "1", "per_page" to "100", "category_id" to id,
+                    "start_date" to start.toString(), "end_date" to end.toString(),
+                ))).transactions
+            }
+        }.flatMap { it.await() }.distinctBy { it.id }.sortedWith(compareByDescending<Transaction> { it.date }.thenBy { it.name })
+    }
+
+    suspend fun setDefaultAccount(accountId: String?) {
+        save { it.copy(preferences = it.preferences.copy(defaultAccountId = accountId)) }
     }
 
     private suspend fun <T> optionalReport(load: suspend () -> T): T? = try {
@@ -185,8 +229,8 @@ class RelayRepository(
         return api.json.decodeFromString(authorized("/transactions", query))
     }
 
-    suspend fun categories(): List<NamedRef> {
-        val categories = mutableListOf<NamedRef>()
+    suspend fun categories(): List<CategoryOption> {
+        val categories = mutableListOf<CategoryOption>()
         var page = 1
         do {
             val result = api.json.decodeFromString<CategoriesPage>(
@@ -199,6 +243,9 @@ class RelayRepository(
     }
 
     suspend fun merchants(): List<NamedRef> = api.json.decodeFromString(authorized("/merchants"))
+
+    /** The signed-in user's personal tags, alphabetically. */
+    suspend fun tags(): List<TagRef> = api.json.decodeFromString(authorized("/tags"))
 
     suspend fun updateTransaction(id: String, changes: JsonObject): Transaction =
         api.json.decodeFromString(authorized("/transactions/$id", method = "PATCH", body = fields("transaction" to changes)))

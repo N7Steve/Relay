@@ -1,6 +1,7 @@
 package app.relay.android.data
 
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.Locale
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonNull
@@ -41,7 +42,7 @@ class RelayRepositoryTest {
         server = MockWebServer().apply { useHttps(serverCertificates.sslSocketFactory(), false); start() }
         api = RelayApi(RelayApi.defaultClient().newBuilder().sslSocketFactory(clientCertificates.sslSocketFactory(), clientCertificates.trustManager).build())
         store = MemoryStore()
-        repo = RelayRepository(store, device, api) { now }
+        repo = RelayRepository(store, device, api, today = { LocalDate.parse("2026-11-22") }) { now }
         repo.initialize()
     }
 
@@ -162,10 +163,12 @@ class RelayRepositoryTest {
             "/api/v1/accounts?page=2&per_page=100&include_disabled=true" to json("""{"accounts":[${account.format("2", "Tarjeta", 50000, "liability", "credit_card")}],"pagination":{"page":2,"per_page":100,"total_count":2,"total_pages":2}}"""),
             "/api/v1/balance_sheet" to json("""{"currency":"EUR","net_worth":{"amount":"1000.0","currency":"EUR","formatted":"€1,000.00"},
                 "assets":{"amount":"1500.0","currency":"EUR"},"liabilities":{"amount":"500.0","currency":"EUR"}}"""),
-            "/api/v1/cash_flow?include=sankey" to json("""{"month":"2026-11-01","as_of":"2026-11-22","currency":"EUR",
-                "income":"150","spending":"30","net_savings":"120","sankey":{"nodes":[
+            "/api/v1/family_settings" to json("""{"month_start_day":25}"""),
+            "/api/v1/cash_flow?view=sankey&start_date=2026-10-25&end_date=2026-11-22" to json("""{"as_of":"2026-11-22","currency":"EUR",
+                "period":{"start_date":"2026-10-25","end_date":"2026-11-22"},
+                "sankey":{"income":"150","spending":"30","net_savings":"120","nodes":[
                   {"name":"Cash Flow","kind":"cash_flow","value":"150"},
-                  {"name":"Alimentación","kind":"expense","value":"30"},
+                  {"name":"Alimentación","kind":"expense","value":"30","color":"#ef4444"},
                   {"name":"Supermercado","kind":"expense","value":"20"},
                   {"name":"Surplus","kind":"surplus","value":"120"}
                 ],"links":[{"source":0,"target":1},{"source":1,"target":2},{"source":0,"target":3}]}}"""),
@@ -177,12 +180,82 @@ class RelayRepositoryTest {
         assertEquals(BigDecimal("1000.0"), summary.balanceSheet?.netWorth?.decimal)
         assertEquals(BigDecimal("1000.0"), summary.netWorthHistory?.points?.single()?.value?.decimal)
         assertEquals(listOf("Alimentación"), summary.cashFlow?.sankey?.expenseCategories()?.map { it.name })
-        val historyRequest = List(5) { server.takeRequest() }.single { it.path == "/api/v1/actions/get_net_worth_series" }
+        assertEquals("#ef4444", summary.cashFlow?.sankey?.expenseCategories()?.single()?.color)
+        assertEquals("150", summary.cashFlow?.income)
+        assertEquals("2026-10-25", summary.cashFlow?.period?.startDate)
+        assertEquals(25, summary.monthStartDay)
+        val historyRequest = List(6) { server.takeRequest() }.single { it.path == "/api/v1/actions/get_net_worth_series" }
         assertEquals("POST", historyRequest.method)
         val period = api.json.parseToJsonElement(historyRequest.body.readUtf8()).jsonObject["arguments"]!!.jsonObject
         assertEquals("2026-10-24", period["start_date"]!!.jsonPrimitive.content)
         assertEquals("2026-11-22", period["end_date"]!!.jsonPrimitive.content)
         assertEquals(summary, store.current.summary)
+    }
+
+    @Test fun netWorthRangeIsRememberedAndRequestedForItsSpan() = runBlocking {
+        signIn()
+        route("/api/v1/actions/get_net_worth_series" to json("""{"currency":"EUR","points":[]}"""))
+        repo.loadNetWorth(NetWorthRange.Year)
+        val period = api.json.parseToJsonElement(server.takeRequest().body.readUtf8()).jsonObject["arguments"]!!.jsonObject
+        assertEquals("2025-11-23", period["start_date"]!!.jsonPrimitive.content)
+        assertEquals(NetWorthRange.Year, store.current.preferences.netWorthRange)
+    }
+
+    @Test fun reportingMonthsFollowTheFamilyStartDay() {
+        assertEquals(LocalDate.parse("2026-11-01"), reportingMonthStart(LocalDate.parse("2026-11-22"), 1))
+        assertEquals(LocalDate.parse("2026-10-25"), reportingMonthStart(LocalDate.parse("2026-11-22"), 25))
+        assertEquals(LocalDate.parse("2026-11-10"), reportingMonthStart(LocalDate.parse("2026-11-22"), 10))
+        assertEquals(LocalDate.parse("2026-11-01"), reportingMonthName(LocalDate.parse("2026-10-25"), 25))
+        assertEquals(LocalDate.parse("2026-11-01"), reportingMonthName(LocalDate.parse("2026-11-10"), 10))
+    }
+
+    @Test fun storedLogosAreDownloadedWithTheSessionToken() = runBlocking {
+        signIn()
+        route(
+            "/api/v1/accounts/a1/logo" to MockResponse().setHeader("Content-Type", "image/webp").setBody("logo"),
+        )
+        assertEquals("logo", repo.download("/accounts/a1/logo", 1024)?.decodeToString())
+        assertEquals("Bearer a1", server.takeRequest().getHeader("Authorization"))
+        assertNull(repo.download("/merchants/m1/logo", 1024))
+        assertNull(repo.download("/accounts/a1/logo", 2))
+    }
+
+    @Test fun cashFlowCategoriesKeepSubcategoriesOnBothSides() {
+        val breakdown = api.json.decodeFromString<CashFlowBreakdown>("""{"nodes":[
+            {"name":"Nómina","kind":"income","value":"2000","category_id":"c-in"},
+            {"name":"Cash Flow","kind":"cash_flow","value":"2000"},
+            {"name":"Hogar","kind":"expense","value":"900","category_id":"c-home","color":"#22c55e"},
+            {"name":"Alquiler","kind":"expense","value":"700","category_id":"c-rent"},
+            {"name":"Ocio","kind":"expense","value":"100","category_id":"c-fun"},
+            {"name":"Surplus","kind":"surplus","value":"1000"}
+          ],"links":[{"source":0,"target":1},{"source":1,"target":2},{"source":2,"target":3},{"source":1,"target":4},{"source":1,"target":5}]}""")
+        val expenses = breakdown.categories("expense")
+        assertEquals(listOf("Hogar", "Ocio"), expenses.map { it.node.name })
+        assertEquals(listOf("c-rent"), expenses.first().children.map { it.categoryId })
+        assertEquals(listOf("Nómina"), breakdown.categories("income").map { it.node.name })
+    }
+
+    @Test fun activityReportAndCategoryMovementsUseTheReportPeriod() = runBlocking {
+        signIn()
+        route(
+            "/api/v1/actions/get_activity_report" to json("""{"currency":"EUR","period":{"start_date":"2026-10-25","end_date":"2026-11-24"},
+                "current":{"income":{"amount":"2000.0","currency":"EUR"},"expenses":{"amount":"1500.0","currency":"EUR"},
+                  "investment_return":{"amount":"0.0","currency":"EUR"}},
+                "previous":{"income":{"amount":"1800.0","currency":"EUR"},"expenses":{"amount":"1600.0","currency":"EUR"}},
+                "net_savings":{"amount":"500.0","currency":"EUR"},"income_change_percent":"11.1","expense_change_percent":"-6.3"}"""),
+            "/api/v1/transactions?page=1&per_page=100&category_id=c1&start_date=2026-10-25&end_date=2026-11-24" to json(
+                """{"transactions":[{"id":"t1","date":"2026-11-02","currency":"EUR"}]}"""),
+            "/api/v1/transactions?page=1&per_page=100&category_id=c2&start_date=2026-10-25&end_date=2026-11-24" to json(
+                """{"transactions":[{"id":"t2","date":"2026-11-20","currency":"EUR"},{"id":"t1","date":"2026-11-02","currency":"EUR"}]}"""),
+        )
+        val start = LocalDate.parse("2026-10-25")
+        val end = LocalDate.parse("2026-11-24")
+        val report = repo.activityReport(start, end)
+        assertEquals(BigDecimal("500.0"), report.netSavings.decimal)
+        assertEquals("-6.3", report.expenseChangePercent)
+        val period = api.json.parseToJsonElement(server.takeRequest().body.readUtf8()).jsonObject["arguments"]!!.jsonObject
+        assertEquals("2026-10-25", period["start_date"]!!.jsonPrimitive.content)
+        assertEquals(listOf("t2", "t1"), repo.categoryTransactions(listOf("c1", "c2"), start, end).map { it.id })
     }
 
     @Test fun missingExchangeRatesKeepTheAccountsVisible() = runBlocking {

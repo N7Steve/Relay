@@ -2,6 +2,7 @@ package app.relay.android.data
 
 import java.math.BigDecimal
 import java.text.NumberFormat
+import java.time.LocalDate
 import java.util.Currency
 import java.util.Locale
 import kotlinx.serialization.SerialName
@@ -43,8 +44,20 @@ import kotlinx.serialization.json.JsonPrimitive
     val tokens: Tokens? = null,
     val user: User? = null,
     val summary: Summary? = null,
+    val preferences: Preferences = Preferences(),
 ) {
     val signedIn get() = tokens != null && user != null
+}
+
+/** Per-device choices; cleared with the session. */
+@Serializable data class Preferences(
+    /** Account opened first in Movimientos; null shows every account. */
+    val defaultAccountId: String? = null,
+    val netWorthRange: NetWorthRange = NetWorthRange.Month,
+)
+
+enum class NetWorthRange(val label: String, val days: Long) {
+    Month("1M", 30), Quarter("3M", 91), Half("6M", 182), Year("1A", 365), TwoYears("2A", 730),
 }
 
 @Serializable data class Summary(
@@ -54,17 +67,57 @@ import kotlinx.serialization.json.JsonPrimitive
     val fetchedAt: Long,
     val cashFlow: CashFlow? = null,
     val netWorthHistory: NetWorthHistory? = null,
+    val netWorthRange: NetWorthRange = NetWorthRange.Month,
+    /** Family setting: the day each reporting month starts (1–28). */
+    val monthStartDay: Int = 1,
 )
 
 @Serializable data class CashFlow(
-    val month: String,
+    /** Only in summaries cached before custom month periods; [period] replaces it. */
+    val month: String? = null,
     @SerialName("as_of") val asOf: String,
     val currency: String,
     val income: String,
     val spending: String,
     @SerialName("net_savings") val netSavings: String,
     val sankey: CashFlowBreakdown,
+    val period: ReportPeriod? = null,
 )
+
+@Serializable data class ReportPeriod(@SerialName("start_date") val startDate: String, @SerialName("end_date") val endDate: String)
+
+/** `GET /cash_flow?view=sankey` for an explicit period. */
+@Serializable data class CashFlowGraph(
+    @SerialName("as_of") val asOf: String,
+    val currency: String,
+    val period: ReportPeriod,
+    val sankey: SankeyTotals,
+) {
+    fun cashFlow() = CashFlow(
+        asOf = asOf, currency = currency, income = sankey.income, spending = sankey.spending,
+        netSavings = sankey.netSavings, sankey = CashFlowBreakdown(sankey.nodes, sankey.links), period = period,
+    )
+}
+
+@Serializable data class SankeyTotals(
+    val income: String,
+    val spending: String,
+    @SerialName("net_savings") val netSavings: String,
+    val nodes: List<CashFlowNode>,
+    val links: List<CashFlowLink>,
+)
+
+@Serializable data class FamilySettings(@SerialName("month_start_day") val monthStartDay: Int = 1)
+
+/** First day of the reporting month containing [today], as Relay's Family#custom_month_start_for. */
+fun reportingMonthStart(today: LocalDate, startDay: Int): LocalDate {
+    val day = startDay.coerceIn(1, 28)
+    return if (today.dayOfMonth >= day) today.withDayOfMonth(day) else today.minusMonths(1).withDayOfMonth(day)
+}
+
+/** A late start (after the 15th) names the following month, as the web dashboard does. */
+fun reportingMonthName(start: LocalDate, startDay: Int): LocalDate =
+    if (startDay > 15) start.plusMonths(1).withDayOfMonth(1) else start.withDayOfMonth(1)
 
 @Serializable data class CashFlowBreakdown(val nodes: List<CashFlowNode>, val links: List<CashFlowLink>) {
     fun expenseCategories(): List<CashFlowNode> {
@@ -74,9 +127,48 @@ import kotlinx.serialization.json.JsonPrimitive
             .mapNotNull { nodes.getOrNull(it.target)?.takeIf { node -> node.kind == "expense" } }
             .sortedByDescending { it.value.toBigDecimal() }
     }
+
+    /** [kind] is "expense" or "income"; expense flows leave the centre node, income flows enter it. */
+    fun categories(kind: String): List<FlowCategory> {
+        val center = nodes.indexOfFirst { it.kind == "cash_flow" }
+        if (center < 0) return emptyList()
+        val outward = kind == "expense"
+        fun next(index: Int) = if (outward) links.filter { it.source == index }.map { it.target } else links.filter { it.target == index }.map { it.source }
+        return next(center).mapNotNull { root ->
+            val node = nodes.getOrNull(root)?.takeIf { it.kind == kind } ?: return@mapNotNull null
+            val children = next(root).mapNotNull { nodes.getOrNull(it) }.filter { it.kind == kind }.sortedByDescending { it.value.toBigDecimal() }
+            FlowCategory(node, children)
+        }.sortedByDescending { it.node.value.toBigDecimal() }
+    }
 }
 
-@Serializable data class CashFlowNode(val name: String, val kind: String, val value: String)
+/** `POST /actions/get_activity_report`: the web report's headline figures for a period. */
+@Serializable data class ActivityReport(
+    val currency: String,
+    val period: ReportPeriod,
+    val current: ActivityTotals,
+    val previous: ActivityTotals,
+    @SerialName("net_savings") val netSavings: Money,
+    @SerialName("income_change_percent") val incomeChangePercent: String? = null,
+    @SerialName("expense_change_percent") val expenseChangePercent: String? = null,
+)
+
+@Serializable data class ActivityTotals(
+    val income: Money,
+    val expenses: Money,
+    @SerialName("investment_return") val investmentReturn: Money? = null,
+)
+
+@Serializable data class CashFlowNode(
+    val name: String,
+    val kind: String,
+    val value: String,
+    val color: String? = null,
+    @SerialName("category_id") val categoryId: String? = null,
+)
+
+/** A top-level category of one side of the cash flow, with its subcategories. */
+data class FlowCategory(val node: CashFlowNode, val children: List<CashFlowNode>)
 @Serializable data class CashFlowLink(val source: Int, val target: Int)
 @Serializable data class NetWorthHistory(val currency: String, val points: List<NetWorthPoint>)
 @Serializable data class NetWorthPoint(val date: String, val value: Money)
@@ -132,7 +224,14 @@ import kotlinx.serialization.json.JsonPrimitive
 
 @Serializable data class AccountRef(val id: String, val name: String, @SerialName("account_type") val accountType: String? = null)
 @Serializable data class CategoryRef(val id: String, val name: String, val color: String? = null, val icon: String? = null)
-@Serializable data class CategoriesPage(val categories: List<NamedRef>, val pagination: Pagination = Pagination())
+@Serializable data class CategoriesPage(val categories: List<CategoryOption>, val pagination: Pagination = Pagination())
+@Serializable data class CategoryOption(
+    val id: String,
+    val name: String,
+    val color: String? = null,
+    val icon: String? = null,
+    val parent: NamedRef? = null,
+)
 @Serializable data class NamedRef(
     val id: String,
     val name: String,

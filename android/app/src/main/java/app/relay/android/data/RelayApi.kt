@@ -64,6 +64,19 @@ class RelayApi(private val client: OkHttpClient = defaultClient()) {
         }
     }
 
+    /** Authenticated binary download, e.g. a stored logo; null when absent or larger than [maxBytes]. */
+    suspend fun download(state: DiskState, path: String, bearer: String, maxBytes: Long): ByteArray? = withContext(Dispatchers.IO) {
+        val url = serverUrl(state.server).newBuilder().encodedPath("/api/v1$path").build()
+        val request = Request.Builder().url(url).header("Accept", "image/*").header("Authorization", "Bearer $bearer")
+            .cloudflareAccess(state).build()
+        client.newCall(request).execute().use { response ->
+            if (response.code == 404) return@use null
+            if (!response.isSuccessful) throw failure(response, response.body?.string().orEmpty(), path)
+            val source = response.body?.source() ?: return@use null
+            if (source.request(maxBytes + 1)) null else source.readByteArray()
+        }
+    }
+
     private fun failure(response: Response, text: String, path: String): ApiException {
         if (response.isRedirect) {
             val location = response.header("Location").orEmpty()

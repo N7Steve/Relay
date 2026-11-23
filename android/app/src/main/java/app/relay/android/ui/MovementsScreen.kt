@@ -20,6 +20,8 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -53,12 +55,21 @@ import app.relay.android.data.Transaction
 import app.relay.android.data.formatMoney
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun MovementsScreen(feed: Feed, accounts: List<Account>?, onTransaction: (Transaction) -> Unit) {
+@Composable fun MovementsScreen(
+    feed: Feed,
+    accounts: List<Account>?,
+    defaultAccountId: String?,
+    onDefault: (String?) -> Unit,
+    onTransaction: (Transaction) -> Unit,
+) {
     val state by feed.state.collectAsStateWithLifecycle()
     val list = rememberLazyListState()
-    LaunchedEffect(accounts) {
-        val selected = state.accountId
-        feed.open(selected?.takeUnless { id -> accounts != null && accounts.none { it.id == id } })
+    // Day-to-day accounts only; investments and other assets open from Resumen.
+    val cash = remember(accounts) { accounts?.filter { it.accountType == "depository" && it.status != "disabled" } }
+    LaunchedEffect(cash) {
+        val fresh = state.page == 0 && !state.loading && state.error == null
+        val requested = if (fresh) defaultAccountId else state.accountId
+        feed.open(requested?.takeUnless { id -> cash != null && cash.none { it.id == id } })
     }
     LaunchedEffect(state.accountId, state.query) { list.scrollToItem(0) }
     LoadMoreEffect(list, feed)
@@ -67,7 +78,7 @@ import app.relay.android.data.formatMoney
         Column(Modifier.statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
             Text("Movimientos", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.enter(0))
             Spacer(Modifier.height(14.dp))
-            AccountSelect(accounts.orEmpty(), state.accountId, feed::open)
+            AccountSelect(cash.orEmpty(), state.accountId, defaultAccountId, feed::open, onDefault)
             Spacer(Modifier.height(8.dp))
             SearchField(state.query, feed::search, Modifier.enter(1))
         }
@@ -83,13 +94,20 @@ import app.relay.android.data.formatMoney
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable private fun AccountSelect(accounts: List<Account>, selectedId: String?, onSelect: (String?) -> Unit) {
+@Composable private fun AccountSelect(
+    accounts: List<Account>,
+    selectedId: String?,
+    defaultId: String?,
+    onSelect: (String?) -> Unit,
+    onDefault: (String?) -> Unit,
+) {
     val selected = accounts.find { it.id == selectedId }
     var expanded by remember { mutableStateOf(false) }
+    val validDefault = defaultId?.takeIf { id -> accounts.any { it.id == id } }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
         OutlinedTextField(
             value = selected?.name ?: "Todas las cuentas", onValueChange = {}, readOnly = true, singleLine = true,
-            label = { Text("Cuenta") },
+            label = { Text(if (selectedId == validDefault) "Cuenta · predeterminada" else "Cuenta") },
             leadingIcon = selected?.let { account -> { AccountBadge(account, 30.dp) } },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
@@ -97,18 +115,39 @@ import app.relay.android.data.formatMoney
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, containerColor = Relay.surface2) {
             accounts.forEach { account ->
                 DropdownMenuItem(
-                    text = { Text(account.name) },
+                    text = { AccountOptionLabel(account.name, account.id == validDefault) },
                     leadingIcon = { AccountBadge(account, 30.dp) },
-                    trailingIcon = if (account.id == selectedId) ({ Icon(Icons.Outlined.Check, "Seleccionada") }) else null,
+                    trailingIcon = { AccountOptionActions(account.id == selectedId, account.id == validDefault) { onDefault(account.id) } },
                     onClick = { onSelect(account.id); expanded = false },
                 )
             }
             if (accounts.isNotEmpty()) HorizontalDivider(color = Relay.border)
             DropdownMenuItem(
-                text = { Text("Todas las cuentas") },
-                trailingIcon = if (selectedId == null) ({ Icon(Icons.Outlined.Check, "Seleccionada") }) else null,
+                text = { AccountOptionLabel("Todas las cuentas", validDefault == null) },
+                trailingIcon = { AccountOptionActions(selectedId == null, validDefault == null) { onDefault(null) } },
                 onClick = { onSelect(null); expanded = false },
             )
+            Text("Las inversiones y otros activos se abren desde Resumen.", style = MaterialTheme.typography.labelSmall,
+                color = Relay.subtle, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+        }
+    }
+}
+
+@Composable private fun AccountOptionLabel(name: String, isDefault: Boolean) {
+    Column {
+        Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (isDefault) Text("Predeterminada", style = MaterialTheme.typography.labelSmall, color = Relay.warning)
+    }
+}
+
+/** Check for the current choice plus a star that makes the row the default. */
+@Composable private fun AccountOptionActions(selected: Boolean, isDefault: Boolean, onDefault: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (selected) Icon(Icons.Outlined.Check, "Seleccionada", tint = Relay.text)
+        IconButton(onClick = onDefault, enabled = !isDefault) {
+            Icon(if (isDefault) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                if (isDefault) "Cuenta predeterminada" else "Usar como predeterminada",
+                tint = if (isDefault) Relay.warning else Relay.muted)
         }
     }
 }

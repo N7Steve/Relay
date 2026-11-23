@@ -60,6 +60,7 @@ import java.util.Locale
 ) {
     val summaryState by vm.summary.collectAsStateWithLifecycle()
     val recent by vm.recent.state.collectAsStateWithLifecycle()
+    val worthLoading by vm.netWorthLoading.collectAsStateWithLifecycle()
     val summary = session.summary
     LaunchedEffect(Unit) { if (recent.page == 0 && !recent.loading) vm.recent.open(null) }
 
@@ -78,9 +79,11 @@ import java.util.Locale
             }
 
             summary?.let {
-                item(key = "net-worth-history") { NetWorthWidget(it.netWorthHistory) }
-                item(key = "monthly-flow") { CashFlowWidget(it.cashFlow) }
-                item(key = "spending-categories") { ExpensesWidget(it.cashFlow) }
+                item(key = "net-worth-history") {
+                    NetWorthWidget(it.netWorthHistory, session.preferences.netWorthRange, worthLoading, vm::selectNetWorthRange)
+                }
+                item(key = "monthly-flow") { CashFlowWidget(it.cashFlow, it.monthStartDay) }
+                item(key = "spending-categories") { ExpensesWidget(it.cashFlow, it.monthStartDay) }
             }
 
             if (summary != null) {

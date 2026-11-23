@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
@@ -48,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.relay.android.data.DiskState
@@ -56,6 +58,7 @@ import app.relay.android.data.Transaction
 enum class Tab(val label: String, val icon: ImageVector) {
     Home("Resumen", Icons.Outlined.Dashboard),
     Movements("Movimientos", Icons.Outlined.ReceiptLong),
+    Reports("Informe", Icons.Outlined.Insights),
     Settings("Ajustes", Icons.Outlined.Settings),
 }
 
@@ -69,7 +72,8 @@ enum class Tab(val label: String, val icon: ImageVector) {
                 current == 0 || state == null -> Splash()
                 current == 1 || !state.signedIn -> LoginScreen(vm, state)
                 else -> {
-                    val logos = remember(state.server, state.user?.id, state.cloudflareAccess) { LogoLoader(state) }
+                    val context = LocalContext.current
+                    val logos = remember(state.server, state.user?.id) { LogoLoader(state, context.applicationContext, vm::logo) }
                     CompositionLocalProvider(LocalLogos provides logos) { Shell(vm, state) }
                 }
             }
@@ -110,7 +114,9 @@ enum class Tab(val label: String, val icon: ImageVector) {
             ) { key ->
                 when {
                     account != null && key == account.id -> AccountScreen(account, vm.accountMovements, onBack = { accountId = null }, onTransaction = { detail = it })
-                    key == Tab.Movements.name -> MovementsScreen(vm.movements, session.summary?.accounts) { detail = it }
+                    key == Tab.Movements.name -> MovementsScreen(vm.movements, session.summary?.accounts, session.preferences.defaultAccountId,
+                        onDefault = vm::setDefaultAccount) { detail = it }
+                    key == Tab.Reports.name -> ReportsScreen(vm, session) { detail = it }
                     key == Tab.Settings.name -> SettingsScreen(vm, session)
                     else -> HomeScreen(vm, session, onAccount = { accountId = it.id }, onSeeAll = { tab = Tab.Movements }, onTransaction = { detail = it })
                 }
@@ -142,7 +148,7 @@ enum class Tab(val label: String, val icon: ImageVector) {
     ) {
         Tab.entries.forEach { tab ->
             val active = tab == selected
-            val weight by animateFloatAsState(if (active) 1.5f else 1f, tween(Relay.BASE, easing = Relay.easeOut), label = "tab")
+            val weight by animateFloatAsState(if (active) 2.2f else 1f, tween(Relay.BASE, easing = Relay.easeOut), label = "tab")
             val source = remember { MutableInteractionSource() }
             Row(
                 Modifier.weight(weight).height(48.dp).clip(RoundedCornerShape(18.dp))

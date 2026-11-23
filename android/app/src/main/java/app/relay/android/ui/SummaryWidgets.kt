@@ -2,14 +2,19 @@ package app.relay.android.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -31,6 +37,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.relay.android.data.CashFlow
 import app.relay.android.data.NetWorthHistory
+import app.relay.android.data.NetWorthRange
+import app.relay.android.data.reportingMonthName
 import app.relay.android.data.formatMoney
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -39,10 +47,20 @@ import java.util.Locale
 
 private val spanish = Locale.forLanguageTag("es-ES")
 private val shortDate = DateTimeFormatter.ofPattern("d MMM", spanish)
+private val shortDateYear = DateTimeFormatter.ofPattern("d MMM yyyy", spanish)
 private val monthYear = DateTimeFormatter.ofPattern("MMMM yyyy", spanish)
 
-@Composable internal fun NetWorthWidget(history: NetWorthHistory?) {
-    SummaryWidget("Evolución del patrimonio", "Últimos 30 días") {
+private fun NetWorthRange.description() = when (this) {
+    NetWorthRange.Month -> "Últimos 30 días"
+    NetWorthRange.Quarter -> "Últimos 3 meses"
+    NetWorthRange.Half -> "Últimos 6 meses"
+    NetWorthRange.Year -> "Último año"
+    NetWorthRange.TwoYears -> "Últimos 2 años"
+}
+
+@Composable internal fun NetWorthWidget(history: NetWorthHistory?, selected: NetWorthRange, loading: Boolean, onRange: (NetWorthRange) -> Unit) {
+    SummaryWidget("Evolución del patrimonio", selected.description()) {
+        RangeSelector(selected, loading, onRange)
         val points = history?.points.orEmpty()
         when {
             history == null -> WidgetMessage("No se pudo cargar la evolución.")
@@ -57,16 +75,39 @@ private val monthYear = DateTimeFormatter.ofPattern("MMMM yyyy", spanish)
                     style = MaterialTheme.typography.titleLarge.merge(tabular),
                 )
                 WorthChart(points.map { it.value.decimal })
+                val from = LocalDate.parse(first.date)
+                val to = LocalDate.parse(last.date)
+                val axis = if (from.year == to.year) shortDate else shortDateYear
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(LocalDate.parse(first.date).format(shortDate), color = Relay.muted, style = MaterialTheme.typography.labelMedium)
-                    Text(LocalDate.parse(last.date).format(shortDate), color = Relay.muted, style = MaterialTheme.typography.labelMedium)
+                    Text(from.format(axis), color = Relay.muted, style = MaterialTheme.typography.labelMedium)
+                    Text(to.format(axis), color = Relay.muted, style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
     }
 }
 
-@Composable private fun WorthChart(values: List<BigDecimal>) {
+@Composable private fun RangeSelector(selected: NetWorthRange, loading: Boolean, onRange: (NetWorthRange) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Relay.surface2.copy(alpha = 0.7f)).padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        NetWorthRange.entries.forEach { range ->
+            val active = range == selected
+            Box(
+                Modifier.weight(1f).height(32.dp).clip(RoundedCornerShape(10.dp))
+                    .then(if (active) Modifier.background(Relay.gradient) else Modifier)
+                    .clickable(enabled = !active) { onRange(range) },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (active && loading) CircularProgressIndicator(Modifier.size(14.dp), color = Color.White, strokeWidth = 2.dp)
+                else Text(range.label, style = MaterialTheme.typography.labelLarge, color = if (active) Color.White else Relay.muted)
+            }
+        }
+    }
+}
+
+@Composable internal fun WorthChart(values: List<BigDecimal>) {
     val min = values.min().toDouble()
     val span = values.max().toDouble() - min
     Canvas(Modifier.fillMaxWidth().height(100.dp)) {
@@ -95,8 +136,8 @@ private val monthYear = DateTimeFormatter.ofPattern("MMMM yyyy", spanish)
     }
 }
 
-@Composable internal fun CashFlowWidget(flow: CashFlow?) {
-    SummaryWidget("Flujo de fondos", flow?.monthLabel()) {
+@Composable internal fun CashFlowWidget(flow: CashFlow?, monthStartDay: Int) {
+    SummaryWidget("Flujo de fondos", flow?.periodLabel(monthStartDay)) {
         if (flow == null) {
             WidgetMessage("No se pudo cargar el flujo del mes.")
         } else {
@@ -115,17 +156,22 @@ private val monthYear = DateTimeFormatter.ofPattern("MMMM yyyy", spanish)
     }
 }
 
-@Composable internal fun ExpensesWidget(flow: CashFlow?) {
-    val rows = remember(flow) { flow?.sankey?.expenseCategories().orEmpty() }
-    var expanded by rememberSaveable(flow?.month) { mutableStateOf(false) }
-    SummaryWidget("Gastos netos por categoría", flow?.monthLabel()) {
+@Composable internal fun ExpensesWidget(flow: CashFlow?, monthStartDay: Int) {
+    val rows = remember(flow) {
+        flow?.sankey?.expenseCategories().orEmpty().mapIndexed { index, node ->
+            node to (node.color?.let(::parseHex) ?: chartPalette[index % chartPalette.size])
+        }
+    }
+    var expanded by rememberSaveable(flow?.period?.startDate ?: flow?.month) { mutableStateOf(false) }
+    SummaryWidget("Gastos netos por categoría", flow?.periodLabel(monthStartDay)) {
         when {
             flow == null -> WidgetMessage("No se pudieron cargar las categorías del mes.")
             rows.isEmpty() -> WidgetMessage("Este mes todavía no hay gastos por categoría.")
             else -> {
-                val max = rows.first().value.toBigDecimal()
-                (if (expanded) rows else rows.take(5)).forEach { row ->
-                    MoneyBar(row.name, row.value.toBigDecimal(), max, flow.currency, Relay.cyan)
+                ShareBar(rows.map { (node, color) -> node.value.toBigDecimal() to color })
+                val max = rows.first().first.value.toBigDecimal()
+                (if (expanded) rows else rows.take(5)).forEach { (row, color) ->
+                    MoneyBar(row.name, row.value.toBigDecimal(), max, flow.currency, color, dot = true)
                 }
                 if (rows.size > 5) TextButton(onClick = { expanded = !expanded }) {
                     Text(if (expanded) "Ver menos" else "Ver todas las categorías")
@@ -151,9 +197,22 @@ private val monthYear = DateTimeFormatter.ofPattern("MMMM yyyy", spanish)
     Text(message, color = Relay.muted, style = MaterialTheme.typography.bodyMedium)
 }
 
-@Composable private fun MoneyBar(label: String, amount: BigDecimal, max: BigDecimal, currency: String, color: Color) {
+/** Each category's share of the period's spending, in its own colour. */
+@Composable private fun ShareBar(parts: List<Pair<BigDecimal, Color>>) {
+    val visible = parts.filter { it.first.signum() > 0 }
+    if (visible.isEmpty()) return
+    val total = visible.sumOf { it.first }.toDouble()
+    Row(Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(50)), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        visible.forEach { (value, color) ->
+            Box(Modifier.weight((value.toDouble() / total).toFloat().coerceAtLeast(0.005f)).fillMaxHeight().background(color))
+        }
+    }
+}
+
+@Composable private fun MoneyBar(label: String, amount: BigDecimal, max: BigDecimal, currency: String, color: Color, dot: Boolean = false) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (dot) Box(Modifier.size(10.dp).clip(CircleShape).background(color))
             Text(label, Modifier.weight(1f), color = Relay.secondary, style = MaterialTheme.typography.bodyMedium,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text(formatMoney(amount, currency), color = Relay.text, style = MaterialTheme.typography.bodyMedium.merge(tabular))
@@ -165,4 +224,11 @@ private val monthYear = DateTimeFormatter.ofPattern("MMMM yyyy", spanish)
     }
 }
 
-private fun CashFlow.monthLabel(): String = LocalDate.parse(month).format(monthYear).replaceFirstChar { it.uppercase() }
+/** "Noviembre 2026", plus the exact dates when the family starts its months on another day. */
+private fun CashFlow.periodLabel(startDay: Int): String? = runCatching {
+    val range = period ?: return@runCatching month?.let { LocalDate.parse(it).format(monthYear).replaceFirstChar(Char::uppercase) }
+    val start = LocalDate.parse(range.startDate)
+    val end = LocalDate.parse(range.endDate)
+    val name = reportingMonthName(start, startDay).format(monthYear).replaceFirstChar(Char::uppercase)
+    if (start.dayOfMonth == 1) name else "$name · ${start.format(shortDate)} – ${end.format(shortDate)}"
+}.getOrNull()
