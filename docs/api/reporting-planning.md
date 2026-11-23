@@ -11,7 +11,8 @@ permiso efectivo del recurso y `idempotency_key`, compartida entre API y MCP.
 | Herramienta | Motor nativo y resultado |
 | --- | --- |
 | `get_report_accounts` | Cuentas accesibles, participación financiera, fiscalidad y elegibilidad para informes de efectivo e inversión; paginado |
-| `get_activity_report` | `Reports::Activity`, comparación con el período anterior de igual duración, ahorro neto y ajustado y gasto compartido |
+| `get_activity_report` | `Reports::Activity`, comparación con el período anterior de igual duración, ahorro neto y ajustado y gasto compartido; la rentabilidad de carteras gestionadas va aparte en `investment_return` y no suma ingresos |
+| `get_spending_trend` | `IncomeStatement#daily_expense_series`: gasto acumulado diario del período (máximo 92 días) frente al mes anterior, con el total comparable al mismo número de días |
 | `get_category_report` | `IncomeStatement.net_category_totals`, categorías netas, totales y pesos |
 | `get_shared_expenses` | `SharedExpensesCalculator`: deuda/compensaciones acumuladas, gasto ajustado del período e ingresos de rentas |
 | `get_investment_report` | `InvestmentStatement`: aportaciones, retiradas, dividendos, intereses, efectivo, posiciones, ganancias y rentabilidad, con desglose gestionado y fiscalidad |

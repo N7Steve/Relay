@@ -32,6 +32,33 @@ class Api::V1::ReportingOperationsTest < ActionDispatch::IntegrationTest
     assert_equal calculator.calculate_adjusted_expenses(period).amount, response.parsed_body.dig("adjusted_expenses", "amount").to_d
   end
 
+  test "spending trend accumulates spending against the previous month at the same day count" do
+    user = users(:empty)
+    @key.update!(user: user)
+    account = user.family.accounts.create!(name: "Cash", balance: 0, currency: "USD", accountable: Depository.new)
+    portfolio = user.family.accounts.create!(name: "Managed", balance: 0, currency: "USD", accountable: Investment.new(subtype: "roboadvisor"))
+    { Date.new(2026, 2, 3) => 40, Date.new(2026, 2, 20) => 60, Date.new(2026, 3, 2) => 25, Date.new(2026, 3, 4) => -100 }.each do |date, amount|
+      account.entries.create!(name: "Spending case", date: date, amount: amount, currency: "USD", entryable: Transaction.new)
+    end
+    portfolio.entries.create!(name: "Valuation", date: Date.new(2026, 3, 3), amount: 500, currency: "USD",
+      entryable: Transaction.new(kind: "investment_value_adjustment"))
+
+    invoke("get_spending_trend", start_date: "2026-03-01", end_date: "2026-03-05")
+    assert_response :success, response.body
+    body = response.parsed_body
+    assert_equal({ "start_date" => "2026-02-01", "end_date" => "2026-02-28" }, body.fetch("previous_period"))
+    assert_equal %w[0.0 25.0 25.0 25.0 25.0], body.fetch("current").map { |point| point.fetch("amount") }
+    assert_equal 28, body.fetch("previous").length
+    assert_equal "100.0", body.fetch("previous").last.fetch("amount")
+    assert_equal "25.0", body.fetch("current_total")
+    assert_equal "40.0", body.fetch("comparison_total")
+    assert_equal "2026-02-05", body.fetch("comparison_end_date")
+    assert_equal "-15.0", body.fetch("delta")
+
+    invoke("get_spending_trend", start_date: "2026-01-01", end_date: "2026-04-30")
+    assert_response :unprocessable_entity
+  end
+
   test "series and net worth preserve server values and currency" do
     invoke("get_report_accounts", per_page: 100)
     assert_response :success

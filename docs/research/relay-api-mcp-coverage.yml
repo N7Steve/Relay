@@ -477,7 +477,8 @@
         "get_activity_report",
         "get_category_report",
         "get_report_accounts",
-        "get_shared_expenses"
+        "get_shared_expenses",
+        "get_spending_trend"
       ],
       "evidence": [
         "test/controllers/api/v1/reporting_operations_test.rb"

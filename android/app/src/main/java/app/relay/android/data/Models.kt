@@ -159,6 +159,22 @@ fun reportingMonthName(start: LocalDate, startDay: Int): LocalDate =
     @SerialName("investment_return") val investmentReturn: Money? = null,
 )
 
+/** `POST /actions/get_spending_trend`: cumulative spending against the previous month. */
+@Serializable data class SpendingTrend(
+    val currency: String,
+    val period: ReportPeriod,
+    @SerialName("previous_period") val previousPeriod: ReportPeriod,
+    @SerialName("current_total") val currentTotal: String,
+    @SerialName("comparison_total") val comparisonTotal: String,
+    val delta: String,
+    val current: List<SpendingPoint>,
+    val previous: List<SpendingPoint>,
+)
+
+@Serializable data class SpendingPoint(val date: String, val amount: String) {
+    val decimal: BigDecimal get() = amount.toBigDecimalOrNull() ?: BigDecimal.ZERO
+}
+
 @Serializable data class CashFlowNode(
     val name: String,
     val kind: String,
@@ -216,9 +232,14 @@ data class FlowCategory(val node: CashFlowNode, val children: List<CashFlowNode>
     val status: String? = null,
     @SerialName("institution_name") val institutionName: String? = null,
     @SerialName("logo_url") val logoUrl: String? = null,
+    val capabilities: AccountCapabilities? = null,
 ) {
     val isLiability get() = classification == "liability"
+    /** Servers that predate capabilities are treated as writable; the API still enforces access. */
+    val writable get() = capabilities?.write != false && status != "disabled"
 }
+
+@Serializable data class AccountCapabilities(val read: Boolean = true, val annotate: Boolean = false, val write: Boolean = false)
 
 @Serializable data class AccountsPage(val accounts: List<Account>, val pagination: Pagination = Pagination())
 
@@ -258,8 +279,36 @@ data class FlowCategory(val node: CashFlowNode, val children: List<CashFlowNode>
     val transfer: TransferRef? = null,
     val tags: List<TagRef> = emptyList(),
     @SerialName("editable_fields") val editableFields: List<String> = emptyList(),
+    val kind: String? = null,
+    @SerialName("native_operation") val nativeOperation: String? = null,
+    @SerialName("shared_expense") val sharedExpense: Boolean = false,
+    val excluded: Boolean = false,
+    val source: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
 ) {
     val isIncome get() = signedAmountCents > 0
+
+    /** What the movement is, which decides its icon, detail and editable fields. */
+    val type: MovementType get() = when {
+        nativeOperation == "valuation" || kind == "investment_value_adjustment" -> MovementType.Valuation
+        nativeOperation == "contribution" || kind == "investment_contribution" -> MovementType.Contribution
+        nativeOperation == "withdrawal" -> MovementType.Withdrawal
+        nativeOperation == "transfer" || transfer != null || kind in TRANSFER_KINDS -> MovementType.Transfer
+        isIncome -> MovementType.Income
+        else -> MovementType.Expense
+    }
+
+    companion object {
+        val TRANSFER_KINDS = setOf("funds_movement", "cc_payment", "loan_payment", "investment_contribution", "transfer_to_excluded", "transfer_from_excluded")
+    }
+}
+
+enum class MovementType(val label: String) {
+    Expense("Gasto"), Income("Ingreso"), Transfer("Transferencia"),
+    Contribution("Aportación"), Withdrawal("Retirada"), Valuation("Valoración");
+
+    /** Ordinary income and spending carry a category, merchant and tags. */
+    val ordinary get() = this == Expense || this == Income
 }
 
 @Serializable data class TransactionsPage(val transactions: List<Transaction>, val pagination: Pagination = Pagination())

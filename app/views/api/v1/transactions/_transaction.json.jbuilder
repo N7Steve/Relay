@@ -24,16 +24,28 @@ json.classification transaction.entry.classification
 
 account = transaction.entry.account
 transfer = transaction.transfer
+# Managed-portfolio valuations, contributions, withdrawals and transfers have a
+# deterministic name and a read-only native classification.
+native_operation = transaction.native_managed_operation
+json.kind transaction.kind
+json.native_operation native_operation
+json.shared_expense transaction.shared_expense?
+json.excluded transaction.entry.excluded?
+
 editable_fields = []
 if !transaction.entry.split_child? && api_access.allowed?(account, :annotate)
-  editable_fields += %w[merchant_id tag_ids]
-  if !transfer || [ transfer.from_account, transfer.to_account ].all? { |leg| api_access.allowed?(leg, :annotate) }
-    editable_fields << "category_id"
-  end
-  if api_access.allowed?(account, :write)
-    editable_fields << "name"
-    split_parent = @split_parent_ids ? @split_parent_ids.include?(transaction.entry.id) : transaction.entry.split_parent?
-    editable_fields += %w[date amount] unless split_parent || transfer
+  editable_fields << "notes"
+  unless native_operation
+    editable_fields << "tag_ids"
+    editable_fields << "merchant_id" unless transfer
+    if !transfer || [ transfer.from_account, transfer.to_account ].all? { |leg| api_access.allowed?(leg, :annotate) }
+      editable_fields << "category_id"
+    end
+    if api_access.allowed?(account, :write)
+      editable_fields << "name"
+      split_parent = @split_parent_ids ? @split_parent_ids.include?(transaction.entry.id) : transaction.entry.split_parent?
+      editable_fields += %w[date amount shared_expense] unless split_parent || transfer
+    end
   end
 end
 json.editable_fields editable_fields

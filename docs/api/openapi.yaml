@@ -1420,6 +1420,25 @@ components:
           nullable: true
         user_modified:
           type: boolean
+        kind:
+          type: string
+          description: Accounting kind, e.g. standard, funds_movement, investment_contribution
+            or investment_value_adjustment
+        native_operation:
+          type: string
+          nullable: true
+          enum:
+          - valuation
+          - contribution
+          - withdrawal
+          - transfer
+          -
+          description: Managed-portfolio operation with a deterministic name and read-only
+            classification
+        shared_expense:
+          type: boolean
+        excluded:
+          type: boolean
         editable_fields:
           type: array
           items:
@@ -1431,8 +1450,10 @@ components:
             - category_id
             - merchant_id
             - tag_ids
+            - notes
+            - shared_expense
           description: Basic fields available for individual editing, considering
-            account access, splits and paired transfers
+            account access, splits, paired transfers and native portfolio operations
         classification:
           type: string
         account:
@@ -4918,6 +4939,26 @@ components:
       required: []
       additionalProperties: false
     DailyInputGetActivityReport:
+      type: object
+      properties:
+        start_date:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        end_date:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        account_ids:
+          type: array
+          items:
+            type: string
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          maxItems: 100
+          uniqueItems: true
+      required:
+      - start_date
+      - end_date
+      additionalProperties: false
+    DailyInputGetSpendingTrend:
       type: object
       properties:
         start_date:
@@ -13007,6 +13048,63 @@ paths:
               properties:
                 arguments:
                   "$ref": "#/components/schemas/DailyInputGetActivityReport"
+        required: true
+  "/api/v1/actions/get_spending_trend":
+    post:
+      summary: Cumulative daily spending of a period (at most 92 days) against the
+        previous month. Uses authenticated account permissions and Relay financial
+        rules.
+      tags:
+      - Daily operations
+      security:
+      - apiKeyAuth: []
+      description: Shared operation with MCP. Money uses signed decimal strings. Writes
+        require a unique actor-scoped idempotency_key; reusing a key with changed
+        arguments returns 422. Account permissions are checked on every call. Family-wide
+        organization writes require administrator and complete account visibility.
+      parameters: []
+      responses:
+        '200':
+          description: operation result
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DailyOperationResult"
+        '401':
+          description: missing, expired or revoked credential
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: credential scope or account permission denied
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: resource unavailable to this actor
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: invalid input or idempotency conflict
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - arguments
+              additionalProperties: false
+              properties:
+                arguments:
+                  "$ref": "#/components/schemas/DailyInputGetSpendingTrend"
         required: true
   "/api/v1/actions/get_category_report":
     post:
@@ -26848,6 +26946,10 @@ paths:
                       type: boolean
                       description: Whether provider syncs should preserve user-supplied
                         transaction changes
+                    shared_expense:
+                      type: boolean
+                      description: 'Shared with a partner: expenses count half in
+                        adjusted spending (requires write access)'
                     tag_ids:
                       type: array
                       items:
@@ -26965,6 +27067,9 @@ paths:
                       - expense
                       - inflow
                       - outflow
+                    shared_expense:
+                      type: boolean
+                      description: Shared with a partner (requires write access)
                     tag_ids:
                       type: array
                       items:

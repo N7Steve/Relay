@@ -178,6 +178,7 @@ RSpec.describe 'API V1 Transactions', type: :request do
               external_id: { type: :string, description: 'Optional external idempotency key scoped to account and source' },
               source: { type: :string, description: 'Optional source namespace for external_id. Requires external_id and defaults to api when external_id is provided' },
               user_modified: { type: :boolean, description: 'Whether provider syncs should preserve user-supplied transaction changes' },
+              shared_expense: { type: :boolean, description: 'Shared with a partner: expenses count half in adjusted spending (requires write access)' },
               tag_ids: { type: :array, items: { type: :string, format: :uuid }, description: 'Array of tag IDs' }
             },
             required: %w[account_id date amount name]
@@ -320,6 +321,7 @@ RSpec.describe 'API V1 Transactions', type: :request do
               category_id: { type: :string, format: :uuid, nullable: true, description: 'Omit to keep the category or send null to clear it.' },
               merchant_id: { type: :string, format: :uuid, nullable: true, description: 'Omit to keep the merchant or send null to clear it.' },
               nature: { type: :string, enum: %w[income expense inflow outflow] },
+              shared_expense: { type: :boolean, description: 'Shared with a partner (requires write access)' },
               tag_ids: {
                 type: :array,
                 items: { type: :string, format: :uuid },

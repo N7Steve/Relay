@@ -28,9 +28,12 @@ import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -78,7 +81,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-private enum class Picker { Category, Merchant, Tags }
+internal enum class Picker { Category, Merchant, Tags }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable internal fun TransactionEditor(transaction: Transaction, state: TransactionEditState, vm: AppViewModel) {
@@ -97,6 +100,8 @@ private enum class Picker { Category, Merchant, Tags }
     var tagIds by rememberSaveable(transaction.id) { mutableStateOf(transaction.tags.map { it.id }) }
     // Names and colours for the chips; ids alone survive configuration changes.
     val knownTags = remember(transaction.id) { mutableStateMapOf<String, TagRef>().apply { transaction.tags.forEach { put(it.id, it) } } }
+    var notes by rememberSaveable(transaction.id) { mutableStateOf(transaction.notes.orEmpty()) }
+    var shared by rememberSaveable(transaction.id) { mutableStateOf(transaction.sharedExpense) }
     var picker by rememberSaveable(transaction.id) { mutableStateOf<Picker?>(null) }
     var pickingDate by rememberSaveable(transaction.id) { mutableStateOf(false) }
 
@@ -120,6 +125,8 @@ private enum class Picker { Category, Merchant, Tags }
         if ("tag_ids" in fields && tagIds.toSet() != transaction.tags.map { it.id }.toSet()) {
             put("tag_ids", JsonArray(tagIds.map { JsonPrimitive(it) }))
         }
+        if ("notes" in fields && notes.trim() != transaction.notes.orEmpty().trim()) put("notes", notes.trim())
+        if ("shared_expense" in fields && shared != transaction.sharedExpense) put("shared_expense", shared)
     }
     val canSave = changes.isNotEmpty() && !(nameChanged && name.isBlank()) && ("amount" !in fields || validAmount)
     val saving by rememberUpdatedState(state.saving)
@@ -135,12 +142,12 @@ private enum class Picker { Category, Merchant, Tags }
             Modifier.fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Editar movimiento", style = MaterialTheme.typography.titleLarge)
+            Text(if (fields == listOf("notes")) "Notas" else "Editar movimiento", style = MaterialTheme.typography.titleLarge)
             if ("name" in fields) OutlinedTextField(
                 value = name, onValueChange = { name = it }, label = { Text("Nombre") },
                 singleLine = true, enabled = !state.saving, isError = nameChanged && name.isBlank(),
                 modifier = Modifier.fillMaxWidth(),
-            ) else Text(transaction.name, color = Relay.muted)
+            ) else Text(transaction.name, color = Relay.muted, style = MaterialTheme.typography.bodyLarge)
             if ("amount" in fields) OutlinedTextField(
                 value = amount, onValueChange = { amount = it }, label = { Text("Importe · ${transaction.currency}") },
                 singleLine = true, enabled = !state.saving, isError = !validAmount,
@@ -165,6 +172,8 @@ private enum class Picker { Category, Merchant, Tags }
                 },
             ) { picker = Picker.Merchant }
             if ("tag_ids" in fields) TagsChoice(tagIds.mapNotNull(knownTags::get), state.saving) { picker = Picker.Tags }
+            if ("shared_expense" in fields) SharedExpenseCheck(shared, !state.saving) { shared = it }
+            if ("notes" in fields) NotesField(notes, !state.saving) { notes = it }
             state.error?.let { ErrorBanner(it) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = vm::cancelEdit, enabled = !state.saving) { Text("Cancelar") }
@@ -199,7 +208,7 @@ private enum class Picker { Category, Merchant, Tags }
     }
 }
 
-@Composable private fun EditorChoice(
+@Composable internal fun EditorChoice(
     label: String,
     value: String,
     busy: Boolean,
@@ -220,8 +229,34 @@ private enum class Picker { Category, Merchant, Tags }
     }
 }
 
+/** The web's "Gasto compartido" check: a shared expense counts half in adjusted spending. */
+@Composable internal fun SharedExpenseCheck(checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)
+            .background(if (checked) Relay.violet.copy(alpha = 0.12f) else Relay.surface2.copy(alpha = 0.45f))
+            .clickable(enabled = enabled) { onChange(!checked) }.padding(start = 14.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Outlined.Group, null, tint = if (checked) Relay.violet else Relay.muted, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text("Gasto compartido", style = MaterialTheme.typography.bodyLarge, color = Relay.text)
+            Text("Cuenta la mitad en tus gastos ajustados", style = MaterialTheme.typography.labelSmall, color = Relay.muted)
+        }
+        Checkbox(checked, onCheckedChange = onChange, enabled = enabled,
+            colors = CheckboxDefaults.colors(checkedColor = Relay.violet, uncheckedColor = Relay.muted, checkmarkColor = Color.White))
+    }
+}
+
+@Composable internal fun NotesField(notes: String, enabled: Boolean, onChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = notes, onValueChange = onChange, label = { Text("Notas") }, enabled = enabled,
+        minLines = 2, maxLines = 6, modifier = Modifier.fillMaxWidth(),
+    )
+}
+
 @OptIn(ExperimentalLayoutApi::class)
-@Composable private fun TagsChoice(tags: List<TagRef>, busy: Boolean, onClick: () -> Unit) {
+@Composable internal fun TagsChoice(tags: List<TagRef>, busy: Boolean, onClick: () -> Unit) {
     OutlinedButton(onClick = onClick, enabled = !busy, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium) {
         Column(Modifier.weight(1f).padding(vertical = 3.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("Etiquetas", color = Relay.muted, style = MaterialTheme.typography.labelMedium)
@@ -238,7 +273,7 @@ private enum class Picker { Category, Merchant, Tags }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable private fun EditDateDialog(date: String, onDismiss: () -> Unit, onSelect: (String) -> Unit) {
+@Composable internal fun EditDateDialog(date: String, onDismiss: () -> Unit, onSelect: (String) -> Unit) {
     val selected = rememberDatePickerState(initialSelectedDateMillis = LocalDate.parse(date).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
     DatePickerDialog(
         onDismissRequest = onDismiss,
@@ -290,7 +325,7 @@ private enum class Picker { Category, Merchant, Tags }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable private fun CategoryPicker(selectedId: String?, vm: AppViewModel, onDismiss: () -> Unit, onSelect: (CategoryOption?) -> Unit) {
+@Composable internal fun CategoryPicker(selectedId: String?, vm: AppViewModel, onDismiss: () -> Unit, onSelect: (CategoryOption?) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
     var attempt by rememberSaveable { mutableStateOf(0) }
     val result = rememberOptions(attempt) { vm.categories() }
@@ -354,7 +389,7 @@ private enum class Picker { Category, Merchant, Tags }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable private fun TagPicker(
+@Composable internal fun TagPicker(
     selectedIds: List<String>,
     known: List<TagRef>,
     vm: AppViewModel,
@@ -410,7 +445,7 @@ private enum class Picker { Category, Merchant, Tags }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable private fun MerchantPicker(selectedId: String?, vm: AppViewModel, onDismiss: () -> Unit, onSelect: (NamedRef?) -> Unit) {
+@Composable internal fun MerchantPicker(selectedId: String?, vm: AppViewModel, onDismiss: () -> Unit, onSelect: (NamedRef?) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
     var attempt by rememberSaveable { mutableStateOf(0) }
     val result = rememberOptions(attempt) { vm.merchants() }

@@ -285,6 +285,45 @@ class RelayRepositoryTest {
         assertEquals(listOf("category_id"), updated.editableFields)
     }
 
+    @Test fun spendingTrendAndNewMovementsUseTheirActions() = runBlocking {
+        signIn()
+        route(
+            "/api/v1/actions/get_spending_trend" to json("""{"currency":"EUR","period":{"start_date":"2026-11-01","end_date":"2026-11-02"},
+                "previous_period":{"start_date":"2026-10-01","end_date":"2026-10-31"},"current_total":"30.0","comparison_total":"10.0",
+                "delta":"20.0","current":[{"date":"2026-11-01","amount":"5.0"},{"date":"2026-11-02","amount":"30.0"}],
+                "previous":[{"date":"2026-10-01","amount":"0.0"},{"date":"2026-10-02","amount":"10.0"}]}"""),
+            "/api/v1/transactions" to json("""{"id":"t9","date":"2026-11-22","currency":"EUR","signed_amount_cents":-1250,
+                "kind":"standard","shared_expense":true,"editable_fields":["notes","shared_expense"]}""", 201),
+        )
+        val trend = repo.spendingTrend(LocalDate.parse("2026-11-01"), LocalDate.parse("2026-11-02"))
+        assertEquals(BigDecimal("30.0"), trend.current.last().decimal)
+        assertEquals("2026-10-01", trend.previousPeriod.startDate)
+        val trendRequest = server.takeRequest()
+        assertEquals("POST", trendRequest.method)
+        assertEquals("2026-11-01", api.json.parseToJsonElement(trendRequest.body.readUtf8()).jsonObject["arguments"]!!
+            .jsonObject["start_date"]!!.jsonPrimitive.content)
+
+        val created = repo.createTransaction(fields("account_id" to value("a1"), "amount" to value("12.50"), "nature" to value("expense"),
+            "external_id" to value("draft-1"), "source" to value("relay-android")))
+        assertTrue(created.sharedExpense)
+        assertEquals(MovementType.Expense, created.type)
+        val body = api.json.parseToJsonElement(server.takeRequest().body.readUtf8()).jsonObject["transaction"]!!.jsonObject
+        assertEquals("draft-1", body["external_id"]!!.jsonPrimitive.content)
+        assertEquals("expense", body["nature"]!!.jsonPrimitive.content)
+    }
+
+    @Test fun movementTypeFollowsKindAndNativeOperation() {
+        fun movement(kind: String?, native: String? = null, cents: Long = -100, transfer: TransferRef? = null) =
+            Transaction(id = "t", date = "2026-11-22", currency = "EUR", signedAmountCents = cents, kind = kind, nativeOperation = native, transfer = transfer)
+        assertEquals(MovementType.Valuation, movement("investment_value_adjustment", "valuation", cents = 500).type)
+        assertEquals(MovementType.Contribution, movement("investment_contribution").type)
+        assertEquals(MovementType.Withdrawal, movement("funds_movement", "withdrawal").type)
+        assertEquals(MovementType.Transfer, movement("funds_movement", transfer = TransferRef("x")).type)
+        assertEquals(MovementType.Income, movement("standard", cents = 100).type)
+        assertEquals(MovementType.Expense, movement("standard").type)
+        assertEquals(MovementType.Expense, movement(null).type)
+    }
+
     @Test fun logoutRevokesOnTheServerAndForgetsTokens() = runBlocking {
         signIn()
         server.enqueue(MockResponse().setResponseCode(204))

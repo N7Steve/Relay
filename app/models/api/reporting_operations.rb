@@ -31,6 +31,23 @@ module Api::ReportingOperations
       expense_change_percent: report_percentage_change(prior.expenses, current.expenses))
   end
 
+  # Cumulative daily spending of a period against the month before it, as the
+  # dashboard's spending chart. The comparison total stops at the same day count.
+  def get_spending_trend(args)
+    period = report_period(args, max_days: 92)
+    previous = Period.custom(start_date: period.start_date.prev_month, end_date: period.start_date - 1)
+    accounts = report_accounts(args, include_tax_advantaged: true)
+    statement = IncomeStatement.new(family, user: user, accounts: accounts)
+    current, prior = spending_series(statement, period), spending_series(statement, previous)
+    comparison = prior[[ current.size, prior.size ].min - 1]
+    current_total, comparison_total = current.last.fetch(:amount).to_d, comparison.fetch(:amount).to_d
+    report_envelope(period, accounts).merge(
+      previous_period: { start_date: previous.start_date.iso8601, end_date: previous.end_date.iso8601 },
+      current_total: current_total.to_s("F"), comparison_total: comparison_total.to_s("F"),
+      comparison_end_date: comparison.fetch(:date), delta: (current_total - comparison_total).to_s("F"),
+      current: current, previous: prior)
+  end
+
   def get_category_report(args)
     period, accounts = report_period(args), report_accounts(args)
     statement = IncomeStatement.new(family, user: user, accounts: accounts)
@@ -129,6 +146,15 @@ module Api::ReportingOperations
       latest = Sync.where(syncable_type: "Account", syncable_id: accounts.select(:id)).maximum(:updated_at)
       { generated_at: Time.current.iso8601, latest_account_sync_update: latest&.iso8601,
         recalculating: Sync.where(syncable_type: "Account", syncable_id: accounts.select(:id)).visible.exists? }
+    end
+
+    def spending_series(statement, period)
+      daily = statement.daily_expense_series(period: period).index_by(&:date)
+      cumulative = BigDecimal("0")
+      period.date_range.map do |date|
+        cumulative += daily[date]&.total || 0
+        { date: date.iso8601, amount: cumulative.to_d.to_s("F") }
+      end
     end
 
     def financial_series(series)

@@ -2,7 +2,7 @@ package app.relay.android.ui
 
 import app.relay.android.data.ActivityReport
 import app.relay.android.data.CashFlow
-import app.relay.android.data.NetWorthHistory
+import app.relay.android.data.SpendingTrend
 import app.relay.android.data.RelayRepository
 import app.relay.android.data.SessionExpiredException
 import app.relay.android.data.reportingMonthStart
@@ -25,7 +25,7 @@ data class ReportState(
     val current: LocalDate? = null,
     val activity: Map<LocalDate, ActivityReport> = emptyMap(),
     val flows: Map<LocalDate, CashFlow> = emptyMap(),
-    val worth: Map<LocalDate, NetWorthHistory> = emptyMap(),
+    val spending: Map<LocalDate, SpendingTrend> = emptyMap(),
     val loading: Boolean = false,
     val refreshing: Boolean = false,
     val error: String? = null,
@@ -42,7 +42,7 @@ data class ReportState(
 }
 
 /**
- * The monthly report: headline figures, a six-month trend, net worth and categories.
+ * The monthly report: headline figures, a six-month trend, spending against the previous month and categories.
  * Results are kept per month, so stepping back one month only loads that month.
  */
 class Reports(
@@ -86,7 +86,7 @@ class Reports(
         val month = mutable.value.month ?: return
         job?.cancel()
         val current = reportingMonthStart(today(), mutable.value.startDay)
-        mutable.update { it.copy(current = current, activity = emptyMap(), flows = emptyMap(), worth = emptyMap(), error = null) }
+        mutable.update { it.copy(current = current, activity = emptyMap(), flows = emptyMap(), spending = emptyMap(), error = null) }
         load(month, refreshing = true)
     }
 
@@ -101,7 +101,7 @@ class Reports(
         val cached = mutable.value
         val months = cached.copy(month = month).trendMonths
         val end = ReportState.end(month)
-        if (months.all { it in cached.activity } && month in cached.flows && month in cached.worth) {
+        if (months.all { it in cached.activity } && month in cached.flows && month in cached.spending) {
             mutable.update { it.copy(loading = false, refreshing = false) }
             return
         }
@@ -113,18 +113,19 @@ class Reports(
                         start to async { attempt { repository.activityReport(start, ReportState.end(start)) } }
                     }
                     val flow = if (month in cached.flows) null else async { attempt { repository.cashFlow(month, end) } }
-                    val worth = if (month in cached.worth) null else async {
-                        attempt { repository.netWorthBetween(month, minOf(end, today())) }
+                    // The current month's curve stops today; the previous month is drawn in full.
+                    val spending = if (month in cached.spending) null else async {
+                        attempt { repository.spendingTrend(month, minOf(end, today())) }
                     }
                     val loaded = activity.map { (start, result) -> start to result.await() }
                     val flowResult = flow?.await()
-                    val worthResult = worth?.await()
+                    val spendingResult = spending?.await()
                     val failure = loaded.firstOrNull { it.first == month }?.second?.exceptionOrNull()
                     mutable.update { state ->
                         state.copy(
                             activity = state.activity + loaded.mapNotNull { (start, result) -> result.getOrNull()?.let { start to it } },
                             flows = flowResult?.getOrNull()?.let { state.flows + (month to it) } ?: state.flows,
-                            worth = worthResult?.getOrNull()?.let { state.worth + (month to it) } ?: state.worth,
+                            spending = spendingResult?.getOrNull()?.let { state.spending + (month to it) } ?: state.spending,
                             loading = if (state.month == month) false else state.loading,
                             refreshing = if (state.month == month) false else state.refreshing,
                             error = if (state.month == month) failure?.let(describe) else state.error,

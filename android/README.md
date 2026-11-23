@@ -14,8 +14,16 @@ y `am.sure.mobile`).
   saldo del mes en curso, gastos netos por categoría y últimos movimientos.
   Se puede actualizar deslizando hacia abajo.
 - **Movimientos:** selector de cuentas, búsqueda, paginación y logos de
-  comercios. Abre un movimiento para editar el nombre, el importe, la fecha,
-  la categoría o el comercio según los permisos de la cuenta.
+  comercios. Cada tipo tiene su detalle: los gastos e ingresos muestran siempre
+  cuenta, categoría, comercio y etiquetas, con notas y demás atributos en «Más
+  información»; las valoraciones indican subida o bajada y solo admiten notas;
+  aportaciones, retiradas y transferencias muestran origen y destino, sin
+  comercio. Los gastos compartidos llevan el mismo icono que en la web y se
+  marcan al editar. El botón «+» registra un gasto o ingreso en una cuenta
+  corriente o tarjeta; un identificador de borrador evita duplicarlo al reintentar.
+- **Informe:** ahorro, ingresos y gastos del mes con la rentabilidad de
+  inversiones aparte, tendencia de seis meses, gasto acumulado frente al mes
+  anterior y gasto o ingreso por categoría con subcategorías desplegables.
 - **Cuenta:** logo bancario o personalizado, saldo y movimientos de una cuenta.
 - **Ajustes:** servidor, versión, búsqueda de actualizaciones, cierre de sesión
   (revoca los tokens en el servidor) y olvido local.

@@ -9,6 +9,8 @@ import app.relay.android.data.DiskState
 import app.relay.android.data.NetWorthRange
 import app.relay.android.data.SessionExpiredException
 import app.relay.android.data.Transaction
+import app.relay.android.data.value
+import java.util.UUID
 import kotlinx.serialization.json.JsonObject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -23,6 +25,15 @@ data class LoginState(val busy: Boolean = false, val mfaRequired: Boolean = fals
 
 data class SummaryState(val loading: Boolean = false, val error: String? = null)
 data class TransactionEditState(val transaction: Transaction? = null, val saving: Boolean = false, val error: String? = null)
+
+/** A new movement being written; [draftId] makes a retried submission idempotent on the server. */
+data class TransactionCreateState(
+    val open: Boolean = false,
+    val accountId: String? = null,
+    val draftId: String = "",
+    val saving: Boolean = false,
+    val error: String? = null,
+)
 
 data class FeedState(
     val accountId: String? = null,
@@ -83,6 +94,12 @@ class Feed(private val scope: kotlinx.coroutines.CoroutineScope, private val loa
 
     fun clear() { job?.cancel(); mutable.value = FeedState() }
 
+    /** Something was added: reload the first page if this list has been opened. */
+    fun reloadIfOpen() {
+        if (mutable.value.page == 0 && job?.isActive != true) return
+        refresh()
+    }
+
     fun transactionChanged(transaction: Transaction) {
         if (mutable.value.page == 0 && job?.isActive != true) return
         mutable.update { state ->
@@ -133,6 +150,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val busySigningOut = signingOut.asStateFlow()
     private val editState = MutableStateFlow(TransactionEditState())
     val editor = editState.asStateFlow()
+    private val createState = MutableStateFlow(TransactionCreateState())
+    val creator = createState.asStateFlow()
     private val worthLoading = MutableStateFlow(false)
     val netWorthLoading = worthLoading.asStateFlow()
     private var worthJob: Job? = null
@@ -283,10 +302,40 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun startCreate(accountId: String?) {
+        if (!createState.value.open) createState.value = TransactionCreateState(open = true, accountId = accountId, draftId = UUID.randomUUID().toString())
+    }
+
+    fun cancelCreate() {
+        if (!createState.value.saving) createState.value = TransactionCreateState()
+    }
+
+    fun createTransaction(fields: JsonObject) {
+        val draft = createState.value
+        if (!draft.open || draft.saving) return
+        createState.value = draft.copy(saving = true, error = null)
+        viewModelScope.launch {
+            try {
+                repository.createTransaction(JsonObject(fields + ("external_id" to value(draft.draftId)) + ("source" to value("relay-android"))))
+                if (createState.value.draftId != draft.draftId) return@launch
+                createState.value = TransactionCreateState()
+                movements.reloadIfOpen()
+                accountMovements.reloadIfOpen()
+                reports.invalidate()
+                refreshSummary()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                if (createState.value.draftId == draft.draftId) createState.value = draft.copy(error = describe(error))
+            }
+        }
+    }
+
     private fun resetScreens() {
         loginState.value = LoginState()
         summaryState.value = SummaryState()
         editState.value = TransactionEditState()
+        createState.value = TransactionCreateState()
         movements.clear(); accountMovements.clear(); recent.clear(); reports.clear()
     }
 

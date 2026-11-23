@@ -174,6 +174,9 @@ class RelayRepository(
     suspend fun activityReport(start: LocalDate, end: LocalDate): ActivityReport =
         api.json.decodeFromString(authorized("/actions/get_activity_report", method = "POST", body = period(start, end)))
 
+    suspend fun spendingTrend(start: LocalDate, end: LocalDate): SpendingTrend =
+        api.json.decodeFromString(authorized("/actions/get_spending_trend", method = "POST", body = period(start, end)))
+
     private fun period(start: LocalDate, end: LocalDate) = fields("arguments" to fields(
         "start_date" to value(start.toString()),
         "end_date" to value(end.toString()),
@@ -246,6 +249,10 @@ class RelayRepository(
 
     /** The signed-in user's personal tags, alphabetically. */
     suspend fun tags(): List<TagRef> = api.json.decodeFromString(authorized("/tags"))
+
+    /** [draft] carries an external_id so a retried submission never records the movement twice. */
+    suspend fun createTransaction(draft: JsonObject): Transaction =
+        api.json.decodeFromString(authorized("/transactions", method = "POST", body = fields("transaction" to draft)))
 
     suspend fun updateTransaction(id: String, changes: JsonObject): Transaction =
         api.json.decodeFromString(authorized("/transactions/$id", method = "PATCH", body = fields("transaction" to changes)))

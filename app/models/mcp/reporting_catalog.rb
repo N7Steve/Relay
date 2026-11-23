@@ -8,6 +8,8 @@ class Mcp::ReportingCatalog
     [
       c.definition("get_report_accounts", c::PAGE, read: true),
       c.definition("get_activity_report", filter, required: %w[start_date end_date], read: true),
+      c.definition("get_spending_trend", filter, required: %w[start_date end_date], read: true,
+        description: "Cumulative daily spending of a period (at most 92 days) against the previous month. Uses authenticated account permissions and Relay financial rules."),
       c.definition("get_category_report", filter, required: %w[start_date end_date], read: true),
       c.definition("get_shared_expenses", filter, required: %w[start_date end_date], read: true),
       c.definition("get_investment_report", filter, required: %w[start_date end_date], read: true),

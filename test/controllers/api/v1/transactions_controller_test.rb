@@ -702,6 +702,46 @@ class Api::V1::TransactionsControllerTest < ActionDispatch::IntegrationTest
     assert_empty response.parsed_body["editable_fields"]
   end
 
+  test "movement type decides editable fields and shared expenses are writable" do
+    expense = create_transaction(account: accounts(:depository), amount: 40)
+
+    get api_v1_transaction_url(expense.transaction), headers: api_headers(@api_key)
+    assert_response :success
+    body = response.parsed_body
+    assert_equal "standard", body["kind"]
+    assert_nil body["native_operation"]
+    assert_equal false, body["shared_expense"]
+    assert_equal false, body["excluded"]
+    assert_equal %w[amount category_id date merchant_id name notes shared_expense tag_ids], body["editable_fields"].sort
+
+    patch api_v1_transaction_url(expense.transaction), params: { transaction: { shared_expense: true, notes: "Cena" } },
+      headers: api_headers(@api_key), as: :json
+    assert_response :success
+    assert_equal true, response.parsed_body["shared_expense"]
+    assert expense.transaction.reload.shared_expense?
+    assert_equal "Cena", expense.reload.notes
+
+    post api_v1_transactions_url, params: { transaction: { account_id: accounts(:depository).id, name: "Compra", amount: "12.5",
+      nature: "expense", date: Date.current.iso8601, shared_expense: true } }, headers: api_headers(@api_key), as: :json
+    assert_response :created
+    assert_equal true, response.parsed_body["shared_expense"]
+    assert Transaction.find(response.parsed_body["id"]).shared_expense?
+
+    transfer = create_transfer(from_account: accounts(:depository), to_account: accounts(:credit_card), amount: 10)
+    get api_v1_transaction_url(transfer.outflow_transaction), headers: api_headers(@api_key)
+    assert_not_includes response.parsed_body["editable_fields"], "merchant_id"
+    assert_not_includes response.parsed_body["editable_fields"], "shared_expense"
+
+    portfolio = @family.accounts.create!(name: "Managed", balance: 1000, currency: "USD",
+      accountable: Investment.new(subtype: "roboadvisor"))
+    valuation = create_transaction(account: portfolio, amount: -25, kind: "investment_value_adjustment")
+    get api_v1_transaction_url(valuation.transaction), headers: api_headers(@api_key)
+    assert_response :success
+    assert_equal "investment_value_adjustment", response.parsed_body["kind"]
+    assert_equal "valuation", response.parsed_body["native_operation"]
+    assert_equal [ "notes" ], response.parsed_body["editable_fields"]
+  end
+
   test "updating a transfer category requires annotation access to both accounts" do
     source = accounts(:depository)
     destination = accounts(:credit_card)

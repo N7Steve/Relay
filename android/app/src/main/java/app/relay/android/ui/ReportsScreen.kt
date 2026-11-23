@@ -3,13 +3,17 @@ package app.relay.android.ui
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -32,6 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -41,9 +46,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
-import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Today
+import androidx.compose.material.icons.outlined.TrendingDown
+import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -66,17 +72,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,7 +96,7 @@ import app.relay.android.data.CashFlow
 import app.relay.android.data.CashFlowNode
 import app.relay.android.data.DiskState
 import app.relay.android.data.FlowCategory
-import app.relay.android.data.NetWorthHistory
+import app.relay.android.data.SpendingTrend
 import app.relay.android.data.Transaction
 import app.relay.android.data.formatMoney
 import app.relay.android.data.reportingMonthName
@@ -249,7 +260,7 @@ private class LastShown<T> { var value: T? = null }
 ) {
     val pending = state.loading && state.month == month
     val activity = shownWhileLoading(state.activity[month], pending)
-    val worth = shownWhileLoading(state.worth[month], pending)
+    val spending = shownWhileLoading(state.spending[month], pending)
     val flow = shownWhileLoading(state.flows[month], pending)
     Column(Modifier.fillMaxWidth().padding(top = 12.dp).animateContentSize(tween(Relay.BASE, easing = Relay.easeOut)),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -259,7 +270,7 @@ private class LastShown<T> { var value: T? = null }
             else -> HeroSkeleton()
         }
         TrendCard(state, month, startDay, currency, onSelect)
-        Box(Modifier.stale(worth != null && state.worth[month] == null)) { WorthCard(worth, pending) }
+        Box(Modifier.stale(spending != null && state.spending[month] == null)) { SpendingCard(spending, pending, month, startDay) }
         Box(Modifier.stale(flow != null && state.flows[month] == null)) { CategoriesCard(flow, pending, month, icons, onCategory) }
     }
 }
@@ -308,10 +319,25 @@ private class LastShown<T> { var value: T? = null }
                 HeroFigure("Gastos", formatMoney(expenses, report.currency),
                     change(report.previous.expenses.decimal, report.expenseChangePercent, higherIsBetter = false), Modifier.weight(1f), alignEnd = true)
             }
+            // Market movements are neither income nor spending, so they sit apart from both.
             investment?.let {
-                Spacer(Modifier.height(12.dp))
-                Text("Incluye ${formatMoney(it, report.currency, signed = true)} de rentabilidad de inversiones",
-                    style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+                val up = it.signum() > 0
+                val tint = if (up) Color(0xFFB9F6D9) else Color(0xFFFFC9C9)
+                Spacer(Modifier.height(14.dp))
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.12f))
+                        .padding(horizontal = 12.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(if (up) Icons.Outlined.TrendingUp else Icons.Outlined.TrendingDown, null, tint = tint, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Rendimiento de inversiones", style = MaterialTheme.typography.labelMedium, color = Color.White)
+                        Text("Aparte de ingresos y gastos", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+                    }
+                    Text(formatMoney(it, report.currency, signed = true), style = MaterialTheme.typography.titleSmall.merge(tabular),
+                        color = tint, maxLines = 1)
+                }
             }
         }
     }
@@ -421,31 +447,88 @@ private fun change(previous: BigDecimal, percentText: String?, higherIsBetter: B
     }
 }
 
-@Composable private fun WorthCard(history: NetWorthHistory?, pending: Boolean) {
-    ReportCard("Patrimonio", "Evolución durante el mes") {
-        val points = history?.points.orEmpty()
+/** Spending accumulated day by day against the previous month, as the web dashboard chart. */
+@Composable private fun SpendingCard(trend: SpendingTrend?, pending: Boolean, month: LocalDate, startDay: Int) {
+    ReportCard("Gasto", "Acumulado frente al mes anterior") {
         when {
-            history == null && pending -> Skeleton(Modifier.fillMaxWidth(), height = 100.dp)
-            history == null -> CardMessage("No se pudo cargar la evolución del patrimonio.")
-            points.size < 2 -> CardMessage("No hay suficiente historial de saldos para este mes.")
+            trend == null && pending -> Skeleton(Modifier.fillMaxWidth(), height = 150.dp)
+            trend == null -> CardMessage("No se pudo cargar la evolución del gasto.")
+            trend.current.isEmpty() -> CardMessage("No hay gastos en este mes.")
             else -> {
-                val first = points.first().value.decimal
-                val last = points.last().value.decimal
-                val delta = last - first
+                val total = trend.currentTotal.toBigDecimalOrNull() ?: BigDecimal.ZERO
+                val comparison = trend.comparisonTotal.toBigDecimalOrNull() ?: BigDecimal.ZERO
+                val delta = trend.delta.toBigDecimalOrNull() ?: BigDecimal.ZERO
+                val tone = when (delta.signum()) { 1 -> Relay.danger; -1 -> Relay.income; else -> Relay.muted }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                    Text(formatMoney(delta, history.currency, signed = true), style = MaterialTheme.typography.titleLarge.merge(tabular),
-                        color = when (delta.signum()) { 1 -> Relay.income; -1 -> Relay.danger; else -> Relay.text }, modifier = Modifier.weight(1f))
-                    if (first.signum() != 0) Text(
-                        "${if (delta.signum() >= 0) "↑" else "↓"} ${percent(delta.multiply(BigDecimal(100)).divide(first.abs(), 1, RoundingMode.HALF_UP))}",
-                        style = MaterialTheme.typography.labelLarge, color = Relay.muted,
+                    Column(Modifier.weight(1f)) {
+                        Text(formatMoney(total, trend.currency), style = MaterialTheme.typography.titleLarge.merge(tabular), color = Relay.text)
+                        Text(
+                            when (delta.signum()) {
+                                0 -> "Igual que el mes anterior"
+                                1 -> "${formatMoney(delta, trend.currency)} más que el mes anterior"
+                                else -> "${formatMoney(delta.abs(), trend.currency)} menos que el mes anterior"
+                            },
+                            style = MaterialTheme.typography.labelMedium, color = tone,
+                        )
+                    }
+                    if (comparison.signum() > 0 && delta.signum() != 0) Text(
+                        "${if (delta.signum() > 0) "↑" else "↓"} ${percent(delta.multiply(BigDecimal(100)).divide(comparison, 1, RoundingMode.HALF_UP))}",
+                        style = MaterialTheme.typography.labelLarge.merge(tabular), color = tone,
+                        modifier = Modifier.clip(RoundedCornerShape(50)).background(tone.copy(alpha = 0.14f)).padding(horizontal = 10.dp, vertical = 4.dp),
                     )
                 }
-                WorthChart(points.map { it.value.decimal })
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(formatMoney(first, history.currency), style = MaterialTheme.typography.labelMedium.merge(tabular), color = Relay.muted)
-                    Text(formatMoney(last, history.currency), style = MaterialTheme.typography.labelMedium.merge(tabular), color = Relay.text)
+                val days = (ReportState.end(month).toEpochDay() - month.toEpochDay() + 1).toInt()
+                SpendingChart(trend.current.map { it.decimal }, trend.previous.map { it.decimal }, days, trend)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Legend(monthName(month, startDay).substringBefore(' '), Relay.magenta)
+                    Spacer(Modifier.width(14.dp))
+                    Legend("Mes anterior", Relay.muted)
+                    Spacer(Modifier.weight(1f))
+                    Text("${month.format(dayMonth)} – ${ReportState.end(month).format(dayMonth)}",
+                        style = MaterialTheme.typography.labelSmall.merge(tabular), color = Relay.subtle)
                 }
             }
+        }
+    }
+}
+
+/** Two cumulative curves on the selected month's axis; the current one is revealed from the left. */
+@Composable private fun SpendingChart(current: List<BigDecimal>, previous: List<BigDecimal>, days: Int, key: Any) {
+    val reveal = remember(key) { Animatable(0f) }
+    LaunchedEffect(key) { reveal.animateTo(1f, tween(750, easing = Relay.easeOut)) }
+    val axis = maxOf(days, previous.size, current.size, 2)
+    val max = (current + previous).maxOfOrNull { it.toDouble() }?.takeIf { it > 0 } ?: 1.0
+    Canvas(Modifier.fillMaxWidth().height(140.dp)) {
+        val margin = 6.dp.toPx()
+        val width = size.width - 2 * margin
+        val height = size.height - 2 * margin
+        fun point(index: Int, value: BigDecimal) =
+            Offset(margin + width * index / (axis - 1), margin + height * (1 - (value.toDouble() / max).toFloat()))
+        fun path(values: List<BigDecimal>) = Path().apply {
+            values.forEachIndexed { index, value -> point(index, value).let { if (index == 0) moveTo(it.x, it.y) else lineTo(it.x, it.y) } }
+        }
+        listOf(0f, 0.5f, 1f).forEach { fraction ->
+            val y = margin + height * fraction
+            drawLine(Relay.border, Offset(margin, y), Offset(size.width - margin, y))
+        }
+        if (previous.size > 1) drawPath(path(previous), Relay.muted.copy(alpha = 0.8f),
+            style = Stroke(2.dp.toPx(), cap = StrokeCap.Round, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8.dp.toPx(), 6.dp.toPx()))))
+        if (current.isEmpty()) return@Canvas
+        val line = path(current)
+        val last = point(current.lastIndex, current.last())
+        val fill = Path().apply {
+            addPath(line)
+            lineTo(last.x, size.height - margin)
+            lineTo(margin, size.height - margin)
+            close()
+        }
+        clipRect(right = margin + (last.x - margin) * reveal.value + 6.dp.toPx()) {
+            drawPath(fill, Brush.verticalGradient(listOf(Relay.magenta.copy(alpha = 0.28f), Color.Transparent)))
+            drawPath(line, Brush.horizontalGradient(listOf(Relay.violet, Relay.magenta)), style = Stroke(2.75.dp.toPx(), cap = StrokeCap.Round))
+        }
+        if (reveal.value > 0.98f) {
+            drawCircle(Relay.magenta.copy(alpha = 0.25f), 7.dp.toPx(), last)
+            drawCircle(Relay.magenta, 3.5.dp.toPx(), last)
         }
     }
 }
@@ -472,7 +555,7 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
                 val total = categories.sumOf { it.node.value.toBigDecimal() }
                 Donut(categories.map { it.node.value.toBigDecimal() }.zip(colors), total, flow.currency,
                     if (kind == "expense") "Gastos" else "Ingresos")
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     categories.forEachIndexed { index, category ->
                         CategoryReportRow(category, colors[index], icons, total, flow.currency, month, onCategory)
                     }
@@ -526,6 +609,10 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
     }
 }
 
+/**
+ * One category: name and amount on a line, its share as a bar underneath. Tapping the row lists its
+ * movements; the chevron unfolds the subcategories with their share of this category.
+ */
 @Composable private fun CategoryReportRow(
     category: FlowCategory,
     color: Color,
@@ -541,54 +628,90 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
     val share = if (total.signum() > 0) amount.multiply(BigDecimal(100)).divide(total, 1, RoundingMode.HALF_UP) else BigDecimal.ZERO
     val icon = node.categoryId?.let(icons::get)
     val ids = listOfNotNull(node.categoryId) + category.children.mapNotNull { it.categoryId }
-    Column {
+    val rotation by animateFloatAsState(if (expanded) 180f else 0f, tween(Relay.BASE, easing = Relay.easeOut), label = "chevron")
+    val background by animateColorAsState(if (expanded) Relay.surface2.copy(alpha = 0.5f) else Relay.surface2.copy(alpha = 0f),
+        tween(Relay.BASE), label = "row")
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(background)) {
         Row(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .clickable(enabled = ids.isNotEmpty()) { onCategory(CategorySelection(node.name, color, icon, amount, ids, month, node.categoryId)) }
-                .padding(horizontal = 6.dp, vertical = 8.dp),
+                .padding(start = 8.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconBadge(categoryIcon(icon), color, size = 38.dp)
+            IconBadge(categoryIcon(icon), color, size = 40.dp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(node.name, style = MaterialTheme.typography.bodyLarge, color = Relay.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(4.dp))
-                Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(50)).background(Relay.surface3)) {
-                    Box(Modifier.fillMaxWidth((share.toFloat() / 100f).coerceIn(0f, 1f)).fillMaxHeight().background(color))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(node.name, style = MaterialTheme.typography.bodyLarge, color = Relay.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f))
+                    Spacer(Modifier.width(8.dp))
+                    Text(formatMoney(amount, currency), style = MaterialTheme.typography.bodyLarge.merge(tabular).copy(fontWeight = FontWeight.Medium),
+                        color = Relay.text, maxLines = 1)
+                }
+                Spacer(Modifier.height(7.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ShareBar(share, color, Modifier.weight(1f))
+                    Text(percent(share), style = MaterialTheme.typography.labelSmall.merge(tabular), color = Relay.muted, textAlign = TextAlign.End,
+                        modifier = Modifier.widthIn(min = 48.dp))
                 }
             }
-            Spacer(Modifier.width(12.dp))
-            Column(horizontalAlignment = Alignment.End) {
-                Text(formatMoney(amount, currency), style = MaterialTheme.typography.bodyMedium.merge(tabular), color = Relay.text)
-                Text(percent(share), style = MaterialTheme.typography.labelSmall.merge(tabular), color = Relay.muted)
-            }
-            if (category.children.isNotEmpty()) {
-                IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(36.dp)) {
-                    Icon(if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                        if (expanded) "Ocultar subcategorías" else "Ver subcategorías", tint = Relay.muted)
-                }
-            } else {
-                Spacer(Modifier.width(36.dp))
-            }
-        }
-        if (expanded) category.children.forEach { child ->
-            val childIcon = child.categoryId?.let(icons::get)
-            val childAmount = child.value.toBigDecimal()
-            Row(
-                Modifier.fillMaxWidth().padding(start = 30.dp).clip(RoundedCornerShape(12.dp))
-                    .clickable(enabled = child.categoryId != null) {
-                        onCategory(CategorySelection(child.name, color, childIcon, childAmount, listOfNotNull(child.categoryId), month, child.categoryId))
-                    }
-                    .padding(horizontal = 8.dp, vertical = 7.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            // The slot is kept on every row so amounts and bars line up.
+            Box(
+                Modifier.padding(start = 2.dp).size(34.dp).clip(CircleShape)
+                    .then(if (category.children.isNotEmpty()) Modifier.clickable { expanded = !expanded } else Modifier),
+                contentAlignment = Alignment.Center,
             ) {
-                IconBadge(categoryIcon(childIcon), child.color?.let(::parseHex) ?: color, size = 28.dp)
-                Spacer(Modifier.width(10.dp))
-                Text(child.name, style = MaterialTheme.typography.bodyMedium, color = Relay.secondary, modifier = Modifier.weight(1f),
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(formatMoney(childAmount, currency), style = MaterialTheme.typography.bodyMedium.merge(tabular), color = Relay.secondary)
+                if (category.children.isNotEmpty()) Icon(Icons.Outlined.ExpandMore,
+                    if (expanded) "Ocultar subcategorías" else "Ver subcategorías", tint = Relay.secondary, modifier = Modifier.rotate(rotation))
             }
         }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically(tween(Relay.BASE + 60, easing = Relay.easeOut)) + fadeIn(tween(Relay.BASE)),
+            exit = shrinkVertically(tween(Relay.BASE, easing = Relay.easeOut)) + fadeOut(tween(Relay.FAST)),
+        ) {
+            Column(Modifier.fillMaxWidth().padding(start = 52.dp, end = 40.dp, bottom = 8.dp)) {
+                category.children.forEach { child ->
+                    val childIcon = child.categoryId?.let(icons::get)
+                    val childAmount = child.value.toBigDecimal()
+                    val childColor = child.color?.let(::parseHex) ?: color
+                    val childShare = if (amount.signum() > 0) childAmount.multiply(BigDecimal(100)).divide(amount, 1, RoundingMode.HALF_UP) else BigDecimal.ZERO
+                    Row(
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                            .clickable(enabled = child.categoryId != null) {
+                                onCategory(CategorySelection(child.name, childColor, childIcon, childAmount, listOfNotNull(child.categoryId), month, child.categoryId))
+                            }
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        IconBadge(categoryIcon(childIcon), childColor, size = 28.dp)
+                        Spacer(Modifier.width(10.dp))
+                        Column(Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(child.name, style = MaterialTheme.typography.bodyMedium, color = Relay.secondary, maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                                Spacer(Modifier.width(8.dp))
+                                Text(formatMoney(childAmount, currency), style = MaterialTheme.typography.bodyMedium.merge(tabular), color = Relay.text)
+                            }
+                            Spacer(Modifier.height(5.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                ShareBar(childShare, childColor, Modifier.weight(1f), height = 3.dp)
+                                Text(percent(childShare), style = MaterialTheme.typography.labelSmall.merge(tabular), color = Relay.subtle,
+                                    textAlign = TextAlign.End, modifier = Modifier.widthIn(min = 44.dp))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A share of 0–100 % as a rounded bar that grows into place. */
+@Composable private fun ShareBar(share: BigDecimal, color: Color, modifier: Modifier, height: Dp = 5.dp) {
+    val fraction by animateFloatAsState((share.toFloat() / 100f).coerceIn(0f, 1f), tween(600, easing = Relay.easeOut), label = "share")
+    Box(modifier.height(height).clip(RoundedCornerShape(50)).background(Relay.surface3.copy(alpha = 0.8f))) {
+        Box(Modifier.fillMaxWidth(fraction.coerceAtLeast(0.01f)).fillMaxHeight().clip(RoundedCornerShape(50)).background(color))
     }
 }
 

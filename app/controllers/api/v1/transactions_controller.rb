@@ -358,7 +358,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
     def transaction_params
       params.require(:transaction).permit(
         :date, :amount, :name, :description, :notes, :currency,
-        :category_id, :merchant_id, :nature, :user_modified, tag_ids: []
+        :category_id, :merchant_id, :nature, :user_modified, :shared_expense, tag_ids: []
       )
     end
 
@@ -387,8 +387,9 @@ class Api::V1::TransactionsController < Api::V1::BaseController
         entryable_attributes: {
           category_id: transaction_params[:category_id],
           merchant_id: transaction_params[:merchant_id],
+          shared_expense: shared_expense_param,
           tag_ids: transaction_params[:tag_ids] || []
-        }
+        }.compact
       }
       if idempotency_key_requested?
         entry_params[:external_id] = idempotency_external_id
@@ -400,6 +401,7 @@ class Api::V1::TransactionsController < Api::V1::BaseController
 
     def entry_params_for_update
       references = transaction_params.slice(:category_id, :merchant_id).select { |_, value| value.nil? || value.present? }
+      references[:shared_expense] = shared_expense_param if transaction_params.key?(:shared_expense)
       entry_params = {
         name: transaction_params[:name] || transaction_params[:description],
         date: transaction_params[:date],
@@ -413,6 +415,10 @@ class Api::V1::TransactionsController < Api::V1::BaseController
       end
 
       entry_params.compact
+    end
+
+    def shared_expense_param
+      ActiveModel::Type::Boolean.new.cast(transaction_params[:shared_expense]) if transaction_params.key?(:shared_expense)
     end
 
     # Check if tag_ids was explicitly provided in the request.

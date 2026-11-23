@@ -2,11 +2,13 @@ package app.relay.android.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -25,8 +27,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.ReceiptLong
@@ -47,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -91,44 +96,66 @@ enum class Tab(val label: String, val icon: ImageVector) {
     var detail by remember { mutableStateOf<Transaction?>(null) }
     val notice by vm.notice.collectAsStateWithLifecycle()
     val editor by vm.editor.collectAsStateWithLifecycle()
+    val creator by vm.creator.collectAsStateWithLifecycle()
+    val movementsFeed by vm.movements.state.collectAsStateWithLifecycle()
+    val accounts = session.summary?.accounts.orEmpty()
+    val canCreate = remember(accounts) { creatableAccounts(accounts).isNotEmpty() }
     val account = accountId?.let { id -> session.summary?.accounts?.find { it.id == id } }
     LaunchedEffect(Unit) { vm.onForeground() }
 
     BackHandler(enabled = account != null) { accountId = null }
     BackHandler(enabled = account == null && tab != Tab.Home) { tab = Tab.Home }
 
-    Column(Modifier.fillMaxSize()) {
-        Box(Modifier.weight(1f)) {
-            AnimatedContent(
-                targetState = account?.id ?: tab.name,
-                transitionSpec = {
-                    if (account != null && targetState == account.id) {
-                        (slideInHorizontally(tween(320, easing = Relay.easeOut)) { it / 3 } + fadeIn(tween(Relay.BASE))) togetherWith fadeOut(tween(Relay.FAST))
-                    } else if (initialState.length > 12) {
-                        fadeIn(tween(Relay.BASE)) togetherWith (slideOutHorizontally(tween(Relay.BASE)) { it / 3 } + fadeOut(tween(Relay.FAST)))
-                    } else {
-                        (fadeIn(tween(Relay.BASE)) + scaleIn(tween(Relay.BASE), initialScale = 0.98f)) togetherWith fadeOut(tween(Relay.FAST))
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            Box(Modifier.weight(1f)) {
+                AnimatedContent(
+                    targetState = account?.id ?: tab.name,
+                    transitionSpec = {
+                        if (account != null && targetState == account.id) {
+                            (slideInHorizontally(tween(320, easing = Relay.easeOut)) { it / 3 } + fadeIn(tween(Relay.BASE))) togetherWith fadeOut(tween(Relay.FAST))
+                        } else if (initialState.length > 12) {
+                            fadeIn(tween(Relay.BASE)) togetherWith (slideOutHorizontally(tween(Relay.BASE)) { it / 3 } + fadeOut(tween(Relay.FAST)))
+                        } else {
+                            (fadeIn(tween(Relay.BASE)) + scaleIn(tween(Relay.BASE), initialScale = 0.98f)) togetherWith fadeOut(tween(Relay.FAST))
+                        }
+                    },
+                    label = "screen",
+                ) { key ->
+                    when {
+                        account != null && key == account.id -> AccountScreen(account, vm.accountMovements, onBack = { accountId = null }, onTransaction = { detail = it })
+                        key == Tab.Movements.name -> MovementsScreen(vm.movements, session.summary?.accounts, session.preferences.defaultAccountId,
+                            onDefault = vm::setDefaultAccount) { detail = it }
+                        key == Tab.Reports.name -> ReportsScreen(vm, session) { detail = it }
+                        key == Tab.Settings.name -> SettingsScreen(vm, session)
+                        else -> HomeScreen(vm, session, onAccount = { accountId = it.id }, onSeeAll = { tab = Tab.Movements }, onTransaction = { detail = it })
                     }
-                },
-                label = "screen",
-            ) { key ->
-                when {
-                    account != null && key == account.id -> AccountScreen(account, vm.accountMovements, onBack = { accountId = null }, onTransaction = { detail = it })
-                    key == Tab.Movements.name -> MovementsScreen(vm.movements, session.summary?.accounts, session.preferences.defaultAccountId,
-                        onDefault = vm::setDefaultAccount) { detail = it }
-                    key == Tab.Reports.name -> ReportsScreen(vm, session) { detail = it }
-                    key == Tab.Settings.name -> SettingsScreen(vm, session)
-                    else -> HomeScreen(vm, session, onAccount = { accountId = it.id }, onSeeAll = { tab = Tab.Movements }, onTransaction = { detail = it })
                 }
             }
+            if (account == null) BottomBar(tab) { tab = it }
         }
-        if (account == null) BottomBar(tab) { tab = it }
+
+        // New movement: from the summary, the movements list (its selected account) or a day-to-day account.
+        val createFor = when {
+            account != null -> account.id.takeIf { account.writable && account.accountType in setOf("depository", "credit_card") }
+            tab == Tab.Movements -> movementsFeed.accountId ?: ""
+            tab == Tab.Home -> ""
+            else -> null
+        }
+        Box(Modifier.fillMaxSize().navigationBarsPadding().padding(end = 20.dp, bottom = if (account == null) 84.dp else 20.dp),
+            contentAlignment = Alignment.BottomEnd) {
+            AnimatedVisibility(canCreate && createFor != null && !creator.open,
+                enter = fadeIn(tween(Relay.BASE)) + scaleIn(tween(Relay.BASE), 0.6f), exit = fadeOut(tween(Relay.FAST)) + scaleOut(tween(Relay.FAST), 0.6f)) {
+                CreateButton { vm.startCreate(createFor?.ifEmpty { null }) }
+            }
+        }
     }
 
     detail?.let { selected ->
         TransactionSheet(selected, onEdit = { detail = null; vm.editTransaction(selected) }, onDismiss = { detail = null })
     }
     editor.transaction?.let { transaction -> TransactionEditor(transaction, editor, vm) }
+    if (creator.open) TransactionCreator(creator, accounts, session.preferences.defaultAccountId, vm)
     UpdatePrompt(vm.updates)
     notice?.let { message ->
         AlertDialog(
@@ -137,6 +164,15 @@ enum class Tab(val label: String, val icon: ImageVector) {
             confirmButton = { TextButton(onClick = vm::dismissNotice) { Text("Aceptar") } },
         )
     }
+}
+
+@Composable private fun CreateButton(onClick: () -> Unit) {
+    val source = remember { MutableInteractionSource() }
+    Box(
+        Modifier.pressScale(source, 0.92f).shadow(10.dp, CircleShape, spotColor = Relay.violet).size(58.dp).clip(CircleShape)
+            .background(Relay.gradient).clickable(source, null, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) { Icon(Icons.Outlined.Add, "Nuevo movimiento", tint = Color.White, modifier = Modifier.size(28.dp)) }
 }
 
 @Composable private fun BottomBar(selected: Tab, onSelect: (Tab) -> Unit) {

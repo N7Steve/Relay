@@ -65,7 +65,7 @@ import java.util.Locale
     LaunchedEffect(Unit) { if (recent.page == 0 && !recent.loading) vm.recent.open(null) }
 
     PullToRefreshBox(isRefreshing = summaryState.loading && summary != null, onRefresh = vm::refreshSummary, modifier = Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp)) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 96.dp)) {
             item(key = "greeting") { Greeting(session, Modifier.statusBarsPadding().padding(top = 20.dp, bottom = 18.dp).enter(0)) }
             summaryState.error?.let { error -> item(key = "error") { ErrorBanner(error, Modifier.padding(bottom = 14.dp), vm::refreshSummary) } }
             item(key = "net-worth") {

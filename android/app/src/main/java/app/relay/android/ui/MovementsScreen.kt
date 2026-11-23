@@ -83,7 +83,7 @@ import app.relay.android.data.formatMoney
             SearchField(state.query, feed::search, Modifier.enter(1))
         }
         PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = feed::refresh, modifier = Modifier.fillMaxSize()) {
-            LazyColumn(Modifier.fillMaxSize(), state = list, contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 24.dp)) {
+            LazyColumn(Modifier.fillMaxSize(), state = list, contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 96.dp)) {
                 transactionGroups(state.items, showAccount = state.accountId == null, onClick = onTransaction)
                 feedFooter(state, feed::retry,
                     if (state.query.isBlank()) "Sin movimientos" else "Sin resultados",
@@ -175,7 +175,7 @@ import app.relay.android.data.formatMoney
     val tone = accountTone(account.accountType)
 
     PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = feed::refresh, modifier = Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize(), state = list, contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 24.dp)) {
+        LazyColumn(Modifier.fillMaxSize(), state = list, contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 96.dp)) {
             item(key = "header") {
                 Column(Modifier.statusBarsPadding().padding(top = 8.dp)) {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Volver", tint = Relay.text) }

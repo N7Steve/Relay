@@ -39,8 +39,11 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.RequestQuote
+import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material.icons.outlined.ShowChart
 import androidx.compose.material.icons.outlined.SwapHoriz
+import androidx.compose.material.icons.outlined.TrendingDown
+import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +70,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.relay.android.R
+import app.relay.android.data.MovementType
 import app.relay.android.data.Transaction
 import kotlinx.coroutines.delay
 
@@ -217,11 +221,20 @@ fun accountTypeName(type: String?): String = when (type) {
     else -> "Otras"
 }
 
-/** Category colour from the API (#rrggbb), or a stable tone for uncategorized rows. */
-fun transactionTone(transaction: Transaction): Color =
-    transaction.category?.color?.let(::parseHex) ?: if (transaction.transfer != null) Relay.cyan else Relay.secondary
+/** Category colour from the API (#rrggbb); valuations read as gain or loss and transfers in cyan. */
+fun transactionTone(transaction: Transaction): Color = when (transaction.type) {
+    MovementType.Valuation -> if (transaction.isIncome) Relay.income else Relay.danger
+    MovementType.Contribution, MovementType.Withdrawal -> Relay.cyan
+    else -> transaction.category?.color?.let(::parseHex) ?: if (transaction.type == MovementType.Transfer) Relay.cyan else Relay.secondary
+}
 
-fun transactionIcon(transaction: Transaction): ImageVector? = if (transaction.transfer != null) Icons.Outlined.SwapHoriz else null
+fun transactionIcon(transaction: Transaction): ImageVector? = when (transaction.type) {
+    MovementType.Valuation -> if (transaction.isIncome) Icons.Outlined.TrendingUp else Icons.Outlined.TrendingDown
+    MovementType.Contribution -> Icons.Outlined.Savings
+    MovementType.Withdrawal -> Icons.Outlined.AccountBalanceWallet
+    MovementType.Transfer -> Icons.Outlined.SwapHoriz
+    else -> null
+}
 
 fun parseHex(value: String): Color? = runCatching {
     val hex = value.trim().removePrefix("#")
