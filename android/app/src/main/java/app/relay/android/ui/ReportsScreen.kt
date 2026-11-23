@@ -1,10 +1,15 @@
 package app.relay.android.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -46,7 +51,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +64,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -67,10 +72,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.relay.android.data.ActivityReport
@@ -104,7 +111,7 @@ private fun percent(value: BigDecimal) = String.format(spanish, "%.1f %%", value
 
 /** Categories to list when a report row is opened; a parent includes its subcategories. */
 private data class CategorySelection(val name: String, val color: Color, val icon: String?, val total: BigDecimal,
-    val categoryIds: List<String>, val start: LocalDate)
+    val categoryIds: List<String>, val start: LocalDate, val categoryId: String?)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable fun ReportsScreen(vm: AppViewModel, session: DiskState, onTransaction: (Transaction) -> Unit) {
@@ -130,20 +137,18 @@ private data class CategorySelection(val name: String, val color: Color, val ico
             Modifier.fillMaxSize().swipeMonths(reports::previous, reports::next).verticalScroll(rememberScrollState())
                 .statusBarsPadding().padding(horizontal = 20.dp).padding(top = 20.dp, bottom = 24.dp),
         ) {
-            Text("Informe", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.enter(0))
+            Row(Modifier.fillMaxWidth().enter(0), verticalAlignment = Alignment.CenterVertically) {
+                Text("Informe", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+                // Lives in the title row so appearing never pushes the report down.
+                AnimatedVisibility(state.month != null && !state.isCurrent, enter = fadeIn(tween(Relay.BASE)) + scaleIn(tween(Relay.BASE), 0.85f),
+                    exit = fadeOut(tween(Relay.FAST)) + scaleOut(tween(Relay.FAST), 0.85f)) {
+                    TodayChip(reports::goToCurrent)
+                }
+            }
             Spacer(Modifier.height(14.dp))
-            MonthSwitcher(state, startDay, reports::previous, reports::next, reports::goToCurrent)
-            val month = state.month
-            if (month != null) AnimatedContent(
-                targetState = month,
-                transitionSpec = {
-                    val forward = targetState > initialState
-                    (slideInHorizontally(tween(320, easing = Relay.easeOut)) { if (forward) it / 4 else -it / 4 } + fadeIn(tween(Relay.BASE))) togetherWith
-                        (slideOutHorizontally(tween(Relay.BASE)) { if (forward) -it / 4 else it / 4 } + fadeOut(tween(Relay.FAST)))
-                },
-                label = "report-month",
-            ) { shown ->
-                ReportBody(state, shown, startDay, icons, currency, reports::select, reports::retry) { opened = it }
+            MonthSwitcher(state, startDay, reports::previous, reports::next)
+            state.month?.let { month ->
+                ReportBody(state, month, startDay, icons, currency, reports::select, reports::retry) { opened = it }
             }
         }
     }
@@ -174,17 +179,40 @@ private data class CategorySelection(val name: String, val color: Color, val ico
     }
 }
 
-@Composable private fun MonthSwitcher(state: ReportState, startDay: Int, onPrevious: () -> Unit, onNext: () -> Unit, onToday: () -> Unit) {
+@Composable private fun TodayChip(onClick: () -> Unit) {
+    Row(
+        Modifier.clip(RoundedCornerShape(50)).background(Relay.blue.copy(alpha = 0.14f)).clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Outlined.Today, null, tint = Relay.blue, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("Mes actual", style = MaterialTheme.typography.labelLarge, color = Relay.blue)
+    }
+}
+
+/** Only the month name slides, in the direction of travel; the arrows and the page stay put. */
+@Composable private fun MonthSwitcher(state: ReportState, startDay: Int, onPrevious: () -> Unit, onNext: () -> Unit) {
     val month = state.month
     Panel(Modifier.fillMaxWidth().enter(1), padding = 6.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onPrevious, enabled = month != null) {
                 Icon(Icons.Outlined.ChevronLeft, "Mes anterior", tint = Relay.text)
             }
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(month?.let { monthName(it, startDay) } ?: "…", style = MaterialTheme.typography.titleMedium, color = Relay.text)
-                month?.let {
-                    Text(rangeLabel(it), style = MaterialTheme.typography.labelMedium.merge(tabular), color = Relay.muted)
+            AnimatedContent(
+                targetState = month,
+                modifier = Modifier.weight(1f).clipToBounds(),
+                transitionSpec = {
+                    val forward = compareValues(targetState, initialState) > 0
+                    val motion = tween<IntOffset>(300, easing = Relay.easeOut)
+                    (slideInHorizontally(motion) { if (forward) it else -it } togetherWith
+                        slideOutHorizontally(motion) { if (forward) -it else it }) using SizeTransform(clip = true)
+                },
+                label = "report-month",
+            ) { shown ->
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(shown?.let { monthName(it, startDay) } ?: "…", style = MaterialTheme.typography.titleMedium, color = Relay.text)
+                    Text(shown?.let(::rangeLabel) ?: " ", style = MaterialTheme.typography.labelMedium.merge(tabular), color = Relay.muted)
                 }
             }
             IconButton(onClick = onNext, enabled = state.canGoNext) {
@@ -192,13 +220,21 @@ private data class CategorySelection(val name: String, val color: Color, val ico
             }
         }
     }
-    if (month != null && !state.isCurrent) {
-        TextButton(onClick = onToday, modifier = Modifier.fillMaxWidth()) {
-            Icon(Icons.Outlined.Today, null, tint = Relay.blue, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Volver al mes actual", color = Relay.blue)
-        }
-    }
+}
+
+/** Holds the last value shown so a month that is still loading keeps the page in place. */
+private class LastShown<T> { var value: T? = null }
+
+@Composable private fun <T> shownWhileLoading(value: T?, pending: Boolean): T? {
+    val last = remember { LastShown<T>() }
+    if (value != null) last.value = value
+    return value ?: last.value.takeIf { pending }
+}
+
+/** Figures from the previous month stay visible but dimmed until the new month arrives. */
+@Composable private fun Modifier.stale(stale: Boolean): Modifier {
+    val alpha by animateFloatAsState(if (stale) 0.4f else 1f, tween(Relay.BASE), label = "stale")
+    return graphicsLayer { this.alpha = alpha }
 }
 
 @Composable private fun ReportBody(
@@ -211,17 +247,20 @@ private data class CategorySelection(val name: String, val color: Color, val ico
     onRetry: () -> Unit,
     onCategory: (CategorySelection) -> Unit,
 ) {
-    val activity = state.activity[month]
     val pending = state.loading && state.month == month
-    Column(Modifier.fillMaxWidth().padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    val activity = shownWhileLoading(state.activity[month], pending)
+    val worth = shownWhileLoading(state.worth[month], pending)
+    val flow = shownWhileLoading(state.flows[month], pending)
+    Column(Modifier.fillMaxWidth().padding(top = 12.dp).animateContentSize(tween(Relay.BASE, easing = Relay.easeOut)),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
         when {
-            activity != null -> SavingsHero(activity)
-            state.error != null && state.month == month -> ErrorBanner(state.error, onRetry = onRetry)
+            state.error != null && state.month == month && state.activity[month] == null -> ErrorBanner(state.error, onRetry = onRetry)
+            activity != null -> Box(Modifier.stale(state.activity[month] == null)) { SavingsHero(activity) }
             else -> HeroSkeleton()
         }
         TrendCard(state, month, startDay, currency, onSelect)
-        WorthCard(state.worth[month], pending)
-        CategoriesCard(state.flows[month], pending, month, icons, onCategory)
+        Box(Modifier.stale(worth != null && state.worth[month] == null)) { WorthCard(worth, pending) }
+        Box(Modifier.stale(flow != null && state.flows[month] == null)) { CategoriesCard(flow, pending, month, icons, onCategory) }
     }
 }
 
@@ -505,7 +544,7 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
     Column {
         Row(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
-                .clickable(enabled = ids.isNotEmpty()) { onCategory(CategorySelection(node.name, color, icon, amount, ids, month)) }
+                .clickable(enabled = ids.isNotEmpty()) { onCategory(CategorySelection(node.name, color, icon, amount, ids, month, node.categoryId)) }
                 .padding(horizontal = 6.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -528,6 +567,8 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
                     Icon(if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
                         if (expanded) "Ocultar subcategorías" else "Ver subcategorías", tint = Relay.muted)
                 }
+            } else {
+                Spacer(Modifier.width(36.dp))
             }
         }
         if (expanded) category.children.forEach { child ->
@@ -536,7 +577,7 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
             Row(
                 Modifier.fillMaxWidth().padding(start = 30.dp).clip(RoundedCornerShape(12.dp))
                     .clickable(enabled = child.categoryId != null) {
-                        onCategory(CategorySelection(child.name, color, childIcon, childAmount, listOfNotNull(child.categoryId), month))
+                        onCategory(CategorySelection(child.name, color, childIcon, childAmount, listOfNotNull(child.categoryId), month, child.categoryId))
                     }
                     .padding(horizontal = 8.dp, vertical = 7.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -585,7 +626,10 @@ private fun nodeColor(node: CashFlowNode, index: Int) = node.color?.let(::parseH
             Spacer(Modifier.height(8.dp))
             val movements = result?.getOrNull().orEmpty()
             LazyColumn(Modifier.fillMaxWidth().heightIn(max = 520.dp)) {
-                items(movements, key = { it.id }) { TransactionRow(it, { onTransaction(it) }) }
+                items(movements, key = { it.id }) { movement ->
+                    TransactionRow(movement, { onTransaction(movement) }, showDate = true,
+                        showCategory = selection.categoryId == null || movement.category?.id != selection.categoryId)
+                }
                 item(key = "status") {
                     when {
                         result == null -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {

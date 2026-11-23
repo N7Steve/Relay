@@ -131,6 +131,7 @@ module Api
             id: merchant.id,
             name: merchant.name,
             type: merchant.type,
+            logo_url: merchant.display_logo_url(family: current_resource_owner.family, proxy: true),
             created_at: merchant.created_at,
             updated_at: merchant.updated_at
           }

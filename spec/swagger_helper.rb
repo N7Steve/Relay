@@ -552,6 +552,7 @@ RSpec.configure do |config|
               id: { type: :string, format: :uuid },
               name: { type: :string },
               type: { type: :string, enum: %w[FamilyMerchant ProviderMerchant] },
+              logo_url: { type: :string, nullable: true, description: 'HTTPS URL or a same-origin path for a custom merchant logo' },
               created_at: { type: :string, format: :'date-time' },
               updated_at: { type: :string, format: :'date-time' }
             }

@@ -50,6 +50,20 @@ class Api::V1::MerchantsControllerTest < ActionDispatch::IntegrationTest
     assert merchant.key?("name")
     assert merchant.key?("created_at")
     assert merchant.key?("updated_at")
+    assert merchant.key?("logo_url")
+  end
+
+  test "index supplies the family custom merchant logo" do
+    customization = @user.family.merchant_customizations.create!(merchant: @merchant)
+    file_fixture("profile_image.png").open("rb") do |image|
+      customization.custom_logo.attach(io: image, filename: "logo.png", content_type: "image/png")
+    end
+
+    get api_v1_merchants_url, headers: auth_headers
+
+    assert_response :success
+    merchant = JSON.parse(response.body).find { |m| m["id"] == @merchant.id }
+    assert_match %r{\A/rails/active_storage/representations/proxy/}, merchant["logo_url"]
   end
 
   test "index does not return merchants from other families" do

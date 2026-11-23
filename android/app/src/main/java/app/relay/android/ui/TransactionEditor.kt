@@ -30,11 +30,10 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -94,6 +93,7 @@ private enum class Picker { Category, Merchant, Tags }
     var categoryIconName by rememberSaveable(transaction.id) { mutableStateOf(transaction.category?.icon) }
     var merchantId by rememberSaveable(transaction.id) { mutableStateOf(transaction.merchant?.id) }
     var merchantLabel by rememberSaveable(transaction.id) { mutableStateOf(transaction.merchant?.name) }
+    var merchantLogo by rememberSaveable(transaction.id) { mutableStateOf(transaction.merchant?.logoUrl) }
     var tagIds by rememberSaveable(transaction.id) { mutableStateOf(transaction.tags.map { it.id }) }
     // Names and colours for the chips; ids alone survive configuration changes.
     val knownTags = remember(transaction.id) { mutableStateMapOf<String, TagRef>().apply { transaction.tags.forEach { put(it.id, it) } } }
@@ -155,7 +155,15 @@ private enum class Picker { Category, Merchant, Tags }
                 "Categoría", categoryLabel ?: "Sin categoría", state.saving,
                 leading = { IconBadge(categoryIcon(categoryIconName), if (categoryId == null) Relay.muted else categoryTone(categoryColor), size = 34.dp) },
             ) { picker = Picker.Category }
-            if ("merchant_id" in fields) EditorChoice("Comercio", merchantLabel ?: "Sin comercio", state.saving) { picker = Picker.Merchant }
+            if ("merchant_id" in fields) EditorChoice(
+                "Comercio", merchantLabel ?: "Sin comercio", state.saving,
+                leading = {
+                    val id = merchantId
+                    val label = merchantLabel
+                    if (id == null || label == null) IconBadge(Icons.Outlined.Storefront, Relay.muted, size = 34.dp)
+                    else MerchantBadge(NamedRef(id, label, merchantLogo), 34.dp)
+                },
+            ) { picker = Picker.Merchant }
             if ("tag_ids" in fields) TagsChoice(tagIds.mapNotNull(knownTags::get), state.saving) { picker = Picker.Tags }
             state.error?.let { ErrorBanner(it) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -176,9 +184,10 @@ private enum class Picker { Category, Merchant, Tags }
             categoryIconName = choice?.icon
             picker = null
         }
-        Picker.Merchant -> MerchantDialog(merchantId, vm, onDismiss = { picker = null }) { choice ->
+        Picker.Merchant -> MerchantPicker(merchantId, vm, onDismiss = { picker = null }) { choice ->
             merchantId = choice?.id
             merchantLabel = choice?.label
+            merchantLogo = choice?.logoUrl
             picker = null
         }
         Picker.Tags -> TagPicker(tagIds, knownTags.values.toList(), vm, onDismiss = { picker = null }) { chosen ->
@@ -400,38 +409,45 @@ private enum class Picker { Category, Merchant, Tags }
     }
 }
 
-@Composable private fun MerchantDialog(selectedId: String?, vm: AppViewModel, onDismiss: () -> Unit, onSelect: (NamedRef?) -> Unit) {
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable private fun MerchantPicker(selectedId: String?, vm: AppViewModel, onDismiss: () -> Unit, onSelect: (NamedRef?) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
     var attempt by rememberSaveable { mutableStateOf(0) }
     val result = rememberOptions(attempt) { vm.merchants() }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Relay.surface2,
-        title = { Text("Comercio") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = query, onValueChange = { query = it }, label = { Text("Buscar") },
-                    modifier = Modifier.fillMaxWidth(), singleLine = true,
-                )
-                val filtered = result?.getOrNull().orEmpty().filter { it.label.contains(query.trim(), ignoreCase = true) }
-                LazyColumn(Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
-                    item { ReferenceOption("Sin comercio", selectedId == null) { onSelect(null) } }
-                    items(filtered, key = { it.id }) { option ->
-                        ReferenceOption(option.label, option.id == selectedId) { onSelect(option) }
+    val search = query.trim()
+    val rows = remember(result, search) { result?.getOrNull().orEmpty().filter { it.label.contains(search, ignoreCase = true) } }
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = Relay.surface, contentColor = Relay.text) {
+        Column(Modifier.fillMaxWidth().imePadding().navigationBarsPadding().padding(horizontal = 20.dp).padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Comercio", style = MaterialTheme.typography.titleLarge)
+            PickerSearch(query, { query = it }, "Buscar comercio")
+            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 520.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (search.isEmpty()) item(key = "none") {
+                    MerchantRow("Sin comercio", selectedId == null, onClick = { onSelect(null) }) {
+                        IconBadge(Icons.Outlined.Storefront, Relay.muted, size = 40.dp)
                     }
-                    item { PickerStatus(result, vm, empty = result?.isSuccess == true && query.isNotBlank() && filtered.isEmpty()) { attempt++ } }
                 }
+                items(rows, key = { it.id }) { option ->
+                    MerchantRow(option.label, option.id == selectedId, onClick = { onSelect(option) }) { MerchantBadge(option, 40.dp) }
+                }
+                item(key = "status") { PickerStatus(result, vm, empty = result?.isSuccess == true && rows.isEmpty()) { attempt++ } }
             }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
-    )
+        }
+    }
 }
 
-@Composable private fun ReferenceOption(label: String, selected: Boolean, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(label) },
-        trailingIcon = if (selected) ({ Icon(Icons.Outlined.Check, "Seleccionado") }) else null,
-        onClick = onClick,
-    )
+@Composable private fun MerchantRow(name: String, selected: Boolean, onClick: () -> Unit, badge: @Composable () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+            .then(if (selected) Modifier.background(Relay.violet.copy(alpha = 0.14f)) else Modifier)
+            .clickable(onClick = onClick).padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        badge()
+        Spacer(Modifier.width(12.dp))
+        Text(name, style = MaterialTheme.typography.bodyLarge, color = Relay.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f))
+        if (selected) Icon(Icons.Outlined.Check, "Seleccionado", tint = Relay.violet)
+    }
 }
