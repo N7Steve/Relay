@@ -5,7 +5,7 @@
     python script/release_local.py publish tmp/releases/<commit>
 
 The signed APK is bundled into the server image, so TrueNAS updates both at once
-when its cron job pulls ghcr.io/n7steve/relay:stable. Requires Python 3.11+.
+when its cron job pulls 100.81.25.109:30008/n7steve/relay:stable. Requires Python 3.11+.
 """
 import argparse
 import contextlib
@@ -20,10 +20,13 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parent.parent
-IMAGE = "ghcr.io/n7steve/relay"
+REGISTRY = "100.81.25.109:30008"
+REPOSITORY = "n7steve/relay"
+IMAGE = f"{REGISTRY}/{REPOSITORY}"
 CHANNEL = "stable"
 APPLICATION_ID = "app.relay.android"
 ANDROID = ROOT / "android"
@@ -314,6 +317,72 @@ def prepare(preview, skip_rails_tests=False):
         print("Sube este commit a origin/main y ejecuta: python script/release_local.py publish " + str(folder))
 
 
+def verify_private_image(image):
+    """Ensure the published Gitea package rejects anonymous pulls over HTTP."""
+    prefix = IMAGE + ":"
+    if not image.startswith(prefix) or not re.fullmatch(r"[\w.-]+", image[len(prefix):]):
+        raise RuntimeError("Referencia de imagen inesperada para la comprobacion privada")
+    reference = image[len(prefix):]
+    manifest_url = f"http://{REGISTRY}/v2/{REPOSITORY}/manifests/{reference}"
+    headers = {
+        "Accept": "application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json",
+        "User-Agent": "relay-anonymous-registry-check",
+    }
+    try:
+        with urllib.request.urlopen(urllib.request.Request(manifest_url, headers=headers), timeout=30):
+            pass
+    except urllib.error.HTTPError as error:
+        if error.code == 403:
+            return
+        if error.code != 401:
+            raise RuntimeError("No se ha podido verificar la privacidad de la imagen") from None
+        challenge = error.headers.get("WWW-Authenticate", "") if error.headers else ""
+        if not challenge.lower().startswith("bearer "):
+            return
+        params = dict(re.findall(r'([a-zA-Z]+)="([^"]*)"', challenge))
+        realm = params.get("realm", "")
+        if not realm.startswith(f"http://{REGISTRY}/"):
+            raise RuntimeError("No se ha podido verificar la privacidad de la imagen") from None
+        query = urllib.parse.urlencode({k: params[k] for k in ("service", "scope") if k in params})
+        token_url = f"{realm}?{query}" if query else realm
+        try:
+            with urllib.request.urlopen(
+                urllib.request.Request(token_url, headers={"User-Agent": "relay-anonymous-registry-check"}),
+                timeout=30,
+            ) as response:
+                token = json.load(response).get("token", "")
+            if not token:
+                return
+            with urllib.request.urlopen(
+                urllib.request.Request(manifest_url, headers={**headers, "Authorization": "Bearer " + token}),
+                timeout=30,
+            ):
+                pass
+        except urllib.error.HTTPError as token_error:
+            if token_error.code in (401, 403):
+                return
+            raise RuntimeError("No se ha podido verificar la privacidad de la imagen") from None
+        except (urllib.error.URLError, OSError, ValueError, KeyError):
+            raise RuntimeError("No se ha podido verificar la privacidad de la imagen") from None
+        raise RuntimeError("La imagen se puede descargar sin autenticar; haz privado el paquete antes de publicar")
+    except (urllib.error.URLError, OSError, ValueError, KeyError):
+        raise RuntimeError("No se ha podido verificar la privacidad de la imagen") from None
+    raise RuntimeError("La imagen se puede descargar sin autenticar; haz privado el paquete antes de publicar")
+
+
+def check_registry_reachable():
+    url = f"http://{REGISTRY}/v2/"
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "relay-check"}), timeout=15):
+            return
+    except urllib.error.HTTPError as error:
+        if error.code in (401, 403):
+            return
+        raise RuntimeError(f"El registro Gitea respondio HTTP {error.code} en {url}") from None
+    except (urllib.error.URLError, OSError) as error:
+        raise RuntimeError(f"No se puede conectar con el registro Gitea en {url}: {error}") from None
+
+
 def publish(folder):
     folder = folder.resolve()
     prepared = json.loads((folder / "prepared.json").read_text())
@@ -333,10 +402,11 @@ def publish(folder):
     image = json.loads(run("docker", "image", "inspect", prepared["image"], capture=True))[0]
     if image["Id"] != prepared["imageId"]:
         raise RuntimeError("La imagen preparada ha cambiado")
-    # A traceable tag first; TrueNAS only follows the channel once the push is complete.
+    # A traceable tag first; TrueNAS only follows the channel once the push and privacy check pass.
     target = f"{IMAGE}:sha-{commit}"
     run("docker", "tag", prepared["image"], target)
     run("docker", "push", target)
+    verify_private_image(target)
     run("docker", "tag", prepared["image"], f"{IMAGE}:{CHANNEL}")
     run("docker", "push", f"{IMAGE}:{CHANNEL}")
     digests = json.loads(run("docker", "image", "inspect", target, capture=True))[0].get("RepoDigests", [])
@@ -356,7 +426,8 @@ def check():
     run("docker", "buildx", "version", capture=True)
     env = android_env(1, "0.1.1")
     print(f"Java: {env['JAVA_HOME']}\nSDK Android: {env['ANDROID_HOME']}\nFirma: {env['RELAY_ANDROID_KEYSTORE']}")
-    print("Herramientas listas. Para publicar, Docker necesita 'docker login ghcr.io' con write:packages.")
+    check_registry_reachable()
+    print(f"Herramientas listas y Gitea accesible en http://{REGISTRY}. Configura insecure-registries y 'docker login {REGISTRY} -u n7steve'.")
 
 
 def main():

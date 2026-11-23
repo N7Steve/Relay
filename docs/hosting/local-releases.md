@@ -1,8 +1,10 @@
 # Local releases
 
 Relay and its Android app are compiled and verified on the development computer.
-GitHub stores the source and GHCR stores the image; nothing is rebuilt after a
-push. TrueNAS follows `ghcr.io/n7steve/relay:stable` through its
+GitHub stores the source (mirrored as a pull mirror in Gitea) and the local Gitea
+Container Registry (`100.81.25.109:30008/n7steve/relay`) stores the private image;
+nothing is rebuilt after a push. TrueNAS follows
+`100.81.25.109:30008/n7steve/relay:stable` through its
 [cron updater](truenas.md#automatic-updates-cron). The signed APK travels inside
 the image and Relay serves it to signed-in devices.
 
@@ -18,8 +20,10 @@ the image and Relay serves it to signed-in devices.
   never regenerate them for an update. `RELAY_ANDROID_KEYSTORE`,
   `RELAY_ANDROID_STORE_PASSWORD`, `RELAY_ANDROID_KEY_ALIAS` and
   `RELAY_ANDROID_KEY_PASSWORD` override the defaults.
-- `docker login ghcr.io -u N7Steve` with a classic token that has
-  `write:packages`.
+- Configure `"insecure-registries": ["100.81.25.109:30008"]` in Docker Engine
+  (`%USERPROFILE%\.docker\daemon.json`) and run
+  `docker login 100.81.25.109:30008 -u n7steve` with a Gitea token that has
+  `write:package`.
 
 ```powershell
 npm run release:check

@@ -6,7 +6,7 @@ umask 077
 
 usage() {
   echo "Uso: sudo bash /mnt/AppsPool/relay/update-relay.sh [--check|--cron]"
-  echo "Actualiza la app relay a la imagen publicada ghcr.io/n7steve/relay:stable."
+  echo "Actualiza la app relay a la imagen publicada 127.0.0.1:30008/n7steve/relay:stable."
   echo "--check descarga la referencia y valida la instalación sin parar ni actualizar."
   echo "--cron  igual que sin argumentos, pero no conserva registro si no hay cambios."
 }
@@ -25,7 +25,8 @@ done
 ROOT=/mnt/AppsPool/relay
 APP=relay
 PROJECT=ix-relay
-REGISTRY_IMAGE=ghcr.io/n7steve/relay
+REGISTRY_IMAGE=127.0.0.1:30008/n7steve/relay
+LEGACY_REGISTRY_IMAGE=ghcr.io/n7steve/relay
 CHANNEL=stable
 mountpoint -q /mnt/AppsPool || die "El pool AppsPool no está montado."
 [[ -d $ROOT/config && -d $ROOT/postgres && -d $ROOT/storage && -d $ROOT/redis ]] || die "Instala primero compose.truenas.folder.yml con nombre relay."
@@ -70,7 +71,7 @@ trap 'exit 143' TERM
 
 echo "Consultando $REGISTRY_IMAGE:$CHANNEL..."
 docker pull --quiet "$REGISTRY_IMAGE:$CHANNEL" >/dev/null ||
-  die "No se pudo descargar $REGISTRY_IMAGE:$CHANNEL. Revisa la red o las credenciales de ghcr.io."
+  die "No se pudo descargar $REGISTRY_IMAGE:$CHANNEL. Revisa Gitea o las credenciales de 127.0.0.1:30008."
 docker image inspect "$REGISTRY_IMAGE:$CHANNEL" > "$WORK/image.json"
 read -r IMAGE_ID IMAGE SHA < <(python3 -I - "$WORK/image.json" "$REGISTRY_IMAGE" <<'PY'
 import json
@@ -100,13 +101,13 @@ fi
 echo "Leyendo la configuración guardada de la app Relay..."
 midclt call app.get_instance "$APP" > "$WORK/app.json"
 midclt call app.config "$APP" > "$WORK/before.json"
-python3 -I - "$WORK" "$IMAGE" "$ROOT" "$REGISTRY_IMAGE" <<'PY'
+python3 -I - "$WORK" "$IMAGE" "$ROOT" "$REGISTRY_IMAGE" "$LEGACY_REGISTRY_IMAGE" <<'PY'
 import copy
 import json
 import pathlib
 import sys
 
-work, image, root, repository = sys.argv[1:]
+work, image, root, repository, legacy_repository = sys.argv[1:]
 work = pathlib.Path(work)
 app = json.loads((work / "app.json").read_text())
 
@@ -145,7 +146,10 @@ for name, expected in expected_mounts.items():
 for name in ("init", "web", "worker"):
     service = services[name]
     current = service.get("image", "")
-    published = current.startswith(repository + ":") or current.startswith(repository + "@sha256:")
+    published = any(
+        current.startswith(repo + ":") or current.startswith(repo + "@sha256:")
+        for repo in (repository, legacy_repository)
+    )
     # Installations from the earlier updater build the GitHub source locally.
     legacy = current.startswith("relay-local:") and isinstance(service.get("build"), dict) and \
         service["build"].get("context", "").startswith("https://github.com/N7Steve/Relay.git#")
@@ -328,7 +332,7 @@ rm -f -- "$ATTEMPT"
 # Keep the running and previous images for a manual rollback; Docker refuses to
 # remove an image that a container still uses.
 docker image ls --no-trunc --format '{{.Repository}} {{.ID}}' | sort -u | while read -r repository old; do
-  [[ $repository == "$REGISTRY_IMAGE" && $old != "$IMAGE_ID" && $old != "$PREVIOUS_IMAGE_ID" ]] || continue
+  [[ ( $repository == "$REGISTRY_IMAGE" || $repository == "$LEGACY_REGISTRY_IMAGE" ) && $old != "$IMAGE_ID" && $old != "$PREVIOUS_IMAGE_ID" ]] || continue
   docker image rm "$old" >/dev/null 2>&1 || true
 done
 echo "Actualización terminada correctamente. Commit: $SHA"

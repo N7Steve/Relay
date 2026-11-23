@@ -1,30 +1,29 @@
 # Relay on TrueNAS 25.10: installation in AppsPool/relay
 
-Relay is built and verified on the development computer and published to GHCR as
-`ghcr.io/n7steve/relay`. TrueNAS never compiles Relay: a cron job runs the
-updater, which pulls the `stable` channel and applies it with a backup. The
-image also bundles the signed Android APK, so the native app updates itself from
-Relay once the server is updated. See [local releases](local-releases.md).
+Relay is built and verified on the development computer and published to the local
+Gitea Container Registry as `100.81.25.109:30008/n7steve/relay`. TrueNAS never
+compiles Relay: a cron job runs the updater, which pulls the `stable` channel and
+applies it with a backup. The image also bundles the signed Android APK, so the
+native app updates itself from Relay once the server is updated. See
+[local releases](local-releases.md).
 
 ## Registry access
 
-The NAS must be able to pull `ghcr.io/n7steve/relay`.
+The NAS pulls `127.0.0.1:30008/n7steve/relay` over loopback from the local Gitea
+instance (no `daemon.json` changes needed on TrueNAS).
 
-- **Public package** (GitHub → Packages → relay → Package settings → Change
-  visibility): no credentials on the NAS.
-- **Private package**: create a GitHub classic token with only `read:packages`
-  (the read-only token already used for Ilos works) and store it with the app,
-  not in `/root`, so it survives TrueNAS upgrades:
+- **Private package**: create a Gitea token with only `read:package` and store it
+  with the app, not in `/root`, so it survives TrueNAS upgrades:
 
   ```bash
   sudo mkdir -p /mnt/AppsPool/relay/registry
   sudo chmod 700 /mnt/AppsPool/relay/registry
-  sudo DOCKER_CONFIG=/mnt/AppsPool/relay/registry docker login ghcr.io -u N7Steve
+  sudo DOCKER_CONFIG=/mnt/AppsPool/relay/registry docker login 127.0.0.1:30008 -u n7steve --password-stdin
   ```
 
   The updater uses `/mnt/AppsPool/relay/registry/config.json` automatically when
   it exists. For a first installation also run
-  `sudo DOCKER_CONFIG=/mnt/AppsPool/relay/registry docker pull ghcr.io/n7steve/relay:stable`
+  `sudo DOCKER_CONFIG=/mnt/AppsPool/relay/registry docker pull 127.0.0.1:30008/n7steve/relay:stable`
   so TrueNAS finds the image locally.
 
 ## Fresh installation
@@ -85,7 +84,7 @@ In **System → Advanced Settings → Cron Jobs → Add**:
 Each run:
 
 1. Checks AppsPool, takes the lock (a concurrent cron run exits quietly) and pulls
-   `ghcr.io/n7steve/relay:stable`. Registry errors stop before touching Relay.
+   `100.81.25.109:30008/n7steve/relay:stable`. Registry errors stop before touching Relay.
 2. Requires a `linux/amd64` image with one registry digest and a
    `BUILD_COMMIT_SHA`.
 3. Validates the running `relay` app and its mounts. Other app names, foreign

@@ -1,8 +1,12 @@
+import email.message
+import io
 import json
 import sys
 import tempfile
 import unittest
+import urllib.error
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import release_local  # noqa: E402
@@ -57,6 +61,40 @@ class VersionTest(unittest.TestCase):
     def test_rejects_an_empty_history(self):
         with self.assertRaises(ValueError):
             release_local.version_for(0)
+
+
+class PrivateRegistryTest(unittest.TestCase):
+    def _http_error(self, url, code, headers=None):
+        hdrs = email.message.Message()
+        for key, value in (headers or {}).items():
+            hdrs[key] = value
+        return urllib.error.HTTPError(url, code, "Error", hdrs, None)
+
+    def test_private_image_rejects_anonymous_access(self):
+        image = f"{release_local.IMAGE}:sha-test"
+        challenge = {
+            "WWW-Authenticate": 'Bearer realm="http://100.81.25.109:30008/v2/token",service="container_registry",scope="repository:n7steve/relay:pull"'
+        }
+        with patch.object(
+            release_local.urllib.request,
+            "urlopen",
+            side_effect=[
+                self._http_error("http://100.81.25.109:30008/v2/", 401, challenge),
+                self._http_error("http://100.81.25.109:30008/v2/token", 401),
+            ],
+        ):
+            release_local.verify_private_image(image)
+        with patch.object(
+            release_local.urllib.request,
+            "urlopen",
+            side_effect=[
+                self._http_error("http://100.81.25.109:30008/v2/", 401, challenge),
+                io.BytesIO(b'{"token":"anonymous-token"}'),
+                io.BytesIO(b"{}"),
+            ],
+        ):
+            with self.assertRaisesRegex(RuntimeError, "sin autenticar"):
+                release_local.verify_private_image(image)
 
 
 if __name__ == "__main__":

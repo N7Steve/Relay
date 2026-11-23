@@ -28,7 +28,7 @@
 ## Local builds and publication
 
 - Server images and the native Android APK (`android/`) are built and verified on this computer with `script/release_local.py` (`npm run release:check|release:prepare|release:publish`); see [local releases](docs/hosting/local-releases.md). Do not restore builds on the NAS or in CI after a push.
-- TrueNAS follows `ghcr.io/n7steve/relay:stable` through its cron updater; publishing needs no YAML change. The APK is bundled in the image.
+- TrueNAS follows `100.81.25.109:30008/n7steve/relay:stable` (private Gitea Container Registry over HTTP) through its cron updater; publishing needs no YAML change. The APK is bundled in the image.
 - A request to publish authorizes pushing the validated image. Code-only commit/push requests do not by themselves request a release. Never publish a preview.
 - Preserve the Android signing identity in `%USERPROFILE%\.android\relay` and its fingerprint in `android/release-signing.sha256`. Never generate a replacement key or distribute debug-signed builds.
 
