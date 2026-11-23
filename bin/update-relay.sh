@@ -237,10 +237,31 @@ PY
 
 echo "Aplicando el cambio a través de TrueNAS; web preparará la base de datos al arrancar..."
 UPDATE_STARTED=true
+submit_update() {
+  # The configuration goes over the middleware socket, never on a command line:
+  # TrueNAS audits commands run through sudo (its cron jobs included), and sudo
+  # kills a process whose long arguments it cannot verify ("argv mismatch").
+  python3 -I - "$APP" "$WORK/payload.json" <<'PY'
+import json
+import sys
+
+try:
+    from truenas_api_client import Client
+except ImportError:
+    from middlewared.client import Client
+
+app, path = sys.argv[1:]
+with open(path) as source:
+    payload = json.load(source)
+# Without waiting, a job method returns its id; the caller polls the state.
+with Client() as client:
+    print(client.call("app.update", app, payload))
+PY
+}
 update_job_succeeded() {
   local job_id state deadline
   # Submit the job without streaming progress or downloading the job's full result.
-  midclt call app.update "$APP" "$(cat "$WORK/payload.json")" > "$BACKUP/update-result.json" 2> "$BACKUP/update-error.txt" || return 1
+  submit_update > "$BACKUP/update-result.json" 2> "$BACKUP/update-error.txt" || return 1
   job_id=$(<"$BACKUP/update-result.json")
   [[ $job_id =~ ^[0-9]+$ ]] || return 1
   echo "Trabajo TrueNAS: $job_id"

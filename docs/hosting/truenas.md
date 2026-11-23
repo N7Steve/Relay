@@ -95,8 +95,11 @@ Each run:
 5. Stops web/worker gracefully and saves PostgreSQL, config/keys, attachments,
    Redis and the before/after app configuration to a private backup directory.
 6. Pins the image **by digest** through TrueNAS `app.update`, preserving
-   environment, ports and mounts. It polls the state of that job by ID. Web
-   prepares/migrates the database on startup.
+   environment, ports and mounts. The configuration is sent over the middleware
+   socket with TrueNAS's Python client, never as a command-line argument: TrueNAS
+   audits commands run through `sudo` (cron jobs included), and sudo kills a
+   process whose long arguments it cannot verify (`argv mismatch`). It polls the
+   state of that job by ID. Web prepares/migrates the database on startup.
 7. Waits for web health and worker startup, verifies the running image and commit,
    checks that no migrations are pending and records the SHA and digest.
 8. Removes older Relay images, keeping the running and previous one.

@@ -67,20 +67,6 @@ class UpdateRelayTest < Minitest::Test
             abort "Unexpected job lookup: #{args.inspect}" unless options["select"] == ["state"] && JSON.parse(args[2]) == [["id", "=", 123]]
             puts JSON.generate([{state: fail_at == "job_failed" ? "FAILED" : "SUCCESS"}])
           end
-        when "app.update"
-          File.write("#{dir}/submitted", "true")
-          Process.kill("KILL", Process.pid) if fail_at == "update_killed"
-          if fail_at == "update" || fail_at == "update_running"
-            # Rejected before anything was stored; the error is huge and noisy.
-            warn "ValidationError: " + ("expected {config}, got {config} " * 200)
-            exit 137
-          end
-          File.write("#{dir}/payload.json", args.last) unless fail_at == "job_failed"
-          if fail_at == "update_applied"
-            warn "connection lost"
-            exit 1
-          end
-          puts "123"
         else
           abort "Unexpected midclt command: #{args.inspect}"
         end
@@ -144,9 +130,11 @@ class UpdateRelayTest < Minitest::Test
       File.write(path, driver)
       FileUtils.chmod(0755, path)
     end
+    install_middleware_client
   end
 
   def teardown
+    FileUtils.rm_f(@client) if @client
     FileUtils.remove_entry(@dir) if @dir
   end
 
@@ -265,6 +253,16 @@ class UpdateRelayTest < Minitest::Test
     assert_equal 1, Dir.glob("#{@root}/backups/*/BACKUP_COMPLETE").length
   end
 
+  def test_configuration_never_travels_on_a_command_line
+    # TrueNAS audits commands through sudo, which kills a process whose long
+    # arguments it cannot verify; the configuration goes over the middleware socket.
+    output, status = run_script("--cron")
+    assert status.success?, output
+    assert_includes calls, [ "middleware", "app.update", "relay" ]
+    longest = calls.flatten.map { |arg| arg.to_s.length }.max
+    assert_operator longest, :<, 500
+  end
+
   def test_success_pins_the_published_digest_and_verifies_after_backup
     output, status = run_script
     assert status.success?, output
@@ -367,6 +365,51 @@ class UpdateRelayTest < Minitest::Test
   end
 
   private
+
+    # The updater submits app.update with TrueNAS's Python client; this stand-in
+    # records the call and fails as FAIL_AT asks. It never replaces a real client.
+    def install_middleware_client
+      _, found = Open3.capture2e("python3", "-I", "-c", "import truenas_api_client")
+      skip "A real truenas_api_client is installed; run these tests in a disposable container" if found.success?
+      site, = Open3.capture2("python3", "-I", "-c", "import site; print(site.getsitepackages()[0])")
+      FileUtils.mkdir_p(site.strip)
+      @client = File.join(site.strip, "truenas_api_client.py")
+      File.write(@client, <<~'PYTHON')
+        import json
+        import os
+        import signal
+        import sys
+
+
+        class Client:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *error):
+                return False
+
+            def call(self, method, *params):
+                folder = os.environ["MOCK_DIR"]
+                fail_at = os.environ.get("FAIL_AT", "")
+                with open(os.path.join(folder, "calls.jsonl"), "a") as log:
+                    log.write(json.dumps(["middleware", method, params[0]]) + "\n")
+                if method != "app.update":
+                    raise RuntimeError("Unexpected middleware call: " + method)
+                open(os.path.join(folder, "submitted"), "w").write("true")
+                if fail_at == "update_killed":
+                    os.kill(os.getpid(), signal.SIGKILL)
+                if fail_at in ("update", "update_running"):
+                    # Rejected before anything was stored; the error is huge and noisy.
+                    sys.stderr.write("ValidationError: " + "expected {config}, got {config} " * 200 + "\n")
+                    raise RuntimeError("rejected")
+                if fail_at != "job_failed":
+                    with open(os.path.join(folder, "payload.json"), "w") as payload:
+                        json.dump(params[1], payload)
+                if fail_at == "update_applied":
+                    raise ConnectionError("connection lost")
+                return 123
+      PYTHON
+    end
 
     def write_config
       File.write(File.join(@dir, "config.json"), JSON.generate(@config))
