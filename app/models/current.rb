@@ -33,6 +33,18 @@ class Current < ActiveSupport::CurrentAttributes
     family.entries.joins(:account).merge(Account.accessible_by(user))
   end
 
+  # Personal plus family-managed accounts and entries. Only for authorizing
+  # a lookup of one record; lists and totals keep the personal scopes.
+  def reachable_accounts
+    return family&.accounts unless user
+    user.reachable_accounts
+  end
+
+  def reachable_entries
+    return family&.entries unless user
+    family.entries.where(account_id: user.reachable_accounts.select(:id))
+  end
+
   # Used for invalidating caches whose results depend on the current user's
   # account-share access (e.g. the transactions index's uncategorized count
   # and projected recurring list, which are scoped to accessible accounts).

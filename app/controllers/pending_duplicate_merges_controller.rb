@@ -60,7 +60,7 @@ class PendingDuplicateMergesController < ApplicationController
 
   private
     def set_transaction
-      entry = Current.accessible_entries.find(params[:transaction_id])
+      entry = Current.reachable_entries.find(params[:transaction_id])
       @transaction = entry.entryable
 
       unless @transaction.is_a?(Transaction) && @transaction.legacy_pending?

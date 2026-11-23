@@ -45,7 +45,7 @@ class AccountsController < ApplicationController
     @mobile_sidebar = ActiveModel::Type::Boolean.new.cast(params[:mobile])
     active_account_id = params[:active_account_id].presence
     @sidebar_active_account_id = if active_account_id
-      Current.user.accessible_accounts.where(id: active_account_id).pick(:id)&.to_s
+      Current.user.reachable_accounts.where(id: active_account_id).pick(:id)&.to_s
     end
 
     render layout: false
@@ -59,7 +59,8 @@ class AccountsController < ApplicationController
     # separately, a render crossing midnight shows a chart projecting from one
     # date beside a table shaded against another.
     @as_of = Date.current
-    @accessible_account_ids = Current.user.accessible_accounts.pluck(:id).to_set
+    # The account page also serves accounts managed through the Family section.
+    @accessible_account_ids = Current.user.reachable_accounts.pluck(:id).to_set
     @q = params.fetch(:q, {}).permit(:search, :uncategorized, status: [])
     entries = @account.entries.excluding_split_parents.search(@q).reverse_chronological.includes(:entryable)
     if statement_tab_active?
@@ -341,11 +342,11 @@ class AccountsController < ApplicationController
     end
 
     def set_account
-      @account = Current.user.accessible_accounts.find(params[:id])
+      @account = Current.user.reachable_accounts.find(params[:id])
     end
 
     def set_manageable_account
-      @account = Current.user.accessible_accounts.find(params[:id])
+      @account = Current.user.reachable_accounts.find(params[:id])
       permission = @account.permission_for(Current.user)
       unless permission.in?([ :owner, :full_control ])
         respond_to do |format|

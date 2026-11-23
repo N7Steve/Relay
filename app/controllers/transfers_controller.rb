@@ -156,7 +156,7 @@ class TransfersController < ApplicationController
 
   private
     def set_transfer
-      accessible_ids = transfer_transaction_ids(Current.user.accessible_accounts)
+      accessible_ids = transfer_transaction_ids(Current.user.reachable_accounts)
       @transfer = Transfer.where(inflow_transaction_id: accessible_ids, outflow_transaction_id: accessible_ids).find(params[:id])
     end
 

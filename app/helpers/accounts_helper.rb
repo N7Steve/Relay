@@ -14,6 +14,22 @@ module AccountsHelper
     render "accounts/summary_card", title: title, content: content
   end
 
+  # Family-managed accounts for the sidebar's Family group, grouped by the
+  # member who owns them. Empty unless the family manager shows the group.
+  def family_sidebar_account_groups
+    user = Current.user
+    return [] unless user&.family_manager? && user.show_family_accounts?
+
+    user.family_managed_accounts
+      .navigation_visible
+      .includes(:accountable, :owner)
+      .with_attached_logo
+      .alphabetically
+      .group_by(&:owner)
+      .map { |owner, accounts| [ owner&.display_name || t("family_accounts.unowned"), accounts ] }
+      .sort_by { |name, _accounts| name.downcase }
+  end
+
   def sync_path_for(account)
     # Always use the account sync path, which handles syncing all providers
     sync_account_path(account)
@@ -48,7 +64,7 @@ module AccountsHelper
       end
 
     [
-      family.build_cache_key("account_sidebar_tabs_v8", invalidate_on_data_updates: true),
+      family.build_cache_key("account_sidebar_tabs_v9", invalidate_on_data_updates: true),
       ExternalAccess.enabled?(:logos),
       Current.user&.id,
       shares_version,
@@ -60,7 +76,9 @@ module AccountsHelper
       # so toggling it in Settings busts the 12h fragment cache immediately
       # (this partial renders with skip_digest: true, so the template digest
       # would not otherwise reflect the change).
-      Current.user&.always_expanded_account_groups&.sort
+      Current.user&.always_expanded_account_groups&.sort,
+      # The Family group depends on the role and the show/hide preference.
+      Current.user&.family_manager? && Current.user.show_family_accounts?
     ]
   end
 end

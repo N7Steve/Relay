@@ -90,7 +90,7 @@ class TransactionAttachmentsController < ApplicationController
     def set_transaction
       @transaction = Current.family.transactions
                        .joins(entry: :account)
-                       .merge(Account.accessible_by(Current.user))
+                       .merge(Account.reachable_by(Current.user))
                        .find(params[:transaction_id])
     end
 

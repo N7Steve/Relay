@@ -22,6 +22,7 @@ es:
       version: Versión
       settings: Ajustes
       changelog: Novedades
+      family: Familia
       feedback: Sugerencias
       contact: Contacto
       log_out: Cerrar sesión

@@ -51,6 +51,7 @@ class Mcp::Catalog
     account = { type: "object", required: %w[id name balance currency capabilities], properties: {
       id: ID, name: STRING, balance: MONEY, currency: STRING,
       capabilities: { type: "object", required: %w[read annotate write], properties: { read: BOOLEAN, annotate: BOOLEAN, write: BOOLEAN } },
+      family_managed: BOOLEAN, owner_id: { type: [ "string", "null" ] },
       accountable: { type: "object" }
     } }
     entry = { type: "object", required: %w[id transaction_id account_id amount date currency], properties: {

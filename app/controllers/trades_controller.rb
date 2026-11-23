@@ -5,7 +5,7 @@ class TradesController < ApplicationController
 
   # Defaults to a buy trade
   def new
-    @account = accessible_accounts.find_by(id: params[:account_id])
+    @account = reachable_accounts.find_by(id: params[:account_id])
     @model = Current.family.entries.new(
       account: @account,
       currency: @account ? @account.currency : Current.family.currency,
@@ -15,7 +15,7 @@ class TradesController < ApplicationController
 
   # Can create a trade, transaction (e.g. "fees"), or transfer (e.g. "withdrawal")
   def create
-    @account = accessible_accounts.find(params[:account_id])
+    @account = reachable_accounts.find(params[:account_id])
 
     return unless require_account_permission!(@account)
 
@@ -93,7 +93,7 @@ class TradesController < ApplicationController
     def set_entry_for_unlock
       trade = Current.family.trades
                 .joins(entry: :account)
-                .merge(Account.accessible_by(Current.user))
+                .merge(Account.reachable_by(Current.user))
                 .find(params[:id])
       @entry = trade.entry
     end

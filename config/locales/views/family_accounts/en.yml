@@ -1,0 +1,25 @@
+---
+en:
+  family_accounts:
+    account_notice: "%{owner}'s account, managed from Family. It does not count in your finances."
+    no_accounts: Has no accounts of their own.
+    not_authorized: Only super admins can manage the family's accounts.
+    unowned: No owner
+    roles:
+      admin: Admin
+      guest: Guest
+      member: Member
+      super_admin: Super admin
+    sidebar:
+      manage: Manage
+      title: Family
+    show:
+      empty: There are no other members in the family.
+      finances_notice: These accounts do not count in your finances. They stay out of your net worth, reports, budgets, agenda and transaction list. You can open and edit them like your own, including through MCP.
+      subtitle: View and manage the rest of your family's accounts without mixing them with yours.
+      title: Family
+      visibility:
+        description: Shows the Family group in the account sidebar.
+        label: Show family accounts
+    update:
+      success: Family accounts preference saved.

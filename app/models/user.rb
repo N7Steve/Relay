@@ -178,6 +178,22 @@ class User < ApplicationRecord
     family.accounts.included_in_finances_for(self)
   end
 
+  # Super admins manage the accounts of the rest of their family from a
+  # separate Family section. Those accounts never join their own finances.
+  def family_manager?
+    super_admin? && active?
+  end
+
+  def family_managed_accounts
+    family.accounts.family_managed_by(self)
+  end
+
+  # Personal accounts plus family-managed ones: for authorizing a lookup,
+  # never for building a list or total.
+  def reachable_accounts
+    family.accounts.reachable_by(self)
+  end
+
   # Other family members who have granted this user access to their personal
   # budget (see BudgetShare). Used to build the budget owner switcher.
   def budget_owners_shared_with_me
@@ -751,6 +767,19 @@ class User < ApplicationRecord
 
   def preview_features_enabled?
     preferences&.dig("preview_features_enabled") == true
+  end
+
+  # Whether the Family group appears in the account sidebar. Defaults on; the
+  # Family page keeps listing those accounts either way.
+  def show_family_accounts?
+    preferences&.dig("show_family_accounts") != false
+  end
+
+  def update_show_family_accounts!(value)
+    transaction do
+      lock!
+      update!(preferences: (preferences || {}).merge("show_family_accounts" => ActiveModel::Type::Boolean.new.cast(value) == true))
+    end
   end
 
   private

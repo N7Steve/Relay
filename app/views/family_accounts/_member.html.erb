@@ -1,0 +1,23 @@
+<%# locals: (name:, role:, accounts:) %>
+
+<%= render DS::Card.new(class: "gap-3", data: { testid: "family-member" }) do %>
+  <div class="flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2 min-w-0">
+      <%= icon "user", class: "text-secondary" %>
+      <h2 class="font-medium text-primary truncate"><%= name %></h2>
+    </div>
+    <% if role.present? %>
+      <%= render DS::Pill.new(label: t("family_accounts.roles.#{role}"), tone: :gray, marker: false) %>
+    <% end %>
+  </div>
+
+  <% if accounts.any? %>
+    <div class="space-y-1">
+      <% accounts.each do |account| %>
+        <%= render "accounts/sidebar_account_link", account: account, color: account.accountable.color %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-secondary"><%= t("family_accounts.no_accounts") %></p>
+  <% end %>
+<% end %>

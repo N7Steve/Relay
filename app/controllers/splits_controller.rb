@@ -83,7 +83,7 @@ class SplitsController < ApplicationController
   private
 
     def set_entry
-      @entry = Current.accessible_entries.find(params[:transaction_id])
+      @entry = Current.reachable_entries.find(params[:transaction_id])
     end
 
     def require_split_write_permission!

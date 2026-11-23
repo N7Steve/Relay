@@ -1,0 +1,25 @@
+---
+es:
+  family_accounts:
+    account_notice: "Cuenta de %{owner}, gestionada desde Familia. No cuenta en tus finanzas."
+    no_accounts: No tiene cuentas propias.
+    not_authorized: Solo los superadministradores pueden gestionar las cuentas de la familia.
+    unowned: Sin propietario
+    roles:
+      admin: Administrador
+      guest: Invitado
+      member: Miembro
+      super_admin: Superadministrador
+    sidebar:
+      manage: Gestionar
+      title: Familia
+    show:
+      empty: No hay otros miembros en la familia.
+      finances_notice: Estas cuentas no cuentan en tus finanzas. Quedan fuera de tu patrimonio, informes, presupuestos, agenda y listado de movimientos. Puedes abrirlas y editarlas igual que las tuyas, también por MCP.
+      subtitle: Consulta y gestiona las cuentas del resto de tu familia sin mezclarlas con las tuyas.
+      title: Familia
+      visibility:
+        description: Muestra el grupo Familia en la barra lateral de cuentas.
+        label: Mostrar cuentas de familia
+    update:
+      success: Preferencia de cuentas de familia guardada.

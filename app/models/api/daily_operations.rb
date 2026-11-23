@@ -587,6 +587,7 @@ class Api::DailyOperations
     def account_json(record)
       record.as_json(only: %w[id name currency accountable_type status archived financial_treatment notes institution_name institution_domain]).merge(
         "balance" => record.balance.to_s("F"), "capabilities" => access.account_capabilities(record),
+        "family_managed" => access.family_managed?(record), "owner_id" => record.owner_id,
         "accountable" => record.accountable.as_json(except: %w[id created_at updated_at]))
     end
 

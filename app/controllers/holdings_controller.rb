@@ -5,7 +5,7 @@ class HoldingsController < ApplicationController
   before_action :require_holding_write_permission!, only: %i[update destroy unlock_cost_basis remap_security reset_security]
 
   def index
-    @account = accessible_accounts.find(params[:account_id])
+    @account = reachable_accounts.find(params[:account_id])
     @current_holdings = @account.current_holdings
   end
 
@@ -97,7 +97,7 @@ class HoldingsController < ApplicationController
     def set_holding
       @holding = Current.family.holdings
                    .joins(:account)
-                   .merge(Account.accessible_by(Current.user))
+                   .merge(Account.reachable_by(Current.user))
                    .find(params[:id])
     end
 

@@ -57,6 +57,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :family_accounts, only: %i[show update]
+
   resources :family_exports, only: %i[new create index destroy] do
     member do
       get :download

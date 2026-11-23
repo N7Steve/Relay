@@ -1,0 +1,41 @@
+<%# locals: (mobile: false) %>
+
+<% groups = family_sidebar_account_groups %>
+<% if groups.any? %>
+  <section class="mt-4 pt-4 border-t border-divider" data-testid="family-accounts-sidebar">
+    <div class="flex items-center justify-between gap-2 px-3 mb-2">
+      <h2 class="text-xs font-medium uppercase text-secondary"><%= t("family_accounts.sidebar.title") %></h2>
+      <%= link_to t("family_accounts.sidebar.manage"), family_accounts_path, class: "text-xs text-secondary hover:text-primary" %>
+    </div>
+
+    <% groups.each_with_index do |(owner_name, accounts), index| %>
+      <% disclosure_key = [ "account-sidebar", Current.user.id, mobile ? "mobile" : "desktop", "family", index ].join("-") %>
+      <div class="py-1">
+        <%= render DS::Disclosure.new(
+              align: :left,
+              open: accounts.any? { |account| page_active?(account_path(account)) },
+              animated: true,
+              data: {
+                controller: "persisted-disclosure",
+                persisted_disclosure_key_value: disclosure_key,
+                action: "turbo:before-morph-attribute->persisted-disclosure#preserveOpen"
+              }
+            ) do |disclosure| %>
+          <% disclosure.with_summary_content do %>
+            <div class="flex items-center gap-2 min-w-0">
+              <%= icon "chevron-right", class: "group-open:rotate-90 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out" %>
+              <%= icon "user", class: "w-4 h-4 text-secondary" %>
+              <span class="text-sm text-primary font-medium truncate"><%= owner_name %></span>
+            </div>
+          <% end %>
+
+          <div class="space-y-1">
+            <% accounts.each do |account| %>
+              <%= render "accounts/sidebar_account_link", account: account, color: account.accountable.color %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+<% end %>

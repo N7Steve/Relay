@@ -35,6 +35,13 @@ sharing rules, so family membership alone does not describe every user's access.
 Use [Current.user and Current.family](../../app/models/current.rb), and the existing
 account-access scopes for the surface being changed.
 
+Active super admins also manage the rest of their family's accounts through the
+Family section (`Account.family_managed_by`). Those accounts stay outside every
+personal scope (`accessible_by`, `writable_by`, `included_in_finances_for`), so
+they never reach the manager's reports, budgets, agenda or lists. Authorize a
+single-record lookup with `reachable_by`/`Current.reachable_entries`; never use
+those to build a list or total. `Api::Access` includes them for MCP operations.
+
 An [Account](../../app/models/account.rb) has its own balance and currency.
 [Entries](../../app/models/entry.rb), [balances](../../app/models/balance.rb) and
 [holdings](../../app/models/holding.rb) also retain currencies. The family's

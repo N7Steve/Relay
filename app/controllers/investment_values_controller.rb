@@ -35,12 +35,12 @@ class InvestmentValuesController < ApplicationController
 
   private
     def set_account
-      @account = accessible_accounts.find(params[:account_id] || params.dig(:investment_value, :account_id))
+      @account = reachable_accounts.find(params[:account_id] || params.dig(:investment_value, :account_id))
       raise ActiveRecord::RecordNotFound unless @account.managed_portfolio?
     end
 
     def set_entry
-      @entry = Current.accessible_entries.where(entryable_type: "Transaction")
+      @entry = Current.reachable_entries.where(entryable_type: "Transaction")
         .joins("INNER JOIN transactions ON transactions.id = entries.entryable_id").where(transactions: { kind: "investment_value_adjustment" }).find(params[:id])
       @account = @entry.account
     end

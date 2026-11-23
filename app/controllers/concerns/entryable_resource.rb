@@ -13,7 +13,7 @@ module EntryableResource
   end
 
   def new
-    account = accessible_accounts.find_by(id: params[:account_id])
+    account = reachable_accounts.find_by(id: params[:account_id])
 
     @entry = Current.family.entries.new(
       account: account,
@@ -45,10 +45,7 @@ module EntryableResource
     end
 
     def set_entry
-      @entry = Current.family.entries
-                 .joins(:account)
-                 .merge(Account.accessible_by(Current.user))
-                 .find(params[:id])
+      @entry = Current.reachable_entries.find(params[:id])
     end
 
     def entry_permission

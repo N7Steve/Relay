@@ -9,6 +9,9 @@
   ] %>
 
 <% desktop_nav_items = mobile_nav_items.reject { |item| item[:mobile_only] } %>
+<% if Current.user.family_manager? %>
+  <% desktop_nav_items += [ { name: t(".nav.family"), path: family_accounts_path, icon: "users", icon_custom: false, active: page_active?(family_accounts_path) } ] %>
+<% end %>
 <% expanded_sidebar_class = "w-full opacity-100" %>
 <% collapsed_sidebar_class = "w-0 opacity-0 overflow-hidden" %>
 

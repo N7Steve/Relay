@@ -39,7 +39,7 @@ module TransactionsHelper
   def can_annotate_account?(account)
     return false unless Current.user
 
-    @annotatable_account_ids ||= Account.annotatable_by(Current.user).pluck(:id).to_set
+    @annotatable_account_ids ||= (Account.annotatable_by(Current.user).pluck(:id) + family_managed_account_ids).to_set
     @annotatable_account_ids.include?(account.id)
   end
 
@@ -49,8 +49,13 @@ module TransactionsHelper
   end
 
   def writable_transfer_sides(transfer)
-    @writable_transfer_account_ids ||= Current.family.accounts.writable_by(Current.user).ids.to_set
+    @writable_transfer_account_ids ||= (Current.family.accounts.writable_by(Current.user).ids + family_managed_account_ids).to_set
     [ transfer.from_account.id, transfer.to_account.id ].count { |id| @writable_transfer_account_ids.include?(id) }
+  end
+
+  # Family-managed accounts carry full control for the family manager.
+  def family_managed_account_ids
+    @family_managed_account_ids ||= Current.user.family_managed_accounts.ids
   end
 
   # ---- Transaction extra details helpers ----

@@ -23,6 +23,7 @@ en:
       version: Version
       settings: Settings
       changelog: Changelog
+      family: Family
       feedback: Feedback
       contact: Contact
       log_out: Log out

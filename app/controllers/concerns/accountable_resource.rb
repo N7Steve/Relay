@@ -148,11 +148,11 @@ module AccountableResource
     end
 
     def set_account
-      @account = Current.user.accessible_accounts.find(params[:id])
+      @account = Current.user.reachable_accounts.find(params[:id])
     end
 
     def set_manageable_account
-      @account = Current.user.accessible_accounts.find(params[:id])
+      @account = Current.user.reachable_accounts.find(params[:id])
       require_account_permission!(@account)
     end
 

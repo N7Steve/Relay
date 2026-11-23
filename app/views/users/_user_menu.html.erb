@@ -55,6 +55,9 @@
         icon: "settings",
         href: intro_mode ? settings_profile_path : accounts_path(return_to: request.fullpath)
       ) %>
+      <% if user.family_manager? && !intro_mode %>
+        <%= render DS::MenuItem.new(variant: "link", roving: false, text: t(".family"), icon: "users", href: family_accounts_path) %>
+      <% end %>
       <%= render DS::MenuItem.new(variant: "link", roving: false, text: "Changelog", icon: "box", href: changelog_path) %>
       <%= render DS::MenuItem.new(variant: "button", roving: false, text: "Recalculate balances", icon: "refresh-cw", href: sync_all_accounts_path, method: :post) %>
 

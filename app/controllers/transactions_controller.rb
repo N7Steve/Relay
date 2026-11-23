@@ -117,7 +117,7 @@ class TransactionsController < ApplicationController
   end
 
   def create
-    account = Current.user.accessible_accounts.find_by(id: params.dig(:entry, :account_id))
+    account = Current.user.reachable_accounts.find_by(id: params.dig(:entry, :account_id))
 
     if account.nil?
       @entry = Current.family.entries.new(entry_params)
@@ -502,7 +502,7 @@ class TransactionsController < ApplicationController
     def duplicate_source
       return @duplicate_source if defined?(@duplicate_source)
       @duplicate_source = if params[:duplicate_entry_id].present?
-        source = Current.family.entries.joins(:account).merge(Account.accessible_by(Current.user)).find_by(id: params[:duplicate_entry_id])
+        source = Current.reachable_entries.find_by(id: params[:duplicate_entry_id])
         source if source&.transaction?
       end
     end
@@ -657,6 +657,12 @@ class TransactionsController < ApplicationController
 
     def set_new_transaction_form_options
       accessible_accounts_scope = accessible_accounts
+      # A family account opened from its own page joins only its own form.
+      family_account_id = @entry&.account_id
+      if family_account_id && Current.user.family_managed_accounts.exists?(id: family_account_id)
+        accessible_accounts_scope = Current.family.accounts.where(id: accessible_accounts.select(:id))
+          .or(Current.family.accounts.where(id: family_account_id))
+      end
 
       @account_currencies = accessible_accounts_scope.pluck(:id, :currency).to_h
       @manual_accounts = accessible_accounts_scope

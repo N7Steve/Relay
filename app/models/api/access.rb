@@ -71,14 +71,22 @@ class Api::Access
     readable? && scopes.include?("read_write")
   end
 
+  # Includes the accounts a family manager reaches through the Family section,
+  # so MCP can operate on them as the web does. Reports still merge
+  # Account.included_in_finances_for, which leaves those accounts out.
   def accounts
-    readable? ? user.family.accounts.accessible_by(user) : user.family.accounts.none
+    readable? ? user.family.accounts.reachable_by(user) : user.family.accounts.none
+  end
+
+  def family_managed?(account)
+    family_managed_ids.include?(account.id)
   end
 
   def allowed?(account, action)
     return false unless readable? && account.family_id == user.family_id
 
     permission = account.owner_id == user.id ? :owner : share_permissions[account.id]&.to_sym
+    permission ||= :full_control if family_managed?(account)
     case action.to_sym
     when :read then permission.present?
     when :annotate then writable? && (permission == :owner || permission.to_s.in?(AccountShare::ANNOTATE_PERMISSIONS))
@@ -108,5 +116,9 @@ class Api::Access
   private
     def share_permissions
       @share_permissions ||= user.account_shares.pluck(:account_id, :permission).to_h
+    end
+
+    def family_managed_ids
+      @family_managed_ids ||= user.family_managed_accounts.ids.to_set
     end
 end

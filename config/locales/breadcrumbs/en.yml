@@ -24,6 +24,7 @@ en:
     depositories: Cash accounts
     enable_banking_items: Enable Banking
     exports: Exports
+    family_accounts: Family
     family_exports: Exports
     family_merchants: Merchants
     feedback: Feedback

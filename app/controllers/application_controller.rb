@@ -129,4 +129,10 @@ class ApplicationController < ActionController::Base
       Current.finance_accounts
     end
     helper_method :finance_accounts
+
+    # Authorizes a lookup of one account the user may operate on, including
+    # the accounts a family manager reaches through the Family section.
+    def reachable_accounts
+      Current.reachable_accounts
+    end
 end

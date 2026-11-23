@@ -2,7 +2,7 @@ class ValuationsController < ApplicationController
   include EntryableResource, StreamExtensions
 
   def confirm_create
-    @account = accessible_accounts.find(params.dig(:entry, :account_id))
+    @account = reachable_accounts.find(params.dig(:entry, :account_id))
     return unless require_account_permission!(@account)
 
     @entry = @account.entries.build(entry_params.merge(currency: @account.currency))
@@ -23,7 +23,7 @@ class ValuationsController < ApplicationController
   end
 
   def confirm_update
-    @entry = Current.accessible_entries.find(params[:id])
+    @entry = Current.reachable_entries.find(params[:id])
     return unless require_account_permission!(@entry.account)
 
     @account = @entry.account
@@ -47,7 +47,7 @@ class ValuationsController < ApplicationController
   end
 
   def create
-    account = accessible_accounts.find(params.dig(:entry, :account_id))
+    account = reachable_accounts.find(params.dig(:entry, :account_id))
     return unless require_account_permission!(account)
 
     result = account.create_reconciliation(

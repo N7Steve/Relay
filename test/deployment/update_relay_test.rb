@@ -10,7 +10,7 @@ class UpdateRelayTest < Minitest::Test
   IMAGE_ID = "sha256:#{'a' * 64}"
   OLD_IMAGE_ID = "sha256:#{'0' * 64}"
   STALE_IMAGE_ID = "sha256:#{'1' * 64}"
-  DIGEST = "ghcr.io/n7steve/relay@sha256:#{'b' * 64}"
+  DIGEST = "100.81.25.109:30008/n7steve/relay@sha256:#{'b' * 64}"
   SCRIPT = File.expand_path("../../bin/update-relay.sh", __dir__)
 
   def setup
@@ -24,7 +24,7 @@ class UpdateRelayTest < Minitest::Test
     @script = File.join(@dir, "update-relay.sh")
     File.write(@script, File.read(SCRIPT).sub("ROOT=/mnt/AppsPool/relay", "ROOT=#{@root}"))
     File.write(File.join(@dir, "relay.env"), "PRIVATE_TEST_VALUE=true\n")
-    services = %w[init web worker].to_h { |name| [ name, { "image" => "ghcr.io/n7steve/relay:stable", "pull_policy" => "missing" } ] }
+    services = %w[init web worker].to_h { |name| [ name, { "image" => "100.81.25.109:30008/n7steve/relay:stable", "pull_policy" => "missing" } ] }
     services["db"] = { "image" => "postgres:16-bookworm", "environment" => { "POSTGRES_DB" => "relay_production", "POSTGRES_USER" => "relay_user" } }
     services["redis"] = { "image" => "redis:7.4-bookworm" }
     services["web"]["ports"] = [ "3002:3000" ]
@@ -32,7 +32,7 @@ class UpdateRelayTest < Minitest::Test
     services["db"]["volumes"] = [ "#{@root}/postgres:/var/lib/postgresql/data", "#{@root}/config:/config:ro" ]
     services["redis"]["volumes"] = [ "#{@root}/redis:/data" ]
     %w[web worker].each { |name| services[name]["volumes"] = [ "#{@root}/config:/config:ro", "#{@root}/storage:/rails/storage" ] }
-    @config = { "x-relay-image" => { "image" => "ghcr.io/n7steve/relay:stable", "pull_policy" => "missing" }, "services" => services }
+    @config = { "x-relay-image" => { "image" => "100.81.25.109:30008/n7steve/relay:stable", "pull_policy" => "missing" }, "services" => services }
     write_config
     driver = <<~'RUBY'
       #!/usr/bin/env ruby
@@ -87,8 +87,8 @@ class UpdateRelayTest < Minitest::Test
             }
             puts JSON.generate([ image ])
           when "ls"
-            puts "ghcr.io/n7steve/relay #{ENV.fetch('STALE_IMAGE_ID')}"
-            puts "ghcr.io/n7steve/relay #{ENV.fetch('IMAGE_ID')}"
+            puts "100.81.25.109:30008/n7steve/relay #{ENV.fetch('STALE_IMAGE_ID')}"
+            puts "100.81.25.109:30008/n7steve/relay #{ENV.fetch('IMAGE_ID')}"
             puts "postgres #{ENV.fetch('STALE_IMAGE_ID').tr('1', '2')}"
           when "rm"
             # Only mocks: never remove a real image.
@@ -158,7 +158,7 @@ class UpdateRelayTest < Minitest::Test
   def test_registry_failure_leaves_app_untouched
     output, status = run_script(fail_at: "registry")
     refute status.success?, output
-    assert_equal [ [ "docker", "pull", "--quiet", "ghcr.io/n7steve/relay:stable" ] ], calls.select { |c| c[0] == "docker" }
+    assert_equal [ [ "docker", "pull", "--quiet", "100.81.25.109:30008/n7steve/relay:stable" ] ], calls.select { |c| c[0] == "docker" }
     refute calls.any? { |c| c[0] == "midclt" }
   end
 
@@ -287,6 +287,19 @@ class UpdateRelayTest < Minitest::Test
     assert calls.any? { |c| c.last.include?(". /config/relay.env") && c.last.include?("db:abort_if_pending_migrations") }
     removed = calls.select { |c| c[0] == "docker" && c[1] == "image" && c[2] == "rm" }.map(&:last)
     assert_equal [ STALE_IMAGE_ID ], removed
+  end
+
+  def test_legacy_ghcr_installation_is_converted
+    %w[init web worker].each do |name|
+      @config["services"][name]["image"] = "ghcr.io/n7steve/relay@sha256:#{'c' * 64}"
+    end
+    write_config
+    output, status = run_script
+    assert status.success?, output
+    updated = JSON.parse(File.read("#{@dir}/payload.json")).fetch("custom_compose_config")
+    %w[init web worker].each do |name|
+      assert_equal DIGEST, updated["services"][name]["image"]
+    end
   end
 
   def test_legacy_source_build_installation_is_converted

@@ -277,6 +277,23 @@ Este bloque se incorporó después del HEAD usado para el inventario original y 
 - `test/controllers/invitations_controller_test.rb`
 - `test/controllers/settings/profiles_controller_test.rb`
 
+### Sección Familia para superadministradores (23 de noviembre de 2026)
+
+- Un `super_admin` activo alcanza las cuentas de otros miembros de su familia que no posee ni tiene compartidas (`Account.family_managed_by`). Las ve y edita con control total; la interfaz no ofrece borrarlas, compartirlas ni importar en ellas.
+- Esas cuentas quedan fuera de todos los scopes personales (`accessible_by`, `writable_by`, `included_in_finances_for`): no suman patrimonio ni aparecen en informes, presupuestos, Agenda, objetivos o el listado general de movimientos. La API REST (y la APK) conserva el alcance personal.
+- `Account.reachable_by`/`Current.reachable_entries` solo autorizan búsquedas de un registro (página de cuenta, edición de movimientos, valoraciones, operaciones, posiciones). No usarlos para listados ni totales.
+- La página `/family_accounts` agrupa las cuentas por miembro y guarda la preferencia `show_family_accounts`, que muestra u oculta el grupo Familia de la barra lateral.
+- `Api::Access` incluye esas cuentas, así que el MCP opera sobre ellas con la misma aprobación web; `list_accounts` las marca con `family_managed` y `owner_id`. Los informes siguen filtrando por finanzas propias.
+- Un miembro o administrador normal no obtiene acceso inverso.
+
+### Archivos de la sección Familia
+
+- `app/models/account.rb`, `app/models/user.rb`, `app/models/current.rb`, `app/models/api/access.rb`
+- `app/controllers/family_accounts_controller.rb`, `app/views/family_accounts/`
+- `app/views/accounts/_family_sidebar_section.html.erb`, `app/views/accounts/_sidebar_account_link.html.erb`
+- `config/locales/views/family_accounts/{en,es}.yml`, `config/mcp/instructions.md`
+- `test/models/account/family_managed_test.rb`, `test/controllers/family_accounts_controller_test.rb`, `test/controllers/api/v1/family_managed_accounts_test.rb`
+
 ## 2. Pagos recurrentes / programados
 
 Es el bloque funcional propio más grande. No debe reducirse a una simple etiqueta de “transacciones recurrentes” durante un merge.

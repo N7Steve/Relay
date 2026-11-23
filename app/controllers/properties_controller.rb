@@ -122,7 +122,7 @@ class PropertiesController < ApplicationController
     end
 
     def set_property
-      @account = accessible_accounts.find(params[:id])
+      @account = reachable_accounts.find(params[:id])
       @property = @account.property
     end
 

@@ -1,13 +1,17 @@
 <%# locals: (account:) %>
 
 <% permission = account.permission_for(Current.user) %>
+<%# Sharing and imports belong to the owner's own scope, not the Family section. %>
+<% family_managed = account.family_managed_by?(Current.user) %>
 <%= render DS::Menu.new(testid: "account-menu") do |menu| %>
   <% if permission.in?([ :owner, :full_control ]) %>
     <% menu.with_item(variant: "link", text: t(".edit"), href: edit_account_path(account), icon: "pencil-line", data: { turbo_frame: :modal }) %>
   <% end %>
-  <% menu.with_item(variant: "link", text: t(".sharing"), href: account_sharing_path(account), icon: "users", data: { turbo_frame: :modal }) %>
+  <% unless family_managed %>
+    <% menu.with_item(variant: "link", text: t(".sharing"), href: account_sharing_path(account), icon: "users", data: { turbo_frame: :modal }) %>
+  <% end %>
 
-  <% if permission.in?([ :owner, :full_control ]) %>
+  <% if permission.in?([ :owner, :full_control ]) && !family_managed %>
     <% menu.with_item(variant: "divider") %>
 
     <% if account.supports_trades? %>

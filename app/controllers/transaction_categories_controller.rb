@@ -2,7 +2,7 @@ class TransactionCategoriesController < ApplicationController
   include ActionView::RecordIdentifier
 
   def update
-    @entry = Current.accessible_entries.transactions.find(params[:transaction_id])
+    @entry = Current.reachable_entries.transactions.find(params[:transaction_id])
     return unless require_account_permission!(@entry.account, :annotate, redirect_path: transaction_path(@entry))
 
     @entry.update!(entry_params)

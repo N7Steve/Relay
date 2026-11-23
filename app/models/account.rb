@@ -160,6 +160,28 @@ class Account < ApplicationRecord
       .distinct
   }
 
+  # Accounts a family manager reaches only through the Family section:
+  # another member's accounts that are neither owned by nor shared with the
+  # manager. They stay outside every personal scope above, so they never
+  # count in the manager's reports, budgets, agenda or lists.
+  scope :family_managed_by, ->(user) {
+    if user&.family_manager?
+      where(family_id: user.family_id)
+        .where("accounts.owner_id IS DISTINCT FROM ?", user.id)
+        .where.not(id: AccountShare.where(user_id: user.id).select(:account_id))
+    else
+      none
+    end
+  }
+
+  # Accounts a user may open and operate on: their personal accounts plus
+  # the accounts they manage for their family. Use it to authorize a lookup,
+  # never to build a list or total.
+  scope :reachable_by, ->(user) {
+    where(id: Account.accessible_by(user).select(:id))
+      .or(where(id: Account.family_managed_by(user).select(:id)))
+  }
+
   has_one_attached :logo, dependent: :purge_later
   # No dependent: option; before_destroy captures IDs, after_destroy_commit moves statements back to inbox.
   has_many :account_statements
@@ -570,12 +592,14 @@ class Account < ApplicationRecord
   def shared_with?(user)
     return false if user.nil?
 
-    owned_by?(user) ||
-      if account_shares.loaded?
-        account_shares.any? { |s| s.user_id == user.id }
-      else
-        account_shares.exists?(user: user)
-      end
+    owned_by?(user) || share_for(user).present? || family_managed_by?(user)
+  end
+
+  # Another member's account that a family manager reaches through the
+  # Family section, without an ownership or share of their own.
+  def family_managed_by?(user)
+    user.present? && user.family_manager? && user.family_id == family_id &&
+      !owned_by?(user) && share_for(user).nil?
   end
 
   def shared?
@@ -584,7 +608,9 @@ class Account < ApplicationRecord
 
   def permission_for(user)
     return :owner if owned_by?(user)
-    account_shares.find_by(user: user)&.permission&.to_sym
+    return :full_control if family_managed_by?(user)
+
+    share_for(user)&.permission&.to_sym
   end
 
   def share_with!(user, permission: "read_only", include_in_finances: true)
@@ -609,6 +635,16 @@ class Account < ApplicationRecord
   end
 
   private
+    def share_for(user)
+      return if user.nil?
+
+      if account_shares.loaded?
+        account_shares.find { |share| share.user_id == user.id }
+      else
+        account_shares.find_by(user_id: user.id)
+      end
+    end
+
     def normalize_financial_treatment
       self[:financial_treatment] = financial_treatment unless defined?(@invalid_financial_treatment)
     end
