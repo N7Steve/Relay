@@ -2,33 +2,33 @@
 
 <%# === ROW 1: Existing metrics (3 cols) === %>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-  <%# Total Income Card %>
+  <%# Employment income: the recurring income savings are measured against %>
   <div class="bg-container rounded-xl shadow-border-xs p-6">
     <div class="flex items-start justify-between mb-3">
       <div class="flex items-center gap-2">
-        <%= icon("trending-up", size: "sm") %>
+        <%= icon("briefcase", size: "sm") %>
         <h3 class="text-sm font-medium text-secondary">
-          <%= t("reports.summary.total_income") %>
+          <%= t("reports.summary.rent_income") %>
         </h3>
       </div>
     </div>
 
     <div class="space-y-2">
       <p class="text-2xl font-semibold text-primary privacy-sensitive">
-        <%= metrics[:current_income].format %>
+        <%= metrics[:rent_income].format %>
       </p>
 
-      <% if metrics[:income_change] %>
+      <% if metrics[:rent_income_change] && metrics[:rent_income_change] != 0 %>
         <div class="flex items-center gap-1.5 privacy-sensitive">
-          <% if metrics[:income_change] >= 0 %>
+          <% if metrics[:rent_income_change] >= 0 %>
             <%= icon("arrow-up", size: "sm") %>
             <span class="text-sm font-medium text-success">
-              +<%= metrics[:income_change] %>%
+              +<%= metrics[:rent_income_change] %>%
             </span>
           <% else %>
             <%= icon("arrow-down", size: "sm") %>
             <span class="text-sm font-medium text-destructive">
-              <%= metrics[:income_change] %>%
+              <%= metrics[:rent_income_change] %>%
             </span>
           <% end %>
           <span class="text-sm text-subdued">
@@ -36,6 +36,9 @@
           </span>
         </div>
       <% end %>
+      <p class="text-sm text-subdued privacy-sensitive">
+        <%= t("reports.summary.total_income_hint", amount: metrics[:current_income].format) %>
+      </p>
     </div>
   </div>
 
@@ -101,23 +104,24 @@
 
 <%# === ROW 2: Custom metrics (3 cols) === %>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <%# Employment income %>
+  <%# Managed portfolio performance: market movement, neither income nor expense %>
+  <% investment_return = metrics[:investment_return] %>
   <div class="bg-container rounded-xl shadow-border-xs p-6">
     <div class="flex items-start justify-between mb-3">
       <div class="flex items-center gap-2">
-        <%= icon("briefcase", class: "w-5 h-5") %>
+        <%= icon(investment_return.negative? ? "trending-down" : "trending-up", class: "w-5 h-5") %>
         <h3 class="text-sm font-medium text-secondary">
-          Ingresos de renta
+          <%= t("reports.summary.investment_return") %>
         </h3>
       </div>
     </div>
 
     <div class="space-y-2">
-      <p class="text-2xl font-semibold text-primary privacy-sensitive">
-        <%= rent_income.format %>
+      <p class="text-2xl font-semibold privacy-sensitive <%= investment_return.negative? ? "text-destructive" : (investment_return.zero? ? "text-primary" : "text-success") %>">
+        <%= investment_return.positive? ? "+" : "" %><%= investment_return.format %>
       </p>
-      <p class="text-sm text-subdued">
-        Solo rentas de trabajo
+      <p class="text-sm text-subdued privacy-sensitive">
+        <%= t("reports.summary.investment_return_previous", amount: metrics[:previous_investment_return].format) %>
       </p>
     </div>
   </div>

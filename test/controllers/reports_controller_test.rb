@@ -9,7 +9,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     @family = @user.family
   end
 
-  test "native investment return reconciles income savings trends activity and exports without changing normal categories" do
+  test "native investment return stays apart from income savings trends and exports" do
     sign_in @user = users(:empty)
     @family = @user.family
     bank = @family.accounts.create!(name: "Payroll", balance: 0, currency: "USD", accountable: Depository.new)
@@ -35,47 +35,45 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
 
     get reports_path(options)
     assert_response :success
-    assert_select "p.privacy-sensitive", text: "$3,498.43"
-    assert_select "p.privacy-sensitive", text: "$3,298.43"
+    # Employment income leads; the portfolio gain is shown on its own card.
     assert_select "p.privacy-sensitive", text: "$3,207.88"
-    assert_select "p", text: I18n.t("reports.summary.adjusted_savings", amount: "$3,398.43")
-    assert_select "tr[data-category='category-native_investments']" do
-      assert_select "span", text: I18n.t("reports.transactions_breakdown.native_investments")
-      assert_select ".privacy-sensitive", text: "$290.47"
-      assert_select "a", count: 0
-    end
+    assert_select "p.privacy-sensitive", text: I18n.t("reports.summary.total_income_hint", amount: "$3,207.96")
+    assert_select "p.privacy-sensitive.text-success", text: "+$290.47"
+    assert_select "p.privacy-sensitive", text: "$3,007.96"
+    assert_select "p", text: I18n.t("reports.summary.adjusted_savings", amount: "$3,107.96")
+    assert_select "tr[data-category='category-native_investments']", count: 0
+    assert_select "tr[data-valuation-account='#{portfolio.id}'] .text-success", text: "+$290.47"
     assert_select "tr[data-category='category-#{ordinary_investments.id}'] .privacy-sensitive", text: "$0.08"
-    assert_select "section[data-section-key='trends_insights'] td", text: "$3,498.43"
-
-    get reports_path(options.merge(adjust_shared_expenses: "1"))
-    assert_select "tr[data-category='category-native_investments'] .privacy-sensitive", text: "$290.47"
-    assert_select "tr[data-category='category-uncategorized'] .privacy-sensitive", text: "$100.00"
+    assert_select "section[data-section-key='trends_insights'] td", text: "$3,207.96"
 
     get print_reports_path(options)
     assert_response :success
-    assert_includes response.body, I18n.t("reports.transactions_breakdown.native_investments")
-    assert_includes response.body, "$3,498.43"
+    assert_includes response.body, "$3,207.96"
+    assert_not_includes response.body, "$3,498.43"
 
     get export_transactions_reports_path(options.merge(format: :csv))
     assert_response :success
-    row = CSV.parse(response.body).find { |record| record.first == I18n.t("reports.transactions_breakdown.native_investments") }
-    assert_equal [ I18n.t("reports.transactions_breakdown.native_investments"), "$290.47", "$290.47" ], row
+    rows = CSV.parse(response.body)
+    assert_equal [ "TOTAL INCOME", "$3,207.96", "$3,207.96" ], rows.find { |record| record.first == "TOTAL INCOME" }
+    assert_not rows.flatten.include?("$290.47")
 
     get reports_path(options.merge(filter_account_id: bank.id))
-    assert_select "tr[data-category='category-native_investments']", count: 0
+    assert_select "tr[data-valuation-account]", count: 0
+
+    get reports_path(options.merge(filter_account_id: portfolio.id))
+    assert_select "tr[data-valuation-account='#{portfolio.id}']"
 
     get reports_path(options.merge(filter_category_id: ordinary_investments.id))
-    assert_select "tr[data-category='category-native_investments']", count: 0
+    assert_select "tr[data-valuation-account]", count: 0
 
-    # A falling native value reduces income; it is not an ordinary expense.
+    # A falling value is a valuation loss, not an expense, and leaves income alone.
     update = Investment::ValueUpdate.new(account: portfolio, amount: "1150", date: Date.current)
     assert update.save, update.errors.full_messages.to_sentence
     get reports_path(options)
-    assert_select "p.privacy-sensitive", text: "$3,157.96"
-    assert_select "tr[data-category='category-native_investments'] .text-destructive", text: "-$50.00"
-    get export_transactions_reports_path(options.merge(format: :csv))
-    row = CSV.parse(response.body).find { |record| record.first == I18n.t("reports.transactions_breakdown.native_investments") }
-    assert_equal [ I18n.t("reports.transactions_breakdown.native_investments"), "-$50.00", "-$50.00" ], row
+    assert_select "p.privacy-sensitive", text: I18n.t("reports.summary.total_income_hint", amount: "$3,207.96")
+    assert_select "p.privacy-sensitive.text-destructive", text: "-$50.00"
+    assert_select "tr[data-valuation-account='#{portfolio.id}'] .text-destructive", text: "-$50.00"
+    assert_select "tr[data-category='category-uncategorized'] .privacy-sensitive", text: "$200.00"
   end
 
   test "reports omit investment performance while retaining managed portfolios and saved section order" do
@@ -357,7 +355,8 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
   test "index calculates summary metrics correctly" do
     get reports_path(period_type: :monthly)
     assert_response :ok
-    assert_select "h3", text: I18n.t("reports.summary.total_income")
+    assert_select "h3", text: I18n.t("reports.summary.rent_income")
+    assert_select "h3", text: I18n.t("reports.summary.investment_return")
     assert_select "h3", text: I18n.t("reports.summary.total_expenses")
     assert_select "h3", text: I18n.t("reports.summary.net_savings")
   end

@@ -1,5 +1,5 @@
-# Reports include managed portfolio performance as income without changing the
-# cash-only income statement used by budgets and forecasts.
+# Reports show managed portfolio performance beside income and expenses. Market
+# movements are neither: counting them as income would distort savings rates.
 class Reports::Activity
   Totals = Data.define(:income, :expenses, :investment_return)
 
@@ -17,7 +17,7 @@ class Reports::Activity
     @totals[[ period.start_date, period.end_date ]] ||= begin
       cash = @income_statement.totals(transactions_scope: cash_transactions.in_period(period), date_range: period.date_range)
       performance = investment_return(period: period)
-      Totals.new(income: cash.income_money + performance, expenses: cash.expense_money, investment_return: performance)
+      Totals.new(income: cash.income_money, expenses: cash.expense_money, investment_return: performance)
     end
   end
 
@@ -25,6 +25,12 @@ class Reports::Activity
     returns = investment_returns(period: period)
     returns = returns.select { |id, _| id == account_id } if account_id.present?
     Money.new(returns.values.sum(&:amount), @family.currency)
+  end
+
+  # Each managed portfolio counted in the report with its return for the period.
+  def investment_returns_by_account(period:)
+    returns = investment_returns(period: period)
+    managed_accounts.map { |account| [ account, returns.fetch(account.id) ] }
   end
 
   def cash_transactions

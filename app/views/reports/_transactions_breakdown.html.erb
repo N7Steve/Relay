@@ -118,4 +118,10 @@
       <%= t("reports.transactions_breakdown.no_transactions") %>
     </div>
   <% end %>
+
+  <% if local_assigns[:valuations].present? %>
+    <div class="mt-8">
+      <%= render "reports/valuations_table", valuations: valuations %>
+    </div>
+  <% end %>
 </div>

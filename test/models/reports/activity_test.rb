@@ -10,7 +10,7 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     @period = Period.custom(start_date: Date.new(2026, 8, 1), end_date: Date.new(2026, 8, 31))
   end
 
-  test "adds native gains once to income while capital transfers remain excluded" do
+  test "keeps native gains apart from income while capital transfers remain excluded" do
     movement(@cash, -1000)
     movement(@cash, 200)
     movement(@portfolio, -300, kind: "investment_contribution")
@@ -22,14 +22,15 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     report = Reports::Activity.new(@family, user: @user)
     totals = report.totals(period: @period)
     assert_equal 56, totals.investment_return.amount
-    assert_equal 1056, totals.income.amount
+    # Market movements are neither income nor expenses; the native rows are not counted twice.
+    assert_equal 1000, totals.income.amount
     assert_equal 200, totals.expenses.amount
-    assert_equal 1056, report.totals(period: @period).income.amount
+    assert_equal 1000, report.totals(period: @period).income.amount
     # Budgets retain their existing cash-only definition.
     assert_equal 1010, IncomeStatement.new(@family, user: @user).income_totals(period: @period).total
   end
 
-  test "losses reduce income and native returns do not change adjusted spending" do
+  test "losses do not reduce income and native returns do not change adjusted spending" do
     movement(@cash, -1000)
     shared = movement(@cash, 200)
     shared.transaction.update!(shared_expense: true)
@@ -37,7 +38,8 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     report = Reports::Activity.new(@family, user: @user)
 
     assert_equal(-50, report.totals(period: @period).investment_return.amount)
-    assert_equal 950, report.totals(period: @period).income.amount
+    assert_equal 1000, report.totals(period: @period).income.amount
+    assert_equal 200, report.totals(period: @period).expenses.amount
     calculator = SharedExpensesCalculator.new(@family, transactions: report.cash_transactions)
     assert_equal 100, calculator.calculate_adjusted_expenses(@period).amount
   end
@@ -53,9 +55,10 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     report = Reports::Activity.new(@family, user: @user)
 
     totals = report.totals(period: @period)
-    assert_equal 1050, totals.income.amount
+    assert_equal 1000, totals.income.amount
     assert_equal 200, totals.expenses.amount
-    assert_equal 850, (totals.income - totals.expenses).amount
+    assert_equal 800, (totals.income - totals.expenses).amount
+    assert_equal 50, totals.investment_return.amount
 
     previous = report.totals(period: Period.custom(start_date: @period.start_date - 1.month, end_date: @period.start_date - 1))
     assert_equal 300000, previous.income.amount
@@ -73,7 +76,9 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     movement(@portfolio, -20, kind: "investment_value_adjustment", date: @period.end_date + 1)
     report = Reports::Activity.new(@family, user: @user)
     assert_equal 75, report.investment_return(period: @period).amount
-    assert_equal 75, report.totals(period: @period).income.amount
+    assert_equal 75, report.totals(period: @period).investment_return.amount
+    assert_equal 0, report.totals(period: @period).income.amount
+    assert_equal [ [ @portfolio, Money.new(75, "USD") ] ], report.investment_returns_by_account(period: @period)
   end
 
   test "includes provider native monetary performance without counting contributed capital" do
@@ -85,7 +90,7 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     report = Reports::Activity.new(@family, user: @user)
 
     assert_equal 260, report.investment_return(period: @period).amount
-    assert_equal 260, report.totals(period: @period).income.amount
+    assert_equal 260, report.totals(period: @period).investment_return.amount
   end
 
   test "respects family finance access and exclusions while including historical pending rows" do
@@ -106,7 +111,7 @@ class Reports::ActivityTest < ActiveSupport::TestCase
     assert_equal 550, report.investment_return(period: @period, account_id: @portfolio.id).amount
 
     @portfolio.update!(exclude_from_reports: true)
-    assert_equal 0, Reports::Activity.new(@family, user: @user).totals(period: @period).income.amount
+    assert_equal 0, Reports::Activity.new(@family, user: @user).totals(period: @period).investment_return.amount
   end
 
   test "foreign portfolio returns use stored conversion and fail if it is missing" do

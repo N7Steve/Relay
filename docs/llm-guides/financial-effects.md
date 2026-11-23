@@ -216,13 +216,17 @@ defecto, flujos de mercado, revaloraciones y movimientos de rendimiento locales.
 Excluye aportaciones y retiradas e incluye comisiones. No calcula rendimientos
 de mercado nuevos entre observaciones ni necesita proveedores externos.
 
-Los informes añaden una categoría calculada «Inversiones» con la
-rentabilidad monetaria del período de las carteras gestionadas, usando el mismo
-motor que su tarjeta de rentabilidad. Las ganancias suman ingresos y las pérdidas
-los reducen. `Reports::Activity` aplica este criterio a resumen, ahorro,
-comparación con el período anterior, evolución mensual, desglose, impresión y
-exportación CSV/Google Sheets. Las categorías personalizadas conservan su
-identidad y sus movimientos; no se deduce rentabilidad de su nombre.
+Los informes muestran la rentabilidad monetaria del período de las carteras
+gestionadas aparte de ingresos y gastos (decisión del 23 de noviembre de 2026),
+usando el mismo motor que su tarjeta de rentabilidad. Una subida no es un
+ingreso ni una bajada un gasto: `Reports::Activity` devuelve `income` y
+`expenses` solo con movimientos de efectivo y `investment_return` por separado,
+de modo que resumen, tasa de ahorro, comparación con el período anterior,
+evolución mensual, impresión y exportación CSV/Google Sheets no la incluyen.
+La web la presenta en la tarjeta «Rendimiento de inversiones» y en la tabla
+«Valoraciones», con una fila por cartera; `get_activity_report` la expone en
+`investment_return`. Las categorías personalizadas conservan su identidad y sus
+movimientos; no se deduce rentabilidad de su nombre.
 
 Las aportaciones, retiradas y transferencias no son rentabilidad. Los dividendos,
 intereses, comisiones y ajustes nativos ya incluidos en la rentabilidad de una

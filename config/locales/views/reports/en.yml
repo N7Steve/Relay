@@ -36,6 +36,10 @@ en:
       next_decade: "Next decade"
     invalid_date_range: "End date cannot be before start date. The dates have been swapped."
     summary:
+      rent_income: Employment income
+      total_income_hint: "Total income: %{amount}"
+      investment_return: Investment performance
+      investment_return_previous: "Previous period: %{amount}"
       total_income: Total Income
       total_expenses: Total Expenses
       net_savings: Net Savings
@@ -88,7 +92,11 @@ en:
       add_transaction: Add Transaction
       add_account: Add Account
     transactions_breakdown:
-      native_investments: Investments
+      valuations:
+        title: Valuations
+        description: Gains and losses of managed portfolios. They count as neither income nor expenses.
+        account: Account
+        change: Change
       period_return: Period return
       adjust_shared_expenses: Adjust for shared expenses
       title: Activity Breakdown

@@ -35,6 +35,10 @@ es:
       next_decade: Década siguiente
     invalid_date_range: La fecha de fin no puede ser anterior a la de inicio. Las fechas se han intercambiado.
     summary:
+      rent_income: Ingresos de renta
+      total_income_hint: "Ingresos totales: %{amount}"
+      investment_return: Rendimiento de inversiones
+      investment_return_previous: "Periodo anterior: %{amount}"
       total_income: Ingresos totales
       total_expenses: Gastos totales
       net_savings: Ahorro neto
@@ -87,7 +91,11 @@ es:
       add_transaction: Añadir transacción
       add_account: Añadir cuenta
     transactions_breakdown:
-      native_investments: Inversiones
+      valuations:
+        title: Valoraciones
+        description: Subidas y bajadas de las carteras gestionadas. No cuentan como ingresos ni gastos.
+        account: Cuenta
+        change: Variación
       period_return: Rentabilidad del período
       adjust_shared_expenses: Ajustar a gastos compartidos
       title: Desglose de actividad

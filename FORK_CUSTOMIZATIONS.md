@@ -436,6 +436,7 @@ Los subtipos no son meras etiquetas en todo el dominio: algunos subtipos de inve
 - `Investment::RoboadvisorPerformance` centraliza el índice temporal ajustado por aportaciones de proveedores como Indexa, el P&L monetario y el fallback de valoraciones para carteras manuales.
 - Las carteras gestionadas se detectan por subtipo (`roboadvisor`/`managed_fund`) o por proveedor Indexa, de modo que un plan Indexa conserva el subtipo fiscal `pension` sin desaparecer de las métricas de roboadvisor.
 - Sección de rendimiento roboadvisor dentro del dashboard de informes.
+- La rentabilidad del periodo de las carteras gestionadas no es ingreso ni gasto: `Reports::Activity` la devuelve aparte (`investment_return`), la tarjeta «Rendimiento de inversiones» sustituye a «Ingresos de renta» en la segunda fila (que pasa a ser la primera tarjeta) y la tabla «Valoraciones» lista la subida o bajada de cada cartera. La tasa de ahorro solo usa movimientos de efectivo.
 - Cálculo de liquidez neta estimada con tramos fiscales progresivos mediante `PortfoliosHelper`.
 - Tratamiento regional/fiscal de inversiones y etiquetas de actividad de inversión.
 - Flujos de inversión y aportaciones diferenciados de ingresos/gastos ordinarios.

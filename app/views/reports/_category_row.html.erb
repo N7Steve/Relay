@@ -86,11 +86,7 @@
           </span>
         <% end %>
         <span class="text-xs text-subdued whitespace-nowrap">
-          <% if item[:native] %>
-            <%= t("reports.transactions_breakdown.period_return") %>
-          <% else %>
-            (<%= t("reports.transactions_breakdown.table.entries", count: item[:count]) %>)
-          <% end %>
+          (<%= t("reports.transactions_breakdown.table.entries", count: item[:count]) %>)
         </span>
       <% end %>
     </div>

@@ -148,6 +148,14 @@ class ReportsController < ApplicationController
       @adjusted_expenses = calculator.calculate_adjusted_expenses(@period)
       @summary_metrics[:adjusted_savings] = @summary_metrics[:current_income] - @adjusted_expenses
       @rent_income = calculator.calculate_rent_income(@period)
+      previous_rent_income = calculator.calculate_rent_income(@previous_period)
+      @summary_metrics[:rent_income] = @rent_income
+      @summary_metrics[:rent_income_change] = calculate_percentage_change(previous_rent_income, @rent_income)
+      @summary_metrics[:investment_return] = @current_report_totals.investment_return
+      @summary_metrics[:previous_investment_return] = @previous_report_totals.investment_return
+
+      # Market movements of managed portfolios, apart from income and expenses
+      @valuations = build_valuations_breakdown
     end
 
     def report_activity
@@ -202,6 +210,7 @@ class ReportsController < ApplicationController
           partial: "reports/transactions_breakdown",
           locals: {
             transactions: @transactions,
+            valuations: @valuations,
             period_type: @period_type,
             start_date: @start_date,
             end_date: @end_date
@@ -604,27 +613,23 @@ class ReportsController < ApplicationController
         parent_data.merge(subcategories: subcategories)
       end
 
-      if (native_return = filtered_investment_return(@period)) && !native_return.zero?
-        result << init_category_group.call(:native_investments, t("reports.transactions_breakdown.native_investments"),
-          Category::OTHER_INVESTMENTS_COLOR, "trending-up", "income").merge(
-            total: native_return.amount, subcategories: [], native: true,
-            color_class: native_return.negative? ? "text-destructive" : "text-success"
-          )
-      end
-
       # Sort by the chosen key with the specified direction
       result.sort_by(&sort_logic)
     end
 
-    def filtered_investment_return(period)
-      # Computed portfolio performance has no custom category, tag or entry amount.
-      return if %i[filter_category_id filter_tag_id filter_amount_min filter_amount_max].any? { |key| params[key].present? }
+    # One row per managed portfolio with its market movement in the period.
+    # Computed performance has no custom category, tag or entry amount.
+    def build_valuations_breakdown
+      return [] if %i[filter_category_id filter_tag_id filter_amount_min filter_amount_max].any? { |key| params[key].present? }
 
-      start_date = [ period.start_date, parse_date_param(:filter_date_start) ].compact.max
-      end_date = [ period.end_date, parse_date_param(:filter_date_end) ].compact.min
-      return if start_date > end_date
+      start_date = [ @period.start_date, parse_date_param(:filter_date_start) ].compact.max
+      end_date = [ @period.end_date, parse_date_param(:filter_date_end) ].compact.min
+      return [] if start_date > end_date
 
-      report_activity.investment_return(period: Period.custom(start_date: start_date, end_date: end_date), account_id: params[:filter_account_id])
+      rows = report_activity.investment_returns_by_account(period: Period.custom(start_date: start_date, end_date: end_date))
+      rows = rows.select { |account, _| account.id == params[:filter_account_id] } if params[:filter_account_id].present?
+      rows.reject { |_, amount| amount.zero? }.sort_by { |_, amount| -amount.amount }
+        .map { |account, amount| { account: account, amount: amount } }
     end
 
     def build_investment_metrics
@@ -990,16 +995,6 @@ class ReportsController < ApplicationController
         breakdown[key][:months][month_key] ||= 0
         breakdown[key][:months][month_key] += converted_amount
         breakdown[key][:total] += converted_amount
-      end
-
-      native_months = months.to_h do |month|
-        period = Period.custom(start_date: [ month, @start_date ].max,
-          end_date: [ Current.family.custom_month_end_for(month), @end_date ].min)
-        [ month, filtered_investment_return(period)&.amount || 0.to_d ]
-      end
-      if native_months.values.any?(&:nonzero?)
-        breakdown[:native_investments] = { category: t("reports.transactions_breakdown.native_investments"),
-          type: "income", months: native_months, total: native_months.values.sum }
       end
 
       # Convert to array and sort by type and total (descending)

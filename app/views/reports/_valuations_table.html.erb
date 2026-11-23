@@ -1,0 +1,48 @@
+<%# locals: (valuations:) %>
+<%# Market movements of managed portfolios: neither income nor expense. %>
+<% total = valuations.sum { |row| row[:amount].amount } %>
+<% total_money = Money.new(total, Current.family.currency) %>
+<% tone = ->(amount) { amount.negative? ? "text-destructive" : (amount.zero? ? "text-primary" : "text-success") } %>
+
+<div>
+  <div class="text-large mb-1 flex items-center gap-2 text-lg">
+    <%= icon(total.negative? ? "trending-down" : "trending-up", class: "w-5 h-5") %>
+    <span><%= t("reports.transactions_breakdown.valuations.title") %>:</span>
+    <span class="font-medium <%= tone.call(total) %> privacy-sensitive"><%= total.positive? ? "+" : "" %><%= total_money.format %></span>
+  </div>
+  <p class="text-sm text-subdued mb-4"><%= t("reports.transactions_breakdown.valuations.description") %></p>
+
+  <div class="bg-container-inset rounded-xl p-1 overflow-x-auto">
+    <div class="rounded-lg shadow-border-xs bg-container overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-container-inset">
+          <tr class="uppercase text-xs font-medium text-secondary">
+            <th class="px-4 py-2 text-left font-medium"><%= t("reports.transactions_breakdown.valuations.account") %></th>
+            <th class="px-4 py-2 text-right font-medium"><%= t("reports.transactions_breakdown.valuations.change") %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% valuations.each_with_index do |row, index| %>
+            <% account = row[:account] %>
+            <tr data-valuation-account="<%= account.id %>" class="text-secondary text-sm <%= index < valuations.size - 1 ? "table-divider" : "" %>">
+              <td class="py-3 px-4 lg:px-6">
+                <div class="flex items-center gap-2 relative">
+                  <%= render "accounts/logo", account: account, size: "sm" %>
+                  <%= link_to account.name, account_path(account),
+                        class: "font-medium text-primary hover:underline truncate before:absolute before:inset-0 before:content-['']",
+                        data: { turbo_frame: "_top", turbo_prefetch: false } %>
+                  <span class="text-xs text-subdued whitespace-nowrap"><%= t("reports.transactions_breakdown.period_return") %></span>
+                </div>
+              </td>
+              <td class="py-3 px-4 lg:px-6 text-right">
+                <span class="text-sm <%= tone.call(row[:amount]) %> privacy-sensitive">
+                  <%= row[:amount].positive? ? "+" : "" %><%= row[:amount].format %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
