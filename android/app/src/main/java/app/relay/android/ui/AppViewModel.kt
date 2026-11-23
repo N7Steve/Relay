@@ -182,12 +182,20 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun signIn(server: String, email: String, password: String, otp: String, clientId: String, clientSecret: String) {
+    fun signIn(
+        server: String,
+        email: String,
+        password: String,
+        otp: String,
+        clientId: String,
+        clientSecret: String,
+        rememberCredentials: Boolean = true,
+    ) {
         if (loginState.value.busy) return
         loginState.update { it.copy(busy = true, error = null) }
         viewModelScope.launch {
             try {
-                repository.login(server, email, password, otp, clientId, clientSecret)
+                repository.login(server, email, password, otp, clientId, clientSecret, rememberCredentials)
                 resetScreens()
                 refreshSummary()
                 updates.check()

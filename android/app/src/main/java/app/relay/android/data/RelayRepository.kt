@@ -57,20 +57,30 @@ class RelayRepository(
         next
     }
 
-    suspend fun login(server: String, email: String, password: String, otp: String, clientId: String, clientSecret: String) {
+    suspend fun login(
+        server: String,
+        email: String,
+        password: String,
+        otp: String,
+        clientId: String,
+        clientSecret: String,
+        rememberCredentials: Boolean = false,
+    ) {
         val origin = serverUrl(server).toString()
         val current = mutable.value ?: DiskState()
         val access = CloudflareAccess.fromInput(clientId, clientSecret)
         val deviceId = current.deviceId.ifEmpty { UUID.randomUUID().toString() }
+        val cleanEmail = email.trim()
         val draft = DiskState(server = origin, deviceId = deviceId, cloudflareAccess = access)
         val body = fields(
-            "email" to value(email.trim()),
+            "email" to value(cleanEmail),
             "password" to value(password),
             "device" to deviceFields(deviceId),
         ).let { if (otp.isNotBlank()) JsonObject(it + ("otp_code" to value(otp.filter(Char::isDigit)))) else it }
         val response = api.json.decodeFromString<TokenResponse>(api.request(draft, "/auth/login", "POST", body))
         val user = requireNotNull(response.user) { "El servidor no devolvió el usuario." }
-        save { draft.copy(tokens = response.tokens(clock()), user = user) }
+        val saved = if (rememberCredentials) SavedCredentials(origin, cleanEmail, password, access) else null
+        save { draft.copy(tokens = response.tokens(clock()), user = user, savedCredentials = saved) }
     }
 
     private fun deviceFields(deviceId: String) = fields(
@@ -257,20 +267,27 @@ class RelayRepository(
     suspend fun updateTransaction(id: String, changes: JsonObject): Transaction =
         api.json.decodeFromString(authorized("/transactions/$id", method = "PATCH", body = fields("transaction" to changes)))
 
-    /** Revokes the device tokens on the server, then forgets them locally. */
+    /** Revokes the device tokens on the server, keeping remembered login credentials if enabled. */
     suspend fun logout() {
         val state = mutable.value?.takeIf { it.signedIn } ?: return forget()
         api.request(state, "/auth/logout", "POST", fields("refresh_token" to value(state.tokens!!.refreshToken)))
-        forget()
+        save { DiskState(server = it.server, deviceId = it.deviceId, savedCredentials = it.savedCredentials) }
     }
 
-    /** Local sign-out: keeps only the server address and device identifier. */
+    /** Local sign-out: clears session, cache and saved credentials; keeps only server and device id. */
     suspend fun forget() {
         save { DiskState(server = it.server, deviceId = it.deviceId) }
     }
 
-    /** Session expired or revoked: the Service Token stays so signing in again is quick. */
+    /** Session expired or revoked: keep Service Token and remembered credentials so signing in again is quick. */
     private suspend fun expire() {
-        save { DiskState(server = it.server, deviceId = it.deviceId, cloudflareAccess = it.cloudflareAccess) }
+        save {
+            DiskState(
+                server = it.server,
+                deviceId = it.deviceId,
+                cloudflareAccess = it.cloudflareAccess,
+                savedCredentials = it.savedCredentials,
+            )
+        }
     }
 }

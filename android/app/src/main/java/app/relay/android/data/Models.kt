@@ -11,6 +11,8 @@ import kotlinx.serialization.json.JsonPrimitive
 
 /** Cloudflare Access Service Token sent only to the configured HTTPS origin. */
 @Serializable data class CloudflareAccess(val clientId: String, val clientSecret: String) {
+    override fun toString() = "CloudflareAccess([redacted])"
+
     companion object {
         fun fromInput(clientId: String, clientSecret: String): CloudflareAccess? {
             val id = clientId.trim()
@@ -23,6 +25,15 @@ import kotlinx.serialization.json.JsonPrimitive
             return CloudflareAccess(id, secret)
         }
     }
+}
+
+@Serializable data class SavedCredentials(
+    val server: String,
+    val email: String,
+    val password: String,
+    val cloudflareAccess: CloudflareAccess? = null,
+) {
+    override fun toString() = "SavedCredentials(server=$server, email=$email, password=[redacted])"
 }
 
 @Serializable data class Tokens(val accessToken: String, val refreshToken: String, val expiresAt: Long)
@@ -41,6 +52,7 @@ import kotlinx.serialization.json.JsonPrimitive
     val server: String = "",
     val deviceId: String = "",
     val cloudflareAccess: CloudflareAccess? = null,
+    val savedCredentials: SavedCredentials? = null,
     val tokens: Tokens? = null,
     val user: User? = null,
     val summary: Summary? = null,

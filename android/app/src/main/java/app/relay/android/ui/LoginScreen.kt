@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -33,16 +34,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -57,15 +62,19 @@ import app.relay.android.data.DiskState
 
 @Composable fun LoginScreen(vm: AppViewModel, session: DiskState) {
     val state by vm.login.collectAsStateWithLifecycle()
-    var server by rememberSaveable { mutableStateOf(session.server.trimEnd('/')) }
-    var email by rememberSaveable { mutableStateOf(session.user?.email.orEmpty()) }
-    var password by rememberSaveable { mutableStateOf("") }
+    val saved = session.savedCredentials
+    val initialServer = (saved?.server ?: session.server).trimEnd('/')
+    val initialAccess = saved?.cloudflareAccess ?: session.cloudflareAccess
+    var server by rememberSaveable(initialServer) { mutableStateOf(initialServer) }
+    var email by rememberSaveable(saved?.email) { mutableStateOf(saved?.email ?: session.user?.email.orEmpty()) }
+    var password by remember(saved) { mutableStateOf(saved?.password.orEmpty()) }
     var otp by rememberSaveable { mutableStateOf("") }
     var showPassword by rememberSaveable { mutableStateOf(false) }
-    var clientId by rememberSaveable { mutableStateOf(session.cloudflareAccess?.clientId.orEmpty()) }
-    var clientSecret by rememberSaveable { mutableStateOf(session.cloudflareAccess?.clientSecret.orEmpty()) }
-    var accessOpen by rememberSaveable { mutableStateOf(session.cloudflareAccess != null) }
-    val submit = { vm.signIn(server, email, password, otp, clientId, clientSecret) }
+    var clientId by remember(saved, session.cloudflareAccess) { mutableStateOf(initialAccess?.clientId.orEmpty()) }
+    var clientSecret by remember(saved, session.cloudflareAccess) { mutableStateOf(initialAccess?.clientSecret.orEmpty()) }
+    var accessOpen by rememberSaveable(initialAccess != null) { mutableStateOf(initialAccess != null) }
+    var rememberCredentials by rememberSaveable(saved != null) { mutableStateOf(true) }
+    val submit = { vm.signIn(server, email, password, otp, clientId, clientSecret, rememberCredentials) }
     val ready = server.isNotBlank() && email.isNotBlank() && password.isNotEmpty() && (!state.mfaRequired || otp.length >= 6)
 
     Box(Modifier.fillMaxSize().relayBackdrop(1.4f).systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
@@ -83,8 +92,13 @@ import app.relay.android.data.DiskState
 
             Panel(Modifier.fillMaxWidth().enter(3), padding = 20.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Field(server, { server = it; if (it.trimEnd('/') != session.server.trimEnd('/')) { clientId = ""; clientSecret = "" } },
-                        "Servidor", "https://relay.tudominio.com", KeyboardType.Uri)
+                    Field(server, { next ->
+                        if (next.trim().trimEnd('/') != server.trim().trimEnd('/')) {
+                            clientId = ""
+                            clientSecret = ""
+                        }
+                        server = next
+                    }, "Servidor", "https://relay.tudominio.com", KeyboardType.Uri)
                     Field(email, { email = it }, "Email", "tu@email.com", KeyboardType.Email)
                     Field(password, { password = it }, "Contraseña", null, KeyboardType.Password,
                         hidden = !showPassword, imeAction = if (state.mfaRequired) ImeAction.Next else ImeAction.Done,
@@ -114,6 +128,20 @@ import app.relay.android.data.DiskState
                             Field(clientId, { clientId = it.trim() }, "Client ID", null, KeyboardType.Ascii)
                             Field(clientSecret, { clientSecret = it.trim() }, "Client Secret", null, KeyboardType.Password, hidden = true)
                         }
+                    }
+
+                    Row(
+                        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)
+                            .toggleable(rememberCredentials, enabled = !state.busy, role = Role.Switch) { rememberCredentials = it }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                            Text("Recordar credenciales", style = MaterialTheme.typography.bodyMedium, color = Relay.text)
+                            Text("Guarda servidor, email, contraseña y Cloudflare Access cifrados en este móvil.",
+                                style = MaterialTheme.typography.bodySmall, color = Relay.muted)
+                        }
+                        Switch(checked = rememberCredentials, onCheckedChange = null, enabled = !state.busy)
                     }
 
                     state.error?.let { ErrorBanner(it) }

@@ -335,6 +335,38 @@ class RelayRepositoryTest {
         assertNull(store.current.cloudflareAccess)
     }
 
+    @Test fun rememberedCredentialsSurviveExpiryAndLogoutButAreClearedByForget() = runBlocking {
+        server.enqueue(json(tokens("a1", "r1")))
+        repo.login(origin(), " steve@example.com ", "saved-pass", "", " cf-id ", " cf-secret ", rememberCredentials = true)
+        server.takeRequest()
+        val expected = SavedCredentials(origin(), "steve@example.com", "saved-pass", CloudflareAccess("cf-id", "cf-secret"))
+        assertEquals(expected, store.current.savedCredentials)
+        assertFalse(expected.toString().contains("saved-pass"))
+
+        // Refresh rejection expires session while preserving savedCredentials and Service Token.
+        server.enqueue(json("""{"error":"unauthorized"}""", 401))
+        server.enqueue(json("""{"error":"Invalid refresh token"}""", 401))
+        assertThrows(SessionExpiredException::class.java) { runBlocking { repo.authorized("/accounts") } }
+        assertFalse(store.current.signedIn)
+        assertEquals(expected, store.current.savedCredentials)
+        assertEquals(CloudflareAccess("cf-id", "cf-secret"), store.current.cloudflareAccess)
+
+        // Explicit logout keeps savedCredentials for quick re-entry.
+        server.enqueue(json(tokens("a2", "r2")))
+        repo.login(origin(), "steve@example.com", "saved-pass", "", "cf-id", "cf-secret", rememberCredentials = true)
+        server.takeRequest()
+        server.enqueue(MockResponse().setResponseCode(204))
+        repo.logout()
+        assertFalse(store.current.signedIn)
+        assertNull(store.current.cloudflareAccess)
+        assertEquals(expected, store.current.savedCredentials)
+
+        // Forget locally wipes savedCredentials completely.
+        repo.forget()
+        assertNull(store.current.savedCredentials)
+        assertNull(store.current.cloudflareAccess)
+    }
+
     @Test fun serverAddressMustBeABareHttpsOrigin() {
         assertEquals("https://relay.example.com/", serverUrl("relay.example.com").toString())
         assertThrows(IllegalArgumentException::class.java) { serverUrl("http://relay.example.com") }

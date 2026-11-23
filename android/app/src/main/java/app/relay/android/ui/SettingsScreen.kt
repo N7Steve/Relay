@@ -113,7 +113,7 @@ import app.relay.android.data.DiskState
     if (confirmForget) AlertDialog(
         onDismissRequest = { confirmForget = false },
         title = { Text("¿Olvidar la sesión?") },
-        text = { Text("Se borrarán la sesión y los datos guardados en este móvil sin avisar al servidor. Para revocarla, usa Cerrar sesión o revisa los dispositivos en Relay web.") },
+        text = { Text("Se borrarán la sesión, las credenciales guardadas y los datos locales de este móvil sin avisar al servidor. Para revocarla, usa Cerrar sesión o revisa los dispositivos en Relay web.") },
         confirmButton = { TextButton(onClick = { confirmForget = false; vm.forget() }) { Text("Olvidar", color = Relay.danger) } },
         dismissButton = { TextButton(onClick = { confirmForget = false }) { Text("Cancelar") } },
         containerColor = Relay.surface,
