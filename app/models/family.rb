@@ -454,13 +454,13 @@ class Family < ApplicationRecord
   def build_cache_key(key, invalidate_on_data_updates: false)
     # Our data sync process updates this timestamp whenever any family account successfully completes a data update.
     # By including it in the cache key, we can expire caches every time family account data changes.
-    data_invalidation_key = invalidate_on_data_updates ? latest_sync_completed_at : nil
+    data_invalidation_key = invalidate_on_data_updates ? cache_key_timestamp(latest_sync_completed_at) : nil
 
     [
       id,
       key,
       data_invalidation_key,
-      accounts.maximum(:updated_at)
+      cache_key_timestamp(accounts.maximum(:updated_at))
     ].compact.join("_")
   end
 
@@ -487,6 +487,12 @@ class Family < ApplicationRecord
   end
 
   private
+    # Microseconds in UTC: syncs often complete several times within one second, and a
+    # second-resolution key would keep serving whatever was cached between those completions.
+    def cache_key_timestamp(time)
+      time&.utc&.iso8601(6)
+    end
+
     # Mirrors the inline `investment_ids` / `crypto_ids` SQL blocks in
     # `tax_advantaged_account_ids`. Joins `depositories` and filters by
     # `Depository::TAX_ADVANTAGED_SUBTYPES` (currently `%w[hsa]`). Extracted

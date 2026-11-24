@@ -466,6 +466,28 @@ class FamilyTest < ActiveSupport::TestCase
   # The rescue is deliberately narrow, so a registry bug still surfaces rather
   # than being reported to the operator as a Jev misconfiguration.
 
+  test "build_cache_key changes when syncs complete within the same second" do
+    family = families(:dylan_family)
+    completed_at = Time.zone.parse("2026-11-21 22:38:12.269")
+
+    family.update_column(:latest_sync_completed_at, completed_at)
+    first_key = family.reload.build_cache_key("sidebar", invalidate_on_data_updates: true)
+
+    family.update_column(:latest_sync_completed_at, completed_at + 0.195.seconds)
+    second_key = family.reload.build_cache_key("sidebar", invalidate_on_data_updates: true)
+
+    assert_not_equal first_key, second_key
+  end
+
+  test "build_cache_key does not depend on the time zone" do
+    family = families(:dylan_family)
+
+    utc_key = Time.use_zone("UTC") { family.reload.build_cache_key("sidebar", invalidate_on_data_updates: true) }
+    madrid_key = Time.use_zone("Europe/Madrid") { family.reload.build_cache_key("sidebar", invalidate_on_data_updates: true) }
+
+    assert_equal utc_key, madrid_key
+  end
+
   private
     def set_preview_features(user, enabled)
       user.update!(preferences: (user.preferences || {}).merge("preview_features_enabled" => enabled))

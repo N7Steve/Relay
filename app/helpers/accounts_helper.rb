@@ -65,6 +65,8 @@ module AccountsHelper
 
     [
       family.build_cache_key("account_sidebar_tabs_v9", invalidate_on_data_updates: true),
+      # Rows pulse while their account syncs, so any sync start or finish must change the key.
+      family.latest_sync_activity_at&.utc&.iso8601(6),
       ExternalAccess.enabled?(:logos),
       Current.user&.id,
       shares_version,
