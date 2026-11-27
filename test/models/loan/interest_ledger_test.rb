@@ -40,20 +40,20 @@ class Loan::InterestLedgerTest < ActiveSupport::TestCase
     end
   end
 
-  test "refreshing is idempotent, keeps edited amounts and clears everything when turned off" do
+  test "refreshing is idempotent, records how each entry was worked out, and clears everything when turned off" do
     travel_to Date.new(2026, 11, 27) do
       loan = mortgage_with_payments(interest_tracking: true)
-      ledger = Loan::InterestLedger.new(loan)
 
-      ledger.refresh!
+      Loan::InterestLedger.new(loan).refresh!
       Loan::InterestLedger.new(loan).refresh!
       assert_equal 11, loan.account.entries.where(source: Loan::InterestLedger::SOURCE).count
 
-      edited = loan.account.entries.find_by!(source: Loan::InterestLedger::SOURCE, date: Date.new(2026, 1, 12))
-      edited.update!(amount: 200.66, user_modified: true)
-      edited.lock_attr!(:amount)
-      Loan::InterestLedger.new(loan.reload).refresh!
-      assert_equal BigDecimal("200.66"), edited.reload.amount
+      january = loan.account.entries.find_by!(source: Loan::InterestLedger::SOURCE, date: Date.new(2026, 1, 12))
+      detail = january.transaction.extra["loan_interest"]
+      assert_equal "2025-12-12", detail["from"]
+      assert_equal 31, detail["days"]
+      assert_equal "157500.0", detail["average_balance"]
+      assert_equal [ [ "2025-12-12", "1.5" ] ], detail["rates"]
 
       loan.update!(interest_tracking: false)
       Loan::InterestLedger.new(loan.reload).refresh!
@@ -66,8 +66,10 @@ class Loan::InterestLedgerTest < ActiveSupport::TestCase
       loan = build_structured_mortgage(family: @family, interest_tracking: true)
       add_opening_valuation(loan)
       source = @family.accounts.create!(name: "Cuenta hipoteca", balance: 5000, currency: "EUR", accountable: Depository.new)
-      Transfer::Creator.new(family: @family, source_account_id: source.id, destination_account_id: loan.account.id,
-                            date: Date.new(2026, 1, 13), amount: 543.56).create
+      Loan::ContractWrites.allow do
+        Transfer::Creator.new(family: @family, source_account_id: source.id, destination_account_id: loan.account.id,
+                              date: Date.new(2026, 1, 13), amount: 543.56).create
+      end
 
       postings = Loan::InterestLedger.new(loan).postings
 
@@ -85,7 +87,7 @@ class Loan::InterestLedgerTest < ActiveSupport::TestCase
       loan = mortgage_with_payments(interest_tracking: true, through: Date.new(2026, 2, 12))
       baseline = Loan::InterestLedger.new(loan).postings.last.last
 
-      create_transaction(account: loan.account, date: Date.new(2026, 1, 20), amount: -10_000, currency: "EUR", name: "Amortización")
+      Loan::ContractWrites.allow { create_transaction(account: loan.account, date: Date.new(2026, 1, 20), amount: -10_000, currency: "EUR", name: "Amortización") }
       reduced = Loan::InterestLedger.new(loan.reload).postings.last.last
 
       # 10,000 x 1.5% x 23 days / 365 = 9.45 less.
@@ -104,16 +106,18 @@ class Loan::InterestLedgerTest < ActiveSupport::TestCase
     end
   end
 
-  test "a note on a posted entry does not pin its amount" do
+  test "posted interest cannot be edited, recategorised or deleted by hand" do
     travel_to Date.new(2026, 11, 27) do
       loan = mortgage_with_payments(interest_tracking: true)
       Loan::InterestLedger.new(loan).refresh!
-      noted = loan.account.entries.find_by!(source: Loan::InterestLedger::SOURCE, date: Date.new(2026, 1, 12))
-      noted.update!(notes: "revisado", amount: 1, user_modified: true)
+      entry = loan.account.entries.find_by!(source: Loan::InterestLedger::SOURCE, date: Date.new(2026, 1, 12))
 
-      Loan::InterestLedger.new(loan.reload).refresh!
-
-      assert_equal BigDecimal("200.65"), noted.reload.amount
+      assert_not entry.update(amount: 1)
+      assert entry.errors.added?(:base, :loan_contract_closed)
+      assert_not entry.transaction.update(category: categories(:food_and_drink))
+      assert_not entry.destroy
+      assert entry.reload.persisted?
+      assert entry.update(notes: "revisado"), "a note is fine"
     end
   end
 
@@ -121,7 +125,7 @@ class Loan::InterestLedgerTest < ActiveSupport::TestCase
     travel_to Date.new(2026, 11, 27) do
       loan = build_structured_mortgage(family: @family, interest_tracking: true)
       create_valuation(account: loan.account, date: Date.new(2026, 10, 20), amount: 153_900, currency: "EUR", kind: "opening_anchor")
-      create_transaction(account: loan.account, date: Date.new(2026, 11, 12), amount: -543.56, currency: "EUR")
+      Loan::ContractWrites.allow { create_transaction(account: loan.account, date: Date.new(2026, 11, 12), amount: -543.56, currency: "EUR") }
 
       postings = Loan::InterestLedger.new(loan.reload).postings
 
@@ -162,8 +166,10 @@ class Loan::InterestLedgerTest < ActiveSupport::TestCase
     def mortgage_with_payments(interest_tracking:, through: Date.new(2026, 11, 12))
       loan = build_structured_mortgage(family: @family, interest_tracking: interest_tracking)
       add_opening_valuation(loan)
-      mortgage_payment_dates(through: through).each do |date|
-        create_transaction(account: loan.account, date: date, amount: -543.56, currency: "EUR", name: "Cuota hipoteca")
+      Loan::ContractWrites.allow do
+        mortgage_payment_dates(through: through).each do |date|
+          create_transaction(account: loan.account, date: date, amount: -543.56, currency: "EUR", name: "Cuota hipoteca")
+        end
       end
       loan.reload
     end

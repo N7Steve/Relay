@@ -1,4 +1,7 @@
 class ScheduledPaymentsController < ApplicationController
+  # What a user can still change on a series a loan owns.
+  LOAN_SERIES_EDITABLE = %w[title account_id category_id tag_ids auto_confirm].freeze
+
   layout -> { turbo_frame_request? ? false : "application" }
   rescue_from ArgumentError, ActiveRecord::RecordInvalid, Money::ConversionError, with: :invalid_payment_operation
   before_action :set_agenda_breadcrumbs
@@ -94,6 +97,9 @@ class ScheduledPaymentsController < ApplicationController
   def update
     @scheduled_payment = find_scheduled_payment
     attributes = scheduled_payment_params
+    # A loan's instalment series takes its amount, dates and destination from
+    # the loan; only how it is labelled and paid from can change here.
+    attributes = attributes.slice(*LOAN_SERIES_EDITABLE) if @scheduled_payment.loan_managed?
     updated = @scheduled_payment.with_lock do
       # Association writers (tags) can write before model validation fails.
       raise ActiveRecord::Rollback unless @scheduled_payment.update(attributes)
@@ -118,6 +124,10 @@ class ScheduledPaymentsController < ApplicationController
 
   def destroy
     sp = find_scheduled_payment
+    if sp.loan_managed?
+      redirect_to agenda_return_path, alert: t("scheduled_payments.loan_managed")
+      return
+    end
     sp.with_lock { sp.destroy! }
     flash[:notice] = t("scheduled_payments.deleted")
     redirect_to agenda_return_path

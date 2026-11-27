@@ -76,6 +76,7 @@ class Loan::StructuredRateTest < ActiveSupport::TestCase
       assert upcoming.new_record?
       # October's average, published to three decimals, + 1.80 - 1.20.
       assert_equal BigDecimal("3.239"), upcoming.index_value
+      assert_equal Date.new(2026, 10, 1), upcoming.index_month, "labelled with the month the value comes from"
       assert_equal BigDecimal("3.839"), upcoming.rate
     end
   end

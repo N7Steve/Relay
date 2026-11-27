@@ -17,6 +17,8 @@ class Rule::Registry::TransactionResource < Rule::Registry
 
   def resource_scope
     family.transactions.visible.with_entry.merge(Entry.excluding_split_parents).where(entry: { date: rule.effective_date.. })
+      .where.not(kind: Loan::InterestLedger::KIND)
+      .where.not(entry: { account_id: Account.contract_managed_loans.select(:id) })
   end
 
   def condition_filters

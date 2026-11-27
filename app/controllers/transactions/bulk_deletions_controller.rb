@@ -12,6 +12,10 @@ class Transactions::BulkDeletionsController < ApplicationController
       .flatten
       .compact
       .to_set
+    # And the movements a contract-managed loan wrote itself: its interest
+    # and its prepayments (Entry::LoanContractGuard).
+    protected_entry_ids.merge(Current.family.entries.where(source: Loan::InterestLedger::SOURCE).pluck(:id))
+    protected_entry_ids.merge(Loan::Prepayment.where.not(entry_id: nil).pluck(:entry_id))
 
     entries_scope = Current.family.entries
                       .where(account_id: writable_account_ids)

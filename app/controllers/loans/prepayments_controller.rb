@@ -19,10 +19,10 @@ class Loans::PrepaymentsController < ApplicationController
     end
   end
 
-  # Removes the contractual choice only. The money already moved stays on the
-  # accounts; the balance and posted interest keep following it.
+  # Removes the contractual choice; on a contract-managed loan, its transfer
+  # too (Loan::PrepaymentRecorder#remove).
   def destroy
-    @loan.prepayments.find(params[:id]).destroy!
+    Loan::PrepaymentRecorder.new(@loan).remove(@loan.prepayments.find(params[:id]))
     after_terms_change!
     redirect_to rates_tab_path, notice: t(".success")
   end

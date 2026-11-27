@@ -9,6 +9,7 @@ class Transactions::BulkUpdatesController < ApplicationController
     updated = Current.family
                      .entries
                      .where(account_id: accounts.select(:id))
+                     .where.not(account_id: Account.contract_managed_loans.select(:id))
                      .excluding_split_parents
                      .excluding_transfer_transactions
                      .where(id: bulk_update_params[:entry_ids])

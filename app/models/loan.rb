@@ -11,6 +11,9 @@ class Loan < ApplicationRecord
   # Extra repayments and the borrower's choice for each: shorter term or lower
   # instalment. The schedule re-sizes from them.
   has_many :prepayments, -> { order(:paid_on, :created_at) }, class_name: "Loan::Prepayment", inverse_of: :loan, dependent: :destroy
+  # The Agenda series that pays the instalment, owned by the loan: its amount
+  # for every occurrence is the schedule's, never a figure typed in Agenda.
+  has_one :instalment_series, class_name: "ScheduledPayment", inverse_of: :loan, dependent: :nullify
 
   # How interest accrues between payments. "monthly" charges rate / 12 on the
   # balance each period, the convention schedules have always used. "daily"
@@ -332,6 +335,50 @@ class Loan < ApplicationRecord
     interest_accrual == "daily"
   end
 
+  # A loan that posts its interest is a closed contract: its account only
+  # takes the loan's own movements. See Loan::ContractWrites.
+  def contract_managed?
+    interest_tracking?
+  end
+
+  # Hands an existing Agenda transfer series to the loan, or creates one from
+  # `source_account`. From then on its amount is the schedule's and the loan
+  # account accepts its instalments; its history is kept as it is.
+  def adopt_instalment_series!(scheduled_payment: nil, source_account: nil, title: nil)
+    transaction do
+      series = scheduled_payment || build_instalment_series_from(source_account, title)
+      series.loan = self
+      series.save!
+      account.update!(enable_transfer_matcher: false)
+      sync_scheduled_payments!
+      series
+    end
+  end
+
+  # Movements on the account that the contract does not account for: left
+  # over from before the loan was managed, or written around it. The loan's
+  # page lists them so they can be removed.
+  def foreign_entries
+    return Entry.none unless account
+
+    linked = ScheduledPaymentEntry.where(entry_id: account.entries.select(:id)).pluck(:entry_id) +
+      ScheduledPaymentEntry.where(transfer_entry_id: account.entries.select(:id)).pluck(:transfer_entry_id) +
+      prepayments.where.not(entry_id: nil).pluck(:entry_id)
+    account.entries.where("entries.source IS DISTINCT FROM ?", Loan::InterestLedger::SOURCE)
+      .where.not(id: linked.compact)
+      .where.not(id: account.entries.joins("INNER JOIN valuations ON valuations.id = entries.entryable_id")
+                                   .where(entryable_type: "Valuation", valuations: { kind: "opening_anchor" }).select(:id))
+      .order(:date)
+  end
+
+  # Active monthly transfer series into this loan's account that could be
+  # adopted as its instalment.
+  def instalment_series_candidates
+    return ScheduledPayment.none unless account
+
+    ScheduledPayment.active.transfer.monthly.where(target_account_id: account.id, loan_id: nil)
+  end
+
   # The simulator's name for this loan's accrual convention.
   def day_count
     daily_accrual? ? :actual_365 : :monthly
@@ -386,13 +433,23 @@ class Loan < ApplicationRecord
   INSTALMENT_SERIES_TOLERANCE = BigDecimal("0.4")
 
   def sync_scheduled_payments!(as_of: Date.current)
-    return [] unless structured_rate? && account
-    return [] if rate_reviewer.first_index_gap(as_of: as_of)
+    return [] unless account && (structured_rate? || instalment_series)
 
-    ScheduledPayment.active.transfer.monthly.where(target_account_id: account.id, currency: account.currency).filter_map do |scheduled|
+    gap = structured_rate? ? rate_reviewer.first_index_gap(as_of: as_of) : nil
+
+    series = if instalment_series
+      [ instalment_series ]
+    else
+      ScheduledPayment.active.transfer.monthly.where(target_account_id: account.id, currency: account.currency)
+    end
+    series.filter_map do |scheduled|
+      # An instalment whose period runs at a rate not known yet keeps its
+      # amount until the index value arrives.
+      next if gap && gap < scheduled.next_run_date
+
       due = instalment_with_premium(scheduled.next_run_date)
       next if due.nil? || (scheduled.amount - due).abs < BigDecimal("0.01")
-      next unless instalment_series?(scheduled)
+      next unless scheduled.loan_id == id || instalment_series?(scheduled)
 
       scheduled.update!(amount: due)
       scheduled
@@ -401,11 +458,23 @@ class Loan < ApplicationRecord
 
   # The instalment due in the month of `date`, plus any premium charged
   # alongside it, as one transfer pays both.
-  private def instalment_with_premium(date)
+  def instalment_with_premium(date)
     payment = amortization_schedule&.payment_for(date)
     return nil if payment.nil?
 
     payment.payment.amount + (insurance&.premium_for(payment.number)&.amount || 0)
+  end
+
+  private def build_instalment_series_from(source_account, title)
+    raise ArgumentError, "source account required" if source_account.nil?
+
+    first_date = payment_dates.find { |date| date > Date.current } || Date.current
+    ScheduledPayment.new(
+      family: account.family, account: source_account, target_account: account, payment_type: "transfer",
+      title: title.presence || I18n.t("loans.instalment_series.default_title", account: account.name),
+      amount: instalment_with_premium(first_date) || 0, currency: account.currency, frequency: "monthly",
+      start_date: first_date, next_run_date: first_date, auto_confirm: true
+    )
   end
 
   private def instalment_series?(scheduled)

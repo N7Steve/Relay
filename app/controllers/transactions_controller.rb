@@ -176,12 +176,19 @@ class TransactionsController < ApplicationController
   def show
     if @entry.transaction&.investment_value_target
       redirect_to investment_value_path(@entry)
+    elsif @entry.transaction&.loan_interest?
+      render "loans/interest_entries/show"
     end
   end
 
   def update
     if @entry.transaction&.investment_value_target
       redirect_to investment_value_path(@entry), status: :see_other
+      return
+    end
+    # The contract's own movements are read-only, notes aside.
+    if @entry.loan_contract_locked? && (permitted_entry_params.keys - %w[notes]).any?
+      redirect_back_or_to account_path(@entry.account), alert: t("loans.contract.closed"), status: :see_other
       return
     end
     if @entry.update(permitted_entry_params)

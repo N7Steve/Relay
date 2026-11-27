@@ -17,6 +17,9 @@ class ScheduledPayment < ApplicationRecord
   belongs_to :category, optional: true
   belongs_to :merchant, optional: true
   belongs_to :target_account, class_name: "Account", optional: true
+  # Set when the series pays a loan's instalment and the loan owns it: the
+  # amount of every occurrence is the loan schedule's (see Loan#adopt_instalment_series!).
+  belongs_to :loan, optional: true, inverse_of: :instalment_series
 
   has_many :scheduled_payment_entries, dependent: :destroy
   has_many :taggings, as: :taggable, dependent: :destroy
@@ -48,6 +51,8 @@ class ScheduledPayment < ApplicationRecord
   validate :target_account_different_from_source, if: :transfer?
   validate :frequency_day_within_range
   validate :associations_belong_to_family
+  validate :loan_series_shape
+  validate :contract_managed_target_is_owned
   validate :estimated_amount_requires_manual_confirmation
   validates :end_date, comparison: { greater_than_or_equal_to: :start_date }, allow_nil: true, if: -> { start_date.present? }
 
@@ -64,6 +69,24 @@ class ScheduledPayment < ApplicationRecord
       where(account_id: account_ids, target_account_id: nil)
     )
   }
+
+  def loan_managed?
+    loan_id.present?
+  end
+
+  # What an occurrence on `date` pays: the loan's instalment for that month
+  # when the loan owns the series, otherwise the series' own amount.
+  #
+  # While a revision before `date` waits for its index value, the rate of that
+  # period is unknown: the last amount synced stands until it arrives.
+  def amount_for(date)
+    return amount unless loan_managed?
+
+    gap = loan.structured_rate? ? loan.rate_reviewer.first_index_gap : nil
+    return amount if gap && gap < date
+
+    loan.instalment_with_premium(date) || amount
+  end
 
   def generate_pending_entry!(through: nil)
     with_lock do
@@ -556,5 +579,20 @@ class ScheduledPayment < ApplicationRecord
 
     def clear_end_date_for_once
       self.end_date = nil
+    end
+
+    def loan_series_shape
+      return unless loan_managed?
+
+      errors.add(:loan, :invalid) unless transfer? && monthly? && target_account_id.present? && target_account_id == loan.account&.id
+    end
+
+    # A contract-managed loan account only takes instalments from the series
+    # the loan owns.
+    def contract_managed_target_is_owned
+      return if loan_managed? || !transfer? || target_account.nil?
+      return unless target_account.accountable_type == "Loan" && target_account.accountable&.contract_managed?
+
+      errors.add(:target_account, :loan_contract_closed)
     end
 end

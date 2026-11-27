@@ -2,6 +2,8 @@
 
 <% if entry.transaction.investment_value_adjustment? %>
   <%= render "investment_values/adjustment", entry: entry %>
+<% elsif entry.transaction.loan_interest? %>
+  <%= render "loans/interest_entries/row", entry: entry %>
 <% else %>
 
 <% transaction = entry.entryable %>

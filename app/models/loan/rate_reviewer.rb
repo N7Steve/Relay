@@ -198,8 +198,10 @@ class Loan
         if stored&.month == wanted
           [ stored.month, stored.published_value ]
         elsif projected
+          # Labelled with the month the value really comes from: the month the
+          # revision will use is not published yet.
           value = scenario.value_for(index_key, wanted, latest: stored)
-          value.nil? ? [ nil, nil ] : [ wanted, value ]
+          value.nil? ? [ nil, nil ] : [ stored.month, value ]
         elsif stored && as_of >= date + INDEX_GRACE_DAYS
           [ stored.month, stored.published_value ]
         else

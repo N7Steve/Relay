@@ -89,3 +89,28 @@ cost) and/or prepayment under an index shift, plus a sensitivity table for
 Euribor -1/0/+1/+2. Nothing is saved: hypothetical periods and projected
 revisions are built by `loan_id`, never through the association, because with
 has_many inversing they would join the loan's collections in memory.
+
+## Contract-managed loans
+
+A loan with `interest_tracking` is a closed contract (`Loan#contract_managed?`).
+[`Entry::LoanContractGuard`](../../app/models/entry/loan_contract_guard.rb)
+rejects every create, change or removal on its account unless it runs inside
+[`Loan::ContractWrites.allow`](../../app/models/loan/contract_writes.rb): the
+interest ledger, the loan's own Agenda series (`scheduled_payments.loan_id`,
+confirmed through `ScheduledPaymentEntry#with_payment_lock`) and
+`Loan::PrepaymentRecorder`. Outside it only the opening-anchor valuation, a
+note, removing a non-contract ("foreign") entry and whole-account deletion are
+allowed. Transactions of contract entries keep their category and merchant.
+`LoanContractProtection` turns a rejected write from any screen into an alert;
+transfers, bulk edits, bulk deletions and rules skip these accounts up front.
+
+The adopted series (`Loan#adopt_instalment_series!`) pays `amount_for(date)`,
+the schedule's instalment for that month, ignoring typed overrides; Agenda can
+relabel it or change the paying account but not delete it or change its amount,
+dates or destination. While a revision waits for its index value, instalments
+after it keep the last synced amount and no interest is posted past it.
+
+Posted interest entries are read-only. Each carries how it was worked out in
+`transactions.extra["loan_interest"]` (period, days, average principal, rates,
+method) for its detail view. A new case the contract does not cover is added as
+code in `ContractWrites`, never opened up as a manual edit.

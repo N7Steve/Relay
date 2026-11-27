@@ -21,10 +21,15 @@
 
       <%= form.number_field :fee, label: t(".fee"), min: 0, step: 0.01 %>
 
+      <%# A contract-managed loan only takes money it records itself, so the
+          paying account is required and the transfer is always created here. %>
+      <% managed = @loan.contract_managed? %>
       <%= form.select :source_account_id,
             @source_accounts.map { |account| [ account.name, account.id ] },
-            { label: t(".source_account"), include_blank: t(".source_account_none"), selected: params.dig(:loan_prepayment, :source_account_id) } %>
-      <p class="text-xs text-secondary"><%= t(".source_account_hint") %></p>
+            { label: t(".source_account"), include_blank: (managed ? false : t(".source_account_none")),
+              selected: params.dig(:loan_prepayment, :source_account_id) },
+            { required: managed } %>
+      <p class="text-xs text-secondary"><%= managed ? t(".source_account_managed_hint") : t(".source_account_hint") %></p>
 
       <%= form.text_area :notes, label: t(".notes"), rows: 2 %>
 

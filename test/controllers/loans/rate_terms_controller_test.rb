@@ -2,6 +2,7 @@ require "test_helper"
 
 class Loans::RateTermsControllerTest < ActionDispatch::IntegrationTest
   include StructuredLoanTestHelper
+  include EntriesTestHelper
 
   setup do
     sign_in @user = users(:family_admin)
@@ -139,6 +140,73 @@ class Loans::RateTermsControllerTest < ActionDispatch::IntegrationTest
       patch loan_rate_period_path(loan.account, variable), params: { loan_rate_period: { spread: "1.5" } }
 
       assert_equal BigDecimal("3.6"), loan.rate_revisions.reload.find_by!(effective_on: Date.new(2026, 12, 12)).rate
+    end
+  end
+
+  test "a period saved before its bonuses is put right by recalculating" do
+    travel_to Date.new(2026, 11, 27) do
+      account = accounts(:loan)
+      account.loan.update!(start_date: MORTGAGE_START, term_months: 360, initial_balance: 157_500)
+      post loan_rate_periods_path(account), params: {
+        loan_rate_period: { starts_on: MORTGAGE_START, rate_kind: "fixed", base_rate: "2.7", review_interval_months: 12 }
+      }
+      account.loan.rate_bonuses.create!(name: "Seguro de vida", kind: "life_insurance", points: 1.2)
+      assert_equal BigDecimal("2.7"), account.loan.rate_revisions.reload.sole.rate, "recorded before the bonus existed"
+
+      post loan_rate_review_path(account, recalculate: 1)
+
+      assert_redirected_to account_path(account, tab: "rates")
+      assert_equal BigDecimal("1.5"), account.loan.rate_revisions.reload.sole.rate
+    end
+  end
+
+  test "a managed loan's account refuses movements from ordinary screens" do
+    travel_to Date.new(2026, 11, 27) do
+      loan = build_structured_mortgage(family: @family, interest_tracking: true)
+      create_valuation(account: loan.account, date: MORTGAGE_START, amount: 157_500, currency: "EUR", kind: "opening_anchor")
+      source = @family.accounts.create!(name: "Cuenta hipoteca", owner: @user, balance: 5_000, currency: "EUR", accountable: Depository.new)
+
+      assert_no_difference -> { loan.account.entries.count } do
+        post transfers_path, params: { transfer: { from_account_id: source.id, to_account_id: loan.account.id, date: "2026-11-20", amount: "543.56" } }
+      end
+      assert_equal I18n.t("loans.contract.closed"), flash[:alert]
+
+      Loan::InterestLedger.new(loan.reload).refresh!
+      interest = loan.account.entries.find_by!(source: Loan::InterestLedger::SOURCE, date: Date.new(2026, 1, 12))
+      patch transaction_path(interest), params: { entry: { amount: "1" } }
+      assert_equal BigDecimal("200.65"), interest.reload.amount
+
+      delete transaction_path(interest)
+      assert interest.reload.persisted?
+
+      get transaction_path(interest)
+      assert_response :success
+      assert_match(/157[.,]500/, response.body, "the average principal of the period")
+    end
+  end
+
+  test "the loan adopts an existing Agenda series and Agenda can no longer delete it" do
+    travel_to Date.new(2026, 11, 27) do
+      loan = build_structured_mortgage(family: @family, interest_tracking: false)
+      source = @family.accounts.create!(name: "Cuenta hipoteca", owner: @user, balance: 5_000, currency: "EUR", accountable: Depository.new)
+      series = ScheduledPayment.create!(
+        family: @family, account: source, target_account: loan.account, payment_type: "transfer",
+        title: "Cuota Hipoteca", amount: 543.56, currency: "EUR", frequency: "monthly",
+        start_date: Date.new(2026, 1, 12), next_run_date: Date.new(2026, 12, 12)
+      )
+      series.update_columns(next_run_date: Date.new(2026, 12, 12))
+      loan.update!(interest_tracking: true)
+
+      post loan_instalment_series_path(loan.account, scheduled_payment_id: series.id)
+      assert_redirected_to account_path(loan.account, tab: "rates")
+      assert_equal loan, series.reload.loan
+
+      delete scheduled_payment_path(series)
+      assert ScheduledPayment.exists?(series.id)
+
+      patch scheduled_payment_path(series), params: { scheduled_payment: { amount: "1", title: "Cuota" } }
+      assert_equal "Cuota", series.reload.title
+      assert_equal BigDecimal("543.56"), series.amount
     end
   end
 

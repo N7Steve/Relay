@@ -422,6 +422,7 @@ Rails.application.routes.draw do
       resource :rate_review, only: :create
       resources :reference_rates, only: %i[new create]
       resources :prepayments, only: %i[new create destroy]
+      resource :instalment_series, only: %i[new create]
       resource :scenario, only: :show
     end
   end

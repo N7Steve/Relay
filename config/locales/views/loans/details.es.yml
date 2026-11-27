@@ -1,0 +1,85 @@
+---
+es:
+  UI:
+    account:
+      chart:
+        title:
+          loan_remaining_balance: Deuda pendiente
+        loan:
+          actual: Saldo registrado
+          scheduled: Cuadro original
+          projected: Previsión desde hoy
+          today: Hoy
+          interactive_chart: gráfico interactivo
+          no_payoff: no se termina con la cuota actual
+          aria_description: Gráfico de la deuda del préstamo. Saldo registrado %{current_balance}. Fin previsto en el cuadro original %{scheduled_payoff_date}. Fin previsto desde la deuda actual %{projected_payoff_date}.
+          aria_actual_history_starts: El historial del saldo registrado empieza el %{date}.
+          projected_payoff: Fin previsto
+          months_saved:
+            one: "%{count} mes antes de lo previsto"
+            other: "%{count} meses antes de lo previsto"
+          on_schedule: Según lo previsto
+          interest_saved: Intereses ahorrados
+          not_converged: Con la cuota actual esta deuda no se termina de pagar al vencimiento original; quedarían %{balloon} pendientes.
+          projection_basis: Compara la deuda registrada hoy con la que marca el cuadro para el mismo día. Un pago anotado antes de su fecha aparece como adelantado hasta esa fecha; uno anotado después, como retrasado.
+          legend: Series del gráfico
+          since_start: desde el inicio del préstamo
+  loans:
+    form:
+      rate_type_adjustable: Ajustable
+      rate_type_fixed: Fijo
+      rate_type_variable: Variable
+      rate_changes: Cambios de tipo
+      rate_changes_hint: Cada fila fija el tipo que se aplica desde su fecha hasta la siguiente. Volver a introducir una fecha sustituye esa fila. En préstamos con tramos (pestaña Tipo de interés) no se usan.
+      rate_changes_empty: No hay cambios de tipo registrados. El préstamo usa el tipo de interés de arriba.
+      rate_change_effective_date: Fecha de efecto
+      rate_change_rate: Tipo
+      rate_change_add: Añadir cambio de tipo
+      rate_change_remove: Quitar
+      start_date: Fecha de inicio
+      start_date_hint: Cuándo se firmó y se entregó el dinero. Déjalo vacío para usar la fecha de apertura de la cuenta.
+      down_payment: Entrada aportada
+      insurance_rate: Tipo del seguro
+      insurance_rate_placeholder: '0,36'
+      insurance_rate_hint: Tipo anual que se cobra cada mes junto a la cuota. El nivelado se calcula sobre el capital inicial; el decreciente, sobre lo que queda por pagar. Los seguros con prima anual aparte se registran como bonificaciones.
+      insurance_rate_type: Tipo de seguro
+      insurance_rate_type_decreasing_life: Decreciente
+      insurance_rate_type_level_term: Nivelado
+    overview:
+      original_payoff_date: Vencimiento original
+    tabs:
+      repayment_progress:
+        instalment: Cuota %{number} · %{date}
+        insurance: Seguro
+        interest: Intereses
+        of_original: de %{amount}
+        principal: Capital
+        repaid: Amortizado
+        total: Total
+      schedule:
+        date: Fecha
+        variable_rate_notice: El tipo de este préstamo cambia con el tiempo. El cuadro recalcula la cuota en cada revisión manteniendo la fecha de fin (o la nueva, si redujiste plazo); las revisiones futuras son estimaciones.
+        opening_payment: Primera cuota
+        forecasted_payoff_date: Fin previsto
+        forecasted_payoff_not_converged: No se termina con la cuota actual
+        interest: Intereses
+        monthly_payment: Cuota mensual
+        not_applicable: N/D
+        number: "#"
+        payment: Cuota
+        principal: Capital
+        remaining_balance: Capital pendiente
+        total_cost: Coste total
+        total_interest: Intereses totales
+        payoff_date: Fecha de fin
+      overview:
+        insurance_rate_only: "%{rate} al año"
+        leverage: Apalancamiento
+        leverage_band_conservative: Conservador
+        leverage_band_high: Alto
+        leverage_band_moderate: Moderado
+        leverage_multiple: "%{ratio}x"
+        original_payoff_date: Vencimiento original
+        total_cost: Coste total
+        total_cost_with_insurance: Coste total con seguro
+        total_insurance: Seguro

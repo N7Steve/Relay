@@ -91,6 +91,7 @@ es:
     rate_reviews:
       create:
         success: Revisiones actualizadas
+        recalculated: Revisiones recalculadas
     reference_rates:
       new:
         title: Añadir valor del índice
@@ -127,6 +128,9 @@ es:
         upcoming_fixed_hint: Se aplican las bonificaciones activas en la fecha de revisión.
         revisions_title: Revisiones
         review_now: Revisar ahora
+        recalculate: Recalcular no confirmadas
+        recalculate_confirm_title: ¿Recalcular las revisiones?
+        recalculate_confirm_body: Las revisiones calculadas por Relay (no las confirmadas) se borran y se vuelven a calcular con los tramos, bonificaciones y valores del índice actuales. Los intereses registrados se recalculan después.
         periods_title: Tramos
         period_fixed_terms: "Fijo %{rate}"
         period_variable_terms: "%{index} + %{spread}"

@@ -1,0 +1,69 @@
+---
+es:
+  activerecord:
+    errors:
+      messages:
+        loan_contract_closed: La cuenta de este préstamo solo admite sus propios movimientos (cuota, amortizaciones e intereses)
+    attributes:
+      loan/prepayment:
+        source_account_id: Cuenta de origen
+  scheduled_payments:
+    loan_managed: Esta serie paga la cuota de un préstamo y la gestiona el propio préstamo; no se puede eliminar desde la Agenda.
+  loans:
+    contract:
+      closed: La cuenta de este préstamo solo admite sus propios movimientos. Las cuotas llegan desde su serie de Agenda y las amortizaciones se registran desde el préstamo.
+      managed_link: Gestionado por el contrato
+    instalment_series:
+      default_title: Cuota %{account}
+      new:
+        title: Cuota en Agenda
+        intro: La cuota pasa a pertenecer al préstamo. Su importe en cada vencimiento sale del cuadro (cambia solo con las revisiones y amortizaciones) y la Agenda ya no permite editar el importe, las fechas ni el destino. El historial de la serie se conserva.
+        adopt_title: Usar una serie existente
+        series_detail: Desde %{account} · %{amount} · próxima el %{date}
+        adopt: Usar esta serie
+        create_title: O crear una nueva
+        series_title: Nombre
+        source_account: Se paga desde
+        create: Crear cuota
+      create:
+        success: La cuota de Agenda pertenece ahora al préstamo
+        already_linked: Este préstamo ya tiene su cuota en Agenda
+        choose: Elige una serie existente o la cuenta desde la que se paga
+    prepayments:
+      new:
+        source_account_managed_hint: Relay crea la transferencia desde esta cuenta. La cuenta del préstamo no admite movimientos que no registre el propio préstamo.
+    interest_entries:
+      row:
+        subtitle: Intereses
+        period: "%{from} – %{to}"
+      show:
+        locked: Calculado por el préstamo; no se puede editar ni borrar. Si no coincide con el banco, corrige su origen (el tipo de la revisión o los movimientos) y se recalcula solo.
+        period: Periodo
+        days: Días
+        average_balance: Capital medio
+        rates: Tipo aplicado
+        rate_from: "%{rate} desde el %{date}"
+        method: Cálculo
+        methods:
+          daily: Diario (días reales / 365, 366 en bisiesto)
+          monthly: Mensual (tipo / 12)
+        formula_daily: Intereses = capital de cada día × tipo / 36.500 (36.600 en años bisiestos), sumados para los días del periodo y redondeados al céntimo.
+        formula_monthly: Intereses = capital al inicio del periodo × tipo / 12, redondeados al céntimo.
+        open_rates: Ver tipo de interés
+    tabs:
+      contract:
+        title: Cuota y movimientos
+        link: Vincular cuota de Agenda
+        closed: La cuenta está cerrada al contrato. Solo entran la cuota de su serie de Agenda, las amortizaciones registradas aquí y los intereses que calcula el préstamo.
+        series_detail: Desde %{account} · próxima el %{date} · %{amount}
+        series_owned: El importe sale del cuadro de amortización; cambia solo con las revisiones y amortizaciones.
+        no_series: La cuota todavía no está vinculada a una serie de Agenda. Vincúlala para que el préstamo pueda recibir sus cuotas.
+        foreign_title: Movimientos ajenos al contrato
+        foreign_message: Estos movimientos están en la cuenta del préstamo pero no son cuotas, amortizaciones ni intereses suyos. Alteran la deuda y los intereses calculados; elimínalos si no deben estar.
+        remove: Eliminar
+        remove_confirm_title: ¿Eliminar este movimiento?
+        remove_confirm_body: Se elimina de la cuenta del préstamo y la deuda y los intereses se recalculan.
+        columns:
+          date: Fecha
+          name: Concepto
+          amount: Importe

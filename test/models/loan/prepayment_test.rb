@@ -108,8 +108,10 @@ class Loan::PrepaymentTest < ActiveSupport::TestCase
       loan = build_structured_mortgage(family: @family, interest_tracking: true)
       create_valuation(account: loan.account, date: MORTGAGE_START, amount: 157_500, currency: "EUR", kind: "opening_anchor")
       source = @family.accounts.create!(name: "Ahorro", balance: 30_000, currency: "EUR", accountable: Depository.new)
-      Transfer::Creator.new(family: @family, source_account_id: source.id, destination_account_id: loan.account.id,
-                            date: Date.new(2026, 1, 14), amount: 10_000).create
+      Loan::ContractWrites.allow do
+        Transfer::Creator.new(family: @family, source_account_id: source.id, destination_account_id: loan.account.id,
+                              date: Date.new(2026, 1, 14), amount: 10_000).create
+      end
 
       postings = Loan::InterestLedger.new(loan.reload).postings
       february = postings.find { |date, _| date == Date.new(2026, 2, 12) }.last

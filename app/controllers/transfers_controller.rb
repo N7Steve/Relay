@@ -28,6 +28,10 @@ class TransfersController < ApplicationController
 
     return unless require_account_permission!(source_account, redirect_path: transactions_path)
     return unless require_account_permission!(destination_account, redirect_path: transactions_path)
+    if [ source_account, destination_account ].any? { |account| account.accountable.is_a?(Loan) && account.loan.contract_managed? }
+      redirect_back_or_to transactions_path, alert: t("loans.contract.closed")
+      return
+    end
 
     @transfer = Transfer::Creator.new(
       family: Current.family,
@@ -193,6 +197,7 @@ class TransfersController < ApplicationController
       @accounts = accessible_accounts
         .active
         .not_archived
+        .where.not(id: Account.contract_managed_loans.select(:id))
         .alphabetically
         .includes(
           :account_providers,

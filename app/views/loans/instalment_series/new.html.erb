@@ -1,0 +1,33 @@
+<%= render DS::Dialog.new do |dialog| %>
+  <% dialog.with_header(title: t(".title")) %>
+  <% dialog.with_body do %>
+    <div class="space-y-6">
+      <p class="text-sm text-secondary"><%= t(".intro") %></p>
+
+      <% if @candidates.any? %>
+        <section class="space-y-2">
+          <h3 class="font-medium text-primary"><%= t(".adopt_title") %></h3>
+          <% @candidates.each do |series| %>
+            <div class="flex items-center justify-between gap-3 rounded-lg bg-container-inset p-3">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-primary"><%= series.title %></p>
+                <p class="text-xs text-secondary"><%= t(".series_detail", account: series.account.name, amount: format_money(series.amount_money), date: l(series.next_run_date, format: :long)) %></p>
+              </div>
+              <%= render DS::Button.new(text: t(".adopt"), variant: "primary", size: "sm",
+                                        href: loan_instalment_series_path(@account, scheduled_payment_id: series.id), method: :post) %>
+            </div>
+          <% end %>
+        </section>
+      <% end %>
+
+      <section class="space-y-2">
+        <h3 class="font-medium text-primary"><%= t(".create_title") %></h3>
+        <%= styled_form_with url: loan_instalment_series_path(@account), method: :post, class: "space-y-4" do |form| %>
+          <%= form.text_field :title, label: t(".series_title"), value: t("loans.instalment_series.default_title", account: @account.name) %>
+          <%= form.select :source_account_id, @source_accounts.map { |account| [ account.name, account.id ] }, { label: t(".source_account") }, { required: true } %>
+          <%= form.submit t(".create") %>
+        <% end %>
+      </section>
+    </div>
+  <% end %>
+<% end %>

@@ -63,6 +63,8 @@ class Account < ApplicationRecord
   scope :assets, -> { where(classification: "asset") }
   scope :liabilities, -> { where(classification: "liability") }
   scope :alphabetically, -> { order(:name) }
+  # Loan accounts closed to everything but the loan's own movements.
+  scope :contract_managed_loans, -> { where(accountable_type: "Loan", accountable_id: Loan.where(interest_tracking: true).select(:id)) }
   scope :manual, -> {
     left_joins(:account_providers)
       .where(account_providers: { id: nil })

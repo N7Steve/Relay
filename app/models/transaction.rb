@@ -113,6 +113,10 @@ class Transaction < ApplicationRecord
   }, prefix: :forecast, validate: true
 
   before_validation :normalize_legacy_one_time_kind
+  # Interest a loan posts, and the legs of a contract-managed loan's own
+  # movements, take no category or merchant: they are the contract's, and
+  # Entry::LoanContractGuard keeps them as the loan wrote them.
+  validate :loan_contract_transaction_unchanged, on: :update
   after_save :clear_forecast_behavior_assignment
 
   # Explicitly selecting normal must also override a historical one_time row
@@ -490,5 +494,13 @@ class Transaction < ApplicationRecord
       return unless family
 
       FamilyMerchantAssociation.where(family: family, merchant: merchant).delete_all
+    end
+
+    def loan_contract_transaction_unchanged
+      return if Loan::ContractWrites.allowed?
+      return unless (changes.keys & %w[category_id merchant_id]).any?
+      return unless loan_interest? || entry&.loan_contract_locked?
+
+      errors.add(:base, :loan_contract_closed)
     end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_27_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_28_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -1317,6 +1317,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_27_100000) do
     t.uuid "family_id", null: false
     t.string "frequency", null: false
     t.integer "frequency_day", null: false
+    t.uuid "loan_id"
     t.uuid "merchant_id"
     t.date "next_run_date", null: false
     t.integer "occurrences_count", default: 0
@@ -1332,6 +1333,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_27_100000) do
     t.index ["family_id", "next_run_date"], name: "index_scheduled_payments_on_family_id_and_next_run_date", where: "((status)::text = 'active'::text)"
     t.index ["family_id", "status"], name: "index_scheduled_payments_on_family_id_and_status"
     t.index ["family_id"], name: "index_scheduled_payments_on_family_id"
+    t.index ["loan_id"], name: "index_scheduled_payments_on_loan_id", unique: true
     t.index ["merchant_id"], name: "index_scheduled_payments_on_merchant_id"
     t.index ["next_run_date"], name: "index_scheduled_payments_on_next_run_date"
     t.index ["target_account_id"], name: "index_scheduled_payments_on_target_account_id"
@@ -1722,6 +1724,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_27_100000) do
   add_foreign_key "scheduled_payments", "accounts", column: "target_account_id"
   add_foreign_key "scheduled_payments", "categories"
   add_foreign_key "scheduled_payments", "families"
+  add_foreign_key "scheduled_payments", "loans", on_delete: :nullify
   add_foreign_key "scheduled_payments", "merchants"
   add_foreign_key "security_prices", "securities"
   add_foreign_key "sessions", "impersonation_sessions", column: "active_impersonator_session_id", on_delete: :nullify

@@ -13,6 +13,8 @@ class ScheduledPaymentEntry < ApplicationRecord
       if amount_override && (!amount_override.finite? || amount_override.negative?)
         raise ArgumentError, "Amount must be finite and non-negative"
       end
+      # A loan's instalment is the contract's, whatever was typed.
+      amount_override = nil if scheduled_payment.loan_managed?
       scheduled_payment.validate!
 
       if scheduled_payment.transfer?
@@ -114,10 +116,16 @@ class ScheduledPaymentEntry < ApplicationRecord
 
     # All state transitions lock the series first, then reload the occurrence.
     # A stale request must see a confirmation committed by a previous request.
+    # A series a loan owns writes to the loan's closed account through the
+    # loan's own door (Loan::ContractWrites).
     def with_payment_lock
       scheduled_payment.with_lock do
         lock!
-        yield
+        if scheduled_payment.loan_managed?
+          Loan::ContractWrites.allow { yield }
+        else
+          yield
+        end
       end
     end
 
@@ -158,7 +166,7 @@ class ScheduledPaymentEntry < ApplicationRecord
 
     def create_transfer_entries!(date_override: nil, amount_override: nil)
       sp = scheduled_payment
-      effective_amount = (amount_override || sp.amount).abs
+      effective_amount = (amount_override || sp.amount_for(scheduled_date)).abs
       effective_date = date_override || scheduled_date
 
       outflow_txn = Transaction.create!(

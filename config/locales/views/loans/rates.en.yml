@@ -90,6 +90,7 @@ en:
     rate_reviews:
       create:
         success: Revisions updated
+        recalculated: Revisions recalculated
     reference_rates:
       new:
         title: Add index value
@@ -126,6 +127,9 @@ en:
         upcoming_fixed_hint: Bonuses active on the revision date are applied.
         revisions_title: Revisions
         review_now: Review now
+        recalculate: Recalculate unconfirmed
+        recalculate_confirm_title: Recalculate revisions?
+        recalculate_confirm_body: Revisions calculated by Relay (not confirmed ones) are removed and recorded again from the current periods, bonuses and index values. Posted interest follows.
         periods_title: Periods
         period_fixed_terms: "Fixed %{rate}"
         period_variable_terms: "%{index} + %{spread}"

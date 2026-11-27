@@ -82,8 +82,15 @@
       <div class="flex items-center justify-between gap-2">
         <h3 class="font-medium text-primary"><%= t(".revisions_title") %></h3>
         <% if can_edit %>
-          <%= render DS::Button.new(text: t(".review_now"), icon: "refresh-cw", variant: "ghost", size: "sm",
-                                    href: loan_rate_review_path(account), method: :post) %>
+          <div class="flex items-center gap-1">
+            <%= render DS::Button.new(text: t(".recalculate"), icon: "rotate-ccw", variant: "ghost", size: "sm",
+                                      href: loan_rate_review_path(account, recalculate: 1), method: :post,
+                                      confirm: CustomConfirm.new(title: t(".recalculate_confirm_title"),
+                                                                 body: t(".recalculate_confirm_body"),
+                                                                 btn_text: t(".recalculate"))) %>
+            <%= render DS::Button.new(text: t(".review_now"), icon: "refresh-cw", variant: "ghost", size: "sm",
+                                      href: loan_rate_review_path(account), method: :post) %>
+          </div>
         <% end %>
       </div>
 
@@ -204,6 +211,7 @@
   <% end %>
 
   <% if loan.amortizable? %>
+    <%= render "loans/tabs/contract", account: account, can_edit: can_edit %>
     <%= render "loans/tabs/prepayments", account: account, can_edit: can_edit %>
   <% end %>
 </div>

@@ -5,7 +5,12 @@
 
       <%# Show menu if: manual (can add balance) OR non-crypto (can add transactions) %>
       <%# This hides the menu only for linked crypto accounts who have no actions %>
-      <% if account.managed_portfolio? && account.permission_for(Current.user).in?([:owner, :full_control]) %>
+      <% if account.accountable.is_a?(Loan) && account.accountable.contract_managed? %>
+        <%# A contract-managed loan takes no hand-made movements: instalments
+            come from its Agenda series and prepayments from the loan itself. %>
+        <%= render DS::Link.new(text: t("loans.contract.managed_link"), icon: "lock", variant: "secondary",
+                                href: helpers.account_path(account, tab: "rates"), data: { turbo_frame: "_top" }) %>
+      <% elsif account.managed_portfolio? && account.permission_for(Current.user).in?([:owner, :full_control]) %>
         <%= render DS::Menu.new(variant: "button") do |menu| %>
           <% menu.with_button(text: t("accounts.show.activity.new"), variant: "secondary", icon: "plus") %>
           <% menu.with_item(variant: "link", text: t("investment_values.title"), icon: "chart-line", href: new_investment_value_path(account_id: account.id), data: { turbo_frame: :modal }) %>
