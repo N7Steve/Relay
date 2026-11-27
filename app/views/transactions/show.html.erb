@@ -20,7 +20,7 @@
             <div class="flex items-center gap-2 flex-wrap">
               <% if source_sp %>
                 <%= render DS::Link.new(
-                  text: t("transactions.show.scheduled_payment_edit_link", title: source_sp.title),
+                  text: t(source_sp.loan_managed? ? "transactions.show.scheduled_payment_view_link" : "transactions.show.scheduled_payment_edit_link", title: source_sp.title),
                   icon: "external-link",
                   variant: "ghost",
                   size: :sm,

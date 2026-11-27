@@ -6,28 +6,32 @@
 <% loan = account.loan %>
 <% series = loan.instalment_series %>
 
-<section class="space-y-2">
-  <div class="flex items-center justify-between gap-2">
-    <h3 class="font-medium text-primary"><%= t(".title") %></h3>
-    <% if can_edit && series.nil? %>
-      <%= render DS::Link.new(text: t(".link"), icon: "repeat", variant: "ghost", size: "sm",
-                              href: new_loan_instalment_series_path(account), frame: :modal) %>
-    <% end %>
-  </div>
-
-  <% if loan.contract_managed? %>
-    <p class="text-xs text-secondary"><%= t(".closed") %></p>
+<% actions = capture do %>
+  <% if can_edit && series.nil? %>
+    <%= render DS::Link.new(text: t(".link"), icon: "repeat", variant: "ghost", size: "sm",
+                            href: new_loan_instalment_series_path(account), frame: :modal) %>
   <% end %>
+<% end %>
 
+<%= loan_section(title: t(".title"),
+      subtitle: (t(".closed") if loan.contract_managed?),
+      icon: "repeat",
+      actions: actions) do %>
   <% if series %>
-    <%= render DS::Card.new(class: "space-y-1") do %>
-      <p class="text-sm font-medium text-primary"><%= series.title %></p>
-      <p class="text-sm text-secondary">
-        <%= t(".series_detail", account: series.account.name, date: l(series.next_run_date, format: :long),
-                                amount: format_money(Money.new(series.amount_for(series.next_run_date), series.currency))) %>
-      </p>
-      <p class="text-xs text-secondary"><%= t(".series_owned") %></p>
-    <% end %>
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-container-inset p-3">
+      <div class="min-w-0 space-y-0.5">
+        <p class="text-sm font-medium text-primary"><%= series.title %></p>
+        <p class="text-xs text-secondary"><%= series.account.name %> → <%= account.name %> · <%= t(".series_owned") %></p>
+      </div>
+      <% if series.next_run_date %>
+        <div class="text-right">
+          <p class="text-xs text-secondary"><%= l(series.next_run_date, format: :long) %></p>
+          <p class="text-base font-medium text-primary privacy-sensitive tabular-nums">
+            <%= format_money(Money.new(series.amount_for(series.next_run_date), series.currency)) %>
+          </p>
+        </div>
+      <% end %>
+    </div>
   <% else %>
     <%= render DS::Alert.new(message: t(".no_series"), variant: (loan.contract_managed? ? :warning : :info)) %>
   <% end %>
@@ -36,11 +40,11 @@
     <% foreign = loan.foreign_entries.includes(:entryable).to_a %>
     <% if foreign.any? %>
       <%= render DS::Alert.new(title: t(".foreign_title"), message: t(".foreign_message"), variant: :warning) %>
-      <%= render DS::Table.new(rows: foreign, label: t(".foreign_title")) do |table| %>
+      <%= render DS::Table.new(rows: foreign, inset: true, label: t(".foreign_title")) do |table| %>
         <% table.with_column(t(".columns.date")) { |entry| l(entry.date, format: :long) } %>
         <% table.with_column(t(".columns.name")) { |entry| entry.name } %>
         <% table.with_column(t(".columns.amount"), numeric: true, class: "privacy-sensitive") { |entry| format_money(entry.amount_money) } %>
-        <% table.with_column("", numeric: true) do |entry| %>
+        <% table.with_column("", align: :right) do |entry| %>
           <% if can_edit %>
             <%= render DS::Button.new(
                   text: t(".remove"), variant: "ghost", size: "sm",
@@ -52,4 +56,4 @@
       <% end %>
     <% end %>
   <% end %>
-</section>
+<% end %>

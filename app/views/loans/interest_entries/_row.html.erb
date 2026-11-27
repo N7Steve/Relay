@@ -1,12 +1,14 @@
 <%# locals: (entry:) %>
 <%# Interest a contract-managed loan posted to itself. Its own row: no
     selection, no category menu -- it is the contract's, and its detail
-    explains how it was worked out rather than offering edits. %>
+    explains how it was worked out rather than offering edits. It keeps the
+    transaction row's columns, with the "Interest" pill where the category
+    sits on any other movement. %>
 <% detail = entry.transaction.extra&.dig("loan_interest") || {} %>
 <%= turbo_frame_tag dom_id(entry) do %>
   <%= turbo_frame_tag dom_id(entry.transaction) do %>
-    <div class="flex items-center justify-between gap-3 p-3 lg:p-4 text-sm">
-      <div class="pr-4 lg:pr-10 flex items-center gap-3 lg:gap-4 min-w-0">
+    <div class="flex lg:grid lg:grid-cols-12 items-center gap-3 lg:gap-0 p-3 lg:p-4 text-sm">
+      <div class="pr-4 lg:pr-10 flex items-center gap-3 lg:gap-4 col-span-8 xl:col-span-5 min-w-0">
         <%= check_box_tag dom_id(entry, "selection"),
               disabled: true,
               class: "checkbox checkbox--light hidden lg:block",
@@ -14,16 +16,27 @@
               data: { id: entry.id, entry_type: "Transaction", bulk_edit: false, bulk_select_target: "row", checkbox_toggle_target: "selectionEntry" } %>
         <%= render DS::FilledIcon.new(icon: "percent", variant: :surface, size: "lg", rounded: true, class_name: "text-warning") %>
         <div class="min-w-0 space-y-1">
-          <%= link_to entry.name, transaction_path(entry), class: "font-medium text-primary hover:underline", data: { turbo_frame: "drawer" } %>
-          <p class="text-xs text-secondary">
-            <%= entry.account.name %> · <%= t("loans.interest_entries.row.subtitle") %>
+          <%= link_to entry.name, transaction_path(entry), class: "font-medium text-primary hover:underline truncate block", data: { turbo_frame: "drawer" } %>
+          <p class="text-xs text-secondary truncate">
+            <%= entry.account.name %>
             <% if detail["from"] %>
               · <%= t("loans.interest_entries.row.period", from: l(Date.iso8601(detail["from"]), format: :short), to: l(Date.iso8601(detail["to"]), format: :short)) %>
             <% end %>
           </p>
+          <div class="flex md:hidden">
+            <%= render DS::Pill.new(label: t("loans.interest_ledger.pill"), tone: :info, marker: false, icon: "percent") %>
+          </div>
         </div>
       </div>
-      <p class="font-semibold whitespace-nowrap privacy-sensitive text-primary"><%= format_money(-entry.amount_money) %></p>
+
+      <div class="hidden xl:block col-span-3"></div>
+      <div class="hidden md:flex min-w-0 items-center gap-1 col-span-2">
+        <%= render DS::Pill.new(label: t("loans.interest_ledger.pill"), tone: :info, marker: false, icon: "percent") %>
+      </div>
+
+      <div class="shrink-0 col-span-4 lg:col-span-2 ml-auto flex items-center justify-end">
+        <p class="font-medium whitespace-nowrap privacy-sensitive text-primary"><%= format_money(-entry.amount_money) %></p>
+      </div>
     </div>
   <% end %>
 <% end %>

@@ -181,6 +181,7 @@ previo; el formato de los archivos JavaScript modificados sí pasa.
 | Categorías y transacciones | Propia | Creación/edición de categorías, selectores, búsqueda, formulario y detalle enriquecidos |
 | Identidad visual de cuentas y comercios | Propia, todavía sin commit | Subida, previsualización, borrado, precedencia frente a Brandfetch/proveedor y aislamiento por familia |
 | Transferencias y divisiones | Propia o muy modificada | Clasificación al cruzar la frontera financiera, conversión y splitting |
+| Hipotecas y préstamos estructurados | Propia (noviembre de 2026) | Tramos, bonificaciones y revisiones congeladas; devengo diario; intereses `loan_interest` registrados en la cuenta; amortizaciones anticipadas; escenarios; Euríbor del BCE (`reference_rates`); cuenta cerrada al contrato (`Entry::LoanContractGuard`, `Loan::ContractWrites`) y serie de Agenda propiedad del préstamo (`scheduled_payments.loan_id`). Ver [préstamos](docs/llm-guides/loans.md) |
 | Exportaciones de familia | Propia | Copia completa y CSV personalizado de transacciones |
 | UI/UX | Propia o adaptada | Vistas compactas, cuentas agrupadas, componentes interactivos y mejoras responsive |
 | Períodos mensuales del dashboard | Propia | Money In / Out y gasto acumulado deben respetar conjuntamente `family.month_start_day` |
@@ -379,6 +380,7 @@ El formulario expone una única decisión de tratamiento financiero, respaldada 
 - **Incluida en mis finanzas**: forma parte del patrimonio, los informes y la actividad habitual.
 - **Solo seguimiento (`exclude_from_reports`)**: permite consultar y sincronizar la cuenta, pero la excluye del patrimonio, los informes y las métricas. Las transferencias conservan su naturaleza de transferencia.
 - **Fuera de mis finanzas (`cashflow_boundary`)**: implica `exclude_from_reports`; además, las transferencias que cruzan esta frontera se contabilizan como gasto al salir de mis finanzas y como ingreso al entrar. Es el tratamiento destinado a cuentas operativas compartidas como la cuenta de la hipoteca.
+- **Hipotecas (préstamos de subtipo `mortgage`)**: siempre en mis finanzas, pero fuera del patrimonio neto (`Account.included_in_net_worth`); no admiten «Fuera de mis finanzas» y muestran el indicador «Fuera del patrimonio».
 - **Archivada (`archived`)**: es únicamente una preferencia de presentación. Se oculta de la barra lateral, selectores operativos y listado predeterminado de transacciones, pero sigue sincronizándose y permanece en el patrimonio, informes y gráficos históricos.
 - **Desactivada (`status = disabled`)**: conserva la semántica de ciclo de vida upstream y no se modifica en esta fase.
 

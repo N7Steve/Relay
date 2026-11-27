@@ -109,12 +109,14 @@ module Api::PlanningOperations
 
   def update_scheduled_payment(args)
     record = planning_payment(args.fetch("scheduled_payment_id"), write: true)
+    reject_loan_managed!(record)
     record.with_lock { record.update!(schedule_attributes(args)); record.sync_confirmed_entries! }
     schedule_json(record)
   end
 
   def set_scheduled_payment_status(args)
     record = planning_payment(args.fetch("scheduled_payment_id"), write: true)
+    reject_loan_managed!(record)
     record.with_lock do
       invalid!("Completed schedules cannot be reactivated") if record.completed?
       record.update!(status: args.fetch("status"))
@@ -124,6 +126,7 @@ module Api::PlanningOperations
 
   def delete_scheduled_payment(args)
     record = planning_payment(args.fetch("scheduled_payment_id"), write: true)
+    reject_loan_managed!(record)
     record.with_lock { record.destroy! }
     { deleted: true }
   end
@@ -325,6 +328,12 @@ module Api::PlanningOperations
       account(attrs["account_id"], :write) if attrs["account_id"]
       account(attrs["target_account_id"], :write) if attrs["target_account_id"]
       attrs
+    end
+
+    # A loan's instalment series is the contract's payment order: it can be
+    # confirmed or skipped, never edited, paused or deleted.
+    def reject_loan_managed!(record)
+      invalid!("This schedule pays a loan's instalment and is managed by the loan's contract") if record.loan_managed?
     end
 
     def confirmation_overrides(args)

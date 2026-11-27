@@ -60,6 +60,11 @@ class Account < ApplicationRecord
   # Accounts whose data should be included in financial reports, dashboards,
   # and exports. Excludes accounts where the user has opted to suppress them.
   scope :included_in_reports, -> { where(exclude_from_reports: false) }
+  # Mortgages belong to the user's finances (reports, Agenda, the loans list)
+  # but are left out of net worth: owing the house's loan while saving would
+  # otherwise read as a negative net worth that only moves with the savings.
+  scope :mortgage_loans, -> { where(accountable_type: "Loan", accountable_id: Loan.where(subtype: Loan::MORTGAGE_SUBTYPE).select(:id)) }
+  scope :included_in_net_worth, -> { included_in_reports.where.not(id: Account.unscoped.mortgage_loans.select(:id)) }
   scope :assets, -> { where(classification: "asset") }
   scope :liabilities, -> { where(classification: "liability") }
   scope :alphabetically, -> { order(:name) }
@@ -126,6 +131,16 @@ class Account < ApplicationRecord
 
   def outside_finances?
     cashflow_boundary?
+  end
+
+  def mortgage_loan?
+    accountable_type == "Loan" && accountable&.mortgage?
+  end
+
+  # Counted in the family's net worth (and the balance sheet totals built on
+  # it). Mortgages stay in the user's finances but never in net worth.
+  def excluded_from_net_worth?
+    exclude_from_reports? || mortgage_loan?
   end
 
   # All accounts a user can access (owned + shared with them)
@@ -648,6 +663,9 @@ class Account < ApplicationRecord
     end
 
     def normalize_financial_treatment
+      # A mortgage is part of the user's finances; it is kept out of net worth
+      # by its subtype, not by sitting outside the finances boundary.
+      self.financial_treatment = "included" if cashflow_boundary? && mortgage_loan? && !defined?(@invalid_financial_treatment)
       self[:financial_treatment] = financial_treatment unless defined?(@invalid_financial_treatment)
     end
 

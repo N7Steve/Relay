@@ -15,6 +15,7 @@ es:
       enable: Activar cuenta
       disable: Desactivar cuenta
       outside_finances_indicator: Fuera de mis finanzas
+      outside_net_worth_indicator: Fuera del patrimonio. La hipoteca forma parte de tus finanzas, pero no resta del patrimonio neto
       tracking_only_indicator: Solo seguimiento
       set_default: Establecer como predeterminada
       remove_default: Quitar predeterminada
@@ -48,6 +49,7 @@ es:
       transfer_matcher_disabled_globally: El emparejamiento automático está desactivado en toda la instalación. Esta preferencia se aplicará si vuelve a activarse.
       name_placeholder: Ejemplo de nombre de cuenta
       financial_treatment_label: Tratamiento financiero
+      mortgage_net_worth_hint: Las hipotecas forman parte de tus finanzas (Agenda, informes y préstamos), pero no restan del patrimonio neto.
       financial_treatment_description: Define si la cuenta forma parte de tus finanzas y cómo se tratan las transferencias con ella.
       financial_treatment_options:
         included: Incluida en mis finanzas

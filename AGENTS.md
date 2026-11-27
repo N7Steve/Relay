@@ -53,4 +53,5 @@ Adding or modifying `app/controllers/api/v1/` endpoints requires Minitest behavi
 
 - Read [provider sync guidance](docs/llm-guides/providers.md) when changing imports, pending transactions, FX metadata or diagnostics. Use `DebugLogEntry.capture(...)` for support-relevant failures and partial responses, with provider/source metadata and family/account-provider context where available.
 - Security prices and exchange rates have no external providers since pruning phase 9A; do not reintroduce them without an explicit product decision. See [phase 9](docs/migration/pruning-phase-9.md).
+- Read the [loans guide](docs/llm-guides/loans.md) before touching loans, mortgages, rate revisions, posted interest, prepayments, Euribor or loan-owned Agenda series. Accounts of contract-managed loans are closed: add new cases as code in `Loan::ContractWrites`, never as manual edits.
 - For feature rollout, follow [preview-feature gating](docs/llm-guides/gating-a-preview-feature.md); for goals, read the [Goals guide](docs/llm-guides/goals.md).

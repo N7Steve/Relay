@@ -15,6 +15,7 @@ en:
       enable: Enable account
       disable: Disable account
       outside_finances_indicator: Outside my finances
+      outside_net_worth_indicator: Outside net worth. The mortgage is part of your finances but is not subtracted from net worth
       tracking_only_indicator: Tracking only
       set_default: Set as default
       remove_default: Unset default
@@ -47,6 +48,7 @@ en:
       name_label: Account name
       name_placeholder: Example account name
       financial_treatment_label: Financial treatment
+      mortgage_net_worth_hint: Mortgages are part of your finances (Agenda, reports and loans) but are not subtracted from your net worth.
       financial_treatment_description: Choose whether this account belongs to your finances and how transfers across its boundary are treated.
       financial_treatment_options:
         included: Included in my finances

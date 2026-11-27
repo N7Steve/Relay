@@ -59,6 +59,48 @@ module LoansHelper
     parts.join(" ")
   end
 
+  # A titled card on a loan tab (loans/_section). The body is captured here, in
+  # the calling view, so its `t(".key")` lookups keep that view's scope.
+  def loan_section(title:, subtitle: nil, icon: nil, actions: nil, class_name: nil, &block)
+    render "loans/section", title: title, subtitle: subtitle, icon: icon, actions: actions,
+                            class_name: class_name, content: capture(&block)
+  end
+
+  # The same composition as separate terms, for the rate card to lay out as
+  # "index + spread − bonuses = rate". Each term is { label:, value:, sign: }.
+  def loan_rate_composition_parts(revision)
+    parts = if revision.variable?
+      index = t("reference_rates.indexes.#{revision.reference_index}", default: revision.reference_index.to_s)
+      month = revision.index_month ? l(revision.index_month, format: :month_year) : nil
+      [
+        { label: month ? "#{index} · #{month}" : index, value: loan_rate_percentage(revision.index_value), sign: nil },
+        { label: t("loans.tabs.rates.parts.spread"), value: loan_rate_percentage(revision.spread), sign: "+" }
+      ]
+    else
+      [ { label: t("loans.tabs.rates.parts.fixed"), value: loan_rate_percentage(revision.base_rate), sign: nil } ]
+    end
+    if revision.bonus_points.to_d.positive?
+      parts << { label: t("loans.tabs.rates.parts.bonuses"), value: loan_rate_percentage(revision.bonus_points), sign: "−" }
+    end
+    parts
+  end
+
+  # A change of rate in percentage points, signed: "+0,125 p.p.".
+  def loan_rate_delta(delta)
+    value = number_with_precision(delta.abs, precision: 3, strip_insignificant_zeros: true)
+    t("loans.tabs.rates.delta_points", sign: delta.negative? ? "−" : "+", value: value)
+  end
+
+  # A change of money, signed, coloured by whether it is good for the borrower
+  # (paying less is good).
+  def loan_money_delta(delta)
+    return if delta.nil? || delta.zero?
+
+    tag.span(class: delta.negative? ? "text-success" : "text-destructive") do
+      "#{delta.negative? ? "−" : "+"}#{format_money(delta.abs)}"
+    end
+  end
+
   # A scenario figure, which may be Money, a bare amount or missing.
   def loan_money(currency, amount)
     return "—" if amount.nil?

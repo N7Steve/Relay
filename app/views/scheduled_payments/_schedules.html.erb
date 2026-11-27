@@ -35,7 +35,12 @@
             <%= render DS::Pill.new(label: t("scheduled_payments.status.#{payment.status}"), tone: agenda_status_tone(payment.status), marker: false) %>
           </div>
           <p class="lg:col-span-2 justify-self-end text-sm font-medium text-primary privacy-sensitive"><%= scheduled_payment_display_amount(payment) %></p>
-          <% if @agenda.writable?(payment) %>
+          <% if @agenda.writable?(payment) && payment.loan_managed? %>
+            <div class="col-span-2 lg:col-span-3 flex items-center justify-end gap-1">
+              <%= render DS::Link.new(text: t("scheduled_payments.managed_by_loan"), icon: "landmark", variant: "ghost", size: :sm,
+                    href: edit_scheduled_payment_path(payment, **agenda_context_params), frame: :modal) %>
+            </div>
+          <% elsif @agenda.writable?(payment) %>
             <div class="col-span-2 lg:col-span-3 flex items-center justify-end gap-1">
               <%= render DS::Link.new(icon: "pencil", variant: "ghost", size: :sm, href: edit_scheduled_payment_path(payment, **agenda_context_params),
                     frame: :modal, title: t("scheduled_payments.agenda.edit"), aria: { label: t("scheduled_payments.agenda.edit") }) %>

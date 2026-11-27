@@ -1,7 +1,4 @@
 class ScheduledPaymentsController < ApplicationController
-  # What a user can still change on a series a loan owns.
-  LOAN_SERIES_EDITABLE = %w[title account_id category_id tag_ids auto_confirm].freeze
-
   layout -> { turbo_frame_request? ? false : "application" }
   rescue_from ArgumentError, ActiveRecord::RecordInvalid, Money::ConversionError, with: :invalid_payment_operation
   before_action :set_agenda_breadcrumbs
@@ -92,14 +89,16 @@ class ScheduledPaymentsController < ApplicationController
 
   def edit
     @scheduled_payment = find_scheduled_payment
+    # A loan's instalment series is a payment order the loan's contract
+    # issues: it is shown, never edited, from Agenda.
+    render :loan_series if @scheduled_payment.loan_managed?
   end
 
   def update
     @scheduled_payment = find_scheduled_payment
+    return reject_loan_managed_change if @scheduled_payment.loan_managed?
+
     attributes = scheduled_payment_params
-    # A loan's instalment series takes its amount, dates and destination from
-    # the loan; only how it is labelled and paid from can change here.
-    attributes = attributes.slice(*LOAN_SERIES_EDITABLE) if @scheduled_payment.loan_managed?
     updated = @scheduled_payment.with_lock do
       # Association writers (tags) can write before model validation fails.
       raise ActiveRecord::Rollback unless @scheduled_payment.update(attributes)
@@ -124,10 +123,8 @@ class ScheduledPaymentsController < ApplicationController
 
   def destroy
     sp = find_scheduled_payment
-    if sp.loan_managed?
-      redirect_to agenda_return_path, alert: t("scheduled_payments.loan_managed")
-      return
-    end
+    return reject_loan_managed_change if sp.loan_managed?
+
     sp.with_lock { sp.destroy! }
     flash[:notice] = t("scheduled_payments.deleted")
     redirect_to agenda_return_path
@@ -135,6 +132,7 @@ class ScheduledPaymentsController < ApplicationController
 
   def toggle_status
     sp = find_scheduled_payment
+    return reject_loan_managed_change if sp.loan_managed?
 
     sp.with_lock do
       if sp.completed?
@@ -163,7 +161,9 @@ class ScheduledPaymentsController < ApplicationController
       @scheduled_date || Date.current
     end
 
-    @default_amount = @scheduled_payment.amount.abs
+    # A loan's instalment is the contract's figure for that month, not a value
+    # to type: the form shows it and the model ignores any override.
+    @default_amount = @scheduled_payment.amount_for(@scheduled_date || @default_date).abs
     render layout: false
   end
 
@@ -323,6 +323,10 @@ class ScheduledPaymentsController < ApplicationController
       Current.family.available_merchants_for(Current.user).find(attributes[:merchant_id]) if attributes[:merchant_id].present?
       Current.family.personal_tags_for(Current.user).find(attributes[:tag_ids].reject(&:blank?)) if attributes[:tag_ids].present?
       attributes
+    end
+
+    def reject_loan_managed_change
+      redirect_to agenda_return_path, alert: t("scheduled_payments.loan_managed"), status: :see_other
     end
 
     def invalid_payment_operation

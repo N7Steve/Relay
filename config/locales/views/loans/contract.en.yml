@@ -8,7 +8,20 @@ en:
       loan/prepayment:
         source_account_id: Paid from
   scheduled_payments:
-    loan_managed: This series pays a loan's instalment and the loan manages it; it cannot be deleted from Agenda.
+    loan_managed: This series pays a loan's instalment and its contract manages it; it cannot be edited, paused or deleted from Agenda.
+    loan_series:
+      title: Loan payment order
+      message: The contract works out each instalment from its revisions and prepayments, and the loan account processes it. That is why it is not edited from Agenda.
+      loan: Loan
+      paying_account: Paid from
+      frequency: Frequency
+      next_payment: Next payment
+      amount: Amount
+      close: Close
+      open_loan: View loan
+    managed_by_loan: Managed by the loan
+    confirm_modal_loan:
+      amount_hint: Amount worked out by the loan's contract for this due date.
   loans:
     contract:
       closed: This loan's account only takes its own movements. Instalments come from its Agenda series and prepayments are recorded from the loan.
@@ -34,7 +47,6 @@ en:
         source_account_managed_hint: Relay creates the transfer from this account. The loan's account takes no movements the loan does not record itself.
     interest_entries:
       row:
-        subtitle: Interest
         period: "%{from} – %{to}"
       show:
         locked: Worked out by the loan; it cannot be edited or deleted. If it differs from the lender's, correct its source (the revision's rate or the movements) and it is recalculated.
@@ -55,7 +67,6 @@ en:
         title: Instalment and movements
         link: Link Agenda instalment
         closed: The account is closed to the contract. Only the instalment from its Agenda series, the prepayments recorded here and the interest the loan works out come in.
-        series_detail: From %{account} · next on %{date} · %{amount}
         series_owned: The amount comes from the schedule; it changes only with revisions and prepayments.
         no_series: The instalment is not linked to an Agenda series yet. Link it so the loan can receive its instalments.
         foreign_title: Movements outside the contract

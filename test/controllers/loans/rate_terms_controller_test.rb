@@ -185,7 +185,7 @@ class Loans::RateTermsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the loan adopts an existing Agenda series and Agenda can no longer delete it" do
+  test "the loan adopts an existing Agenda series and Agenda can no longer change it" do
     travel_to Date.new(2026, 11, 27) do
       loan = build_structured_mortgage(family: @family, interest_tracking: false)
       source = @family.accounts.create!(name: "Cuenta hipoteca", owner: @user, balance: 5_000, currency: "EUR", accountable: Depository.new)
@@ -205,8 +205,22 @@ class Loans::RateTermsControllerTest < ActionDispatch::IntegrationTest
       assert ScheduledPayment.exists?(series.id)
 
       patch scheduled_payment_path(series), params: { scheduled_payment: { amount: "1", title: "Cuota" } }
-      assert_equal "Cuota", series.reload.title
+      assert_equal "Cuota Hipoteca", series.reload.title, "a payment order of the contract is not edited from Agenda"
       assert_equal BigDecimal("543.56"), series.amount
+      assert_equal I18n.t("scheduled_payments.loan_managed"), flash[:alert]
+
+      post toggle_status_scheduled_payment_path(series)
+      assert series.reload.active?, "nor paused"
+
+      get edit_scheduled_payment_path(series)
+      assert_response :success
+      assert_select "dialog input[name^='scheduled_payment']", count: 0, message: "the dialog shows the series without its form"
+      assert_select "a[href='#{account_path(loan.account, tab: "overview")}']", count: 1
+
+      get confirm_entry_form_scheduled_payment_path(series, scheduled_date: "2026-12-12")
+      assert_response :success
+      assert_select "input[name='confirm_amount']", count: 0, message: "the instalment is the contract's, not typed"
+      assert_select "input[name='confirm_date']", count: 1
     end
   end
 

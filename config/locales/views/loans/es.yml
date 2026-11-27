@@ -15,6 +15,28 @@ es:
       subtype_none: Ninguno
     new:
       title: Introduce los detalles del préstamo
+    subtypes:
+      mortgage:
+        short: Hipoteca
+        long: Hipoteca
+      student:
+        short: Préstamo de estudios
+        long: Préstamo de estudios
+      auto:
+        short: Préstamo de coche
+        long: Préstamo de coche
+      home_equity:
+        short: Préstamo con garantía
+        long: Préstamo con garantía hipotecaria
+      line_of_credit:
+        short: Línea de crédito
+        long: Línea de crédito
+      business:
+        short: Préstamo empresarial
+        long: Préstamo empresarial
+      other:
+        short: Otro préstamo
+        long: Otro préstamo
     overview:
       interest_rate: Tasa de interés
       monthly_payment: Pago mensual

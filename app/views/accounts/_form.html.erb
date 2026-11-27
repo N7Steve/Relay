@@ -31,10 +31,13 @@
           [
             [t(".financial_treatment_options.included", default: "Included in my finances"), "included"],
             [t(".financial_treatment_options.tracking", default: "Tracking only"), "tracking"],
-            [t(".financial_treatment_options.outside_finances", default: "Outside my finances"), "outside_finances"]
-          ],
+            ([t(".financial_treatment_options.outside_finances", default: "Outside my finances"), "outside_finances"] unless account.mortgage_loan?)
+          ].compact,
           { label: t(".financial_treatment_label", default: "Financial treatment") } %>
       <p class="text-secondary text-sm"><%= t(".financial_treatment_description", default: "Choose whether this account belongs to your finances and how boundary transfers are treated.") %></p>
+      <% if account.mortgage_loan? %>
+        <p class="text-secondary text-sm"><%= t(".mortgage_net_worth_hint", default: "Mortgages are part of your finances but are not subtracted from your net worth.") %></p>
+      <% end %>
     </div>
 
     <% if account.persisted? && account.supports_category_matcher? %>

@@ -1,0 +1,42 @@
+---
+en:
+  loans:
+    tabs:
+      overview:
+        terms_title: Loan terms
+        terms_subtitle: What the contract sets and what it costs in total
+        term_years:
+          one: "%{count} year"
+          other: "%{count} years"
+        term_months:
+          one: "%{count} month"
+          other: "%{count} months"
+      repayment_progress:
+        remaining_payments:
+          one: "%{count} payment left"
+          other: "%{count} payments left"
+      rates:
+        current_payment: Current payment
+        new_payment: New payment
+        new_payment_from: Payment from %{date}
+        days_left:
+          one: In %{count} day
+          other: In %{count} days
+        delta_points: "%{sign}%{value} pp"
+        revisions_subtitle: Past revisions are frozen; the next one is an estimate.
+        periods_subtitle: How the rate is built at each stage of the contract.
+        parts:
+          fixed: Fixed rate
+          spread: Spread
+          bonuses: Bonuses
+      schedule:
+        progress_label: Payments made
+        progress: "%{paid} of %{total}"
+        next_payment: "Next: %{date} · %{amount}"
+        legend_paid: Paid
+        legend_next: Next payment
+    scenarios:
+      show:
+        form_title: What to try
+        index_title: Index path
+        no_proposal: Choose a change of terms or a prepayment to compare it with your current loan.

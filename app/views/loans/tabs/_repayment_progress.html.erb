@@ -1,65 +1,103 @@
 <%# locals: (loan:, as_of:) %>
 
-<%# The repayment ring and the instalment the borrower is on. Rendered only
-    when the paydown can be measured -- an account with no balance to compare
-    against what was borrowed gets no ring rather than an empty one. %>
+<%# The head of the Overview: what is still owed and how far it has been paid
+    down (the ring), and the instalment the borrower is on, split into what
+    repays the debt and what pays interest. The ring is drawn only when the
+    paydown can be measured -- an account with no balance to compare against
+    what was borrowed gets no ring rather than an empty one. %>
+<% account = loan.account %>
 <% segments = loan.to_donut_segments_json %>
 <%# The instalment for the Overview's own reference date, so this card and the
-    ones above it answer for the same day. %>
+    figures below answer for the same day. %>
 <% breakdown = loan.payment_breakdown(as_of: as_of) %>
+<% split = loan.repayment_split(as_of: as_of) %>
+<% remaining = loan.remaining_months(as_of: as_of) %>
 
-<% if segments.present? || breakdown.present? %>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-    <% if segments.present? %>
-      <div class="bg-container rounded-lg border border-primary p-4">
-        <p class="text-sm text-secondary mb-2"><%= t(".repaid") %></p>
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+  <%= render DS::Card.new(class: class_names("gap-4", breakdown.present? ? "lg:col-span-3" : "lg:col-span-5")) do %>
+    <div class="flex items-center justify-between gap-4">
+      <div class="min-w-0 space-y-1">
+        <h4 class="text-sm text-secondary"><%= t("loans.tabs.overview.remaining_principal") %></h4>
+        <p class="text-3xl font-semibold text-primary privacy-sensitive tabular-nums"><%= format_money(account.balance_money.abs) %></p>
+        <% if remaining&.positive? %>
+          <p class="text-xs text-secondary"><%= t(".remaining_payments", count: remaining) %></p>
+        <% end %>
+      </div>
 
+      <% if segments.present? %>
         <%# The paid arc is declared as the controller's pass-through segment so
-            its `var(--color-warning)` reaches the SVG fill as written. Every
+            its `var(--color-success)` reaches the SVG fill as written. Every
             other segment goes through `d3.color()`, which returns null for a
             CSS variable and takes the whole chart down with it. %>
-        <div class="relative h-40"
+        <div class="relative h-32 w-32 shrink-0"
              data-controller="donut-chart"
              data-donut-chart-segments-value="<%= segments %>"
              data-donut-chart-overage-segment-id-value="paid">
           <div data-donut-chart-target="chartContainer" class="absolute inset-0 pointer-events-none"></div>
 
           <div data-donut-chart-target="contentContainer" class="flex justify-center items-center h-full">
-            <div data-donut-chart-target="defaultContent" class="flex flex-col items-center">
-              <p class="text-3xl font-medium text-primary privacy-sensitive">
+            <div data-donut-chart-target="defaultContent" class="flex flex-col items-center text-center px-2">
+              <p class="text-xl font-semibold text-primary privacy-sensitive">
                 <%= number_to_percentage(loan.balance_paid_ratio * 100, precision: 0) %>
               </p>
-              <p class="text-sm text-secondary privacy-sensitive"><%= t(".of_original", amount: format_money(loan.original_balance)) %></p>
+              <p class="text-xs text-secondary"><%= t(".repaid") %></p>
+              <p class="text-xs text-secondary privacy-sensitive"><%= t(".of_original", amount: format_money(loan.original_balance)) %></p>
             </div>
           </div>
         </div>
+      <% end %>
+    </div>
+
+    <% if split %>
+      <div class="grid grid-cols-2 gap-3 pt-4 border-t border-primary">
+        <div class="space-y-0.5">
+          <p class="flex items-center gap-1.5 text-xs text-secondary">
+            <span class="w-2 h-2 rounded-full bg-success"></span><%= t("loans.tabs.overview.principal_repaid") %>
+          </p>
+          <p class="text-base font-medium text-primary privacy-sensitive tabular-nums"><%= format_money(split[:principal]) %></p>
+        </div>
+        <div class="space-y-0.5">
+          <p class="flex items-center gap-1.5 text-xs text-secondary">
+            <span class="w-2 h-2 rounded-full bg-warning"></span><%= t("loans.tabs.overview.interest_paid") %>
+          </p>
+          <p class="text-base font-medium text-primary privacy-sensitive tabular-nums"><%= format_money(split[:interest]) %></p>
+        </div>
       </div>
     <% end %>
+  <% end %>
 
-    <% if breakdown.present? %>
-      <div class="bg-container rounded-lg border border-primary p-4">
-        <p class="text-sm text-secondary mb-2">
+  <% if breakdown.present? %>
+    <%= render DS::Card.new(class: "gap-4 lg:col-span-2") do %>
+      <div class="space-y-1">
+        <p class="text-sm text-secondary">
           <%= t(".instalment", number: breakdown[:number], date: l(breakdown[:date], format: :long)) %>
         </p>
-
-        <dl class="space-y-2">
-          <% [ :principal, :interest, :insurance ].each do |part| %>
-            <% next if part == :insurance && breakdown[:insurance].zero? %>
-            <div class="flex items-center justify-between gap-2">
-              <dt class="text-sm text-secondary"><%= t(".#{part}") %></dt>
-              <dd class="text-sm text-primary privacy-sensitive tabular-nums">
-                <%= format_money(breakdown[part]) %>
-                <span class="text-secondary"><%= number_to_percentage(breakdown[:ratios][part] * 100, precision: 0) %></span>
-              </dd>
-            </div>
-          <% end %>
-
-          <div class="flex items-center justify-between gap-2 pt-2 border-t border-primary">
-            <dt class="text-sm text-secondary"><%= t(".total") %></dt>
-            <dd class="text-sm font-medium text-primary privacy-sensitive tabular-nums"><%= format_money(breakdown[:total]) %></dd>
-          </div>
-        </dl>
+        <p class="text-3xl font-semibold text-primary privacy-sensitive tabular-nums"><%= format_money(breakdown[:total]) %></p>
       </div>
+
+      <%# How the instalment divides, as one bar: principal, interest and any
+          premium in proportion. %>
+      <% parts = [ [ :principal, "bg-success" ], [ :interest, "bg-warning" ], [ :insurance, "bg-subdued" ] ]
+           .reject { |part, _| part == :insurance && breakdown[:insurance].zero? } %>
+      <div class="flex h-2 w-full overflow-hidden rounded-full bg-surface-inset" aria-hidden="true">
+        <% parts.each do |part, color| %>
+          <div class="<%= color %> h-full" style="width: <%= (breakdown[:ratios][part] * 100).round(2) %>%"></div>
+        <% end %>
+      </div>
+
+      <dl class="space-y-2">
+        <% parts.each do |part, color| %>
+          <div class="flex items-center justify-between gap-2">
+            <dt class="flex items-center gap-1.5 text-sm text-secondary">
+              <span class="w-2 h-2 rounded-full <%= color %>"></span><%= t(".#{part}") %>
+            </dt>
+            <dd class="text-sm text-primary privacy-sensitive tabular-nums">
+              <%= format_money(breakdown[part]) %>
+              <span class="text-secondary"><%= number_to_percentage(breakdown[:ratios][part] * 100, precision: 0) %></span>
+            </dd>
+          </div>
+        <% end %>
+      </dl>
     <% end %>
-  </div>
-<% end %>
+  <% end %>
+</div>

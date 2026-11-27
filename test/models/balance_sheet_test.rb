@@ -72,6 +72,37 @@ class BalanceSheetTest < ActiveSupport::TestCase
     assert depository_group.accounts.any?(&:exclude_from_reports?)
   end
 
+  # A mortgage is in the user's finances but owing the house's loan must not
+  # turn savings into a negative net worth.
+  test "mortgages stay listed and in reports but out of net worth" do
+    create_account(balance: 50_000, accountable: Depository.new)
+    create_account(balance: 1_000, accountable: CreditCard.new)
+    mortgage = create_account(balance: 100_000, accountable: Loan.new(subtype: "mortgage"))
+    car_loan = create_account(balance: 8_000, accountable: Loan.new(subtype: "auto"))
+
+    balance_sheet = BalanceSheet.new(@family)
+    loan_group = balance_sheet.liabilities.account_groups.find(&:loan?)
+
+    assert_equal 50_000 - 1_000 - 8_000, balance_sheet.net_worth
+    assert_equal 8_000, loan_group.total
+    assert_equal [ car_loan.id, mortgage.id ].sort, loan_group.accounts.map(&:id).sort, "still listed among the loans"
+    assert_equal "included", mortgage.reload.financial_treatment
+    assert_includes Account.included_in_reports, mortgage
+    assert_not_includes Account.included_in_net_worth, mortgage
+    assert_includes Account.included_in_net_worth, car_loan
+    assert_not_includes BalanceSheet::HistoricalAccountScope.new(@family).account_ids, mortgage.id
+  end
+
+  test "a mortgage cannot be placed outside the finances" do
+    mortgage = create_account(balance: 100_000, accountable: Loan.new(subtype: "mortgage"))
+
+    mortgage.update!(financial_treatment: "outside_finances")
+
+    assert_equal "included", mortgage.reload.financial_treatment
+    assert_not mortgage.cashflow_boundary?
+    assert_not mortgage.exclude_from_reports?
+  end
+
   test "archived accounts stay in current net worth and report account groups" do
     active_asset = create_account(balance: 1000, accountable: Depository.new)
     archived_asset = create_account(balance: 5000, accountable: Depository.new)

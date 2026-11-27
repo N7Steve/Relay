@@ -67,6 +67,11 @@ cambia los kinds, importes ni reglas de frontera de la tabla anterior.
 
 Una cuenta `tracking` queda fuera de informes pero no cambia la frontera de
 transferencias. `outside_finances` queda fuera y establece la frontera.
+Las hipotecas (`Loan` con subtipo `mortgage`) están siempre incluidas en mis
+finanzas (informes, Agenda, grupo de préstamos) pero fuera del patrimonio neto
+(`Account.included_in_net_worth`, `Account#excluded_from_net_worth?`): no
+restan del balance ni de su serie histórica, y su cuota sigue siendo el gasto
+`loan_payment`. No admiten el tratamiento `outside_finances`.
 Archivar afecta la navegación, no equivale a excluir de finanzas. El patrimonio
 usa saldos y posiciones de las cuentas seleccionadas, con signos de
 activo/pasivo y conversión de monedas; no es la suma de este informe de gastos.

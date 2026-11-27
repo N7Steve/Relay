@@ -31,6 +31,9 @@ class Loan < ApplicationRecord
     "other" => { short: "Other Loan", long: "Other Loan" }
   }.freeze
 
+  # Mortgages stay out of net worth (see Account.included_in_net_worth).
+  MORTGAGE_SUBTYPE = "mortgage".freeze
+
   # The rate types the form offers. They are not the only ones a loan can
   # carry: PlaidAccount::Liabilities::MortgageProcessor writes Plaid's raw
   # `interest_rate.type` straight through ("arm", among others), and a loan
@@ -111,6 +114,10 @@ class Loan < ApplicationRecord
   # fiction" -- but the schedule now re-amortises at each recorded rate change,
   # so the objection no longer holds. A variable loan with no changes recorded
   # yet simply runs at its base rate, which is what it is actually doing.
+  def mortgage?
+    subtype == MORTGAGE_SUBTYPE
+  end
+
   def amortizable?
     # `account` first: original_balance reads through it, and a Loan can exist
     # without one (Loan.new in a form, a fixture built in isolation). #2984's
@@ -624,7 +631,7 @@ class Loan < ApplicationRecord
     return nil if ratio.nil?
 
     [
-      { color: "var(--color-warning)", amount: ratio, id: "paid" },
+      { color: "var(--color-success)", amount: ratio, id: "paid" },
       { color: "var(--budget-unused-fill)", amount: 1 - ratio, id: "unused" }
     ]
   end

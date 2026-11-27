@@ -1,0 +1,30 @@
+<%# A series a loan owns: a payment order its contract issues every month.
+    Agenda shows it; amount, dates, accounts and status belong to the loan. %>
+<% payment = @scheduled_payment %>
+<% loan_account = payment.loan.account %>
+<% next_date = payment.next_run_date %>
+<%= render DS::Dialog.new(width: "md") do |dialog| %>
+  <% dialog.with_header(title: payment.title) %>
+  <% dialog.with_body do %>
+    <div class="space-y-4">
+      <%= render DS::Alert.new(title: t(".title"), message: t(".message"), variant: :info) %>
+
+      <div class="space-y-2">
+        <%= render DS::DetailRow.new(label: t(".loan"), value: loan_account.name) %>
+        <%= render DS::DetailRow.new(label: t(".paying_account"), value: payment.account.name) %>
+        <%= render DS::DetailRow.new(label: t(".frequency"), value: t("scheduled_payments.form.frequencies.#{payment.frequency}")) %>
+        <% if next_date && !payment.completed? %>
+          <%= render DS::DetailRow.new(label: t(".next_payment"), value: l(next_date, format: :long)) %>
+          <%= render DS::DetailRow.new(label: t(".amount"), value_class: "privacy-sensitive font-medium",
+                                       value: format_money(Money.new(payment.amount_for(next_date), payment.currency))) %>
+        <% end %>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <%= render DS::Button.new(text: t(".close"), variant: "ghost", size: :sm, type: "button", data: { action: "DS--dialog#close" }) %>
+        <%= render DS::Link.new(text: t(".open_loan"), icon: "landmark", variant: "primary", size: :sm,
+                                href: account_path(loan_account, tab: "overview"), frame: "_top") %>
+      </div>
+    </div>
+  <% end %>
+<% end %>

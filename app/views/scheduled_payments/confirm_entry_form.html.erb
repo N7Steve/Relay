@@ -12,12 +12,23 @@
       <p class="text-sm font-medium text-primary"><%= @scheduled_payment.title %></p>
       <%= f.date_field :confirm_date, value: @default_date, required: true,
             label: t("scheduled_payments.confirm_modal.date_label") %>
-      <%= f.number_field :confirm_amount, value: @default_amount, required: true, min: 0, step: "0.01",
-            label: t("scheduled_payments.confirm_modal.amount_label") %>
-      <% if @scheduled_payment.amount_estimated? %>
-        <p class="text-xs text-secondary"><%= t("scheduled_payments.confirm_modal.estimated_hint") %></p>
+      <% if @scheduled_payment.loan_managed? %>
+        <%# The contract's instalment: shown, not typed (the model ignores any
+            amount sent for a loan's series). %>
+        <div class="rounded-lg bg-container-inset p-3 space-y-1">
+          <%= render DS::DetailRow.new(label: t("scheduled_payments.confirm_modal.amount_label"), align: :center,
+                                       value_class: "text-base font-medium privacy-sensitive",
+                                       value: format_money(Money.new(@default_amount, @scheduled_payment.currency))) %>
+          <p class="text-xs text-secondary"><%= t("scheduled_payments.confirm_modal_loan.amount_hint") %></p>
+        </div>
+      <% else %>
+        <%= f.number_field :confirm_amount, value: @default_amount, required: true, min: 0, step: "0.01",
+              label: t("scheduled_payments.confirm_modal.amount_label") %>
+        <% if @scheduled_payment.amount_estimated? %>
+          <p class="text-xs text-secondary"><%= t("scheduled_payments.confirm_modal.estimated_hint") %></p>
+        <% end %>
+        <p class="text-sm text-secondary"><%= @scheduled_payment.currency %></p>
       <% end %>
-      <p class="text-sm text-secondary"><%= @scheduled_payment.currency %></p>
       <div class="flex items-center justify-end gap-2 pt-2">
         <%= render DS::Button.new(text: t("shared.cancel"), variant: "ghost", size: :sm, type: "button", data: { action: "DS--dialog#close" }) %>
         <%= render DS::Button.new(text: t("scheduled_payments.confirm_modal.confirm_button"), variant: "primary", size: :sm, type: "submit") %>

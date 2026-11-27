@@ -1,0 +1,42 @@
+---
+es:
+  loans:
+    tabs:
+      overview:
+        terms_title: Condiciones del préstamo
+        terms_subtitle: Lo que fija el contrato y lo que cuesta en total
+        term_years:
+          one: "%{count} año"
+          other: "%{count} años"
+        term_months:
+          one: "%{count} mes"
+          other: "%{count} meses"
+      repayment_progress:
+        remaining_payments:
+          one: Queda %{count} cuota
+          other: Quedan %{count} cuotas
+      rates:
+        current_payment: Cuota actual
+        new_payment: Nueva cuota
+        new_payment_from: Cuota desde el %{date}
+        days_left:
+          one: Dentro de %{count} día
+          other: Dentro de %{count} días
+        delta_points: "%{sign}%{value} p.p."
+        revisions_subtitle: Las pasadas quedan congeladas; la próxima es una estimación.
+        periods_subtitle: Cómo se forma el tipo en cada etapa del contrato.
+        parts:
+          fixed: Tipo fijo
+          spread: Diferencial
+          bonuses: Bonificaciones
+      schedule:
+        progress_label: Cuotas pagadas
+        progress: "%{paid} de %{total}"
+        next_payment: "Próxima: %{date} · %{amount}"
+        legend_paid: Pagada
+        legend_next: Próxima cuota
+    scenarios:
+      show:
+        form_title: Qué quieres probar
+        index_title: Evolución del índice
+        no_proposal: Elige un cambio de condiciones o una amortización para compararlo con tu préstamo actual.

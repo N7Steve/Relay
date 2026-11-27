@@ -2,136 +2,164 @@
   <% scenario = @scenario %>
   <% currency = scenario.currency %>
   <% structured = @loan.structured_rate? %>
+  <% baseline = scenario.baseline %>
+  <% proposal = scenario.proposal %>
 
-  <div class="space-y-6">
-    <p class="text-sm text-secondary"><%= t(".intro") %></p>
-
-    <% if structured %>
-      <p class="text-xs text-secondary">
-        <% if scenario.latest_index %>
-          <%= t(".index_basis", index: t("reference_rates.indexes.#{scenario.latest_index.index_key}"),
-                                value: loan_rate_percentage(scenario.latest_index.published_value),
-                                month: l(scenario.latest_index.month, format: :month_year)) %>
-        <% else %>
-          <%= t(".index_missing") %>
-        <% end %>
-      </p>
-    <% end %>
-
-    <%= render DS::Card.new(class: "space-y-4") do %>
-      <%= styled_form_with model: scenario, scope: :scenario, url: loan_scenario_path(@account), method: :get,
-            data: { turbo_frame: "loan_scenarios" }, class: "space-y-4" do |form| %>
-        <% if structured %>
-          <div class="space-y-1">
-            <%= form.number_field :index_shift, label: t(".index_shift"), step: 0.25, min: -10, max: 10 %>
-            <p class="text-xs text-secondary"><%= t(".index_shift_hint") %></p>
-          </div>
-
-          <h3 class="font-medium text-primary"><%= t(".change_title") %></h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <%= form.select :change_kind,
-                  Loan::Scenario::CHANGE_KINDS.map { |kind| [ t(".change_kinds.#{kind}"), kind ] },
-                  { label: t(".change_kind"), include_blank: t(".change_none") } %>
-            <%= form.date_field :change_on, label: t(".change_on") %>
-            <%= form.number_field :change_rate, label: t(".change_rate"), min: 0, step: 0.001 %>
-            <%= form.number_field :change_spread, label: t(".change_spread"), step: 0.001 %>
-            <%= form.number_field :change_cost, label: t(".change_cost"), min: 0, step: 0.01 %>
-          </div>
-          <p class="text-xs text-secondary"><%= t(".change_hint") %></p>
-          <div class="flex items-center justify-between gap-3 rounded-lg bg-container-inset p-3">
-            <div>
-              <p class="form-field__label"><%= t(".keep_bonuses") %></p>
-              <p class="text-xs text-secondary"><%= t(".keep_bonuses_hint") %></p>
-            </div>
-            <%= form.toggle :keep_bonuses %>
-          </div>
-        <% end %>
-
-        <h3 class="font-medium text-primary"><%= t(".prepayment_title") %></h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <%= form.number_field :prepayment_amount, label: t(".prepayment_amount"), min: 0, step: 0.01 %>
-          <%= form.date_field :prepayment_on, label: t(".prepayment_on") %>
-          <%= form.select :prepayment_mode, Loan::Prepayment.mode_options, { label: t(".prepayment_mode") } %>
-          <%= form.number_field :prepayment_fee, label: t(".prepayment_fee"), min: 0, step: 0.01 %>
-        </div>
-
-        <%= form.submit t(".submit") %>
-      <% end %>
-    <% end %>
-
-    <% if scenario.errors.any? %>
-      <%= render "shared/form_errors", model: scenario %>
-    <% end %>
-
-    <% baseline = scenario.baseline %>
-    <% proposal = scenario.proposal %>
-
-    <% if baseline %>
-      <% if proposal %>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <%= summary_card title: t(".net_saving") do %>
-            <% saving = scenario.net_saving %>
-            <span class="<%= saving.negative? ? "text-destructive" : "text-success" %>"><%= loan_money(currency, saving) %></span>
-          <% end %>
-          <%= summary_card title: t(".payment_after_change") do %>
-            <%= loan_money(currency, proposal.payment_after_change) %>
-          <% end %>
-          <%= summary_card title: t(".months_saved") do %>
-            <%= scenario.months_saved.to_i %>
-          <% end %>
-        </div>
-      <% end %>
-
-      <% rows = [
-           [ t(".rows.next_payment"), :next_payment ],
-           [ t(".rows.payment_after_change"), :payment_after_change ],
-           [ t(".rows.remaining_interest"), :remaining_interest ],
-           [ t(".rows.costs"), :costs ],
-           [ t(".rows.total_cost"), :total_cost ],
-           [ t(".rows.payoff_date"), :payoff_date ]
-         ] %>
-      <%= render DS::Table.new(rows: rows, label: t(".comparison")) do |table| %>
-        <% table.with_column("") { |row| row.first } %>
-        <% table.with_column(t(".columns.current"), numeric: true, class: "privacy-sensitive") do |row| %>
-          <% value = baseline.public_send(row.last) %>
-          <%= loan_outcome_value(currency, value) %>
-        <% end %>
-        <% if proposal %>
-          <% table.with_column(t(".columns.scenario"), numeric: true, class: "privacy-sensitive") do |row| %>
-            <% value = proposal.public_send(row.last) %>
-            <%= loan_outcome_value(currency, value) %>
-          <% end %>
-        <% end %>
-      <% end %>
-
+  <div class="space-y-4">
+    <%= render DS::Alert.new(variant: :info) do %>
+      <p class="text-secondary"><%= t(".intro") %></p>
       <% if structured %>
-        <section class="space-y-2">
-          <h3 class="font-medium text-primary"><%= t(".sensitivity_title") %></h3>
-          <p class="text-xs text-secondary"><%= t(".sensitivity_hint") %></p>
-          <%= render DS::Table.new(rows: scenario.sensitivity, label: t(".sensitivity_title")) do |table| %>
-            <% table.with_column(t(".columns.index")) do |row| %>
-              <% if scenario.latest_index %>
-                <%= loan_rate_percentage(scenario.latest_index.published_value + row[:shift]) %>
-              <% else %>
-                <%= t(".shift", shift: row[:shift].to_s("F")) %>
+        <p class="text-xs text-secondary mt-1">
+          <% if scenario.latest_index %>
+            <%= t(".index_basis", index: t("reference_rates.indexes.#{scenario.latest_index.index_key}"),
+                                  value: loan_rate_percentage(scenario.latest_index.published_value),
+                                  month: l(scenario.latest_index.month, format: :month_year)) %>
+          <% else %>
+            <%= t(".index_missing") %>
+          <% end %>
+        </p>
+      <% end %>
+    <% end %>
+
+    <div class="grid grid-cols-1 xl:grid-cols-5 gap-4 items-start">
+      <%# What to try: an index shift, a change of terms, a prepayment. %>
+      <%= loan_section(title: t(".form_title"), icon: "sliders-horizontal", class_name: "xl:col-span-2") do %>
+        <%= styled_form_with model: scenario, scope: :scenario, url: loan_scenario_path(@account), method: :get,
+              data: { turbo_frame: "loan_scenarios" }, class: "space-y-5" do |form| %>
+          <% if structured %>
+            <fieldset class="space-y-2">
+              <legend class="flex items-center gap-2 text-sm font-medium text-primary mb-2">
+                <%= icon "chart-line", size: "sm" %><%= t(".index_title") %>
+              </legend>
+              <%= form.number_field :index_shift, label: t(".index_shift"), step: 0.25, min: -10, max: 10 %>
+              <p class="text-xs text-secondary"><%= t(".index_shift_hint") %></p>
+            </fieldset>
+
+            <fieldset class="space-y-3 pt-4 border-t border-primary">
+              <legend class="flex items-center gap-2 text-sm font-medium text-primary mb-2">
+                <%= icon "arrow-left-right", size: "sm" %><%= t(".change_title") %>
+              </legend>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <%= form.select :change_kind,
+                      Loan::Scenario::CHANGE_KINDS.map { |kind| [ t(".change_kinds.#{kind}"), kind ] },
+                      { label: t(".change_kind"), include_blank: t(".change_none") } %>
+                <%= form.date_field :change_on, label: t(".change_on") %>
+                <%= form.number_field :change_rate, label: t(".change_rate"), min: 0, step: 0.001 %>
+                <%= form.number_field :change_spread, label: t(".change_spread"), step: 0.001 %>
+                <%= form.number_field :change_cost, label: t(".change_cost"), min: 0, step: 0.01 %>
+              </div>
+              <p class="text-xs text-secondary"><%= t(".change_hint") %></p>
+              <div class="flex items-center justify-between gap-3 rounded-lg bg-container-inset p-3">
+                <div>
+                  <p class="form-field__label"><%= t(".keep_bonuses") %></p>
+                  <p class="text-xs text-secondary"><%= t(".keep_bonuses_hint") %></p>
+                </div>
+                <%= form.toggle :keep_bonuses %>
+              </div>
+            </fieldset>
+          <% end %>
+
+          <fieldset class="<%= class_names("space-y-3", "pt-4 border-t border-primary" => structured) %>">
+            <legend class="flex items-center gap-2 text-sm font-medium text-primary mb-2">
+              <%= icon "piggy-bank", size: "sm" %><%= t(".prepayment_title") %>
+            </legend>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <%= form.number_field :prepayment_amount, label: t(".prepayment_amount"), min: 0, step: 0.01 %>
+              <%= form.date_field :prepayment_on, label: t(".prepayment_on") %>
+              <%= form.select :prepayment_mode, Loan::Prepayment.mode_options, { label: t(".prepayment_mode") } %>
+              <%= form.number_field :prepayment_fee, label: t(".prepayment_fee"), min: 0, step: 0.01 %>
+            </div>
+          </fieldset>
+
+          <%= form.submit t(".submit") %>
+        <% end %>
+      <% end %>
+
+      <div class="xl:col-span-3 space-y-4">
+        <% if scenario.errors.any? %>
+          <%= render "shared/form_errors", model: scenario %>
+        <% end %>
+
+        <% if baseline %>
+          <% if proposal %>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <% saving = scenario.net_saving %>
+              <%= render DS::Card.new(class: "gap-1") do %>
+                <p class="text-sm text-secondary"><%= t(".net_saving") %></p>
+                <p class="text-2xl font-semibold privacy-sensitive tabular-nums <%= saving.negative? ? "text-destructive" : "text-success" %>"><%= loan_money(currency, saving) %></p>
               <% end %>
+              <%= render DS::Card.new(class: "gap-1") do %>
+                <p class="text-sm text-secondary"><%= t(".payment_after_change") %></p>
+                <p class="text-2xl font-semibold text-primary privacy-sensitive tabular-nums"><%= loan_money(currency, proposal.payment_after_change) %></p>
+                <% if baseline.payment_after_change && proposal.payment_after_change %>
+                  <p class="text-xs privacy-sensitive"><%= loan_money_delta(proposal.payment_after_change - baseline.payment_after_change) %></p>
+                <% end %>
+              <% end %>
+              <%= render DS::Card.new(class: "gap-1") do %>
+                <p class="text-sm text-secondary"><%= t(".months_saved") %></p>
+                <p class="text-2xl font-semibold text-primary tabular-nums"><%= scenario.months_saved.to_i %></p>
+              <% end %>
+            </div>
+          <% else %>
+            <%= render DS::Card.new do %>
+              <div class="flex items-center gap-3">
+                <%= render DS::FilledIcon.new(icon: "sparkles", variant: :surface, size: "md", rounded: true) %>
+                <p class="text-sm text-secondary"><%= t(".no_proposal") %></p>
+              </div>
             <% end %>
-            <% table.with_column(t(".columns.current_payment"), numeric: true, class: "privacy-sensitive") { |row| loan_money(currency, row[:baseline]&.payment_after_change) } %>
-            <% table.with_column(t(".columns.current_interest"), numeric: true, class: "privacy-sensitive") { |row| loan_money(currency, row[:baseline]&.remaining_interest) } %>
-            <% if proposal %>
-              <% table.with_column(t(".columns.scenario_payment"), numeric: true, class: "privacy-sensitive") { |row| loan_money(currency, row[:proposal]&.payment_after_change) } %>
-              <% table.with_column(t(".columns.scenario_cost"), numeric: true, class: "privacy-sensitive") do |row| %>
-                <% if row[:proposal] && row[:baseline] %>
-                  <% delta = row[:proposal].total_cost - row[:baseline].total_cost %>
-                  <span class="<%= delta.positive? ? "text-destructive" : "text-success" %>"><%= loan_money(currency, delta) %></span>
-                <% else %>
-                  —
+          <% end %>
+
+          <% rows = [
+               [ t(".rows.next_payment"), :next_payment ],
+               [ t(".rows.payment_after_change"), :payment_after_change ],
+               [ t(".rows.remaining_interest"), :remaining_interest ],
+               [ t(".rows.costs"), :costs ],
+               [ t(".rows.total_cost"), :total_cost ],
+               [ t(".rows.payoff_date"), :payoff_date ]
+             ] %>
+          <%= loan_section(title: t(".comparison"), icon: "scale") do %>
+            <%= render DS::Table.new(rows: rows, inset: true, label: t(".comparison")) do |table| %>
+              <% table.with_column("", class: "text-secondary") { |row| row.first } %>
+              <% table.with_column(t(".columns.current"), numeric: true, class: "privacy-sensitive") do |row| %>
+                <%= loan_outcome_value(currency, baseline.public_send(row.last)) %>
+              <% end %>
+              <% if proposal %>
+                <% table.with_column(t(".columns.scenario"), numeric: true, class: "font-medium privacy-sensitive") do |row| %>
+                  <%= loan_outcome_value(currency, proposal.public_send(row.last)) %>
                 <% end %>
               <% end %>
             <% end %>
           <% end %>
-        </section>
-      <% end %>
-    <% end %>
+
+          <% if structured %>
+            <%= loan_section(title: t(".sensitivity_title"), subtitle: t(".sensitivity_hint"), icon: "activity") do %>
+              <%= render DS::Table.new(rows: scenario.sensitivity, inset: true, label: t(".sensitivity_title"),
+                                       row_class: ->(row) { "bg-container-inset font-medium" if row[:shift].zero? }) do |table| %>
+                <% table.with_column(t(".columns.index")) do |row| %>
+                  <% if scenario.latest_index %>
+                    <%= loan_rate_percentage(scenario.latest_index.published_value + row[:shift]) %>
+                  <% else %>
+                    <%= t(".shift", shift: row[:shift].to_s("F")) %>
+                  <% end %>
+                <% end %>
+                <% table.with_column(t(".columns.current_payment"), numeric: true, class: "privacy-sensitive") { |row| loan_money(currency, row[:baseline]&.payment_after_change) } %>
+                <% table.with_column(t(".columns.current_interest"), numeric: true, class: "privacy-sensitive") { |row| loan_money(currency, row[:baseline]&.remaining_interest) } %>
+                <% if proposal %>
+                  <% table.with_column(t(".columns.scenario_payment"), numeric: true, class: "privacy-sensitive") { |row| loan_money(currency, row[:proposal]&.payment_after_change) } %>
+                  <% table.with_column(t(".columns.scenario_cost"), numeric: true, class: "privacy-sensitive") do |row| %>
+                    <% if row[:proposal] && row[:baseline] %>
+                      <% delta = row[:proposal].total_cost - row[:baseline].total_cost %>
+                      <span class="<%= delta.positive? ? "text-destructive" : "text-success" %>"><%= loan_money(currency, delta) %></span>
+                    <% else %>
+                      —
+                    <% end %>
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
   </div>
 <% end %>

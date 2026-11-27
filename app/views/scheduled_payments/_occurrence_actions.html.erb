@@ -18,9 +18,15 @@
           href: retract_entry_scheduled_payment_path(payment, entry_id: occurrence.entry_id, **agenda_context_params),
           method: :post, confirm: t("scheduled_payments.retract_confirm")) %>
   <% end %>
-  <%= render DS::Link.new(icon: "pencil", variant: "ghost", size: :sm,
-        aria: { label: t("scheduled_payments.agenda.edit") }, title: t("scheduled_payments.agenda.edit"),
-        href: edit_scheduled_payment_path(payment, **agenda_context_params), frame: :modal) %>
+  <% if payment.loan_managed? %>
+    <%= render DS::Link.new(icon: "landmark", variant: "ghost", size: :sm,
+          aria: { label: t("scheduled_payments.managed_by_loan") }, title: t("scheduled_payments.managed_by_loan"),
+          href: edit_scheduled_payment_path(payment, **agenda_context_params), frame: :modal) %>
+  <% else %>
+    <%= render DS::Link.new(icon: "pencil", variant: "ghost", size: :sm,
+          aria: { label: t("scheduled_payments.agenda.edit") }, title: t("scheduled_payments.agenda.edit"),
+          href: edit_scheduled_payment_path(payment, **agenda_context_params), frame: :modal) %>
+  <% end %>
 <% else %>
   <span class="text-xs text-secondary"><%= t("scheduled_payments.agenda.read_only") %></span>
 <% end %>

@@ -31,6 +31,8 @@
               <%= render DS::Tooltip.new(text: t("accounts.account.tracking_only_indicator", default: "Tracking only"), as: :span) do %>
                 <%= icon("eye-off", class: "w-3.5 h-3.5 text-secondary") %>
               <% end %>
+            <% elsif account.mortgage_loan? %>
+              <%= render DS::Tooltip.new(text: t("accounts.account.outside_net_worth_indicator", default: "Not subtracted from net worth"), icon: "info", size: "sm", as: :span) %>
             <% end %>
 
             <% if account.shared? %>

@@ -7,22 +7,23 @@
 <% loan = account.loan %>
 <% prepayments = loan.prepayments.to_a %>
 
-<section class="space-y-2">
-  <div class="flex items-center justify-between gap-2">
-    <h3 class="font-medium text-primary"><%= t(".title") %></h3>
-    <% if can_edit && loan.amortizable? %>
-      <%= render DS::Link.new(text: t(".add"), icon: "plus", variant: "ghost", size: "sm",
-                              href: new_loan_prepayment_path(account), frame: :modal) %>
-    <% end %>
-  </div>
+<% actions = capture do %>
+  <% if can_edit && loan.amortizable? %>
+    <%= render DS::Link.new(text: t(".add"), icon: "plus", variant: "ghost", size: "sm",
+                            href: new_loan_prepayment_path(account), frame: :modal) %>
+  <% end %>
+<% end %>
 
+<%= loan_section(title: t(".title"), icon: "piggy-bank", actions: actions) do %>
   <% if prepayments.empty? %>
     <p class="text-sm text-secondary"><%= t(".empty") %></p>
   <% else %>
-    <%= render DS::Table.new(rows: prepayments, label: t(".title")) do |table| %>
+    <%= render DS::Table.new(rows: prepayments, inset: true, label: t(".title")) do |table| %>
       <% table.with_column(t(".columns.date")) { |prepayment| l(prepayment.paid_on, format: :long) } %>
-      <% table.with_column(t(".columns.amount"), numeric: true, class: "privacy-sensitive") { |prepayment| format_money(prepayment.amount_money) } %>
-      <% table.with_column(t(".columns.mode")) { |prepayment| t("loans.prepayments.modes.#{prepayment.mode}") } %>
+      <% table.with_column(t(".columns.amount"), numeric: true, class: "font-medium privacy-sensitive") { |prepayment| format_money(prepayment.amount_money) } %>
+      <% table.with_column(t(".columns.mode")) do |prepayment| %>
+        <%= render DS::Pill.new(label: t("loans.prepayments.modes.#{prepayment.mode}"), tone: :info, marker: false) %>
+      <% end %>
       <% table.with_column(t(".columns.fee"), numeric: true, class: "text-secondary privacy-sensitive") { |prepayment| format_money(prepayment.fee_money) } %>
       <% table.with_column(t(".columns.movement")) do |prepayment| %>
         <% if prepayment.matching_entry %>
@@ -31,7 +32,7 @@
           <%= render DS::Pill.new(label: t(".missing"), tone: :warning, marker: false) %>
         <% end %>
       <% end %>
-      <% table.with_column("", numeric: true) do |prepayment| %>
+      <% table.with_column("", align: :right) do |prepayment| %>
         <% if can_edit %>
           <%= render DS::Button.new(
                 text: t(".delete"), variant: "ghost", size: "sm",
@@ -42,4 +43,4 @@
       <% end %>
     <% end %>
   <% end %>
-</section>
+<% end %>

@@ -25,6 +25,13 @@
               size: "xs",
               as: :span
             ) %>
+      <% elsif account.mortgage_loan? && !account.exclude_from_reports? %>
+        <%= render DS::Tooltip.new(
+              text: t("accounts.account.outside_net_worth_indicator", default: "Not subtracted from net worth"),
+              icon: "info",
+              size: "xs",
+              as: :span
+            ) %>
       <% end %>
     </div>
   </div>

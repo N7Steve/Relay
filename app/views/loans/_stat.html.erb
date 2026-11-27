@@ -1,0 +1,9 @@
+<%# locals: (title:, value:, hint: nil, value_class: nil) %>
+<%# A labelled figure inside a loan section card. %>
+<div class="rounded-lg bg-container-inset p-3 min-w-0">
+  <h4 class="text-xs text-secondary truncate"><%= title %></h4>
+  <p class="<%= class_names("mt-1 text-base font-medium text-primary privacy-sensitive break-words", value_class) %>"><%= value %></p>
+  <% if hint.present? %>
+    <span class="block mt-0.5 text-xs text-secondary"><%= hint %></span>
+  <% end %>
+</div>

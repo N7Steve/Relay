@@ -1,6 +1,6 @@
 class BalanceSheet::NetWorthBreakdownSeriesBuilder
   # Use the same resolution as the dashboard net worth chart.
-  CACHE_VERSION = "v3"
+  CACHE_VERSION = "v4"
 
   def initialize(family, user: nil)
     @family = family

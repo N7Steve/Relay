@@ -8,7 +8,20 @@ es:
       loan/prepayment:
         source_account_id: Cuenta de origen
   scheduled_payments:
-    loan_managed: Esta serie paga la cuota de un préstamo y la gestiona el propio préstamo; no se puede eliminar desde la Agenda.
+    loan_managed: Esta serie paga la cuota de un préstamo y la gestiona su contrato; no se puede editar, pausar ni eliminar desde la Agenda.
+    loan_series:
+      title: Orden de pago del préstamo
+      message: El contrato calcula el importe de cada cuota con sus revisiones y amortizaciones, y la cuenta del préstamo la procesa. Por eso no se edita desde la Agenda.
+      loan: Préstamo
+      paying_account: Cuenta de cargo
+      frequency: Frecuencia
+      next_payment: Próximo cargo
+      amount: Importe
+      close: Cerrar
+      open_loan: Ver préstamo
+    managed_by_loan: Gestionada por el préstamo
+    confirm_modal_loan:
+      amount_hint: Importe calculado por el contrato del préstamo para este vencimiento.
   loans:
     contract:
       closed: La cuenta de este préstamo solo admite sus propios movimientos. Las cuotas llegan desde su serie de Agenda y las amortizaciones se registran desde el préstamo.
@@ -34,7 +47,6 @@ es:
         source_account_managed_hint: Relay crea la transferencia desde esta cuenta. La cuenta del préstamo no admite movimientos que no registre el propio préstamo.
     interest_entries:
       row:
-        subtitle: Intereses
         period: "%{from} – %{to}"
       show:
         locked: Calculado por el préstamo; no se puede editar ni borrar. Si no coincide con el banco, corrige su origen (el tipo de la revisión o los movimientos) y se recalcula solo.
@@ -55,7 +67,6 @@ es:
         title: Cuota y movimientos
         link: Vincular cuota de Agenda
         closed: La cuenta está cerrada al contrato. Solo entran la cuota de su serie de Agenda, las amortizaciones registradas aquí y los intereses que calcula el préstamo.
-        series_detail: Desde %{account} · próxima el %{date} · %{amount}
         series_owned: El importe sale del cuadro de amortización; cambia solo con las revisiones y amortizaciones.
         no_series: La cuota todavía no está vinculada a una serie de Agenda. Vincúlala para que el préstamo pueda recibir sus cuotas.
         foreign_title: Movimientos ajenos al contrato
