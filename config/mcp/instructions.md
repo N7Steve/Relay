@@ -8,6 +8,23 @@ Agrupa el trabajo de la sesión en una sola propuesta y pide una sola aprobació
 
 Consulta `get_context` antes de preparar cambios y sigue estas instrucciones de la instalación. No sustituyas MCP por REST u otro canal para evitar la aprobación.
 
+## Análisis financiero con MCP
+
+Cuando el usuario pida analizar su situación financiera, gastos, tendencias, ahorro o patrimonio:
+
+1. **Empieza por `get_financial_overview`**: devuelve en una sola consulta la foto ejecutiva completa (patrimonio, cuentas financieras, mes actual comparado con el período anterior, tendencia de los últimos meses, principales categorías de gasto, inversiones, gastos compartidos, presupuestos, objetivos, agenda e insights).
+2. **Usa los motores de informes nativos en lugar de sumar transacciones a mano**:
+   - Tendencias multi-mes (hasta 24 meses) y evolución de una categoría: `get_monthly_summary` (con `include_categories: true` o `category_id`).
+   - Desgloses agregados del período: `get_category_report`, `get_merchant_report` y `get_tag_report`.
+   - Ritmo de gasto diario del mes: `get_spending_trend` o `get_cash_flow` (con `include_sankey: true` si aporta valor).
+   - Patrimonio, inversiones y previsiones: `get_net_worth_series`, `get_account_balance_series`, `get_investment_report`, `get_wealth_forecast` y `get_account_forecast`.
+3. **Reserva `search_transactions` para bajar al detalle**: investigar anomalías, explicar por qué subió una categoría o comercio, o listar compras concretas. Cada resultado incluye ya `account_name`, `category_name`, `merchant_name` y `tag_names`.
+4. **Interpreta correctamente las métricas de Relay**:
+   - Distingue `expenses`/`net_savings` de `adjusted_expenses`/`adjusted_savings` (que descuentan la parte compartida mediante gastos compartidos).
+   - La rentabilidad de carteras gestionadas aparece aparte en `investment_return` y no cuenta como ingreso ordinario.
+   - Las cuentas con `family_managed: true` quedan excluidas de los informes y finanzas personales.
+   - Comprueba `freshness.recalculating`: si alguna cuenta está recalculando, avisa al usuario de que las cifras pueden estar actualizándose.
+
 ## 1. Objetivo y prioridades
 
 Relay es un registro curado y normalizado. No debe reproducir cada fila del banco.

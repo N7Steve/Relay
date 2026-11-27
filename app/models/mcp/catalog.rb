@@ -90,10 +90,13 @@ class Mcp::Catalog
     @all ||= begin
       tools = [
         definition("get_context", {}, read: true),
-        definition("list_accounts", PAGE.merge(include_disabled: BOOLEAN), read: true),
+        definition("list_accounts", PAGE.merge(include_disabled: BOOLEAN), read: true,
+          description: "List accessible accounts with balances, currencies, capabilities, and family_managed flags. For financial analysis, prefer get_financial_overview or get_report_accounts."),
         definition("get_account", { account_id: ID }, required: [ "account_id" ], read: true),
-        definition("search_transactions", transaction_search_properties, read: true),
-        definition("get_cash_flow", { month: DATE, include_sankey: BOOLEAN }, read: true),
+        definition("search_transactions", transaction_search_properties, read: true,
+          description: "Search and filter individual transactions with readable account, category, merchant, and tag names. Use for drilling into specific movements or anomalies; use reporting tools (get_monthly_summary, get_category_report, get_merchant_report, get_tag_report) for aggregated totals."),
+        definition("get_cash_flow", { month: DATE, include_sankey: BOOLEAN }, read: true,
+          description: "Monthly cash flow for a single month (defaults to current month): income, spending, net savings, savings_rate, cumulative daily comparison vs previous month, and optional Sankey breakdown."),
         definition("get_operation", { idempotency_key: KEY }, required: [ "idempotency_key" ], read: true),
         definition("get_account_sync", { account_id: ID }, required: [ "account_id" ], read: true),
         definition("create_account", ACCOUNT.merge(accountable_type: { type: "string", enum: Accountable::TYPES }, opening_balance_date: DATE), required: %w[name balance accountable_type]),

@@ -141,6 +141,25 @@ class IncomeStatement
     totals(transactions_scope: scope, date_range: period.date_range)
   end
 
+  def merchant_totals(period:)
+    MerchantTotals.new(
+      family,
+      transactions_scope: family.transactions.visible.in_period(period),
+      date_range: period.date_range,
+      included_account_ids: included_account_ids
+    ).call
+  end
+
+  def tag_totals(period:, tag_ids:)
+    TagTotals.new(
+      family,
+      transactions_scope: family.transactions.visible.in_period(period),
+      date_range: period.date_range,
+      tag_ids: tag_ids,
+      included_account_ids: included_account_ids
+    ).call
+  end
+
   # Accounts actually reflected in totals/totals_for: visible, not excluded
   # from reports, not tax-advantaged, and (when scoped to a user) included in
   # that user's finances. Callers offering an account filter (e.g. a

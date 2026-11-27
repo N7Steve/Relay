@@ -462,6 +462,7 @@
       "disposition": "implemented",
       "tools": [
         "get_cash_flow",
+        "get_financial_overview",
         "get_net_worth",
         "get_net_worth_series"
       ],
@@ -476,9 +477,12 @@
         "export_transactions",
         "get_activity_report",
         "get_category_report",
+        "get_merchant_report",
+        "get_monthly_summary",
         "get_report_accounts",
         "get_shared_expenses",
-        "get_spending_trend"
+        "get_spending_trend",
+        "get_tag_report"
       ],
       "evidence": [
         "test/controllers/api/v1/reporting_operations_test.rb"

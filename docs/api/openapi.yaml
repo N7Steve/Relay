@@ -4951,6 +4951,39 @@ components:
       - replacement_id
       - idempotency_key
       additionalProperties: false
+    DailyInputGetFinancialOverview:
+      type: object
+      properties:
+        months:
+          type: integer
+          minimum: 1
+          maximum: 12
+      required: []
+      additionalProperties: false
+    DailyInputGetMonthlySummary:
+      type: object
+      properties:
+        months:
+          type: integer
+          minimum: 1
+          maximum: 24
+        end_month:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        account_ids:
+          type: array
+          items:
+            type: string
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          maxItems: 100
+          uniqueItems: true
+        include_categories:
+          type: boolean
+        category_id:
+          type: string
+          pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      required: []
+      additionalProperties: false
     DailyInputGetReportAccounts:
       type: object
       properties:
@@ -5019,6 +5052,64 @@ components:
             pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
           maxItems: 100
           uniqueItems: true
+      required:
+      - start_date
+      - end_date
+      additionalProperties: false
+    DailyInputGetMerchantReport:
+      type: object
+      properties:
+        start_date:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        end_date:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        account_ids:
+          type: array
+          items:
+            type: string
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          maxItems: 100
+          uniqueItems: true
+        type:
+          type: string
+          enum:
+          - expense
+          - income
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+      required:
+      - start_date
+      - end_date
+      additionalProperties: false
+    DailyInputGetTagReport:
+      type: object
+      properties:
+        start_date:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        end_date:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        account_ids:
+          type: array
+          items:
+            type: string
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          maxItems: 100
+          uniqueItems: true
+        type:
+          type: string
+          enum:
+          - expense
+          - income
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
       required:
       - start_date
       - end_date
@@ -10332,8 +10423,9 @@ paths:
         required: true
   "/api/v1/actions/list_accounts":
     post:
-      summary: List accounts. Uses authenticated account permissions and Relay financial
-        rules.
+      summary: List accessible accounts with balances, currencies, capabilities, and
+        family_managed flags. For financial analysis, prefer get_financial_overview
+        or get_report_accounts.
       tags:
       - Daily operations
       security:
@@ -10444,8 +10536,10 @@ paths:
         required: true
   "/api/v1/actions/search_transactions":
     post:
-      summary: Search transactions. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Search and filter individual transactions with readable account, category,
+        merchant, and tag names. Use for drilling into specific movements or anomalies;
+        use reporting tools (get_monthly_summary, get_category_report, get_merchant_report,
+        get_tag_report) for aggregated totals.
       tags:
       - Daily operations
       security:
@@ -10500,8 +10594,9 @@ paths:
         required: true
   "/api/v1/actions/get_cash_flow":
     post:
-      summary: Get cash flow. Uses authenticated account permissions and Relay financial
-        rules.
+      summary: 'Monthly cash flow for a single month (defaults to current month):
+        income, spending, net savings, savings_rate, cumulative daily comparison vs
+        previous month, and optional Sankey breakdown.'
       tags:
       - Daily operations
       security:
@@ -12962,10 +13057,126 @@ paths:
                 arguments:
                   "$ref": "#/components/schemas/DailyInputReplaceTag"
         required: true
+  "/api/v1/actions/get_financial_overview":
+    post:
+      summary: 'Start here for financial analysis: single-call executive snapshot
+        with net worth, finance accounts, current month activity and comparison, recent
+        monthly trend (default 3 months), top expense categories, investments, shared
+        expenses, active budgets, goals, agenda summary, and recent insights.'
+      tags:
+      - Daily operations
+      security:
+      - apiKeyAuth: []
+      description: Shared operation with MCP. Money uses signed decimal strings. Writes
+        require a unique actor-scoped idempotency_key; reusing a key with changed
+        arguments returns 422. Account permissions are checked on every call. Family-wide
+        organization writes require administrator and complete account visibility.
+      parameters: []
+      responses:
+        '200':
+          description: operation result
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DailyOperationResult"
+        '401':
+          description: missing, expired or revoked credential
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: credential scope or account permission denied
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: resource unavailable to this actor
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: invalid input or idempotency conflict
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - arguments
+              additionalProperties: false
+              properties:
+                arguments:
+                  "$ref": "#/components/schemas/DailyInputGetFinancialOverview"
+        required: true
+  "/api/v1/actions/get_monthly_summary":
+    post:
+      summary: Multi-month time series (1 to 24 months, default 12) of income, expenses,
+        adjusted expenses, net and adjusted savings, savings rates, and managed investment
+        returns, plus completed-month averages. Optionally include top monthly categories
+        or track a specific category_id across months.
+      tags:
+      - Daily operations
+      security:
+      - apiKeyAuth: []
+      description: Shared operation with MCP. Money uses signed decimal strings. Writes
+        require a unique actor-scoped idempotency_key; reusing a key with changed
+        arguments returns 422. Account permissions are checked on every call. Family-wide
+        organization writes require administrator and complete account visibility.
+      parameters: []
+      responses:
+        '200':
+          description: operation result
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DailyOperationResult"
+        '401':
+          description: missing, expired or revoked credential
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: credential scope or account permission denied
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: resource unavailable to this actor
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: invalid input or idempotency conflict
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - arguments
+              additionalProperties: false
+              properties:
+                arguments:
+                  "$ref": "#/components/schemas/DailyInputGetMonthlySummary"
+        required: true
   "/api/v1/actions/get_report_accounts":
     post:
-      summary: Get report accounts. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: List accessible accounts with their financial_treatment, tax_treatment,
+        and eligibility flags for cash, finance, and investment reports.
       tags:
       - Daily operations
       security:
@@ -13020,8 +13231,9 @@ paths:
         required: true
   "/api/v1/actions/get_activity_report":
     post:
-      summary: Get activity report. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Income, expenses, net savings, adjusted expenses/savings (accounting
+        for shared expenses), and managed portfolio investment_return for a custom
+        period, compared against the immediately preceding period of equal length.
       tags:
       - Daily operations
       security:
@@ -13077,8 +13289,8 @@ paths:
   "/api/v1/actions/get_spending_trend":
     post:
       summary: Cumulative daily spending of a period (at most 92 days) against the
-        previous month. Uses authenticated account permissions and Relay financial
-        rules.
+        previous month at the same day count. Uses authenticated account permissions
+        and Relay financial rules.
       tags:
       - Daily operations
       security:
@@ -13133,8 +13345,9 @@ paths:
         required: true
   "/api/v1/actions/get_category_report":
     post:
-      summary: Get category report. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Net income and net expense totals grouped by top-level category (with
+        percentage weights, sorted descending) for a period in family currency. Use
+        this instead of summing search_transactions.
       tags:
       - Daily operations
       security:
@@ -13187,10 +13400,124 @@ paths:
                 arguments:
                   "$ref": "#/components/schemas/DailyInputGetCategoryReport"
         required: true
+  "/api/v1/actions/get_merchant_report":
+    post:
+      summary: Expense and income totals grouped by merchant (with transaction counts,
+        average ticket, and percentage weights, sorted descending) for a period in
+        family currency. Use this instead of paginating search_transactions.
+      tags:
+      - Daily operations
+      security:
+      - apiKeyAuth: []
+      description: Shared operation with MCP. Money uses signed decimal strings. Writes
+        require a unique actor-scoped idempotency_key; reusing a key with changed
+        arguments returns 422. Account permissions are checked on every call. Family-wide
+        organization writes require administrator and complete account visibility.
+      parameters: []
+      responses:
+        '200':
+          description: operation result
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DailyOperationResult"
+        '401':
+          description: missing, expired or revoked credential
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: credential scope or account permission denied
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: resource unavailable to this actor
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: invalid input or idempotency conflict
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - arguments
+              additionalProperties: false
+              properties:
+                arguments:
+                  "$ref": "#/components/schemas/DailyInputGetMerchantReport"
+        required: true
+  "/api/v1/actions/get_tag_report":
+    post:
+      summary: 'Expense and income totals grouped by personal tag (with transaction
+        counts and averages, sorted descending) for a period in family currency. Note:
+        multi-tag transactions count under each tag.'
+      tags:
+      - Daily operations
+      security:
+      - apiKeyAuth: []
+      description: Shared operation with MCP. Money uses signed decimal strings. Writes
+        require a unique actor-scoped idempotency_key; reusing a key with changed
+        arguments returns 422. Account permissions are checked on every call. Family-wide
+        organization writes require administrator and complete account visibility.
+      parameters: []
+      responses:
+        '200':
+          description: operation result
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DailyOperationResult"
+        '401':
+          description: missing, expired or revoked credential
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '403':
+          description: credential scope or account permission denied
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: resource unavailable to this actor
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '422':
+          description: invalid input or idempotency conflict
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - arguments
+              additionalProperties: false
+              properties:
+                arguments:
+                  "$ref": "#/components/schemas/DailyInputGetTagReport"
+        required: true
   "/api/v1/actions/get_shared_expenses":
     post:
-      summary: Get shared expenses. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Shared-expense balance/debt, adjusted expenses for the period, and
+        rent income computed by Relay's native SharedExpensesCalculator.
       tags:
       - Daily operations
       security:
@@ -13245,8 +13572,9 @@ paths:
         required: true
   "/api/v1/actions/get_investment_report":
     post:
-      summary: Get investment report. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: 'Investment statement for a period: portfolio value, cash, holdings,
+        unrealized gains, period return trend, and per-account managed portfolio returns
+        with tax treatment.'
       tags:
       - Daily operations
       security:
@@ -13301,8 +13629,8 @@ paths:
         required: true
   "/api/v1/actions/get_net_worth":
     post:
-      summary: Get net worth. Uses authenticated account permissions and Relay financial
-        rules.
+      summary: 'Current balance sheet snapshot in family currency: net worth, total
+        assets, and total liabilities across finance-eligible accounts.'
       tags:
       - Daily operations
       security:
@@ -13357,8 +13685,8 @@ paths:
         required: true
   "/api/v1/actions/get_net_worth_series":
     post:
-      summary: Get net worth series. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Historical daily net worth time series in family currency for up to
+        731 days.
       tags:
       - Daily operations
       security:
@@ -13413,8 +13741,8 @@ paths:
         required: true
   "/api/v1/actions/get_account_balance_series":
     post:
-      summary: Get account balance series. Uses authenticated account permissions
-        and Relay financial rules.
+      summary: 'Historical daily series for one account in its native currency (up
+        to 731 days): balance, cash_balance, holdings_balance, or gains.'
       tags:
       - Daily operations
       security:
@@ -13469,8 +13797,8 @@ paths:
         required: true
   "/api/v1/actions/export_transactions":
     post:
-      summary: Export transactions. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Paginated CSV export of filtered transactions in their original ledger
+        currency and signed amounts (positive = outflow, negative = inflow).
       tags:
       - Daily operations
       security:
@@ -13525,8 +13853,8 @@ paths:
         required: true
   "/api/v1/actions/get_account_forecast":
     post:
-      summary: Get account forecast. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Projected future balance and monthly savings for a single account over
+        the selected horizon, incorporating history and scheduled Agenda payments.
       tags:
       - Daily operations
       security:
@@ -13581,8 +13909,8 @@ paths:
         required: true
   "/api/v1/actions/get_wealth_forecast":
     post:
-      summary: Get wealth forecast. Uses authenticated account permissions and Relay
-        financial rules.
+      summary: Projected future net worth and monthly savings across finance accounts
+        over the selected horizon, optionally including scheduled Agenda payments.
       tags:
       - Daily operations
       security:

@@ -174,12 +174,12 @@ modelos, SQL o métodos.
 | Duplicados y conversión | `merge_duplicate`, `dismiss_duplicate`, `convert_transaction_to_trade` |
 | Transferencias | `create_transfer`, `update_transfer`, `match_transfer`, `unlink_transfer`, `delete_transfer` |
 | Organización | `list/create/update/delete` de categorías, comercios y etiquetas; `merge_categories`, `merge_merchants`, `merge_tags`, `replace_category`, `replace_tag` |
-| Informes y planificación | 11 consultas financieras y 39 operaciones de presupuestos, Agenda y Goals; [contrato y límites](reporting-planning.md) |
+| Informes y planificación | 16 consultas financieras y 39 operaciones de presupuestos, Agenda y Goals; [contrato y límites](reporting-planning.md) |
 | Inversión y procesos | 24 operaciones de inversión y 54 de reglas, importaciones, archivos y backups; [contrato y límites](investment-processes.md) |
 | Integraciones y administración | 60 operaciones de perfil, familia, seguridad, banco, Drive, acceso externo y trabajos; [autoridad y presencia humana](integrations-administration.md) |
 | Cierre de cobertura | 8 consultas/operaciones adicionales de contexto, movimientos, transferencias, valores locales e insights; [auditoría y release](mcp-release.md) |
 
-El catálogo de dominio contiene 244 herramientas. El transporte MCP añade
+El catálogo de dominio contiene 249 herramientas. El transporte MCP añade
 `get_pending_changes` para seguimiento, sin ruta REST de aprobación.
 Los informes reutilizan los
 motores financieros de la web; la planificación conserva propiedad, permisos,

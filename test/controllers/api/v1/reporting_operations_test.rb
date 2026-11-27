@@ -129,6 +129,109 @@ class Api::V1::ReportingOperationsTest < ActionDispatch::IntegrationTest
     assert response.parsed_body.key?("portfolio_value")
   end
 
+  test "monthly summary returns multi-month series, averages, and category tracking" do
+    user = users(:empty)
+    @key.update!(user: user)
+    account = user.family.accounts.create!(name: "Checking", balance: 0, currency: "USD", accountable: Depository.new)
+    groceries = user.family.categories.create!(name: "Groceries")
+
+    travel_to Date.new(2026, 3, 15) do
+      account.entries.create!(name: "Jan salary", date: Date.new(2026, 1, 5), amount: -1000, currency: "USD", entryable: Transaction.new)
+      account.entries.create!(name: "Jan food", date: Date.new(2026, 1, 10), amount: 200, currency: "USD", entryable: Transaction.new(category: groceries))
+      account.entries.create!(name: "Feb salary", date: Date.new(2026, 2, 5), amount: -1200, currency: "USD", entryable: Transaction.new)
+      account.entries.create!(name: "Feb food", date: Date.new(2026, 2, 10), amount: 400, currency: "USD", entryable: Transaction.new(category: groceries))
+      account.entries.create!(name: "Mar food", date: Date.new(2026, 3, 10), amount: 150, currency: "USD", entryable: Transaction.new(category: groceries))
+
+      invoke("get_monthly_summary", months: 3, include_categories: true, category_id: groceries.id)
+      assert_response :success, response.body
+      body = response.parsed_body
+      assert_equal %w[2026-01-01 2026-02-01 2026-03-01], body.fetch("months").map { |row| row.fetch("month") }
+      assert_equal [ false, false, true ], body.fetch("months").map { |row| row.fetch("partial") }
+      assert_equal %w[200.0 400.0 150.0], body.fetch("months").map { |row| row.fetch("category_expense") }
+      assert_equal "Groceries", body.dig("category", "name")
+      assert_equal 2, body.dig("averages", "months_counted")
+      assert_equal true, body.dig("averages", "excludes_partial_current_month")
+      assert_equal "1100.0", body.dig("averages", "income")
+      assert_equal "300.0", body.dig("averages", "expenses")
+
+      invoke("get_monthly_summary", end_month: "2026-03-10")
+      assert_response :unprocessable_entity
+      invoke("get_monthly_summary", end_month: "2026-04-01")
+      assert_response :unprocessable_entity
+    end
+  end
+
+  test "merchant and tag reports aggregate in family currency and respect permissions and FX" do
+    user = users(:empty)
+    @key.update!(user: user)
+    account = user.family.accounts.create!(name: "Card", balance: 0, currency: "USD", accountable: Depository.new)
+    alpha = user.family.merchants.create!(name: "Alpha Market")
+    beta = user.family.merchants.create!(name: "Beta Cafe")
+    travel_tag = user.family.tags.create!(name: "Trip", user: user)
+    other_user = user.family.users.create!(email: "other@example.com", password: "Password123!", role: "member", first_name: "Other", last_name: "User")
+    private_tag = user.family.tags.create!(name: "Private", user: other_user)
+
+    tx1 = Transaction.new(merchant: alpha)
+    tx1.tags << travel_tag
+    tx1.tags << private_tag
+    account.entries.create!(name: "Purchase 1", date: Date.new(2026, 3, 5), amount: 80, currency: "USD", entryable: tx1)
+    account.entries.create!(name: "Purchase 2", date: Date.new(2026, 3, 6), amount: 40, currency: "USD", entryable: Transaction.new(merchant: alpha))
+    account.entries.create!(name: "Coffee", date: Date.new(2026, 3, 7), amount: 30, currency: "USD", entryable: Transaction.new(merchant: beta))
+    account.entries.create!(name: "Salary", date: Date.new(2026, 3, 8), amount: -500, currency: "USD", entryable: Transaction.new(merchant: beta))
+
+    invoke("get_merchant_report", start_date: "2026-03-01", end_date: "2026-03-31", type: "expense", limit: 1)
+    assert_response :success, response.body
+    body = response.parsed_body
+    assert_equal "150.0", body.fetch("total_expenses")
+    assert_equal true, body.fetch("expenses_truncated")
+    assert_equal 1, body.fetch("expenses").length
+    assert_equal "Alpha Market", body.fetch("expenses").first.fetch("name")
+    assert_equal "120.0", body.fetch("expenses").first.fetch("amount")
+    assert_equal 2, body.fetch("expenses").first.fetch("transactions_count")
+    assert_equal "60.0", body.fetch("expenses").first.fetch("average")
+    assert_equal 80.0, body.fetch("expenses").first.fetch("weight")
+    assert_empty body.fetch("income")
+
+    invoke("get_tag_report", start_date: "2026-03-01", end_date: "2026-03-31")
+    assert_response :success, response.body
+    tag_body = response.parsed_body
+    assert_equal [ "Trip" ], tag_body.fetch("expenses").map { |row| row.fetch("name") }
+    assert_equal "80.0", tag_body.fetch("expenses").first.fetch("amount")
+    assert tag_body.fetch("note").present?
+
+    ExchangeRate.delete_all
+    account.entries.create!(name: "FX missing", date: Date.new(2026, 3, 9), amount: 15, currency: "EUR", entryable: Transaction.new(merchant: alpha))
+    invoke("get_merchant_report", start_date: "2026-03-01", end_date: "2026-03-31")
+    assert_response :unprocessable_entity
+    assert_equal "missing_conversion", response.parsed_body.fetch("code")
+  end
+
+  test "financial overview returns unified snapshot and search_transactions includes readable names" do
+    account = accounts(:depository)
+    category = @user.family.categories.create!(name: "Dining")
+    merchant = @user.family.merchants.create!(name: "Bistro")
+    tag = @user.family.tags.create!(name: "Weekend", user: @user)
+    tx = Transaction.new(category: category, merchant: merchant)
+    tx.tags << tag
+    account.entries.create!(name: "Dinner out", date: Date.current, amount: 45, currency: "USD", entryable: tx)
+
+    invoke("get_financial_overview", months: 2)
+    assert_response :success, response.body
+    overview = response.parsed_body
+    %w[as_of currency net_worth accounts current_month recent_months top_expense_categories shared_expenses budgets goals agenda recent_insights freshness].each do |key|
+      assert overview.key?(key), "missing key #{key}"
+    end
+    assert_equal 2, overview.fetch("recent_months").length
+
+    invoke("search_transactions", search: "Dinner out")
+    assert_response :success, response.body
+    row = response.parsed_body.fetch("data").first
+    assert_equal account.name, row.fetch("account_name")
+    assert_equal "Dining", row.dig("transaction", "category_name")
+    assert_equal "Bistro", row.dig("transaction", "merchant_name")
+    assert_equal [ "Weekend" ], row.dig("transaction", "tag_names")
+  end
+
   private
     def invoke(name, args)
       post "/api/v1/actions/#{name}", params: { arguments: args }, headers: { "X-Api-Key" => @key.display_key }, as: :json

@@ -86,7 +86,7 @@ class Api::DailyOperations
       scope = scope.where(transactions: { field => args[field] }) if args.key?(field)
     end
     scope = scope.where(entryable_id: Tagging.where(tag_id: args["tag_ids"], taggable_type: "Transaction").select(:taggable_id)) if args["tag_ids"]
-    paginate(scope.order(date: :desc, id: :desc).includes(:entryable), args) { |entry| entry_json(entry) }
+    paginate(scope.order(date: :desc, id: :desc).includes(:account, entryable: [ :category, :merchant, :tags ]), args) { |entry| entry_json(entry) }
   end
 
   def get_cash_flow(args)
@@ -592,10 +592,17 @@ class Api::DailyOperations
     end
 
     def entry_json(entry)
+      tx = entry.transaction
+      tags = tx.tags.to_a
       entry.as_json(only: %w[id name date currency notes excluded import_protected parent_entry_id]).merge(
         "transaction_id" => entry.entryable_id, "account_id" => entry.account_id,
+        "account_name" => entry.account&.name,
         "amount" => entry.amount.to_s("F"), "protection" => entry.protection_reason,
-        "transaction" => entry.transaction.as_json(only: %w[category_id merchant_id kind forecast_behavior shared_expense]).merge("tag_ids" => entry.transaction.tag_ids))
+        "transaction" => tx.as_json(only: %w[category_id merchant_id kind forecast_behavior shared_expense]).merge(
+          "category_name" => tx.category&.name,
+          "merchant_name" => tx.merchant&.name,
+          "tag_ids" => tags.map(&:id),
+          "tag_names" => tags.map(&:name)))
     end
 
     def transfer_json(transfer)

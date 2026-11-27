@@ -10,10 +10,14 @@ permiso efectivo del recurso y `idempotency_key`, compartida entre API y MCP.
 
 | Herramienta | Motor nativo y resultado |
 | --- | --- |
+| `get_financial_overview` | Resumen ejecutivo unificado en una sola consulta: patrimonio, cuentas financieras, actividad del mes actual y comparativa, tendencia de los últimos meses (por defecto 3), top categorías, inversiones, gastos compartidos, presupuestos activos, objetivos, agenda e insights recientes |
+| `get_monthly_summary` | Serie mensual multi-mes (1–24 meses, por defecto 12) con ingresos, gastos, gastos ajustados, ahorro neto/ajustado, tasas de ahorro, rentabilidad gestionada y promedios de meses cerrados; admite `include_categories` y seguimiento por `category_id` |
 | `get_report_accounts` | Cuentas accesibles, participación financiera, fiscalidad y elegibilidad para informes de efectivo e inversión; paginado |
 | `get_activity_report` | `Reports::Activity`, comparación con el período anterior de igual duración, ahorro neto y ajustado y gasto compartido; la rentabilidad de carteras gestionadas va aparte en `investment_return` y no suma ingresos |
 | `get_spending_trend` | `IncomeStatement#daily_expense_series`: gasto acumulado diario del período (máximo 92 días) frente al mes anterior, con el total comparable al mismo número de días |
 | `get_category_report` | `IncomeStatement.net_category_totals`, categorías netas, totales y pesos |
+| `get_merchant_report` | `IncomeStatement#merchant_totals`: totales de gasto e ingreso agrupados por comercio (número de movimientos, ticket medio y peso), ordenados de mayor a menor |
+| `get_tag_report` | `IncomeStatement#tag_totals`: totales de gasto e ingreso agrupados por etiqueta personal del actor (número de movimientos y ticket medio); los movimientos con varias etiquetas cuentan en cada una |
 | `get_shared_expenses` | `SharedExpensesCalculator`: deuda/compensaciones acumuladas, gasto ajustado del período e ingresos de rentas |
 | `get_investment_report` | `InvestmentStatement`: aportaciones, retiradas, dividendos, intereses, efectivo, posiciones, ganancias y rentabilidad, con desglose gestionado y fiscalidad |
 | `get_net_worth` | `BalanceSheet` con el actor autenticado; activos, pasivos y patrimonio |
