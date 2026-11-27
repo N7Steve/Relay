@@ -255,6 +255,164 @@ RSpec.configure do |config|
               pagination: { '$ref' => '#/components/schemas/Pagination' }
             }
           },
+          LoanSummary: {
+            type: :object,
+            required: %w[currency current_debt original_principal repaid_ratio principal_repaid interest_paid current_rate
+                         rate_type structured_rate interest_tracking payment next_payment_date next_payment_number
+                         term_months remaining_months start_date payoff_date total_cost],
+            properties: {
+              currency: { type: :string },
+              current_debt: { '$ref' => '#/components/schemas/Money' },
+              original_principal: { '$ref' => '#/components/schemas/Money' },
+              repaid_ratio: { type: :number, nullable: true, description: 'Share of the original principal repaid (0-1), from the account balance' },
+              principal_repaid: { '$ref' => '#/components/schemas/Money', nullable: true, description: 'Only for loans that post their interest' },
+              interest_paid: { '$ref' => '#/components/schemas/Money', nullable: true, description: 'Interest posted so far; only for loans that post their interest' },
+              current_rate: { type: :string, nullable: true, description: 'Annual rate in force, in percent, as a decimal string' },
+              rate_type: { type: :string, nullable: true },
+              structured_rate: { type: :boolean, description: 'Whether the rate comes from rate periods and revisions' },
+              interest_tracking: { type: :boolean, description: 'Whether the loan posts its interest (closed contract)' },
+              payment: { '$ref' => '#/components/schemas/Money', nullable: true, description: 'Next scheduled instalment' },
+              next_payment_date: { type: :string, format: :date, nullable: true },
+              next_payment_number: { type: :integer, nullable: true },
+              term_months: { type: :integer, nullable: true },
+              remaining_months: { type: :integer, nullable: true },
+              start_date: { type: :string, format: :date, nullable: true },
+              payoff_date: { type: :string, format: :date, nullable: true, description: 'Date of the last contractual payment' },
+              total_cost: { '$ref' => '#/components/schemas/Money', nullable: true, description: 'Principal, interest and insurance over the whole term' }
+            }
+          },
+          LoanListItem: {
+            type: :object,
+            required: %w[account summary],
+            properties: {
+              account: { '$ref' => '#/components/schemas/AccountDetail' },
+              summary: { '$ref' => '#/components/schemas/LoanSummary' }
+            }
+          },
+          LoanCollection: {
+            type: :object,
+            required: %w[as_of loans],
+            properties: {
+              as_of: { type: :string, format: :date },
+              loans: { type: :array, items: { '$ref' => '#/components/schemas/LoanListItem' } }
+            }
+          },
+          LoanRateRevision: {
+            type: :object,
+            required: %w[effective_on rate rate_kind status bonus_points composition],
+            properties: {
+              effective_on: { type: :string, format: :date },
+              rate: { type: :string, description: 'Resulting annual rate in percent' },
+              rate_kind: { type: :string, enum: %w[fixed variable] },
+              status: { type: :string, enum: %w[projected pending calculated confirmed] },
+              base_rate: { type: :string, nullable: true, description: 'Fixed rate before bonuses' },
+              reference_index: { type: :string, nullable: true },
+              reference_index_name: { type: :string, nullable: true },
+              index_month: { type: :string, format: :date, nullable: true, description: 'Month the index value comes from' },
+              index_value: { type: :string, nullable: true },
+              spread: { type: :string, nullable: true },
+              bonus_points: { type: :string },
+              composition: { type: :string, description: 'How the rate is built, localized' },
+              new_payment: { '$ref' => '#/components/schemas/Money', nullable: true, description: 'Next revision only: first instalment at the new rate' },
+              new_payment_date: { type: :string, format: :date, nullable: true, description: 'Next revision only' }
+            }
+          },
+          LoanRatePeriod: {
+            type: :object,
+            required: %w[starts_on rate_kind review_interval_months applies_bonuses],
+            properties: {
+              starts_on: { type: :string, format: :date },
+              rate_kind: { type: :string, enum: %w[fixed variable] },
+              base_rate: { type: :string, nullable: true },
+              reference_index: { type: :string, nullable: true },
+              reference_index_name: { type: :string, nullable: true },
+              spread: { type: :string, nullable: true },
+              floor_rate: { type: :string, nullable: true },
+              review_interval_months: { type: :integer },
+              applies_bonuses: { type: :boolean },
+              lender_name: { type: :string, nullable: true }
+            }
+          },
+          LoanRateBonus: {
+            type: :object,
+            required: %w[name kind points active annual_cost],
+            properties: {
+              name: { type: :string },
+              kind: { type: :string },
+              points: { type: :string },
+              active: { type: :boolean },
+              annual_cost: { '$ref' => '#/components/schemas/Money', nullable: true }
+            }
+          },
+          LoanSchedulePayment: {
+            type: :object,
+            required: %w[number date payment principal interest prepayment ending_balance past],
+            properties: {
+              number: { type: :integer },
+              date: { type: :string, format: :date },
+              payment: { type: :string, description: 'Decimal amount in the schedule currency' },
+              principal: { type: :string },
+              interest: { type: :string },
+              prepayment: { type: :string },
+              ending_balance: { type: :string },
+              past: { type: :boolean, description: 'Due on or before as_of' }
+            }
+          },
+          LoanDetail: {
+            type: :object,
+            required: %w[as_of account summary current_instalment rate schedule],
+            properties: {
+              as_of: { type: :string, format: :date },
+              account: { '$ref' => '#/components/schemas/AccountDetail' },
+              summary: { '$ref' => '#/components/schemas/LoanSummary' },
+              current_instalment: {
+                type: :object,
+                nullable: true,
+                required: %w[number date total principal interest insurance ratios],
+                properties: {
+                  number: { type: :integer },
+                  date: { type: :string, format: :date },
+                  total: { '$ref' => '#/components/schemas/Money' },
+                  principal: { '$ref' => '#/components/schemas/Money' },
+                  interest: { '$ref' => '#/components/schemas/Money' },
+                  insurance: { '$ref' => '#/components/schemas/Money' },
+                  ratios: {
+                    type: :object,
+                    required: %w[principal interest insurance],
+                    properties: { principal: { type: :number }, interest: { type: :number }, insurance: { type: :number } }
+                  }
+                }
+              },
+              rate: {
+                type: :object,
+                required: %w[structured current_rate current next_revision revisions periods bonuses],
+                properties: {
+                  structured: { type: :boolean },
+                  current_rate: { type: :string, nullable: true },
+                  current: { '$ref' => '#/components/schemas/LoanRateRevision', nullable: true },
+                  next_revision: { '$ref' => '#/components/schemas/LoanRateRevision', nullable: true },
+                  revisions: { type: :array, items: { '$ref' => '#/components/schemas/LoanRateRevision' } },
+                  periods: { type: :array, items: { '$ref' => '#/components/schemas/LoanRatePeriod' } },
+                  bonuses: { type: :array, items: { '$ref' => '#/components/schemas/LoanRateBonus' } }
+                }
+              },
+              schedule: {
+                type: :object,
+                nullable: true,
+                required: %w[currency re_amortising opening_payment total_interest total_paid payoff_date projected_payoff_date payments],
+                properties: {
+                  currency: { type: :string },
+                  re_amortising: { type: :boolean },
+                  opening_payment: { '$ref' => '#/components/schemas/Money' },
+                  total_interest: { '$ref' => '#/components/schemas/Money' },
+                  total_paid: { '$ref' => '#/components/schemas/Money' },
+                  payoff_date: { type: :string, format: :date, nullable: true },
+                  projected_payoff_date: { type: :string, format: :date, nullable: true, description: 'From the current balance at the contractual instalments' },
+                  payments: { type: :array, items: { '$ref' => '#/components/schemas/LoanSchedulePayment' } }
+                }
+              }
+            }
+          },
           FamilySettings: {
             type: :object,
             required: %w[id currency locale date_format month_start_day moniker default_account_sharing custom_enabled_currencies enabled_currencies created_at updated_at],

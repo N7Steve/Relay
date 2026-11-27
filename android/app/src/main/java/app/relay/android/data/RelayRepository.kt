@@ -204,6 +204,12 @@ class RelayRepository(
         }.flatMap { it.await() }.distinctBy { it.id }.sortedWith(compareByDescending<Transaction> { it.date }.thenBy { it.name })
     }
 
+    /** Loan accounts the user can read, each with its headline figures. */
+    suspend fun loans(): LoansPage = api.json.decodeFromString(authorized("/loans"))
+
+    /** One loan: instalment split, rate revisions and the amortization schedule. */
+    suspend fun loan(accountId: String): LoanDetail = api.json.decodeFromString(authorized("/loans/$accountId"))
+
     suspend fun setDefaultAccount(accountId: String?) {
         save { it.copy(preferences = it.preferences.copy(defaultAccountId = accountId)) }
     }

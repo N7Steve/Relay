@@ -160,6 +160,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val accountMovements = Feed(viewModelScope, { page, query, account -> repository.transactions(page, query, account) }, ::describe)
     val recent = Feed(viewModelScope, { page, _, _ -> repository.transactions(page, perPage = 6) }, ::describe)
     val reports = Reports(viewModelScope, repository, ::describe)
+    val loans = Loans(viewModelScope, repository, ::describe)
 
     init {
         viewModelScope.launch {
@@ -344,7 +345,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         summaryState.value = SummaryState()
         editState.value = TransactionEditState()
         createState.value = TransactionCreateState()
-        movements.clear(); accountMovements.clear(); recent.clear(); reports.clear()
+        movements.clear(); accountMovements.clear(); recent.clear(); reports.clear(); loans.clear()
     }
 
     internal fun describe(error: Throwable): String = when (error) {

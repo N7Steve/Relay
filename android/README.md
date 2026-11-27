@@ -24,6 +24,14 @@ y `am.sure.mobile`).
 - **Informe:** ahorro, ingresos y gastos del mes con la rentabilidad de
   inversiones aparte, tendencia de seis meses, gasto acumulado frente al mes
   anterior y gasto o ingreso por categoría con subcategorías desplegables.
+- **Préstamos:** pestaña que aparece solo si hay alguna cuenta de préstamo; con
+  un único préstamo abre directamente su detalle. Muestra la deuda pendiente y
+  el porcentaje amortizado, la cuota actual dividida en capital, intereses y
+  seguro, el tipo de interés y su composición, la próxima revisión con el tipo y
+  la cuota estimados, bonificaciones, revisiones, condiciones y el cuadro de
+  amortización (cuotas pendientes y pagadas). Solo lectura; todas las cifras las
+  calcula el servidor (`GET /api/v1/loans` y `/api/v1/loans/<id>`). Se puede
+  actualizar deslizando hacia abajo.
 - **Cuenta:** logo bancario o personalizado, saldo y movimientos de una cuenta.
 - **Ajustes:** servidor, versión, búsqueda de actualizaciones, cierre de sesión
   (revoca los tokens en el servidor) y olvido local.

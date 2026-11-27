@@ -32,6 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.House
 import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Settings
@@ -55,6 +56,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.relay.android.data.DiskState
@@ -64,6 +66,8 @@ enum class Tab(val label: String, val icon: ImageVector) {
     Home("Resumen", Icons.Outlined.Dashboard),
     Movements("Movimientos", Icons.Outlined.ReceiptLong),
     Reports("Informe", Icons.Outlined.Insights),
+    /** Shown only while the user has a loan account. */
+    Loans("Préstamos", Icons.Outlined.House),
     Settings("Ajustes", Icons.Outlined.Settings),
 }
 
@@ -101,7 +105,11 @@ enum class Tab(val label: String, val icon: ImageVector) {
     val accounts = session.summary?.accounts.orEmpty()
     val canCreate = remember(accounts) { creatableAccounts(accounts).isNotEmpty() }
     val account = accountId?.let { id -> session.summary?.accounts?.find { it.id == id } }
+    // The loans section appears once the cached summary lists a loan; net worth stays the server's figure.
+    val hasLoans = remember(accounts) { accounts.any { it.accountType == "loan" && it.status !in setOf("disabled", "pending_deletion") } }
+    val tabs = remember(hasLoans) { Tab.entries.filter { it != Tab.Loans || hasLoans } }
     LaunchedEffect(Unit) { vm.onForeground() }
+    LaunchedEffect(tabs) { if (tab !in tabs) tab = Tab.Home }
 
     BackHandler(enabled = account != null) { accountId = null }
     BackHandler(enabled = account == null && tab != Tab.Home) { tab = Tab.Home }
@@ -127,12 +135,13 @@ enum class Tab(val label: String, val icon: ImageVector) {
                         key == Tab.Movements.name -> MovementsScreen(vm.movements, session.summary?.accounts, session.preferences.defaultAccountId,
                             onDefault = vm::setDefaultAccount) { detail = it }
                         key == Tab.Reports.name -> ReportsScreen(vm, session) { detail = it }
+                        key == Tab.Loans.name -> LoansScreen(vm)
                         key == Tab.Settings.name -> SettingsScreen(vm, session)
                         else -> HomeScreen(vm, session, onAccount = { accountId = it.id }, onSeeAll = { tab = Tab.Movements }, onTransaction = { detail = it })
                     }
                 }
             }
-            if (account == null) BottomBar(tab) { tab = it }
+            if (account == null) BottomBar(tabs, tab) { tab = it }
         }
 
         // New movement: from the summary, the movements list (its selected account) or a day-to-day account.
@@ -175,16 +184,18 @@ enum class Tab(val label: String, val icon: ImageVector) {
     ) { Icon(Icons.Outlined.Add, "Nuevo movimiento", tint = Color.White, modifier = Modifier.size(28.dp)) }
 }
 
-@Composable private fun BottomBar(selected: Tab, onSelect: (Tab) -> Unit) {
+@Composable private fun BottomBar(tabs: List<Tab>, selected: Tab, onSelect: (Tab) -> Unit) {
     val shape = RoundedCornerShape(24.dp)
     Row(
         Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp)
             .clip(shape).background(Relay.surface.copy(alpha = 0.94f)).border(1.dp, Relay.border, shape).padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Tab.entries.forEach { tab ->
+        // A fifth destination narrows the others, so the selected one widens a little more to keep its label.
+        val activeWeight = if (tabs.size > 4) 2.6f else 2.2f
+        tabs.forEach { tab ->
             val active = tab == selected
-            val weight by animateFloatAsState(if (active) 2.2f else 1f, tween(Relay.BASE, easing = Relay.easeOut), label = "tab")
+            val weight by animateFloatAsState(if (active) activeWeight else 1f, tween(Relay.BASE, easing = Relay.easeOut), label = "tab")
             val source = remember { MutableInteractionSource() }
             Row(
                 Modifier.weight(weight).height(48.dp).clip(RoundedCornerShape(18.dp))
@@ -195,7 +206,7 @@ enum class Tab(val label: String, val icon: ImageVector) {
                 Icon(tab.icon, tab.label, tint = if (active) Color.White else Relay.muted, modifier = Modifier.size(22.dp))
                 if (active) {
                     Spacer(Modifier.size(8.dp))
-                    Text(tab.label, color = Color.White, style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                    Text(tab.label, color = Color.White, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }

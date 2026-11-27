@@ -388,6 +388,69 @@ class RelayRepositoryTest {
         assertThrows(IllegalArgumentException::class.java) { serverUrl("https://user:pass@relay.example.com") }
     }
 
+    @Test fun loansListAndDetailReadTheServerFigures() = runBlocking {
+        signIn()
+        val account = """{"id":"loan-1","name":"Hipoteca","balance_cents":15366510,"currency":"EUR","classification":"liability",
+            "account_type":"loan","subtype":"mortgage","status":"active","institution_name":"Bankinter","logo_url":null}"""
+        val money = { amount: String -> """{"amount":"$amount","currency":"EUR","formatted":"€$amount"}""" }
+        val summary = """{"currency":"EUR","current_debt":${money("153665.1")},"original_principal":${money("157500.0")},
+            "repaid_ratio":0.0243,"principal_repaid":${money("3834.9")},"interest_paid":${money("2144.26")},"current_rate":"1.5",
+            "rate_type":"variable","structured_rate":true,"interest_tracking":true,"payment":${money("543.56")},
+            "next_payment_date":"2026-12-12","next_payment_number":12,"term_months":360,"remaining_months":349,
+            "start_date":"2025-12-12","payoff_date":"2055-12-12","total_cost":null}"""
+        val revision = """{"effective_on":"2026-12-12","rate":"3.839","rate_kind":"variable","status":"projected","base_rate":null,
+            "reference_index":"euribor_12m","reference_index_name":"12-month Euribor","index_month":"2026-10-01","index_value":"3.239",
+            "spread":"1.8","bonus_points":"1.2","composition":"12-month Euribor 3.239% (October 2026) + spread 1.8% − bonuses 1.2%",
+            "new_payment":${money("718.4")},"new_payment_date":"2027-01-12"}"""
+        route(
+            "/api/v1/loans" to json("""{"as_of":"2026-11-27","loans":[{"account":$account,"summary":$summary}]}"""),
+            "/api/v1/loans/loan-1" to json("""{"as_of":"2026-11-27","account":$account,"summary":$summary,
+                "current_instalment":{"number":12,"date":"2026-12-12","total":${money("543.56")},"principal":${money("348.1")},
+                  "interest":${money("195.46")},"insurance":${money("0.0")},"ratios":{"principal":0.6404,"interest":0.3596,"insurance":0.0}},
+                "rate":{"structured":true,"current_rate":"1.5",
+                  "current":{"effective_on":"2025-12-12","rate":"1.5","rate_kind":"fixed","status":"calculated","base_rate":"2.7",
+                    "reference_index":null,"reference_index_name":null,"index_month":null,"index_value":null,"spread":null,
+                    "bonus_points":"1.2","composition":"Fixed 2.7% − bonuses 1.2%"},
+                  "next_revision":$revision,
+                  "revisions":[{"effective_on":"2025-12-12","rate":"1.5","rate_kind":"fixed","status":"calculated","base_rate":"2.7",
+                    "bonus_points":"1.2","composition":"Fixed 2.7% − bonuses 1.2%"},$revision],
+                  "periods":[{"starts_on":"2025-12-12","rate_kind":"fixed","base_rate":"2.7","reference_index":null,"spread":null,
+                    "floor_rate":"0.0","review_interval_months":12,"applies_bonuses":true,"lender_name":null}],
+                  "bonuses":[{"name":"Seguro de vida","kind":"life_insurance","points":"0.6","active":true,"annual_cost":${money("176.13")}},
+                    {"name":"Seguro de hogar","kind":"home_insurance","points":"0.3","active":false,"annual_cost":null}]},
+                "schedule":{"currency":"EUR","re_amortising":true,"opening_payment":${money("543.56")},"total_interest":${money("98000.0")},
+                  "total_paid":${money("255500.0")},"payoff_date":"2055-12-12","projected_payoff_date":"2055-12-12","payments":[
+                  {"number":11,"date":"2026-11-12","payment":"543.56","principal":"344.0","interest":"199.56","prepayment":"0.0","ending_balance":"153665.1","past":true},
+                  {"number":12,"date":"2026-12-12","payment":"543.56","principal":"348.1","interest":"195.46","prepayment":"0.0","ending_balance":"153317.0","past":false},
+                  {"number":13,"date":"2027-01-12","payment":"718.4","principal":"220.0","interest":"498.4","prepayment":"0.0","ending_balance":"153097.0","past":false}]}}"""),
+        )
+
+        val loans = repo.loans().loans
+        assertEquals("Hipoteca", loans.single().account.name)
+        assertEquals("loan", loans.single().account.accountType)
+        assertEquals(BigDecimal("153665.1"), loans.single().summary.currentDebt.decimal)
+        assertEquals(0.0243, loans.single().summary.repaidRatio!!, 1e-9)
+        assertNull(loans.single().summary.totalCost)
+
+        val detail = repo.loan("loan-1")
+        assertEquals("/api/v1/loans/loan-1", List(2) { server.takeRequest() }.last().path)
+        assertEquals(BigDecimal("2144.26"), detail.summary.interestPaid?.decimal)
+        assertEquals(12, detail.currentInstalment?.number)
+        assertEquals(0.6404, detail.currentInstalment!!.ratios.principal, 1e-9)
+        val upcoming = detail.rate.nextRevision!!
+        assertEquals("Euríbor 12M 3,239 % (oct 2026) + diferencial 1,80 % − bonificaciones 1,20 %", plainSpaces(upcoming.compositionText()))
+        assertEquals("Fijo 2,70 % − bonificaciones 1,20 %", plainSpaces(detail.rate.current!!.compositionText()))
+        assertEquals(BigDecimal("718.4"), upcoming.newPayment?.decimal)
+        assertEquals("Prevista", upcoming.statusLabel)
+        assertEquals(listOf("calculated", "projected"), detail.rate.revisions.map { it.status })
+        assertFalse(detail.rate.bonuses.last().active)
+        val schedule = detail.schedule!!
+        assertEquals(listOf(12, 13), schedule.upcoming.map { it.number })
+        assertEquals(listOf(11), schedule.paid.map { it.number })
+    }
+
+    private fun plainSpaces(text: String) = text.replace(' ', ' ').replace(' ', ' ')
+
     @Test fun moneyIsFormattedFromMinorUnits() {
         val spain = Locale.forLanguageTag("es-ES")
         assertEquals("123.456,78 €", formatMoney(12345678, "EUR", spain).replace(' ', ' '))
