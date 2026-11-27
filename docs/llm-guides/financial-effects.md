@@ -35,6 +35,7 @@ familias, cuentas, fechas o monedas. El llamador debe mantener esos filtros.
 | Valoración | Ancla absoluta de valor/deuda | No es Transaction | Excluida |
 | Ajuste nativo de cartera gestionada | Diferencia firmada; los nuevos cierres conservan el total declarado | Excluido de ingresos/gastos y de pendiente de categorizar | Rendimiento de inversión, separado del residual de gastos |
 | Trade | Movimiento de efectivo y posiciones | Excluido de IncomeStatement::Totals | Excluido |
+| Intereses de préstamo (`loan_interest`, `Loan::InterestLedger`) | Aumenta la deuda del préstamo el día de cada cuota | Excluido: la cuota `loan_payment` ya es el gasto | Historial de la cuenta de préstamo |
 
 Los informes tienen filtros adicionales por estado de cuenta, tratamiento,
 participación personal, fiscalidad y actividad de inversión. Un scope de

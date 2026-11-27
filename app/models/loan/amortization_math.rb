@@ -46,6 +46,21 @@ class Loan
       ((balance * monthly_rate * growth) / (growth - 1)).round(currency_precision)
     end
 
+    # How many payments of `payment` clear `balance`, the first of them also
+    # covering `first_period_interest` already charged. The annuity formula
+    # solved for the term, rounded up: the last payment is the smaller one.
+    # Capped at Simulator::MAX_PERIODS for a payment that never clears it.
+    def payments_to_clear(balance:, payment:, monthly_rate:, first_period_interest:)
+      remaining = balance - (payment - first_period_interest)
+      return 1 if remaining <= 0
+      return (remaining / payment).ceil + 1 if monthly_rate.zero?
+
+      ratio = 1 - (monthly_rate * remaining / payment)
+      return Simulator::MAX_PERIODS if ratio <= 0
+
+      (-Math.log(ratio.to_f) / Math.log(1 + monthly_rate.to_f)).ceil + 1
+    end
+
     # One period's interest/principal split for a fixed payment against a given
     # balance.
     #

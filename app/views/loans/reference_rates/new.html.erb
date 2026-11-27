@@ -1,0 +1,21 @@
+<%= render DS::Dialog.new do |dialog| %>
+  <% dialog.with_header(title: t(".title")) %>
+  <% dialog.with_body do %>
+    <%= styled_form_with model: @reference_rate,
+          scope: :reference_rate,
+          url: loan_reference_rates_path(@account),
+          class: "space-y-4" do |form| %>
+      <% if @reference_rate.errors.any? %>
+        <%= render "shared/form_errors", model: @reference_rate %>
+      <% end %>
+
+      <p class="text-sm text-secondary"><%= t(".intro") %></p>
+
+      <%= form.select :index_key, ReferenceRate.index_options, { label: t(".index_key") } %>
+      <%= form.month_field :month, label: t(".month"), value: @reference_rate.month&.strftime("%Y-%m"), required: true %>
+      <%= form.number_field :value, label: t(".value"), step: 0.001, required: true %>
+
+      <%= form.submit t(".submit") %>
+    <% end %>
+  <% end %>
+<% end %>

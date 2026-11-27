@@ -1,0 +1,133 @@
+---
+es:
+  accounts:
+    show:
+      tabs:
+        scenarios: Escenarios
+  activerecord:
+    attributes:
+      loan/prepayment:
+        paid_on: Fecha
+        amount: Importe
+        mode: Destino
+        fee: Comisión
+    errors:
+      models:
+        loan/prepayment:
+          attributes:
+            paid_on:
+              before_origination: no puede ser anterior al inicio del préstamo
+              after_maturity: no puede ser posterior al vencimiento del préstamo
+  activemodel:
+    attributes:
+      loan/scenario:
+        index_shift: Variación del índice
+        change_kind: Nuevo tipo
+        change_on: Fecha del cambio
+        change_rate: Tipo fijo
+        change_spread: Diferencial
+        change_cost: Coste del cambio
+        prepayment_amount: Importe a amortizar
+        prepayment_on: Fecha de la amortización
+        prepayment_mode: Destino de la amortización
+        prepayment_fee: Comisión de la amortización
+    errors:
+      models:
+        loan/scenario:
+          attributes:
+            change_kind:
+              requires_structured_rate: necesita que el préstamo tenga tramos de tipo
+  loans:
+    rate_periods:
+      form:
+        applies_bonuses: Aplicar bonificaciones
+        applies_bonuses_hint: Desactívalo si el tipo de este tramo ya es el final (por ejemplo, la oferta de otro banco).
+    prepayments:
+      modes:
+        reduce_payment: Reducir cuota
+        reduce_term: Reducir plazo
+      transfer_name: Amortización anticipada %{account}
+      new:
+        title: Amortización anticipada
+        intro: Registra un pago extra y qué has pedido al banco que haga con él. La deuda y los intereses lo reflejan desde el día del pago; el cuadro y la cuota programada se recalculan con tu elección.
+        paid_on: Fecha del pago
+        amount: Importe
+        mode: Destino
+        mode_hint: Reducir plazo mantiene la cuota y termina antes (suele ahorrar más intereses). Reducir cuota mantiene la fecha de fin y baja la cuota.
+        fee: Comisión del banco
+        source_account: Pagado desde
+        source_account_none: Ya está en la cuenta del préstamo
+        source_account_hint: Si eliges una cuenta, Relay crea la transferencia (y la comisión) por ti. Si el pago ya aparece en la cuenta del préstamo, deja esta opción y se enlazará.
+        notes: Notas
+        submit: Registrar amortización
+      create:
+        success: Amortización registrada
+      destroy:
+        success: Amortización eliminada
+    tabs:
+      schedule:
+        prepayment: Amortización
+        description: Calculado desde el capital inicial, el tipo y el plazo, a partir del %{start_date}. Incluye las amortizaciones anticipadas registradas; otros pagos extra no.
+      prepayments:
+        title: Amortizaciones anticipadas
+        add: Registrar amortización
+        empty: No hay amortizaciones anticipadas registradas.
+        linked: Movimiento encontrado
+        missing: Sin movimiento
+        delete: Eliminar
+        delete_confirm_title: ¿Eliminar esta amortización?
+        delete_confirm_body: Se borra solo la elección de reducir cuota o plazo. El dinero movido sigue en las cuentas; elimina la transferencia aparte si también sobra.
+        columns:
+          date: Fecha
+          amount: Importe
+          mode: Destino
+          fee: Comisión
+          movement: Movimiento
+    scenarios:
+      show:
+        intro: Compara tu hipoteca tal como está con un cambio de condiciones (pasar a fijo, otro banco) o una amortización anticipada. Nada de lo que pruebes aquí se guarda.
+        index_basis: "Base: %{index} %{value} (%{month}), mantenido en el tiempo."
+        index_missing: Aún no hay valores del índice; las revisiones futuras usan el último tipo conocido.
+        index_shift: Variación del Euríbor (puntos)
+        index_shift_hint: Se suma al último valor publicado en todas las revisiones futuras, en ambos lados de la comparación.
+        change_title: Cambio de condiciones
+        change_kind: Nuevo tipo
+        change_none: Sin cambio
+        change_kinds:
+          fixed: Fijo
+          variable: Variable
+        change_on: Desde
+        change_rate: Tipo fijo final (%)
+        change_spread: Diferencial final (%)
+        change_cost: Coste del cambio (€)
+        change_hint: Pon el tipo o diferencial final que te ofrecen, ya bonificado, y los gastos totales (comisión de novación o subrogación, notaría, tasación).
+        keep_bonuses: Mantener mis bonificaciones
+        keep_bonuses_hint: Actívalo solo si el nuevo tipo se bonifica con los mismos productos.
+        prepayment_title: Amortización anticipada
+        prepayment_amount: Importe (€)
+        prepayment_on: Fecha
+        prepayment_mode: Destino
+        prepayment_fee: Comisión (€)
+        submit: Comparar
+        net_saving: Ahorro neto en intereses
+        payment_after_change: Cuota tras el cambio
+        months_saved: Meses menos
+        comparison: Comparación
+        rows:
+          next_payment: Próxima cuota
+          payment_after_change: Cuota tras el cambio o la próxima revisión
+          remaining_interest: Intereses pendientes
+          costs: Costes del cambio
+          total_cost: Total pendiente de pagar
+          payoff_date: Fin del préstamo
+        columns:
+          current: Actual
+          scenario: Escenario
+          index: Euríbor
+          current_payment: Cuota actual
+          current_interest: Intereses actuales
+          scenario_payment: Cuota escenario
+          scenario_cost: Diferencia total
+        sensitivity_title: Según el Euríbor
+        sensitivity_hint: La misma comparación con el Euríbor un punto por debajo, igual, uno y dos puntos por encima del último publicado. Una diferencia negativa significa que el escenario sale más barato.
+        shift: "%{shift} puntos"

@@ -91,6 +91,21 @@
     <% end %>
   <% end %>
 
+  <%# What the instalments paid so far actually did: the principal they
+      repaid and the interest they settled. Only a loan that posts its
+      interest knows the split; without it every instalment reads as
+      principal. %>
+  <% split = account.loan.repayment_split(as_of: today) %>
+  <% if split %>
+    <%= summary_card title: t(".principal_repaid") do %>
+      <%= format_money split[:principal] %>
+    <% end %>
+
+    <%= summary_card title: t(".interest_paid") do %>
+      <%= format_money split[:interest] %>
+    <% end %>
+  <% end %>
+
   <%# Leverage needs a down payment to be a ratio at all, and a loan with none
       recorded is not unleveraged -- it is one nobody has told us about. %>
   <% if account.loan.initial_leverage_ratio.present? %>

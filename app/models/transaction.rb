@@ -102,7 +102,8 @@ class Transaction < ApplicationRecord
     one_time: "one_time", # Legacy input/storage value; new writes use forecast_behavior
     investment_contribution: "investment_contribution", # Transfer to investment/crypto account, excluded from budget analytics
     transfer_to_excluded: "transfer_to_excluded", # Crossing out of the user's financial boundary; treated as an expense
-    transfer_from_excluded: "transfer_from_excluded" # Crossing into the user's financial boundary; treated as income
+    transfer_from_excluded: "transfer_from_excluded", # Crossing into the user's financial boundary; treated as income
+    loan_interest: "loan_interest" # Interest a loan charges to its own account (Loan::InterestLedger); excluded from budget analytics
   }
 
   enum :forecast_behavior, {
@@ -128,7 +129,10 @@ class Transaction < ApplicationRecord
   # Kinds excluded from budget/income-statement analytics.
   # loan_payment and transfer_to_excluded are intentionally NOT here —
   # they represent real cash outflow from a budgeting perspective.
-  BUDGET_EXCLUDED_KINDS = %w[funds_movement one_time cc_payment investment_contribution investment_value_adjustment].freeze
+  # loan_interest IS here for the same reason: the instalment that settles it
+  # is already the loan_payment expense, so counting the interest as well
+  # would report it twice.
+  BUDGET_EXCLUDED_KINDS = %w[funds_movement one_time cc_payment investment_contribution investment_value_adjustment loan_interest].freeze
 
   scope :budget_reportable, -> { where(budget_inclusion_sql) }
   scope :exceptional_for_forecast, -> { where(exceptional_forecast_sql) }
@@ -174,7 +178,7 @@ class Transaction < ApplicationRecord
   #     expense/income that is only excluded from budget *analytics* so it
   #     doesn't skew medians. "Has no category" and "counts toward the
   #     budget" are different questions; only the former belongs here.
-  UNCATEGORIZED_EXCLUDED_KINDS = %w[funds_movement cc_payment investment_value_adjustment].freeze
+  UNCATEGORIZED_EXCLUDED_KINDS = %w[funds_movement cc_payment investment_value_adjustment loan_interest].freeze
 
   # All valid investment activity labels (for UI dropdown)
   ACTIVITY_LABELS = [

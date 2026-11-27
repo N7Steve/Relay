@@ -9,6 +9,7 @@ require Rails.root.join("db/migrate/20261026190000_personalize_tags_and_imports"
 require Rails.root.join("db/migrate/20261121120000_add_mcp_custom_instructions_to_users")
 require Rails.root.join("db/migrate/20261121130000_add_shared_expense_to_scheduled_payments")
 require Rails.root.join("db/migrate/20261121140000_add_enable_transfer_matcher_to_accounts")
+require Rails.root.join("db/migrate/20261127100000_create_loan_rate_structure")
 
 class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
   self.use_transactional_tests = false
@@ -91,6 +92,7 @@ class RemoveRetiredProductPersistenceMigrationTest < ActiveSupport::TestCase
     assert_nil connection.select_value("SELECT mcp_custom_instructions FROM users WHERE id = '#{user_id}'")
     ActiveRecord::Migration.suppress_messages { AddSharedExpenseToScheduledPayments.new.migrate(:up) }
     ActiveRecord::Migration.suppress_messages { AddEnableTransferMatcherToAccounts.new.migrate(:up) }
+    ActiveRecord::Migration.suppress_messages { CreateLoanRateStructure.new.migrate(:up) }
     actual_columns = connection.tables.excluding("schema_migrations", "ar_internal_metadata").to_h do |table|
       [ table, connection.columns(table).map { |column| [ column.name, column.sql_type, column.default, column.null ] }.sort_by(&:first) ]
     end

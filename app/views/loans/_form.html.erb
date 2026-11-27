@@ -66,6 +66,22 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <%# How interest accrues between payments. Daily is the Spanish
+            mortgage convention and what reproduces a lender's statement. %>
+        <%= loan_form.select :interest_accrual,
+                           Loan::INTEREST_ACCRUALS.map { |value| [ t("loans.form.interest_accruals.#{value}"), value ] },
+                           { label: t("loans.form.interest_accrual") } %>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 rounded-lg bg-container-inset p-3">
+        <div>
+          <p class="form-field__label"><%= t("loans.form.interest_tracking") %></p>
+          <p class="text-xs text-secondary"><%= t("loans.form.interest_tracking_hint") %></p>
+        </div>
+        <%= loan_form.toggle :interest_tracking %>
+      </div>
+
+      <div class="flex items-center gap-2">
         <%# The premium many lenders quote beside the instalment. Charged
             alongside it rather than inside it, so it moves the loan's total
             cost without moving its repayment. %>

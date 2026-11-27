@@ -32,6 +32,11 @@ class Settings::HostingsController < ApplicationController
       Setting.external_logos_enabled = hosting_params[:external_logos_enabled] == "1"
     end
 
+    if hosting_params.key?(:external_reference_rates_enabled)
+      Setting.external_reference_rates_enabled = hosting_params[:external_reference_rates_enabled] == "1"
+      ImportReferenceRatesJob.perform_later if Setting.external_reference_rates_enabled
+    end
+
     if hosting_params.key?(:brand_fetch_client_id)
       Setting.brand_fetch_client_id = hosting_params[:brand_fetch_client_id]
     end
@@ -80,7 +85,7 @@ class Settings::HostingsController < ApplicationController
     # Strong parameters for the self-hosting settings form.
     def hosting_params
       return ActionController::Parameters.new unless params.key?(:setting)
-      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :external_logos_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :auto_sync_enabled, :auto_sync_time)
+      permitted = params.require(:setting).permit(:onboarding_state, :require_email_confirmation, :invite_only_default_family_id, :external_logos_enabled, :external_reference_rates_enabled, :brand_fetch_client_id, :brand_fetch_high_res_logos, :auto_sync_enabled, :auto_sync_time)
       permitted
     end
 

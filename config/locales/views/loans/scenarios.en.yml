@@ -1,0 +1,130 @@
+---
+en:
+  accounts:
+    show:
+      tabs:
+        scenarios: Scenarios
+  activerecord:
+    attributes:
+      loan/prepayment:
+        paid_on: Date
+        amount: Amount
+        mode: Applied to
+        fee: Fee
+    errors:
+      models:
+        loan/prepayment:
+          attributes:
+            paid_on:
+              before_origination: cannot be before the loan started
+              after_maturity: cannot be after the loan matures
+  activemodel:
+    attributes:
+      loan/scenario:
+        index_shift: Index shift
+        change_kind: New rate type
+        change_on: Change date
+        change_rate: Fixed rate
+        change_spread: Spread
+        change_cost: Cost of the change
+        prepayment_amount: Prepayment amount
+        prepayment_on: Prepayment date
+        prepayment_mode: Prepayment applied to
+        prepayment_fee: Prepayment fee
+    errors:
+      models:
+        loan/scenario:
+          attributes:
+            change_kind:
+              requires_structured_rate: needs the loan to have rate periods
+  loans:
+    rate_periods:
+      form:
+        applies_bonuses: Apply bonuses
+        applies_bonuses_hint: Turn off when this period's rate is already final (another lender's offer, for instance).
+    prepayments:
+      modes:
+        reduce_payment: Lower the instalment
+        reduce_term: Shorten the term
+      transfer_name: Prepayment %{account}
+      new:
+        title: Prepayment
+        intro: Record an extra repayment and what you asked the lender to do with it. The balance and interest follow it from the day it is paid; the schedule and the scheduled instalment re-size from your choice.
+        paid_on: Payment date
+        amount: Amount
+        mode: Applied to
+        mode_hint: Shortening the term keeps the instalment and ends sooner (usually saves more interest). Lowering the instalment keeps the end date.
+        fee: Lender fee
+        source_account: Paid from
+        source_account_none: Already on the loan account
+        source_account_hint: Pick an account and Relay creates the transfer (and the fee) for you. If the payment is already on the loan account, leave this and it is linked.
+        notes: Notes
+        submit: Record prepayment
+      create:
+        success: Prepayment recorded
+      destroy:
+        success: Prepayment removed
+    tabs:
+      prepayments:
+        title: Prepayments
+        add: Record prepayment
+        empty: No prepayments recorded.
+        linked: Movement found
+        missing: No movement
+        delete: Remove
+        delete_confirm_title: Remove this prepayment?
+        delete_confirm_body: Only the choice of shorter term or lower instalment is removed. The money moved stays on the accounts; delete the transfer separately if it is not wanted either.
+        columns:
+          date: Date
+          amount: Amount
+          mode: Applied to
+          fee: Fee
+          movement: Movement
+    scenarios:
+      show:
+        intro: Compare the loan as it stands with a change of terms (switching to fixed, another lender) or a prepayment. Nothing tried here is saved.
+        index_basis: "Basis: %{index} %{value} (%{month}), held flat."
+        index_missing: No index values yet; future revisions use the latest known rate.
+        index_shift: Euribor shift (points)
+        index_shift_hint: Added to the latest published value at every future revision, on both sides of the comparison.
+        change_title: Change of terms
+        change_kind: New rate type
+        change_none: No change
+        change_kinds:
+          fixed: Fixed
+          variable: Variable
+        change_on: From
+        change_rate: Final fixed rate (%)
+        change_spread: Final spread (%)
+        change_cost: Cost of the change
+        change_hint: Enter the final rate or spread offered, bonuses included, and the total costs (novation or subrogation fee, notary, valuation).
+        keep_bonuses: Keep my bonuses
+        keep_bonuses_hint: Turn on only if the new rate is discounted by the same products.
+        prepayment_title: Prepayment
+        prepayment_amount: Amount
+        prepayment_on: Date
+        prepayment_mode: Applied to
+        prepayment_fee: Fee
+        submit: Compare
+        net_saving: Net interest saving
+        payment_after_change: Instalment after the change
+        months_saved: Months fewer
+        comparison: Comparison
+        rows:
+          next_payment: Next instalment
+          payment_after_change: Instalment after the change or next revision
+          remaining_interest: Interest still to pay
+          costs: Cost of the change
+          total_cost: Total still to pay
+          payoff_date: Loan ends
+        columns:
+          current: Current
+          scenario: Scenario
+          index: Euribor
+          current_payment: Current instalment
+          current_interest: Current interest
+          scenario_payment: Scenario instalment
+          scenario_cost: Total difference
+        sensitivity_title: Depending on Euribor
+        sensitivity_hint: The same comparison with Euribor one point below, unchanged, one and two points above the latest published value. A negative difference means the scenario is cheaper.
+        shift: "%{shift} points"

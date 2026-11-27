@@ -14,3 +14,9 @@
 # ActiveSupport::Inflector.inflections(:en) do |inflect|
 #   inflect.acronym "RESTful"
 # end
+
+# Loan::RateBonus: without this "bonus" is its own plural and "bonuses"
+# singularizes to "bonuse", which breaks the association and route names.
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.irregular "bonus", "bonuses"
+end

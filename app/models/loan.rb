@@ -1,6 +1,23 @@
 class Loan < ApplicationRecord
   include Accountable
 
+  # Structured interest terms: the rate periods the loan moves through, the
+  # bonuses discounting them, and the revisions each review date froze. A loan
+  # with none of them reads `interest_rate` and `variable_rate_schedule` as it
+  # always has.
+  has_many :rate_periods, -> { order(:starts_on) }, class_name: "Loan::RatePeriod", inverse_of: :loan, dependent: :destroy
+  has_many :rate_bonuses, class_name: "Loan::RateBonus", inverse_of: :loan, dependent: :destroy
+  has_many :rate_revisions, -> { order(:effective_on) }, class_name: "Loan::RateRevision", inverse_of: :loan, dependent: :destroy
+  # Extra repayments and the borrower's choice for each: shorter term or lower
+  # instalment. The schedule re-sizes from them.
+  has_many :prepayments, -> { order(:paid_on, :created_at) }, class_name: "Loan::Prepayment", inverse_of: :loan, dependent: :destroy
+
+  # How interest accrues between payments. "monthly" charges rate / 12 on the
+  # balance each period, the convention schedules have always used. "daily"
+  # charges each day at rate / 365 (366 in a leap year), as Spanish mortgage
+  # deeds define it, which is what reproduces a lender's statement to the cent.
+  INTEREST_ACCRUALS = %w[monthly daily].freeze
+
   SUBTYPES = {
     "mortgage" => { short: "Mortgage", long: "Mortgage" },
     "student" => { short: "Student Loan", long: "Student Loan" },
@@ -38,6 +55,17 @@ class Loan < ApplicationRecord
   # a 20,000 deposit against an 80,000 loan is a different position from the
   # same loan against 5,000.
   validates :down_payment, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
+  validates :interest_accrual, inclusion: { in: INTEREST_ACCRUALS }
+
+  # The interest this loan posts depends on these. Changing them (or turning
+  # posting on or off) recalculates the account, so the posted entries and the
+  # balance follow straight away rather than at the next sync.
+  INTEREST_LEDGER_INPUTS = %w[interest_tracking interest_accrual interest_rate rate_type term_months start_date
+                              initial_balance variable_rate_schedule].freeze
+  after_update_commit :resync_interest_ledger, if: :interest_ledger_inputs_changed?
+  # Posting interest needs payment dates to post it on.
+  validate :interest_tracking_requires_terms
 
   validates :insurance_rate, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   # The form's "None" option submits an empty string, which means no type
@@ -86,12 +114,28 @@ class Loan < ApplicationRecord
     # `rate_type == "fixed"` guard happened to short-circuit before that read;
     # widening the rate types removed the accident, so the requirement is
     # stated rather than relied upon.
+    # A structured loan takes its rates from its periods, so it needs neither
+    # column to be amortised.
     account.present? &&
-      rate_type.present? &&
-      interest_rate.present? &&
+      (structured_rate? || (rate_type.present? && interest_rate.present?)) &&
       term_months.to_i.positive? &&
       term_months.to_i <= Loan::Simulator::MAX_PERIODS &&
       original_balance.amount.positive?
+  end
+
+  private def interest_ledger_inputs_changed?
+    changed = saved_changes.keys & INTEREST_LEDGER_INPUTS
+    changed.include?("interest_tracking") || (interest_tracking? && changed.any?)
+  end
+
+  private def resync_interest_ledger
+    account&.sync_later
+  end
+
+  private def interest_tracking_requires_terms
+    return unless interest_tracking?
+
+    errors.add(:interest_tracking, :requires_terms) if start_date.blank? || term_months.to_i <= 0
   end
 
   private def rate_changes_must_be_parseable
@@ -242,7 +286,7 @@ class Loan < ApplicationRecord
   # The columns AmortizationSchedule.for reads from the loan itself. Assigning
   # any of them drops the memoised schedule, as reload does, so a read after the
   # change answers with the new terms rather than the ones it was built from.
-  SCHEDULE_INPUTS = %i[interest_rate term_months rate_type start_date variable_rate_schedule].freeze
+  SCHEDULE_INPUTS = %i[interest_rate term_months rate_type start_date variable_rate_schedule interest_accrual].freeze
 
   SCHEDULE_INPUTS.each do |input|
     define_method(:"#{input}=") do |value|
@@ -266,7 +310,124 @@ class Loan < ApplicationRecord
   def reload(*)
     @amortization_schedule = nil
     @insurance = nil
+    @rate_reviewer = nil
+    @structured_rate = nil
     super
+  end
+
+  # Whether the rate comes from structured periods rather than from
+  # `interest_rate` and the recorded changes. Read through the association so a
+  # form-built period counts before it is saved.
+  #
+  # Memoised: the simulator asks through RateResolver on every period, and an
+  # unloaded association would query each time. `reload` clears it.
+  def structured_rate?
+    return rate_periods.any? if rate_periods.loaded? || rate_periods.target.any?
+    return @structured_rate unless @structured_rate.nil?
+
+    @structured_rate = new_record? ? false : rate_periods.exists?
+  end
+
+  def daily_accrual?
+    interest_accrual == "daily"
+  end
+
+  # The simulator's name for this loan's accrual convention.
+  def day_count
+    daily_accrual? ? :actual_365 : :monthly
+  end
+
+  def rate_reviewer
+    @rate_reviewer ||= RateReviewer.new(self)
+  end
+
+  # Recorded prepayments as the simulator takes them.
+  def prepayment_events
+    prepayments.map(&:to_event)
+  end
+
+  # The revision in force today, or nil for a loan without rate periods.
+  def current_rate_revision(as_of = Date.current)
+    structured_rate? ? rate_reviewer.revision_on(as_of, as_of: as_of) : nil
+  end
+
+  # Contractual payment dates: one a month from origination, for the term.
+  def payment_dates
+    origin = origination_date
+    return [] if origin.nil? || term_months.to_i <= 0 || term_months.to_i > Loan::Simulator::MAX_PERIODS
+
+    (1..term_months.to_i).map { |number| origin >> number }
+  end
+
+  # The date of the last contractual payment.
+  def maturity_date
+    origin = origination_date
+    origin && term_months.to_i.positive? ? origin >> term_months.to_i : nil
+  end
+
+  # The contractual instalment falling in the month of `date`, from the
+  # schedule: on a structured loan, sized at every recorded revision and at
+  # the projected ones. Read by month, as the schedule reconciles real
+  # payments, so an Agenda series a day off the contractual date still finds
+  # it. Nil without a schedule or a payment that month.
+  def payment_due_on(date)
+    amortization_schedule&.payment_for(date)&.payment
+  end
+
+  # Keeps the Agenda transfers that pay this loan at the instalment due on
+  # their next occurrence, so a revision reaches the cash forecast and the
+  # generated transfer without the borrower re-typing the new figure. Past
+  # occurrences are never touched. Returns the payments changed.
+  #
+  # Only the monthly series that pays the instalment: one whose amount is
+  # within INSTALMENT_SERIES_TOLERANCE of an instalment due around its next
+  # date. A yearly extra-repayment transfer into the same loan is left alone.
+  # Nothing moves while a revision is waiting for its index value.
+  INSTALMENT_SERIES_TOLERANCE = BigDecimal("0.4")
+
+  def sync_scheduled_payments!(as_of: Date.current)
+    return [] unless structured_rate? && account
+    return [] if rate_reviewer.first_index_gap(as_of: as_of)
+
+    ScheduledPayment.active.transfer.monthly.where(target_account_id: account.id, currency: account.currency).filter_map do |scheduled|
+      due = instalment_with_premium(scheduled.next_run_date)
+      next if due.nil? || (scheduled.amount - due).abs < BigDecimal("0.01")
+      next unless instalment_series?(scheduled)
+
+      scheduled.update!(amount: due)
+      scheduled
+    end
+  end
+
+  # The instalment due in the month of `date`, plus any premium charged
+  # alongside it, as one transfer pays both.
+  private def instalment_with_premium(date)
+    payment = amortization_schedule&.payment_for(date)
+    return nil if payment.nil?
+
+    payment.payment.amount + (insurance&.premium_for(payment.number)&.amount || 0)
+  end
+
+  private def instalment_series?(scheduled)
+    [ scheduled.next_run_date, scheduled.next_run_date << 1 ].any? do |date|
+      due = instalment_with_premium(date)
+      due&.positive? && (scheduled.amount - due).abs <= due * INSTALMENT_SERIES_TOLERANCE
+    end
+  end
+
+  # Interest posted to the account so far, and the principal those payments
+  # repaid: what the borrower has actually put into the loan, split. Nil when
+  # the loan does not post its interest.
+  def repayment_split(as_of: Date.current)
+    return nil unless interest_tracking?
+
+    interest = account.entries.where(source: Loan::InterestLedger::SOURCE).where(date: ..as_of).sum(:amount)
+    principal_repaid = original_balance.amount - (account.balance || 0)
+    {
+      interest: Money.new(interest, account.currency),
+      principal: Money.new(principal_repaid, account.currency),
+      paid: Money.new(principal_repaid + interest, account.currency)
+    }
   end
 
   # The insurance policy charged alongside this loan's instalments, or nil when

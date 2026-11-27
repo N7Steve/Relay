@@ -23,7 +23,7 @@ class Family::Backup
     GoogleDriveConnection GoogleDriveOauthConfiguration
     GoogleDriveExportSchedule GoogleDriveExportTarget GoogleDriveExportRun
     Import ImportSession ImportSourceMapping Import::Row Import::Mapping
-    ExchangeRate
+    ExchangeRate Loan::RatePeriod Loan::RateBonus Loan::RateRevision Loan::Prepayment ReferenceRate
   ] + PROVIDERS.flat_map { |prefix| [ "#{prefix}Item", "#{prefix}Account" ] }).freeze
 
   EXCLUDED_FAMILY_TABLES = {
@@ -57,7 +57,11 @@ class Family::Backup
     "GoogleDriveExportTarget" => [ "GoogleDriveExportSchedule", "google_drive_export_schedule_id" ],
     "GoogleDriveExportRun" => [ "GoogleDriveExportSchedule", "google_drive_export_schedule_id" ],
     "Import::Row" => [ "Import", "import_id" ],
-    "Import::Mapping" => [ "Import", "import_id" ]
+    "Import::Mapping" => [ "Import", "import_id" ],
+    "Loan::RatePeriod" => [ "Loan", "loan_id" ],
+    "Loan::RateBonus" => [ "Loan", "loan_id" ],
+    "Loan::RateRevision" => [ "Loan", "loan_id" ],
+    "Loan::Prepayment" => [ "Loan", "loan_id" ]
   }.merge(PROVIDERS.to_h { |prefix| [ "#{prefix}Account", [ "#{prefix}Item", "#{prefix.underscore}_item_id" ] ] }).freeze
   POLYMORPHIC_PARENTS = {
     "Address" => %w[Property],
@@ -182,6 +186,10 @@ class Family::Backup
           *@family.holdings.distinct.pluck(:currency), *@family.goals.distinct.pluck(:currency),
           *Security::Price.where(security_id: scope_for("Security").select(:id)).distinct.pluck(:currency) ].compact.uniq
         model.where(from_currency: currencies, to_currency: currencies)
+      when "ReferenceRate"
+        # Index values are instance-wide like exchange rates; a family's backup
+        # carries the series its loans are revised against.
+        model.where(index_key: Loan::RatePeriod.where(loan_id: scope_for("Loan").select(:id)).select(:reference_index))
       when "Transaction", "Trade", "Valuation"
         model.where(id: @family.entries.where(entryable_type: name).select(:entryable_id))
       when *Family::DataImporter::ACCOUNTABLE_TYPE_CLASSES.keys

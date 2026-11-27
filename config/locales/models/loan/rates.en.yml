@@ -1,0 +1,32 @@
+---
+en:
+  activerecord:
+    attributes:
+      loan:
+        interest_tracking: Interest posting
+      loan/rate_period:
+        starts_on: Start date
+        rate_kind: Rate type
+        base_rate: Fixed rate
+        reference_index: Reference index
+        spread: Spread
+        review_interval_months: Review interval
+        floor_rate: Minimum rate
+      loan/rate_bonus:
+        name: Name
+        kind: Product
+        points: Discount
+        annual_cost: Annual cost
+      loan/rate_revision:
+        rate: Rate
+        effective_on: Date
+      reference_rate:
+        month: Month
+        value: Value
+        index_key: Index
+    errors:
+      models:
+        loan:
+          attributes:
+            interest_tracking:
+              requires_terms: needs the loan's origination date and term

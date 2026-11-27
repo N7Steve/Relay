@@ -1,0 +1,209 @@
+<%# locals: (account:, as_of: Date.current) %>
+
+<%# Structured interest terms: what the rate is made of today, when it is next
+    set and what that will cost, and the periods, bonuses and index values it
+    is built from. Revisions already recorded are history; the ones still ahead
+    are projections from the latest index value and the bonuses active now. %>
+<% loan = account.loan %>
+<% today = as_of %>
+<% can_edit = account.permission_for(Current.user).in?([ :owner, :full_control ]) %>
+
+<div class="space-y-6">
+  <% unless loan.structured_rate? %>
+    <%= render DS::EmptyState.new(
+          icon: "percent",
+          title: t(".empty_title"),
+          description: t(".empty_description")
+        ) do |empty| %>
+      <% if can_edit && loan.maturity_date %>
+        <% empty.with_action do %>
+          <%= render DS::Link.new(text: t(".add_period"), icon: "plus", variant: "primary",
+                                  href: new_loan_rate_period_path(account), frame: :modal) %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if loan.maturity_date.nil? %>
+      <%= render DS::Alert.new(message: t(".missing_terms"), variant: :warning) %>
+    <% end %>
+  <% else %>
+    <% reviewer = loan.rate_reviewer %>
+    <% timeline = reviewer.timeline(as_of: today) %>
+    <% current = reviewer.revision_on(today, as_of: today) %>
+    <% upcoming = reviewer.next_revision(as_of: today) %>
+    <% balance = account.balance.to_d.abs %>
+
+    <% unless loan.interest_tracking? && loan.daily_accrual? %>
+      <%= render DS::Alert.new(title: t(".tracking_off_title"), message: t(".tracking_off_message"), variant: :info) %>
+    <% end %>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <%= summary_card title: t(".current_rate") do %>
+        <%= current ? loan_rate_percentage(current.rate) : t(".unknown") %>
+      <% end %>
+
+      <%= summary_card title: t(".next_revision") do %>
+        <% if upcoming %>
+          <%= l(upcoming.effective_on, format: :long) %>
+        <% else %>
+          <%= t(".none") %>
+        <% end %>
+      <% end %>
+
+      <%= summary_card title: t(".next_rate_estimate") do %>
+        <%= upcoming ? loan_rate_percentage(upcoming.rate) : t(".not_applicable") %>
+      <% end %>
+    </div>
+
+    <% if current %>
+      <p class="text-sm text-secondary">
+        <%= t(".current_composition", composition: loan_rate_composition(current), rate: loan_rate_percentage(current.rate)) %>
+      </p>
+    <% end %>
+
+    <% if upcoming %>
+      <% first_payment_after = loan.payment_dates.find { |date| date > upcoming.effective_on } %>
+      <% new_payment = first_payment_after && loan.payment_due_on(first_payment_after) %>
+      <%= render DS::Card.new(class: "space-y-2") do %>
+        <h3 class="font-medium text-primary"><%= t(".upcoming_title", date: l(upcoming.effective_on, format: :long)) %></h3>
+        <p class="text-sm text-secondary"><%= loan_rate_composition(upcoming) %> = <%= loan_rate_percentage(upcoming.rate) %></p>
+        <% if new_payment %>
+          <p class="text-sm text-primary privacy-sensitive">
+            <%= t(".upcoming_payment", amount: format_money(new_payment), date: l(first_payment_after, format: :long)) %>
+          </p>
+        <% end %>
+        <p class="text-xs text-secondary">
+          <%= upcoming.variable? ? t(".upcoming_variable_hint") : t(".upcoming_fixed_hint") %>
+        </p>
+      <% end %>
+    <% end %>
+
+    <section class="space-y-2">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="font-medium text-primary"><%= t(".revisions_title") %></h3>
+        <% if can_edit %>
+          <%= render DS::Button.new(text: t(".review_now"), icon: "refresh-cw", variant: "ghost", size: "sm",
+                                    href: loan_rate_review_path(account), method: :post) %>
+        <% end %>
+      </div>
+
+      <%# History, anything due and not recorded yet, and the next one ahead. %>
+      <% shown = timeline.select { |revision| revision.persisted? || revision.effective_on <= today || revision.equal?(upcoming) } %>
+      <%= render DS::Table.new(rows: shown, label: t(".revisions_title")) do |table| %>
+        <% table.with_column(t(".columns.date")) { |revision| l(revision.effective_on, format: :long) } %>
+        <% table.with_column(t(".columns.composition"), class: "text-secondary") { |revision| loan_rate_composition(revision) } %>
+        <% table.with_column(t(".columns.rate"), numeric: true) { |revision| loan_rate_percentage(revision.rate) } %>
+        <% table.with_column(t(".columns.status")) do |revision| %>
+          <% status = loan_rate_revision_status(revision, as_of: today) %>
+          <%= render DS::Pill.new(label: t(".statuses.#{status}"), tone: loan_rate_revision_tone(status), marker: false) %>
+        <% end %>
+        <% table.with_column("", numeric: true) do |revision| %>
+          <% if can_edit && revision.persisted? %>
+            <%= render DS::Link.new(text: t(".edit"), variant: "ghost", size: "sm",
+                                    href: edit_loan_rate_revision_path(account, revision), frame: :modal) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </section>
+
+    <section class="space-y-2">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="font-medium text-primary"><%= t(".periods_title") %></h3>
+        <% if can_edit %>
+          <%= render DS::Link.new(text: t(".add_period"), icon: "plus", variant: "ghost", size: "sm",
+                                  href: new_loan_rate_period_path(account), frame: :modal) %>
+        <% end %>
+      </div>
+
+      <%= render DS::Table.new(rows: loan.rate_periods.to_a, label: t(".periods_title")) do |table| %>
+        <% table.with_column(t(".columns.starts_on")) { |period| l(period.starts_on, format: :long) } %>
+        <% table.with_column(t(".columns.kind")) { |period| t("loans.rate_periods.kinds.#{period.rate_kind}") } %>
+        <% table.with_column(t(".columns.terms"), class: "text-secondary") do |period| %>
+          <% if period.fixed? %>
+            <%= t(".period_fixed_terms", rate: loan_rate_percentage(period.base_rate)) %>
+          <% else %>
+            <%= t(".period_variable_terms", index: t("reference_rates.indexes.#{period.reference_index}"), spread: loan_rate_percentage(period.spread)) %>
+          <% end %>
+          <%= t(".period_review", months: period.review_interval_months) %>
+          <% if period.lender_name.present? %>· <%= period.lender_name %><% end %>
+        <% end %>
+        <% table.with_column("", numeric: true) do |period| %>
+          <% if can_edit %>
+            <%= render DS::Link.new(text: t(".edit"), variant: "ghost", size: "sm",
+                                    href: edit_loan_rate_period_path(account, period), frame: :modal) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </section>
+
+    <section class="space-y-2">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="font-medium text-primary"><%= t(".bonuses_title") %></h3>
+        <% if can_edit %>
+          <%= render DS::Link.new(text: t(".add_bonus"), icon: "plus", variant: "ghost", size: "sm",
+                                  href: new_loan_rate_bonus_path(account), frame: :modal) %>
+        <% end %>
+      </div>
+
+      <% bonuses = loan.rate_bonuses.ordered.to_a %>
+      <% if bonuses.empty? %>
+        <p class="text-sm text-secondary"><%= t(".bonuses_empty") %></p>
+      <% else %>
+        <p class="text-xs text-secondary"><%= t(".bonuses_hint", balance: format_money(Money.new(balance, account.currency))) %></p>
+        <%= render DS::Table.new(rows: bonuses, label: t(".bonuses_title")) do |table| %>
+          <% table.with_column(t(".columns.bonus")) do |bonus| %>
+            <span class="<%= bonus.active? ? "text-primary" : "text-subdued line-through" %>"><%= bonus.name %></span>
+          <% end %>
+          <% table.with_column(t(".columns.points"), numeric: true) { |bonus| loan_rate_percentage(bonus.points) } %>
+          <% table.with_column(t(".columns.saving"), numeric: true, class: "privacy-sensitive") { |bonus| format_money(bonus.annual_saving_on(balance)) } %>
+          <% table.with_column(t(".columns.cost"), numeric: true, class: "text-secondary privacy-sensitive") { |bonus| bonus.annual_cost ? format_money(bonus.annual_cost_money) : "—" } %>
+          <% table.with_column(t(".columns.net"), numeric: true, class: "privacy-sensitive") do |bonus| %>
+            <% net = bonus.annual_net_on(balance) %>
+            <% if net %>
+              <span class="<%= net.negative? ? "text-destructive" : "text-success" %>"><%= format_money(net) %></span>
+            <% else %>
+              —
+            <% end %>
+          <% end %>
+          <% table.with_column("", numeric: true) do |bonus| %>
+            <% if can_edit %>
+              <%= render DS::Link.new(text: t(".edit"), variant: "ghost", size: "sm",
+                                      href: edit_loan_rate_bonus_path(account, bonus), frame: :modal) %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </section>
+
+    <% index_keys = loan.rate_periods.filter_map(&:reference_index).uniq %>
+    <% if index_keys.any? %>
+      <section class="space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="font-medium text-primary"><%= t(".index_title") %></h3>
+          <% if can_edit && Current.user.super_admin? %>
+            <%= render DS::Link.new(text: t(".add_index_value"), icon: "plus", variant: "ghost", size: "sm",
+                                    href: new_loan_reference_rate_path(account, index_key: index_keys.first), frame: :modal) %>
+          <% end %>
+        </div>
+        <p class="text-xs text-secondary">
+          <%= ExternalAccess.enabled?(:reference_rates) ? t(".index_auto_on") : t(".index_auto_off") %>
+        </p>
+        <% values = ReferenceRate.where(index_key: index_keys).order(month: :desc).limit(6).to_a %>
+        <% if values.any? %>
+          <%= render DS::Table.new(rows: values, label: t(".index_title")) do |table| %>
+            <% table.with_column(t(".columns.index")) { |row| t("reference_rates.indexes.#{row.index_key}") } %>
+            <% table.with_column(t(".columns.month")) { |row| l(row.month, format: :month_year) } %>
+            <% table.with_column(t(".columns.value"), numeric: true) { |row| loan_rate_percentage(row.published_value) } %>
+            <% table.with_column(t(".columns.source"), class: "text-secondary") { |row| t(".sources.#{row.source}", default: row.source) } %>
+          <% end %>
+        <% else %>
+          <p class="text-sm text-secondary"><%= t(".index_empty") %></p>
+        <% end %>
+      </section>
+    <% end %>
+  <% end %>
+
+  <% if loan.amortizable? %>
+    <%= render "loans/tabs/prepayments", account: account, can_edit: can_edit %>
+  <% end %>
+</div>

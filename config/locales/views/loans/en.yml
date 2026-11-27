@@ -61,7 +61,9 @@ en:
       schedule:
         date: Date
         description: Projected from the original balance, rate and term, starting
-          %{start_date}. Extra payments are not reflected.
+          %{start_date}. Recorded prepayments are included; other extra payments
+          are not.
+        prepayment: Prepayment
         variable_rate_notice: This loan's rate changes over time. The schedule re-amortises
           at each recorded change, keeping the original payoff date and resizing the
           repayment; a change that has not been recorded yet will shift these figures.

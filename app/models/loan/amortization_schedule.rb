@@ -13,31 +13,41 @@
 # what a *schedule* is -- the dates, the term, and the presentation of a run as
 # Payment records -- and nothing about how interest accrues.
 class Loan::AmortizationSchedule
-  Payment = Data.define(:number, :date, :payment, :principal, :interest, :ending_balance)
+  Payment = Data.define(:number, :date, :payment, :principal, :interest, :ending_balance, :prepayment)
 
   attr_reader :principal, :annual_rate, :term_months, :start_date, :currency
 
   class << self
     # Returns a schedule for the loan, or nil when the loan isn't amortizable
     # (missing rate/term/principal).
-    def for(loan)
+    #
+    # `rate_reviewer` and `prepayments` default to the loan's own; a scenario
+    # passes hypothetical ones to ask "what if" without saving anything.
+    def for(loan, rate_reviewer: nil, prepayments: nil)
       return nil unless loan.amortizable?
 
       new(
         principal: loan.original_balance.amount,
-        annual_rate: loan.interest_rate,
+        # A structured loan takes its rates from its periods and may have no
+        # rate column at all; the column is then only an unused fallback.
+        annual_rate: loan.interest_rate || 0,
         term_months: loan.term_months,
         start_date: loan.origination_date,
         currency: loan.account.currency,
-        rate_resolver: (Loan::RateResolver.for(loan) if loan.variable_rate_type?)
+        rate_resolver: (Loan::RateResolver.new(loan, rate_reviewer: rate_reviewer) if loan.variable_rate_type? || loan.structured_rate?),
+        day_count: loan.day_count,
+        payment_sizing: loan.structured_rate? ? :period_opening : :payment_date,
+        prepayments: prepayments || loan.prepayment_events
       )
     end
   end
 
   # `rate_resolver` is how a variable loan's recorded rate changes reach the
   # simulator. Omitted, the schedule runs at one rate for its whole life, which
-  # is what a fixed loan does.
-  def initialize(principal:, annual_rate:, term_months:, start_date:, currency:, rate_resolver: nil)
+  # is what a fixed loan does. `day_count` and `payment_sizing` are passed to
+  # the simulator unchanged; see Loan::Simulator.
+  def initialize(principal:, annual_rate:, term_months:, start_date:, currency:, rate_resolver: nil,
+                 day_count: :monthly, payment_sizing: :payment_date, prepayments: [])
     @currency = currency
     # Rounded to the currency at the door. A balance carrying more fractional
     # units than the currency has -- `first_valuation_amount` is decimal(19,4)
@@ -50,6 +60,9 @@ class Loan::AmortizationSchedule
     @term_months = term_months.to_i
     @start_date = start_date
     @rate_resolver = rate_resolver
+    @day_count = day_count
+    @payment_sizing = payment_sizing
+    @prepayments = prepayments
   end
 
   # True when this schedule re-amortises part-way through, i.e. the repayment
@@ -59,7 +72,7 @@ class Loan::AmortizationSchedule
   # on the first payment, is an event that moves nothing in-term, and a
   # constant payment must not be labelled an opening one.
   def re_amortising?
-    return false unless @rate_resolver
+    return false unless @rate_resolver || @payment_sizing == :period_opening
     return false unless schedulable?
 
     simulation.payments.each_cons(2).any? { |previous, current| previous[:sizing_rate] != current[:sizing_rate] }
@@ -75,7 +88,8 @@ class Loan::AmortizationSchedule
         payment: money(row[:payment_amount]),
         principal: money(row[:principal_payment]),
         interest: money(row[:interest_payment]),
-        ending_balance: money(row[:ending_balance])
+        ending_balance: money(row[:ending_balance]),
+        prepayment: money(row[:prepayment] || 0)
       )
     end
   end
@@ -100,9 +114,15 @@ class Loan::AmortizationSchedule
     money(simulation.total_interest)
   end
 
-  # Principal plus total_interest -- everything the borrower pays.
+  # Principal plus total_interest -- everything the borrower pays, extra
+  # repayments included.
   def total_paid
-    money(payments.sum(BigDecimal("0")) { |payment| payment.payment.amount })
+    money(payments.sum(BigDecimal("0")) { |payment| payment.payment.amount + payment.prepayment.amount })
+  end
+
+  # Interest still to be paid after `date`.
+  def interest_after(date)
+    money(payments.select { |payment| payment.date > date }.sum(BigDecimal("0")) { |payment| payment.interest.amount })
   end
 
   # The date of the final payment, or nil when there's nothing to amortise.
@@ -142,7 +162,10 @@ class Loan::AmortizationSchedule
           payment_schedule: payment_schedule,
           accrual_rate_for: @rate_resolver ? @rate_resolver.method(:accrual_rate_for) : ->(_date) { annual_rate },
           re_amortisation_events: @rate_resolver&.method(:re_amortisation_events),
-          currency_precision: currency_precision
+          currency_precision: currency_precision,
+          day_count: @day_count,
+          payment_sizing: @payment_sizing,
+          prepayments: @prepayments
         ).run
       else
         Loan::SimulationResult.new(payments: [], currency_precision: currency_precision)

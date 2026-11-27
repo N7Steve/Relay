@@ -288,7 +288,7 @@ module Family::AutoTransferMatchable
             inflow_candidates.excluded = FALSE AND
             NOT EXISTS (
               SELECT 1 FROM transactions native_adjustments
-              WHERE native_adjustments.kind = 'investment_value_adjustment'
+              WHERE native_adjustments.kind IN ('investment_value_adjustment', 'loan_interest')
                 AND native_adjustments.id IN (inflow_candidates.entryable_id, outflow_candidates.entryable_id)
             ) AND
             inflow_candidates.amount < 0 AND
@@ -347,7 +347,7 @@ module Family::AutoTransferMatchable
             inflow_candidates.excluded = FALSE AND
             NOT EXISTS (
               SELECT 1 FROM transactions native_adjustments
-              WHERE native_adjustments.kind = 'investment_value_adjustment'
+              WHERE native_adjustments.kind IN ('investment_value_adjustment', 'loan_interest')
                 AND native_adjustments.id IN (inflow_candidates.entryable_id, outflow_candidates.entryable_id)
             ) AND
             inflow_candidates.amount < 0 AND

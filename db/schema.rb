@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_21_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_27_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -969,13 +969,86 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_140000) do
     t.index ["token_digest"], name: "index_invite_codes_on_token_digest", unique: true, where: "(token_digest IS NOT NULL)"
   end
 
+  create_table "loan_prepayments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount", precision: 19, scale: 4, null: false
+    t.datetime "created_at", null: false
+    t.uuid "entry_id"
+    t.decimal "fee", precision: 19, scale: 4, default: "0.0", null: false
+    t.uuid "loan_id", null: false
+    t.string "mode", null: false
+    t.text "notes"
+    t.date "paid_on", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entry_id"], name: "index_loan_prepayments_on_entry_id"
+    t.index ["loan_id"], name: "index_loan_prepayments_on_loan_id"
+    t.check_constraint "amount > 0::numeric", name: "chk_loan_prepayments_amount"
+    t.check_constraint "fee >= 0::numeric", name: "chk_loan_prepayments_fee"
+    t.check_constraint "mode::text = ANY (ARRAY['reduce_payment'::character varying::text, 'reduce_term'::character varying::text])", name: "chk_loan_prepayments_mode"
+  end
+
+  create_table "loan_rate_bonuses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.decimal "annual_cost", precision: 19, scale: 4
+    t.datetime "created_at", null: false
+    t.string "kind", default: "other", null: false
+    t.uuid "loan_id", null: false
+    t.string "name", null: false
+    t.decimal "points", precision: 6, scale: 4, null: false
+    t.datetime "updated_at", null: false
+    t.index ["loan_id"], name: "index_loan_rate_bonuses_on_loan_id"
+    t.check_constraint "annual_cost IS NULL OR annual_cost >= 0::numeric", name: "chk_loan_rate_bonuses_cost"
+    t.check_constraint "points >= 0::numeric", name: "chk_loan_rate_bonuses_points"
+  end
+
+  create_table "loan_rate_periods", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "applies_bonuses", default: true, null: false
+    t.decimal "base_rate", precision: 10, scale: 4
+    t.datetime "created_at", null: false
+    t.decimal "floor_rate", precision: 10, scale: 4, default: "0.0", null: false
+    t.string "lender_name"
+    t.uuid "loan_id", null: false
+    t.string "rate_kind", null: false
+    t.string "reference_index"
+    t.integer "review_interval_months", default: 12, null: false
+    t.decimal "spread", precision: 10, scale: 4
+    t.date "starts_on", null: false
+    t.datetime "updated_at", null: false
+    t.index ["loan_id", "starts_on"], name: "index_loan_rate_periods_on_loan_id_and_starts_on", unique: true
+    t.index ["loan_id"], name: "index_loan_rate_periods_on_loan_id"
+    t.check_constraint "(rate_kind::text = 'fixed'::text AND base_rate IS NOT NULL) OR (rate_kind::text = 'variable'::text AND reference_index IS NOT NULL AND spread IS NOT NULL)", name: "chk_loan_rate_periods_terms"
+    t.check_constraint "rate_kind::text = ANY (ARRAY['fixed'::character varying::text, 'variable'::character varying::text])", name: "chk_loan_rate_periods_kind"
+    t.check_constraint "review_interval_months >= 1 AND review_interval_months <= 120", name: "chk_loan_rate_periods_interval"
+  end
+
+  create_table "loan_rate_revisions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "base_rate", precision: 10, scale: 4
+    t.decimal "bonus_points", precision: 6, scale: 4, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.date "effective_on", null: false
+    t.date "index_month"
+    t.decimal "index_value", precision: 10, scale: 5
+    t.uuid "loan_id", null: false
+    t.decimal "rate", precision: 10, scale: 4, null: false
+    t.string "rate_kind", null: false
+    t.string "reference_index"
+    t.decimal "spread", precision: 10, scale: 4
+    t.string "status", default: "calculated", null: false
+    t.datetime "updated_at", null: false
+    t.index ["loan_id", "effective_on"], name: "index_loan_rate_revisions_on_loan_id_and_effective_on", unique: true
+    t.index ["loan_id"], name: "index_loan_rate_revisions_on_loan_id"
+    t.check_constraint "rate >= 0::numeric", name: "chk_loan_rate_revisions_rate"
+    t.check_constraint "status::text = ANY (ARRAY['calculated'::character varying::text, 'confirmed'::character varying::text])", name: "chk_loan_rate_revisions_status"
+  end
+
   create_table "loans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.decimal "down_payment", precision: 19, scale: 4
     t.decimal "initial_balance", precision: 19, scale: 4
     t.decimal "insurance_rate", precision: 8, scale: 4
     t.string "insurance_rate_type"
+    t.string "interest_accrual", default: "monthly", null: false
     t.decimal "interest_rate", precision: 10, scale: 3
+    t.boolean "interest_tracking", default: false, null: false
     t.jsonb "locked_attributes", default: {}
     t.string "rate_type"
     t.date "start_date"
@@ -986,6 +1059,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_140000) do
     t.check_constraint "down_payment IS NULL OR down_payment >= 0::numeric", name: "chk_loans_down_payment_non_negative"
     t.check_constraint "insurance_rate IS NULL OR insurance_rate >= 0::numeric", name: "chk_loans_insurance_rate_non_negative"
     t.check_constraint "insurance_rate_type IS NULL OR (insurance_rate_type::text = ANY (ARRAY['level_term'::character varying::text, 'decreasing_life'::character varying::text]))", name: "chk_loans_insurance_rate_type"
+    t.check_constraint "interest_accrual::text = ANY (ARRAY['monthly'::character varying::text, 'daily'::character varying::text])", name: "chk_loans_interest_accrual"
   end
 
   create_table "mcp_change_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1143,6 +1217,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_140000) do
     t.string "subtype"
     t.datetime "updated_at", null: false
     t.integer "year_built"
+  end
+
+  create_table "reference_rates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "index_key", null: false
+    t.date "month", null: false
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "value", precision: 10, scale: 5, null: false
+    t.index ["index_key", "month"], name: "index_reference_rates_on_index_key_and_month", unique: true
   end
 
   create_table "rejected_transfers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1608,6 +1692,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_140000) do
   add_foreign_key "insights", "families"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "loan_prepayments", "entries", on_delete: :nullify
+  add_foreign_key "loan_prepayments", "loans", on_delete: :cascade
+  add_foreign_key "loan_rate_bonuses", "loans", on_delete: :cascade
+  add_foreign_key "loan_rate_periods", "loans", on_delete: :cascade
+  add_foreign_key "loan_rate_revisions", "loans", on_delete: :cascade
   add_foreign_key "mcp_change_sets", "families"
   add_foreign_key "mcp_change_sets", "users"
   add_foreign_key "merchant_customizations", "families"

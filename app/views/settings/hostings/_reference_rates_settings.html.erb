@@ -1,0 +1,23 @@
+<div class="space-y-4">
+  <div>
+    <h2 class="font-medium mb-1"><%= t(".title") %></h2>
+    <p class="text-sm text-secondary"><%= t(".description") %></p>
+  </div>
+
+  <%= form_with url: settings_hosting_path, method: :patch,
+        data: { controller: "auto-submit-form" } do %>
+    <div class="flex items-center justify-between gap-4">
+      <div class="text-sm space-y-1">
+        <label class="text-primary font-medium" for="setting_external_reference_rates_enabled"><%= t(".enabled_label") %></label>
+        <p class="text-secondary"><%= t(".enabled_description") %></p>
+      </div>
+      <%= render DS::Toggle.new(
+            id: "setting_external_reference_rates_enabled",
+            name: "setting[external_reference_rates_enabled]",
+            checked: ExternalAccess.enabled?(:reference_rates),
+            disabled: !Current.user.admin?,
+            data: { auto_submit_form_target: "auto" }
+      ) %>
+    </div>
+  <% end %>
+</div>

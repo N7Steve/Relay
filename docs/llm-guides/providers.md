@@ -14,11 +14,14 @@ their historical persistence contract; FinanceKit followed in
 independent; property valuations were removed in phase 12. Do not restore removed connectors through configuration,
 generators, upstream merges or reflection.
 
+The `reference_rates` capability fetches only published loan index series
+(12-month Euribor from the ECB); see [loans](loans.md).
+
 Financial provider requests require explicit installation-wide activation through
 `ExternalAccess`. Check at the transport boundary so direct requests, existing
 client instances and previously queued jobs also respect suspension. Faraday
-connections use `ExternalAccess::RequestMiddleware` with `:bank_sync`
-or `:google_drive` as appropriate. HTTParty bank
+connections use `ExternalAccess::RequestMiddleware` with `:bank_sync`,
+`:google_drive` or `:reference_rates` as appropriate. HTTParty bank
 clients prepend `Provider::ExternalRequestGuard` to their singleton class.
 Other transports must check `ExternalAccess.require!` before opening a connection.
 

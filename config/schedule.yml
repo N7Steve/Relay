@@ -45,3 +45,9 @@ refresh_maintained_goal_targets:
   class: "RefreshMaintainedGoalTargetsJob"
   queue: "scheduled"
   description: "Recomputes the floor of reserves expressed in months of expenses"
+
+import_reference_rates:
+  cron: "0 5 * * *" # daily at 5:00 AM UTC; monthly index values appear in the first days of the month
+  class: "ImportReferenceRatesJob"
+  queue: "scheduled"
+  description: "Imports loan reference indices (Euribor) when enabled, then reviews structured loan rates"

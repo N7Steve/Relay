@@ -1,0 +1,171 @@
+---
+es:
+  accounts:
+    show:
+      tabs:
+        rates: Tipo de interés
+        schedule: Cuadro de amortización
+  reference_rates:
+    indexes:
+      euribor_12m: Euríbor 12 meses
+  loans:
+    form:
+      interest_accrual: Cálculo de intereses
+      interest_accruals:
+        monthly: Mensual (tipo / 12)
+        daily: Diario (días reales / 365)
+      interest_tracking: Registrar los intereses en esta cuenta
+      interest_tracking_hint: Carga los intereses de cada cuota en el préstamo el día de su vencimiento, para que la deuda coincida con la del banco y cada cuota se reparta entre capital e intereses. Tus pagos existentes no se modifican.
+    interest_ledger:
+      entry_name: Intereses del préstamo
+      pill: Intereses
+    rate_periods:
+      kinds:
+        fixed: Fijo
+        variable: Variable
+      form:
+        intro: Un tramo define cómo se calcula el tipo desde su fecha de inicio hasta que empieza el siguiente. Pasar a tipo fijo o cambiar de banco es un tramo nuevo; las revisiones anteriores no cambian.
+        starts_on: Fecha de inicio
+        rate_kind: Tipo de tramo
+        base_rate: Tipo fijo sin bonificar (%)
+        base_rate_hint: Solo tramos fijos. Se le restan las bonificaciones.
+        reference_index: Índice de referencia
+        spread: Diferencial sin bonificar (%)
+        spread_hint: Solo tramos variables. El tipo es el índice más este diferencial, menos las bonificaciones activas.
+        review_interval_months: Revisión cada (meses)
+        floor_rate: Tipo mínimo (%)
+        review_interval_hint: Cada cuánto se vuelve a fijar el tipo dentro del tramo y se comprueban las bonificaciones.
+        lender_name: Entidad
+        submit: Guardar tramo
+      new:
+        title: Nuevo tramo
+      edit:
+        title: Editar tramo
+      create:
+        success: Tramo añadido
+      update:
+        success: Tramo actualizado
+      destroy:
+        success: Tramo eliminado
+    rate_bonuses:
+      kinds:
+        payroll: Cuenta nómina
+        life_insurance: Seguro de vida
+        home_insurance: Seguro de hogar
+        pension: Plan de pensiones
+        other: Otro
+      form:
+        intro: Rebaja del tipo por tener contratado otro producto con el banco. Los cambios se aplican desde la próxima revisión; las revisiones registradas conservan las bonificaciones con las que se calcularon.
+        name: Nombre
+        kind: Producto
+        points: Rebaja (puntos porcentuales)
+        annual_cost: Coste anual del producto
+        annual_cost_hint: Opcional. Sirve para ver si la bonificación compensa.
+        active: Activa
+        active_hint: Desactívala si dejas de tener el producto.
+        submit: Guardar bonificación
+      new:
+        title: Nueva bonificación
+      edit:
+        title: Editar bonificación
+      create:
+        success: Bonificación añadida
+      update:
+        success: Bonificación actualizada
+      destroy:
+        success: Bonificación eliminada
+    rate_revisions:
+      edit:
+        title: Revisión del %{date}
+        intro: Corrige esta revisión con los datos de la comunicación del banco. Al guardarla queda confirmada.
+        index_value: Valor del índice (%)
+        rate: Tipo aplicado (%)
+        submit: Confirmar revisión
+        delete: Recalcular
+        delete_confirm_title: ¿Recalcular esta revisión?
+        delete_confirm_body: Se elimina y se vuelve a registrar con los tramos, bonificaciones y valores del índice actuales.
+      update:
+        success: Revisión confirmada
+      destroy:
+        success: Revisión eliminada
+    rate_reviews:
+      create:
+        success: Revisiones actualizadas
+    reference_rates:
+      new:
+        title: Añadir valor del índice
+        intro: El valor mensual publicado del índice, tal y como aparece en la comunicación del banco o en el BOE.
+        index_key: Índice
+        month: Mes
+        value: Valor (%)
+        submit: Guardar valor
+      create:
+        success: Valor del índice guardado
+    tabs:
+      overview:
+        principal_repaid: Capital amortizado
+        interest_paid: Intereses pagados
+      rates:
+        empty_title: Aún no hay tramos de tipo
+        empty_description: Describe cómo se forma el tipo (un tramo fijo, un índice más un diferencial, bonificaciones) y Relay lo revisará en cada fecha, mantendrá intactas las revisiones pasadas y estimará la próxima cuota.
+        missing_terms: Indica primero la fecha de inicio y el plazo del préstamo.
+        add_period: Añadir tramo
+        add_bonus: Añadir bonificación
+        add_index_value: Añadir valor
+        tracking_off_title: Los intereses aún no se registran
+        tracking_off_message: Edita el préstamo y elige cálculo diario y "Registrar los intereses en esta cuenta" para que la deuda y el reparto de cada cuota coincidan con el banco.
+        current_rate: Tipo vigente
+        next_revision: Próxima revisión
+        next_rate_estimate: Tipo estimado
+        none: Ninguna
+        not_applicable: N/D
+        unknown: Desconocido
+        current_composition: "%{composition} = %{rate}"
+        upcoming_title: Revisión del %{date}
+        upcoming_payment: "Cuota estimada desde el %{date}: %{amount}"
+        upcoming_variable_hint: Estimación con el último valor publicado del índice y las bonificaciones activas hoy. Se registra cuando se publica el valor del mes anterior a la revisión.
+        upcoming_fixed_hint: Se aplican las bonificaciones activas en la fecha de revisión.
+        revisions_title: Revisiones
+        review_now: Revisar ahora
+        periods_title: Tramos
+        period_fixed_terms: "Fijo %{rate}"
+        period_variable_terms: "%{index} + %{spread}"
+        period_review: "· revisión cada %{months} meses"
+        bonuses_title: Bonificaciones
+        bonuses_empty: No hay bonificaciones registradas.
+        bonuses_hint: Ahorro estimado para un año sobre la deuda actual (%{balance}).
+        index_title: Valores del índice
+        index_auto_on: Se descargan automáticamente del Banco Central Europeo.
+        index_auto_off: La descarga automática está desactivada. Actívala en Ajustes › Autoalojamiento o añade los valores a mano.
+        index_empty: Aún no hay valores guardados.
+        edit: Editar
+        sources:
+          ecb: BCE
+          manual: Manual
+        statuses:
+          projected: Prevista
+          pending: Pendiente de índice
+          calculated: Calculada
+          confirmed: Confirmada
+        columns:
+          date: Fecha
+          composition: Composición
+          rate: Tipo
+          status: Estado
+          starts_on: Desde
+          kind: Tipo
+          terms: Condiciones
+          bonus: Bonificación
+          points: Rebaja
+          saving: Ahorro / año
+          cost: Coste / año
+          net: Neto / año
+          index: Índice
+          month: Mes
+          value: Valor
+          source: Origen
+        composition:
+          index: "%{index} %{value}%{month}"
+          spread: "+ diferencial %{value}"
+          fixed: "Fijo %{value}"
+          bonuses: "− bonificaciones %{value}"

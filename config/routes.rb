@@ -414,7 +414,17 @@ Rails.application.routes.draw do
   end
   resources :vehicles, only: %i[new create edit update]
   resources :credit_cards, only: %i[new create edit update]
-  resources :loans, only: %i[new create edit update]
+  resources :loans, only: %i[new create edit update] do
+    scope module: :loans do
+      resources :rate_periods, only: %i[new create edit update destroy]
+      resources :rate_bonuses, only: %i[new create edit update destroy]
+      resources :rate_revisions, only: %i[edit update destroy]
+      resource :rate_review, only: :create
+      resources :reference_rates, only: %i[new create]
+      resources :prepayments, only: %i[new create destroy]
+      resource :scenario, only: :show
+    end
+  end
   resources :cryptos, only: %i[new create edit update]
   resources :other_assets, only: %i[new create edit update]
   resources :other_liabilities, only: %i[new create edit update]

@@ -66,7 +66,7 @@ class UI::AccountPage < ApplicationComponent
     when "Crypto"
       [ :holdings, :activity, :statements ]
     when "Loan"
-      account.loan.amortizable? ? [ :activity, :overview, :schedule ] : [ :activity, :overview ]
+      account.loan.amortizable? ? [ :activity, :overview, :schedule, :rates, :scenarios ] : [ :activity, :overview, :rates ]
     when "Property", "Vehicle"
       [ :activity, :overview ]
     else
@@ -98,6 +98,11 @@ class UI::AccountPage < ApplicationComponent
       render "#{account.accountable_type.downcase.pluralize}/tabs/#{tab}", account: account
     when :schedule
       render "loans/tabs/schedule", account: account, as_of: as_of, projection: loan_projection
+    when :rates
+      render "loans/tabs/rates", account: account, as_of: as_of
+    when :scenarios
+      # Several full simulations: built only when the tab is opened.
+      turbo_frame_tag "loan_scenarios", src: helpers.loan_scenario_path(account), loading: :lazy
     when :statements
       render_statement_tab
     end

@@ -24,6 +24,7 @@ being changed. These guides hold the detailed conventions and procedures.
 | Preserve the disabled telemetry and survey policy | [Feedback surveys](feedback-surveys.md) |
 | Gate or release a preview feature | [Preview-feature gating](gating-a-preview-feature.md) |
 | Change goals, pledges or reconciliation | [Goals](goals.md) |
+| Change loan schedules, rate periods, revisions or posted interest | [Loans](loans.md) |
 
 ## External wealth integration
 

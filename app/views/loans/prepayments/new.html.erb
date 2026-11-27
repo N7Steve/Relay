@@ -1,0 +1,34 @@
+<%= render DS::Dialog.new do |dialog| %>
+  <% dialog.with_header(title: t(".title")) %>
+  <% dialog.with_body do %>
+    <%= styled_form_with model: @prepayment,
+          scope: :loan_prepayment,
+          url: loan_prepayments_path(@account),
+          class: "space-y-4" do |form| %>
+      <% if @prepayment.errors.any? %>
+        <%= render "shared/form_errors", model: @prepayment %>
+      <% end %>
+
+      <p class="text-sm text-secondary"><%= t(".intro") %></p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <%= form.date_field :paid_on, label: t(".paid_on"), required: true %>
+        <%= form.number_field :amount, label: t(".amount"), min: 0.01, step: 0.01, required: true %>
+      </div>
+
+      <%= form.select :mode, Loan::Prepayment.mode_options, { label: t(".mode") } %>
+      <p class="text-xs text-secondary"><%= t(".mode_hint") %></p>
+
+      <%= form.number_field :fee, label: t(".fee"), min: 0, step: 0.01 %>
+
+      <%= form.select :source_account_id,
+            @source_accounts.map { |account| [ account.name, account.id ] },
+            { label: t(".source_account"), include_blank: t(".source_account_none"), selected: params.dig(:loan_prepayment, :source_account_id) } %>
+      <p class="text-xs text-secondary"><%= t(".source_account_hint") %></p>
+
+      <%= form.text_area :notes, label: t(".notes"), rows: 2 %>
+
+      <%= form.submit t(".submit") %>
+    <% end %>
+  <% end %>
+<% end %>

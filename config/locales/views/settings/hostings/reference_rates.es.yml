@@ -1,0 +1,9 @@
+---
+es:
+  settings:
+    hostings:
+      reference_rates_settings:
+        title: Índices de referencia de préstamos
+        description: Los préstamos a tipo variable se revisan con un índice publicado, como el Euríbor a 12 meses.
+        enabled_label: Descargar los valores del índice automáticamente
+        enabled_description: Descarga una vez al día el Euríbor mensual del Banco Central Europeo. Solo se pide la serie del índice; ningún dato de la familia sale de esta instalación.

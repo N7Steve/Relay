@@ -1,0 +1,31 @@
+<%= render DS::Dialog.new do |dialog| %>
+  <% dialog.with_header(title: t(".title", date: l(@rate_revision.effective_on, format: :long))) %>
+  <% dialog.with_body do %>
+    <%= styled_form_with model: @rate_revision,
+          scope: :loan_rate_revision,
+          url: loan_rate_revision_path(@account, @rate_revision),
+          method: :patch,
+          class: "space-y-4" do |form| %>
+      <% if @rate_revision.errors.any? %>
+        <%= render "shared/form_errors", model: @rate_revision %>
+      <% end %>
+
+      <p class="text-sm text-secondary"><%= t(".intro") %></p>
+
+      <% if @rate_revision.variable? %>
+        <%= form.number_field :index_value, label: t(".index_value"), step: 0.001 %>
+      <% end %>
+      <%= form.number_field :rate, label: t(".rate"), min: 0, step: 0.001, required: true %>
+
+      <%= form.submit t(".submit") %>
+    <% end %>
+
+    <div class="mt-4">
+      <%= render DS::Button.new(
+            text: t(".delete"), variant: "ghost", icon: "rotate-ccw", full_width: true,
+            href: loan_rate_revision_path(@account, @rate_revision), method: :delete,
+            confirm: CustomConfirm.new(title: t(".delete_confirm_title"), body: t(".delete_confirm_body"), btn_text: t(".delete"))
+          ) %>
+    </div>
+  <% end %>
+<% end %>

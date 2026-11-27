@@ -1,0 +1,32 @@
+---
+es:
+  activerecord:
+    attributes:
+      loan:
+        interest_tracking: Registro de intereses
+      loan/rate_period:
+        starts_on: Fecha de inicio
+        rate_kind: Tipo de tramo
+        base_rate: Tipo fijo
+        reference_index: Índice de referencia
+        spread: Diferencial
+        review_interval_months: Periodicidad de revisión
+        floor_rate: Tipo mínimo
+      loan/rate_bonus:
+        name: Nombre
+        kind: Producto
+        points: Rebaja
+        annual_cost: Coste anual
+      loan/rate_revision:
+        rate: Tipo
+        effective_on: Fecha
+      reference_rate:
+        month: Mes
+        value: Valor
+        index_key: Índice
+    errors:
+      models:
+        loan:
+          attributes:
+            interest_tracking:
+              requires_terms: necesita la fecha de inicio y el plazo del préstamo

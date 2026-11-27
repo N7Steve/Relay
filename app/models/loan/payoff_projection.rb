@@ -160,6 +160,8 @@ class Loan
           payment_amount: method(:scheduled_payment_for),
           payment_strategy: :scheduled,
           currency_precision: currency_precision,
+          day_count: loan.day_count,
+          payment_sizing: loan.structured_rate? ? :period_opening : :payment_date,
           # A projection that cannot clear the balance must SAY so. Settling the
           # final payment regardless would manufacture a payoff date for a loan
           # the contract no longer pays off.

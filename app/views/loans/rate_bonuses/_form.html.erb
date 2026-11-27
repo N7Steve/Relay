@@ -1,0 +1,31 @@
+<%# locals: (account:, rate_bonus:) %>
+
+<%= styled_form_with model: rate_bonus,
+      scope: :loan_rate_bonus,
+      url: rate_bonus.persisted? ? loan_rate_bonus_path(account, rate_bonus) : loan_rate_bonuses_path(account),
+      class: "space-y-4" do |form| %>
+  <% if rate_bonus.errors.any? %>
+    <%= render "shared/form_errors", model: rate_bonus %>
+  <% end %>
+
+  <p class="text-sm text-secondary"><%= t("loans.rate_bonuses.form.intro") %></p>
+
+  <%= form.text_field :name, label: t("loans.rate_bonuses.form.name"), required: true %>
+  <%= form.select :kind, Loan::RateBonus.kind_options, { label: t("loans.rate_bonuses.form.kind") } %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <%= form.number_field :points, label: t("loans.rate_bonuses.form.points"), min: 0, step: 0.01, required: true %>
+    <%= form.number_field :annual_cost, label: t("loans.rate_bonuses.form.annual_cost"), min: 0, step: 0.01 %>
+  </div>
+  <p class="text-xs text-secondary"><%= t("loans.rate_bonuses.form.annual_cost_hint") %></p>
+
+  <div class="flex items-center justify-between gap-3 rounded-lg bg-container-inset p-3">
+    <div>
+      <p class="form-field__label"><%= t("loans.rate_bonuses.form.active") %></p>
+      <p class="text-xs text-secondary"><%= t("loans.rate_bonuses.form.active_hint") %></p>
+    </div>
+    <%= form.toggle :active %>
+  </div>
+
+  <%= form.submit t("loans.rate_bonuses.form.submit") %>
+<% end %>

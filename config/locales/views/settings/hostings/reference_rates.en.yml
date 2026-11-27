@@ -1,0 +1,9 @@
+---
+en:
+  settings:
+    hostings:
+      reference_rates_settings:
+        title: Loan reference rates
+        description: Variable-rate loans are revised against a published index such as the 12-month Euribor.
+        enabled_label: Import index values automatically
+        enabled_description: Downloads the monthly Euribor from the European Central Bank once a day. Only the index series is requested; no family data leaves this installation.

@@ -1,0 +1,170 @@
+---
+en:
+  accounts:
+    show:
+      tabs:
+        rates: Interest rate
+  reference_rates:
+    indexes:
+      euribor_12m: 12-month Euribor
+  loans:
+    form:
+      interest_accrual: Interest accrual
+      interest_accruals:
+        monthly: Monthly (rate / 12)
+        daily: Daily (actual days / 365)
+      interest_tracking: Post interest to this account
+      interest_tracking_hint: Charges each payment's interest to the loan on its due date, so the balance matches the lender's and every instalment splits into principal and interest. Your existing payments are kept as they are.
+    interest_ledger:
+      entry_name: Loan interest
+      pill: Interest
+    rate_periods:
+      kinds:
+        fixed: Fixed
+        variable: Variable
+      form:
+        intro: A period sets how the rate is calculated from its start date until the next period starts. Switching to a fixed rate or moving the loan to another lender is a new period; earlier revisions stay as they were.
+        starts_on: Starts on
+        rate_kind: Rate type
+        base_rate: Fixed rate before bonuses (%)
+        base_rate_hint: Fixed periods only. Bonuses are subtracted from it.
+        reference_index: Reference index
+        spread: Spread before bonuses (%)
+        spread_hint: Variable periods only. The rate is the index plus this spread, minus active bonuses.
+        review_interval_months: Review every (months)
+        floor_rate: Minimum rate (%)
+        review_interval_hint: How often the rate is set again within the period, and when bonuses are checked.
+        lender_name: Lender
+        submit: Save period
+      new:
+        title: New rate period
+      edit:
+        title: Edit rate period
+      create:
+        success: Rate period added
+      update:
+        success: Rate period updated
+      destroy:
+        success: Rate period removed
+    rate_bonuses:
+      kinds:
+        payroll: Payroll account
+        life_insurance: Life insurance
+        home_insurance: Home insurance
+        pension: Pension plan
+        other: Other
+      form:
+        intro: A discount on the rate for holding another product with the lender. Changes apply from the next revision; recorded revisions keep the bonuses they were set with.
+        name: Name
+        kind: Product
+        points: Discount (percentage points)
+        annual_cost: Annual cost of the product
+        annual_cost_hint: Optional. Used to show whether the bonus pays for itself.
+        active: Active
+        active_hint: Turn off if you stop holding the product.
+        submit: Save bonus
+      new:
+        title: New bonus
+      edit:
+        title: Edit bonus
+      create:
+        success: Bonus added
+      update:
+        success: Bonus updated
+      destroy:
+        success: Bonus removed
+    rate_revisions:
+      edit:
+        title: Revision of %{date}
+        intro: Correct this revision with the figures from your lender's notice. Saving marks it as confirmed.
+        index_value: Index value (%)
+        rate: Applied rate (%)
+        submit: Confirm revision
+        delete: Recalculate
+        delete_confirm_title: Recalculate this revision?
+        delete_confirm_body: It is removed and recorded again from the current periods, bonuses and index values.
+      update:
+        success: Revision confirmed
+      destroy:
+        success: Revision removed
+    rate_reviews:
+      create:
+        success: Revisions updated
+    reference_rates:
+      new:
+        title: Add index value
+        intro: The monthly value published for the index, as quoted in your lender's notice or the official bulletin.
+        index_key: Index
+        month: Month
+        value: Value (%)
+        submit: Save value
+      create:
+        success: Index value saved
+    tabs:
+      overview:
+        principal_repaid: Principal repaid
+        interest_paid: Interest paid
+      rates:
+        empty_title: No rate periods yet
+        empty_description: Describe how the rate is built (a fixed period, an index plus a spread, bonuses) and Relay will revise it on schedule, keep past revisions unchanged and project the next instalment.
+        missing_terms: Set the loan's origination date and term first.
+        add_period: Add period
+        add_bonus: Add bonus
+        add_index_value: Add value
+        tracking_off_title: Interest is not posted yet
+        tracking_off_message: Edit the loan and choose daily accrual and "Post interest to this account" so the balance and each instalment's principal and interest match your lender.
+        current_rate: Rate in force
+        next_revision: Next revision
+        next_rate_estimate: Estimated next rate
+        none: None
+        not_applicable: N/A
+        unknown: Unknown
+        current_composition: "%{composition} = %{rate}"
+        upcoming_title: Revision on %{date}
+        upcoming_payment: "Estimated instalment from %{date}: %{amount}"
+        upcoming_variable_hint: Estimate with the latest published index value and the bonuses active today. It is recorded once the month before the revision is published.
+        upcoming_fixed_hint: Bonuses active on the revision date are applied.
+        revisions_title: Revisions
+        review_now: Review now
+        periods_title: Periods
+        period_fixed_terms: "Fixed %{rate}"
+        period_variable_terms: "%{index} + %{spread}"
+        period_review: "· reviewed every %{months} months"
+        bonuses_title: Bonuses
+        bonuses_empty: No bonuses recorded.
+        bonuses_hint: Savings estimated on a year of the current balance (%{balance}).
+        index_title: Index values
+        index_auto_on: Imported automatically from the European Central Bank.
+        index_auto_off: Automatic import is off. Turn it on in Settings › Self-hosting, or add values by hand.
+        index_empty: No values stored yet.
+        edit: Edit
+        sources:
+          ecb: ECB
+          manual: Manual
+        statuses:
+          projected: Projected
+          pending: Waiting for index
+          calculated: Calculated
+          confirmed: Confirmed
+        columns:
+          date: Date
+          composition: Composition
+          rate: Rate
+          status: Status
+          starts_on: From
+          kind: Type
+          terms: Terms
+          bonus: Bonus
+          points: Discount
+          saving: Saving / year
+          cost: Cost / year
+          net: Net / year
+          index: Index
+          month: Month
+          value: Value
+          source: Source
+        composition:
+          index: "%{index} %{value}%{month}"
+          spread: "+ spread %{value}"
+          fixed: "Fixed %{value}"
+          bonuses: "− bonuses %{value}"

@@ -1,0 +1,47 @@
+<%# locals: (account:, rate_period:) %>
+
+<%= styled_form_with model: rate_period,
+      scope: :loan_rate_period,
+      url: rate_period.persisted? ? loan_rate_period_path(account, rate_period) : loan_rate_periods_path(account),
+      class: "space-y-4" do |form| %>
+  <% if rate_period.errors.any? %>
+    <%= render "shared/form_errors", model: rate_period %>
+  <% end %>
+
+  <p class="text-sm text-secondary"><%= t("loans.rate_periods.form.intro") %></p>
+
+  <%= form.date_field :starts_on, label: t("loans.rate_periods.form.starts_on"), required: true %>
+
+  <%= form.select :rate_kind,
+        Loan::RatePeriod::KINDS.map { |kind| [ t("loans.rate_periods.kinds.#{kind}"), kind ] },
+        { label: t("loans.rate_periods.form.rate_kind") } %>
+
+  <div class="space-y-1">
+    <%= form.number_field :base_rate, label: t("loans.rate_periods.form.base_rate"), min: 0, step: 0.001 %>
+    <p class="text-xs text-secondary"><%= t("loans.rate_periods.form.base_rate_hint") %></p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <%= form.select :reference_index, ReferenceRate.index_options, { label: t("loans.rate_periods.form.reference_index"), include_blank: true } %>
+    <%= form.number_field :spread, label: t("loans.rate_periods.form.spread"), step: 0.001 %>
+  </div>
+  <p class="text-xs text-secondary"><%= t("loans.rate_periods.form.spread_hint") %></p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <%= form.number_field :review_interval_months, label: t("loans.rate_periods.form.review_interval_months"), min: 1, max: 120, required: true %>
+    <%= form.number_field :floor_rate, label: t("loans.rate_periods.form.floor_rate"), min: 0, step: 0.001 %>
+  </div>
+  <p class="text-xs text-secondary"><%= t("loans.rate_periods.form.review_interval_hint") %></p>
+
+  <%= form.text_field :lender_name, label: t("loans.rate_periods.form.lender_name") %>
+
+  <div class="flex items-center justify-between gap-3 rounded-lg bg-container-inset p-3">
+    <div>
+      <p class="form-field__label"><%= t("loans.rate_periods.form.applies_bonuses") %></p>
+      <p class="text-xs text-secondary"><%= t("loans.rate_periods.form.applies_bonuses_hint") %></p>
+    </div>
+    <%= form.toggle :applies_bonuses %>
+  </div>
+
+  <%= form.submit t("loans.rate_periods.form.submit") %>
+<% end %>

@@ -260,6 +260,8 @@ class Family::Backup::Restorer
         Security::Price.find_by(security_id: @id_map[source_key("Security", attrs["security_id"])], date: attrs["date"], currency: attrs["currency"])
       when "ExchangeRate"
         model.find_by(attrs.slice("from_currency", "to_currency", "date"))
+      when "ReferenceRate"
+        model.find_by(attrs.slice("index_key", "month"))
       end
     end
 
@@ -392,7 +394,7 @@ class Family::Backup::Restorer
     end
 
     def shared_record?(data)
-      data["model"].in?(%w[Security Security::Price ExchangeRate]) || (data["model"] == "Merchant" && data.dig("attributes", "type") == "ProviderMerchant")
+      data["model"].in?(%w[Security Security::Price ExchangeRate ReferenceRate]) || (data["model"] == "Merchant" && data.dig("attributes", "type") == "ProviderMerchant")
     end
 
     def restore_attachments!

@@ -1,0 +1,45 @@
+<%# locals: (account:, can_edit:) %>
+
+<%# Extra repayments and the choice recorded for each. The money is an entry on
+    the loan account; this list is the contractual side the schedule re-sizes
+    from. A prepayment with no movement found is flagged: the balance does not
+    reflect it until the money arrives. %>
+<% loan = account.loan %>
+<% prepayments = loan.prepayments.to_a %>
+
+<section class="space-y-2">
+  <div class="flex items-center justify-between gap-2">
+    <h3 class="font-medium text-primary"><%= t(".title") %></h3>
+    <% if can_edit && loan.amortizable? %>
+      <%= render DS::Link.new(text: t(".add"), icon: "plus", variant: "ghost", size: "sm",
+                              href: new_loan_prepayment_path(account), frame: :modal) %>
+    <% end %>
+  </div>
+
+  <% if prepayments.empty? %>
+    <p class="text-sm text-secondary"><%= t(".empty") %></p>
+  <% else %>
+    <%= render DS::Table.new(rows: prepayments, label: t(".title")) do |table| %>
+      <% table.with_column(t(".columns.date")) { |prepayment| l(prepayment.paid_on, format: :long) } %>
+      <% table.with_column(t(".columns.amount"), numeric: true, class: "privacy-sensitive") { |prepayment| format_money(prepayment.amount_money) } %>
+      <% table.with_column(t(".columns.mode")) { |prepayment| t("loans.prepayments.modes.#{prepayment.mode}") } %>
+      <% table.with_column(t(".columns.fee"), numeric: true, class: "text-secondary privacy-sensitive") { |prepayment| format_money(prepayment.fee_money) } %>
+      <% table.with_column(t(".columns.movement")) do |prepayment| %>
+        <% if prepayment.matching_entry %>
+          <%= render DS::Pill.new(label: t(".linked"), tone: :success, marker: false) %>
+        <% else %>
+          <%= render DS::Pill.new(label: t(".missing"), tone: :warning, marker: false) %>
+        <% end %>
+      <% end %>
+      <% table.with_column("", numeric: true) do |prepayment| %>
+        <% if can_edit %>
+          <%= render DS::Button.new(
+                text: t(".delete"), variant: "ghost", size: "sm",
+                href: loan_prepayment_path(account, prepayment), method: :delete,
+                confirm: CustomConfirm.new(title: t(".delete_confirm_title"), body: t(".delete_confirm_body"), btn_text: t(".delete"))
+              ) %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</section>
